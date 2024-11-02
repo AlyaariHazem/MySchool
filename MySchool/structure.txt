@@ -1,0 +1,82 @@
+src
+└── app
+    ├── core
+    │   ├── models
+    │   │   ├── user.model.ts
+    │   │   ├── student.model.ts
+    │   │   ├── teacher.model.ts
+    │   ├── services
+    │   │   ├── auth.service.ts
+    │   │   ├── user.service.ts
+    │   │   ├── student.service.ts
+    │   │   ├── teacher.service.ts
+    │   └── guards
+    │       ├── auth.guard.ts
+    │       ├── admin.guard.ts
+    │       ├── teacher.guard.ts
+    │       ├── student.guard.ts
+    ├── state
+    │   ├── auth.state.ts
+    │   ├── user.state.ts
+    │   ├── student.state.ts
+    │   ├── teacher.state.ts
+    ├── components
+    │   ├── admin
+    │   │   ├── dashboard
+    │   │   │   ├── admin-dashboard.component.ts
+    │   │   │   ├── admin-dashboard.component.html
+    │   │   │   ├── admin-dashboard.component.css
+    │   │   ├── manage-users
+    │   │   │   ├── manage-users.component.ts
+    │   │   │   ├── manage-users.component.html
+    │   │   │   ├── manage-users.component.css
+    │   ├── teacher
+    │   │   ├── dashboard
+    │   │   │   ├── teacher-dashboard.component.ts
+    │   │   │   ├── teacher-dashboard.component.html
+    │   │   │   ├── teacher-dashboard.component.css
+    │   │   ├── manage-classes
+    │   │   │   ├── manage-classes.component.ts
+    │   │   │   ├── manage-classes.component.html
+    │   │   │   ├── manage-classes.component.css
+    │   ├── student
+    │   │   ├── dashboard
+    │   │   │   ├── student-dashboard.component.ts
+    │   │   │   ├── student-dashboard.component.html
+    │   │   │   ├── student-dashboard.component.css
+    │   │   ├── view-grades
+    │   │   │   ├── view-grades.component.ts
+    │   │   │   ├── view-grades.component.html
+    │   │   │   ├── view-grades.component.css
+    ├── shared
+    │   ├── components
+    │   │   ├── header
+    │   │   │   ├── header.component.ts
+    │   │   │   ├── header.component.html
+    │   │   │   ├── header.component.css
+    │   │   ├── footer
+    │   │   │   ├── footer.component.ts
+    │   │   │   ├── footer.component.html
+    │   │   │   ├── footer.component.css
+    │   ├── directives
+    │   ├── pipes
+    ├── auth
+    │   ├── login
+    │   │   ├── login.component.ts
+    │   │   ├── login.component.html
+    │   │   ├── login.component.css
+    │   ├── register
+    │   │   ├── register.component.ts
+    │   │   ├── register.component.html
+    │   │   ├── register.component.css
+    ├── firebase
+    │   ├── firebase-config.ts
+    │   ├── firebase.service.ts
+    ├── environments
+    │   ├── environment.ts
+    │   ├── environment.prod.ts
+    ├── app.component.ts
+    ├── app.component.html
+    ├── app.component.css
+    ├── app.module.ts
+    └── app-routing.module.ts

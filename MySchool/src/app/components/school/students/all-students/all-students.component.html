@@ -1,0 +1,66 @@
+<div class="contant" style="top: 0rem;">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-sm-6">
+                            <div class="page-title">
+                                كل الطلاب
+                            </div>
+                        </div>
+                        <div class="col-sm-6 text-sm-left">
+                            <div class="mt-sm-0 mt-2">
+                                <button class="btn btn-outline-primary mr-2"><img src="assets/img/excel.png" alt=""><span class="ml-2">Excel</span></button>
+                                <button class="btn btn-outline-danger mr-2"><img src="assets/img/pdf.png" alt="" height="18"><span class="ml-2">PDF</span></button>
+                                <button class="btn btn-light" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="#">Action</a>
+                                    <div role="separator" class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">Another action</a>
+                                    <div role="separator" class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">Something else here</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table custom-table">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>الاسم</th>
+                                    <th>الرقم التسلسلي</th>
+                                    <th>الصف</th>
+                                    <th>الشعبة</th>
+                                    <th>رقم الهاتف</th>
+                                    <th>تاريخ الميلاد</th>
+                                    <th class="text-right">حدث</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (student of students; track $index) {
+                                    <tr>
+                                        <td>
+                                            <h2><a href="#" class="avatar text-white"><img src="../../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.jpg" alt=""></a><a href="#">{{student.fname + ' ' + student.Sname + ' ' + student.Tname + ' ' + student.Lname}}<span></span></a></h2>
+                                        </td>
+                                        <td>{{student.ContryNum}}</td>
+                                        <td>{{student.class}}</td>
+                                        <td>A</td>
+                                        <td>{{student.phone}}</td>
+                                        <td>{{student.PirthDate}}</td>
+                                        <td class="text-right">
+                                            <button mat-raised-button class="btn btn-primary btn-sm mb-1" (click)="openDialog(student)"><i class="far fa-edit"></i></button>
+                                            <button (click)="deleteStudent(student)" class="btn btn-danger btn-sm mb-1"><i class="far fa-trash-alt"></i></button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

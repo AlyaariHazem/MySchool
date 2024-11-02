@@ -1,0 +1,425 @@
+* {
+    box-sizing: border-box;
+}
+
+/* Set a style for all buttons */
+button {
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    opacity: 0.9;
+}
+
+
+/* Extra styles for the cancel button */
+.cancelbtn {
+    padding: 14px 20px;
+    background-color: #f44336;
+    float: left;
+}
+
+.signupbtn {
+    position: relative;
+    right: -18%;
+}
+
+/* Float cancel and signup buttons and add an equal width */
+.cancelbtn,
+.signupbtn {
+    width: 40%;
+
+}
+
+/* Add padding to container elements */
+.container {
+    padding: 16px;
+}
+
+/* The Modal (background) */
+.modal {
+    display: block;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: #474e5d;
+    padding-top: 50px;
+}
+
+/* Modal Content/Box */
+.modal-content {
+    border-radius: 16px;
+    background-color: #fefefe;
+    margin-left: 7%;
+    border: 1px solid #888;
+    width: 80%;
+    /* Could be more or less, depending on screen size */
+}
+
+/* Style the horizontal ruler */
+hr {
+    border: 1px solid #f1f1f1;
+    margin-bottom: 25px;
+}
+
+/* The Close Button (x) */
+.close {
+    position: absolute;
+    right: 35px;
+    top: 15px;
+    font-size: 40px;
+    font-weight: bold;
+    color: #f1f1f1;
+}
+
+.close:hover,
+.close:focus {
+    color: #f44336;
+    cursor: pointer;
+}
+
+/* Clear floats */
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+/* Change styles for cancel button and signup button on extra small screens */
+@media screen and (max-width: 300px) {
+
+    .cancelbtn,
+    .signupbtn {
+        width: 99%;
+    }
+}
+// the form *******************************************************************************
+
+.info{
+    margin-top: 2rem;
+    width: 100%;
+    z-index:-3;
+}
+  
+.StudentInfo{
+    position: relative;
+    margin-bottom: 1rem;
+    top: 1rem;
+    right:5rem;
+}
+.row1{
+    position: relative;
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    padding-bottom: 8rem;
+    border-width: 0 0 1px 0;
+    border-bottom: 1px solid rgb(152, 152, 152);
+    border-right: 2px solid rgb(31, 26, 26);
+    border-left: 2px solid rgb(40, 35, 35);
+}
+.section1{
+    width: 49%;
+}
+.row1-1{
+    width: 2%;
+    border-top: 2px solid rgb(31, 26, 26);
+    position: absolute;
+    top: 0;
+    right:0;
+}
+.row1-2{
+    width: 2%;
+    border-top: 2px solid rgb(31, 26, 26);
+    position: absolute;
+    top: 0;
+    left:0;
+}
+.row1-top{
+    width: 96.1%;
+    border-top: 1px solid rgb(152, 152, 152);
+    position: absolute;
+    top: 6px;
+    right: 2%;
+}
+
+input,select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 33px;
+    background-color: white;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease-in-out;
+  }
+
+input:focus,select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+.section1 label ,input{
+    width: 45%;
+    margin-right: 2%;
+
+}
+.section1 .lab1 {
+    position: absolute;
+    top: 1rem;
+    right: 23%;
+}
+//place birthDate
+
+.section2 {
+    width: 50%;
+    position: absolute;
+    right: 45%;
+    margin-right: 2%;
+    top: 2.5rem;
+
+}
+.input2-2{
+    position: absolute;
+    left: 2px;
+    width: 48%;
+}
+.input2-1{
+    position: absolute;
+    right: 9px;
+}
+.lab2-1{
+    position: absolute;
+    right: 22px;
+    top: -1.3rem;
+}
+.lab2-2{
+    position: absolute;
+    left: 33%;
+    top: -1.3rem;
+}
+
+//Full Name
+.section3{
+    position: relative;
+    top: 1rem;
+}
+.input3-2{
+    position: absolute;
+    right: 10.5%;
+    width: 12%;
+}
+.input3-4{
+    position: absolute;
+    right: 33.5%;
+    width: 10.8%;
+}
+.input3-3{
+    position: absolute;
+    right: 22.5%;
+    width: 11%;
+}
+.input3-1{
+    position: absolute;
+    right: -7px;
+    width: 11%;
+}
+.lab3-1{
+    position: absolute;
+    right: 20px;
+    top: 1.7rem;
+}
+.lab3-2{
+    position: absolute;
+    right: 13%;
+    top: 1.7rem;
+}
+.lab3-3{
+    position: absolute;
+    right: 26%;
+    top: 1.7rem;
+}
+.lab3-4{
+    position: absolute;
+    right: 37%;
+    top: 1.7rem;
+}
+// full Name with English
+.section4{
+    position: relative;
+    top: -2rem;
+    left: -48%;
+}
+.input4-3{
+    position: absolute;
+    right: 10.5%;
+    width: 13.5%;
+}
+.input4-1{
+    position: absolute;
+    right: 35%;
+    width: 12%;
+}
+.input4-2{
+    position: absolute;
+    right: 24%;
+    width: 11%;
+}
+.input4-4{
+    position: absolute;
+    right: -1.5%;
+    width: 11.9%;
+}
+.lab4-1{
+    position: absolute;
+    right: 42%;
+    top: 1.7rem;
+}
+.lab4-2{
+    position: absolute;
+    right: 30%;
+    top: 1.7rem;
+}
+.lab4-3{
+    position: absolute;
+    right: 20%;
+    top: 1.7rem;
+}
+.lab4-4{
+    position: absolute;
+    right: 3.1rem;
+    top: 1.7rem;
+}
+// register students in the class
+.section5{
+    position: relative;
+    top: 3rem;
+}
+.input5-1{
+    position: absolute;
+    right: 1.5%;
+    width: 13.5%;
+}
+.input5-2{
+    position: absolute;
+    right: 18%;
+    width: 13%;
+}
+.input5-3{
+    position: absolute;
+    right: 34.3%;
+    width: 12%;
+}
+.lab5-3{
+    position: absolute;
+    right: 40%;
+    top: -1.7rem;
+}
+.lab5-2{
+    position: absolute;
+    right: 25%;
+    top: -1.7rem;
+}
+.lab5-1{
+    position: absolute;
+    right: 2%;
+    top: -1.7rem;
+}
+
+
+//section6
+.section6{
+    position: relative;
+    top: 3rem;
+    right:48%;
+}
+.input6-1{
+    position: absolute;
+    right: -1.7%;
+    width: 13.5%;
+}
+.input6-2{
+    position: absolute;
+    right: 18%;
+    width: 13%;
+}
+.input6-3{
+    position: absolute;
+    right: 34.3%;
+    width: 12%;
+}
+.lab6-3{
+    position: absolute;
+    right: 40%;
+    top: -1.7rem;
+}
+.lab6-2{
+    position: absolute;
+    right: 25%;
+    top: -1.7rem;
+}
+.lab6-1{
+    position: absolute;
+    right: 2%;
+    top: -1.7rem;
+}
+
+
+//*******************************************parant
+
+.parentInfo{
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+//photo the user
+.image {
+    position: relative;
+    right: 50%;
+    top: -3rem;
+    width: 44%;
+    color: transparent;
+    overflow: hidden;
+    // background-color: red;
+    padding: 11px;
+    cursor: pointer;
+    z-index: 1112;
+  }
+  .image input{
+    width: 100%;
+    background-color: none;
+  }
+  .image input[type=file]{
+    width: 100%;
+    color:white;
+  }
+  .photo::-webkit-file-upload-button {
+    visibility: hidden;
+  }
+  //this is for button that will save the edit for student
+  .signupbtn{
+    width: 10%;
+    position: absolute;
+    left: 2px;
+    top: 1.5rem;
+  }
+  .cancel{
+    width: 15%;
+    color:red;
+    border:none;
+    position: absolute;
+    right: 2px;
+    top:1.5rem;
+    font-size: 30px;
+  }

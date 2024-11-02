@@ -1,0 +1,42 @@
+<div id="id01" class="">
+    <div class="modal-content" style="background-color:#ffffff!important;">
+        <div class="container">
+            <h2 class="school">تخصيص المدرسة</h2>
+          
+
+            <div id="News" class="tabcontent">
+                <form [formGroup]="form">
+                    <label for="termName" class="termName">اسم الطالب</label><br>
+                    <input type="text" formControlName="stage" class="term" placeholder="الاسم">
+                    <label for="className" class="className">المرحلة</label>
+                    <input type="text" formControlName="note" class="class" placeholder="المرحلة">
+                    <label for="gradeName" class="gradeName">الصف</label>
+                    <input type="text" formControlName="gradeName" class="grade" placeholder="الصف">
+                    
+                    <input type="submit" (click)="openDialog()"  class="btn btn-primary add" value="إضافة طالب+">
+                    
+                    
+                </form>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>رقم الطالب</th>
+                            <th>اسم الطالب</th>
+                            <th>المرحلة</th>
+                            <th>الصف </th>
+                            <th>الشعبة</th>
+                            <th>العمر</th>
+                            <th>النوع</th>
+                            <th>تاريخ التسجيل</th>
+                            <th>العملية</th>
+                        </tr>
+                    </thead>
+                    
+                </table>
+            </div>
+            <!-- <app-grades></app-grades>
+            <app-division></app-division> -->
+            <!-- Add similar content for other tabs (Class and Contact) as needed -->
+        </div>
+    </div>
+</div>

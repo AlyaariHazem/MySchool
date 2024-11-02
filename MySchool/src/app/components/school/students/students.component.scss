@@ -1,0 +1,409 @@
+* {
+    box-sizing: border-box;
+}
+.modal-content {
+    border-radius: 1.5%;
+    overflow-y: auto; /* Allow vertical scrolling */
+    max-height: 80vh; /* Adjust the maximum height as needed */
+}
+
+.custom-dialog-container .mdc-dialog__surface {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    max-width: 100%;
+    max-height: 100%;
+    pointer-events: auto;
+    overflow-y: hidden; // Corrected to disable vertical scrolling
+    background-color: red;
+    outline: 0;
+    transform: scale(0.8); // Custom transform
+}
+  
+.modal-content {
+    border-radius: 1.5%;
+}
+
+h2 {
+    font-family: 'Changa', sans-serif;
+}
+
+.container {
+    border-radius: 23px;
+}
+
+.school {
+    margin-top: 2rem;
+}
+
+.line {
+    width: 100%;
+    position: relative;
+    top: 3rem;
+    z-index: 1;
+    border-bottom: 1px solid rgb(180 180 180);
+}
+
+input,
+select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 33px;
+    width: 19%;
+    background-color: white;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.term {
+    margin-right: -8px;
+}
+
+.class {
+    margin-right: 8px;
+}
+
+.grade {
+    margin-right: 0px;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #2fdf85;
+    box-shadow: 0 0 5px #2fdf85;
+}
+
+
+.tablink {
+    color: black;
+    float: right;
+    border: none;
+    outline: none;
+    background-color: white;
+    width: 100%;
+    cursor: pointer;
+    padding: 14px 16px;
+    font-size: 17px;
+    width: 9%;
+}
+
+.tablink span {
+    z-index: 2;
+}
+
+.tablink:hover {
+    color: black;
+}
+
+.tablink.active {
+    border-bottom: 3px solid #2fdf84;
+    z-index: 4;
+}
+
+.tabcontent {
+    color: black;
+    display: block;
+    padding: 24px 20px;
+    height: 100%;
+}
+
+.className {
+    position: relative;
+    top: -2.3rem;
+    right: 5rem;
+}
+
+.gradeName {
+    position: relative;
+    top: -2rem;
+    right: 2rem;
+}
+
+.termName {
+    position: relative;
+    top: -0.5rem;
+}
+
+.add {
+    position: relative;
+    top: 0rem;
+    width: 14%;
+    border-radius: 32px;
+    left: 1rem;
+    border: none;
+    color: white;
+    background-color: #2fdf84;
+}
+
+.add:active {
+    background-color: #2fdf85;
+}
+@media (max-width:1100px) {
+.add{
+    width: 18%;
+}
+}
+@media (max-width:900px) {
+    .tablink {
+        color: red;
+        padding: 1px 0px;
+        font-size: 11px;
+    }
+
+    .line {
+        top: 1.4rem;
+    }
+
+    .add {
+        position: relative;
+        top: -4.5rem;
+        width: 23%;
+        left: -1rem;
+        color: white;
+        background-color: #2fdf84;
+    }
+    
+    .gradeName {
+        position: relative;
+        top: -0.4rem;
+        right: 17rem;
+    }
+
+    .termName {
+        position: absolute;
+        top: 7.4rem;
+        right: 4%;
+    }
+
+    .term {
+        position: absolute;
+        right: 5%;
+        top: 9rem;
+    }
+
+    .class {
+        position: absolute;
+        right: 26%;
+        top: 9rem;
+    }
+
+    .grade {
+        position: absolute;
+        right: 50%;
+        top: 9rem;
+    }
+    .className{
+        position: relative;
+        top: -0.5rem;
+        right: 21%;
+    }
+    .styled-table{
+        margin-right: -4rem;
+    }
+
+}
+
+@media (max-width:600px) {
+    .tablink {
+        color: green;
+    }
+
+    button {
+        margin-right: 8px;
+    }
+
+    .term {
+        position: absolute;
+        right: 5%;
+
+    }
+    .gradeName {
+        position: relative;
+        top: -0.4rem;
+        right: 9rem;
+    }
+    .class {
+        width: 21%;
+        margin-left: 1rem;
+    }
+    .btn{
+        width:36%;
+    }
+
+    .grade {
+        width: 21%;
+        margin-left: -2rem;
+    }
+    .styled-table{
+        margin-right:-1rem;
+    }
+}
+
+@media (max-width:400px) {
+    // .tablink {
+    //     color: rgb(35, 22, 213);
+    // }
+
+    button {
+        margin-right: 1px;
+    }
+    .styled-table{
+        margin-right: -1.4rem;
+    }
+    .class {
+        left: 0rem;
+        position: absolute;
+    }
+    input{
+        width:24%;
+    }
+    .className{
+        position: relative;
+        top: -0.4rem;
+        right: 4rem;
+    }
+    .gradeName{
+        position: relative;
+        top: -0.4rem;
+        right: 5rem;
+    }
+
+    .grade {
+        left: -3rem;
+        position: absolute;
+    }
+
+    .term {
+        margin-right: -3px;
+        position: absolute;
+    }
+
+    .btn {
+        position: relative;
+        top: -6.5rem;
+        width:38%;
+        left: -1rem;
+        color: white;
+        background-color: #2fdf84;
+    }
+}
+
+//this is for talbes 
+/* Resetting some default styles */
+
+.styled-table {
+    border-collapse: collapse;
+    margin-top: 45px;
+    font-size: 18px;
+    width: 100%;
+    text-align: center;
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+    font-weight: bold;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+    border: 1px solid #dddddd;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.IconEdit {
+    color: #009879;
+}
+
+.IconDelete {
+    color: red;
+}
+
+.dropdown-menu-left a {
+    text-align: right;
+}
+
+.action-button {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.action-button.edit {
+    background-color: #4CAF50;
+    /* Green */
+    color: white;
+}
+
+.action-button.delete {
+    background-color: #f44336;
+    /* Red */
+    color: white;
+}
+
+.action-button:hover {
+    opacity: 0.8;
+}
+
+.division {
+    text-align: center;
+    border: 2px solid rgb(8, 197, 8);
+    margin-left: 5%;
+    border-radius: 11px;
+}
+
+.division:hover {
+    border: 2px solid #34d589;
+
+}
+
+//nested dropdown list 
+.nested-dropdown {
+    display: block;
+}
+
+.previous {
+    border: 2px solid #3ec183;
+    position: absolute;
+    right: 16px;
+    bottom: 4px;
+    border-radius: 4px;
+}
+
+.text {
+    position: absolute;
+    right: 33%;
+    bottom: 6px;
+}
+
+.next {
+    position: relative;
+    border: 2px solid #3ec183;
+    left: 5px;
+    top: 4px;
+    border-radius: 4px;
+}

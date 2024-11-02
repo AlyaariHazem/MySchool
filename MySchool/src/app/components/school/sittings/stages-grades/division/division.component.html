@@ -1,0 +1,64 @@
+<div id="Contact" class="tabcontent">
+    <form [formGroup]="form">
+        <label bel for="termName" class="termName">اسـم الصـف </label><br>
+        <select formControlName="grade" name="term" id="class" class="term" value="إختار الصـف">
+            <option value="" disabled selected>إختار صـف</option>
+            @for (grade of grades; track $index) {
+            <option [value]="grade.id">{{grade.grade}}</option>
+            }
+        </select>
+        <label for="className" class="className">اسـم الشعبة</label>
+        <input type="text" formControlName="division" class="class" placeholder="إدخل اسم شعبة جديدة">
+        <input type="submit" (click)="addDivision()" class="btn btn-primary add" value="إضافة">
+    </form>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>رمز الشعبة</th>
+                <th>الصـف</th>
+                <th>إجمالي الطلاب</th>
+                <th>ملاحظة</th>
+                <th>الحالة</th>
+                <th>العملية</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let div of division; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ div.id }}</td>
+                <td>{{ getGradeName(div.grade) }}</td>
+                <td>{{ "لا يوجد حالياً" }}</td>
+                <td>{{ div.note }}</td>
+                <div class="dropdown" (click)="toggleStateDropdown(div)">
+                    @if (div.state) {
+                    <span class="dropdown-toggle" data-toggle="dropdown">نشط </span>
+                    }
+                    @else {
+                    <span class="dropdown-toggle" data-toggle="dropdown">خامل </span>
+
+                    }
+                    <div class="dropdown-menu">
+                        <span class="dropdown-item" (click)="changeState(div, true)">نشط</span>
+                        <span class="dropdown-item" (click)="changeState(div, false)">خامل</span>
+                    </div>
+                </div>
+
+                <td>
+                    <!-- this is for edit and delete  -->
+                    <div class="col text-left">
+                        <div class=" mt-sm-0 mt-2">
+                            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>
+                            <div class="dropdown-menu dropdown-menu-left">
+                                <a class="dropdown-item" href="#"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                                <div role="separator" class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,136 @@
+<div id="id01" class="">
+    <div class="modal-content" style="background-color:#ffffff!important;">
+        <div class="container">
+            <h2 class="school">تخصيص المدرسة</h2>
+            <button [ngClass]="{'tablink': true, 'active': activeTab === 'News'}"
+                (click)="openPage('News', $event.target)" id="defaultOpen"><span>المراحل</span></button>
+            <button [ngClass]="{'tablink': true, 'active': activeTab === 'Class'}"
+                (click)="openPage('Class', $event.target)"><span>الصفوف</span></button>
+            <button [ngClass]="{'tablink': true, 'active': activeTab === 'Contact'}"
+                (click)="openPage('Contact', $event.target)"><span>الشعب</span></button>
+            <p class="line"></p>
+
+            <div id="News" class="tabcontent">
+                <form [formGroup]="form">
+                    <label for="termName" class="termName">اسـم المرحـلة</label><br>
+                    <input type="text" formControlName="stage" class="term" placeholder="المرحـلة">
+                    <label for="className" class="className">ملاحظة</label>
+                    <input type="text" formControlName="note" class="class" placeholder="ملاحظة">
+                    <input type="submit" (click)="addStage()" class="btn btn-primary add" value="إضافة">
+                </form>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>اسم المرحلة</th>
+                            <th>صفوف</th>
+                            <th>إجمالي الطلاب</th>
+                            <th>ملاحظة</th>
+                            <th>الحالة</th>
+                            <th>العملية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of combinedData$ | async;track $index) {
+                        <tr>
+                            <td>{{$index + 1}}</td>
+                            <td>{{item.stage}}</td>
+                            <td>
+                                <div class="col text-left">
+                                    <div class="mt-sm-0 mt-2">
+                                        <button class="btn btn-left division" type="button"
+                                            (click)="toggleOuterDropdown(item)" aria-haspopup="true"
+                                            aria-expanded="false">
+                                            الصفوف {{ item.grades.length }}<i class="bi bi-caret-down-fill"></i>
+                                        </button>
+                                        @if (isOuterDropdownOpen(item)) {
+                                        <div class="dropdown-menu nested-dropdown dropdown-menu-left">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>اسم الصف</th>
+                                                        <th>إجمالي الطلاب</th>
+                                                        <th>العملية</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for ( grade of getPaginatedGrades(item);track $index) {
+                                                    <tr>
+                                                        <td style="text-align: center;">{{ grade.grade }}</td>
+                                                        <!-- <td>{{ grade.totalStudents }}</td> -->
+                                                        <td>لا يوجد طلاب حالياً</td>
+                                                        <td>
+                                                            <!-- this is for edit and delete  -->
+                                                            <div class="col text-left">
+                                                                <div class=" mt-sm-0 mt-2">
+                                                                    <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                                                                        aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>
+                                                                    <div class="dropdown-menu dropdown-menu-left">
+                                                                        <a class="dropdown-item" href="#"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                                                                        <div role="separator" class="dropdown-divider"></div>
+                                                                        <a class="dropdown-item" href="#"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    }
+
+                                                    @if (item.grades.length === 0) {
+                                                    <tr>
+                                                        <td colspan="3">لا يوجد صفوف يمكنك إضافة صفوف</td>
+                                                    </tr>
+                                                    }
+
+                                                </tbody>
+                                            </table>
+                                            <div class="pagination-buttons">
+                                                <button class="previous" (click)="previousPage(item)"
+                                                    [disabled]="currentPage[item.id] === 0">السابق</button>
+
+                                                <span class="text">صفح {{ currentPage[item.id] + 1 }} من {{
+                                                    getTotalPages(item)
+                                                    }}</span>
+
+                                                <button class="next" (click)="nextPage(item)"
+                                                    [disabled]="(currentPage[item.id] + 1) * maxRowsPerPage >= item.grades.length">
+                                                    التالي
+                                                </button>
+
+                                            </div>
+                                        </div>
+                                        }
+
+                                    </div>
+                                </div>
+                            </td>
+                            <!-- <td>{{item.totalStudents}}</td> -->
+                            <td>لا يوجد طلاب</td>
+                            <td>{{item.note}}</td>
+                            <td>{{item.state ? 'Active' : 'Inactive'}}</td>
+                            <td>
+                                <!-- this is for edit and delete  -->
+                                <div class="col text-left">
+                                    <div class=" mt-sm-0 mt-2">
+                                        <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>
+                                        <div class="dropdown-menu dropdown-menu-left">
+                                            <a class="dropdown-item" href="#"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                                            <div role="separator" class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+            <app-grades></app-grades>
+            <app-division></app-division>
+            <!-- Add similar content for other tabs (Class and Contact) as needed -->
+        </div>
+    </div>
+</div>

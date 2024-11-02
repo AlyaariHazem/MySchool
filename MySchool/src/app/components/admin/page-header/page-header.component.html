@@ -1,0 +1,26 @@
+<div class="page-header">
+    <div class="row">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                @for (breadcrumb of breadcrumbs; track $index;let first=$first;let last = $last) {
+                <li class="breadcrumb-item" [ngClass]="{'lastInBreadcrub': last}">
+                    @if (first) {
+                    <ng-container>
+                        <a [routerLink]="breadcrumb.url"><i class="fas fa-home"></i>{{ breadcrumb.label  }}</a>
+                            
+                    </ng-container>
+                    }
+                    @if (!last&&!first&&$index!==0) {
+                    <ng-container>
+                        <a [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
+                    </ng-container>
+                    }
+                    @if (last!==first&&$index!==0) {
+                    <ng-container>{{ breadcrumb.label }}</ng-container>
+                    }
+                </li>
+                }
+            </ol>
+        </nav>
+    </div>
+</div>

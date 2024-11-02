@@ -1,0 +1,349 @@
+* {
+  box-sizing: border-box;
+}
+/* Ensure the content inside the modal allows overflow */
+.tabcontent {
+  overflow-y: auto; /* Allow vertical scrolling */
+  max-height: 70vh; /* Adjust the maximum height as needed */
+}
+
+.modal-content {
+  border-radius: 1.5%;
+}
+.mdc-dialog__surface {
+  overflow: none !important;
+}
+h2 {
+  font-family: "Changa", sans-serif;
+}
+//this button to close the dailog
+.close-btn {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  font-size: 30px;
+  font-weight: bold;
+  color: #000;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.container {
+  border-radius: 23px;
+}
+
+.school {
+  margin-top: 2rem;
+}
+
+.line {
+  width: 100%;
+  position: relative;
+  top: 3rem;
+  z-index: 1;
+  border-bottom: 1px solid rgb(180 180 180);
+}
+
+input,
+select {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  height: 33px;
+  width: 33%;
+  background-color: white;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.term {
+  margin-right: -8px;
+}
+
+.class {
+  margin-right: 8px;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #2fdf85;
+  box-shadow: 0 0 5px #2fdf85;
+}
+
+.tablink {
+  color: black;
+  float: right;
+  border: none;
+  outline: none;
+  background-color: white;
+  cursor: pointer;
+  padding: 14px 16px;
+  font-size: 17px;
+  width: 15%;
+}
+
+.tablink span {
+  z-index: 2;
+}
+
+.tablink:hover {
+  color: black;
+}
+
+.tablink.active {
+  border-bottom: 3px solid #2fdf84;
+  z-index: 4;
+}
+
+.tabcontent {
+  color: black;
+  display: black;
+  padding: 31px 20px;
+  height: 100%;
+}
+
+.className {
+  position: relative;
+  top: -2.3rem;
+  right: 5rem;
+}
+
+.termName {
+  position: relative;
+  top: -0.5rem;
+}
+
+.add {
+  position: relative;
+  top: 0rem;
+  width: 14%;
+  border-radius: 32px;
+  left: 1rem;
+  border: none;
+  color: white;
+  background-color: #2fdf84;
+}
+
+.add:active {
+  background-color: #2fdf85;
+}
+@media (max-width: 1100px) {
+  .tablink {
+    color: rgb(0, 204, 255);
+    padding: 14px 0px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 900px) {
+  .tablink {
+    color: red;
+    padding: 1px 0px;
+    font-size: 11px;
+    width: 18%;
+  }
+
+  .line {
+    top: 1.4rem;
+  }
+
+  .add {
+    position: relative;
+    top: -4.5rem;
+    width: 14%;
+    left: -1rem;
+    color: white;
+    background-color: #2fdf84;
+  }
+
+  .className {
+    position: relative;
+    top: -6rem;
+    right: 37%;
+  }
+
+  .termName {
+    position: absolute;
+    top: 7.4rem;
+    right: 4%;
+  }
+
+  .term {
+    position: absolute;
+    right: 5%;
+    top: 9rem;
+  }
+
+  .class {
+    position: absolute;
+    right: 38%;
+    top: 9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .tablink {
+    color: green;
+    width: 16%;
+  }
+
+  button {
+    margin-right: 8px;
+  }
+
+  .term {
+    position: absolute;
+    right: 5%;
+  }
+
+  .class {
+    width: 44%;
+    margin-left: 1rem;
+    width: 16%;
+  }
+}
+
+@media (max-width: 400px) {
+  .tablink {
+    color: rgb(35, 22, 213);
+    width: 16%;
+  }
+
+  button {
+    margin-right: 19px;
+  }
+
+  .class {
+    left: 0rem;
+    position: absolute;
+  }
+
+  .term {
+    margin-right: -3px;
+    position: absolute;
+  }
+
+  .btn {
+    position: relative;
+    top: -6.5rem;
+    width: 25%;
+    left: -1rem;
+    color: white;
+    background-color: #2fdf84;
+  }
+}
+
+//this is for talbes
+/* Resetting some default styles */
+
+.styled-table {
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 18px;
+  width: 100%;
+  text-align: center;
+}
+
+.styled-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 12px 15px;
+  border: 1px solid #dddddd;
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+  font-weight: bold;
+  color: #009879;
+}
+
+.IconEdit {
+  color: #009879;
+}
+
+.IconDelete {
+  color: red;
+}
+
+.dropdown-menu-left a {
+  text-align: right;
+}
+
+.action-button {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.action-button.edit {
+  background-color: #4caf50;
+  /* Green */
+  color: white;
+}
+
+.action-button.delete {
+  background-color: #f44336;
+  /* Red */
+  color: white;
+}
+
+.action-button:hover {
+  opacity: 0.8;
+}
+
+.division {
+  text-align: center;
+  border: 2px solid rgb(8, 197, 8);
+  margin-left: 5%;
+  border-radius: 11px;
+}
+
+.division:hover {
+  border: 2px solid #34d589;
+}
+
+//nested dropdown list
+.nested-dropdown {
+  display: block;
+}
+
+.previous {
+  border: 2px solid #3ec183;
+  position: absolute;
+  right: 16px;
+  bottom: 4px;
+  border-radius: 4px;
+}
+
+.text {
+  position: absolute;
+  right: 33%;
+  bottom: 6px;
+}
+
+.next {
+  position: relative;
+  border: 2px solid #3ec183;
+  left: 5px;
+  top: 4px;
+  border-radius: 4px;
+}

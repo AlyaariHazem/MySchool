@@ -1,0 +1,89 @@
+.form {
+    width: 100%;
+    max-width: 500px;
+    margin: auto;margin-top: 6rem;
+    position: fixed;
+    padding: 20px;
+    left:34%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    direction: rtl; /* Ensures the form is right-to-left */
+}
+
+.form-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.mat-form-field {
+    width: 100%;
+}
+
+.mat-form-field.appearance-outline .mat-form-field-outline {
+    border-color: #c0c0c0;
+}
+
+.mat-form-field.mat-focused .mat-form-field-outline {
+    border-color: #3f51b5; /* Change to your desired focus color */
+}
+
+.mat-label {
+    font-size: 14px;
+}
+
+.mat-input-element {
+    direction: rtl; /* Ensures input text is right-to-left */
+}
+
+.mat-error {
+    color: #f44336; /* Error color */
+}
+
+input[matInput] {
+    direction: rtl;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #c0c0c0;
+}
+
+.input2 {
+    margin-top: -10px;
+    width: 100%;
+}
+
+button.btn-primary {
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button.btn-primary:hover {
+    background-color: #303f9f;
+}
+
+.buttonSend {
+    width: 100%;
+    margin-top: 10px;
+}
+
+a {
+    color: #3f51b5;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+p {
+    font-size: 14px;
+    color: #333;
+}

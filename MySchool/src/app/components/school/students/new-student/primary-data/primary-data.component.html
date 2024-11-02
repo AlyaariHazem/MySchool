@@ -1,0 +1,123 @@
+<div id="DataStudent" class="container" dir="rtl">
+  <form [formGroup]="dataForm">
+    <!-- Group 1: Full Names -->
+    <div class="group group1">
+      <label for="Ab" class="label1">الاسم الكامل</label>
+      <input
+        type="text"
+        class="inputAb"
+        name="Ab"
+        formControlName="fullNameAr"
+        readonly
+      />
+      <label for="En" class="label1">Full Name</label>
+      <input
+        type="text"
+        dir="ltr"
+        class="inputEn"
+        name="En"
+        formControlName="fullNameEn"
+        readonly
+      />
+    </div>
+    <br />
+
+    <!-- Group 2: Arabic Names -->
+    <div class="row row1">
+      <label for="row1-1" class="label2">الاسم الأول</label>
+      <input
+        type="text"
+        name="row1-1"
+        placeholder="الاسم الأول"
+        formControlName="firstNameAr"
+      />
+      <label for="row1-2" class="label2">الاسم الثاني</label>
+      <input
+        type="text"
+        name="row1-2"
+        placeholder="الاسم الثاني"
+        formControlName="secondNameAr"
+      />
+      <label for="row1-3" class="label2">الاسم الثالث</label>
+      <input
+        type="text"
+        name="row1-3"
+        placeholder="الاسم الثالث"
+        formControlName="thirdNameAr"
+      />
+      <label for="row1-4" class="label2">الاسم الأخير</label>
+      <input
+        type="text"
+        name="row1-4"
+        placeholder="اسم العائلة"
+        formControlName="lastNameAr"
+      />
+    </div>
+    <br />
+
+    <!-- Group 3: English Names -->
+    <div class="row row2">
+      <label for="row2-4" class="label2 label3">First</label>
+      <input
+        type="text"
+        class="appear"
+        name="row2-4"
+        placeholder="First Name"
+        formControlName="firstNameEn"
+      />
+      <label for="row2-2" class="label2 label3">Second</label>
+      <input
+        type="text"
+        class="appear"
+        name="row2-3"
+        placeholder="Second Name"
+        formControlName="secondNameEn"
+      />
+      <label for="row2-3" class="label2 label3">Third</label>
+      <input
+        type="text"
+        name="row2-2"
+        placeholder="Third Name"
+        formControlName="thirdNameEn"
+      />
+      <label for="row2-1" class="label2 label3">Last</label>
+      <input
+        type="text"
+        name="row2-1"
+        placeholder="Last Name"
+        formControlName="lastNameEn"
+      />
+    </div>
+    <br />
+
+    <!-- Group 4: Other Information -->
+    <div class="row row3">
+      <label for="row3-1" class="label2">تاريخ الميلاد</label>
+      <input
+        type="date"
+        name="dob"
+        placeholder="تاريخ الميلاد"
+        formControlName="dob"
+      />
+      <label for="row3-2" class="label2">الصف</label>
+      <input
+        type="text"
+        name="grade"
+        placeholder="Grade"
+        formControlName="grade"
+      />
+      <label for="row3-3" class="label2">الشعبة</label>
+      <input
+        type="text"
+        name="division"
+        placeholder="Division"
+        formControlName="division"
+      />
+      <label for="row3-4" class="label2">النوع</label>
+      <select name="sex" placeholder="Sex" formControlName="sex" id="sexSelect">
+        <option value="male">ذكر</option>
+        <option value="female">إنثى</option>
+      </select>
+    </div>
+  </form>
+</div>

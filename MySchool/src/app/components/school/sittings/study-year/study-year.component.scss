@@ -1,0 +1,233 @@
+.info {
+    margin-top: 3rem;
+    width: 100%;
+    z-index: -3;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 900;
+  }
+  
+  .title {
+    font-size: 25px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif
+  }
+  
+  .addNewClass {
+    position: absolute;
+    left: 5%;
+    z-index: 1;
+    top: 13rem;
+  }
+  .addNewClass button{
+    background-color: #2fdf84;
+    border:none;
+  }
+  
+  .row1 {
+    position: relative;
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    padding-bottom: 2rem;
+    border-width: 0 0 1px 0;
+    border-bottom: 1px solid rgb(152, 152, 152);
+    border-right: 2px solid rgb(31, 26, 26);
+    border-left: 2px solid rgb(40, 35, 35);
+  }
+  
+  .row1-1 {
+    width: 2%;
+    border-top: 2px solid rgb(31, 26, 26);
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  
+  .row1-2 {
+    width: 2%;
+    border-top: 2px solid rgb(31, 26, 26);
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
+  //this for edit and add User **************************************************====>>
+  /* Full-width input fields */
+  input[type=text],
+  input[type=password],
+  input[type=email] {
+    // width: 50%;
+    padding: 12px 20px;
+    border: 1px solid #ccc;
+    display: inline-block;
+    box-sizing: border-box;
+  }
+  
+  /* Set a style for all buttons */
+  button:hover {
+    opacity: 0.8;
+  }
+  
+  .container button {
+    width: 16%;
+  }
+  
+  /* Center the image and position the close button */
+  .imgcontainer {
+    text-align: center;
+    margin: 24px 0 12px 0;
+    position: relative;
+  }
+  
+  img.avatar {
+    width: 22%;
+    border-radius: 50%;
+  }
+  
+  svg {
+    cursor: pointer;
+    margin-right: 11px;
+  }
+  
+  svg:hover {
+    color: red;
+  }
+  
+  .container {
+    padding: 16px;
+    margin-top: 1rem;
+  }
+  
+  span.psw {
+    float: right;
+    padding-top: 16px;
+  }
+  
+  /* The Modal (background) */
+  .modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
+    padding-top: 60px;
+  }
+  
+  /* Modal Content/Box */
+  .modal-content {
+    background-color: #fefefe;
+    margin: 5% 25% auto;
+    border: 1px solid #888;
+    width: 62%;
+  }
+  
+  /* The Close Button (x) */
+  .close {
+    position: absolute;
+    right: 30px;
+    top: 0;
+    color: #000;
+    font-size: 35px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: red;
+    cursor: pointer;
+  }
+  
+  /* Add Zoom Animation */
+  .animate {
+    -webkit-animation: animatezoom 0.6s;
+    animation: animatezoom 0.6s
+  }
+  
+  @-webkit-keyframes animatezoom {
+    from {
+      -webkit-transform: scale(0)
+    }
+  
+    to {
+      -webkit-transform: scale(1)
+    }
+  }
+  
+  @keyframes animatezoom {
+    from {
+      transform: scale(0)
+    }
+  
+    to {
+      transform: scale(1)
+    }
+  }
+  
+  .section1 {
+    position: relative;
+  }
+  .NameYear{
+    width: 100%;
+  }
+  .year{
+    position: relative;
+    width:47%;
+    margin-right:2%; 
+    margin-top:0.5rem;
+  }
+  
+  .section1 .note{
+    width:96%;
+    margin-right: 2%;
+    margin-top:0.5rem;
+  }
+  .text{
+    margin-top:2rem;
+  }
+  .record{
+    position: absolute;
+    top:2rem;
+    background-color: #2fdf84;
+    left:2rem;
+    border:none;
+  }
+  /* Change styles for span and cancel button on extra small screens */
+  @media screen and (max-width: 300px) {
+    span.psw {
+      display: block;
+      float: none;
+    
+    }
+    
+    .cancelbtn {
+      width: 100%;
+    }
+  }
+  @media (max-width:900px){
+    .container button {
+       width: 29%;
+       left:1rem;
+       top:1rem;
+     }
+  
+  }

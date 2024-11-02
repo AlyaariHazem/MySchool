@@ -1,0 +1,112 @@
+#DataStudent {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+.label1{
+  margin-bottom: 2px;
+  width: 93.5%;
+  position: relative;
+  right: 1%;
+}
+.label2 {
+  margin-bottom: 5px;
+  position: relative;
+  bottom: 1.5rem;
+  right: 7rem;
+}
+.label3{
+  right: 18%;
+}
+input,select {
+  margin-bottom: 10px;
+  padding: 10px;
+  width: 93.5%;
+  box-sizing: border-box;
+}
+input,
+select {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease-in-out;
+}
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #2fdf85;
+  box-shadow: 0 0 5px #2fdf85;
+  border: 1 solid #2fdf85;
+}
+input:focus.inputAb,input:focus.inputEn{
+  border: 0.2px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 0 5px #ccc;
+}
+.row {
+  position: relative;
+  right:-8%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.row label,
+.row input ,.row select {
+  flex: 1 1 calc(0% - 10px); /* Four columns layout with space between */
+  margin-bottom: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (min-width: 1250px) {
+  .label2 {
+    right: 12%;
+  }
+}
+@media (max-width: 768px) {
+  .label2 {
+    position: relative;
+    bottom: 1.5rem;
+    right: 9px;
+    flex: 1 1 calc(20% - 10px); /* Four columns layout with space between */
+  }
+}
+@media (max-width: 768px) {
+  .row label,
+  .row input {
+    flex: 1 1 calc(24% - 5px); /* Four columns layout with space between */
+    // background-color: red;
+  }
+  .label2 {
+    position: relative;
+    bottom: 0;
+    right: 0;
+  }
+
+  .appear {
+    display: block;
+  }
+}
+@media (max-width: 550px) {
+  .row label,
+  .row input,.row select {
+    flex: 1 1 100%; /* Full width on mobile devices */
+  }
+  .label2 {
+    position: relative;
+    bottom: 0;
+    right: 0;
+  }
+
+  .appear {
+    display: block;
+  }
+}

@@ -1,0 +1,64 @@
+<button class="close-btn" (click)="closeModal()">×</button>
+  <app-head></app-head>
+<div id="id01" class="" dir="rtl">
+  <div class="modal-content" style="background-color: #ffffff !important">
+    <div class="container">
+      <h2 class="school">تخصيص المدرسة</h2>
+
+      <button
+        [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }"
+        id="defaultOpen"
+        (click)="openPage('DataStudent', $event.target)"
+      >
+        <span>بيانات الطالب</span>
+      </button>
+      <button
+        [ngClass]="{ tablink: true, active: activeTab === 'OptionData' }"
+        (click)="openPage('OptionData', $event.target)"
+      >
+        <span>بيانات إختيارية</span>
+      </button>
+      <button
+        [ngClass]="{ tablink: true, active: activeTab === 'guardian' }"
+        (click)="openPage('guardian', $event.target)"
+      >
+        <span>ولي الأمر</span>
+      </button>
+      <button
+        [ngClass]="{ tablink: true, active: activeTab === 'fees' }"
+        (click)="openPage('fees', $event.target)"
+      >
+        <span>رسوم الطالب</span>
+      </button>
+      <button
+        [ngClass]="{ tablink: true, active: activeTab === 'document' }"
+        (click)="openPage('document', $event.target)"
+      >
+        <span>الوثائق</span>
+      </button>
+      <p class="line"></p>
+    </div>
+  </div>
+
+  @if (activeTab === 'DataStudent') {
+  <div class="tabcontent">
+    <app-primary-data></app-primary-data>
+  </div>
+  } @if (activeTab === 'OptionData') {
+  <div class="tabcontent">
+    <app-option-data></app-option-data>
+  </div>
+  } @if (activeTab === 'guardian') {
+  <div class="tabcontent">
+    <app-guardian></app-guardian>
+  </div>
+  } @if (activeTab === 'fees') {
+  <div class="tabcontent">
+    <app-fees></app-fees>
+  </div>
+  } @if (activeTab === 'document') {
+  <div class="tabcontent">
+    <app-document></app-document>
+  </div>
+  }
+</div>

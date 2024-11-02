@@ -1,0 +1,1 @@
+export const BackendUrl='localhost:5180/api/Auth';

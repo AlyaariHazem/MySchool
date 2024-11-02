@@ -1,0 +1,95 @@
+<div class="info" dir="rtl">
+    <div>
+        <h1 style="margin-right:2rem;" class="title"> {{title}} </h1>
+        <div class="addNewClass">
+            <button onclick="document.getElementById('id01').style.display='block'" class="btn btn-primary">+ إضافة
+                سنة جديد</button>
+        </div>
+        <div style="background-color:#ffffff!important;" class="row1">
+            <span class="row1-top"></span>
+            <span class="row1-1"></span>
+            <span class="row1-2"></span>
+            <div class="side">
+                <table class="table table-bordered" dir="auto">
+                    <thead style="text-align: center!important;">
+                        <tr>
+                            <th>#</th>
+                            <th>السنة الدراسية </th>
+                            <th>ملاحظة</th>
+                            <th>الترم الحالي</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>الترم الحالي</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody style="text-align: center!important;">
+                        @for (clas of class; track $index) {
+                        <tr>
+                            <td>{{++$index}}</td>
+                            <td>{{clas.name}}</td>
+                            <td>{{clas.totalStudents}}</td>
+                            <td>{{clas.type}}</td>
+                            <td>{{clas.semester}}</td>
+                            <select type="typeUser" placeholder="الترم الحالي" formControlName="type" name="type"
+                                required style="width: 99%; height: 44px; margin-bottom: 8px;">
+                                <option value="firs">الأول</option>
+                                <option value="second">الثاني</option>
+                            </select><br>
+                            <td>
+                                <span>
+                                    <svg (click)="patchClass(clas)" xmlns="http://www.w3.org/2000/svg" width="20"
+                                        height="20" fill="currentColor" class="bi bi-box-arrow-in-down-left"
+                                        viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd"
+                                            d="M9.636 2.5a.5.5 0 0 0-.5-.5H2.5A1.5 1.5 0 0 0 1 3.5v10A1.5 1.5 0 0 0 2.5 15h10a1.5 1.5 0 0 0 1.5-1.5V6.864a.5.5 0 0 0-1 0V13.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
+                                        <path fill-rule="evenodd"
+                                            d="M5 10.5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 0-1H6.707l8.147-8.146a.5.5 0 0 0-.708-.708L6 9.293V5.5a.5.5 0 0 0-1 0z" />
+                                    </svg>
+                                    <svg (click)="deleteClass(clas)" xmlns="http://www.w3.org/2000/svg" width="20"
+                                        height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                        <path
+                                            d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
+                                    </svg>
+                                </span>
+                            </td>
+                        </tr>
+                        }
+                        <!-- Add more rows here if needed -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="id01" class="modal">
+        <!-- here is stant the Form ****************************************************************************************** -->
+        <form class="modal-content animate" [formGroup]="form">
+            <div class="imgcontainer">
+                <span (click)="close()" class="close" title="Close Modal">&times;</span>
+            </div>
+
+            <div class="container">
+                <label for="NameYear" class="text">العام الدراسي</label><br>
+                <div class="NameYear">
+                    <input class="year" type="date" placeholder="بداية السنة" formControlName="Uname" name="Uname"
+                        required>
+                    <input class="year" type="date" placeholder="نهاية السنة" formControlName="Uname" name="Uname"
+                        required>
+                </div>
+                @if (form.get('uname')?.hasError('required')) {
+                <span style="color: red;">إذا سمحت أدخل سنة صحيحة</span>
+                }
+
+                <div class="section1">
+
+                    <label for="note" class="text"><b>الملاحظة</b></label>
+                    <input type="text" class="note" placeholder="ملاحظة " minlength="8" formControlName="note"
+                        name="note">
+                </div>
+
+                <button type="submit" (click)="register()" class="btn btn-primary record">إضافة</button>
+                
+            </div>
+
+        </form>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+<div class="student-header rtl-direction">
+  <div class="student-photo-section">
+    <div class="student-photo">
+      <label for="fileInput">
+        <img src="assets/img/user.jpg" alt="Student Photo">
+      </label>
+      <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none;">
+      <button (click)="takePhoto()" class="btn btn-primary">التقاط صورة</button>
+    </div>
+  </div>
+
+  <div class="student-info-section">
+    <div class="student-name-id">
+      <div class="student-name">
+        <label>اسم الطالب:</label>
+        <span>{{ student.name }}</span>
+      </div>
+      <div class="student-id">
+        <label>رقم الطالب:</label>
+        <span>{{ student.id }}</span>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button (click)="addStudent()" class="btn btn-success">إضافة</button>
+      <button (click)="newStudent()" class="btn btn-info">جديد</button>
+      <button (click)="printGrades()" class="btn btn-warning">الشهادة</button>
+    </div>
+  </div>
+</div>

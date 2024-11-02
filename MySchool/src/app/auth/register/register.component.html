@@ -1,0 +1,188 @@
+<div id="id01" class="modal">
+    <span (click)="onNoClick()" class="close" title="Close Modal">&times;</span>
+    <form class="modal-content" [formGroup]="form" style="background-color:#ffffff!important;">
+        <div class="container">
+            <div class="info" dir="rtl">
+                <h2>إدخل البيانات الشخصية</h2>
+                <h4 class="StudentInfo">معلومات الطالب</h4>
+                <div class="row1">
+                    <span class="row1-top"></span>
+                    <span class="row1-1"></span>
+                    <span class="row1-2"></span>
+                    <div class="side">
+                        <div class="section1">
+                            <label for="PlacePD" class="lab1">مكان الميلاد</label><br>
+                            <label for="ContryNum" class="lab2R1">رقم الهوية</label><br>
+                            <input type="text" id="ContryNum" class="input" formControlName="StudentName">
+                            @if (form.get('StudentName')?.invalid && (form.get('StudentName')?.dirty ||
+                            form.get('StudentName')?.touched)) {
+
+                            <div class="lab1" style="top: 4.5rem;right: 2px; color: red;">
+                                @if (form.get('StudentName')?.errors?.['required']) {
+                                <div>رقم الهوية مطلوب</div>
+                                }
+
+                            </div>
+                            }
+
+                            <input type="text" id="PlacePD" name="PlacePD" formControlName="PlacePD" class="input">
+                            @if (form.get('PlacePD')?.invalid && (form.get('PlacePD')?.dirty ||
+                            form.get('PlacePD')?.touched)) {
+                            <div class="lab1" style="top: 4.5rem;color: red;">
+                                @if (form.get('PlacePD')?.errors?.['required']) {
+                                <div>مكان الميلاد مطلوب</div>
+
+                                }
+                            </div>
+                            }
+
+                        </div>
+                        <div class="section2">
+                            <label for="six" class="lab2-2">الجنس</label>
+                            <label for="PirthDate" class="lab2-1">تاريخ الميلاد</label>
+                            <input type="date" id="PirthDate" class="input2-1" formControlName="PirthDate">
+                            <select class="input2-2" type="text" id="six" formControlName="six">
+                                <option value="male">ذكر</option>
+                                <option value="female">انثى</option>
+                            </select>
+                        </div>
+
+
+                        <div class="section3">
+                            <h2 style="margin-right: 22px;">الاسم باللغة العربية</h2>
+                            <label for="fname" class="lab3-1">الاسم</label>
+                            @if (form.get('fname')?.hasError('required')) {
+                            <div class="lab3-1" style="top: 5rem;color: red;">
+                                <div>الاسم مطلوب</div>
+                            </div>
+                            }
+                            <input type="text" id="fname" class="input3-1" formControlName="fname">
+                            <label for="Sname" class="lab3-2">الأب</label>
+                            @if (form.get('Sname')?.hasError('required')) {
+                            <div class="lab3-2" style="top: 5rem;color: red;">
+                                <div>الاسم الأب مطلوب</div>
+                            </div>
+                            }
+                            <input type="text" id="Sname" class="input3-2" formControlName="Sname">
+                            <label for="Tname" class="lab3-3">الجد</label>
+
+                            <input type="text" id="Tname" class="input3-3" formControlName="Tname">
+                            <label for="Lname" class="lab3-4">العائلة</label>
+                            <input type="text" id="Lname" class="input3-4" formControlName="Lname">
+                            @if (form.get('Lname')?.hasError('required')) {
+                            <div class="lab3-4" style="top: 5rem;color: red;">
+                                <div>الاسم العائلة مطلوب</div>
+                            </div>
+                            }
+                        </div>
+                        <div class="section4">
+                            <h2 style="margin-right: 33%;">Name By English </h2>
+                            <label for="fnameE" class="lab4-1">First</label>
+                            <input type="text" id="fnameE" class="input4-1" formControlName="fnameE">
+                            <label for="SnameE" class="lab4-2">Second</label>
+                            <input type="text" id="SnameE" class="input4-2" formControlName="SnameE">
+                            <label for="TnameE" class="lab4-3">Third</label>
+                            <input type="text" id="TnameE" class="input4-3" formControlName="TnameE">
+                            <label for="LnameE" class="lab4-4">Last</label>
+                            <input type="text" id="LnameE" class="input4-4" formControlName="LnameE">
+                        </div>
+
+                        <div class="section5">
+                            <label for="class" class="lab5-1">الفصل</label>
+                            <select class="input5-1" type="text" id="class" formControlName="class">
+                                <option value="first">الاول</option>
+                                <option value="second">الثاني</option>
+                                <option value="third">الثالث</option>
+                                <option value="forth">الرابع</option>
+                            </select>
+                            <label for="lSchool" class="lab5-2">المدرسة السابقة</label>
+                            <input type="text" id="lSchool" class="input5-2" formControlName="lSchool">
+                            <label for="country" class="lab5-3">الجنسية</label>
+                            <select class="input5-3" type="text" id="country" formControlName="country">
+                                <option value="ye">اليمن</option>
+                                <option value="oman">السعودية</option>
+                                <option value="US">الصومال</option>
+                                <option value="ys">اثيوبيا</option>
+                            </select>
+                        </div>
+
+                        <div class="section6">
+                            <label for="phone" class="lab6-1">رقم الجوال</label>
+                            <input type="text" minlength="9" maxlength="9" class="input6-1" formControlName="phone"
+                                style="width: 13.5%;">
+                            @if (form.get('phone')?.invalid && (form.get('phone')?.dirty || form.get('phone')?.touched))
+                            {
+                            <div class="lab6-1" style="color: red; top: 2rem;">
+                                @if (form.get('phone')?.errors?.['maxlength']) {
+
+                                }@else if(form.get('phone')?.errors?.['minlength']) {
+
+                                <div>رقم الهاتف يجب أن يكون صحيح</div>
+                                }
+                            </div>
+                            }
+                            <label for="section" class="lab6-2">المحافظة</label>
+                            <input type="text" class="input6-2" id="section" formControlName="section">
+                            <label for="city" class="lab6-3">المدينة/الحي</label>
+                            <input type="text" id="city" class="input6-3" formControlName="city">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- *******************************           parent **************************** -->
+            <div class="info parentInfo" dir="rtl">
+                <h4 class="StudentInfo">معلومات ولي أمر الطالب</h4>
+                <div class="row1">
+                    <span class="row1-top"></span>
+                    <span class="row1-1"></span>
+                    <span class="row1-2"></span>
+                    <div class="side">
+                        <div class="section1">
+                            <label for="ParantName" class="lab1">الاسم</label><br>
+                            <label for="ParnatContryNum" class="lab2R1">رقم الهوية</label><br>
+                            <input type="text" id="ParnatContryNum" formControlName="ParnatContryNum" class="input">
+                            <input type="text" id="ParantName" name="ParantName" formControlName="ParantName"
+                                class="input">
+                        </div>
+                        <div class="section2">
+                            <label for="parantEmail" class="lab2-2">الإيميل</label>
+                            <label for="parantPhone" class="lab2-1">رقم الهاتف</label>
+                            <input type="password" id="parantPhone" formControlName="parantPhone" class="input2-1">
+                            <input type="email" id="parantEmail" formControlName="parantEmail" class="input2-2">
+                        </div>
+
+
+                        <div class="section5">
+                            <label for="parantType" class="lab5-1">العلاقة الاجتماعية</label>
+                            <select class="input5-1" type="parantType" id="class" formControlName="parantType">
+                                <option value="father">أب</option>
+                                <option value="brather">أخ</option>
+                                <option value="mother">أم</option>
+                                <option value="ancle">عم</option>
+                            </select>
+                            <label for="parantJob" class="lab5-2">المهنة</label>
+                            <input type="tel+967" id="parantJob" style="width:16%;right:14%;"
+                                formControlName="parantJob" class="input5-2">
+                        </div>
+
+                        <div class="section6">
+                            <label for="typeJob" class="lab6-1">نوع المهنة</label>
+                            <input type="text" id="typeJob" class="input6-1" formControlName="typeJob"
+                                style="width: 13.5%;">
+                            <label for="discriptionJob" class="lab6-2">وصف المهنة</label>
+                            <input type="text" class="input6-2" id="discriptionJob" formControlName="discriptionJob">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <mat-dialog-actions>
+                <button mat-button class="cancelbtn" (click)="onNoClick()">إلغاء</button>
+                <button mat-button  class="btn btn-success signupbtn" type="submit" (click)="onSubmit()">إرسال البيانات</button>
+            </mat-dialog-actions>
+        </div>
+    </form>
+</div>
+<form [formGroup]="form" style="background-color:#ffffff!important ;">
+
+</form>
