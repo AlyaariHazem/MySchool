@@ -1495,13 +1495,6 @@ label {
     opacity: 0
 }
 
-.page-header {
-    border: 1px solid #d5dbe1;
-    padding: 25px;
-    border-radius: 10px;
-    margin-bottom: 30px
-}
-
 .page-title {
     color: #000;
     padding-left: 10px;
@@ -7764,8 +7757,7 @@ body[data-layout-mode=dark] .alertify .ajs-footer .ajs-buttons .ajs-button.ajs-o
     }
 
     .page-header .breadcrumb {
-        padding-left: 0;
-        font-size: 9px
+        display: none;
     }
 
     .widget .laTest-posts {

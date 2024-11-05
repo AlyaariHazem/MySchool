@@ -1,14 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseService } from '../../firebase/firebase.service';
-import { map, Observable,switchMap } from 'rxjs';
-import { Stages } from '../models/stages-grades.modul';
+import { catchError, map, Observable,switchMap } from 'rxjs';
+import { AddStage, Stages } from '../models/stages-grades.modul';
 import { firebaseUrl } from '../../firebase/firebase-config';
+import { URLAPIService } from '../../ASP.NET API/urlapi.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StageService {
   firebaseService = inject(FirebaseService);
+  APIService = inject(FirebaseService);
+  private API = inject(URLAPIService);
 
   // Get all stage from Firebase
   getStages(): Observable<Array<Stages>> {
@@ -23,6 +26,36 @@ export class StageService {
         return stageArray;
       })
     );
+  }
+  
+
+ // I want this to display my stages 
+  getAllStages(): Observable<any> {
+    return this.API.http.get(`${this.API.baseUrl}/stages`).pipe(
+      map(response => response), // Process or map the response here if needed
+      catchError(error => {
+        console.error("Error fetching stages:", error);
+        throw error; // Optionally handle the error or rethrow
+      })
+    );
+  }
+  AddStage(stage:AddStage):Observable<any>{
+    return this.API.http.post(`${this.API.baseUrl}/stages`,stage).pipe(
+      
+    )
+  }
+
+  DeleteStage(id: number): Observable<any> {
+    return this.API.http.delete(`${this.API.baseUrl}/stages/${id}`).pipe(
+      catchError(error => {
+        console.error("Error deleting stage:", error);
+        throw error; // Optionally rethrow or handle the error here
+      })
+    );
+  }
+    
+  DeleteClass(id:number):Observable<any>{
+    return this.API.http.delete(`${this.API.baseUrl}/classes/${id}`);
   }
 
   // Add a new stage to Firebase

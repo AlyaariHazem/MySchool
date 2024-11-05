@@ -88,8 +88,9 @@
   }
   
   .termName {
-    position: relative;
-    top: -0.5rem;
+    position: absolute;
+    right: 10%;
+    top: 9.5rem;
   }
   
   .add {
@@ -128,8 +129,8 @@
   
     .className {
       position: relative;
-      top: -6rem;
-      right: 37%
+      top: -4rem;
+      right: 0%;
     }
   
     .termName {

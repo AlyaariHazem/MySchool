@@ -1,82 +1,29 @@
-import { Component, inject, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {  ToastrService } from 'ngx-toastr';
-
-
+import { Component } from '@angular/core';
+import { AuthAPIService } from '../authAPI.service';  // Make sure this points to your service
+import { Router } from '@angular/router';
 import { ShardModule } from '../../shared/shard.module';
-import { StudentsServicesService } from '../../core/services/student.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ShardModule],
+  imports: [ShardModule, MatDialogModule],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.scss'
+  styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
-  form: FormGroup;
-  name = "info";
+  registerError: string | null = null;
 
-  private toastService = inject(ToastrService);
-  private studentService=inject(StudentsServicesService);
-  
-  sendNewStudent(): void {
-    if (this.form.valid) {
-      // this.addStudent();
-    } else {
-      console.log('Form is invalid:', this.form);
-      // this.toastService.error('ادخل بيانات الطالب بالكامل');
-    }
-  }
-  constructor( public dialogRef: MatDialogRef<RegisterComponent>,
-    
-    private formBuilder: FormBuilder){
+  constructor(private authService: AuthAPIService, private router: Router) {}
 
-      this.form = this.formBuilder.group({
-        PlacePD: ['', Validators.required],
-        StudentName: ['', Validators.required],
-        PirthDate: '',
-        LnameE: ["", [Validators.required]],
-        TnameE: ["", [Validators.required]],
-        SnameE: ["", [Validators.required]],
-        fnameE: ["", [Validators.required]],
-        Lname: ["", [Validators.required]],
-        Tname: ["", [Validators.required]],
-        Sname: ["", [Validators.required]],
-        fname: ["", [Validators.required]],
-        six: "male",
-        city: "",
-        section: "",
-        phone: ["", [Validators.minLength(9)]],
-        country: "ye",
-        lSchool: "",
-        class: "",
-        discriptionJob: "",
-        typeJob: "",
-        parantJob: "",
-        parantType: "father",
-        parantEmail: "",
-        parantPhone: ['', [Validators.required, Validators.minLength(8)]],
-        ParantName: '',
-        ParnatContryNum: "",
-      });
-    }
-  
-  onNoClick(): void {
-      this.dialogRef.close();
-      this.toastService.error('ادخل بيانات الطالب بالكامل');
-  }
-  onSubmit(): void {
-    if (this.form.valid) {
-      this.studentService.addStudent(this.form.value).subscribe(()=>{
-        console.log('you sent the form',this.form.value);
-      });
-      this.dialogRef.close(this.form.value);
-      this.toastService.success('تم إضافة الطالب بنجاح');
-    } else {
-      this.form.markAllAsTouched();      
-      this.toastService.error('ادخل بيانات الطالب بالكامل');
-    }
+  register(formValue: { userName: string; email: string; password: string }) {
+    this.authService.register(formValue).subscribe({
+      next: () => {
+        this.router.navigate(['/login']); // Navigate to login or any other page on success
+      },
+      error: (error) => {
+        this.registerError = error.error.message || 'Registration failed'; // Handle errors
+      }
+    });
   }
 }

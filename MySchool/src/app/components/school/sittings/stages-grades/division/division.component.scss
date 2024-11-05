@@ -33,7 +33,7 @@ select {
 }
 
 .term {
-  margin-right: -8px;
+  margin-left: 17%;
 }
 
 .class {
@@ -81,13 +81,14 @@ select:focus {
 }
 
 .className {
-  position: relative;
-  top: -2.3rem;
-  right: 5rem;
+  position: absolute;
+  top: 37%;
+  right: 4%;
 }
 
 .termName {
   position: relative;
+  right: 5%;
   top: -0.5rem;
 }
 
@@ -127,8 +128,8 @@ select:focus {
 
   .className {
     position: relative;
-    top: -6rem;
-    right: 37%;
+    top: -3.8rem;
+    right: 5%;
   }
 
   .termName {

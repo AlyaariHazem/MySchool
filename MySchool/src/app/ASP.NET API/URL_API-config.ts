@@ -1,0 +1,1 @@
+export const URLAPI='http://localhost:5180/api';

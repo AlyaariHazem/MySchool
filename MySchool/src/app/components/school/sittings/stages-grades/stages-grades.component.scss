@@ -7,9 +7,9 @@
 }
 
 h2 {
-  font-family: 'Changa', sans-serif;
+  font-family: "Changa", sans-serif;
 }
-input:focus{
+input:focus {
   border: 1px solid #2fdf85;
 }
 .container {
@@ -17,7 +17,9 @@ input:focus{
 }
 
 .school {
-  margin-top: 2rem;
+  text-align: right;
+  font-style: italic;
+  margin-bottom: -0.1rem;
 }
 
 .line {
@@ -34,13 +36,15 @@ select {
   border-radius: 4px;
   height: 33px;
   width: 33%;
+  margin-left: 2rem;
   background-color: white;
   box-sizing: border-box;
   transition: border-color 0.3s ease-in-out;
 }
 
 .term {
-  margin-right: -8px;
+  position: relative;
+  right: -4rem;
 }
 
 .class {
@@ -53,7 +57,6 @@ select:focus {
   border-color: #2fdf85;
   box-shadow: 0 0 5px #2fdf85;
 }
-
 
 .tablink {
   color: black;
@@ -84,26 +87,26 @@ select:focus {
 .tabcontent {
   color: black;
   display: none;
-  padding: 100px 20px;
+  margin-top: 6rem;
   height: 100%;
 }
 
 .className {
   position: relative;
-  top: -2.3rem;
-  right: 5rem;
+  top: -2rem;
+  right: 3.3rem;
 }
 
 .termName {
   position: relative;
-  top: -0.5rem;
+  top: -2rem;
 }
 
 .add {
   position: relative;
   top: 0rem;
-  width: 14%;
-  border-radius: 32px;
+  width: 10%;
+  border-radius: 13px;
   left: 1rem;
   border: none;
   color: white;
@@ -114,7 +117,7 @@ select:focus {
   background-color: #2fdf85;
 }
 
-@media (max-width:900px) {
+@media (max-width: 900px) {
   .tablink {
     color: red;
     padding: 1px 0px;
@@ -126,30 +129,26 @@ select:focus {
   }
 
   .add {
-    position: relative;
-    top: -4.5rem;
-    width: 14%;
     left: -1rem;
-    color: white;
-    background-color: #2fdf84;
+    position: relative;
+    top: 0rem;
+    width: 15%;
   }
 
   .className {
     position: relative;
-    top: -6rem;
-    right: 37%
+    right: -18%;
+    left: 6%;
   }
 
   .termName {
     position: absolute;
     top: 7.4rem;
-    right: 4%;
+    right: 8%;
   }
 
   .term {
-    position: absolute;
-    right: 5%;
-    top: 9rem;
+    right: -9rem;
   }
 
   .class {
@@ -157,10 +156,9 @@ select:focus {
     right: 38%;
     top: 9rem;
   }
-
 }
 
-@media (max-width:600px) {
+@media (max-width: 600px) {
   .tablink {
     color: green;
   }
@@ -172,16 +170,25 @@ select:focus {
   .term {
     position: absolute;
     right: 5%;
-
   }
-
+  .add {
+    left: -2rem;
+    position: relative;
+    top: -3rem;
+    width: 17%;
+  }
   .class {
     width: 44%;
     margin-left: 1rem;
   }
+  .className {
+    position: relative;
+    right: 6%;
+    padding: 12px;
+  }
 }
 
-@media (max-width:400px) {
+@media (max-width: 400px) {
   .tablink {
     color: rgb(35, 22, 213);
   }
@@ -202,15 +209,23 @@ select:focus {
 
   .btn {
     position: relative;
-    top: -6.5rem;
-    width: 25%;
-    left: -1rem;
+    top: -0.5rem;
+    width: 71%;
+    left: 0rem;
+    color: white;
+    background-color: #2fdf84;
+  }
+  .add {
+    position: relative;
+    top: -3.5rem;
+    width: 30%;
+    left: -3rem;
     color: white;
     background-color: #2fdf84;
   }
 }
 
-//this is for talbes 
+//this is for talbes
 /* Resetting some default styles */
 
 .styled-table {
@@ -272,7 +287,7 @@ select:focus {
 }
 
 .action-button.edit {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   /* Green */
   color: white;
 }
@@ -289,17 +304,16 @@ select:focus {
 
 .division {
   text-align: center;
-  border:2px solid rgb(8, 197, 8);
+  border: 2px solid rgb(8, 197, 8);
   margin-left: 5%;
   border-radius: 11px;
 }
 
 .division:hover {
   border: 2px solid #34d589;
-
 }
 
-//nested dropdown list 
+//nested dropdown list
 .nested-dropdown {
   display: block;
 }
@@ -309,7 +323,7 @@ select:focus {
   position: absolute;
   right: 16px;
   bottom: 4px;
-  border-radius:4px;
+  border-radius: 4px;
 }
 
 .text {
@@ -323,5 +337,5 @@ select:focus {
   border: 2px solid #3ec183;
   left: 5px;
   top: 4px;
-  border-radius:4px;
+  border-radius: 4px;
 }
