@@ -24,9 +24,9 @@
                         <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['sittings']}"></span>
                     </a>
                     <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('sittings')">
-                        <li><a routerLink="/school/sitting/years"><span> السنوات الدراسية</span></a></li>
-                        <li><a routerLink="/school/sitting/schoolInfo"><span>معلومات المدرسة</span></a></li>
-                        <li><a routerLink="/school/sitting/stages"><span>المراحل والصفوف</span></a></li>
+                        <li><a routerLink="/school/sitting/years" routerLinkActive="active"><span> السنوات الدراسية</span></a></li>
+                        <li><a routerLink="/school/sitting/schoolInfo" routerLinkActive="active"><span>معلومات المدرسة</span></a></li>
+                        <li><a routerLink="/school/sitting/stages" routerLinkActive="active"><span>المراحل والصفوف</span></a></li>
                     </ul>
                 </li>
                 <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')">

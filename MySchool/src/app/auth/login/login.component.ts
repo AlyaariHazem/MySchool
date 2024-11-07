@@ -6,11 +6,12 @@ import { ShardModule } from '../../shared/shard.module';
 import { RouterOutlet } from '@angular/router';
 import { AuthAPIService } from '../authAPI.service';
 import { response } from 'express';
+import { TranslateDirective } from '../../directives/translate.directive';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ShardModule, MatDialogModule],
+  imports: [ShardModule, MatDialogModule,TranslateDirective],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
@@ -23,8 +24,8 @@ export class LoginComponent {
     this.authService.login(credentials).subscribe({
       next: (response: any) => {
         if (response && response.token) {
-          this.toastr.success('Login successful');
           this.authService.router.navigateByUrl('school');
+          this.toastr.success('Login successful');
         }
       },
       error: () => {

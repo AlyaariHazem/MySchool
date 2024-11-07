@@ -1,6 +1,6 @@
 <div class="form">
   <form class="form-inline" action="" dir="rtl" #loginForm="ngForm" (ngSubmit)="login(loginForm.value)">
-    <h2 style="margin-right: 3rem;">تسجيل الدخول لنظام مدرستي</h2>
+    <h2 style="margin-right: 3rem;" >تسجيل الدخول لنظام مدرستي</h2>
     <!-- Phone Input Field -->
     <mat-form-field appearance="outline" class="input2">
       <mat-label>إدخل رقم الهاتف</mat-label>
@@ -39,9 +39,11 @@
     <!-- Login and Register Buttons -->
     <br />
     <button type="submit" class="btn btn-success mb-2 buttonSend">تسجيل دخول</button>
-    <button type="button" class="btn btn-success mb-2 buttonSend" mat-raised-button (click)="openRegisterDialog()">
+    <button type="button"  class="btn btn-success mb-2 buttonSend" mat-raised-button (click)="openRegisterDialog()">
       طالب جديد
     </button>
-    <a href="#">هل نسيت كلمة السر؟</a>
+    <a href="#" >هل نسيت كلمة السر؟</a>
+    <!-- here I use custom directive -->
+    <!-- <p appTranslate='rtl' Color='red'>hello</p> -->
   </form>
 </div>

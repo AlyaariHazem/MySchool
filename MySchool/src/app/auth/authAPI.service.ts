@@ -1,14 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { URLAPIService } from '../ASP.NET API/urlapi.service';
 import { Router } from '@angular/router';
+import { BackendAspService } from '../environments/ASP.NET/backend-asp.service';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthAPIService {
-  private API = inject(URLAPIService);  
+  private API = inject(BackendAspService);  
   constructor(public router: Router) { }
 
   login(credentials: { username: string; password: string }): Observable<any> {
@@ -29,5 +29,6 @@ export class AuthAPIService {
     localStorage.removeItem('token');
     // Navigate to the login page
     this.API.router.navigate(['/login']);
+  //  localStorage.removeItem('token'); 
   }
 }

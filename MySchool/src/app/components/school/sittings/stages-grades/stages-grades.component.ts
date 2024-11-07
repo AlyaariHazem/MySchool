@@ -4,8 +4,7 @@ import { AddStage, Stage, Stages } from '../../../../core/models/stages-grades.m
 import { StageService } from '../../../../core/services/stage.service';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { GradeService } from '../../../../core/services/grade.service';
+import { response } from 'express';
 
 @Component({
   selector: 'app-stages-grades',
@@ -35,6 +34,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   ngOnInit(): void {
     this.getStage();
   }
+
   stage: Stage[] = [];
   errorMessage: string = '';
 
@@ -45,12 +45,23 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
       complete: () => console.log('Stages loaded successfully', this.stages) // Optional: on completion
     });
   }
-  
-  addStage(form: FormGroup): void {
-    const addStageData: AddStage = form.value;
-    this.stageService.AddStage(addStageData);
+
+  addStage(): void {
+    if (this.form.valid) { // Check if the form is valid
+      const addStageData: AddStage = this.form.value;
+      this.stageService.AddStage(addStageData).subscribe({
+        next: () => {
+          this.getStage(); // Refresh the stages after adding
+          this.form.reset(); // Reset the form after submission
+          this.toastr.success('Stage Added successfully');
+        },
+        error: () => this.toastr.success(response.statusMessage,'some thing is wrong!') // Handle error
+      });
+    } else {
+      this.errorMessage = 'Please fill in the required fields'; // Inform user of validation issues
+    }
   }
-  
+
   // Method to delete a stage by ID
   deleteStage(id: number): void {
     this.stageService.DeleteStage(id).subscribe({
@@ -64,7 +75,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
     });
   }
 
-  deleteClass(ID:number):void{
+  deleteClass(ID: number): void {
     this.stageService.DeleteClass(ID);
   }
 

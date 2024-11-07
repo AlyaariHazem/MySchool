@@ -29,13 +29,12 @@ export interface Division{
 export interface Class {
     ClassID: number;
     className: string;
-    // Include additional fields present in the class structure if necessary
+    StudentCount: number;
 }
 
 export interface Student {
     StudentID: number;
     StudentName: string;
-    // Include additional fields present in the student structure if necessary
 }
   
   export interface Stage {

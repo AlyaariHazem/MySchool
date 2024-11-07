@@ -19,7 +19,7 @@ import { TeachersComponent } from './teachers/teachers.component';
 import { SchoolRoutingModule } from './school-routing.module';
 import { CommonModule } from '@angular/common';
 import { NavigateComponent } from './navigate/navigate.component';
-import { RouterOutlet } from '@angular/router';
+import { RouterLinkActive, RouterOutlet } from '@angular/router';
 import { StudyYearComponent } from './sittings/study-year/study-year.component';
 import { StagesGradesComponent } from './sittings/stages-grades/stages-grades.component';
 import { SchoolInfoComponent } from './sittings/school-info/school-info.component';
@@ -80,6 +80,7 @@ const modules = [
   MatDialogClose,
   ReactiveFormsModule,
   RouterOutlet,
+  RouterLinkActive,
   FormsModule, MatFormFieldModule, MatInputModule,
   
 ];

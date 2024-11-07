@@ -2,22 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "ng serve -o",
-      "type": "pwa-chrome",
+      "name": "Debug Frontend with Edge",
+      "type": "pwa-msedge", // Change this to use Edge
       "request": "launch",
-      "preLaunchTask": "npm: start",
-      "url": "http://localhost:4200",
+      "preLaunchTask": "Serve Frontend",
+      "url": "http://localhost:4200/#",
       "webRoot": "${workspaceFolder}",
       "sourceMaps": true,
-      "trace": true,
       "sourceMapPathOverrides": {
-        "webpack:///./*": "${webRoot}/*",
-        "webpack:///src/*": "${webRoot}/src/*"
+        "webpack:/*": "${webRoot}/*",
+        "/./*": "${webRoot}/*",
+        "/src/*": "${webRoot}/src/*",
+        "/*": "*",
+        "/./~/*": "${workspaceFolder}/node_modules/*"
       }
     },
     {
-      "name": "ng test",
-      "type": "pwa-chrome",
+      "name": "ng test with Edge",
+      "type": "pwa-msedge", // Change this to use Edge
       "request": "launch",
       "preLaunchTask": "npm: test",
       "url": "http://localhost:9876/debug.html",

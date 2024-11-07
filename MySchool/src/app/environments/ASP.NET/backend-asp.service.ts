@@ -5,7 +5,8 @@ import { Router } from '@angular/router';
 @Injectable({
   providedIn: 'root'
 })
-export class URLAPIService {
+export class BackendAspService {
+
   public baseUrl = 'http://localhost:5180/api';
 
   constructor(public http: HttpClient, public router: Router) { }

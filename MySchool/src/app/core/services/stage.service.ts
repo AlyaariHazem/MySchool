@@ -3,7 +3,7 @@ import { FirebaseService } from '../../firebase/firebase.service';
 import { catchError, map, Observable,switchMap } from 'rxjs';
 import { AddStage, Stages } from '../models/stages-grades.modul';
 import { firebaseUrl } from '../../firebase/firebase-config';
-import { URLAPIService } from '../../ASP.NET API/urlapi.service';
+import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,23 +11,7 @@ import { URLAPIService } from '../../ASP.NET API/urlapi.service';
 export class StageService {
   firebaseService = inject(FirebaseService);
   APIService = inject(FirebaseService);
-  private API = inject(URLAPIService);
-
-  // Get all stage from Firebase
-  getStages(): Observable<Array<Stages>> {
-    return this.firebaseService.getRequest<{ [key: string]: Stages }>('stages').pipe(
-      map(stageObj => {
-        const stageArray: Stages[] = [];
-        for (const key in stageObj) {
-          if (stageObj.hasOwnProperty(key)) {
-            stageArray.push({ ...stageObj[key]});
-          }
-        }
-        return stageArray;
-      })
-    );
-  }
-  
+  private API = inject(BackendAspService);  
 
  // I want this to display my stages 
   getAllStages(): Observable<any> {
@@ -41,7 +25,10 @@ export class StageService {
   }
   AddStage(stage:AddStage):Observable<any>{
     return this.API.http.post(`${this.API.baseUrl}/stages`,stage).pipe(
-      
+      catchError(error => {
+        console.error("Error adding stage:", error);
+        throw error; // Optionally rethrow or handle the error here
+      })
     )
   }
 
@@ -58,6 +45,21 @@ export class StageService {
     return this.API.http.delete(`${this.API.baseUrl}/classes/${id}`);
   }
 
+
+  // Get all stage from Firebase
+  getStages(): Observable<Array<Stages>> {
+    return this.firebaseService.getRequest<{ [key: string]: Stages }>('stages').pipe(
+      map(stageObj => {
+        const stageArray: Stages[] = [];
+        for (const key in stageObj) {
+          if (stageObj.hasOwnProperty(key)) {
+            stageArray.push({ ...stageObj[key]});
+          }
+        }
+        return stageArray;
+      })
+    );
+  }
   // Add a new stage to Firebase
   addStage(stage: Stages): Observable<any> {
     return this.getStages().pipe(
@@ -83,5 +85,5 @@ export class StageService {
   deleteStage(stageId: string): Observable<any> {
     return this.firebaseService.deleteRequest(`${firebaseUrl}stages/${stageId}.json`, { 'content-type': 'application/json' });
   }
-  constructor() { }
+  
 }

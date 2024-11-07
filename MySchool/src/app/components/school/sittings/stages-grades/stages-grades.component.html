@@ -24,28 +24,33 @@
       <p class="line"></p>
 
       <div id="News" class="tabcontent">
-        <form [formGroup]="form">
-          <label for="termName" class="termName">اسـم المرحـلة</label>
+        <form [formGroup]="form" (ngSubmit)="addStage()">
+          <label for="stageName" class="termName">اسـم المرحـلة</label>
           <input
             type="text"
-            required="this is Field required"
             formControlName="StageName"
             class="term"
             placeholder="المرحـلة"
           />
-          <label for="className" class="className">ملاحظة</label>
+          <div *ngIf="form.get('StageName')?.invalid && form.get('StageName')?.touched" class="error">
+            اسم المرحلة مطلوب
+          </div>
+          
+          <label for="note" class="className">ملاحظة</label>
           <input
             type="text"
             formControlName="Note"
             class="class"
             placeholder="ملاحظة"
           />
+          
           <input
             type="submit"
-            (click)="getStage()"
             class="btn btn-primary add"
             value="إضافة"
           />
+
+          <!-- <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div> -->
         </form>
         <table class="styled-table">
           <thead>
@@ -109,7 +114,9 @@
                                   role="separator"
                                   class="dropdown-divider"
                                 ></div>
-                                <a class="dropdown-item" (click)="deleteClass(Class.ClassID)"
+                                <a
+                                  class="dropdown-item"
+                                  (click)="deleteClass(Class.ClassID)"
                                   ><i class="bi bi-trash IconDelete"></i>حذف</a
                                 >
                               </div>
@@ -166,7 +173,9 @@
                         ><i class="bi bi-pencil-square IconEdit"></i>تعديل</a
                       >
                       <div role="separator" class="dropdown-divider"></div>
-                      <a class="dropdown-item" (click)="deleteStage(item.stageID)"
+                      <a
+                        class="dropdown-item"
+                        (click)="deleteStage(item.stageID)"
                         ><i class="bi bi-trash IconDelete"></i>حذف</a
                       >
                     </div>
