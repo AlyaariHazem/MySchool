@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseService } from '../../firebase/firebase.service';
 import { catchError, map, Observable,switchMap } from 'rxjs';
-import { AddStage, Stages } from '../models/stages-grades.modul';
+import { AddStage, Stages, updateStage } from '../models/stages-grades.modul';
 import { firebaseUrl } from '../../firebase/firebase-config';
 import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
+import { error } from 'console';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,7 @@ export class StageService {
       })
     );
   }
+
   AddStage(stage:AddStage):Observable<any>{
     return this.API.http.post(`${this.API.baseUrl}/stages`,stage).pipe(
       catchError(error => {
@@ -45,6 +47,14 @@ export class StageService {
     return this.API.http.delete(`${this.API.baseUrl}/classes/${id}`);
   }
 
+  Update(id:number,update:updateStage):Observable<any>{
+    return this.API.http.put(`${this.API.baseUrl}/stages/${id}`,update).pipe(
+      catchError(error=>{
+        console.log("some error accured");
+        throw error;
+      })
+    );
+  }
 
   // Get all stage from Firebase
   getStages(): Observable<Array<Stages>> {
@@ -60,6 +70,7 @@ export class StageService {
       })
     );
   }
+
   // Add a new stage to Firebase
   addStage(stage: Stages): Observable<any> {
     return this.getStages().pipe(

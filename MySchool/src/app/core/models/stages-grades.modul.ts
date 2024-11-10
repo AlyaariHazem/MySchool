@@ -25,6 +25,8 @@ export interface Division{
     note:string,
     state:boolean
 }
+//these are model for Asp.net 
+
 // stage.model.ts
 export interface Class {
     ClassID: number;
@@ -44,4 +46,10 @@ export interface Student {
     active: boolean;
     classes: Class[]; // List of classes for this stage
     studentCount: number; // Total number of students in classes
+}
+export interface updateStage{
+    id: number;
+    stageName: string;
+    note: string;
+    active: boolean;
 }

@@ -11,7 +11,7 @@ import { TranslateDirective } from '../../directives/translate.directive';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ShardModule, MatDialogModule,TranslateDirective],
+  imports: [ShardModule, MatDialogModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })

@@ -32,10 +32,7 @@
             class="term"
             placeholder="المرحـلة"
           />
-          <div *ngIf="form.get('StageName')?.invalid && form.get('StageName')?.touched" class="error">
-            اسم المرحلة مطلوب
-          </div>
-          
+
           <label for="note" class="className">ملاحظة</label>
           <input
             type="text"
@@ -43,15 +40,30 @@
             class="class"
             placeholder="ملاحظة"
           />
-          
+          <!-- I want when I click on the edit change this for "تعديل" -->
           <input
             type="submit"
             class="btn btn-primary add"
-            value="إضافة"
+            [value]="isEditMode ? 'تعديل' : 'إضافة'"
+            (click)="isEditMode ? updateStage() : addStage()"
           />
-
-          <!-- <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div> -->
         </form>
+        <span
+          style="
+            position: absolute;
+            top: 11rem;
+            right: 4rem;
+            text-align: right;
+            width: 34%;
+            color: red;
+          "
+          *ngIf="
+            form.get('StageName')?.invalid && form.get('StageName')?.touched
+          "
+          class="error"
+        >
+          اسم المرحلة مطلوب
+        </span>
         <table class="styled-table">
           <thead>
             <tr>
@@ -169,7 +181,8 @@
                       <i class="fas fa-ellipsis-h"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-left">
-                      <a class="dropdown-item" href="#"
+                      <!-- when I click here chage in the form from "إضافة" to be like "تعديل"  -->
+                      <a class="dropdown-item" (click)="editStage(item)"
                         ><i class="bi bi-pencil-square IconEdit"></i>تعديل</a
                       >
                       <div role="separator" class="dropdown-divider"></div>

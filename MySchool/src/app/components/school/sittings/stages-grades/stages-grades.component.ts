@@ -1,10 +1,9 @@
 import { AfterViewInit, Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AddStage, Stage, Stages } from '../../../../core/models/stages-grades.modul';
+import { AddStage, Stage, Stages, updateStage } from '../../../../core/models/stages-grades.modul';
 import { StageService } from '../../../../core/services/stage.service';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, combineLatest } from 'rxjs';
-import { response } from 'express';
 
 @Component({
   selector: 'app-stages-grades',
@@ -15,10 +14,15 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   activeTab: string = 'News';
   form: FormGroup;
   stages: Stages[] = [];
+  isEditMode = false;  // Track if we're in edit mode
+  stageToEditId: number | null = null;
   combinedData$: Observable<any[]> | undefined;
   outerDropdownState: { [key: string]: boolean } = {};
   innerDropdownState: { [key: string]: { [key: string]: boolean } } = {};
   currentPage: { [key: string]: number } = {};
+  stage: Stage[] = [];
+  update!: updateStage;
+  errorMessage: string = '';
 
   constructor(
     private stageService: StageService,
@@ -35,32 +39,59 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
     this.getStage();
   }
 
-  stage: Stage[] = [];
-  errorMessage: string = '';
-
   getStage(): void {
     this.stageService.getAllStages().subscribe({
-      next: (data) => this.stage = data.stagesInfo, // On successful data fetch
-      error: (err) => this.errorMessage = 'Failed to load stages', // On error
-      complete: () => console.log('Stages loaded successfully', this.stages) // Optional: on completion
+      next: (data) => this.stage = data.stagesInfo,
+      error: () => this.errorMessage = 'Failed to load stages'
     });
   }
 
   addStage(): void {
-    if (this.form.valid) { // Check if the form is valid
+    if (this.form.valid) {
       const addStageData: AddStage = this.form.value;
       this.stageService.AddStage(addStageData).subscribe({
         next: () => {
-          this.getStage(); // Refresh the stages after adding
-          this.form.reset(); // Reset the form after submission
+          this.getStage();
+          this.form.reset();
+          this.isEditMode = false;
           this.toastr.success('Stage Added successfully');
         },
-        error: () => this.toastr.success(response.statusMessage,'some thing is wrong!') // Handle error
+        error: () => this.toastr.error('Something went wrong')
       });
     } else {
-      this.errorMessage = 'Please fill in the required fields'; // Inform user of validation issues
+      this.errorMessage = 'Please fill in the required fields';
     }
   }
+
+  editStage(stage: Stage): void {
+    this.form.patchValue({
+      StageName: stage.stageName,
+      Note: stage.note
+    });
+    this.isEditMode = true;  // Enter edit mode
+    this.stageToEditId = stage.stageID;  // Set the ID for editing
+  }
+
+  updateStage(): void {
+    if (this.form.valid && this.stageToEditId !== null) {  // Ensure stageToEditId is not null
+      const updateData: updateStage = this.form.value;
+      this.stageService.Update(this.stageToEditId, updateData).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.toastr.success(response.message, 'Stage updated successfully');
+            this.getStage();
+            this.form.reset();
+            this.isEditMode = false;  // Reset to add mode
+            this.stageToEditId = null;
+          }
+          // this.isEditMode = false; 
+        },
+        error: () => this.toastr.error('Failed to update stage', 'Error')
+      });
+      // this.isEditMode = false; 
+    }
+  }
+  
 
   // Method to delete a stage by ID
   deleteStage(id: number): void {
@@ -78,6 +109,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   deleteClass(ID: number): void {
     this.stageService.DeleteClass(ID);
   }
+
 
   ngAfterViewInit(): void {
     const defaultOpen = document.getElementById('defaultOpen');
