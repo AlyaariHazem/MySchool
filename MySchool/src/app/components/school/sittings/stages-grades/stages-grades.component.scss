@@ -441,3 +441,9 @@ select:focus {
 .mat-paginator .mat-icon {
   font-size: 20px; /* Adjust icon size */
 }
+.form-control{
+  position: relative;
+    top: -4rem;
+    right: 1.3rem;
+    width: 48%;
+}

@@ -50,7 +50,6 @@ export class GradesComponent implements OnInit {
     this.classService.GetAll().subscribe({
       next: (res) => {
         this.classes = res;
-        console.log('Classes fetched:', this.classes);
         this.length = this.classes.length; // Set total item count
         this.updateDisplayedClass(); // Initialize displayed divisions
       },
@@ -118,7 +117,7 @@ export class GradesComponent implements OnInit {
     const patchDoc = [
       { op: "replace", path: "/state", value: isActive }
     ];
-  
+    
     this.classService.partialUpdate(Class.classID, patchDoc).subscribe({
       next: (response) => {
         if (response.success) {

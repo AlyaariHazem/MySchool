@@ -25,7 +25,7 @@
 
       <div id="News" class="tabcontent">
         <mat-paginator
-        [ngStyle]="{'position': 'relative', 'top': '-30px'}"
+          [ngStyle]="{ position: 'relative', top: '-30px' }"
           [length]="length"
           [pageSize]="pageSize"
           [pageSizeOptions]="[5, 10, 25, 100]"
@@ -61,7 +61,7 @@
         <span
           style="
             position: absolute;
-            top: 12.6rem;
+            top: 14.6rem;
             right: 4rem;
             text-align: right;
             width: 34%;
@@ -176,18 +176,14 @@
               <td>لا يوجد طلاب</td>
               <td>{{ item.note }}</td>
               <td>
-                <div class="dropdown">
+                <div class="dropdown dropdown-toggle" data-toggle="dropdown">
                   @if (item.active) {
-                  <span class="dropdown-toggle" data-toggle="dropdown"
-                    >نشط
-                  </span>
+                  <span>نشط </span>
                   } @else {
-                  <span class="dropdown-toggle" data-toggle="dropdown"
-                    >خامل
-                  </span>
+                  <span>خامل </span>
 
                   }
-                  <div class="dropdown-menu">
+                  <div class="dropdown-menu" style="margin-left: 2rem">
                     <span
                       class="dropdown-item"
                       (click)="changeState(item, true)"

@@ -1,13 +1,13 @@
 <div id="Class" class="tabcontent">
-
-  <mat-paginator [ngStyle]="{'position': 'relative', 'top': '-10px'}"
+  <mat-paginator
+    [ngStyle]="{ position: 'relative', top: '-10px' }"
     [length]="length"
     [pageSize]="pageSize"
     [pageSizeOptions]="[5, 10, 25, 100]"
     (page)="onPageChange($event)"
   >
   </mat-paginator>
-  
+
   <form [formGroup]="form" class="From">
     <label for="stage" class="termName">اسـم المرحـلة</label><br />
     <select name="stage" formControlName="stageID" id="term" class="term">
@@ -124,26 +124,18 @@
         </td>
         <td>{{ Class.studentCount }}</td>
         <td>
-          <div class="dropdown">
+          <div class="dropdown dropdown-toggle" data-toggle="dropdown">
             @if (Class.state) {
-            <span class="dropdown-toggle" data-toggle="dropdown"
-              >نشط
-            </span>
+            <span>نشط </span>
             } @else {
-            <span class="dropdown-toggle" data-toggle="dropdown"
-              >خامل
-            </span>
+            <span>خامل </span>
 
             }
-            <div class="dropdown-menu">
-              <span
-                class="dropdown-item"
-                (click)="changeState(Class, true)"
+            <div class="dropdown-menu" style="margin-left: 2rem">
+              <span class="dropdown-item" (click)="changeState(Class, true)"
                 >نشط</span
               >
-              <span
-                class="dropdown-item"
-                (click)="changeState(Class, false)"
+              <span class="dropdown-item" (click)="changeState(Class, false)"
                 >خامل</span
               >
             </div>

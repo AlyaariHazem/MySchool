@@ -1,6 +1,6 @@
 <div id="Contact" class="tabcontent">
-
-    <mat-paginator [ngStyle]="{'position': 'relative', 'top': '-10px'}"
+  <mat-paginator
+    [ngStyle]="{ position: 'relative', top: '-10px' }"
     [length]="length"
     [pageSize]="pageSize"
     [pageSizeOptions]="[5, 10, 25, 100]"
@@ -9,25 +9,34 @@
   </mat-paginator>
 
   <form [formGroup]="form" class="From">
-    <label for="stage" class="termName">اسـم المرحـلة</label><br />
+    <label for="Class" class="termName">اسم الصف </label><br />
     <select
-      name="stage"
-      formControlName="stage"
+      name="Class"
+      formControlName="ClassID"
       id="term"
       class="term"
-      value="إختار المرحلة"
+      value="إختار الصف"
     >
-      <option value="" disabled selected>إختار المرحلة</option>
-      
+      <option value="" disabled selected>إختار صــف</option>
+
+      @for (Class of classes; track $index) {
+
+      <option [value]="Class.classID">{{ Class.className }}</option>
+      }
     </select>
-    <label for="className" class="className">اسـم الصف</label>
+    <label for="className" class="className">اسـم الشبعة</label>
     <input
       type="text"
-      formControlName="grade"
+      formControlName="divisionName"
       class="class"
       placeholder="إدخال اسم صـف جديد"
     />
-    <input type="submit" class="btn btn-primary add" value="إضافة" />
+    <input
+      type="submit"
+      class="btn btn-primary add"
+      [value]="isEditMode ? 'تحديث' : 'إضافة'"
+      (click)="isEditMode?updateDivision():AddDivision()"
+    />
   </form>
 
   <table class="styled-table" style="overflow-y: hidden; width: 105%">
@@ -37,6 +46,7 @@
         <th>رمز الشعبة</th>
         <th>الصـف</th>
         <th>إجمالي الطلاب</th>
+        <th>ملاحظة</th>
         <th>الحالة</th>
         <th>العملية</th>
       </tr>
@@ -47,14 +57,23 @@
         <td>{{ div.divisionName }}</td>
         <td>{{ div.classesName }}</td>
         <td>{{ div.studentCount }}</td>
+        <td>{{ "لا يوجد ملاحظة" }}</td>
         <td>
-          <div class="dropdown" (click)="toggleStateDropdown(div)">
-            <span class="dropdown-toggle" data-toggle="dropdown">
+          <div
+            class="dropdown dropdown-toggle"
+            data-toggle="dropdown"
+            (click)="toggleStateDropdown(div)"
+          >
+            <span class="">
               {{ div.state ? "نشط" : "خامل" }}
             </span>
-            <div class="dropdown-menu">
-              <span class="dropdown-item">نشط</span>
-              <span class="dropdown-item">خامل</span>
+            <div class="dropdown-menu" style="margin-left: 2rem">
+              <span class="dropdown-item" (click)="changeState(div, true)"
+                >نشط</span
+              >
+              <span class="dropdown-item" (click)="changeState(div, false)"
+                >خامل</span
+              >
             </div>
           </div>
         </td>
@@ -70,11 +89,11 @@
               <i class="fas fa-ellipsis-h"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-left">
-              <a class="dropdown-item" href="#"
+              <a class="dropdown-item" (click)="editDivision(div)"
                 ><i class="bi bi-pencil-square IconEdit"></i>تعديل</a
               >
               <div role="separator" class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#"
+              <a class="dropdown-item" (click)="DeleteDivision(div.divisionID)"
                 ><i class="bi bi-trash IconDelete"></i>حذف</a
               >
             </div>

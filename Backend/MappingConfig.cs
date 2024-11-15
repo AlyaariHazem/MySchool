@@ -37,6 +37,7 @@ public class MappingConfig : Profile
             
         CreateMap<Stage,StagesDTO>().ReverseMap();
         CreateMap<Class,UpdateClassDTO>().ReverseMap();
+        CreateMap<Division,UpdateDivisionDTO>().ReverseMap();
     }
 }
 

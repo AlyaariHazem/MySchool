@@ -37,6 +37,7 @@ import { FeesComponent } from './students/new-student/fees/fees.component';
 import { GuardianComponent } from './students/new-student/guardian/guardian.component';
 import { OptionDataComponent } from './students/new-student/option-data/option-data.component';
 import { HeadComponent } from './students/new-student/head/head.component';
+import { MatButtonModule } from '@angular/material/button';
 
 
 const components = [
@@ -85,6 +86,7 @@ const modules = [
   RouterOutlet,
   RouterLinkActive,
   FormsModule, MatFormFieldModule, MatInputModule,
+  
   
 ];
 

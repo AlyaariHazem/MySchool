@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Backend.Data;
 using Backend.DTOS;
 using Backend.DTOS.School.Stages;
 using Backend.Models;
 using Backend.Repository.School;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 
 namespace FirstProjectWithMVC.Repository.School
@@ -14,10 +16,11 @@ namespace FirstProjectWithMVC.Repository.School
     public class DivisionRepository : IDivisionRepository
     {
         private readonly DatabaseContext _db;
-
-        public DivisionRepository(DatabaseContext db)
+        private readonly IMapper _mapper;
+        public DivisionRepository(DatabaseContext db, IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
 
         }
         public async Task<bool> Add(AddDivisionDTO obj)
@@ -80,7 +83,7 @@ namespace FirstProjectWithMVC.Repository.School
 
         public async Task<bool> Update(DivisionDTO model)
         {
-            var existingDivision = _db.Divisions.FirstOrDefault(d => d.DivisionID == model.DivisionID);
+            var existingDivision = await _db.Divisions.FirstOrDefaultAsync(d => d.DivisionID == model.DivisionID);
             if (existingDivision != null)
             {
                 existingDivision.DivisionName = model.DivisionName;
@@ -91,5 +94,32 @@ namespace FirstProjectWithMVC.Repository.School
             }
             return false;
         }
+
+        public async Task<bool> UpdatePartial(int id, JsonPatchDocument<UpdateDivisionDTO> partialDivision)
+        {
+               if (partialDivision == null || id == 0)
+                return false;
+
+            // Retrieve the Class entity by its ID
+            var division = await _db.Divisions.SingleOrDefaultAsync(s => s.DivisionID == id);
+            if (division == null)
+                return false;
+
+            // Map the Class entity to the DTO (this will be modified)
+            var divisionDTO = _mapper.Map<UpdateDivisionDTO>(division);
+
+            // Apply the patch to the DTO
+            partialDivision.ApplyTo(divisionDTO);
+
+            // Map the patched DTO back to the entity (class)
+            _mapper.Map(divisionDTO, division);
+
+            // Mark the entity as modified and save changes
+            _db.Entry(division).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+            return true;
+        }
+    
+
+        }
     }
-}

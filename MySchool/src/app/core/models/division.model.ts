@@ -6,3 +6,8 @@ export interface divisions{
     classesName:string;
     studentCount:number;
 }
+
+export interface Division{
+    divisionName:string;
+    classID:number;
+  }

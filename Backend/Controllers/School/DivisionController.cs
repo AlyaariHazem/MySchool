@@ -5,6 +5,7 @@ using Backend.Repository.School;
 using Backend.DTOS;
 using Backend.DTOS.School.Stages;
 using Backend.Models;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace Backend.Controllers.School
 {
@@ -36,13 +37,15 @@ namespace Backend.Controllers.School
 
         // PUT api/divisions/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateDivision(int id, DivisionDTO model)
+        public async Task<IActionResult> UpdateDivision(int id, DivisionDTO division)
         {
-            if (model == null)
+            division.DivisionID = id;
+            var divisions = await divisionRepo.GetByIdAsync(id);
+            if (divisions == null)
                 return BadRequest("Invalid division data.");
 
-            divisionRepo.Update(model);
-            return Ok();
+           await divisionRepo.Update(division);
+            return Ok(new { success = true, message = "Division updated successfully" });
         }
 
         // GET api/divisions
@@ -64,6 +67,18 @@ namespace Backend.Controllers.School
           await  divisionRepo.DeleteAsync(id);
             return Ok(new { success=true,message="Division deleted successflly"});
         }
+        //Patch api/divisions/{id}
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchDivision(int id, [FromBody] JsonPatchDocument<UpdateDivisionDTO> patchDoc)
+        {
+            if (patchDoc == null)
+                return BadRequest("Invalid patch document.");
 
+            var division = await divisionRepo.UpdatePartial(id, patchDoc);
+            if (!division)
+            return NotFound(new { success = false, message = "Division not found or update failed." });
+
+            return Ok(new { success = true, message = "Division partially updated successfully." });
+        }
     }
 }
