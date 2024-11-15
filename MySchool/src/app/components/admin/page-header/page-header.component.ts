@@ -10,6 +10,7 @@ interface Breadcrumb {
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
+  host: { '[attr.component-id]': 'app-page-header' },
   styleUrl: './page-header.component.scss'
 })
 export class PageHeaderComponent implements OnInit{

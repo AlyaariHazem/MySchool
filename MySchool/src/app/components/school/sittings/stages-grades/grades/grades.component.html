@@ -1,106 +1,182 @@
 <div id="Class" class="tabcontent">
-    <form [formGroup]="stageForm">
 
-        <label for="stage" class="termName">اسـم المرحـلة</label><br>
-        <select name="stage" formControlName="stage" id="term" class="term" value="إختار المرحلة">
-            <option value="" disabled selected>إختار المرحلة</option>
-            @for (stage of stages; track $index) {
-            <option [value]="stage.id">{{stage.stage}}</option>
-            }
-        </select>
-        <label for="className" class="className">اسـم الصف</label>
-        <input type="text" formControlName="grade" class="class" placeholder="إدخال اسم صـف جديد">
-        <input type="submit" (click)="onSubmit()" class="btn btn-primary add" value="إضافة">
-    </form>
-    <table class="styled-table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>اسم الصـف</th>
-                <th>المرحلة</th>
-                <th>شعب الصـف</th>
-                <th>إجمالي الطلاب</th>
-                <th>الحالة</th>
-                <th>العملية</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (item of combinedData$ | async; track $index) {
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ item.grade }}</td>
-                <td>{{ item.stageName }}</td>
-                <td>
-                    <div class="col text-left">
-                        <div class="mt-sm-0 mt-2">
-                            <button class="btn btn-left division" type="button" (click)="toggleOuterDropdown(item)"
-                                aria-haspopup="true" aria-expanded="false">
-                                شُعب {{ item.divisions.length > 0 ? item.divisions.length : 0 }}<i
-                                    class="bi bi-caret-down-fill"></i>
-                            </button>
-                            @if (isOuterDropdownOpen(item)) {
-                            <div class="dropdown-menu nested-dropdown dropdown-menu-left">
-                                <table>
-                                    <tr>
-                                        <th>الشُعبة</th>
-                                        <th>إجمالي الطلاب</th>
-                                        <th>العملية</th>
-                                    </tr>
-                                    @for (division of item.divisions;track $index) {
-                                    <tr>
-                                        <td style="text-align: center;">{{ division.division }}</td>
-                                        <td><!-- Add total students logic here --> لا يوجد طلاب حالياً</td>
-                                        <td>
-                                            <div class="col text-left">
-                                                <div class="mt-sm-0 mt-2">
-                                                    <button class="btn btn-left" type="button"
-                                                        (click)="toggleInnerDropdown(item, division)">
-                                                        <i class="fas fa-ellipsis-h"></i>
-                                                    </button>
-                                                    @if (isInnerDropdownOpen(item, division)) {
-                                                    <div class="dropdown-menu nested-dropdown dropdown-menu-left">
-                                                        <a class="dropdown-item" href="#"><i
-                                                                class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                                                        <div role="separator" class="dropdown-divider"></div>
-                                                        <a class="dropdown-item" href="#"><i class="bi bi-trash IconDelete"></i>حذف</a>
-                                                    </div>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    }
-                                    @if (item.divisions.length === 0) {
-                                    <tr>
-                                        <td colspan="3">لا يوجد شُعب يمكنك إضافة شُعب للفصل</td>
-                                    </tr>
-                                    }
-                                </table>
-                            </div>
-                            }
-                        </div>
-                    </div>
-                    
-                </td>
+  <mat-paginator [ngStyle]="{'position': 'relative', 'top': '-10px'}"
+    [length]="length"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    (page)="onPageChange($event)"
+  >
+  </mat-paginator>
+  
+  <form [formGroup]="form" class="From">
+    <label for="stage" class="termName">اسـم المرحـلة</label><br />
+    <select name="stage" formControlName="stageID" id="term" class="term">
+      <option value="" disabled selected>إختار المرحلة</option>
 
-                <td>{{ item.studentAccount }}</td>
-                <td>{{ item.state ? 'Active' : 'Inactive' }}</td>
-                <td>
-                    <!-- this is for edit and delete  -->
-                    <div class="col text-left">
-                        <div class=" mt-sm-0 mt-2">
-                            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>
-                            <div class="dropdown-menu dropdown-menu-left">
-                                <a class="dropdown-item" href="#"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                                <div role="separator" class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#"><i class="bi bi-trash IconDelete"></i>حذف</a>
-                            </div>
-                        </div>
+      @for (stage of stages; track $index) {
+      <option [value]="stage.stageID">
+        {{ stage.stageName }}
+      </option>
+      }
+    </select>
+    <label for="className" class="className">اسـم الصف</label>
+    <input
+      type="text"
+      formControlName="className"
+      class="class"
+      placeholder="إدخال اسم صـف جديد"
+    />
+    <input
+      type="submit"
+      class="btn btn-primary add"
+      [value]="isEditMode ? 'تعديل' : 'إضافة'"
+      (click)="isEditMode ? updateClass() : addClass()"
+    />
+  </form>
+
+  <table class="styled-table" style="overflow-y: hidden; width: 105%">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>اسم الصـف</th>
+        <th>المرحلة</th>
+        <th>شعب الصـف</th>
+        <th>إجمالي الطلاب</th>
+        <th>الحالة</th>
+        <th>العملية</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (Class of DisplayClasses; track $index) {
+      <tr>
+        <td>{{ $index + 1 }}</td>
+        <td>{{ Class.className }}</td>
+        <td>{{ Class.stageName }}</td>
+        <td>
+          <button class="btn division" (click)="toggleOuterDropdown(Class)">
+            {{ Class.divisions.length }} شعب
+            <i class="bi bi-caret-down-fill"></i>
+          </button>
+          @if (isOuterDropdownOpen(Class)) {
+          <div class="dropdown-menu nested-dropdown">
+            <table>
+              <thead>
+                <tr>
+                  <th>اسم الشعبة</th>
+                  <th>إجمالي الطلاب</th>
+                  <th>العملية</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (division of getPaginatedClasses(Class); track $index) {
+                <tr>
+                  <td style="text-align: center">
+                    {{ division.divisionName }}
+                  </td>
+                  <td>{{ division.studentCount || "لا يوجد طلاب حالياً" }}</td>
+                  <td>
+                    <button
+                      class="btn btn-left"
+                      type="button"
+                      data-toggle="dropdown"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                    >
+                      <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-left">
+                      <a class="dropdown-item" (click)="editClass(Class)"
+                        ><i class="bi bi-pencil-square IconEdit"></i>تعديل</a
+                      >
+                      <div role="separator" class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#"
+                        ><i class="bi bi-trash IconDelete"></i>حذف</a
+                      >
                     </div>
-                </td>
-            </tr>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+            <div class="pagination-buttons">
+              <button
+                (click)="previousClassPage(Class)"
+                [disabled]="currentClassPage[Class.classID] === 0"
+              >
+                السابق
+              </button>
+              <span
+                >صفحة {{ currentClassPage[Class.classID] + 1 }} من
+                {{ getTotalClassPages(Class) }}</span
+              >
+              <button
+                (click)="nextClassPage(Class)"
+                [disabled]="
+                  currentClassPage[Class.classID] >=
+                  getTotalClassPages(Class) - 1
+                "
+              >
+                التالي
+              </button>
+            </div>
+          </div>
+          }
+        </td>
+        <td>{{ Class.studentCount }}</td>
+        <td>
+          <div class="dropdown">
+            @if (Class.state) {
+            <span class="dropdown-toggle" data-toggle="dropdown"
+              >نشط
+            </span>
+            } @else {
+            <span class="dropdown-toggle" data-toggle="dropdown"
+              >خامل
+            </span>
+
             }
-        </tbody>
-    </table>
+            <div class="dropdown-menu">
+              <span
+                class="dropdown-item"
+                (click)="changeState(Class, true)"
+                >نشط</span
+              >
+              <span
+                class="dropdown-item"
+                (click)="changeState(Class, false)"
+                >خامل</span
+              >
+            </div>
+          </div>
+        </td>
+        <td>
+          <!-- this is for edit and delete  -->
+          <div class="col text-left">
+            <div class="mt-sm-0 mt-2">
+              <button
+                class="btn btn-left"
+                type="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <i class="fas fa-ellipsis-h"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-left">
+                <!-- when I click here chage in the form from "إضافة" to be like "تعديل"  -->
+                <a class="dropdown-item" (click)="editClass(Class)"
+                  ><i class="bi bi-pencil-square IconEdit"></i>تعديل</a
+                >
+                <div role="separator" class="dropdown-divider"></div>
+                <a class="dropdown-item" (click)="deleteClass(Class.classID)"
+                  ><i class="bi bi-trash IconDelete"></i>حذف</a
+                >
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
 </div>

@@ -9,7 +9,7 @@ import { AdminModule } from "./components/admin/admin.module";
     standalone: true,
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
-    imports: [RouterOutlet, LoginComponent, AdminModule]
+    imports: [RouterOutlet, AdminModule]
 })
 export class AppComponent {
   title = 'MySchool';

@@ -3,6 +3,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
+import {MatPaginatorModule} from '@angular/material/paginator';
+
 
 import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
@@ -72,6 +74,7 @@ const modules = [
   CommonModule,
   ReactiveFormsModule,
   MatFormFieldModule,
+  MatPaginatorModule,
   MatInputModule,
   MatDialogTitle,
   MatDialogContent,

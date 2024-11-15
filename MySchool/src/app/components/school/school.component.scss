@@ -1,0 +1,43 @@
+.dropdown-menu-left a {
+    text-align: right;
+  }
+  .dropdown-menu {
+    text-align: right;
+  }
+  .action-button {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .action-button.edit {
+    background-color: #4caf50; /* Green */
+    color: white;
+  }
+  
+  .action-button.delete {
+    background-color: #f44336; /* Red */
+    color: white;
+  }
+  
+  .action-button:hover {
+    opacity: 0.8;
+  }
+  .dropdown {
+    border: 2px solid rgb(8, 197, 8);
+    position: relative;
+    top: 8px;
+    padding: 6% 15%;
+    left: 5%;
+    right: 5%;
+    width: 89%;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  .dropdown:hover {
+    border: 2px solid #34d589;
+  }
+  
+  

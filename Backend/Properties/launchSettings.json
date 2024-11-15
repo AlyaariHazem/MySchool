@@ -37,5 +37,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
-  }
+  },
+"defaultProfile": "http"
 }

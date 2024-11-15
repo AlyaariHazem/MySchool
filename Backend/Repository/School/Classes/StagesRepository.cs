@@ -1,83 +1,114 @@
+using AutoMapper;
+using Azure;
 using Backend.Data;
 using Backend.DTOS;
+using Backend.DTOS.School.Stages;
 using Backend.Models;
-using Backend.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository
 {
     public class StagesRepository : IStagesRepository
     {
-        DatabaseContext context;
-        public StagesRepository(DatabaseContext _context)
+        private readonly DatabaseContext context;
+        private readonly IMapper _mapper;
+
+        public StagesRepository(DatabaseContext _context, IMapper mapper)
         {
             context = _context;
+            _mapper = mapper;
         }
-        public void Add(StagesDTO model)
-        {
 
+        public async Task AddStage(StagesDTO model)
+        {
+            if (model == null)
+                throw new ArgumentNullException(nameof(model), "The model cannot be null.");
+
+            var year = await context.Years.FirstOrDefaultAsync(x => x.Active == true);//when I debugging it reach to here and stop it does not contounus to end
+            // var AddStage=_mapper.Map<Stage>(model);
             Stage newStage = new Stage
             {
                 StageName = model.StageName,
                 Note = model.Note ?? string.Empty,
                 Active = model.Active,
-                HireDate = model.HireDate,
-                YearID = model.YearID
+                HireDate = DateTime.Now,
+                YearID = year!=null?year.YearID:1
             };
 
-            context.Add(newStage);
-            Save();
+           await context.Stages.AddAsync(newStage);
+           await context.SaveChangesAsync();
         }
 
-        public void Update(StagesDTO model)
+
+
+        public async Task Update(UpdateStageDTO model)
         {
-            var existingStage = context.Stages.FirstOrDefault(s => s.StageID == model.ID);
+            var existingStage = await context.Stages.FirstOrDefaultAsync(s => s.StageID == model.ID);
             if (existingStage != null)
             {
                 existingStage.StageName = model.StageName;
                 existingStage.Note = model.Note ?? string.Empty;
 
                 context.Entry(existingStage).State = EntityState.Modified; // Mark the entity as modified
-                Save(); // Save changes
+              await context.SaveChangesAsync();
             }
         }
 
 
-
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            var stage = GetById(id); // Fetch the stage by ID
+            var stage = await context.Stages.FirstOrDefaultAsync(s => s.StageID == id); // Use async to fetch the stage by ID
             if (stage != null)
             {
                 context.Stages.Remove(stage); // Remove the stage from the DbSet
-                Save(); // Commit changes to the database
+                await context.SaveChangesAsync(); // Commit changes to the database
             }
         }
 
-        public Stage GetById(int id)
+        public async Task<Stage> GetByIdAsync(int id)
         {
-            return context.Stages.FirstOrDefault(S => S.StageID == id)!;
+            return await context.Stages.FirstOrDefaultAsync(S => S.StageID == id);
         }
-        public void Save()
+        public async Task SaveAsync()
         {
-            context.SaveChanges();
+           await context.SaveChangesAsync();
         }
-        public List<StageModel> DisplayStages()
+        
+        public async Task<List<StageDTO>> GetAll()
         {
-            var stages = context.Stages
-            .Select(stage => new StageModel
-            {
-                StageID = stage.StageID,
-                StageName = stage.StageName,
-                Note = stage.Note ?? string.Empty,
-                Active = stage.Active,
-                Classes = stage.Classes.ToList(),
-                Students = stage.Classes.SelectMany(c => c.StudentClass)
-                                          .Select(sc => sc.Student)
-                                          .ToList()!,
-                StudentCount = stage.Classes.SelectMany(c => c.StudentClass).Count()
-            }).ToList();
-            return stages;
+            var stageList = await context.Stages
+                .Include(stage => stage.Classes)  // Include Classes
+                .ThenInclude(c => c.StudentClass) // Include StudentClass for counting students
+                .ToListAsync();
+                
+            var stageDTOList = _mapper.Map<List<StageDTO>>(stageList);
+            return stageDTOList;
+        }
+
+        public async Task<bool> UpdatePartial(int id, JsonPatchDocument<StagesDTO> partialStage)
+        {
+            if (partialStage == null || id == 0)
+                return false;
+
+            // Retrieve the stage entity by its ID
+            var stage = await context.Stages.SingleOrDefaultAsync(s => s.StageID == id);
+            if (stage == null)
+                return false;
+
+            // Map the stage entity to the DTO (this will be modified)
+            var stageDTO = _mapper.Map<StagesDTO>(stage);
+
+            // Apply the patch to the DTO
+            partialStage.ApplyTo(stageDTO);
+
+            // Map the patched DTO back to the entity (stage)
+            _mapper.Map(stageDTO, stage);
+
+            // Mark the entity as modified and save changes
+            context.Entry(stage).State = EntityState.Modified;
+            await context.SaveChangesAsync();
+            return true;
         }
 
     }

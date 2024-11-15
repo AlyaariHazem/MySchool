@@ -24,7 +24,16 @@
       <p class="line"></p>
 
       <div id="News" class="tabcontent">
-        <form [formGroup]="form" (ngSubmit)="addStage()">
+        <mat-paginator
+        [ngStyle]="{'position': 'relative', 'top': '-30px'}"
+          [length]="length"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 25, 100]"
+          (page)="onPageChange($event)"
+        >
+        </mat-paginator>
+
+        <form [formGroup]="form" class="From">
           <label for="stageName" class="termName">اسـم المرحـلة</label>
           <input
             type="text"
@@ -48,23 +57,22 @@
             (click)="isEditMode ? updateStage() : addStage()"
           />
         </form>
+        @if( form.get('StageName')?.invalid && form.get('StageName')?.touched){
         <span
           style="
             position: absolute;
-            top: 11rem;
+            top: 12.6rem;
             right: 4rem;
             text-align: right;
             width: 34%;
             color: red;
           "
-          *ngIf="
-            form.get('StageName')?.invalid && form.get('StageName')?.touched
-          "
           class="error"
         >
           اسم المرحلة مطلوب
         </span>
-        <table class="styled-table">
+        }
+        <table class="styled-table" style="overflow-y: hidden; width: 105%">
           <thead>
             <tr>
               <th>#</th>
@@ -77,7 +85,7 @@
             </tr>
           </thead>
           <tbody>
-            @for ( item of getPaginatedStages(); track $index) {
+            @for ( item of displayedDivisions; track $index) {
             <tr>
               <td>{{ $index + 1 + currentStagePage * maxStagesPerPage }}</td>
               <td>{{ item.stageName }}</td>
@@ -87,7 +95,8 @@
                   class="btn division"
                   (click)="toggleOuterDropdown(item)"
                 >
-                  الصفوف <i class="bi bi-caret-down-fill"></i>
+                  {{ item.classes.length }} الصفوف
+                  <i class="bi bi-caret-down-fill"></i>
                 </button>
                 @if (isOuterDropdownOpen(item)) {
                 <div class="dropdown-menu nested-dropdown">
@@ -166,7 +175,32 @@
               </td>
               <td>لا يوجد طلاب</td>
               <td>{{ item.note }}</td>
-              <td>{{ item.active ? "Active" : "Inactive" }}</td>
+              <td>
+                <div class="dropdown">
+                  @if (item.active) {
+                  <span class="dropdown-toggle" data-toggle="dropdown"
+                    >نشط
+                  </span>
+                  } @else {
+                  <span class="dropdown-toggle" data-toggle="dropdown"
+                    >خامل
+                  </span>
+
+                  }
+                  <div class="dropdown-menu">
+                    <span
+                      class="dropdown-item"
+                      (click)="changeState(item, true)"
+                      >نشط</span
+                    >
+                    <span
+                      class="dropdown-item"
+                      (click)="changeState(item, false)"
+                      >خامل</span
+                    >
+                  </div>
+                </div>
+              </td>
               <td>
                 <!-- this is for edit and delete  -->
                 <div class="col text-left">
@@ -199,25 +233,6 @@
             }
           </tbody>
         </table>
-
-        <!-- Pagination controls for stages -->
-        <div class="pagination-buttons" dir="ltr">
-          <button
-            (click)="previousStagePage()"
-            [disabled]="currentStagePage === 0"
-          >
-            السابق
-          </button>
-          <span
-            >صفحة {{ currentStagePage + 1 }} من {{ getTotalStagePages() }}</span
-          >
-          <button
-            (click)="nextStagePage()"
-            [disabled]="currentStagePage >= getTotalStagePages() - 1"
-          >
-            التالي
-          </button>
-        </div>
       </div>
       <app-grades></app-grades>
       <app-division></app-division>

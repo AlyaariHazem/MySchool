@@ -20,10 +20,6 @@ namespace Backend.Models
         public School School { get; set; }
         [Required]
         public int SchoolID { get; set; }
-        [Required]
-        public int UserID { get; set; }
-        [JsonIgnore]
-        public User User { get; set; }
         public virtual ICollection<Teacher> Teachers { get; set; }
 
     }

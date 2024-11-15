@@ -23,7 +23,7 @@ public class School
     public string SchoolType { get; set; }
     public string? Email { get; set; }
     public int? fax { get; set; }
-    public string zone { get; set; }
+    public string? zone { get; set; }
     public virtual ICollection<Year> Years { get; set; }
     [JsonIgnore]
     public Manager Manager { get; set; }

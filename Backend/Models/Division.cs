@@ -12,7 +12,7 @@ namespace Backend.Models
         [Key]
         public int DivisionID { get; set; }
         public string DivisionName { get; set; } = string.Empty;
-        public bool Active { get; set; }
+        public bool State { get; set; }
         public int ClassID { get; set; } // Fix here
         [JsonIgnore]
         public Class Class { get; set; }

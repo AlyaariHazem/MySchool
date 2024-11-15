@@ -4,6 +4,7 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Repository;
 using Backend.Repository.School;
+using FirstProjectWithMVC.Repository.School;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +14,18 @@ using Microsoft.OpenApi.Models; // Required for Swagger configuration
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure services
 builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.CommandTimeout(180) // Set timeout to 180 seconds (3 minutes)
+    )
+);
+//this is for mapping
+builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 #region Swagger Settings
 builder.Services.AddSwaggerGen(swagger =>
@@ -28,7 +35,7 @@ builder.Services.AddSwaggerGen(swagger =>
     {
         Version = "v1",
         Title = "ASP.NET 8 Web API",
-        Description = "ITI Project"
+        Description = "Myschool Project"
     });
 
     // Enable authorization using Swagger (JWT)
@@ -67,6 +74,7 @@ AddEntityFrameworkStores<DatabaseContext>();
 
 builder.Services.AddScoped<IClassesRepository, ClassesRepository>();
 builder.Services.AddScoped<IStagesRepository, StagesRepository>();
+builder.Services.AddScoped<IDivisionRepository, DivisionRepository>();
 
 
 // Configure Identity and JWT Authentication
@@ -126,9 +134,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "ASP.NET 8 Web API V1");
-        c.RoutePrefix = string.Empty; // Sets Swagger UI to the root
+        c.RoutePrefix = "swagger"; // Access Swagger UI at https://localhost:7258/swagger
     });
-
 }
 
 app.UseStaticFiles();

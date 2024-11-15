@@ -2,8 +2,6 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 
-import { StudentsServicesService } from '../../../../core/services/student.service';
-import { UploadImageService } from '../../../../core/services/upload-image.service';
 
 @Component({
   selector: 'app-add-student',
@@ -14,8 +12,6 @@ export class AddStudentComponent {
   form: FormGroup;
   name = "info";
   private toastService = inject(ToastrService);
-  private studentService=inject(StudentsServicesService);
-  private uplaodImae=inject(UploadImageService);
   
   sendNewStudent(): void {
     if (this.form.valid) {
@@ -60,20 +56,7 @@ export class AddStudentComponent {
     }
     
   onSubmit(): void {
-    if (this.form.valid) {
-      const imageFile = this.form.get('image')?.value;
-      this.studentService.addStudent(this.form.value).subscribe(()=>{
-        console.log('you sent the form',this.form.value);
-        this.toastService.success('تم إضافة الطالب بنجاح');
-      });
-
-      this.uplaodImae.uploadImage(imageFile).subscribe(()=>{
-      })
-      
-    } else {
-      this.form.markAllAsTouched();      
-      this.toastService.error('ادخل بيانات الطالب بالكامل');
-    }
+   
   }
   fileImage!:File;
   validateImageFile(event: any) {

@@ -24,10 +24,6 @@ namespace Backend.Models
     public int ManagerID { get; set; }
     [JsonIgnore]
     public Manager Manager { get; set; }
-    [Required]
-    public int UserID { get; set; }
-    [JsonIgnore]
-    public User User { get; set; }
     public virtual ICollection<Salary> Salaries { get; set; }
     public virtual ICollection<TeacherStudent> TeacherStudents { get; set; }
     public virtual ICollection<TeacherSubjectStudent> TeacherSubjectStudents { get; set; }

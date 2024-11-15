@@ -1,30 +1,9 @@
-export interface Stages{
-    id:string,
-    stage:string,
-    note:string,
-    state:boolean
-}
-export interface AddStage{
-    StageName:string,
-    Note:string,
+export interface AddStage {
+    StageName: string,
+    Note: string,
 }
 
-export interface Grades{
-    id:string,
-    grade:string,
-    stage:string,
-    totalStudents:number,
-    note:string,
-    state:boolean
-}
 
-export interface Division{
-    id:string,
-    division:string,
-    grade:string,
-    note:string,
-    state:boolean
-}
 //these are model for Asp.net 
 
 // stage.model.ts
@@ -38,8 +17,8 @@ export interface Student {
     StudentID: number;
     StudentName: string;
 }
-  
-  export interface Stage {
+
+export interface Stage {
     stageID: number; // Changed to match your API model
     stageName: string;
     note: string;
@@ -47,7 +26,8 @@ export interface Student {
     classes: Class[]; // List of classes for this stage
     studentCount: number; // Total number of students in classes
 }
-export interface updateStage{
+
+export interface updateStage {
     id: number;
     stageName: string;
     note: string;

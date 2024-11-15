@@ -4,8 +4,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable, combineLatest, map } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { StageService } from '../../../../core/services/stage.service';
-import { GradeService } from '../../../../core/services/grade.service';
-import { Stages } from '../../../../core/models/stages-grades.modul';
 
 @Component({
   selector: 'app-new-student',
@@ -15,7 +13,6 @@ import { Stages } from '../../../../core/models/stages-grades.modul';
 export class NewStudentComponent implements OnInit, AfterViewInit {
   activeTab: string = 'DataStudent'; // Default active tab
   form: FormGroup;
-  stages: Stages[] = [];
   combinedData$: Observable<any[]> | undefined;
   currentPage: { [key: string]: number } = {};
 
@@ -23,7 +20,6 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     private formBuilder: FormBuilder,
     private stageService: StageService,
     private toastr: ToastrService,
-    private gradesService: GradeService,
     private changeDetectorRef: ChangeDetectorRef,
     public dialogRef: MatDialogRef<NewStudentComponent>, // Inject MatDialogRef
     @Inject(MAT_DIALOG_DATA) public data: any
@@ -37,27 +33,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.getStages();
-    const stages$ = this.stageService.getStages();
-    const grades$ = this.gradesService.getGrades();
-
-    this.combinedData$ = combineLatest([stages$, grades$]).pipe(
-      map(([stages, grades]) => {
-        return stages.map(stage => {
-          const gradesForStage = grades.filter(grade => grade.stage === stage.id);
-          const totalStudents = gradesForStage.reduce((acc, grade) => acc + grade.totalStudents, 0);
-          const gradesWithDivisions = gradesForStage.map(grade => ({
-            ...grade
-          }));
-          this.currentPage[stage.id] = 0; // Initialize the current page for each stage
-          return {
-            ...stage,
-            grades: gradesWithDivisions,
-            totalStudents
-          };
-        });
-      })
-    );
+   
   }
 
   ngAfterViewInit(): void {
@@ -91,38 +67,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     this.dialogRef.close(); // Close the modal
   }
 
-  getStages() {
-    this.stageService.getStages().subscribe(stages => {
-      this.stages = stages;
-    });
-  }
-
-  addStage() {
-    if (this.form.valid) {
-      this.stageService.addStage(this.form.value).subscribe(() => {
-        this.getStages();
-        this.form.reset({ state: true });
-        this.toastr.success('تم إضافة المرحلة بنجاح');
-      });
-    } else {
-      this.toastr.error('يجب أن تدخل بيانات');
-    }
-  }
-
-  editStage(stage: Stages) {
-    this.form.patchValue(stage);
-    this.stageService.editStage(stage).subscribe(() => {
-      this.toastr.success('تم تحديث المرحلة بنجاح');
-      this.getStages();
-    });
-  }
-
-  deleteStage(stageId: string) {
-    this.stageService.deleteStage(stageId).subscribe(() => {
-      this.toastr.success('تم حذف المرحلة بنجاح');
-      this.getStages();
-    });
-  }
+  
 
   openOuterDropdown: any = null;
   openInnerDropdown: any = null;

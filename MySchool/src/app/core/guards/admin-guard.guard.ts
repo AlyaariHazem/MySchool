@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
 import { CanMatchFn } from '@angular/router';
-import { AuthService } from '../../auth/auth.service';
+import { AuthAPIService } from '../../auth/authAPI.service';
 
 export const adminGuardGuard: CanMatchFn = (route, state) => {
-  const authService = inject(AuthService);
+  const authService = inject(AuthAPIService);
   
   // Check if we are in a browser environment before accessing localStorage
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;

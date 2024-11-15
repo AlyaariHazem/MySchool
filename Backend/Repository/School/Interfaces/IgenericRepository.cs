@@ -7,8 +7,8 @@ namespace Backend.Repository
 {
      public interface IgenericRepository<T> where T : class
     {
-        void Delete(int id);
-        T GetById(int id);
+        Task DeleteAsync(int id);
+        Task<T> GetByIdAsync(int id);
         
     }
    

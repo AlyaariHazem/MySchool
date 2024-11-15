@@ -4,8 +4,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 
 import { DialogData } from '../all-students/all-students.component';
-import { StudentsServicesService } from '../../../../core/services/student.service';
-import { UploadImageService } from '../../../../core/services/upload-image.service';
 import { Students } from '../../../../core/models/students.model';
 
 @Component({
@@ -17,8 +15,6 @@ export class EditStudentComponent implements OnInit {
   form: FormGroup;
 
   private toastService = inject(ToastrService);
-  private studentService = inject(StudentsServicesService);
-  private uploadImageService = inject(UploadImageService);
 
   constructor(private formBuilder: FormBuilder,
               public dialogRef: MatDialogRef<EditStudentComponent>,
@@ -96,30 +92,10 @@ export class EditStudentComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.valid) {
-      this.editStudent();
-    } else {
-      this.form.markAllAsTouched();
-      this.toastService.error('ادخل بيانات الطالب بالكامل');
-    }
+   
   }
 
-  editStudent(): void {
-    const student: Students = {
-      ...this.form.value,
-      id: this.data.student.id
-    };
-    const imageFile = this.form.get('image')?.value;
-    if (imageFile) {
-      this.uploadImageService.uploadImage(imageFile).subscribe(() => {
-        // handle the image upload if necessary
-      });
-    }
-    this.studentService.editStudent(student).subscribe((result) => {
-      this.dialogRef.close(result);
-      this.toastService.success('تم تعديل الطالب بنجاح');
-    });
-  }
+  
 
   validateImageFile(event: any): void {
     const file = event.target.files[0];

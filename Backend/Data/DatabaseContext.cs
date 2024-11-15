@@ -24,7 +24,7 @@ namespace Backend.Data
         public DbSet<Stage> Stages { get; set; }
         public DbSet<Year> Years { get; set; }
         public DbSet<Guardian> Guardians { get; set; }
-        public DbSet<User> Users { get; set; }
+        // public DbSet<User> Users { get; set; }
         public DbSet<Salary> Salarys { get; set; }
         public DbSet<TeacherStudent> TeacherStudents { get; set; }
 
@@ -161,30 +161,30 @@ namespace Backend.Data
             modelBuilder.Entity<Manager>()
             .OwnsOne(M => M.FullName);
 
-            //this is for Roles 
-            modelBuilder.Entity<User>()
-            .HasOne(u => u.Guardian)
-            .WithOne(g => g.User)
-            .HasForeignKey<Guardian>(g => g.UserID)
-            .OnDelete(DeleteBehavior.Restrict);
+            // //this is for Roles 
+            // modelBuilder.Entity<User>()
+            // .HasOne(u => u.Guardian)
+            // .WithOne(g => g.User)
+            // .HasForeignKey<Guardian>(g => g.UserID)
+            // .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Teacher)
-                .WithOne(t => t.User)
-                .HasForeignKey<Teacher>(t => t.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<User>()
+            //     .HasOne(u => u.Teacher)
+            //     .WithOne(t => t.User)
+            //     .HasForeignKey<Teacher>(t => t.UserID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Student)
-                .WithOne(s => s.User)
-                .HasForeignKey<Student>(s => s.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<User>()
+            //     .HasOne(u => u.Student)
+            //     .WithOne(s => s.User)
+            //     .HasForeignKey<Student>(s => s.UserID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Manager)
-                .WithOne(m => m.User)
-                .HasForeignKey<Manager>(m => m.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<User>()
+            //     .HasOne(u => u.Manager)
+            //     .WithOne(m => m.User)
+            //     .HasForeignKey<Manager>(m => m.UserID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
             // Ternary relationship between Teachers, Students, and Subjects
             modelBuilder.Entity<TeacherSubjectStudent>()

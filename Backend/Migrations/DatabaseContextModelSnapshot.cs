@@ -109,6 +109,9 @@ namespace Backend.Migrations
                     b.Property<int>("StageID")
                         .HasColumnType("int");
 
+                    b.Property<bool>("State")
+                        .HasColumnType("bit");
+
                     b.HasKey("ClassID");
 
                     b.HasIndex("StageID");
@@ -124,15 +127,15 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DivisionID"));
 
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
                     b.Property<int>("ClassID")
                         .HasColumnType("int");
 
                     b.Property<string>("DivisionName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("State")
+                        .HasColumnType("bit");
 
                     b.HasKey("DivisionID");
 
@@ -164,13 +167,7 @@ namespace Backend.Migrations
                     b.Property<string>("TypeGuardian")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
                     b.HasKey("GuardianID");
-
-                    b.HasIndex("UserID")
-                        .IsUnique();
 
                     b.ToTable("Guardians");
                 });
@@ -196,15 +193,9 @@ namespace Backend.Migrations
                     b.Property<int>("SchoolID")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
                     b.HasKey("ManagerID");
 
                     b.HasIndex("SchoolID")
-                        .IsUnique();
-
-                    b.HasIndex("UserID")
                         .IsUnique();
 
                     b.ToTable("Managers");
@@ -298,7 +289,6 @@ namespace Backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("zone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SchoolID");
@@ -361,17 +351,11 @@ namespace Backend.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
                     b.HasKey("StudentID");
 
                     b.HasIndex("DivisionID");
 
                     b.HasIndex("GuardianID");
-
-                    b.HasIndex("UserID")
-                        .IsUnique();
 
                     b.ToTable("Students");
                 });
@@ -459,15 +443,9 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
                     b.HasKey("TeacherID");
 
                     b.HasIndex("ManagerID");
-
-                    b.HasIndex("UserID")
-                        .IsUnique();
 
                     b.ToTable("Teachers");
                 });
@@ -507,41 +485,6 @@ namespace Backend.Migrations
                     b.ToTable("TeacherSubjectStudent");
                 });
 
-            modelBuilder.Entity("Backend.Models.User", b =>
-                {
-                    b.Property<int>("UserID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserID"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<byte[]>("PasswordSalt")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserID");
-
-                    b.ToTable("Users");
-                });
-
             modelBuilder.Entity("Backend.Models.Year", b =>
                 {
                     b.Property<int>("YearID")
@@ -559,7 +502,7 @@ namespace Backend.Migrations
                     b.Property<int>("SchoolID")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("YearDateEnd")
+                    b.Property<DateOnly?>("YearDateEnd")
                         .HasColumnType("date");
 
                     b.Property<DateOnly>("YearDateStart")
@@ -729,12 +672,6 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.Guardian", b =>
                 {
-                    b.HasOne("Backend.Models.User", "User")
-                        .WithOne("Guardian")
-                        .HasForeignKey("Backend.Models.Guardian", "UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
                         {
                             b1.Property<int>("GuardianID")
@@ -748,11 +685,7 @@ namespace Backend.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.Property<string>("SecondName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("ThirdName")
+                            b1.Property<string>("MiddleName")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
@@ -766,8 +699,6 @@ namespace Backend.Migrations
 
                     b.Navigation("FullName")
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Backend.Models.Manager", b =>
@@ -775,12 +706,6 @@ namespace Backend.Migrations
                     b.HasOne("Backend.Models.School", "School")
                         .WithOne("Manager")
                         .HasForeignKey("Backend.Models.Manager", "SchoolID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.User", "User")
-                        .WithOne("Manager")
-                        .HasForeignKey("Backend.Models.Manager", "UserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -797,11 +722,7 @@ namespace Backend.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.Property<string>("SecondName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("ThirdName")
+                            b1.Property<string>("MiddleName")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
@@ -817,8 +738,6 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("School");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Backend.Models.Salary", b =>
@@ -857,12 +776,6 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.User", "User")
-                        .WithOne("Student")
-                        .HasForeignKey("Backend.Models.Student", "UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
                         {
                             b1.Property<int>("StudentID")
@@ -876,11 +789,7 @@ namespace Backend.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.Property<string>("SecondName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("ThirdName")
+                            b1.Property<string>("MiddleName")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
@@ -898,8 +807,6 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Guardian");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Backend.Models.StudentClass", b =>
@@ -959,12 +866,6 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.User", "User")
-                        .WithOne("Teacher")
-                        .HasForeignKey("Backend.Models.Teacher", "UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
                         {
                             b1.Property<int>("TeacherID")
@@ -978,11 +879,7 @@ namespace Backend.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.Property<string>("SecondName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("ThirdName")
+                            b1.Property<string>("MiddleName")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
@@ -998,8 +895,6 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Manager");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Backend.Models.TeacherStudent", b =>
@@ -1172,21 +1067,6 @@ namespace Backend.Migrations
                     b.Navigation("TeacherStudents");
 
                     b.Navigation("TeacherSubjectStudents");
-                });
-
-            modelBuilder.Entity("Backend.Models.User", b =>
-                {
-                    b.Navigation("Guardian")
-                        .IsRequired();
-
-                    b.Navigation("Manager")
-                        .IsRequired();
-
-                    b.Navigation("Student")
-                        .IsRequired();
-
-                    b.Navigation("Teacher")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Backend.Models.Year", b =>

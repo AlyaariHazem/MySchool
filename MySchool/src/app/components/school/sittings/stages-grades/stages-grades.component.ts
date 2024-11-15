@@ -1,9 +1,12 @@
-import { AfterViewInit, Component, HostListener, OnInit } from '@angular/core';
+import { AfterViewInit, Component, HostListener, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AddStage, Stage, Stages, updateStage } from '../../../../core/models/stages-grades.modul';
-import { StageService } from '../../../../core/services/stage.service';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, combineLatest } from 'rxjs';
+
+import { AddStage, Stage, updateStage } from '../../../../core/models/stages-grades.modul';
+import { StageService } from '../../../../core/services/stage.service';
+import { ClassService } from '../../../../core/services/class.service';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-stages-grades',
@@ -13,7 +16,6 @@ import { Observable, combineLatest } from 'rxjs';
 export class StagesGradesComponent implements AfterViewInit, OnInit {
   activeTab: string = 'News';
   form: FormGroup;
-  stages: Stages[] = [];
   isEditMode = false;  // Track if we're in edit mode
   stageToEditId: number | null = null;
   combinedData$: Observable<any[]> | undefined;
@@ -21,9 +23,12 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   innerDropdownState: { [key: string]: { [key: string]: boolean } } = {};
   currentPage: { [key: string]: number } = {};
   stage: Stage[] = [];
+  displayedDivisions: Stage[] = [];
   update!: updateStage;
   errorMessage: string = '';
 
+  private classService = inject(ClassService);
+  
   constructor(
     private stageService: StageService,
     private formBuilder: FormBuilder,
@@ -41,12 +46,18 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
 
   getStage(): void {
     this.stageService.getAllStages().subscribe({
-      next: (data) => this.stage = data.stagesInfo,
+      next: (data) =>{
+        this.stage = data.stagesInfo;
+        this.length = this.stage.length; // Set total item count
+        this.updateDisplayedDivisions(); // Initialize displayed divisions
+      },
       error: () => this.errorMessage = 'Failed to load stages'
     });
   }
 
   addStage(): void {
+    this.form.markAllAsTouched();
+
     if (this.form.valid) {
       const addStageData: AddStage = this.form.value;
       this.stageService.AddStage(addStageData).subscribe({
@@ -60,6 +71,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
       });
     } else {
       this.errorMessage = 'Please fill in the required fields';
+      this.isEditMode = false;
     }
   }
 
@@ -73,25 +85,45 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   }
 
   updateStage(): void {
-    if (this.form.valid && this.stageToEditId !== null) {  // Ensure stageToEditId is not null
+    this.form.markAllAsTouched();
+    if (this.form.valid && this.stageToEditId !== null) {
       const updateData: updateStage = this.form.value;
       this.stageService.Update(this.stageToEditId, updateData).subscribe({
         next: (response) => {
           if (response.success) {
-            this.toastr.success(response.message, 'Stage updated successfully');
-            this.getStage();
-            this.form.reset();
-            this.isEditMode = false;  // Reset to add mode
-            this.stageToEditId = null;
+           this.toastr.success(response.success,"Stage Updated Successfully");
+           this.form.reset();
+           this.getStage();  
           }
-          // this.isEditMode = false; 
         },
         error: () => this.toastr.error('Failed to update stage', 'Error')
       });
-      // this.isEditMode = false; 
+      this.toastr.success('Stage updated successfully');
+      this.form.reset();
+      this.getStage(); 
+      this.isEditMode = false;
     }
   }
   
+  changeState(stage: Stage, isActive: boolean): void {
+    const patchDoc = [
+      { op: "replace", path: "/active", value: isActive }
+    ];
+  
+    this.stageService.partialUpdate(stage.stageID, patchDoc).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success(response.message);
+          this.getStage(); // Refresh the list to show updated data
+        }
+      },
+      error: () => this.toastr.error('Failed to update stage', 'Error')
+    });
+  
+    this.isEditMode = false;
+  }
+  
+
 
   // Method to delete a stage by ID
   deleteStage(id: number): void {
@@ -107,7 +139,13 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   }
 
   deleteClass(ID: number): void {
-    this.stageService.DeleteClass(ID);
+    this.classService.Delete(ID).subscribe({
+      next: (response) => {
+        if (response.success) {
+        }
+      },
+      error: () => this.toastr.error('يجب أن يكون الصف فارغ', 'خطأ')
+    });
   }
 
 
@@ -246,4 +284,26 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
       this.openInnerDivision = null;
     }
   }
+
+  currentPages: number = 0; // Current page index
+  pageSize: number = 5; // Number of items per page
+  length: number = 0; // Total number of items
+
+  updateDisplayedDivisions(): void {
+    const startIndex = this.currentPages * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.displayedDivisions = this.stage.slice(startIndex, endIndex);
+  }
+
+  // Handle paginator events
+  onPageChange(event: PageEvent): void {
+    this.currentPages = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updateDisplayedDivisions();
+  }
+
+  toggleStateDropdown(item: any): void {
+    item.isDropdownOpen = !item.isDropdownOpen;
+  }
+
 }

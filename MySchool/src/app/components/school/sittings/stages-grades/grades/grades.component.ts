@@ -1,11 +1,12 @@
 import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GradeService } from '../../../../../core/services/grade.service';
+
+import {  Stage } from '../../../../../core/models/stages-grades.modul';
+import { ClassService } from '../../../../../core/services/class.service';
+import { CLass, ClassDTO, updateClass } from '../../../../../core/models/class.model';
 import { StageService } from '../../../../../core/services/stage.service';
-import { Division, Grades, Stages } from '../../../../../core/models/stages-grades.modul';
-import { combineLatest, map, Observable } from 'rxjs';
-import { DivisionService } from '../../../../../core/services/division.service';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-grades',
@@ -13,116 +14,193 @@ import { DivisionService } from '../../../../../core/services/division.service';
   styleUrls: ['./grades.component.scss']
 })
 export class GradesComponent implements OnInit {
-  
-  stageForm: FormGroup;
-  stages: Array<Stages> = [];
-  grades: Array<Grades> = [];
-  division: Array<Division> = [];
+  stages: Array<Stage> = [];
+  classes: ClassDTO[] = [];
+  DisplayClasses: ClassDTO[] = [];
+  AddClass?: CLass;
+  form: FormGroup;
+  isEditMode = false;
+  classToEditId: number | null = null;
+   
+  currentPage: number = 0; // Current page index
+  pageSize: number = 5; // Number of items per page
+  length: number = 0; // Total number of items
 
   private toastr = inject(ToastrService);
-  private getStage = inject(StageService);
+  private classService = inject(ClassService);
+  private stageService = inject(StageService);
+  errorMessage: string = "";
 
-  constructor(private fb: FormBuilder, private stagesService: StageService,
-    private gradesService: GradeService,
-    private divisionsService: DivisionService) {
-    this.stageForm = this.fb.group({
-      id: '',
-      grade: ['', [Validators.required, Validators.minLength(3)]],
-      stage: ['', Validators.required],
-      state: true
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      className: ['', Validators.required],
+      stageID: ''
     });
   }
 
-  refresh() {
-    this.getStage.getStages().subscribe(res => {
-      this.stages = res;
-      console.log('the stages', this.stages);
-    });
-    this.gradesService.getGrades().subscribe(res => {
-      this.grades = res;
-      console.log('the grade is ', this.grades);
-    })
+  ngOnInit(): void {
+    this.getAllClasses();
   }
 
-  onSubmit(): void {
-    if (this.stageForm.valid) {
-      const gradeData = this.stageForm.value;
-      this.gradesService.addGrade(gradeData).subscribe(() => {
-        this.toastr.success('تم إضافة الصف بنجاح');
-        this.refresh();
-      }, error => {
-        this.toastr.error('حدث خطأ أثناء إضافة الصف');
-        console.error(error);
+  openOuterDropdown: any = null;
+  currentClassPage: { [key: string]: number } = {};
+  maxClassesPerPage = 3;
+
+  getAllClasses(): void {
+    this.classService.GetAll().subscribe({
+      next: (res) => {
+        this.classes = res;
+        console.log('Classes fetched:', this.classes);
+        this.length = this.classes.length; // Set total item count
+        this.updateDisplayedClass(); // Initialize displayed divisions
+      },
+      error: (err) => {
+        console.error('Error fetching classes:', err);
+        this.toastr.error('Error fetching classes');
+      }
+    });
+
+    this.stageService.getAllStages().subscribe({
+      next: (res) => this.stages = res.stagesInfo,
+      error: (err) => this.toastr.error('Error fetching Stages ', err)
+    });
+  }
+
+  addClass(): void {
+    if (this.form.valid) {
+      const addClassData: CLass = this.form.value;
+      this.classService.Add(addClassData).subscribe({
+        next: (res) => {
+          this.getAllClasses();
+          this.form.reset();
+          this.isEditMode = false;
+          this.toastr.success('Stage Added successfully');
+        },
+        error: () => this.toastr.error('Something went wrong')
       });
-      console.log('Form Submitted', this.stageForm.value);
     } else {
-      this.toastr.error('إدخل بيانات');
-      console.log('Form is invalid', this.stageForm);
+      this.errorMessage = 'Please fill in the required fields';
+      this.isEditMode = false;
     }
   }
-  //this is for combine data from stages and grades and divisions and to display the divison that in the grade
-  combinedData$: Observable<any[]> | undefined;
-  ngOnInit(): void {
-    this.refresh();
-    const stages$ = this.stagesService.getStages();
-    const grades$ = this.gradesService.getGrades();
-    const divisions$ = this.divisionsService.getDivision();
 
-    this.combinedData$ = combineLatest([stages$, grades$, divisions$]).pipe(
-      map(([stages, grades, divisions]) => {
-        return grades.map(grade => {
-          const stage = stages.find(stage => stage.id === grade.stage);
-          const divisionsForGrade = divisions.filter(division => division.grade === grade.id);
-          return {
-            ...grade,
-            stageName: stage ? stage.stage : '',
-            divisions: divisionsForGrade,
-            note: stage ? stage.note : '',
-            state: stage ? stage.state : false
-          };
-        });
-      })
-    );
+  editClass(Class: ClassDTO): void {
+    this.form.patchValue({
+      stageID: Class.stageID,
+      className: Class.className
+    });
+    this.isEditMode = true;  // Enter edit mode
+    this.classToEditId = Class.classID;  // Set the ID for editing
   }
-  //this for nested dropdown list 
-  openOuterDropdown: any = null;
-  openInnerDropdown: any = null;
-  openInnerDivision: any = null;
+
+  updateClass(): void {
+    this.form.markAllAsTouched();
+    if (this.form.valid && this.classToEditId !== null) {
+      const updateData: updateClass = this.form.value;
+      this.classService.Update(this.classToEditId, updateData).subscribe({
+        next: (response) => {
+          if (response.success) {
+           this.toastr.success(response.success,"Stage Updated Successfully");
+           this.form.reset();
+           this.getAllClasses();  
+          }
+        },
+        error: () => this.toastr.error('Failed to update stage', 'Error')
+      });
+      this.toastr.success('Stage updated successfully');
+      this.form.reset();
+      this.getAllClasses(); 
+      this.isEditMode = false;
+    }
+  }
+
+  changeState(Class: ClassDTO, isActive: boolean): void {
+    const patchDoc = [
+      { op: "replace", path: "/state", value: isActive }
+    ];
+  
+    this.classService.partialUpdate(Class.classID, patchDoc).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success(response.message);
+          this.getAllClasses(); // Refresh the list to show updated data
+        }
+      },
+      error: () => this.toastr.error('Failed to update Class', 'Error')
+    });
+  
+    this.isEditMode = false;
+  }
+
+  // Method to delete a Class by ID
+  deleteClass(id: number): void {
+    this.classService.Delete(id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success(response.message, 'Class Deleted');
+          this.getAllClasses(); // Refresh the list after deletion
+        }
+      },
+      error: () => this.toastr.error('Failed to delete Class', 'Error')
+    });
+  }
 
   toggleOuterDropdown(item: any): void {
-    if (this.openOuterDropdown === item) {
-      this.openOuterDropdown = null;
-    } else {
-      this.openOuterDropdown = item;
+    this.openOuterDropdown = this.openOuterDropdown === item ? null : item;
+  }
+
+  getPaginatedClasses(item: any) {
+    if (this.currentClassPage[item.classID] === undefined) {
+      this.currentClassPage[item.classID] = 0;
     }
+    const startIndex = this.currentClassPage[item.classID] * this.maxClassesPerPage;
+    const endIndex = startIndex + this.maxClassesPerPage;
+    return item.divisions.slice(startIndex, endIndex);
+  }
+
+  previousClassPage(item: any) {
+    if (this.currentClassPage[item.classID] > 0) {
+      this.currentClassPage[item.classID]--;
+    }
+  }
+
+  nextClassPage(item: any) {
+    if ((this.currentClassPage[item.classID] + 1) * this.maxClassesPerPage < item.divisions.length) {
+      this.currentClassPage[item.classID]++;
+    }
+  }
+
+  getTotalClassPages(item: any): number {
+    return Math.ceil(item.divisions.length / this.maxClassesPerPage);
   }
 
   isOuterDropdownOpen(item: any): boolean {
     return this.openOuterDropdown === item;
   }
 
-  toggleInnerDropdown(item: any, division: any): void {
-    if (this.openInnerDropdown === item && this.openInnerDivision === division) {
-      this.openInnerDropdown = null;
-      this.openInnerDivision = null;
-    } else {
-      this.openInnerDropdown = item;
-      this.openInnerDivision = division;
-    }
-  }
-
-  isInnerDropdownOpen(item: any, division: any): boolean {
-    return this.openInnerDropdown === item && this.openInnerDivision === division;
-  }
 
   @HostListener('document:click', ['$event'])
   clickout(event: Event) {
     const target = event.target as HTMLElement;
-
     if (!target.closest('.dropdown-menu') && !target.closest('.btn')) {
       this.openOuterDropdown = null;
-      this.openInnerDropdown = null;
-      this.openInnerDivision = null;
     }
   }
+
+  updateDisplayedClass(): void {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.DisplayClasses = this.classes.slice(startIndex, endIndex);
+  }
+
+  // Handle paginator events
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updateDisplayedClass();
+  }
+  toggleStateDropdown(item: any): void {
+    item.isDropdownOpen = !item.isDropdownOpen;
+  }
+
 }

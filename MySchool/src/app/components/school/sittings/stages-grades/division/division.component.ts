@@ -1,9 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { divisions } from '../../../../../core/models/division.model';
 import { DivisionService } from '../../../../../core/services/division.service';
-import { GradeService } from '../../../../../core/services/grade.service';
-import { Division, Grades } from '../../../../../core/models/stages-grades.modul';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-division',
@@ -11,13 +11,16 @@ import { Division, Grades } from '../../../../../core/models/stages-grades.modul
   styleUrls: ['./division.component.scss']
 })
 export class DivisionComponent implements OnInit {
-  division: Array<Division> = [];
+  divisions: Array<divisions> = [];
+  displayedDivisions: Array<divisions> = [];
   form: FormGroup;
-  grades: Array<Grades> = [];
+  
+  currentPage: number = 0; // Current page index
+  pageSize: number = 5; // Number of items per page
+  length: number = 0; // Total number of items
 
-  divisionService = inject(DivisionService);
-  gradeService = inject(GradeService);
   toastr = inject(ToastrService);
+  divisionService = inject(DivisionService);
 
   constructor(private formBuilder: FormBuilder) {
     this.form = this.formBuilder.group({
@@ -29,41 +32,37 @@ export class DivisionComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.gradeService.getGrades().subscribe(res => {
-      this.grades = res;
+    this.getAllDivisions();
+  }
+
+  getAllDivisions(): void {
+    this.divisionService.getAll().subscribe({
+      next: (res) => {
+        this.divisions = res.divisionInfo;
+        this.length = this.divisions.length; // Set total item count
+        this.updateDisplayedDivisions(); // Initialize displayed divisions
+      },
+      error: (err) => {
+        this.toastr.error('Error fetching divisions', err);
+      }
     });
-    this.loadDivisions();
   }
 
-  loadDivisions() {
-    this.divisionService.getDivision().subscribe(res => {
-      this.division = res;
-    });
+  // Update displayed data based on pagination
+  updateDisplayedDivisions(): void {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.displayedDivisions = this.divisions.slice(startIndex, endIndex);
   }
 
-  addDivision() {
-    if (this.form.valid) {
-      this.divisionService.addDivision(this.form.value).subscribe(() => {
-        this.toastr.success('تم إضافة الشعبة بنجاح');
-        this.loadDivisions(); // Refresh the list of divisions
-      });
-    } else {
-      this.toastr.error('يجب إدخال بيانات ');
-    }
+  // Handle paginator events
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updateDisplayedDivisions();
   }
 
-  getGradeName(gradeId: string): string {
-    const grade = this.grades.find(g => g.id === gradeId);
-    return grade ? grade.grade : 'N/A';
-  }
-  toggleStateDropdown(item: any) {
+  toggleStateDropdown(item: any): void {
     item.isDropdownOpen = !item.isDropdownOpen;
-  }
-
-  changeState(item: any, newState: boolean) {
-    item.state = newState;
-    this.divisionService.editDivision(item).subscribe(() => {
-      this.toastr.success('State updated successfully');
-    });
   }
 }

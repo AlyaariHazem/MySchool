@@ -15,16 +15,11 @@ namespace Backend.Models
         public Name FullName { get; set; }
         public DateOnly DateOfBirth { get; set; }
         public string Gender { get; set; } = string.Empty;
-
         public string? Phone { get; set; }
         [Required]
         public int GuardianID { get; set; }
         [JsonIgnore]
         public Guardian Guardian { get; set; }
-        [Required]
-        public int UserID { get; set; }
-        [JsonIgnore]
-        public User User { get; set; }
         [Required]
         public int DivisionID { get; set; }
         [JsonIgnore]

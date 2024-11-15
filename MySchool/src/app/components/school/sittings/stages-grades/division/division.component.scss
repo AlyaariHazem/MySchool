@@ -1,17 +1,8 @@
-* {
-  box-sizing: border-box;
-}
-.modal-content {
-  border-radius: 1.5%;
-}
 h2 {
   font-family: "Changa", sans-serif;
 }
 .container {
   border-radius: 23px;
-}
-.school {
-  margin-top: 2rem;
 }
 .line {
   width: 100%;
@@ -33,7 +24,7 @@ select {
 }
 
 .term {
-  margin-left: 17%;
+  margin-right: -8px;
 }
 
 .class {
@@ -76,20 +67,24 @@ select:focus {
 .tabcontent {
   color: black;
   display: none;
-  padding: 100px 20px;
+  padding: 60px 20px;
   height: 100%;
 }
 
 .className {
-  position: absolute;
-  top: 37%;
-  right: 4%;
-}
-
-.termName {
   position: relative;
-  right: 5%;
+  top: -2.3rem;
+  right: 5rem;
+}
+.From {
+  margin-left: 21rem;
+  position: relative;
+  left: 3rem;
+}
+.termName {
+  position: absolute;
   top: -0.5rem;
+  right: 3rem;
 }
 
 .add {
@@ -97,7 +92,7 @@ select:focus {
   top: 0rem;
   width: 14%;
   border-radius: 32px;
-  left: 1rem;
+  left: -11rem;
   border: none;
   color: white;
   background-color: #2fdf84;
@@ -113,41 +108,31 @@ select:focus {
     padding: 1px 0px;
     font-size: 11px;
   }
+  .dropdown{
+    width: 105%;
+  }
   .line {
     top: 1.4rem;
   }
-
+  .tabcontent{
+    padding: 38px 20px;
+  }
   .add {
     position: relative;
-    top: -4.5rem;
+    top: -1.5rem;
     width: 14%;
     left: -1rem;
     color: white;
     background-color: #2fdf84;
   }
 
-  .className {
-    position: relative;
-    top: -3.8rem;
-    right: 5%;
-  }
-
   .termName {
-    position: absolute;
-    top: 7.4rem;
-    right: 4%;
+    right: 0rem;
   }
-
-  .term {
-    position: absolute;
-    right: 5%;
-    top: 9rem;
-  }
-
-  .class {
-    position: absolute;
-    right: 38%;
-    top: 9rem;
+  .From {
+    margin-left: 0rem;
+    position: relative;
+    left: 3rem;
   }
 }
 
@@ -159,15 +144,17 @@ select:focus {
   button {
     margin-right: 8px;
   }
-
-  .term {
-    position: absolute;
-    right: 5%;
+  .From{
+    left:1rem;
   }
-
-  .class {
-    width: 44%;
-    margin-left: 1rem;
+  .tabcontent{
+    padding: 38px 20px;
+  }
+  .add{
+    position: relative;
+    top: -1.5rem;
+    width: 4rem;
+    left: -3rem;
   }
 }
 
@@ -180,21 +167,13 @@ select:focus {
     margin-right: 19px;
   }
 
-  .class {
-    left: 0rem;
-    position: absolute;
-  }
+  
 
-  .term {
-    margin-right: -3px;
-    position: absolute;
-  }
-
-  .btn {
+  .add {
     position: relative;
-    top: -6.5rem;
-    width: 25%;
-    left: -1rem;
+    top: -3.5rem;
+    width: 4rem;
+    left: -4rem;
     color: white;
     background-color: #2fdf84;
   }
@@ -205,10 +184,13 @@ select:focus {
 
 .styled-table {
   border-collapse: collapse;
-  margin: 25px 0;
+  margin: 23px 0;
   font-size: 18px;
   width: 100%;
+  position: relative;
+  margin-left: 4rem;
   text-align: center;
+  right: -2rem;
 }
 
 .styled-table thead tr {
@@ -249,9 +231,6 @@ select:focus {
 .dropdown-menu-left a {
   text-align: right;
 }
-.dropdown-menu {
-  text-align: right;
-}
 .action-button {
   padding: 5px 10px;
   margin: 0 5px;
@@ -273,6 +252,34 @@ select:focus {
 .action-button:hover {
   opacity: 0.8;
 }
+.division {
+  text-align: center;
+  border: 2px solid green;
+  margin-left: 8%;
+  border-radius: 11px;
+  padding: 3% 19%;
+}
+.division:hover {
+  border: 2px solid rgb(8, 197, 8);
+}
+//nested dropdown list
+.nested-dropdown {
+  display: block;
+}
+.division {
+  text-align: center;
+  border: 2px solid rgb(8, 197, 8);
+  margin-left: 8%;
+  border-radius: 11px;
+  padding: 3% 19%;
+}
+.division:hover {
+  border: 2px solid rgb(8, 197, 8);
+}
+//nested dropdown list
+.nested-dropdown {
+  display: block;
+}
 .dropdown {
   border: 2px solid rgb(8, 197, 8);
   position: relative;
@@ -286,4 +293,21 @@ select:focus {
 }
 .dropdown:hover {
   border: 2px solid #34d589;
+}
+.mat-paginator {
+  font-family: 'Roboto', sans-serif; /* Apply the chosen font */
+  font-size: 14px; /* Adjust font size as needed */
+  color: #333; /* Change text color */
+}
+
+.mat-paginator .mat-button {
+  font-weight: 500; /* Set button font weight */
+}
+
+.mat-paginator .mat-select {
+  font-weight: 400; /* Set select font weight */
+}
+
+.mat-paginator .mat-icon {
+  font-size: 20px; /* Adjust icon size */
 }
