@@ -1,45 +1,52 @@
 import { inject, Injectable } from '@angular/core';
-import { FirebaseService } from '../../firebase/firebase.service';
-import { map, Observable } from 'rxjs';
-import { Class } from '../models/class.model';
-import { firebaseUrl } from '../../firebase/firebase-config';
+import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
+import { catchError, map, Observable } from 'rxjs';
+import { CLass, ClassDTO, updateClass } from '../models/class.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClassService {
-  firebaseService = inject(FirebaseService);
+  private API = inject(BackendAspService);
+  constructor() { }
 
-  // Get all class from Firebase
-  getClass(): Observable<Array<Class>> {
-    return this.firebaseService.getRequest<{ [key: string]: Class }>('classes').pipe(
-      map(classObj => {
-        const classArray: Class[] = [];
-        for (const key in classObj) {
-          if (classObj.hasOwnProperty(key)) {
-            classArray.push({ ...classObj[key], id: key });
-          }
-        }
-        return classArray;
+  GetAll(): Observable<ClassDTO[]> {
+    return this.API.http.get<{ classInfo: ClassDTO[] }>(`${this.API.baseUrl}/Classes`).pipe(
+      map(response => response.classInfo)  // Adjust to access 'classInfo'
+    );
+  }
+
+  Add(Class: CLass): Observable<any> {
+    return this.API.http.post(`${this.API.baseUrl}/Classes`, Class).pipe(
+      catchError(error => {
+        console.error("Error adding Class:", error);
+        throw error; // Optionally rethrow or handle the error here
+      })
+    )
+  }
+
+  Delete(id: number): Observable<any> {
+    return this.API.http.delete(`${this.API.baseUrl}/Classes/${id}`);
+  }
+
+  Update(id: number, update: updateClass): Observable<any> {
+    return this.API.http.put(`${this.API.baseUrl}/Classes/${id}`, update).pipe(
+      map(response => response), // Optionally process the response if needed
+      catchError(error => {
+        console.error("Error updating Class:", error);
+        throw error;
       })
     );
   }
 
-  // Add a new class to Firebase
-  addClass(clas: Class): Observable<any> {
-    return this.firebaseService.postRequest(`${firebaseUrl}classes.json`, clas, { 'content-type': 'application/json' });
+  partialUpdate(id: number, patchDoc: any): Observable<any> {
+    return this.API.http.patch(`${this.API.baseUrl}/Classes/${id}`, patchDoc).pipe(
+      map(response => response),
+      catchError(error => {
+        console.error("Error with partial update:", error);
+        throw error;
+      })
+    );
   }
-
-  // Edit an existing class in Firebase
-  editClass(clas: Class): Observable<any> {
-    const classId = clas.id;
-    const { id, ...classWithoutId } = clas; // Destructure the class to exclude the id
-    return this.firebaseService.patchRequest(`${firebaseUrl}classes/${classId}.json`, classWithoutId, { 'content-type': 'application/json' });
-  }
-
-  // Delete a class from Firebase
-  deleteClass(classId: string): Observable<any> {
-    return this.firebaseService.deleteRequest(`${firebaseUrl}classes/${classId}.json`, { 'content-type': 'application/json' });
-  }
-  constructor() { }
+  
 }
