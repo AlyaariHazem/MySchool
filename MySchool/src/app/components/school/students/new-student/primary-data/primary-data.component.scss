@@ -1,112 +1,96 @@
-#DataStudent {
-  width: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
 form {
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
-.label1{
-  margin-bottom: 2px;
-  width: 93.5%;
-  position: relative;
-  right: 1%;
+
+.group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
 }
-.label2 {
-  margin-bottom: 5px;
-  position: relative;
-  bottom: 1.5rem;
-  right: 7rem;
+
+.container{
+  margin-top: -2rem;
 }
-.label3{
-  right: 18%;
+.form-control {
+  display: flex;
+  border:none;
+  flex-direction: column;
+  gap: 5px; /* Space between label and input */
 }
-input,select {
-  margin-bottom: 10px;
-  padding: 10px;
-  width: 93.5%;
-  box-sizing: border-box;
+
+label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333;
 }
-input,
-select {
+
+input, select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: white;
-  box-sizing: border-box;
-  transition: border-color 0.3s ease-in-out;
+  border-radius: 5px;
+  transition: border-color 0.3s, background-color 0.3s;
 }
+
 input:focus,
 select:focus {
   outline: none;
   border-color: #2fdf85;
   box-shadow: 0 0 5px #2fdf85;
-  border: 1 solid #2fdf85;
-}
-input:focus.inputAb,input:focus.inputEn{
-  border: 0.2px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0 0 5px #ccc;
-}
-.row {
-  position: relative;
-  right:-8%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-.row label,
-.row input ,.row select {
-  flex: 1 1 calc(0% - 10px); /* Four columns layout with space between */
-  margin-bottom: 10px;
 }
 
-.hidden {
-  display: none;
+input[readonly] {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
 }
 
-@media (min-width: 1250px) {
-  .label2 {
-    right: 12%;
-  }
+input::placeholder, select::placeholder {
+  color: #aaa;
 }
+
+#sexSelect {
+  height: 42px;
+}
+
+button {
+  align-self: flex-end;
+  padding: 12px 20px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
 @media (max-width: 768px) {
-  .label2 {
-    position: relative;
-    bottom: 1.5rem;
-    right: 9px;
-    flex: 1 1 calc(20% - 10px); /* Four columns layout with space between */
-  }
-}
-@media (max-width: 768px) {
-  .row label,
-  .row input {
-    flex: 1 1 calc(24% - 5px); /* Four columns layout with space between */
-    // background-color: red;
-  }
-  .label2 {
-    position: relative;
-    bottom: 0;
-    right: 0;
+  .container {
+    padding: 15px;
   }
 
-  .appear {
-    display: block;
-  }
-}
-@media (max-width: 550px) {
-  .row label,
-  .row input,.row select {
-    flex: 1 1 100%; /* Full width on mobile devices */
-  }
-  .label2 {
-    position: relative;
-    bottom: 0;
-    right: 0;
+  .group {
+    grid-template-columns: 1fr;
   }
 
-  .appear {
-    display: block;
+  label {
+    font-size: 0.9rem;
+  }
+
+  input, select {
+    font-size: 0.9rem;
+  }
+
+  button {
+    width: 100%;
+    text-align: center;
   }
 }

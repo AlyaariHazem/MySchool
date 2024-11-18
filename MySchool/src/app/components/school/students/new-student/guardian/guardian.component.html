@@ -1,4 +1,67 @@
-<div id="guardian">
-    <h3>أولياء الأمور</h3>
-    <p>بعض بيانات أولياء الأمور </p>
+<div id="guardian" class="group5" [formGroup]="formGroup">
+  <!-- Group 1: Guardian's Full Name and Relationship -->
+  <div class="group group1">
+    <div class="form-control">
+      <label for="guardianName" class="label1">اسم ولي الأمر</label>
+      <input
+        type="text"
+        id="guardianName"
+        name="guardianName"
+        formControlName="guardianName"
+      />
+    </div>
+    <div class="form-control">
+      <label for="relationship" class="label1">صلة القرابة</label>
+      <input
+        type="text"
+        id="relationship"
+        name="relationship"
+        formControlName="relationship"
+      />
+    </div>
   </div>
+
+  <!-- Group 2: Contact Information -->
+  <div class="group group1">
+    <div class="form-control">
+      <label for="email" class="label1">البريد الإلكتروني</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        formControlName="email"
+      />
+    </div>
+    <div class="form-control">
+      <label for="phone" class="label1">الجوال</label>
+      <input
+        type="number"
+        id="phone"
+        name="phone"
+        formControlName="phone"
+      />
+    </div>
+  </div>
+
+  <!-- Group 3: Birth Date and Address -->
+  <div class="group group1">
+    <div class="form-control">
+      <label for="dob" class="label1">تاريخ الميلاد</label>
+      <input
+        type="date"
+        id="dob"
+        name="dob"
+        formControlName="dob"
+      />
+    </div>
+    <div class="form-control">
+      <label for="address" class="label1">العنوان</label>
+      <input
+        type="text"
+        id="address"
+        name="address"
+        formControlName="address"
+      />
+    </div>
+  </div>
+</div>

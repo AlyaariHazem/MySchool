@@ -12,7 +12,7 @@ import { StageService } from '../../../../core/services/stage.service';
 })
 export class NewStudentComponent implements OnInit, AfterViewInit {
   activeTab: string = 'DataStudent'; // Default active tab
-  form: FormGroup;
+  mainForm: FormGroup;
   combinedData$: Observable<any[]> | undefined;
   currentPage: { [key: string]: number } = {};
 
@@ -24,17 +24,65 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     public dialogRef: MatDialogRef<NewStudentComponent>, // Inject MatDialogRef
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.form = this.formBuilder.group({
-      id: '',
-      stage: ['', Validators.required],
-      note: '',
-      state: true
+    // Create the main form
+    this.mainForm = this.formBuilder.group({
+      primaryData: this.formBuilder.group({
+        // Full Names
+        fullNameAr: [{ value: '', disabled: true }, Validators.required],
+        fullNameEn: [{ value: '', disabled: true }, Validators.required],
+
+        // Arabic Names
+        firstNameAr: ['', Validators.required],
+        secondNameAr: ['', Validators.required],
+        lastNameAr: ['', Validators.required],
+
+        // English Names
+        firstNameEn: ['', Validators.required],
+        secondNameEn: ['', Validators.required],
+        thirdNameEn: ['', Validators.required],
+        lastNameEn: ['', Validators.required],
+
+        // Other Information
+        dob: ['', Validators.required],
+        grade: ['', [Validators.required, Validators.maxLength(50)]],
+        division: ['', [Validators.required, Validators.maxLength(50)]],
+        sex: ['', Validators.required]
+
+      }),
+      optionData: this.formBuilder.group({
+        placeOfBirth: ['', [Validators.required, Validators.maxLength(100)]],
+        mobileNumber: ['', [Validators.required, Validators.pattern(/^967\d{9}$/)]],
+        address: ['', [Validators.required, Validators.maxLength(200)]]
+
+      }),
+      guardian: this.formBuilder.group({
+        guardianName: ['', [Validators.required]],         // Guardian's full name
+        relationship: ['', [Validators.required]],         // Relationship to the student
+        email: ['', [Validators.required, Validators.email]], // Email
+        phone: ['', [Validators.required, Validators.pattern('^\\d{10}$')]],  // Phone number (10 digits)
+        dob: ['', [Validators.required]],                  // Date of Birth
+        address: ['', [Validators.required]],
+      }),
+      fees: this.formBuilder.group({
+
+      }),
+      document: this.formBuilder.group({
+
+      })
     });
+  }
+  onSubmit() {
+    if (this.mainForm.valid) {
+      console.log('Form Submitted', this.mainForm.value);
+    } else {
+      console.log('Form is not valid');
+    }
   }
 
   ngOnInit(): void {
-   
+    console.log(this.mainForm.get('primaryData')); // Should log a FormGroup object
   }
+  
 
   ngAfterViewInit(): void {
     setTimeout(() => {
@@ -66,8 +114,6 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
   closeModal(): void {
     this.dialogRef.close(); // Close the modal
   }
-
-  
 
   openOuterDropdown: any = null;
   openInnerDropdown: any = null;
@@ -121,5 +167,24 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
 
   getTotalPages(item: any): number {
     return Math.ceil(item.grades.length / this.maxRowsPerPage);
+  }
+  // Method to handle the photo upload (file selection)
+  uploadPhoto(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input?.files?.[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const photoUrl = e.target?.result as string;
+        // Logic to update student photo
+        console.log('Photo uploaded:', photoUrl);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
+  takePhoto() {
+    // Implement logic to open camera and take a photo
   }
 }

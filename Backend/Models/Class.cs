@@ -18,6 +18,8 @@ namespace Backend.Models
         [JsonIgnore]
         public virtual ICollection<Subject> Subjects { get; set; }
         [JsonIgnore]
+        public virtual ICollection<FeeClass> FeeClasses { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Division> Divisions { get; set; }
         [JsonIgnore]
         public virtual ICollection<StudentClass> StudentClass { get; set; }

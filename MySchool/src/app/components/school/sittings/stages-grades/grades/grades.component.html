@@ -31,6 +31,7 @@
       class="btn btn-primary add"
       [value]="isEditMode ? 'تعديل' : 'إضافة'"
       (click)="isEditMode ? updateClass() : addClass()"
+      [disabled]="!form.valid"
     />
   </form>
 

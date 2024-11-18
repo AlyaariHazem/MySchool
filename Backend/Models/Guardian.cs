@@ -11,13 +11,13 @@ namespace Backend.Models
     {
         [Key]
         public int GuardianID { get; set; }
-        [Required]
-        public Name FullName { get; set; }
+        public string FullName { get; set; }
         public string? Phone { get; set; }
         public string? Email { get; set; }
-        public string? Job { get; set; }
         public string? TypeGuardian { get; set; }
-        public string? Description { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
+        public string? Address { get; set; }
+        public virtual ICollection<Accounts> Accounts { get; set; }
         public virtual ICollection<Student> Students { get; set; }
     }
 }

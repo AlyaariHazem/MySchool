@@ -35,7 +35,8 @@
       type="submit"
       class="btn btn-primary add"
       [value]="isEditMode ? 'تحديث' : 'إضافة'"
-      (click)="isEditMode?updateDivision():AddDivision()"
+      (click)="isEditMode ? updateDivision() : AddDivision()"
+      [disabled]="!form.valid"
     />
   </form>
 
@@ -52,7 +53,10 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let div of displayedDivisions; let i = index">
+      @for (div of displayedDivisions; track $index;let i = $index) {
+
+      
+      <tr>
         <td>{{ currentPage * pageSize + i + 1 }}</td>
         <td>{{ div.divisionName }}</td>
         <td>{{ div.classesName }}</td>
@@ -100,6 +104,7 @@
           </div>
         </td>
       </tr>
+    }
     </tbody>
   </table>
 </div>

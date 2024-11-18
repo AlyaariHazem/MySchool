@@ -49,7 +49,7 @@
                         <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['studentsSubmenu']}"></span>
                     </a>
                     <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('studentsSubmenu')">
-                        <li><a routerLink="/school/students/all-students"><span>كل الطلاب</span></a></li>
+                        <li><a routerLink="/school/students/all-students" routerLinkActive="active"><span>كل الطلاب</span></a></li>
                         <li><a routerLink="/school/students/add-student"><span>إضافة طالب</span></a></li>
                         <li><a routerLink="/school/students/edit-student"><span>تعديل طالب</span></a></li>
                         <li><a routerLink="/school/students/chart-for-student"><span>طالب جديد</span></a></li>

@@ -2,9 +2,15 @@
   <div class="student-photo-section">
     <div class="student-photo">
       <label for="fileInput">
-        <img src="assets/img/user.jpg" alt="Student Photo">
+        <img src="assets/img/user.jpg" alt="Student Photo" />
       </label>
-      <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none;">
+      <input
+        type="file"
+        id="fileInput"
+        accept="image/*"
+        (change)="uploadPhoto($event)"
+        style="display: none"
+      />
       <button (click)="takePhoto()" class="btn btn-primary">التقاط صورة</button>
     </div>
   </div>
@@ -13,11 +19,11 @@
     <div class="student-name-id">
       <div class="student-name">
         <label>اسم الطالب:</label>
-        <span>{{ student.name }}</span>
+        <span>{{ student?.name }}</span>
       </div>
       <div class="student-id">
         <label>رقم الطالب:</label>
-        <span>{{ student.id }}</span>
+        <span>{{ student?.id }}</span>
       </div>
     </div>
 

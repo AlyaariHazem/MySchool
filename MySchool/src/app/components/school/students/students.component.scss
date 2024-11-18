@@ -1,406 +1,295 @@
-.modal-content {
-    border-radius: 1.5%;
-    overflow-y: auto; /* Allow vertical scrolling */
-    max-height: 80vh; /* Adjust the maximum height as needed */
-}
-
 .custom-dialog-container .mdc-dialog__surface {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 0;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    max-width: 100%;
-    max-height: 100%;
-    pointer-events: auto;
-    overflow-y: hidden; // Corrected to disable vertical scrolling
-    background-color: red;
-    outline: 0;
-    transform: scale(0.8); // Custom transform
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+  pointer-events: auto;
+  overflow-y: hidden; // Corrected to disable vertical scrolling
+  background-color: red;
+  outline: 0;
+  transform: scale(0.8); // Custom transform
 }
-  
+form {
+  position: absolute;
+  right: -6rem;
+  top: 4rem;
+}
+::-webkit-scrollbar form {
+  position: absolute;
+  right: 2rem;
+  top: 3rem;
+}
 .modal-content {
-    border-radius: 1.5%;
+  border-radius: 1.5%;
 }
 
 h2 {
-    font-family: 'Changa', sans-serif;
+  font-family: "Changa", sans-serif;
 }
 
 .container {
-    border-radius: 23px;
+  border-radius: 23px;
 }
 
 .school {
-    margin-top: 2rem;
+  text-align: right;
 }
 
 .line {
-    width: 100%;
-    position: relative;
-    top: 3rem;
-    z-index: 1;
-    border-bottom: 1px solid rgb(180 180 180);
+  width: 100%;
+  position: relative;
+  top: 3rem;
+  z-index: 1;
+  border-bottom: 1px solid rgb(180 180 180);
 }
 
 input,
 select {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    height: 33px;
-    width: 19%;
-    background-color: white;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease-in-out;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  height: 33px;
+  width: 19%;
+  background-color: white;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease-in-out;
 }
 
 .term {
-    margin-right: -8px;
+  margin-right: -8px;
 }
 
 .class {
-    margin-right: 8px;
+  margin-right: 8px;
 }
 
 .grade {
-    margin-right: 0px;
+  margin-right: 0px;
 }
 
 input:focus,
 select:focus {
-    outline: none;
-    border-color: #2fdf85;
-    box-shadow: 0 0 5px #2fdf85;
+  outline: none;
+  border-color: #2fdf85;
+  box-shadow: 0 0 5px #2fdf85;
 }
 
-
 .tablink {
-    color: black;
-    float: right;
-    border: none;
-    outline: none;
-    background-color: white;
-    width: 100%;
-    cursor: pointer;
-    padding: 14px 16px;
-    font-size: 17px;
-    width: 9%;
+  color: black;
+  float: right;
+  border: none;
+  outline: none;
+  background-color: white;
+  width: 100%;
+  cursor: pointer;
+  padding: 14px 16px;
+  font-size: 17px;
+  width: 9%;
 }
 
 .tablink span {
-    z-index: 2;
+  z-index: 2;
 }
 
 .tablink:hover {
-    color: black;
+  color: black;
 }
 
 .tablink.active {
-    border-bottom: 3px solid #2fdf84;
-    z-index: 4;
+  border-bottom: 3px solid #2fdf84;
+  z-index: 4;
 }
 
 .tabcontent {
-    color: black;
-    display: block;
-    padding: 24px 20px;
-    height: 100%;
+  color: black;
+  display: block;
+  padding: 24px 20px;
+  height: 100%;
 }
 
 .className {
-    position: relative;
-    top: -2.3rem;
-    right: 5rem;
+  position: relative;
+  top: -2.3rem;
+  right: 5rem;
 }
 
 .gradeName {
-    position: relative;
-    top: -2rem;
-    right: 2rem;
+  position: relative;
+  top: -2rem;
+  right: 2rem;
 }
 
 .termName {
-    position: relative;
-    top: -0.5rem;
+  position: absolute;
+  top: -0.5rem;
+  right: 17%;
 }
 
 .add {
-    position: relative;
-    top: 0rem;
-    width: 14%;
-    border-radius: 32px;
-    left: 1rem;
-    border: none;
-    color: white;
-    background-color: #2fdf84;
+  position: relative;
+  top: -4rem;
+  width: 11%;
+  border-radius: 32px;
+  left: -1rem;
+  border: none;
+  color: white;
+  background-color: #2fdf84;
 }
 
 .add:active {
-    background-color: #2fdf85;
+  background-color: #2fdf85;
 }
-@media (max-width:1100px) {
-.add{
+@media (max-width: 1100px) {
+  .add {
     width: 18%;
+  }
 }
-}
-@media (max-width:900px) {
-    .tablink {
-        color: red;
-        padding: 1px 0px;
-        font-size: 11px;
-    }
-
-    .line {
-        top: 1.4rem;
-    }
-
-    .add {
-        position: relative;
-        top: -4.5rem;
-        width: 23%;
-        left: -1rem;
-        color: white;
-        background-color: #2fdf84;
-    }
-    
-    .gradeName {
-        position: relative;
-        top: -0.4rem;
-        right: 17rem;
-    }
-
-    .termName {
-        position: absolute;
-        top: 7.4rem;
-        right: 4%;
-    }
-
-    .term {
-        position: absolute;
-        right: 5%;
-        top: 9rem;
-    }
-
-    .class {
-        position: absolute;
-        right: 26%;
-        top: 9rem;
-    }
-
-    .grade {
-        position: absolute;
-        right: 50%;
-        top: 9rem;
-    }
-    .className{
-        position: relative;
-        top: -0.5rem;
-        right: 21%;
-    }
-    .styled-table{
-        margin-right: -4rem;
-    }
-
+@media (max-width: 900px) {
+  form {
+    right: -1rem;
+  }
 }
 
-@media (max-width:600px) {
-    .tablink {
-        color: green;
-    }
-
-    button {
-        margin-right: 8px;
-    }
-
-    .term {
-        position: absolute;
-        right: 5%;
-
-    }
-    .gradeName {
-        position: relative;
-        top: -0.4rem;
-        right: 9rem;
-    }
-    .class {
-        width: 21%;
-        margin-left: 1rem;
-    }
-    .btn{
-        width:36%;
-    }
-
-    .grade {
-        width: 21%;
-        margin-left: -2rem;
-    }
-    .styled-table{
-        margin-right:-1rem;
-    }
+@media (max-width: 600px) {
+  form {
+    right: -1rem;
+  }
 }
 
-@media (max-width:400px) {
-    // .tablink {
-    //     color: rgb(35, 22, 213);
-    // }
-
-    button {
-        margin-right: 1px;
-    }
-    .styled-table{
-        margin-right: -1.4rem;
-    }
-    .class {
-        left: 0rem;
-        position: absolute;
-    }
-    input{
-        width:24%;
-    }
-    .className{
-        position: relative;
-        top: -0.4rem;
-        right: 4rem;
-    }
-    .gradeName{
-        position: relative;
-        top: -0.4rem;
-        right: 5rem;
-    }
-
-    .grade {
-        left: -3rem;
-        position: absolute;
-    }
-
-    .term {
-        margin-right: -3px;
-        position: absolute;
-    }
-
-    .btn {
-        position: relative;
-        top: -6.5rem;
-        width:38%;
-        left: -1rem;
-        color: white;
-        background-color: #2fdf84;
-    }
+@media (max-width: 400px) {
+  // .tablink {
+  //     color: rgb(35, 22, 213);
+  // }
 }
 
-//this is for talbes 
+//this is for talbes
 /* Resetting some default styles */
 
 .styled-table {
-    border-collapse: collapse;
-    margin-top: 45px;
-    font-size: 18px;
-    width: 100%;
-    text-align: center;
+  border-collapse: collapse;
+  margin-top: 45px;
+  font-size: 18px;
+  overflow-x: auto;
+  max-width: 100%;
+  text-align: center;
 }
 
 .styled-table thead tr {
-    background-color: #009879;
-    color: #ffffff;
-    text-align: center;
-    font-weight: bold;
+  background-color: #009879;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
 }
 
 .styled-table th,
 .styled-table td {
-    padding: 12px 15px;
-    border: 1px solid #dddddd;
+  padding: 12px 2rem;
+  border: 1px solid #dddddd;
 }
 
 .styled-table tbody tr {
-    border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
 }
 
 .styled-table tbody tr:nth-of-type(even) {
-    background-color: #f3f3f3;
+  background-color: #f3f3f3;
 }
 
 .styled-table tbody tr:last-of-type {
-    border-bottom: 2px solid #009879;
+  border-bottom: 2px solid #009879;
 }
 
 .styled-table tbody tr.active-row {
-    font-weight: bold;
-    color: #009879;
+  font-weight: bold;
+  color: #009879;
 }
-
-.IconEdit {
-    color: #009879;
+.input-group {
+  margin-bottom: 15px;
+  position: relative;
 }
-
-.IconDelete {
-    color: red;
+.label1 {
+  position: absolute;
+  left: 94px;
+  top: -30px;
+  font-size: 11px;
+  color: #777;
+  transition: 0.2s;
+  pointer-events: none;
 }
-
-.dropdown-menu-left a {
-    text-align: right;
+#clearIcon {
+  position: absolute;
+  left: 1.7rem;
+  top: -25px;
+  font-size: 12px !important;
+  color: #777;
+  transition: 0.2s;
+  pointer-events: none;
 }
-
-.action-button {
-    padding: 5px 10px;
-    margin: 0 5px;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
+#clearIcon:hover {
+  cursor: pointer;
 }
-
-.action-button.edit {
-    background-color: #4CAF50;
-    /* Green */
-    color: white;
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
-
-.action-button.delete {
-    background-color: #f44336;
-    /* Red */
-    color: white;
+li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
 }
-
-.action-button:hover {
-    opacity: 0.8;
+li:hover {
+  background-color: #f0f0f0;
 }
-
-.division {
-    text-align: center;
-    border: 2px solid rgb(8, 197, 8);
-    margin-left: 5%;
-    border-radius: 11px;
+.input1 {
+  width: 20%;
+  top: -33px;
+  position: absolute;
+  left: 0;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+  transition: border-color 0.2s;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="%234CAF50" d="M1 3h14l-7 10z"/></svg>')
+    no-repeat left 10px center;
+  background-size: 12px;
+  padding-left: 40px; /* Space for the arrow */
 }
-
-.division:hover {
-    border: 2px solid #34d589;
-
+.input1:focus {
+  border-color: #4caf50;
+  outline: none;
 }
-
-//nested dropdown list 
-.nested-dropdown {
-    display: block;
+.input1:focus + .label1,
+.input1:not(:placeholder-shown) + .label1 {
+    left: 94px;
+    top: -35px;
+  font-size: 11px;
+  color: #4caf50;
 }
-
-.previous {
-    border: 2px solid #3ec183;
-    position: absolute;
-    right: 16px;
-    bottom: 4px;
-    border-radius: 4px;
-}
-
-.text {
-    position: absolute;
-    right: 33%;
-    bottom: 6px;
-}
-
-.next {
-    position: relative;
-    border: 2px solid #3ec183;
-    left: 5px;
-    top: 4px;
-    border-radius: 4px;
+.input1[type="submit"] {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 15px;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 100%;
+  font-size: 16px;
+  transition: background 0.2s;
 }

@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
@@ -19,7 +19,6 @@ import { AddStudentComponent } from './students/add-student/add-student.componen
 import { EditStudentComponent } from './students/edit-student/edit-student.component';
 import { TeachersComponent } from './teachers/teachers.component';
 import { SchoolRoutingModule } from './school-routing.module';
-import { CommonModule } from '@angular/common';
 import { NavigateComponent } from './navigate/navigate.component';
 import { RouterLinkActive, RouterOutlet } from '@angular/router';
 import { StudyYearComponent } from './sittings/study-year/study-year.component';
@@ -37,7 +36,7 @@ import { FeesComponent } from './students/new-student/fees/fees.component';
 import { GuardianComponent } from './students/new-student/guardian/guardian.component';
 import { OptionDataComponent } from './students/new-student/option-data/option-data.component';
 import { HeadComponent } from './students/new-student/head/head.component';
-import { MatButtonModule } from '@angular/material/button';
+import { ShardModule } from '../../shared/shard.module';
 
 
 const components = [
@@ -71,8 +70,7 @@ const components = [
 ];
 
 const modules = [
-  FormsModule,
-  CommonModule,
+  ShardModule,
   ReactiveFormsModule,
   MatFormFieldModule,
   MatPaginatorModule,
@@ -82,11 +80,8 @@ const modules = [
   MatDialogActions,
   MatDialogModule,
   MatDialogClose,
-  ReactiveFormsModule,
   RouterOutlet,
   RouterLinkActive,
-  FormsModule, MatFormFieldModule, MatInputModule,
-  
   
 ];
 

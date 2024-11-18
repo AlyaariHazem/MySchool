@@ -12,21 +12,25 @@ namespace Backend.Data
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
         
+        public DbSet<Attachments> Attachments { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Manager> Managers { get; set; }
         public DbSet<Student> Students { get; set; }
-        public DbSet<SubjectStudent> SubjectStudents { get; set; }
-        public DbSet<StudentClass> StudentClass { get; set; }
+        public DbSet<Accounts> Accounts { get; set; }
         public DbSet<Division> Divisions { get; set; }
         public DbSet<Subject> Subjects { get; set; }
+        public DbSet<Salary> Salarys { get; set; }
         public DbSet<Stage> Stages { get; set; }
         public DbSet<Year> Years { get; set; }
+        public DbSet<Fee> Fees { get; set; }
+        public DbSet<FeeClass> FeeClass { get; set; }
         public DbSet<Guardian> Guardians { get; set; }
-        // public DbSet<User> Users { get; set; }
-        public DbSet<Salary> Salarys { get; set; }
+        public DbSet<SubjectStudent> SubjectStudents { get; set; }
+        public DbSet<StudentClass> StudentClass { get; set; }
         public DbSet<TeacherStudent> TeacherStudents { get; set; }
+        // public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,8 +38,21 @@ namespace Backend.Data
             
             modelBuilder.Entity<TeacherStudent>().HasKey(TS => new { TS.StudentID, TS.TeacherID });
             modelBuilder.Entity<StudentClass>().HasKey(SC => new { SC.StudentID, SC.ClassID });
+            modelBuilder.Entity<FeeClass>().HasKey(SC => new { SC.FeeID, SC.ClassID });
             modelBuilder.Entity<SubjectStudent>().HasKey(SS => new { SS.SubjectID, SS.StudentID });
-            // Ternary relationship between Teachers, Students, and Subjects
+            
+            modelBuilder.Entity<Accounts>()
+                .HasKey(a => a.AccountID);
+                
+            modelBuilder.Entity<Fee>()
+                .HasKey(a => a.FeeID);
+                
+            modelBuilder.Entity<Attachments>()
+                .HasKey(a => a.AttachmentID);
+
+            modelBuilder.Entity<Vouchers>()
+                .HasKey(v => v.VoucherID); 
+
             modelBuilder.Entity<TeacherSubjectStudent>()
                 .HasKey(tss => new { tss.TeacherID, tss.StudentID, tss.SubjectID });
 
@@ -109,6 +126,18 @@ namespace Backend.Data
                 .WithMany(SC => SC.StudentClass)
                 .HasForeignKey(S => S.ClassID)
                 .OnDelete(DeleteBehavior.Restrict);
+           
+            // many to many relationship for Classes and Fees
+            modelBuilder.Entity<FeeClass>()
+                .HasOne<Fee>(F => F.Fee)
+                .WithMany(FC => FC.FeeClasses)
+                .HasForeignKey(F => F.FeeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<FeeClass>()
+                .HasOne<Class>(C => C.Class)
+                .WithMany(SC => SC.FeeClasses)
+                .HasForeignKey(F => F.ClassID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // one to many relationship for Class and Subject
             modelBuilder.Entity<Class>()
@@ -149,10 +178,6 @@ namespace Backend.Data
             modelBuilder.Entity<Student>()
             .OwnsOne(s => s.FullName);
 
-            //composite Atribute for Guardian and Name
-            modelBuilder.Entity<Guardian>()
-            .OwnsOne(G => G.FullName);
-
             //composite Atribute for teacher and Name
             modelBuilder.Entity<Teacher>()
             .OwnsOne(T => T.FullName);
@@ -161,6 +186,27 @@ namespace Backend.Data
             modelBuilder.Entity<Manager>()
             .OwnsOne(M => M.FullName);
 
+             // One-to-many: Guardian ↔ Account
+            modelBuilder.Entity<Guardian>()
+                .HasMany(g => g.Accounts)
+                .WithOne(a => a.Guardian)
+                .HasForeignKey(a => a.GuardianID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Attachments>()
+               .HasOne(a => a.Student)
+               .WithMany(s => s.Attachments)
+               .HasForeignKey(a => a.StudentID)
+               .OnDelete(DeleteBehavior.Cascade);// Optional relationship
+        
+            
+            //  // One-to-One: Guardian ↔ Account
+            // modelBuilder.Entity<Guardian>()
+            // .HasOne(g => g.Account)
+            // .WithOne(a => a.Guardian)
+            // .HasForeignKey<Accounts>(a => a.GuardianID)
+            // .OnDelete(DeleteBehavior.Cascade);
+            
             // //this is for Roles 
             // modelBuilder.Entity<User>()
             // .HasOne(u => u.Guardian)
@@ -204,6 +250,40 @@ namespace Backend.Data
                 .WithMany(sub => sub.TeacherSubjectStudents)
                 .HasForeignKey(tss => tss.SubjectID)
                 .OnDelete(DeleteBehavior.Cascade);
+                
+                //this are the data that I will add to Guardian Table ---> Data Seeding
+                modelBuilder.Entity<Guardian>().HasData(
+                    new Guardian
+                    {
+                        GuardianID = 1, // Explicit ID for seeding
+                        FullName = "School"
+                    },
+                    new Guardian
+                    {
+                        GuardianID = 2, // Explicit ID for seeding
+                        FullName = "Branches"
+                    },
+                    new Guardian
+                    {
+                        GuardianID = 3, // Explicit ID for seeding
+                        FullName = "Fuands"
+                    },
+                    new Guardian
+                    {
+                        GuardianID = 4, // Explicit ID for seeding
+                        FullName = "Guardians"
+                    },
+                    new Guardian
+                    {
+                        GuardianID = 5, // Explicit ID for seeding
+                        FullName = "Employees"
+                    },
+                    new Guardian
+                    {
+                        GuardianID = 6, // Explicit ID for seeding
+                        FullName = "Bacnks"
+                    }
+                    );
         }
     }
 }

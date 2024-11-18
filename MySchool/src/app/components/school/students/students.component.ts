@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { StageService } from '../../../core/services/stage.service';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -11,8 +10,9 @@ import { NewStudentComponent } from './new-student/new-student.component';
   templateUrl: './students.component.html',
   styleUrls: ['./students.component.scss']
 })
-export class StudentsComponent implements OnInit {
+export class StudentsComponent {
   activeTab: string = 'News';
+  hidenCancel:boolean=true;
   form: FormGroup;
   combinedData$: Observable<any[]> | undefined;
   outerDropdownState: { [key: string]: boolean } = {};
@@ -31,11 +31,9 @@ export class StudentsComponent implements OnInit {
       state: true
     });
   }
-
-  ngOnInit(): void {
-    
-  }
-
+  searchValue:string='';
+  options: string[] = ['الخيار الأول', 'الخيار الثاني', 'الخيار الثالث'];
+  
   openDialog(): void {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.width = '80%';
@@ -48,5 +46,23 @@ export class StudentsComponent implements OnInit {
       // Handle the result if needed
     });
   }
+  onInput() {
+    // You can handle the input value here if needed
+  }
+
+ // Clear the input field
+ clearInput() {
+  this.searchValue = '';
+}
+showCancel(){
+this.hidenCancel=true;
+}
+hiddenCancel(){
+  this.hidenCancel=false;
+  
+}
+clearData(){
+
+}
 
 }

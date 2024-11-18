@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-guardian',
@@ -6,5 +7,6 @@ import { Component } from '@angular/core';
   styleUrl: './guardian.component.scss'
 })
 export class GuardianComponent {
-
+  @Input() formGroup!: FormGroup;
+  constructor() { }
 }
