@@ -1,0 +1,226 @@
+.inputs-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive layout */
+    gap: 16px; /* Spacing between input fields */
+  }
+  
+ 
+:host ::ng-deep .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading{
+    border-color: #2fdf85!important;
+    // box-shadow: 0 0 5px 0 #2fdf85!important;
+    border-width: 2px 2px 2px 0 !important;
+    transition: border-color 0.2s;
+ }
+:host ::ng-deep .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing{
+    border-color: #2fdf85!important;
+    // box-shadow: 0 0 5px 0 #2fdf85!important;
+    border-width: 2px 0 2px 2px !important;
+    transition: border-color 0.2s;
+ }
+ :host ::ng-deep.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch{
+    border-color: #2fdf85!important;
+    // box-shadow: 2px 0 5px 0 #2fdf85!important;
+    border-width: 2px 0 2px 0 !important;
+    transition: border-color 0.2s;
+ }
+  
+  /* Cancel icon styles */
+  .cancel {
+    left: -8px;
+    padding-left: 19px;
+    position: absolute;
+    top: 16px;
+    color:#6f6d6d;
+  }
+  .cancel:hover {
+    color: rgb(70, 70, 70);
+    cursor: pointer;
+  }
+  .dropdown13{
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="%234CAF50" d="M1 3h14l-7 10z"/></svg>') no-repeat left -2px center;
+    background-size: 13px;
+    left: -8px;
+    color:white;
+    padding-left: 19px;
+    position: absolute;
+    top: 16px;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .group5 {
+    border: 1px solid #ccc;
+    margin-top: 1rem;
+  }
+  .form-control {
+    display: flex;
+    border: none;
+    flex-direction: column;
+    gap: 5px; /* Space between label and input */
+  }
+  
+  label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+  }
+  //table ----------------------------------------------------------------------------------->>>>>>>>>>>>>>>>>>>>
+  .table-container {
+    margin-top: 3rem;
+  }
+  .styled-table{
+    width:100%;
+  }
+  @media (max-width: 1600px) {
+    .styled-table th,
+    .styled-table td {
+      padding: auto 10% !important;
+      border: 1px solid #dddddd;
+    }
+  }
+  @media (max-width: 900px) {
+    .styled-table th,
+    .styled-table td {
+      padding: 8% 3% !important;
+      border: 1px solid #ff0000;
+    }
+  }
+  .styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .styled-table th,
+  .styled-table td {
+    padding: 1% 5%;
+    border: 1px solid #dddddd;
+  }
+  
+  .styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+  }
+  
+  .styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+  }
+  
+  .styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+  }
+  
+  .styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+  }
+  .writeMoney{
+    text-align: center;
+  }
+  .ID-colum{
+    width: 6% !important;
+    text-align: center;
+  }  
+  .InCount{
+    width: 88%;
+    padding: 7px 0;
+    border: 2px solid seagreen;
+    border-radius: 5px;
+    color:black;
+    box-sizing: initial;
+  }
+  .Note{
+    width: 98%;
+    border: 2px solid seagreen;
+    border-radius: 5px;
+    padding: 7px 0;
+    box-sizing: initial;
+  }
+  .selected-colum{
+    width:6%;
+  }
+  /* Hide the default checkbox */
+input[type="checkbox"] {
+  display: none;
+}
+.table-container {
+  overflow-x: auto; /* Enable horizontal scrolling */
+  margin-top: 1rem;
+}
+
+.styled-table {
+  border-collapse: collapse; /* Clean table layout */
+  width: 100%;
+  min-width: 600px; /* Ensure the table has a minimum width */
+}
+
+.styled-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 12px 15px;
+  text-align: center;
+  border: 1px solid #ddd; /* Subtle border for separation */
+}
+
+.styled-table tbody tr {
+  background-color: #f9f9f9;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #f1f1f1; /* Highlight row on hover */
+}
+
+.styled-table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+@media (max-width: 768px) {
+  .styled-table th,
+  .styled-table td {
+    padding: 8px; /* Reduce padding for smaller screens */
+    font-size: 0.9rem; /* Adjust font size */
+  }
+}
+
+/* Create a custom checkbox */
+.custom-checkbox {
+  display: inline-block;
+  width: 20px; /* Adjust size as needed */
+  height: 20px; /* Adjust size as needed */
+  border: 2px solid #2fdf85; /* Border color */
+  border-radius: 4px; /* Rounded corners */
+  position: relative;
+  cursor: pointer;
+  margin-right: 8px; /* Space between checkbox and label */
+}
+
+/* Add checkmark when checked */
+input[type="checkbox"]:checked + .custom-checkbox::after {
+  content: '';
+  position: absolute;
+  left: 4px; /* Adjust checkmark position */
+  top: 0;
+  width: 8px; /* Checkmark width */
+  height: 15px; /* Checkmark height */
+  border: solid #007bff; /* Checkmark color */
+  border-width: 0 3px 3px 0; /* Create checkmark shape */
+  transform: rotate(45deg); /* Rotate to form a checkmark */
+}

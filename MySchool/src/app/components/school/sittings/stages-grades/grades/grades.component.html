@@ -1,11 +1,6 @@
 <div id="Class" class="tabcontent">
-  <mat-paginator
-    [ngStyle]="{ position: 'relative', top: '-10px' }"
-    [length]="length"
-    [pageSize]="pageSize"
-    [pageSizeOptions]="[5, 10, 25, 100]"
-    (page)="onPageChange($event)"
-  >
+  <mat-paginator [ngStyle]="{ position: 'relative', top: '-10px' }" [length]="length" [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
   </mat-paginator>
 
   <form [formGroup]="form" class="From">
@@ -20,19 +15,9 @@
       }
     </select>
     <label for="className" class="className">اسـم الصف</label>
-    <input
-      type="text"
-      formControlName="className"
-      class="class"
-      placeholder="إدخال اسم صـف جديد"
-    />
-    <input
-      type="submit"
-      class="btn btn-primary add"
-      [value]="isEditMode ? 'تعديل' : 'إضافة'"
-      (click)="isEditMode ? updateClass() : addClass()"
-      [disabled]="!form.valid"
-    />
+    <input type="text" formControlName="className" class="class" placeholder="إدخال اسم صـف جديد" />
+    <input type="submit" class="btn btn-primary add" [value]="isEditMode ? 'تعديل' : 'إضافة'"
+      (click)="isEditMode ? updateClass() : addClass()" [disabled]="!form.valid" />
   </form>
 
   <table class="styled-table" style="overflow-y: hidden; width: 105%">
@@ -76,23 +61,15 @@
                   </td>
                   <td>{{ division.studentCount || "لا يوجد طلاب حالياً" }}</td>
                   <td>
-                    <button
-                      class="btn btn-left"
-                      type="button"
-                      data-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
+                    <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="false">
                       <i class="fas fa-ellipsis-h"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-left">
-                      <a class="dropdown-item" (click)="editClass(Class)"
-                        ><i class="bi bi-pencil-square IconEdit"></i>تعديل</a
-                      >
+                      <a class="dropdown-item" (click)="editClass(Class)"><i
+                          class="bi bi-pencil-square IconEdit"></i>تعديل</a>
                       <div role="separator" class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="#"
-                        ><i class="bi bi-trash IconDelete"></i>حذف</a
-                      >
+                      <a class="dropdown-item" href="#"><i class="bi bi-trash IconDelete"></i>حذف</a>
                     </div>
                   </td>
                 </tr>
@@ -100,23 +77,15 @@
               </tbody>
             </table>
             <div class="pagination-buttons">
-              <button
-                (click)="previousClassPage(Class)"
-                [disabled]="currentClassPage[Class.classID] === 0"
-              >
+              <button (click)="previousClassPage(Class)" [disabled]="currentClassPage[Class.classID] === 0">
                 السابق
               </button>
-              <span
-                >صفحة {{ currentClassPage[Class.classID] + 1 }} من
-                {{ getTotalClassPages(Class) }}</span
-              >
-              <button
-                (click)="nextClassPage(Class)"
-                [disabled]="
+              <span>صفحة {{ currentClassPage[Class.classID] + 1 }} من
+                {{ getTotalClassPages(Class) }}</span>
+              <button (click)="nextClassPage(Class)" [disabled]="
                   currentClassPage[Class.classID] >=
                   getTotalClassPages(Class) - 1
-                "
-              >
+                ">
                 التالي
               </button>
             </div>
@@ -133,12 +102,8 @@
 
             }
             <div class="dropdown-menu" style="margin-left: 2rem">
-              <span class="dropdown-item" (click)="changeState(Class, true)"
-                >نشط</span
-              >
-              <span class="dropdown-item" (click)="changeState(Class, false)"
-                >خامل</span
-              >
+              <span class="dropdown-item" (click)="changeState(Class, true)">نشط</span>
+              <span class="dropdown-item" (click)="changeState(Class, false)">خامل</span>
             </div>
           </div>
         </td>
@@ -146,24 +111,17 @@
           <!-- this is for edit and delete  -->
           <div class="col text-left">
             <div class="mt-sm-0 mt-2">
-              <button
-                class="btn btn-left"
-                type="button"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
+              <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
                 <i class="fas fa-ellipsis-h"></i>
               </button>
               <div class="dropdown-menu dropdown-menu-left">
                 <!-- when I click here chage in the form from "إضافة" to be like "تعديل"  -->
-                <a class="dropdown-item" (click)="editClass(Class)"
-                  ><i class="bi bi-pencil-square IconEdit"></i>تعديل</a
-                >
+                <a class="dropdown-item" (click)="editClass(Class)"><i
+                    class="bi bi-pencil-square IconEdit"></i>تعديل</a>
                 <div role="separator" class="dropdown-divider"></div>
-                <a class="dropdown-item" (click)="deleteClass(Class.classID)"
-                  ><i class="bi bi-trash IconDelete"></i>حذف</a
-                >
+                <a class="dropdown-item" (click)="deleteClass(Class.classID)"><i
+                    class="bi bi-trash IconDelete"></i>حذف</a>
               </div>
             </div>
           </div>

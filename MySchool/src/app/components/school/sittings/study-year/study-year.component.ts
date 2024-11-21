@@ -2,6 +2,8 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ClassDTO } from '../../../../core/models/class.model';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { NewYearComponent } from './new-year/new-year.component';
 
 
 @Component({
@@ -10,49 +12,22 @@ import { ClassDTO } from '../../../../core/models/class.model';
   styleUrl: './study-year.component.scss'
 })
 export class StudyYearComponent {
-  title = 'السنوات الدراسية';
-  checkTOEdit = false;
-  class:ClassDTO[]=[];
+  constructor(public dialog: MatDialog, private toastr:ToastrService){}
   
-  toastr = inject(ToastrService);
-  formBuilder = inject(FormBuilder);
+  openDialog(): void {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.width = '80%';
+    dialogConfig.height = '70%';
+    dialogConfig.panelClass = 'custom-dialog-container';
 
-  form: FormGroup = this.formBuilder.group({
-    id: [''],
-    name: ['', Validators.required],
-    state: [''],
-    level: '',
-    totalStudents:0,
-    type: [],
-    semester:''
-  });
+    const dialogRef = this.dialog.open(NewYearComponent, dialogConfig);
 
-  ngOnInit(): void {
-    // this.refreshClass();
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.toastr.success('تم إضافة الطالب بنجاح');
+      }
+    });
   }
 
-  // refreshClass(): void {
-  //   this.classService.getClass().subscribe(clas => {
-  //     this.class = clas;
-  //     console.log('Classes:', this.class);
-  //   });
-  // }
-
-  close(): void {
-    const modal = document.getElementById('id01');
-    if (modal) {
-      modal.style.display = 'none';
-    }
-  }
-//this fucntion for display the edit form 
-  patchClass(editClass: ClassDTO): void {
-    const modal = document.getElementById('id01');
-    if (modal) {
-      this.checkTOEdit = true;
-      modal.style.display = 'block';
-      this.form.patchValue(editClass);
-      console.log('Editing class:', editClass);
-    }
-  }
 
 }

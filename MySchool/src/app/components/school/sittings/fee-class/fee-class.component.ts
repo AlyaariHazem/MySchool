@@ -1,24 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { MediaObserver, MediaChange } from '@angular/flex-layout';
 import { Subscription } from 'rxjs';
-import { NewStudentComponent } from './new-student/new-student.component';
 
 @Component({
-  selector: 'app-students',
-  templateUrl: './students.component.html',
-  styleUrls: ['./students.component.scss'],
+  selector: 'app-fee-class',
+  templateUrl: './fee-class.component.html',
+  styleUrl: './fee-class.component.scss'
 })
-export class StudentsComponent implements OnInit {
-  form: FormGroup;
-
-  // Dropdown options
+export class FeeClassComponent {
   studentOptions: string[] = ['طالب 1', 'طالب 2', 'طالب 3'];
   stageOptions: string[] = ['المرحلة الأولى', 'المرحلة الثانية', 'المرحلة الثالثة'];
   classOptions: string[] = ['الصف الأول', 'الصف الثاني', 'الصف الثالث'];
-
+  form:FormGroup;
   // Selection states
   selectedStudent: string | null = null;
   selectedStage: string | null = null;
@@ -47,7 +42,6 @@ export class StudentsComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private toastr: ToastrService,
-    public dialog: MatDialog,
     private mediaObserver: MediaObserver
   ) {
     this.form = this.formBuilder.group({
@@ -98,20 +92,7 @@ export class StudentsComponent implements OnInit {
     }
   }
 
-  openDialog(): void {
-    const dialogConfig = new MatDialogConfig();
-    dialogConfig.width = '80%';
-    dialogConfig.panelClass = 'custom-dialog-container';
-
-    const dialogRef = this.dialog.open(NewStudentComponent, dialogConfig);
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.toastr.success('تم إضافة الطالب بنجاح');
-      }
-    });
-  }
-
+ 
   deleteStudent(studentId: number): void {
     this.students = this.students.filter((student) => student.id !== studentId);
     this.toastr.warning('تم حذف الطالب');

@@ -7681,11 +7681,6 @@ body[data-layout-mode=dark] .alertify .ajs-footer .ajs-buttons .ajs-button.ajs-o
         margin-bottom: 10px
     }
 
-    .sidebar .header-left {
-        position: absolute;
-        width: 100%
-    }
-
     .mobile_btn {
         display: block
     }

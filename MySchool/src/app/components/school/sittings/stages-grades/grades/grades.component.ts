@@ -2,7 +2,7 @@ import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import {  Stage } from '../../../../../core/models/stages-grades.modul';
+import { Stage } from '../../../../../core/models/stages-grades.modul';
 import { ClassService } from '../../../../../core/services/class.service';
 import { CLass, ClassDTO, updateClass } from '../../../../../core/models/class.model';
 import { StageService } from '../../../../../core/services/stage.service';
@@ -21,7 +21,7 @@ export class GradesComponent implements OnInit {
   form: FormGroup;
   isEditMode = false;
   classToEditId: number | null = null;
-   
+
   currentPage: number = 0; // Current page index
   pageSize: number = 5; // Number of items per page
   length: number = 0; // Total number of items
@@ -34,7 +34,7 @@ export class GradesComponent implements OnInit {
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
       className: ['', Validators.required],
-      stageID: ''
+      stageID: ['', Validators.required]
     });
   }
 
@@ -99,16 +99,16 @@ export class GradesComponent implements OnInit {
       this.classService.Update(this.classToEditId, updateData).subscribe({
         next: (response) => {
           if (response.success) {
-           this.toastr.success(response.success,"Stage Updated Successfully");
-           this.form.reset();
-           this.getAllClasses();  
+            this.toastr.success(response.success, "Stage Updated Successfully");
+            this.form.reset();
+            this.getAllClasses();
           }
         },
         error: () => this.toastr.error('Failed to update stage', 'Error')
       });
       this.toastr.success('Stage updated successfully');
       this.form.reset();
-      this.getAllClasses(); 
+      this.getAllClasses();
       this.isEditMode = false;
     }
   }
@@ -117,7 +117,7 @@ export class GradesComponent implements OnInit {
     const patchDoc = [
       { op: "replace", path: "/state", value: isActive }
     ];
-    
+
     this.classService.partialUpdate(Class.classID, patchDoc).subscribe({
       next: (response) => {
         if (response.success) {
@@ -127,7 +127,7 @@ export class GradesComponent implements OnInit {
       },
       error: () => this.toastr.error('Failed to update Class', 'Error')
     });
-  
+
     this.isEditMode = false;
   }
 

@@ -1,67 +1,56 @@
-<div id="guardian" class="group5" [formGroup]="formGroup">
-  <!-- Group 1: Guardian's Full Name and Relationship -->
-  <div class="group group1">
-    <div class="form-control">
-      <label for="guardianName" class="label1">اسم ولي الأمر</label>
-      <input
-        type="text"
-        id="guardianName"
-        name="guardianName"
-        formControlName="guardianName"
-      />
-    </div>
-    <div class="form-control">
-      <label for="relationship" class="label1">صلة القرابة</label>
-      <input
-        type="text"
-        id="relationship"
-        name="relationship"
-        formControlName="relationship"
-      />
-    </div>
-  </div>
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+  <mat-tab label="+ولي أمر جديد">
+    <div id="guardian" class="group5" [formGroup]="formGroup">
+      <!-- Group 1: Guardian's Full Name and Relationship -->
+      <div class="group group1">
+        <div class="form-control">
+          <label for="guardianName" class="label1">اسم ولي الأمر<span style="color:red;"> *</span></label>
+          <input type="text" id="guardianName" name="guardianName" formControlName="guardianName" />
+        </div>
+        <div class="form-control">
+          <label for="relationship" class="label1">صلة القرابة</label>
+          <input type="text" id="relationship" name="relationship" formControlName="relationship" />
+        </div>
+      </div>
 
-  <!-- Group 2: Contact Information -->
-  <div class="group group1">
-    <div class="form-control">
-      <label for="email" class="label1">البريد الإلكتروني</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        formControlName="email"
-      />
-    </div>
-    <div class="form-control">
-      <label for="phone" class="label1">الجوال</label>
-      <input
-        type="number"
-        id="phone"
-        name="phone"
-        formControlName="phone"
-      />
-    </div>
-  </div>
+      <!-- Group 2: Contact Information -->
+      <div class="group group1">
+        <div class="form-control">
+          <label for="email" class="label1">البريد الإلكتروني</label>
+          <input type="email" id="email" name="email" formControlName="email" />
+        </div>
+        <div class="form-control">
+          <label for="phone" class="label1">الجوال</label>
+          <input type="number" id="phone" name="phone" formControlName="phone" />
+        </div>
+      </div>
 
-  <!-- Group 3: Birth Date and Address -->
-  <div class="group group1">
-    <div class="form-control">
-      <label for="dob" class="label1">تاريخ الميلاد</label>
-      <input
-        type="date"
-        id="dob"
-        name="dob"
-        formControlName="dob"
-      />
+      <!-- Group 3: Birth Date and Address -->
+      <div class="group group1">
+        <div class="form-control">
+          <label for="dob" class="label1">تاريخ الميلاد</label>
+          <input type="date" id="dob" name="dob" formControlName="dob" />
+        </div>
+        <div class="form-control">
+          <label for="address" class="label1">العنوان</label>
+          <input type="text" id="address" name="address" formControlName="address" />
+        </div>
+      </div>
     </div>
-    <div class="form-control">
-      <label for="address" class="label1">العنوان</label>
-      <input
-        type="text"
-        id="address"
-        name="address"
-        formControlName="address"
-      />
+  </mat-tab>
+  <mat-tab label="إختيار ولي أمر">
+    <!-- Group 3: Birth Date and Address -->
+    <div class="group group1">
+      <div class="form-control">
+        <label for="dob" class="label1">اختر ولي أمر</label>
+        <select name="Guardian" id="">
+          <option value="value1">حازم عبدالله</option>
+        </select>
+      </div>
+      <div class="form-control">
+        <label for="address" class="label1">العنوان</label>
+        <input type="text" id="address" name="address" />
+      </div>
     </div>
-  </div>
-</div>
+  </mat-tab>
+</mat-tab-group>

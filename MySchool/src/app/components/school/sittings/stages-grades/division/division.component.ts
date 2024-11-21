@@ -31,7 +31,7 @@ export class DivisionComponent implements OnInit {
   constructor(private formBuilder: FormBuilder) {
     this.form = this.formBuilder.group({
       ClassID: ['', Validators.required],
-      divisionName: ''
+      divisionName: ['',Validators.required]
     });
   }
 

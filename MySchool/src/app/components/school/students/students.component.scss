@@ -15,8 +15,21 @@
 }
 form {
   position: absolute;
-  right: -6rem;
+  right: 0rem;
   top: 4rem;
+}
+.table-container {
+    margin-top: 3rem;
+  }
+mat-form-field {
+  margin-right: 1rem;
+  width: 30%;
+}
+.inputText {
+  width: 24%;
+}
+.example-full-width {
+  width: 10%;
 }
 ::-webkit-scrollbar form {
   position: absolute;
@@ -47,17 +60,6 @@ h2 {
   border-bottom: 1px solid rgb(180 180 180);
 }
 
-input,
-select {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  height: 33px;
-  width: 19%;
-  background-color: white;
-  box-sizing: border-box;
-  transition: border-color 0.3s ease-in-out;
-}
-
 .term {
   margin-right: -8px;
 }
@@ -69,14 +71,6 @@ select {
 .grade {
   margin-right: 0px;
 }
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: #2fdf85;
-  box-shadow: 0 0 5px #2fdf85;
-}
-
 .tablink {
   color: black;
   float: right;
@@ -108,6 +102,7 @@ select:focus {
   display: block;
   padding: 24px 20px;
   height: 100%;
+  margin-right: -2rem;
 }
 
 .className {
@@ -129,27 +124,46 @@ select:focus {
 }
 
 .add {
-  position: relative;
-  top: -4rem;
+  position: absolute;
+  top: 1rem;
   width: 11%;
   border-radius: 32px;
-  left: -1rem;
+  left: 1rem;
+  padding: 8px 0;
   border: none;
   color: white;
   background-color: #2fdf84;
 }
-
 .add:active {
   background-color: #2fdf85;
 }
-@media (max-width: 1100px) {
+.modal-container {
+  background-color: white;
+}
+@media (max-width: 1600px) {
   .add {
-    width: 18%;
+    width: 10%;
+  }
+  .school{
+    color:rgb(95, 220, 105);
+  }
+  .styled-table th,
+  .styled-table td {
+    padding: auto 10% !important;
+    border: 1px solid #dddddd;
   }
 }
 @media (max-width: 900px) {
   form {
     right: -1rem;
+  }
+  .school{
+    color: red;
+  }
+  .styled-table th,
+  .styled-table td {
+    padding: 15px 2px !important;
+    border: 1px solid #dddddd;
   }
 }
 
@@ -167,15 +181,6 @@ select:focus {
 
 //this is for talbes
 /* Resetting some default styles */
-
-.styled-table {
-  border-collapse: collapse;
-  margin-top: 45px;
-  font-size: 18px;
-  overflow-x: auto;
-  max-width: 100%;
-  text-align: center;
-}
 
 .styled-table thead tr {
   background-color: #009879;
@@ -206,6 +211,8 @@ select:focus {
   font-weight: bold;
   color: #009879;
 }
+
+//-----------------------------------------------//--------------------
 .input-group {
   margin-bottom: 15px;
   position: relative;
@@ -213,9 +220,9 @@ select:focus {
 .label1 {
   position: absolute;
   left: 94px;
-  top: -30px;
+  top: -37px;
   font-size: 11px;
-  color: #777;
+  color: #141313;
   transition: 0.2s;
   pointer-events: none;
 }
@@ -226,9 +233,17 @@ select:focus {
   font-size: 12px !important;
   color: #777;
   transition: 0.2s;
-  pointer-events: none;
 }
-#clearIcon:hover {
+#clearIcon1 {
+  position: absolute;
+  left: 11.7rem;
+  top: 27px;
+  font-size: 12px !important;
+  color: #777;
+  transition: 0.2s;
+}
+#clearIcon:hover,
+#clearIcon1:hover {
   cursor: pointer;
 }
 ul {
@@ -236,14 +251,14 @@ ul {
   margin: 0;
   padding: 0;
   position: absolute;
-  width: 100%;
+  width: 20%;
+  left: 0;
   background: white;
   border: 1px solid #ccc;
   border-top: none;
   max-height: 150px;
   overflow-y: auto;
   z-index: 1000;
-  display: none;
   border-radius: 0 0 4px 4px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
@@ -255,41 +270,50 @@ li {
 li:hover {
   background-color: #f0f0f0;
 }
-.input1 {
-  width: 20%;
-  top: -33px;
-  position: absolute;
-  left: 0;
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-  font-size: 16px;
+
+:host
+  ::ng-deep
+  .mdc-text-field--outlined.mdc-text-field--focused
+  .mdc-notched-outline__leading {
+  border-color: #2fdf85 !important;
+  // box-shadow: 0 0 5px 0 #2fdf85!important;
+  border-width: 2px 2px 2px 0 !important;
   transition: border-color 0.2s;
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="%234CAF50" d="M1 3h14l-7 10z"/></svg>')
-    no-repeat left 10px center;
-  background-size: 12px;
-  padding-left: 40px; /* Space for the arrow */
 }
-.input1:focus {
-  border-color: #4caf50;
-  outline: none;
+:host
+  ::ng-deep
+  .mdc-text-field--outlined.mdc-text-field--focused
+  .mdc-notched-outline__trailing {
+  border-color: #2fdf85 !important;
+  // box-shadow: 0 0 5px 0 #2fdf85!important;
+  border-width: 2px 0 2px 2px !important;
+  transition: border-color 0.2s;
 }
-.input1:focus + .label1,
-.input1:not(:placeholder-shown) + .label1 {
-    left: 94px;
-    top: -35px;
-  font-size: 11px;
-  color: #4caf50;
+:host
+  ::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
+  .mdc-notched-outline__notch {
+  border-color: #2fdf85 !important;
+  // box-shadow: 2px 0 5px 0 #2fdf85!important;
+  border-width: 2px 0 2px 0 !important;
+  transition: border-color 0.2s;
 }
-.input1[type="submit"] {
-  background: #4caf50;
-  color: white;
-  border: none;
-  padding: 15px;
+
+/* Cancel icon styles */
+.cancel {
+  left: -8px;
+  padding-left: 19px;
+  position: absolute;
+  top: 16px;
+  color: #6f6d6d;
+}
+.cancel:hover {
+  color: rgb(70, 70, 70);
   cursor: pointer;
-  border-radius: 4px;
-  width: 100%;
-  font-size: 16px;
-  transition: background 0.2s;
+}
+.dropdown13 {
+  left: -8px;
+  color: white;
+  padding-left: 19px;
+  position: absolute;
+  top: 16px;
 }

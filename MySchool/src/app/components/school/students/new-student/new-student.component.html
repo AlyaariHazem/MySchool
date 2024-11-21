@@ -7,13 +7,7 @@
         <label for="fileInput">
           <img src="assets/img/user.jpg" alt="Student Photo" />
         </label>
-        <input
-          type="file"
-          id="fileInput"
-          accept="image/*"
-          (change)="uploadPhoto($event)"
-          style="display: none"
-        />
+        <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
         <button (click)="takePhoto()" class="btn btn-primary">
           التقاط صورة
         </button>
@@ -44,35 +38,23 @@
     <h2 class="school">إضافة طالب جديد</h2>
     <div class="modal-content" style="background-color: #ffffff !important">
       <div class="container">
-        <button
-          [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }"
-          id="defaultOpen"
-          (click)="openPage('DataStudent', $event.target)"
-        >
+        <button [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }" id="defaultOpen"
+          (click)="openPage('DataStudent', $event.target)">
           <span>بيانات الطالب</span>
         </button>
-        <button
-          [ngClass]="{ tablink: true, active: activeTab === 'OptionData' }"
-          (click)="openPage('OptionData', $event.target)"
-        >
+        <button [ngClass]="{ tablink: true, active: activeTab === 'OptionData' }"
+          (click)="openPage('OptionData', $event.target)">
           <span>بيانات إختيارية</span>
         </button>
-        <button
-          [ngClass]="{ tablink: true, active: activeTab === 'guardian' }"
-          (click)="openPage('guardian', $event.target)"
-        >
+        <button [ngClass]="{ tablink: true, active: activeTab === 'guardian' }"
+          (click)="openPage('guardian', $event.target)">
           <span>ولي الأمر</span>
         </button>
-        <button
-          [ngClass]="{ tablink: true, active: activeTab === 'fees' }"
-          (click)="openPage('fees', $event.target)"
-        >
+        <button [ngClass]="{ tablink: true, active: activeTab === 'fees' }" (click)="openPage('fees', $event.target)">
           <span>رسوم الطالب</span>
         </button>
-        <button
-          [ngClass]="{ tablink: true, active: activeTab === 'document' }"
-          (click)="openPage('document', $event.target)"
-        >
+        <button [ngClass]="{ tablink: true, active: activeTab === 'document' }"
+          (click)="openPage('document', $event.target)">
           <span>الوثائق</span>
         </button>
         <p class="line"></p>
@@ -80,8 +62,9 @@
     </div>
 
     @if (activeTab === 'DataStudent') {
-      <div class="tabcontent">
-      <app-primary-data [formGroup]="$any(mainForm.get('primaryData'))"></app-primary-data> <!-- this is not work when I add fromGroup but can I do that with anuther way?  -->
+    <div class="tabcontent">
+      <app-primary-data [formGroup]="$any(mainForm.get('primaryData'))"></app-primary-data>
+      <!-- this is not work when I add fromGroup but can I do that with anuther way?  -->
     </div>
     } @if (activeTab === 'OptionData') {
     <div class="tabcontent">

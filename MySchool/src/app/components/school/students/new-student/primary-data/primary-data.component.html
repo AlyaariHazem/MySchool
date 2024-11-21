@@ -1,57 +1,29 @@
-<div id="DataStudent" [formGroup]="formGroup" class="container"  dir="rtl">
+<div id="DataStudent" [formGroup]="formGroup" class="container" dir="rtl">
   <!-- Group 1: Full Names -->
   <div class="group group1">
     <div class="form-control">
       <label for="fullNameAr" class="label1">الاسم الكامل</label>
-      <input
-        type="text"
-        id="fullNameAr"
-        class="inputAb"
-        formControlName="fullNameAr"
-        readonly
-      />
+      <input type="text" id="fullNameAr" class="inputAb" formControlName="fullNameAr" readonly />
     </div>
     <div class="form-control">
       <label for="fullNameEn" class="label1">Full Name</label>
-      <input
-        type="text"
-        id="fullNameEn"
-        dir="ltr"
-        class="inputEn"
-        formControlName="fullNameEn"
-        readonly
-      />
+      <input type="text" id="fullNameEn" dir="ltr" class="inputEn" formControlName="fullNameEn" readonly />
     </div>
   </div>
 
   <!-- Group 2: Arabic Names -->
   <div class="group group2">
     <div class="form-control">
-      <label for="firstNameAr" class="label2">الاسم الأول</label>
-      <input
-        type="text"
-        id="firstNameAr"
-        formControlName="firstNameAr"
-        placeholder="الاسم الأول"
-      />
+      <label for="firstNameAr" class="label2">الاسم الأول<span style="color:red;"> *</span></label>
+      <input type="text" id="firstNameAr" formControlName="firstNameAr" placeholder="الاسم الأول" />
     </div>
     <div class="form-control">
-      <label for="secondNameAr" class="label2">الاسم الثاني</label>
-      <input
-        type="text"
-        id="secondNameAr"
-        formControlName="secondNameAr"
-        placeholder="الاسم الثاني"
-      />
+      <label for="secondNameAr" class="label2">الاسم الثاني<span style="color:red;"> *</span></label>
+      <input type="text" id="secondNameAr" formControlName="secondNameAr" placeholder="الاسم الثاني" />
     </div>
     <div class="form-control">
-      <label for="lastNameAr" class="label2">الاسم الأخير</label>
-      <input
-        type="text"
-        id="lastNameAr"
-        formControlName="lastNameAr"
-        placeholder="اسم العائلة"
-      />
+      <label for="lastNameAr" class="label2">الاسم الأخير<span style="color:red;"> *</span></label>
+      <input type="text" id="lastNameAr" formControlName="lastNameAr" placeholder="اسم العائلة" />
     </div>
   </div>
 
@@ -59,73 +31,38 @@
   <div class="group group3">
     <div class="form-control">
       <label for="firstNameEn" class="label2">First</label>
-      <input
-        type="text"
-        id="firstNameEn"
-        formControlName="firstNameEn"
-        placeholder="First Name"
-      />
+      <input type="text" id="firstNameEn" formControlName="firstNameEn" placeholder="First Name" />
     </div>
     <div class="form-control">
       <label for="secondNameEn" class="label2">Second</label>
-      <input
-        type="text"
-        id="secondNameEn"
-        formControlName="secondNameEn"
-        placeholder="Second Name"
-      />
+      <input type="text" id="secondNameEn" formControlName="secondNameEn" placeholder="Second Name" />
     </div>
     <div class="form-control">
       <label for="thirdNameEn" class="label2">Third</label>
-      <input
-        type="text"
-        id="thirdNameEn"
-        formControlName="thirdNameEn"
-        placeholder="Third Name"
-      />
+      <input type="text" id="thirdNameEn" formControlName="thirdNameEn" placeholder="Third Name" />
     </div>
     <div class="form-control">
       <label for="lastNameEn" class="label2">Last</label>
-      <input
-        type="text"
-        id="lastNameEn"
-        formControlName="lastNameEn"
-        placeholder="Last Name"
-      />
+      <input type="text" id="lastNameEn" formControlName="lastNameEn" placeholder="Last Name" />
     </div>
   </div>
 
   <!-- Group 4: Other Information -->
   <div class="group group4">
     <div class="form-control">
-      <label for="dob" class="label2">تاريخ الميلاد</label>
-      <input
-        type="date"
-        id="dob"
-        formControlName="dob"
-        placeholder="تاريخ الميلاد"
-      />
+      <label for="dob" class="label2">تاريخ الميلاد<span style="color:red;"> *</span></label>
+      <input type="date" id="dob" formControlName="dob" placeholder="تاريخ الميلاد" />
     </div>
     <div class="form-control">
-      <label for="grade" class="label2">الصف</label>
-      <input
-        type="text"
-        id="grade"
-        formControlName="grade"
-        placeholder="Grade"
-      />
+      <label for="grade" class="label2">الصف<span style="color:red;"> *</span></label>
+      <input type="text" id="grade" formControlName="grade" placeholder="Grade" />
     </div>
     <div class="form-control">
-      <label for="division" class="label2">الشعبة</label>
-      <input
-        type="text"
-        id="division"
-        formControlName="division"
-        placeholder="Division"
-      />
+      <label for="division" class="label2">الشعبة<span style="color:red;"> *</span></label>
+      <input type="text" id="division" formControlName="division" placeholder="Division" />
     </div>
     <div class="form-control">
-      <label for="sex" class="label2">النوع</label>
+      <label for="sex" class="label2">النوع<span style="color:red;"> *</span></label>
       <select id="sex" formControlName="sex">
         <option value="male">ذكر</option>
         <option value="female">أنثى</option>

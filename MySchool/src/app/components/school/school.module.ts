@@ -1,9 +1,12 @@
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
-import {MatPaginatorModule} from '@angular/material/paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatCardModule } from '@angular/material/card';
+import {MatTabsModule} from '@angular/material/tabs';
 
 
 import { HeaderComponent } from './header/header.component';
@@ -28,7 +31,7 @@ import { GradesComponent } from './sittings/stages-grades/grades/grades.componen
 import { DivisionComponent } from './sittings/stages-grades/division/division.component';
 import { ActionComponent } from './action/action.component';
 import { StudentsComponent } from './students/students.component';
-import {MatDialogModule} from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { NewStudentComponent } from './students/new-student/new-student.component';
 import { PrimaryDataComponent } from './students/new-student/primary-data/primary-data.component';
 import { DocumentComponent } from './students/new-student/document/document.component';
@@ -37,6 +40,11 @@ import { GuardianComponent } from './students/new-student/guardian/guardian.comp
 import { OptionDataComponent } from './students/new-student/option-data/option-data.component';
 import { HeadComponent } from './students/new-student/head/head.component';
 import { ShardModule } from '../../shared/shard.module';
+import { MatOption } from '@angular/material/core';
+import { AsyncPipe } from '@angular/common';
+import { MatSelectModule } from '@angular/material/select';
+import { FeeClassComponent } from './sittings/fee-class/fee-class.component';
+import { NewYearComponent } from './sittings/study-year/new-year/new-year.component';
 
 
 const components = [
@@ -61,8 +69,10 @@ const components = [
   ActionComponent,
   DivisionComponent,
   NewStudentComponent,
+  FeeClassComponent,
   PrimaryDataComponent,
   DocumentComponent,
+  NewYearComponent,
   FeesComponent,
   GuardianComponent,
   OptionDataComponent,
@@ -75,6 +85,13 @@ const modules = [
   MatFormFieldModule,
   MatPaginatorModule,
   MatInputModule,
+  MatOption,
+  FormsModule,
+  MatSelectModule,
+  MatTabsModule,
+  MatAutocompleteModule,
+  AsyncPipe,
+  MatCardModule,
   MatDialogTitle,
   MatDialogContent,
   MatDialogActions,
@@ -82,7 +99,7 @@ const modules = [
   MatDialogClose,
   RouterOutlet,
   RouterLinkActive,
-  
+
 ];
 
 @NgModule({
@@ -92,9 +109,9 @@ const modules = [
     SchoolRoutingModule,
   ],
   exports: [
-    ...components,...modules
+    ...components, ...modules
   ]
 })
-export class SchoolModule { 
-  
+export class SchoolModule {
+
 }

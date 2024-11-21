@@ -3,10 +3,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RegisterComponent } from '../register/register.component';
 import { ToastrService } from 'ngx-toastr';
 import { ShardModule } from '../../shared/shard.module';
-import { RouterOutlet } from '@angular/router';
 import { AuthAPIService } from '../authAPI.service';
-import { response } from 'express';
-import { TranslateDirective } from '../../directives/translate.directive';
 
 @Component({
   selector: 'app-login',

@@ -1,233 +1,253 @@
-.info {
+.custom-dialog-container .mdc-dialog__surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+  pointer-events: auto;
+  overflow-y: hidden; // Corrected to disable vertical scrolling
+  background-color: red;
+  outline: 0;
+  transform: scale(0.8); // Custom transform
+}
+form {
+  position: absolute;
+  right: 0rem;
+  top: 4rem;
+}
+.table-container {
     margin-top: 3rem;
-    width: 100%;
-    z-index: -3;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-weight: 900;
   }
-  
-  .title {
-    font-size: 25px;
-    font-family: Verdana, Geneva, Tahoma, sans-serif
+mat-form-field {
+  margin-right: 1rem;
+  width: 30%;
+}
+.inputText {
+  width: 24%;
+}
+.example-full-width {
+  width: 10%;
+}
+::-webkit-scrollbar form {
+  position: absolute;
+  right: 2rem;
+  top: 3rem;
+}
+.modal-content {
+  border-radius: 1.5%;
+}
+
+h2 {
+  font-family: "Changa", sans-serif;
+}
+
+.container {
+  border-radius: 23px;
+}
+
+.school {
+  text-align: right;
+}
+
+.styled-table{
+  position: relative;
+  top: -20px;
+}
+
+.add {
+  position: absolute;
+  top: 1rem;
+  width: 11%;
+  border-radius: 32px;
+  left: 1rem;
+  padding: 8px 0;
+  border: none;
+  color: white;
+  background-color: #2fdf84;
+}
+.add:active {
+  background-color: #2fdf85;
+}
+.modal-container {
+  background-color: white;
+}
+@media (max-width: 1600px) {
+  .add {
+    width: 10%;
   }
-  
-  .addNewClass {
-    position: absolute;
-    left: 5%;
-    z-index: 1;
-    top: 13rem;
+  .school{
+    color:rgb(95, 220, 105);
   }
-  .addNewClass button{
-    background-color: #2fdf84;
-    border:none;
+  .styled-table th,
+  .styled-table td {
+    padding: auto 10% !important;
+    border: 1px solid #dddddd;
   }
-  
-  .row1 {
-    position: relative;
-    border-left: 2px solid black;
-    border-right: 2px solid black;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    padding-bottom: 2rem;
-    border-width: 0 0 1px 0;
-    border-bottom: 1px solid rgb(152, 152, 152);
-    border-right: 2px solid rgb(31, 26, 26);
-    border-left: 2px solid rgb(40, 35, 35);
+}
+@media (max-width: 900px) {
+  form {
+    right: -1rem;
   }
-  
-  .row1-1 {
-    width: 2%;
-    border-top: 2px solid rgb(31, 26, 26);
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
-  
-  .row1-2 {
-    width: 2%;
-    border-top: 2px solid rgb(31, 26, 26);
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-  
-  input:focus,
-  select:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-  }
-  
-  //this for edit and add User **************************************************====>>
-  /* Full-width input fields */
-  input[type=text],
-  input[type=password],
-  input[type=email] {
-    // width: 50%;
-    padding: 12px 20px;
-    border: 1px solid #ccc;
-    display: inline-block;
-    box-sizing: border-box;
-  }
-  
-  /* Set a style for all buttons */
-  button:hover {
-    opacity: 0.8;
-  }
-  
-  .container button {
-    width: 16%;
-  }
-  
-  /* Center the image and position the close button */
-  .imgcontainer {
-    text-align: center;
-    margin: 24px 0 12px 0;
-    position: relative;
-  }
-  
-  img.avatar {
-    width: 22%;
-    border-radius: 50%;
-  }
-  
-  svg {
-    cursor: pointer;
-    margin-right: 11px;
-  }
-  
-  svg:hover {
+  .school{
     color: red;
   }
-  
-  .container {
-    padding: 16px;
-    margin-top: 1rem;
+  .styled-table th,
+  .styled-table td {
+    padding: 15px 2px !important;
+    border: 1px solid #dddddd;
   }
-  
-  span.psw {
-    float: right;
-    padding-top: 16px;
+}
+
+@media (max-width: 600px) {
+  form {
+    right: -1rem;
   }
-  
-  /* The Modal (background) */
-  .modal {
-    display: none;
-    /* Hidden by default */
-    position: fixed;
-    /* Stay in place */
-    z-index: 1;
-    /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%;
-    /* Full width */
-    height: 100%;
-    /* Full height */
-    overflow: auto;
-    /* Enable scroll if needed */
-    background-color: rgb(0, 0, 0);
-    /* Fallback color */
-    background-color: rgba(0, 0, 0, 0.4);
-    /* Black w/ opacity */
-    padding-top: 60px;
-  }
-  
-  /* Modal Content/Box */
-  .modal-content {
-    background-color: #fefefe;
-    margin: 5% 25% auto;
-    border: 1px solid #888;
-    width: 62%;
-  }
-  
-  /* The Close Button (x) */
-  .close {
-    position: absolute;
-    right: 30px;
-    top: 0;
-    color: #000;
-    font-size: 35px;
-    font-weight: bold;
-  }
-  
-  .close:hover,
-  .close:focus {
-    color: red;
-    cursor: pointer;
-  }
-  
-  /* Add Zoom Animation */
-  .animate {
-    -webkit-animation: animatezoom 0.6s;
-    animation: animatezoom 0.6s
-  }
-  
-  @-webkit-keyframes animatezoom {
-    from {
-      -webkit-transform: scale(0)
-    }
-  
-    to {
-      -webkit-transform: scale(1)
-    }
-  }
-  
-  @keyframes animatezoom {
-    from {
-      transform: scale(0)
-    }
-  
-    to {
-      transform: scale(1)
-    }
-  }
-  
-  .section1 {
-    position: relative;
-  }
-  .NameYear{
-    width: 100%;
-  }
-  .year{
-    position: relative;
-    width:47%;
-    margin-right:2%; 
-    margin-top:0.5rem;
-  }
-  
-  .section1 .note{
-    width:96%;
-    margin-right: 2%;
-    margin-top:0.5rem;
-  }
-  .text{
-    margin-top:2rem;
-  }
-  .record{
-    position: absolute;
-    top:2rem;
-    background-color: #2fdf84;
-    left:2rem;
-    border:none;
-  }
-  /* Change styles for span and cancel button on extra small screens */
-  @media screen and (max-width: 300px) {
-    span.psw {
-      display: block;
-      float: none;
-    
-    }
-    
-    .cancelbtn {
-      width: 100%;
-    }
-  }
-  @media (max-width:900px){
-    .container button {
-       width: 29%;
-       left:1rem;
-       top:1rem;
-     }
-  
-  }
+}
+
+@media (max-width: 400px) {
+  // .tablink {
+  //     color: rgb(35, 22, 213);
+  // }
+}
+
+//this is for talbes
+/* Resetting some default styles */
+
+.styled-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 12px 2rem;
+  border: 1px solid #dddddd;
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+  font-weight: bold;
+  color: #009879;
+}
+
+//-----------------------------------------------//--------------------
+.input-group {
+  margin-bottom: 15px;
+  position: relative;
+}
+.label1 {
+  position: absolute;
+  left: 94px;
+  top: -37px;
+  font-size: 11px;
+  color: #141313;
+  transition: 0.2s;
+  pointer-events: none;
+}
+#clearIcon {
+  position: absolute;
+  left: 1.7rem;
+  top: -25px;
+  font-size: 12px !important;
+  color: #777;
+  transition: 0.2s;
+}
+#clearIcon1 {
+  position: absolute;
+  left: 11.7rem;
+  top: 27px;
+  font-size: 12px !important;
+  color: #777;
+  transition: 0.2s;
+}
+#clearIcon:hover,
+#clearIcon1:hover {
+  cursor: pointer;
+}
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 20%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 1000;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+li:hover {
+  background-color: #f0f0f0;
+}
+
+:host
+  ::ng-deep
+  .mdc-text-field--outlined.mdc-text-field--focused
+  .mdc-notched-outline__leading {
+  border-color: #2fdf85 !important;
+  // box-shadow: 0 0 5px 0 #2fdf85!important;
+  border-width: 2px 2px 2px 0 !important;
+  transition: border-color 0.2s;
+}
+:host
+  ::ng-deep
+  .mdc-text-field--outlined.mdc-text-field--focused
+  .mdc-notched-outline__trailing {
+  border-color: #2fdf85 !important;
+  // box-shadow: 0 0 5px 0 #2fdf85!important;
+  border-width: 2px 0 2px 2px !important;
+  transition: border-color 0.2s;
+}
+:host
+  ::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
+  .mdc-notched-outline__notch {
+  border-color: #2fdf85 !important;
+  // box-shadow: 2px 0 5px 0 #2fdf85!important;
+  border-width: 2px 0 2px 0 !important;
+  transition: border-color 0.2s;
+}
+
+/* Cancel icon styles */
+.cancel {
+  left: -8px;
+  padding-left: 19px;
+  position: absolute;
+  top: 16px;
+  color: #6f6d6d;
+}
+.cancel:hover {
+  color: rgb(70, 70, 70);
+  cursor: pointer;
+}
+.dropdown13 {
+  left: -8px;
+  color: white;
+  padding-left: 19px;
+  position: absolute;
+  top: 16px;
+}

@@ -1,22 +1,11 @@
 <div id="Contact" class="tabcontent">
-  <mat-paginator
-    [ngStyle]="{ position: 'relative', top: '-10px' }"
-    [length]="length"
-    [pageSize]="pageSize"
-    [pageSizeOptions]="[5, 10, 25, 100]"
-    (page)="onPageChange($event)"
-  >
+  <mat-paginator [ngStyle]="{ position: 'relative', top: '-10px' }" [length]="length" [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
   </mat-paginator>
 
   <form [formGroup]="form" class="From">
     <label for="Class" class="termName">اسم الصف </label><br />
-    <select
-      name="Class"
-      formControlName="ClassID"
-      id="term"
-      class="term"
-      value="إختار الصف"
-    >
+    <select name="Class" formControlName="ClassID" id="term" class="term" value="إختار الصف">
       <option value="" disabled selected>إختار صــف</option>
 
       @for (Class of classes; track $index) {
@@ -25,19 +14,9 @@
       }
     </select>
     <label for="className" class="className">اسـم الشبعة</label>
-    <input
-      type="text"
-      formControlName="divisionName"
-      class="class"
-      placeholder="إدخال اسم صـف جديد"
-    />
-    <input
-      type="submit"
-      class="btn btn-primary add"
-      [value]="isEditMode ? 'تحديث' : 'إضافة'"
-      (click)="isEditMode ? updateDivision() : AddDivision()"
-      [disabled]="!form.valid"
-    />
+    <input type="text" formControlName="divisionName" class="class" placeholder="إدخال اسم صـف جديد" />
+    <input type="submit" class="btn btn-primary add" [value]="isEditMode ? 'تحديث' : 'إضافة'"
+      (click)="isEditMode ? updateDivision() : AddDivision()" [disabled]="!form.valid" />
   </form>
 
   <table class="styled-table" style="overflow-y: hidden; width: 105%">
@@ -55,7 +34,7 @@
     <tbody>
       @for (div of displayedDivisions; track $index;let i = $index) {
 
-      
+
       <tr>
         <td>{{ currentPage * pageSize + i + 1 }}</td>
         <td>{{ div.divisionName }}</td>
@@ -63,48 +42,32 @@
         <td>{{ div.studentCount }}</td>
         <td>{{ "لا يوجد ملاحظة" }}</td>
         <td>
-          <div
-            class="dropdown dropdown-toggle"
-            data-toggle="dropdown"
-            (click)="toggleStateDropdown(div)"
-          >
+          <div class="dropdown dropdown-toggle" data-toggle="dropdown" (click)="toggleStateDropdown(div)">
             <span class="">
               {{ div.state ? "نشط" : "خامل" }}
             </span>
             <div class="dropdown-menu" style="margin-left: 2rem">
-              <span class="dropdown-item" (click)="changeState(div, true)"
-                >نشط</span
-              >
-              <span class="dropdown-item" (click)="changeState(div, false)"
-                >خامل</span
-              >
+              <span class="dropdown-item" (click)="changeState(div, true)">نشط</span>
+              <span class="dropdown-item" (click)="changeState(div, false)">خامل</span>
             </div>
           </div>
         </td>
         <td>
           <div class="col text-left">
-            <button
-              class="btn btn-left"
-              type="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
+            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false">
               <i class="fas fa-ellipsis-h"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-left">
-              <a class="dropdown-item" (click)="editDivision(div)"
-                ><i class="bi bi-pencil-square IconEdit"></i>تعديل</a
-              >
+              <a class="dropdown-item" (click)="editDivision(div)"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
               <div role="separator" class="dropdown-divider"></div>
-              <a class="dropdown-item" (click)="DeleteDivision(div.divisionID)"
-                ><i class="bi bi-trash IconDelete"></i>حذف</a
-              >
+              <a class="dropdown-item" (click)="DeleteDivision(div.divisionID)"><i
+                  class="bi bi-trash IconDelete"></i>حذف</a>
             </div>
           </div>
         </td>
       </tr>
-    }
+      }
     </tbody>
   </table>
 </div>

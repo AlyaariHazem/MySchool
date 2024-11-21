@@ -13,6 +13,7 @@ import { SchoolInfoComponent } from './sittings/school-info/school-info.componen
 import { StagesGradesComponent } from './sittings/stages-grades/stages-grades.component';
 import { ChartForStudentComponent } from './students/chart-for-student/chart-for-student.component';
 import { StudentsComponent } from './students/students.component';
+import { FeeClassComponent } from './sittings/fee-class/fee-class.component';
 
 const routes: Routes = [
   {
@@ -33,11 +34,12 @@ const routes: Routes = [
       {
         path:'sitting',data:{breadcrumb:'الإعدادات'},children:[
           {path:'years',component:StudyYearComponent,data:{breadcrumb:'السنوات الدراسية'}},
-          {path:'schoolInfo',component:SchoolInfoComponent,data:{breadcrumb:'معلومات المدرية'}},
+          {path:'schoolInfo',component:SchoolInfoComponent,data:{breadcrumb:'معلومات المدرسة'}},
           {path:'stages',component:StagesGradesComponent,data:{breadcrumb:'المراحل والفصول'}},
+          {path:'feeClass',component:FeeClassComponent,data:{breadcrumb:'رسوم الصـفوف'}},
+          {path:'',redirectTo:'years',pathMatch:'full'}
         ]
-      }
-      ,
+      },
       { path: 'teacher', component: TeachersComponent, data: { breadcrumb: 'الإستاذ' } },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

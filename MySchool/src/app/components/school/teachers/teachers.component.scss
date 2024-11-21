@@ -1,0 +1,45 @@
+.techear{
+    background-color: white!important;
+  }
+form {
+    position: absolute;
+    right: 0rem;
+    top: 4rem;
+  }
+  mat-form-field {
+    margin-right: 1rem;
+    width: 30%;
+  }
+  .inputText {
+    width: 24%;
+  }
+  .example-full-width {
+    width: 10%;
+  }
+  
+:host
+::ng-deep
+.mdc-text-field--outlined.mdc-text-field--focused
+.mdc-notched-outline__leading {
+border-color: #2fdf85 !important;
+// box-shadow: 0 0 5px 0 #2fdf85!important;
+border-width: 2px 2px 2px 0 !important;
+transition: border-color 0.2s;
+}
+:host
+::ng-deep
+.mdc-text-field--outlined.mdc-text-field--focused
+.mdc-notched-outline__trailing {
+border-color: #2fdf85 !important;
+// box-shadow: 0 0 5px 0 #2fdf85!important;
+border-width: 2px 0 2px 2px !important;
+transition: border-color 0.2s;
+}
+:host
+::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
+.mdc-notched-outline__notch {
+border-color: #2fdf85 !important;
+// box-shadow: 2px 0 5px 0 #2fdf85!important;
+border-width: 2px 0 2px 0 !important;
+transition: border-color 0.2s;
+}

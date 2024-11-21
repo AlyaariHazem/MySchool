@@ -4,11 +4,13 @@ using Backend.DTOS.School.Stages;
 using Backend.Models;
 using Backend.Repository;
 using Backend.Repository.School;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.School
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class StagesController : ControllerBase

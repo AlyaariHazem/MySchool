@@ -4,13 +4,7 @@
       <label for="fileInput">
         <img src="assets/img/user.jpg" alt="Student Photo" />
       </label>
-      <input
-        type="file"
-        id="fileInput"
-        accept="image/*"
-        (change)="uploadPhoto($event)"
-        style="display: none"
-      />
+      <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
       <button (click)="takePhoto()" class="btn btn-primary">التقاط صورة</button>
     </div>
   </div>

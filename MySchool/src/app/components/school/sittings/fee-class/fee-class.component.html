@@ -1,0 +1,135 @@
+<div class="Fee">
+    <h2 class="school">إعدادات الرسوم</h2>
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+        <mat-tab label="بند الرسوم">
+            <div id="guardian" class="group5">
+                <!-- Group 1: Guardian's Full Name and Relationship -->
+                <div class="group group1">
+                    <div class="form-control">
+                        <div class="techear">
+                            <mat-form-field appearance="outline" class="inputText">
+                                <mat-label>إدخل بند رسوم جديد</mat-label>
+                                <input class="inputError" type="email" matInput />
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="form-control control2">
+                        <mat-form-field appearance="outline" class="inputText">
+                            <mat-label>رسم الصـفوف</mat-label>
+                            <input class="inputError" type="email" matInput />
+                        </mat-form-field>
+                    </div>
+                    <button mat-raised-button color="primary" class="add">
+                        إضافة+
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <mat-card>
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم البند</th>
+                                <th>الاسم البديل</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>الحالة</th>
+                                <th>العملية</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    مسنتيب
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </mat-card>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="رسوم الصـفوف">
+            <!-- Group 3: Birth Date and Address -->
+            <div class="group group1">
+                <div class="form-control1">
+                    <mat-form-field appearance="outline">
+                        <mat-label>إختار الصـف</mat-label>
+                        <mat-select [value]="selectedStudent"
+                            (selectionChange)="onSelectionChange('student', $event.value)">
+                            <mat-option [value]="null">None</mat-option>
+                            <mat-option *ngFor="let option of studentOptions" [value]="option">
+                                {{ option }}
+                            </mat-option>
+                        </mat-select>
+                        <span mat-icon-button class="cancel" *ngIf="isStudentSelected"
+                            (click)="clearSelection('student')">
+                            ✖
+                        </span>
+                    </mat-form-field>
+                </div>
+                <div class="form-control1">
+                    <mat-form-field class="button1" appearance="outline">
+                        <mat-label>إختار بند الرسوم</mat-label>
+                        <mat-select [value]="selectedStudent"
+                            (selectionChange)="onSelectionChange('student', $event.value)">
+                            <mat-option [value]="null">None</mat-option>
+                            <mat-option *ngFor="let option of studentOptions" [value]="option">
+                                {{ option }}
+                            </mat-option>
+                        </mat-select>
+                        <span mat-icon-button class="cancel" *ngIf="isStudentSelected"
+                            (click)="clearSelection('student')">
+                            ✖
+                        </span>
+                    </mat-form-field>
+                </div>
+                <div class="form-control control3">
+                    <mat-form-field appearance="outline" class="inputText">
+                        <mat-label>المبلغ</mat-label>
+                        <input class="inputError" type="email" matInput />
+                    </mat-form-field>
+                </div>
+                <button mat-raised-button color="primary" class="add">
+                    إضافة+
+                </button>
+            </div>
+            <div class="table-container">
+                <mat-card>
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم البند</th>
+                                <th>الاسم البديل</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>الحالة</th>
+                                <th>العملية</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    مسنتيب
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </mat-card>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>
