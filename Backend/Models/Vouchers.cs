@@ -8,10 +8,13 @@ namespace Backend.Models;
 public class Vouchers
 {
     public int VoucherID { get; set; }
-    public double Receipt { get; set; }
-    public DateOnly HireDate { get; set; }
+    public decimal Receipt { get; set; }
+    public DateTime HireDate { get; set; } = DateTime.Now;
     public string Note { get; set; }
     public string PayBy { get; set; }
+
+    // Account (Guardian-level association)
     public int AccountID { get; set; }
     public Accounts Accounts { get; set; }
+    public virtual ICollection<Attachments> Attachments { get; set; }
 }

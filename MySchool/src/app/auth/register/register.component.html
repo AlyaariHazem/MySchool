@@ -3,64 +3,28 @@
     <!-- Username Input Field -->
     <mat-form-field appearance="outline" class="input-field">
       <mat-label>اسم المستخدم</mat-label>
-      <input
-        matInput
-        placeholder="أدخل اسم المستخدم"
-        #username="ngModel"
-        ngModel
-        name="userName"
-        required
-        minlength="3"
-        maxlength="22"
-      />
-      <mat-error *ngIf="username.errors?.['required']"
-        >اسم المستخدم مطلوب</mat-error
-      >
-      <mat-error *ngIf="username.errors?.['minlength']"
-        >اسم المستخدم يجب أن يكون 3 حروف على الأقل</mat-error
-      >
+      <input matInput placeholder="أدخل اسم المستخدم" #username="ngModel" ngModel name="userName" required minlength="3"
+        maxlength="22" />
+      <mat-error *ngIf="username.errors?.['required']">اسم المستخدم مطلوب</mat-error>
+      <mat-error *ngIf="username.errors?.['minlength']">اسم المستخدم يجب أن يكون 3 حروف على الأقل</mat-error>
     </mat-form-field>
 
     <!-- Email Input Field -->
     <mat-form-field appearance="outline" class="input-field">
       <mat-label>البريد الإلكتروني</mat-label>
-      <input
-        matInput
-        placeholder="أدخل البريد الإلكتروني"
-        #email="ngModel"
-        ngModel
-        name="email"
-        type="email"
-        required
-        email
-      />
-      <mat-error *ngIf="email.errors?.['required']"
-        >البريد الإلكتروني مطلوب</mat-error
-      >
-      <mat-error *ngIf="email.errors?.['email']"
-        >الرجاء إدخال بريد إلكتروني صالح</mat-error
-      >
+      <input matInput placeholder="أدخل البريد الإلكتروني" #email="ngModel" ngModel name="email" type="email" required
+        email />
+      <mat-error *ngIf="email.errors?.['required']">البريد الإلكتروني مطلوب</mat-error>
+      <mat-error *ngIf="email.errors?.['email']">الرجاء إدخال بريد إلكتروني صالح</mat-error>
     </mat-form-field>
 
     <!-- Password Input Field -->
     <mat-form-field appearance="outline" class="input-field">
       <mat-label>كلمة السر</mat-label>
-      <input
-        matInput
-        placeholder="أدخل كلمة السر"
-        #password="ngModel"
-        ngModel
-        name="password"
-        type="password"
-        required
-        minlength="3"
-      />
-      <mat-error *ngIf="password.errors?.['required']"
-        >كلمة السر مطلوبة</mat-error
-      >
-      <mat-error *ngIf="password.errors?.['minlength']"
-        >كلمة السر يجب أن تكون 3 حروف على الأقل</mat-error
-      >
+      <input matInput placeholder="أدخل كلمة السر" #password="ngModel" ngModel name="password" type="password" required
+        minlength="3" />
+      <mat-error *ngIf="password.errors?.['required']">كلمة السر مطلوبة</mat-error>
+      <mat-error *ngIf="password.errors?.['minlength']">كلمة السر يجب أن تكون 3 حروف على الأقل</mat-error>
     </mat-form-field>
 
     <!-- Error Message Display -->
@@ -69,12 +33,7 @@
     </div>
 
     <!-- Register Button -->
-    <button
-      type="submit"
-      class="btn btn-success mb-2 buttonSend"
-      mat-raised-button
-      color="primary"
-    >
+    <button type="submit" class="btn btn-success mb-2 buttonSend" mat-raised-button color="primary">
       إنشاء حساب
     </button>
   </form>

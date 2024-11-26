@@ -9,13 +9,18 @@ namespace Backend.Models;
 public class Accounts
 {
     public int AccountID { get; set; }
-    public string Type { get; set; }
-    public bool State { get; set; }
+    public decimal? Amount { get; set; } = 0;
+    public bool State { get; set; } = true;
     public string? Note { get; set; }
-    public double OpenBalance { get; set; }
+    public decimal? OpenBalance { get; set; }
     public bool TypeOpenBalance { get; set; }=false;
-    public DateOnly HireDate { get; set; }= DateOnly.FromDateTime(DateTime.Now);
+    public DateTime HireDate { get; set; }=DateTime.Now;
+    public int TypeAccountID { get; set; }
+    public TypeAccount TypeAccount { get; set; }
     public int GuardianID { get; set; }
     public Guardian Guardian { get; set; }
+    public int StudentID { get; set; }
+    public Student Student { get; set; }
+    public virtual ICollection<Vouchers> Vouchers { get; set; }
 
 }

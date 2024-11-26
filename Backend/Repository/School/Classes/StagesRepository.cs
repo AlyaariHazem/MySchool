@@ -79,11 +79,12 @@ namespace Backend.Repository
         {
             var stageList = await context.Stages
                 .Include(stage => stage.Classes)  // Include Classes
-                .ThenInclude(c => c.StudentClass) // Include StudentClass for counting students
+                .ThenInclude(c => c.FeeClasses) // Include StudentClass for counting students
+                .ThenInclude(fc => fc.StudentClassFees)
                 .ToListAsync();
                 
-            var stageDTOList = _mapper.Map<List<StageDTO>>(stageList);
-            return stageDTOList;
+            var ListstageDTO = _mapper.Map<List<StageDTO>>(stageList);
+            return ListstageDTO;
         }
 
         public async Task<bool> UpdatePartial(int id, JsonPatchDocument<StagesDTO> partialStage)

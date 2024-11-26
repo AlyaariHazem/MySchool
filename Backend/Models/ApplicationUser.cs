@@ -8,5 +8,16 @@ namespace Backend.Models;
 
 public class ApplicationUser : IdentityUser
     {
-        public int Phone { get; set; }
+    public string? Address { get; set; }
+    public string? Gender { get; set; } = string.Empty;
+    public DateTime HireDate { get; set; }= DateTime.Now;
+
+    // Relationships with role-specific entities
+    public virtual Teacher? Teacher { get; set; }
+    public virtual Student? Student { get; set; }
+    public virtual Guardian? Guardian { get; set; }
+    public virtual Manager? Manager { get; set; }
+
+    // UserType property to specify the role
+    public string UserType { get; set; } // "Teacher", "Student", "Guardian", "Manager"
     }

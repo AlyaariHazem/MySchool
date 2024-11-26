@@ -15,11 +15,8 @@ namespace Backend.Models
     public int TeacherID { get; set; }
     [Required]
     public Name FullName { get; set; }
-    public string PhoneNum { get; set; }
-    public string? Email { get; set; }
-    public string Gender { get; set; } = string.Empty;
-    public int? Age { get; set; }
-    public DateOnly HireDate { get; set; }
+    public string UserID { get; set; }
+    public virtual ApplicationUser ApplicationUser { get; set; }
     [Required]
     public int ManagerID { get; set; }
     [JsonIgnore]

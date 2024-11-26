@@ -11,7 +11,7 @@ namespace Backend.Data
     public class DatabaseContext : IdentityDbContext<ApplicationUser>
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
-        
+
         public DbSet<Attachments> Attachments { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<Class> Classes { get; set; }
@@ -24,34 +24,36 @@ namespace Backend.Data
         public DbSet<Salary> Salarys { get; set; }
         public DbSet<Stage> Stages { get; set; }
         public DbSet<Year> Years { get; set; }
+        public DbSet<Vouchers> vouchers  { get; set; }
+        public DbSet<TypeAccount> TypeAccounts { get; set; }
         public DbSet<Fee> Fees { get; set; }
         public DbSet<FeeClass> FeeClass { get; set; }
+        public DbSet<StudentClassFees> StudentClassFees { get; set; }
         public DbSet<Guardian> Guardians { get; set; }
         public DbSet<SubjectStudent> SubjectStudents { get; set; }
-        public DbSet<StudentClass> StudentClass { get; set; }
         public DbSet<TeacherStudent> TeacherStudents { get; set; }
         // public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // Call the base method
-            
+
             modelBuilder.Entity<TeacherStudent>().HasKey(TS => new { TS.StudentID, TS.TeacherID });
-            modelBuilder.Entity<StudentClass>().HasKey(SC => new { SC.StudentID, SC.ClassID });
             modelBuilder.Entity<FeeClass>().HasKey(SC => new { SC.FeeID, SC.ClassID });
+            modelBuilder.Entity<StudentClassFees>().HasKey(SCF=>new{SCF.ClassID,SCF.FeeID});
             modelBuilder.Entity<SubjectStudent>().HasKey(SS => new { SS.SubjectID, SS.StudentID });
-            
+
             modelBuilder.Entity<Accounts>()
                 .HasKey(a => a.AccountID);
-                
+
             modelBuilder.Entity<Fee>()
                 .HasKey(a => a.FeeID);
-                
+
             modelBuilder.Entity<Attachments>()
                 .HasKey(a => a.AttachmentID);
 
             modelBuilder.Entity<Vouchers>()
-                .HasKey(v => v.VoucherID); 
+                .HasKey(v => v.VoucherID);
 
             modelBuilder.Entity<TeacherSubjectStudent>()
                 .HasKey(tss => new { tss.TeacherID, tss.StudentID, tss.SubjectID });
@@ -63,16 +65,18 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // many to many relationship for Teachers and Students
-            modelBuilder.Entity<TeacherStudent>()
+           modelBuilder.Entity<TeacherStudent>()
                 .HasOne<Student>(S => S.Student)
                 .WithMany(TS => TS.TeacherStudents)
                 .HasForeignKey(S => S.StudentID)
                 .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<TeacherStudent>()
                 .HasOne<Teacher>(T => T.Teacher)
                 .WithMany(TS => TS.TeacherStudents)
                 .HasForeignKey(T => T.TeacherID)
                 .OnDelete(DeleteBehavior.Restrict);
+
 
             // one to many for School and Year
             modelBuilder.Entity<School>()
@@ -115,18 +119,6 @@ namespace Backend.Data
                 .HasForeignKey(S => S.StudentID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // many to many relationship for Classes and Students
-            modelBuilder.Entity<StudentClass>()
-                .HasOne<Student>(S => S.Student)
-                .WithMany(SC => SC.StudentClass)
-                .HasForeignKey(S => S.StudentID)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<StudentClass>()
-                .HasOne<Class>(C => C.Class)
-                .WithMany(SC => SC.StudentClass)
-                .HasForeignKey(S => S.ClassID)
-                .OnDelete(DeleteBehavior.Restrict);
-           
             // many to many relationship for Classes and Fees
             modelBuilder.Entity<FeeClass>()
                 .HasOne<Fee>(F => F.Fee)
@@ -172,11 +164,15 @@ namespace Backend.Data
                 .HasMany<Student>(S => S.Students)
                 .WithOne(G => G.Guardian)
                 .HasForeignKey(S => S.GuardianID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             //composite Atribute for Student and Name
             modelBuilder.Entity<Student>()
             .OwnsOne(s => s.FullName);
+
+            //composite Atribute for Student and NameEng
+            modelBuilder.Entity<Student>()
+            .OwnsOne(s => s.FullNameAlis);
 
             //composite Atribute for teacher and Name
             modelBuilder.Entity<Teacher>()
@@ -186,51 +182,66 @@ namespace Backend.Data
             modelBuilder.Entity<Manager>()
             .OwnsOne(M => M.FullName);
 
-             // One-to-many: Guardian ↔ Account
+            // One-to-many: Guardian ↔ Account
             modelBuilder.Entity<Guardian>()
                 .HasMany(g => g.Accounts)
                 .WithOne(a => a.Guardian)
                 .HasForeignKey(a => a.GuardianID)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            // One-to-many: Guardian ↔ Account
+            modelBuilder.Entity<Student>()
+                .HasMany(S => S.Accounts)
+                .WithOne(a => a.Student)
+                .HasForeignKey(a => a.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Attachments>()
                .HasOne(a => a.Student)
                .WithMany(s => s.Attachments)
                .HasForeignKey(a => a.StudentID)
                .OnDelete(DeleteBehavior.Cascade);// Optional relationship
-        
-            
-            //  // One-to-One: Guardian ↔ Account
-            // modelBuilder.Entity<Guardian>()
-            // .HasOne(g => g.Account)
-            // .WithOne(a => a.Guardian)
-            // .HasForeignKey<Accounts>(a => a.GuardianID)
-            // .OnDelete(DeleteBehavior.Cascade);
-            
-            // //this is for Roles 
-            // modelBuilder.Entity<User>()
-            // .HasOne(u => u.Guardian)
-            // .WithOne(g => g.User)
-            // .HasForeignKey<Guardian>(g => g.UserID)
-            // .OnDelete(DeleteBehavior.Restrict);
 
-            // modelBuilder.Entity<User>()
-            //     .HasOne(u => u.Teacher)
-            //     .WithOne(t => t.User)
-            //     .HasForeignKey<Teacher>(t => t.UserID)
-            //     .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Attachments>()
+               .HasOne(a => a.Vouchers)
+               .WithMany(v => v.Attachments)
+               .HasForeignKey(a => a.VoucherID)
+               .OnDelete(DeleteBehavior.Cascade);// Optional relationship
 
-            // modelBuilder.Entity<User>()
-            //     .HasOne(u => u.Student)
-            //     .WithOne(s => s.User)
-            //     .HasForeignKey<Student>(s => s.UserID)
-            //     .OnDelete(DeleteBehavior.Restrict);
 
-            // modelBuilder.Entity<User>()
-            //     .HasOne(u => u.Manager)
-            //     .WithOne(m => m.User)
-            //     .HasForeignKey<Manager>(m => m.UserID)
-            //     .OnDelete(DeleteBehavior.Restrict);
+            // One-to-One: ApplicationUser ↔ Teacher
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Teacher)
+                .WithOne(t => t.ApplicationUser)
+                .HasForeignKey<Teacher>(t => t.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // One-to-One: ApplicationUser ↔ Student
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Student)
+                .WithOne(s => s.ApplicationUser)
+                .HasForeignKey<Student>(s => s.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // One-to-One: ApplicationUser ↔ Guardian
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Guardian)
+                .WithOne(g => g.ApplicationUser)
+                .HasForeignKey<Guardian>(g => g.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Vouchers>()
+                .HasOne(v => v.Accounts)
+                .WithMany(a => a.Vouchers)
+                .HasForeignKey(v => v.AccountID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // One-to-One: ApplicationUser ↔ Manager
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Manager)
+                .WithOne(m => m.ApplicationUser)
+                .HasForeignKey<Manager>(m => m.UserID)
+                .OnDelete(DeleteBehavior.Cascade); ;
 
             // Ternary relationship between Teachers, Students, and Subjects
             modelBuilder.Entity<TeacherSubjectStudent>()
@@ -250,40 +261,44 @@ namespace Backend.Data
                 .WithMany(sub => sub.TeacherSubjectStudents)
                 .HasForeignKey(tss => tss.SubjectID)
                 .OnDelete(DeleteBehavior.Cascade);
-                
-                //this are the data that I will add to Guardian Table ---> Data Seeding
-                modelBuilder.Entity<Guardian>().HasData(
-                    new Guardian
-                    {
-                        GuardianID = 1, // Explicit ID for seeding
-                        FullName = "School"
-                    },
-                    new Guardian
-                    {
-                        GuardianID = 2, // Explicit ID for seeding
-                        FullName = "Branches"
-                    },
-                    new Guardian
-                    {
-                        GuardianID = 3, // Explicit ID for seeding
-                        FullName = "Fuands"
-                    },
-                    new Guardian
-                    {
-                        GuardianID = 4, // Explicit ID for seeding
-                        FullName = "Guardians"
-                    },
-                    new Guardian
-                    {
-                        GuardianID = 5, // Explicit ID for seeding
-                        FullName = "Employees"
-                    },
-                    new Guardian
-                    {
-                        GuardianID = 6, // Explicit ID for seeding
-                        FullName = "Bacnks"
-                    }
-                    );
+
+                 // FeeClass to StudentClassFees
+            modelBuilder.Entity<StudentClassFees>()
+                .HasOne(scf => scf.FeeClass)
+                .WithMany(fc => fc.StudentClassFees)
+                .HasForeignKey(scf => new { scf.ClassID, scf.FeeID });
+
+            modelBuilder.Entity<TypeAccount>()
+                .HasMany(t => t.Accounts)
+                .WithOne(a => a.TypeAccount)
+                .HasForeignKey(a => a.TypeAccountID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Student to StudentClassFees
+            modelBuilder.Entity<StudentClassFees>()
+                .HasOne(scf => scf.Student)
+                .WithMany(s => s.StudentClassFees)
+                .HasForeignKey(scf => scf.StudentID);
+
+            modelBuilder.Entity<Vouchers>()
+                .Property(v => v.Receipt)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Accounts>()
+                .Property(v => v.OpenBalance)
+                .HasColumnType("decimal(18,2)"); 
+            
+            modelBuilder.Entity<Accounts>()
+                .Property(v => v.Amount)
+                .HasColumnType("decimal(18,2)"); 
+
+            modelBuilder.Entity<TypeAccount>()
+                .HasData(new TypeAccount{TypeAccountID=1,TypeAccountName="Guardain"},
+                new TypeAccount{TypeAccountID=2,TypeAccountName="School"},
+                new TypeAccount{TypeAccountID=3,TypeAccountName="Branches"},
+                new TypeAccount{TypeAccountID=4,TypeAccountName="Funds"},
+                new TypeAccount{TypeAccountID=5,TypeAccountName="Employees"},
+                new TypeAccount{TypeAccountID=6,TypeAccountName="Banks"});
         }
     }
 }

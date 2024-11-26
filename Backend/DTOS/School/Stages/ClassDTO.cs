@@ -17,5 +17,5 @@ public class ClassDTO
   public bool State { get; set; }
   public int StudentCount { get; set; }
   // public virtual Stage Stage { get; set; } // Single Stage reference
-  public virtual ICollection<DivisionINClassDTO> Divisions { get; set; } = new List<DivisionINClassDTO>();//I want to map in this for this
+  public virtual ICollection<DivisionINClassDTO> Divisions { get; set; } = new List<DivisionINClassDTO>();
 }

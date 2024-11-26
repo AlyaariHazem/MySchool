@@ -11,7 +11,7 @@ public class School
     public int SchoolID { get; set; }
     public string SchoolName { get; set; }
     public string SchoolNameEn { get; set; }
-    public DateOnly School_Crea_Date { get; set; }
+    public DateTime HireDate { get; set; }
     public string? SchoolVison { get; set; }
     public string? SchoolMission { get; set; }
     public string SchoolGoal { get; set; }

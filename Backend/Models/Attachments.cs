@@ -9,8 +9,11 @@ public class Attachments
 {
     public int AttachmentID { get; set; }
     public string AttachmentURL { get; set;}
+    public string? Note { get; set; }
 
     public int? StudentID { get; set; }
     public Student Student { get; set; }
-
+    
+    public int? VoucherID { get; set; }
+    public Vouchers Vouchers { get; set; }
 }

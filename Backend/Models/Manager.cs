@@ -13,9 +13,8 @@ namespace Backend.Models
         public int ManagerID { get; set; }
         [Required]
         public Name FullName { get; set; }
-        public string Phone { get; set; }
-        public string? Email { get; set; }
-        public int? Age { get; set; }
+        public string UserID { get; set; }
+        public virtual ApplicationUser ApplicationUser { get; set; }
         [JsonIgnore]
         public School School { get; set; }
         [Required]

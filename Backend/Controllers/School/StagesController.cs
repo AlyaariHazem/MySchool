@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.School
 {
-    [Authorize]
+    // [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class StagesController : ControllerBase

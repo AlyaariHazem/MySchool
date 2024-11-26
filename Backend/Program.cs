@@ -4,6 +4,9 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Repository;
 using Backend.Repository.School;
+using Backend.Repository.School.Classes;
+using Backend.Repository.School.Implements;
+using Backend.Repository.School.Interfaces;
 using FirstProjectWithMVC.Repository.School;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -70,11 +73,13 @@ builder.Services.AddSwaggerGen(swagger =>
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().
 AddEntityFrameworkStores<DatabaseContext>();
-// Register custom repositories
 
+// Register custom repositories
 builder.Services.AddScoped<IClassesRepository, ClassesRepository>();
 builder.Services.AddScoped<IStagesRepository, StagesRepository>();
 builder.Services.AddScoped<IDivisionRepository, DivisionRepository>();
+builder.Services.AddScoped<IFeesRepository, FeesRepository>();
+builder.Services.AddScoped<IFeeClassRepository, FeeClassRepostory>();
 
 
 // Configure Identity and JWT Authentication

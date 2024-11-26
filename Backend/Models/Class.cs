@@ -12,16 +12,14 @@ namespace Backend.Models
         public string ClassName { get; set; }
         public string ClassYear { get; set; }=DateTime.Now.ToString("yyyy-MM-dd");
         public int StageID { get; set; }
-        public bool State { get; set; }
+        public bool State { get; set; } = true;
         [JsonIgnore]
         public Stage Stage { get; set; }
         [JsonIgnore]
         public virtual ICollection<Subject> Subjects { get; set; }
         [JsonIgnore]
-        public virtual ICollection<FeeClass> FeeClasses { get; set; }
+        public virtual ICollection<FeeClass> FeeClasses { get; set; }=new List<FeeClass>();
         [JsonIgnore]
         public virtual ICollection<Division> Divisions { get; set; }
-        [JsonIgnore]
-        public virtual ICollection<StudentClass> StudentClass { get; set; }
     }
 }

@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Backend.Models;
+namespace Backend.DTOS.School.Fees;
 
-public class Fee
+public class GetFeeDTO
 {
     public int FeeID { get; set; }     
     public string FeeName { get; set;}=string.Empty;
@@ -14,7 +13,4 @@ public class Fee
     public string? Note{ get; set; }
     public DateTime HireDate { get; set; }=DateTime.Now;
     public bool State { get; set; } = true;
-    [JsonIgnore]
-    public virtual ICollection<FeeClass> FeeClasses { get; set; }//when I return the fee I want to igrnore this?
-
 }

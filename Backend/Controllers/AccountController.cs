@@ -23,30 +23,40 @@ namespace WebAPIDotNet.Controllers
             this.config = config;
         }
 
-
-        [HttpPost("Register")]//Post api/Account/Register
+        [HttpPost("Register")] // POST api/Account/Register
         public async Task<IActionResult> Register(RegisterDto UserFromRequest)
         {
             if (ModelState.IsValid)
             {
-                //save DB
-                ApplicationUser user = new ApplicationUser();
-                user.UserName = UserFromRequest.UserName;
-                user.Email = UserFromRequest.Email;
+                // Save to DB
+                ApplicationUser user = new ApplicationUser
+                {
+                    UserName = UserFromRequest.UserName,
+                    Email = UserFromRequest.Email,
+                    UserType = UserFromRequest.UserType // Assign UserType from request
+                };
+
                 IdentityResult result =
                     await userManager.CreateAsync(user, UserFromRequest.Password);
+
                 if (result.Succeeded)
                 {
-                    return Ok("Create");
+                    // Optionally assign to role based on UserType
+                    if (!string.IsNullOrEmpty(UserFromRequest.UserType))
+                    {
+                        await userManager.AddToRoleAsync(user, UserFromRequest.UserType);
+                    }
+
+                    return Ok("User created successfully");
                 }
+
                 foreach (var item in result.Errors)
                 {
-                    ModelState.AddModelError("PAssword", item.Description);
+                    ModelState.AddModelError("Password", item.Description);
                 }
             }
             return BadRequest(ModelState);
         }
-
 
         [HttpPost("Login")]//Post api/Account/login
         public async Task<IActionResult> Login(LoginDto userFRomRequest)
