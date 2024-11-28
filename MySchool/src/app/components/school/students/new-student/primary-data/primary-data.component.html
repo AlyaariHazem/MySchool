@@ -34,12 +34,8 @@
       <input type="text" id="firstNameEn" formControlName="firstNameEn" placeholder="First Name" />
     </div>
     <div class="form-control">
-      <label for="secondNameEn" class="label2">Second</label>
-      <input type="text" id="secondNameEn" formControlName="secondNameEn" placeholder="Second Name" />
-    </div>
-    <div class="form-control">
       <label for="thirdNameEn" class="label2">Third</label>
-      <input type="text" id="thirdNameEn" formControlName="thirdNameEn" placeholder="Third Name" />
+      <input type="text" id="thirdNameEn" formControlName="secondNameEn" placeholder="Third Name" />
     </div>
     <div class="form-control">
       <label for="lastNameEn" class="label2">Last</label>
@@ -53,20 +49,62 @@
       <label for="dob" class="label2">تاريخ الميلاد<span style="color:red;"> *</span></label>
       <input type="date" id="dob" formControlName="dob" placeholder="تاريخ الميلاد" />
     </div>
+
+    <!-- Class -->
     <div class="form-control">
-      <label for="grade" class="label2">الصف<span style="color:red;"> *</span></label>
-      <input type="text" id="grade" formControlName="grade" placeholder="Grade" />
+      <label for="class" class="label2">الصـف<span style="color:red;"> *</span></label>
+      <mat-form-field appearance="outline">
+        <mat-label>إختار المرحلة</mat-label>
+        <mat-select formControlName="grade" [value]="selectedClass" (selectionChange)="onSelectionChange('Class', $event.value)">
+          <mat-option [value]="null">None</mat-option>
+          @for (Class of classes; track $index) {
+          <mat-option [value]="Class.classID">
+            {{ Class.className }}
+          </mat-option>
+          }
+        </mat-select>
+        @if (isClassSelected) {
+        <span mat-icon-button class="cancel" (click)="clearSelection('Class')">✖</span>
+        }
+      </mat-form-field>
     </div>
+
+    <!-- Division -->
     <div class="form-control">
       <label for="division" class="label2">الشعبة<span style="color:red;"> *</span></label>
-      <input type="text" id="division" formControlName="division" placeholder="Division" />
+      <mat-form-field appearance="outline">
+        <mat-label>إختار الشعبة</mat-label>
+        <mat-select formControlName="division" [value]="selectedDivision" (selectionChange)="onSelectionChange('division', $event.value)">
+          <mat-option [value]="null">None</mat-option>
+          @for (Class of divisiones; track $index) {
+            <mat-option [value]="Class.divisionID">
+              {{ Class.divisionName }}
+            </mat-option>
+            }
+        </mat-select>
+        @if (isDivisionSelected) {
+        <span mat-icon-button class="cancel" (click)="clearSelection('division')">✖</span>
+        }
+      </mat-form-field>
     </div>
+
+    <!-- Sex -->
     <div class="form-control">
-      <label for="sex" class="label2">النوع<span style="color:red;"> *</span></label>
-      <select id="sex" formControlName="sex">
-        <option value="male">ذكر</option>
-        <option value="female">أنثى</option>
-      </select>
+      <label for="sex" class="label2">الجنس<span style="color:red;"> *</span></label>
+      <mat-form-field appearance="outline">
+        <mat-label>إختار النوع</mat-label>
+        <mat-select formControlName="sex" [value]="selectedSex" (selectionChange)="onSelectionChange('sex', $event.value)">
+          <mat-option [value]="null">None</mat-option>
+          @for (option of sexOptions; track $index) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+          }
+        </mat-select>
+        @if (isSexSelected) {
+        <span mat-icon-button class="cancel" (click)="clearSelection('sex')">✖</span>
+        }
+      </mat-form-field>
     </div>
   </div>
 </div>

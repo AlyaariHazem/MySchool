@@ -39,7 +39,6 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
         // English Names
         firstNameEn: ['', Validators.required],
         secondNameEn: ['', Validators.required],
-        thirdNameEn: ['', Validators.required],
         lastNameEn: ['', Validators.required],
 
         // Other Information
@@ -51,22 +50,23 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
       }),
       optionData: this.formBuilder.group({
         placeOfBirth: ['', [Validators.required, Validators.maxLength(100)]],
-        mobileNumber: ['', [Validators.required, Validators.pattern(/^967\d{9}$/)]],
+        mobileNumber: ['', [Validators.required]],
         address: ['', [Validators.required, Validators.maxLength(200)]]
 
       }),
       guardian: this.formBuilder.group({
         guardianName: ['', [Validators.required]],         // Guardian's full name
         relationship: ['', [Validators.required]],         // Relationship to the student
-        email: ['', [Validators.required, Validators.email]], // Email
-        phone: ['', [Validators.required, Validators.pattern('^\\d{10}$')]],  // Phone number (10 digits)
+        email: ['', [Validators.required]], // Email
+        phone: ['', [Validators.required]],  // Phone number (10 digits)
         dob: ['', [Validators.required]],                  // Date of Birth
         address: ['', [Validators.required]],
       }),
       fees: this.formBuilder.group({
-
+        
       }),
       document: this.formBuilder.group({
+        ImageURL: ['', [Validators.required]],
 
       })
     });
@@ -75,7 +75,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     if (this.mainForm.valid) {
       console.log('Form Submitted', this.mainForm.value);
     } else {
-      console.log('Form is not valid');
+      console.log('Form is not valid', this.mainForm.value);
     }
   }
 
@@ -83,7 +83,9 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     console.log(this.mainForm.get('primaryData')); // Should log a FormGroup object
   }
   
-
+  check(){
+    console.log("the form",this.mainForm.value)
+  }
   ngAfterViewInit(): void {
     setTimeout(() => {
       const defaultOpen = document.getElementById('defaultOpen');

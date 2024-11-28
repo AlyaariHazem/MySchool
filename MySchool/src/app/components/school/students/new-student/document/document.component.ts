@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-document',
@@ -6,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrl: './document.component.scss'
 })
 export class DocumentComponent {
-
+  @Input() formGroup!: FormGroup;
 }

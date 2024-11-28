@@ -12,16 +12,6 @@ export class HeadComponent {
     // Implement logic to open camera and take a photo
   }
 
-  // uploadPhoto(event: any) {
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = (e: any) => {
-  //       this.student.photoUrl = e.target.result;
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // }
 
   @Input() student?: { name: string, id: string }; // Input for student data
   @Output() studentAdded = new EventEmitter<void>(); // Output event for adding student

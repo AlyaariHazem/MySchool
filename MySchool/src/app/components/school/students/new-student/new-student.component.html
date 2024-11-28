@@ -27,7 +27,7 @@
       </div>
 
       <div class="buttons">
-        <button class="btn btn-success" type="submit" [disabled]="!mainForm.valid">إضافة</button>
+        <button class="btn btn-success" type="submit" (click)="onSubmit()">إضافة</button>
         <button class="btn btn-info">جديد</button>
         <button class="btn btn-warning">الشهادة</button>
       </div>

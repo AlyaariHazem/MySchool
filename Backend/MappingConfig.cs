@@ -6,6 +6,7 @@ using AutoMapper;
 using Backend.DTOS;
 using Backend.DTOS.School.Fees;
 using Backend.DTOS.School.Stages;
+using Backend.DTOS.School.Students;
 using Backend.Models;
 
 namespace Backend;
@@ -42,6 +43,7 @@ public class MappingConfig : Profile
         CreateMap<Class,UpdateClassDTO>().ReverseMap();
         CreateMap<Division,UpdateDivisionDTO>().ReverseMap();
         CreateMap<Fee,GetFeeDTO>().ReverseMap();
+        CreateMap<Student,StudentDetailsDTO>().ReverseMap();
         
         CreateMap<Fee,FeeDTO>().ReverseMap();
         CreateMap<FeeClass,AddFeeClassDTO>().ReverseMap();

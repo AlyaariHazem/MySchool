@@ -6,7 +6,8 @@ using Backend.Models;
 
 namespace Backend.Repository.School.Interfaces;
 
-public interface IStudentRepository:IgenericRepository<Student>
+public interface IStudentRepository
 {
-    Task<bool> Add();
+    Task<Student> AddStudentAsync(Student student);
+
 }

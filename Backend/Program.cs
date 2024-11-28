@@ -7,6 +7,7 @@ using Backend.Repository.School;
 using Backend.Repository.School.Classes;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
+using Backend.Services;
 using FirstProjectWithMVC.Repository.School;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +18,11 @@ using Microsoft.OpenApi.Models; // Required for Swagger configuration
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
+    
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure services
@@ -73,6 +78,8 @@ builder.Services.AddSwaggerGen(swagger =>
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().
 AddEntityFrameworkStores<DatabaseContext>();
+builder.Services.AddScoped<StudentManagementService>();
+
 
 // Register custom repositories
 builder.Services.AddScoped<IClassesRepository, ClassesRepository>();
@@ -80,6 +87,9 @@ builder.Services.AddScoped<IStagesRepository, StagesRepository>();
 builder.Services.AddScoped<IDivisionRepository, DivisionRepository>();
 builder.Services.AddScoped<IFeesRepository, FeesRepository>();
 builder.Services.AddScoped<IFeeClassRepository, FeeClassRepostory>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IGuardianRepository, GuardianRepository>();
+builder.Services.AddScoped<IUserRepository, UsersRepository>();
 
 
 // Configure Identity and JWT Authentication
@@ -131,7 +141,20 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 var app = builder.Build();
+// Seed roles
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new[] { "GUARDIAN", "STUDENT", "TEACHER", "MANAGER" };
 
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

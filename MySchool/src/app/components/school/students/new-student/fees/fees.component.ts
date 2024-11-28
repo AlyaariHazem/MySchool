@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { map, Observable, startWith } from 'rxjs';
 
 @Component({
@@ -8,6 +8,7 @@ import { map, Observable, startWith } from 'rxjs';
   styleUrls: ['./fees.component.scss']
 })
 export class FeesComponent implements OnInit {
+  @Input() formGroup!: FormGroup;
   myControl = new FormControl('');
   options: string[] = ['One', 'Two', 'Three'];
   filteredOptions!: Observable<string[]>;
