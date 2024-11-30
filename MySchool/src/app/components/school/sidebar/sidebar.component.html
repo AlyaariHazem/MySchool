@@ -38,9 +38,9 @@
                     </a>
                     <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('teachersSubmenu')">
                         <li><a routerLink="/school/teacher"><span>جميع المدرسين</span></a></li>
-                        <li><a routerLink="/add-teacher"><span>إضافة مدرس</span></a></li>
-                        <li><a routerLink="/edit-teacher"><span>تعديل مدرس</span></a></li>
-                        <li><a routerLink="/about-teachers"><span>عن المدرسين</span></a></li>
+                        <li><a routerLink="/school/teacher/action"><span>إضافة مدرس</span></a></li>
+                        <li><a routerLink="/school/teacher/edit-teacher"><span>تعديل مدرس</span></a></li>
+                        <li><a routerLink="/school/about-teachers"><span>عن المدرسين</span></a></li>
                     </ul>
                 </li>
                 <li class="submenu" (click)="toggleSubmenu('studentsSubmenu')">

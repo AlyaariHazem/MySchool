@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, HostListener, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { AddStage, Stage, updateStage } from '../../../../core/models/stages-grades.modul';
 import { StageService } from '../../../../core/services/stage.service';

@@ -6,6 +6,17 @@ form {
     right: 0rem;
     top: 4rem;
   }
+  :host ::ng-deep .p-dropdown {
+    position: relative; /* Ensure the parent has a position */
+}
+
+:host ::ng-deep .p-dropdown .p-dropdown-clear-icon {
+    color: #d800ff;
+    left: 6rem !important; /* Apply left adjustment */
+    position: absolute; /* Enable positioning */
+    top: 50%; /* Adjust top to center vertically */
+    transform: translateY(-50%);
+}
   mat-form-field {
     margin-right: 1rem;
     width: 30%;

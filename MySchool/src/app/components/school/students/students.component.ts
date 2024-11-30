@@ -41,6 +41,7 @@ export class StudentsComponent implements OnInit {
     },
     // Add more student data as needed
   ];
+  
   isSmallScreen = false;
   private mediaSub: Subscription | null = null;
 

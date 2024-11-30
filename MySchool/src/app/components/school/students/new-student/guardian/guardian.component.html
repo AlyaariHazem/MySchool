@@ -10,6 +10,11 @@
         <div class="form-control">
           <label for="relationship" class="label1">صلة القرابة</label>
           <input type="text" id="relationship" name="relationship" formControlName="relationship" />
+          @if (formGroup.get('relationship')?.hasError('required') && formGroup.get('relationship')?.touched) {
+            <label style="color:red;">
+              صلة القرابة مطلوبة
+            </label>
+          }
         </div>
       </div>
 

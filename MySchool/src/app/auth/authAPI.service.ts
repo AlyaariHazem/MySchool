@@ -8,7 +8,8 @@ import { BackendAspService } from '../environments/ASP.NET/backend-asp.service';
   providedIn: 'root'
 })
 export class AuthAPIService {
-  private API = inject(BackendAspService);  
+  private API = inject(BackendAspService);
+    
   constructor(public router: Router) { }
 
   login(credentials: { username: string; password: string }): Observable<any> {

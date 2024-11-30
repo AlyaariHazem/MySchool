@@ -57,15 +57,11 @@
         <mat-label>إختار المرحلة</mat-label>
         <mat-select formControlName="grade" [value]="selectedClass" (selectionChange)="onSelectionChange('Class', $event.value)">
           <mat-option [value]="null">None</mat-option>
-          @for (Class of classes; track $index) {
-          <mat-option [value]="Class.classID">
+          <mat-option *ngFor="let Class of classes; let i = index" [value]="Class.classID">
             {{ Class.className }}
           </mat-option>
-          }
         </mat-select>
-        @if (isClassSelected) {
-        <span mat-icon-button class="cancel" (click)="clearSelection('Class')">✖</span>
-        }
+        <span *ngIf="isClassSelected" mat-icon-button class="cancel" (click)="clearSelection('Class')">✖</span>
       </mat-form-field>
     </div>
 
@@ -76,15 +72,11 @@
         <mat-label>إختار الشعبة</mat-label>
         <mat-select formControlName="division" [value]="selectedDivision" (selectionChange)="onSelectionChange('division', $event.value)">
           <mat-option [value]="null">None</mat-option>
-          @for (Class of divisiones; track $index) {
-            <mat-option [value]="Class.divisionID">
-              {{ Class.divisionName }}
-            </mat-option>
-            }
+          <mat-option *ngFor="let Class of divisiones; let i = index" [value]="Class.divisionID">
+            {{ Class.divisionName }}
+          </mat-option>
         </mat-select>
-        @if (isDivisionSelected) {
-        <span mat-icon-button class="cancel" (click)="clearSelection('division')">✖</span>
-        }
+        <span *ngIf="isDivisionSelected" mat-icon-button class="cancel" (click)="clearSelection('division')">✖</span>
       </mat-form-field>
     </div>
 
@@ -95,15 +87,11 @@
         <mat-label>إختار النوع</mat-label>
         <mat-select formControlName="sex" [value]="selectedSex" (selectionChange)="onSelectionChange('sex', $event.value)">
           <mat-option [value]="null">None</mat-option>
-          @for (option of sexOptions; track $index) {
-          <mat-option [value]="option.value">
+          <mat-option *ngFor="let option of sexOptions; let i = index" [value]="option.value">
             {{ option.label }}
           </mat-option>
-          }
         </mat-select>
-        @if (isSexSelected) {
-        <span mat-icon-button class="cancel" (click)="clearSelection('sex')">✖</span>
-        }
+        <span *ngIf="isSexSelected" mat-icon-button class="cancel" (click)="clearSelection('sex')">✖</span>
       </mat-form-field>
     </div>
   </div>

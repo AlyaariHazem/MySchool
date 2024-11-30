@@ -1,0 +1,21 @@
+:host ::ng-deep .p-dropdown {
+    position: relative !important;
+    border-radius: 8px !important;       
+    padding: 4px !important;            
+}
+:host ::ng-deep .p-dropdown .p-dropdown-clear-icon {
+    right: auto !important;
+    left: 2.5rem !important;
+}
+:host ::ng-deep ul{
+    padding-left: 0rem !important;
+}
+:host ::ng-deep .p-dropdown:hover {
+    border-color: #2fdf85 !important; 
+    box-shadow: 0 0 8px #2fdf85 !important; 
+}
+
+:host ::ng-deep .p-dropdown.p-focus {
+    border: 2px solid #2fdf85 !important; 
+    box-shadow: 0 0 4px #1dc16c !important;
+}

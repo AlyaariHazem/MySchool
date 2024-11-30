@@ -1,7 +1,6 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { ClassDTO } from '../../../../core/models/class.model';
+
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { NewYearComponent } from './new-year/new-year.component';
 

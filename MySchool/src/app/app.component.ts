@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 
-import { LoginComponent } from "./auth/login/login.component";
 import { AdminModule } from "./components/admin/admin.module";
 
 @Component({

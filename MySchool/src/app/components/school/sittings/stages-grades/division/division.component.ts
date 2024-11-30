@@ -1,6 +1,7 @@
-import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+
 import { Division, divisions } from '../../../../../core/models/division.model';
 import { DivisionService } from '../../../../../core/services/division.service';
 import { PageEvent } from '@angular/material/paginator';

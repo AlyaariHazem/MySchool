@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { AuthAPIService } from '../authAPI.service';  // Make sure this points to your service
 import { Router } from '@angular/router';
+import { MatDialogModule } from '@angular/material/dialog';
+
 import { ShardModule } from '../../shared/shard.module';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-register',

@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 
 import { DialogData } from '../all-students/all-students.component';
-import { Students } from '../../../../core/models/students.model';
 
 @Component({
   selector: 'app-edit-student',

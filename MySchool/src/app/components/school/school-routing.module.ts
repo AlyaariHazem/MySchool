@@ -14,6 +14,7 @@ import { StagesGradesComponent } from './sittings/stages-grades/stages-grades.co
 import { ChartForStudentComponent } from './students/chart-for-student/chart-for-student.component';
 import { StudentsComponent } from './students/students.component';
 import { FeeClassComponent } from './sittings/fee-class/fee-class.component';
+import { ActionComponent } from './action/action.component';
 
 const routes: Routes = [
   {
@@ -40,7 +41,12 @@ const routes: Routes = [
           {path:'',redirectTo:'years',pathMatch:'full'}
         ]
       },
-      { path: 'teacher', component: TeachersComponent, data: { breadcrumb: 'الإستاذ' } },
+      { path: 'teacher', data: { breadcrumb: 'الإستاذ' }, children: [
+          {path:'',component:TeachersComponent,data:{breadcrumb:'الإستاذ'}},
+          {path:'action',component:ActionComponent,data:{breadcrumb:'حدث'}},
+          {path:'**' ,redirectTo:'action',pathMatch:'full'}
+
+      ]},
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

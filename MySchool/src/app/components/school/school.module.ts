@@ -2,13 +2,15 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
+import { AsyncPipe } from '@angular/common';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
 import {MatTabsModule} from '@angular/material/tabs';
+import { DropdownModule } from 'primeng/dropdown';
 
-
+import { SchoolRoutingModule } from './school-routing.module';
 import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { PageHeaderComponent } from './page-header/page-header.component';
@@ -21,7 +23,6 @@ import { AboutStudentComponent } from './students/about-student/about-student.co
 import { AddStudentComponent } from './students/add-student/add-student.component';
 import { EditStudentComponent } from './students/edit-student/edit-student.component';
 import { TeachersComponent } from './teachers/teachers.component';
-import { SchoolRoutingModule } from './school-routing.module';
 import { NavigateComponent } from './navigate/navigate.component';
 import { RouterLinkActive, RouterOutlet } from '@angular/router';
 import { StudyYearComponent } from './sittings/study-year/study-year.component';
@@ -41,7 +42,6 @@ import { OptionDataComponent } from './students/new-student/option-data/option-d
 import { HeadComponent } from './students/new-student/head/head.component';
 import { ShardModule } from '../../shared/shard.module';
 import { MatOption } from '@angular/material/core';
-import { AsyncPipe } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { FeeClassComponent } from './sittings/fee-class/fee-class.component';
 import { NewYearComponent } from './sittings/study-year/new-year/new-year.component';
@@ -87,6 +87,7 @@ const modules = [
   MatInputModule,
   MatOption,
   FormsModule,
+  DropdownModule,
   MatSelectModule,
   MatTabsModule,
   MatAutocompleteModule,

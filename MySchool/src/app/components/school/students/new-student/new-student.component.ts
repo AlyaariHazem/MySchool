@@ -1,9 +1,7 @@
 import { Component, AfterViewInit, OnInit, Inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Observable, combineLatest, map } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
-import { StageService } from '../../../../core/services/stage.service';
+import { Observable} from 'rxjs';
 
 @Component({
   selector: 'app-new-student',
@@ -18,8 +16,6 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private stageService: StageService,
-    private toastr: ToastrService,
     private changeDetectorRef: ChangeDetectorRef,
     public dialogRef: MatDialogRef<NewStudentComponent>, // Inject MatDialogRef
     @Inject(MAT_DIALOG_DATA) public data: any

@@ -1,5 +1,6 @@
 import { Component, inject, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+
 import { ClassService } from '../../../../../core/services/class.service';
 import { DivisionService } from '../../../../../core/services/division.service';
 import { ClassDTO } from '../../../../../core/models/class.model';
@@ -8,7 +9,9 @@ import { divisions } from '../../../../../core/models/division.model';
 @Component({
   selector: 'app-primary-data',
   templateUrl: './primary-data.component.html',
-  styleUrls: ['./primary-data.component.scss']
+  styleUrls: [
+    './primary-data.component.scss',
+    '../../../../../shared/styles/style-input.scss']// this is very important
 })
 export class PrimaryDataComponent implements OnInit {
   @Input() formGroup!: FormGroup;

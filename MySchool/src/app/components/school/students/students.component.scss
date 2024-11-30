@@ -271,6 +271,12 @@ li:hover {
   background-color: #f0f0f0;
 }
 
+:host ::ng-deep .p-dropdown .p-dropdown-clear-icon {
+  color: #6b7280;
+  left: 3rem!important; /* Align to the left */
+  direction: rtl;
+}
+
 :host
   ::ng-deep
   .mdc-text-field--outlined.mdc-text-field--focused
