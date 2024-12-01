@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import {  NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -15,6 +15,8 @@ import { ChartForStudentComponent } from './students/chart-for-student/chart-for
 import { StudentsComponent } from './students/students.component';
 import { FeeClassComponent } from './sittings/fee-class/fee-class.component';
 import { ActionComponent } from './action/action.component';
+import { AddParentsComponent } from './parents/add-parents/add-parents.component';
+import { FeesComponent } from './fees/fees.component';
 
 const routes: Routes = [
   {
@@ -46,8 +48,10 @@ const routes: Routes = [
           {path:'action',component:ActionComponent,data:{breadcrumb:'حدث'}},
           {path:'**' ,redirectTo:'action',pathMatch:'full'}
 
-      ]},
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+        ]},
+        {path:'CaptureBonds',component:FeesComponent,data:{breadcrumb:'سند قبظ'}},
+        {path:'parants',component:AddParentsComponent,data:{breadcrumb:'ولي الأمر'}},
+        { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
   { path: '', redirectTo: '/school/dashboard', pathMatch: 'full' }

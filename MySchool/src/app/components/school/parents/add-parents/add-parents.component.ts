@@ -6,5 +6,9 @@ import { Component } from '@angular/core';
   styleUrl: './add-parents.component.scss'
 })
 export class AddParentsComponent {
+  visible: boolean = false;
 
+  showDialog() {
+      this.visible = true;
+  }
 }

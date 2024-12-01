@@ -1,0 +1,88 @@
+
+<div id="id01" class="modal-container">
+      <h2 class="school">عرض جميع الطلاب</h2>
+          <form [formGroup]="form">
+            <div class="group group2">
+                <div class="form-control">
+                    <mat-form-field appearance="outline" class="inputText">
+                        <mat-label>رقم الحساب</mat-label>
+                        <input class="inputError" type="email" matInput />
+                    </mat-form-field>
+                </div>
+                <div class="form-control">
+                    <p-dropdown [options]="cities" [(ngModel)]="selectedCity" [checkmark]="true" optionLabel="name" [editable]="true"
+                    [showClear]="true" placeholder="الدفع بواسطة">
+                </p-dropdown>
+                </div>
+                <div class="form-control">
+                    <mat-form-field appearance="outline" class="inputText">
+                        <mat-label>من</mat-label>
+                        <input class="inputError" type="date" matInput />
+                    </mat-form-field>
+                </div>
+                <div class="form-control">
+                    <mat-form-field appearance="outline" class="inputText">
+                        <mat-label>إلى</mat-label>
+                        <input class="inputError" type="date" matInput />
+                    </mat-form-field>
+                </div>
+              </div>
+              <p-button class="showFee"  (onClick)="showDialog()" label="سند قبض جديد" />
+          </form>
+
+            
+            <p-dialog 
+                [(visible)]="visible" 
+                [modal]="true" 
+                [style]="{ width: '75%' }" 
+                [draggable]="false" 
+                [resizable]="false">
+                <h1 class="Title">سند قبض جديد</h1>
+                <button class="add">إضافة</button>
+                <button class="new">جديد</button>
+                <button class="typing">طباعة</button>
+                <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
+                <div class="name">حازم عبدالله اليعري</div>
+                    <app-new-capture></app-new-capture>
+            </p-dialog>
+  
+          <!-- Responsive Table -->
+          <div class="table-container">
+            <div class="table-container">
+              <mat-card>
+                <table class="styled-table">
+                  <thead>
+                    <tr>
+                      <th>رقم الطالب</th>
+                      <th>اسم الطالب</th>
+                      <th>المرحلة</th>
+                      <th>الصف</th>
+                      <th>الشعبة</th>
+                      <th>العمر</th>
+                      <th>النوع</th>
+                      <th>تاريخ التسجيل</th>
+                      <th>العملية</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let student of students">
+                      <td>{{ student.id }}</td>
+                      <td>{{ student.name }}</td>
+                      <td>{{ student.stage }}</td>
+                      <td>{{ student.class }}</td>
+                      <td>{{ student.division }}</td>
+                      <td>{{ student.age }}</td>
+                      <td>{{ student.gender }}</td>
+                      <td>{{ student.registrationDate }}</td>
+                      <td>
+                        <button mat-button color="warn" (click)="deleteStudent(student.id)">حذف</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+  
+              </mat-card>
+            </div>
+  
+          </div>
+      </div>

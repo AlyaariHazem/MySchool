@@ -8,7 +8,7 @@ interface City {
 @Component({
   selector: 'app-action',
   templateUrl: './action.component.html',
-  styleUrl: './action.component.scss'
+  styleUrls: ['./action.component.scss','./../../../shared/styles/style-select.scss'],
 })
 export class ActionComponent implements OnInit {
   cities: City[] | undefined;
@@ -24,4 +24,5 @@ export class ActionComponent implements OnInit {
           { name: 'Paris', code: 'PRS' }
       ];
   }
+ 
 }

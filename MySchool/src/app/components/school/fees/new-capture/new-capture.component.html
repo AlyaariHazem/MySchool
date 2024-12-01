@@ -1,0 +1,85 @@
+<div class="container">
+  <div class="button-container">
+    <button  pButton [icon]="changeView ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"
+      class="p-button-rounded p-button-text" (click)="toggleDiv()">
+    </button>
+  </div>
+
+  <div class="content">
+
+    <p-panel header="فلترة حسابات أولياء الأمور">
+      <div class="group group1">
+        <div class="form-control">
+          <p-floatLabel>
+            <p-dropdown [options]="cities" [(ngModel)]="selectedCity" [checkmark]="true" optionLabel="name"
+              [editable]="true" [showClear]="true" placeholder="حساب ولي الأمر"/>
+          </p-floatLabel>
+        </div>
+        <div class="form-control">
+          <p-dropdown [options]="cities" [(ngModel)]="selectedCity" [checkmark]="true" optionLabel="name"
+            [editable]="true" [showClear]="true" placeholder="الطالب" />
+        </div>
+      </div>
+      <div class="group group2">
+        <div class="form-control">
+          <label for="amount" class="label2">المبلغ ر.ي<span style="color:red;"> *</span></label>
+          <input type="text" id="amount" formControlName="amount" />
+        </div>
+        <div class="form-control">
+          <label for="payBy" class="label2">الدفع بواسطة<span style="color:red;"> *</span></label>
+          <input type="text" id="payBy" formControlName="payBy" />
+        </div>
+      </div>
+      <div class="group group2">
+        <div class="form-control">
+          <label for="amount" class="label2">البيان<span style="color:red;"> *</span></label>
+          <input type="text" id="amount" formControlName="amount" />
+        </div>
+      </div>
+      <div class="group group2">
+        <div class="form-control">
+          <label for="date" class="label2">تاريخ الإنشاء<span style="color:red;"> *</span></label>
+          <input type="date" id="date" formControlName="date" />
+        </div>
+        <div class="form-control">
+          <label for="attachment" class="label2">مرفقات<span style="color:red;"> *</span></label>
+          <label for="file" class="custom-button">إستعراض الملفات
+            <img src="assets/img/cloud-arrow-up.svg" alt="Upload Icon" class="upload-icon" />
+          </label>
+          <input type="file" accept="image/*" id="file" formControlName="ImageURL" class="hidden-file-input" />
+        </div>
+      </div>
+    </p-panel>
+
+    <p-panel header="فواتير ولي الأمر" *ngIf="showDiv2">
+      <button  pButton icon="pi pi-print" class="p-button-rounded p-button-text print"> طباعة </button>
+      <div class="card flex justify-content-center">
+        <p-card header="Simple Card">
+          <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="">
+          <p class="name">حازم عبدالله اليعري</p>
+          <div class="m-2">الصـف: <span>الخامس</span></div>
+          <div class="m-2">الرسوم المطلوبة: <span>$1062</span></div>
+          <span class="typeFee">رسوم طالب</span>
+        </p-card>
+      </div>
+      <div class="card flex justify-content-center">
+        <p-card header="Simple Card">
+          <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="">
+          <p class="name">حازم عبدالله اليعري</p>
+          <div class="m-2">الصـف: <span>الخامس</span></div>
+          <div class="m-2">الرسوم المطلوبة: <span>$1062</span></div>
+          <span class="typeFee">رسوم طالب</span>
+        </p-card>
+      </div>
+      <div class="card flex justify-content-center">
+        <p-card header="Simple Card">
+          <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="">
+          <p class="name">حازم عبدالله اليعري</p>
+          <div class="m-2">الصـف: <span>الخامس</span></div>
+          <div class="m-2">الرسوم المطلوبة: <span>$1062</span></div>
+          <span class="typeFee">رسوم طالب</span>
+        </p-card>
+      </div>
+    </p-panel>
+  </div>
+</div>

@@ -39,7 +39,7 @@
                     <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('teachersSubmenu')">
                         <li><a routerLink="/school/teacher"><span>جميع المدرسين</span></a></li>
                         <li><a routerLink="/school/teacher/action"><span>إضافة مدرس</span></a></li>
-                        <li><a routerLink="/school/teacher/edit-teacher"><span>تعديل مدرس</span></a></li>
+                        <li><a routerLink="/school/parants"><span>تعديل مدرس</span></a></li>
                         <li><a routerLink="/school/about-teachers"><span>عن المدرسين</span></a></li>
                     </ul>
                 </li>
@@ -65,7 +65,7 @@
                         <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['guardianSubmenu']}"></span>
                     </a>
                     <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('guardianSubmenu')">
-                        <li><a routerLink="/all-students"><span> عرض أولياء الامور </span></a></li>
+                        <li><a routerLink="/school/parants"><span> عرض أولياء الامور </span></a></li>
                         <li><a routerLink="/school/students/add-student"><span>إضافة طالب</span></a></li>
                         <li><a routerLink="/edit-student"><span>تعديل طالب</span></a></li>
                         <li><a routerLink=""><span>عن الطلاب</span></a></li>
@@ -90,15 +90,15 @@
                 <li class="submenu" (click)="toggleSubmenu('accountsSubmenu')">
                     <a href="javascript:void(0);">
                         <img src="assets/img/sidebar/icon-10.png" alt="icon">
-                        <span> الحسابات</span>
+                        <span> الرسوم</span>
                         <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['accountsSubmenu']}"></span>
                     </a>
                     <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('accountsSubmenu')">
-                        <li><a href="inbox.html"><span>الفواتير</span></a></li>
-                        <li><a href="inbox.html"><span>المدفوعات</span></a></li>
-                        <li><a href="inbox.html"><span>النفقات</span></a></li>
+                        <li><a routerLink="/school/CaptureBonds"><span>إعدادات الرسوم</span></a></li>
+                        <li><a routerLink="/school/CaptureBonds"><span>سند قبظ</span></a></li>
+                        <li><a routerLink="/school/CaptureBonds"><span>النفقات</span></a></li>
                         <!-- <li><a href="inbox.html"><span>Provident Fund</span></a></li> -->
-                        <li><a href="inbox.html"><span>الضرائب</span></a></li>
+                        <li><a routerLink="/school/CaptureBonds"><span>الضرائب</span></a></li>
                     </ul>
                 </li>
                 <li class="submenu" (click)="toggleSubmenu('payrollSubmenu')">
