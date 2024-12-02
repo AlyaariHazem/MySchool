@@ -1,12 +1,21 @@
 <div id="id01" class="modal-container">
     <div class="modal-content">
-      <h2 class="school">عرض جميع الطلاب</h2>
+      <h2 class="school">العام الدارسي</h2>
       <div class="container">
         <div class="tabcontent">
-         
-          <button mat-raised-button color="primary" class="add" (click)="openDialog()">
-            إضافة طالب+
-          </button>
+          <p-button class="showFee"  (onClick)="showDialog()" label="+ سنة جديدة" />
+
+          <p-dialog 
+          [(visible)]="visible" 
+          [modal]="true" 
+          [style]="{ width: '75%' }" 
+          [draggable]="false" 
+          [resizable]="false">
+          <h1 class="Title">إضافة سنة جديدة</h1>
+          <button class="button add">إضافة</button>
+          <button class="button New">جديد</button>
+              <app-new-year></app-new-year>
+      </p-dialog>
   
           <!-- Responsive Table -->
           <div class="table-container">

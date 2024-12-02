@@ -1,32 +1,18 @@
 import { Component } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { NewYearComponent } from './new-year/new-year.component';
-
 
 @Component({
   selector: 'app-study-year',
   templateUrl: './study-year.component.html',
-  styleUrl: './study-year.component.scss'
+  styleUrls:['./study-year.component.scss',
+            './../../../../shared/styles/style-input.scss'
+  ] 
 })
 export class StudyYearComponent {
-  constructor(public dialog: MatDialog, private toastr:ToastrService){}
-  
-  openDialog(): void {
-    const dialogConfig = new MatDialogConfig();
-    dialogConfig.width = '80%';
-    dialogConfig.height = '70%';
-    dialogConfig.panelClass = 'custom-dialog-container';
+  constructor(){}
+  visible: boolean = false;
 
-    const dialogRef = this.dialog.open(NewYearComponent, dialogConfig);
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.toastr.success('تم إضافة الطالب بنجاح');
-      }
-    });
+  showDialog() {
+      this.visible = true;
   }
-
-
+  
 }

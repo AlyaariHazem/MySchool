@@ -122,7 +122,9 @@ h2 {
   top: -0.5rem;
   right: 17%;
 }
-
+.group2{
+  margin-top: 5rem;
+}
 .add {
   position: absolute;
   top: 1rem;
@@ -322,4 +324,28 @@ li:hover {
   padding-left: 19px;
   position: absolute;
   top: 16px;
+}
+// for card
+.responsive-card {
+  width: 100%;
+  max-width: 250px;
+  flex-grow: 1;
+}
+.group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+@media (max-width: 600px) {
+  .group {
+    grid-template-columns: 1fr; /* Stack cards vertically */
+  }
+}
+p-card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px; /* Optional styling */
+}
+.modal-content {
+  padding: 1rem;
 }

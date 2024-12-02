@@ -1,0 +1,17 @@
+:host {
+    ::ng-deep {
+      .p-chips-multiple-container:hover {
+        outline: none !important;
+        border-color: #2fdf85 !important;
+        box-shadow: 0 0 5px #2fdf85 !important;
+      }
+      .p-inputwrapper-focus{
+        .p-chips-multiple-container{
+            outline: none !important;
+            border-color: #2fdf85 !important;
+            box-shadow: 0 0 5px #2fdf85 !important;
+        }
+      }
+     
+    }
+  }

@@ -38,9 +38,8 @@
                 [draggable]="false" 
                 [resizable]="false">
                 <h1 class="Title">سند قبض جديد</h1>
-                <button class="add">إضافة</button>
-                <button class="new">جديد</button>
-                <button class="typing">طباعة</button>
+                <button class="button add">إضافة</button>
+                <button class="button typing">طباعة</button>
                 <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
                 <div class="name">حازم عبدالله اليعري</div>
                     <app-new-capture></app-new-capture>
@@ -75,7 +74,21 @@
                       <td>{{ student.gender }}</td>
                       <td>{{ student.registrationDate }}</td>
                       <td>
-                        <button mat-button color="warn" (click)="deleteStudent(student.id)">حذف</button>
+                        <div class="col text-left">
+                          <div class="mt-sm-0 mt-2">
+                            <button class="btn btn-left update" type="button" data-toggle="dropdown" aria-haspopup="true"
+                              aria-expanded="false">
+                              <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-left">
+                              <a class="dropdown-item" ><i
+                                  class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                              <div role="separator" class="dropdown-divider"></div>
+                              <a class="dropdown-item" ><i
+                                  class="bi bi-trash IconDelete"></i>حذف</a>
+                            </div>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   </tbody>

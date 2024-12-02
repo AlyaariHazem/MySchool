@@ -18,6 +18,10 @@ form {
   right: 0rem;
   top: 4rem;
 }
+.Title{
+  position: absolute;
+    top: 4px;
+}
 .table-container {
     margin-top: 3rem;
   }
@@ -40,10 +44,11 @@ mat-form-field {
   border-radius: 1.5%;
 }
 
-h2 {
-  font-family: "Changa", sans-serif;
+.showFee{
+  position: relative;
+  left: -35%;
+  top: -3rem;
 }
-
 .container {
   border-radius: 23px;
 }
@@ -56,17 +61,27 @@ h2 {
   position: relative;
   top: -20px;
 }
-
+.New{
+  position: absolute;
+    top: 23px;
+    right: 33%;
+    width: 10%;
+    border: none;
+    padding: 8px 0;
+    background-color: #585858;
+    color: white;
+    border-radius: 4px;
+}
 .add {
   position: absolute;
-  top: 1rem;
-  width: 11%;
-  border-radius: 32px;
-  left: 1rem;
-  padding: 8px 0;
-  border: none;
-  color: white;
-  background-color: #2fdf84;
+    top: 1.4rem;
+    width: 11%;
+    border-radius: 4px;
+    right: 21%;
+    border:none;
+    padding: 8px 0;
+    color: white;
+    background-color: #2fdf84;
 }
 .add:active {
   background-color: #2fdf85;
@@ -77,9 +92,6 @@ h2 {
 @media (max-width: 1600px) {
   .add {
     width: 10%;
-  }
-  .school{
-    color:rgb(95, 220, 105);
   }
   .styled-table th,
   .styled-table td {
@@ -204,50 +216,12 @@ li {
 li:hover {
   background-color: #f0f0f0;
 }
-
-:host
-  ::ng-deep
-  .mdc-text-field--outlined.mdc-text-field--focused
-  .mdc-notched-outline__leading {
-  border-color: #2fdf85 !important;
-  // box-shadow: 0 0 5px 0 #2fdf85!important;
-  border-width: 2px 2px 2px 0 !important;
-  transition: border-color 0.2s;
+//for dialog *********
+:host ::ng-deep .p-ripple.p-button{
+  border-radius: 3rem!important;
+  height: 2rem !important;
+  background-color: #12a212;
 }
-:host
-  ::ng-deep
-  .mdc-text-field--outlined.mdc-text-field--focused
-  .mdc-notched-outline__trailing {
-  border-color: #2fdf85 !important;
-  // box-shadow: 0 0 5px 0 #2fdf85!important;
-  border-width: 2px 0 2px 2px !important;
-  transition: border-color 0.2s;
-}
-:host
-  ::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
-  .mdc-notched-outline__notch {
-  border-color: #2fdf85 !important;
-  // box-shadow: 2px 0 5px 0 #2fdf85!important;
-  border-width: 2px 0 2px 0 !important;
-  transition: border-color 0.2s;
-}
-
-/* Cancel icon styles */
-.cancel {
-  left: -8px;
-  padding-left: 19px;
-  position: absolute;
-  top: 16px;
-  color: #6f6d6d;
-}
-.cancel:hover {
-  color: rgb(70, 70, 70);
-  cursor: pointer;
-}
-.dropdown13 {
-  left: -8px;
-  color: white;
-  padding-left: 19px;
-  position: absolute;
-  top: 16px;
-}
+:host ::ng-deep .p-dialog-header-close{
+  background-color: white!important;
+}//***********************

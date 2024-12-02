@@ -89,7 +89,14 @@ transition: border-color 0.2s;
   .form-control {
     display: flex;
     border: none;
-    width: 67%;
+    width: 100%;
+    flex-direction: column;
+    gap: 5px; /* Space between label and input */
+  }
+  .form-control-active {
+    display: flex;
+    border: none;
+    width: 40%;
     flex-direction: column;
     gap: 5px; /* Space between label and input */
   }
@@ -136,18 +143,7 @@ transition: border-color 0.2s;
         right: 0rem!important;
     }
   }
-  
-.add {
-    position: absolute;
-    top: 2rem;
-    width: 11%;
-    border-radius: 32px;
-    left: 1rem;
-    padding: 8px 0;
-    border: none;
-    color: white;
-    background-color: #2fdf84;
-  }
+
   .add:active {
     background-color: #2fdf85;
   }

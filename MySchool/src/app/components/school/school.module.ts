@@ -14,6 +14,9 @@ import { DialogModule } from 'primeng/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatOption } from '@angular/material/core';
 import { PanelModule } from 'primeng/panel';
+import { ChipsModule } from 'primeng/chips';
+import { InputMaskModule } from 'primeng/inputmask';
+import { CardModule } from 'primeng/card';
 
 import { SchoolRoutingModule } from './school-routing.module';
 import { HeaderComponent } from './header/header.component';
@@ -49,6 +52,7 @@ import { FeeClassComponent } from './sittings/fee-class/fee-class.component';
 import { NewYearComponent } from './sittings/study-year/new-year/new-year.component';
 import { NewCaptureComponent } from './fees/new-capture/new-capture.component';
 import { FeesComponent } from './fees/fees.component';
+import { FeeComponent } from './students/new-student/fee/fee.component';
 
 
 
@@ -84,6 +88,8 @@ const components = [
   HeadComponent,
   NewCaptureComponent,
   FeeClassComponent,
+  FeeComponent,
+  
 
 ];
 
@@ -110,7 +116,10 @@ const modules = [
   RouterLinkActive,
   DialogModule,
   ButtonModule,
-  PanelModule
+  PanelModule,
+  ChipsModule,
+  InputMaskModule,
+  CardModule, 
 ];
 
 @NgModule({

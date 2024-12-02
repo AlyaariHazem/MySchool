@@ -3,11 +3,11 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { map, Observable, startWith } from 'rxjs';
 
 @Component({
-  selector: 'app-fees',
-  templateUrl: './fees.component.html',
-  styleUrls: ['./fees.component.scss']
+  selector: 'app-fee',
+  templateUrl: './fee.component.html',
+  styleUrls: ['./fee.component.scss']
 })
-export class FeesComponent implements OnInit {
+export class FeeComponent implements OnInit {
   @Input() formGroup!: FormGroup;
   myControl = new FormControl('');
   options: string[] = ['One', 'Two', 'Three'];

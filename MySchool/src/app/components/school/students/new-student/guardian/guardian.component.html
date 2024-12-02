@@ -11,9 +11,9 @@
           <label for="relationship" class="label1">صلة القرابة</label>
           <input type="text" id="relationship" name="relationship" formControlName="relationship" />
           @if (formGroup.get('relationship')?.hasError('required') && formGroup.get('relationship')?.touched) {
-            <label style="color:red;">
-              صلة القرابة مطلوبة
-            </label>
+          <label style="color:red;">
+            صلة القرابة مطلوبة
+          </label>
           }
         </div>
       </div>
@@ -26,7 +26,7 @@
         </div>
         <div class="form-control">
           <label for="phone" class="label1">الجوال</label>
-          <input type="number" id="phone" name="phone" formControlName="phone" />
+          <p-inputMask mask="999-999-999" formControlName="phone" placeholder="999-999-999" />
         </div>
       </div>
 

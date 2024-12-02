@@ -39,8 +39,8 @@
     right: 87%;
     top: -8rem;
 }
-button{
-    background-color: #12a212;
+.button{
+  background-color: #12a212;
     color: white;
     position: absolute;
     top: 1rem;
@@ -49,12 +49,8 @@ button{
     border-radius: 3px;
     padding: 3px 10px;
 }
-.new{
-    margin-right: 4.2rem;
-    background-color: #646363;
-}
 .typing{
-    margin-right: 8rem;
+    margin-right: 5rem;
     background-color:white;
     color:black;
 }

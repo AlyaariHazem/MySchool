@@ -46,14 +46,45 @@
             </span>
           </mat-form-field>
         </form>
-      
-        
+
+
         <button mat-raised-button color="primary" class="add" (click)="openDialog()">
           إضافة طالب+
         </button>
-
+        <div class="group group2">
+          @for (card of cards; track $index) {
+          <div class="form-control">
+            <p-card class="responsive-card" header="حازم عبدالله اليعري" >
+              <ng-template pTemplate="header">
+                @if (card%2 == 0) {
+                  <img alt="Card" src="./../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" />
+                }@else{
+                  <img alt="Card" src="./../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.jpg" />
+                }
+              </ng-template>
+              <div>
+                Hazem.{{card}}
+                الصف:الأول
+                <hr>
+                النوع:ذكر
+                المرحلة:الثانية
+                الرسوم المطلوبة:10000
+                <hr>
+                
+              </div>
+              <ng-template pTemplate="footer">
+                <div class="flex gap-3 mt-1">
+                  <p-button label="Cancel" severity="secondary" class="w-full" styleClass="w-full" />
+                  <p-button label="Save" class="w-full" styleClass="w-full" />
+                </div>
+              </ng-template>
+            </p-card>
+          </div>
+        }
+        </div>
+        
         <!-- Responsive Table -->
-        <div class="table-container">
+        <!-- <div class="table-container">
           <div class="table-container">
             <mat-card>
               <table class="styled-table">
@@ -81,7 +112,21 @@
                     <td>{{ student.gender }}</td>
                     <td>{{ student.registrationDate }}</td>
                     <td>
-                      <button mat-button color="warn" (click)="deleteStudent(student.id)">حذف</button>
+                      <div class="col text-left">
+                        <div class="mt-sm-0 mt-2">
+                          <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <i class="fas fa-ellipsis-h"></i>
+                          </button>
+                          <div class="dropdown-menu dropdown-menu-left">
+                            <a class="dropdown-item" ><i
+                                class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                            <div role="separator" class="dropdown-divider"></div>
+                            <a class="dropdown-item" ><i
+                                class="bi bi-trash IconDelete" (click)="deleteStudent(student.id)"></i>حذف</a>
+                          </div>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -90,7 +135,7 @@
             </mat-card>
           </div>
 
-        </div>
+        </div> -->
       </div>
     </div>
   </div>

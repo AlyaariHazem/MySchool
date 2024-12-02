@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 interface City {
   name: string;
@@ -12,7 +11,8 @@ interface City {
 @Component({
   selector: 'app-fees',
   templateUrl: './fees.component.html',
-  styleUrls: ['./fees.component.scss','./../../../shared/styles/style-select.scss']
+  styleUrls: ['./fees.component.scss',
+              './../../../shared/styles/style-select.scss']
 })
 export class FeesComponent {
   visible: boolean = false;
@@ -58,7 +58,6 @@ export class FeesComponent {
 
   constructor(
     private formBuilder: FormBuilder,
-    private toastr: ToastrService,
     public dialog: MatDialog,
     private mediaObserver: MediaObserver
   ) {
@@ -117,9 +116,4 @@ export class FeesComponent {
     }
   }
 
-
-  deleteStudent(studentId: number): void {
-    this.students = this.students.filter((student) => student.id !== studentId);
-    this.toastr.warning('تم حذف الطالب');
-  }
 }

@@ -117,4 +117,5 @@ export class StudentsComponent implements OnInit {
     this.students = this.students.filter((student) => student.id !== studentId);
     this.toastr.warning('تم حذف الطالب');
   }
+  cards:number[]=[1,2,3,4,5,6,7,8,9];
 }
