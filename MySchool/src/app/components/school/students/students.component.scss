@@ -162,6 +162,11 @@ h2 {
   .school{
     color: red;
   }
+  :host ::ng-deep{
+    .chipsOne{
+      display: none;
+    }
+  }
   .styled-table th,
   .styled-table td {
     padding: 15px 2px !important;
@@ -342,10 +347,36 @@ li:hover {
   }
 }
 p-card img {
-  max-width: 100%;
+  max-width: 40%;
   height: auto;
-  border-radius: 8px; /* Optional styling */
+  position: relative;
+  left: 0rem;
+  border-radius: 64px;
 }
 .modal-content {
   padding: 1rem;
+}
+:host ::ng-deep .custom-button {
+  background-color: #ffffff !important;
+  color: #4c4c4c !important;
+  border: none !important;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+:host ::ng-deep .custom-button:hover {
+  border: 1px solid rgb(248, 182, 170)!important;
+}
+:host ::ng-deep .custom-button {
+  border: 1px solid rgb(177, 171, 171)!important;
+  border-radius: 3px!important;
+}
+:host ::ng-deep .custom-button.guardain {
+  margin-right: 1px;
+}
+:host ::ng-deep{
+  .chipsOne{
+    position: absolute;
+    margin-top: -0.2rem;
+    left: 3%;
+    width: 15%;
+  }
 }

@@ -53,33 +53,23 @@
 
     <p-panel header="فواتير ولي الأمر" *ngIf="showDiv2">
       <button  pButton icon="pi pi-print" class="p-button-rounded p-button-text print"> طباعة </button>
+      @for (item of cities; track $index) {
       <div class="card flex justify-content-center">
-        <p-card header="Simple Card">
-          <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="">
-          <p class="name">حازم عبدالله اليعري</p>
+        <p-card>
+          <h2>الاسم:{{item.name}}</h2>
+          <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
           <div class="m-2">الصـف: <span>الخامس</span></div>
-          <div class="m-2">الرسوم المطلوبة: <span>$1062</span></div>
+          <div class="m-2" style="position: relative; top:-2rem;right:40%">الرسوم المطلوبة: <span>$1062</span></div>
           <span class="typeFee">رسوم طالب</span>
+          <hr>
+          <p>المدفوع: <span>12000</span></p>
+          <hr>
+          <p>مدين عليكم: <span>48000</span></p>
+          <p style="text-align: center; font-weight: bold;">خمسة و ثمانون الفاً ريال يمني لا غير</p>
+          <button class="details">تفاصيل</button>
         </p-card>
       </div>
-      <div class="card flex justify-content-center">
-        <p-card header="Simple Card">
-          <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="">
-          <p class="name">حازم عبدالله اليعري</p>
-          <div class="m-2">الصـف: <span>الخامس</span></div>
-          <div class="m-2">الرسوم المطلوبة: <span>$1062</span></div>
-          <span class="typeFee">رسوم طالب</span>
-        </p-card>
-      </div>
-      <div class="card flex justify-content-center">
-        <p-card header="Simple Card">
-          <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="">
-          <p class="name">حازم عبدالله اليعري</p>
-          <div class="m-2">الصـف: <span>الخامس</span></div>
-          <div class="m-2">الرسوم المطلوبة: <span>$1062</span></div>
-          <span class="typeFee">رسوم طالب</span>
-        </p-card>
-      </div>
+    }
     </p-panel>
   </div>
 </div>

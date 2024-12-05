@@ -1,0 +1,51 @@
+<div class="schoolInfo">
+    <div class="contant">
+        <div class="group">
+            <div class="form-control">
+                <label for="amount" class="label2">اسم الحساب<span style="color:red;"> *</span></label>
+                <p-chips name="values" type="number" class="inputChip" />
+            </div>
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">الحساب الأب</label>
+                <p-dropdown [options]="Books" optionLabel="name" [editable]="true" [showClear]="SelectBook"
+                    (onChange)="selectBook()" placeholder="إختار النوع">
+                </p-dropdown>
+            </div>
+        </div>
+
+        <div class="group">
+            <div class="form-control">
+                <label for="amount" class="label2"> نوع الحساب</label>
+                <input name="values" type="checkbox" />
+            </div>
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2"> نوع الحساب  </label>
+                <p-dropdown [options]="Books" optionLabel="name" [editable]="true" [showClear]="SelectBook"
+                    (onChange)="selectBook()" placeholder="إختار النوع">
+                </p-dropdown>
+            </div>
+        </div>
+        <div class="group">
+            <div class="form-control">
+                <label for="amount" class="label2"> الرصيد الإفتتاحي</label>
+                <p-chips name="values" type="number" class="inputChip" />
+            </div>
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2"> نوع الرصيد الإفتتاحي </label>
+                <p-dropdown [options]="Books" optionLabel="name" [editable]="true" [showClear]="SelectBook"
+                    (onChange)="selectBook()" placeholder="إختار النوع">
+                </p-dropdown>
+            </div>
+        </div>
+
+        <div class="group">
+            <div class="form-control">
+                <label for="address" class="label2">البيان</label>
+                <textarea type="text" id="amount"></textarea>
+            </div>
+            <div class="form-control">
+                <label for="address" class="label2">تاريخ الإنشاء</label>
+                <input type="date" id="address" placeholder="التاريخ" />
+            </div>
+        </div>
+</div>

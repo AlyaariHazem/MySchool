@@ -1,1 +1,112 @@
-<p>school-info works!</p>
+<div class="schoolInfo">
+    <h2 class="schoolTitle">معلومات المدرسة</h2>
+    <div class="contant">
+        <label for="fileInput">
+            <img class="photo" src="assets/img/user.jpg" alt="school Photo" />
+        </label>
+        <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
+        <button class="btn btn-success save" type="submit">حفظ التغيرات+</button>
+
+        <div class="group">
+            <div class="form-control">
+                <label for="amount" class="label2">اسم المدرسة<span style="color:red;"> *</span></label>
+                <p-chips name="values" type="number" class="inputChip" />
+
+            </div>
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">اسم البديل للمدرسة</label>
+                <p-chips name="values" type="number" class="inputChip" />
+            </div>
+        </div>
+
+        <div class="group">
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">نوع المدرسة</label>
+                <p-dropdown [options]="Books" optionLabel="name" [editable]="true" [showClear]="SelectBook"
+                    (onChange)="selectBook()" placeholder="إختار النوع">
+                </p-dropdown>
+            </div>
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">فئة المدرسة</label>
+                <p-dropdown [options]="classes" [checkmark]="true" optionLabel="name" [editable]="true"
+                    [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الفئة">
+                </p-dropdown>
+            </div>
+        </div>
+        <div class="group">
+            <div class="form-control">
+                <label for="address" class="label2">العنوان</label>
+                <input type="text" id="address" placeholder="العنوان" />
+            </div>
+        </div>
+        <div class="group">
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">الدولة</label>
+                <p-chips name="values" type="number" class="inputChip" />
+
+            </div>
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">المدينة</label>
+                <p-chips name="values" type="number" class="inputChip" />
+            </div>
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">المنطقة</label>
+                <p-chips name="values" type="number" class="inputChip" />
+
+            </div>
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">الشارع</label>
+                <p-chips name="values" type="number" class="inputChip" />
+            </div>
+        </div>
+        <div class="group">
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">البريد الإلكتروني</label>
+                <p-chips name="values" type="number" class="inputChip" />
+            </div>
+
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">فاكس</label>
+                <p-chips name="values" type="number" class="inputChip" />
+            </div>
+        </div>
+        <div class="group">
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">الهاتف</label>
+                <p-chips name="values" type="number" class="inputChip" />
+
+            </div>
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">الجوال</label>
+                <p-chips name="values" type="number" class="inputChip" />
+            </div>
+        </div>
+        <div class="group">
+            <div class="form-control">
+                <label for="placeOfBirth" class="label2">رابط موقع المدرسة</label>
+                <p-chips name="values" type="number" class="inputChip" />
+
+            </div>
+        </div>
+        <div class="group">
+            <div class="form-control">
+                <label for="amount" class="label2">وصف المدرسة</label>
+                <textarea type="text" id="amount"></textarea>
+            </div>
+            <div class="form-control">
+                <label for="amount" class="label2">وصف المدرسة</label>
+                <textarea type="text" id="amount"></textarea>
+            </div>
+        </div>
+        <div class="group">
+            <div class="form-control">
+                <label for="amount" class="label2">رؤية المدرسة</label>
+                <textarea type="text" id="amount"></textarea>
+            </div>
+            <div class="form-control">
+                <label for="amount" class="label2">رسالة المدرسة</label>
+                <textarea type="text" id="amount"></textarea>
+            </div>
+        </div>
+    </div>
+</div>

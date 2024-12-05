@@ -1,62 +1,73 @@
 <div id="id01" class="modal-container">
-    <div class="modal-content">
-      <h2 class="school">العام الدارسي</h2>
-      <div class="container">
-        <div class="tabcontent">
-          <p-button class="showFee"  (onClick)="showDialog()" label="+ سنة جديدة" />
+  <div class="modal-content">
+    <h2 class="school">العام الدارسي</h2>
+    <div class="container">
+      <div class="tabcontent">
+        <p-button class="showFee" (onClick)="showDialog()" label="+ سنة جديدة" />
 
-          <p-dialog 
-          [(visible)]="visible" 
-          [modal]="true" 
-          [style]="{ width: '75%' }" 
-          [draggable]="false" 
+        <mat-paginator class="cPaginator" [ngStyle]="{ position: 'absolute'}" [length]="years.length"
+          [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
+        </mat-paginator>
+        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
+
+        <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '75%' }" [draggable]="false"
           [resizable]="false">
           <h1 class="Title">إضافة سنة جديدة</h1>
           <button class="button add">إضافة</button>
           <button class="button New">جديد</button>
-              <app-new-year></app-new-year>
-      </p-dialog>
-  
-          <!-- Responsive Table -->
+          <app-new-year></app-new-year>
+        </p-dialog>
+
+        <!-- Responsive Table -->
+        <div class="table-container">
           <div class="table-container">
-            <div class="table-container">
-              <mat-card>
-                <table class="styled-table">
-                  <thead>
-                    <tr>
-                      <th>رقم الطالب</th>
-                      <th>اسم الطالب</th>
-                      <th>المرحلة</th>
-                      <th>الصف</th>
-                      <th>الشعبة</th>
-                      <th>العمر</th>
-                      <th>النوع</th>
-                      <th>تاريخ التسجيل</th>
-                      <th>العملية</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <!-- <tr *ngFor="let student of students">
-                      <td>{{ student.id }}</td>
-                      <td>{{ student.name }}</td>
-                      <td>{{ student.stage }}</td>
-                      <td>{{ student.class }}</td>
-                      <td>{{ student.division }}</td>
-                      <td>{{ student.age }}</td>
-                      <td>{{ student.gender }}</td>
-                      <td>{{ student.registrationDate }}</td>
-                      <td>
-                        <button mat-button color="warn" (click)="deleteStudent(student.id)">حذف</button>
-                      </td>
-                    </tr> -->
-                  </tbody>
-                </table>
-  
-              </mat-card>
-            </div>
-  
+            <mat-card>
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>العام الدراسي</th>
+                    <th>ملاحظة</th>
+                    <th>الترم الحالي</th>
+                    <th>تاريخ الإنشاء</th>
+                    <th>الحالة</th>
+                    <th>العملية</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (year of viewYear; track $index) {
+                  <tr>
+                    <td>{{ $index }}</td>
+                    <td>2024-01-01</td>
+                    <td>لا يوجد</td>
+                    <td></td>
+                    <td>2024-01-01</td>
+                    <td>10</td>
+                    <td>
+                      <div class="col text-left">
+                        <div class="mt-sm-0 mt-2">
+                          <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <i class="fas fa-ellipsis-h"></i>
+                          </button>
+                          <div class="dropdown-menu dropdown-menu-left">
+                            <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                            <div role="separator" class="dropdown-divider"></div>
+                            <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+
+            </mat-card>
           </div>
+
         </div>
       </div>
     </div>
   </div>
+</div>

@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { MediaObserver, MediaChange } from '@angular/flex-layout';
-import { Subscription } from 'rxjs';
 import { NewStudentComponent } from './new-student/new-student.component';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-students',
@@ -13,7 +12,8 @@ import { NewStudentComponent } from './new-student/new-student.component';
 })
 export class StudentsComponent implements OnInit {
   form: FormGroup;
-
+  values = new FormControl<string[] | null>(null);
+  max = 2;
   // Dropdown options
   studentOptions: string[] = ['طالب 1', 'طالب 2', 'طالب 3'];
   stageOptions: string[] = ['المرحلة الأولى', 'المرحلة الثانية', 'المرحلة الثالثة'];
@@ -41,35 +41,28 @@ export class StudentsComponent implements OnInit {
     },
     // Add more student data as needed
   ];
-  
-  isSmallScreen = false;
-  private mediaSub: Subscription | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
     private toastr: ToastrService,
     public dialog: MatDialog,
-    private mediaObserver: MediaObserver
+    private route: ActivatedRoute
   ) {
     this.form = this.formBuilder.group({
       stage: ['', Validators.required],
       gradeName: ['', Validators.required],
     });
   }
-
+  
+  id!:number;
   ngOnInit(): void {
-    this.mediaSub = this.mediaObserver.asObservable().subscribe((changes: MediaChange[]) => {
-      this.isSmallScreen = changes.some(
-        (change) => change.mqAlias === 'xs' || change.mqAlias === 'sm'
-      );
-    });
-  }
-
-  ngOnDestroy(): void {
-    if (this.mediaSub) {
-      this.mediaSub.unsubscribe();
+    this.id = Number(this.route.snapshot.paramMap.get('id'));
+    if(this.id){
+      //this for add student 
+      this.openDialog();
     }
   }
+
 
   // Track selection changes
   onSelectionChange(type: string, value: string): void {

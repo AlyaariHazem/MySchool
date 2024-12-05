@@ -32,7 +32,7 @@
                 </li>
                 <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')">
                     <a href="javascript:void(0);">
-                        <img src="assets/img/sidebar/icon-3.png" alt="icon">
+                        <img src="assets/img/sidebar/icon-10.png" alt="icon">
                         <span> المدرسين</span>
                         <span style="float:left;" class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['teachersSubmenu']}"></span>
                     </a>
@@ -45,16 +45,14 @@
                 </li>
                 <li class="submenu" (click)="toggleSubmenu('studentsSubmenu')">
                     <a href="javascript:void(0);">
-                        <img src="assets/img/sidebar/icon-3.png" alt="icon">
+                        <img src="assets/img/sidebar/icon-10.png" alt="icon">
                         <span> الطلاب</span>
                         <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['studentsSubmenu']}"></span>
                     </a>
                     <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('studentsSubmenu')">
                         <li><a routerLink="/school/students/all-students" routerLinkActive="active"><span>كل الطلاب</span></a></li>
-                        <li><a routerLink="/school/students/add-student"><span>إضافة طالب</span></a></li>
+                        <li><a routerLink="/school/students/add-student/1"><span>إضافة طالب</span></a></li>
                         <li><a routerLink="/school/students/edit-student"><span>تعديل طالب</span></a></li>
-                        <li><a routerLink="/school/students/chart-for-student"><span>طالب جديد</span></a></li>
-                        <li><a routerLink="/school/students/about-students"><span>عن الطلاب</span></a></li>
                     </ul>
                 </li>
                 <!-- Add other menu items similarly -->
@@ -65,14 +63,23 @@
                         <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['guardianSubmenu']}"></span>
                     </a>
                     <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('guardianSubmenu')">
-                        <li><a routerLink="/school/parants"><span> عرض أولياء الامور </span></a></li>
-                        <li><a routerLink="/school/students/add-student"><span>إضافة طالب</span></a></li>
+                        <li><a routerLink="/school/guardian/"><span> عرض أولياء الامور </span></a></li>
                         <li><a routerLink="/edit-student"><span>تعديل طالب</span></a></li>
-                        <li><a routerLink=""><span>عن الطلاب</span></a></li>
+                    </ul>
+                </li>
+                <li class="submenu" (click)="toggleSubmenu('accountSubmenu')">
+                    <a href="javascript:void(0);">
+                        <img src="assets/img/sidebar/icon-3.png" alt="icon">
+                        <span>الحسابات</span>
+                        <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['accountSubmenu']}"></span>
+                    </a>
+                    <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('accountSubmenu')">
+                        <li><a routerLink="/school/account/"><span>الحسابات</span></a></li>
+                        <li><a routerLink="/school/account/bill"><span>الفواتير</span></a></li>
                     </ul>
                 </li>
                 <li>
-                    <a routerLink="dashboard"><img src="assets/img/sidebar/icon-6.png" alt="icon">
+                    <a routerLink="/school/allotment"><img src="assets/img/sidebar/icon-6.png" alt="icon">
                         <span>التقويم</span></a>
                 </li>
                 <li>
@@ -89,7 +96,7 @@
                 </li>
                 <li class="submenu" (click)="toggleSubmenu('accountsSubmenu')">
                     <a href="javascript:void(0);">
-                        <img src="assets/img/sidebar/icon-10.png" alt="icon">
+                        <img src="assets/img/sidebar/icon-11.png" alt="icon">
                         <span> الرسوم</span>
                         <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['accountsSubmenu']}"></span>
                     </a>
@@ -99,6 +106,18 @@
                         <li><a routerLink="/school/CaptureBonds"><span>النفقات</span></a></li>
                         <!-- <li><a href="inbox.html"><span>Provident Fund</span></a></li> -->
                         <li><a routerLink="/school/CaptureBonds"><span>الضرائب</span></a></li>
+                    </ul>
+                </li>
+                <li class="submenu" (click)="toggleSubmenu('courses')">
+                    <a href="javascript:void(0);">
+                        <img src="assets/img/sidebar/icon-19.png" alt="icon">
+                        <span> المقررات و الخطط</span>
+                        <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['courses']}"></span>
+                    </a>
+                    <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('courses')">
+                        <li><a routerLink="/school/course/"><span>الكتب</span></a></li>
+                        <li><a routerLink="/school/course/courses"><span>المقررات</span></a></li>
+                        <li><a routerLink="/school/course/plain"><span>خطط المقررات</span></a></li>
                     </ul>
                 </li>
                 <li class="submenu" (click)="toggleSubmenu('payrollSubmenu')">

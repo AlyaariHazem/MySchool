@@ -46,7 +46,7 @@ mat-form-field {
 
 .showFee{
   position: relative;
-  left: -35%;
+  left: -44%;
   top: -3rem;
 }
 .container {
@@ -225,3 +225,19 @@ li:hover {
 :host ::ng-deep .p-dialog-header-close{
   background-color: white!important;
 }//***********************
+
+// this for pagnator
+:host ::ng-deep{
+  .cPaginator{
+    position: absolute;
+    margin-top: -5rem;
+    left: 27%;
+  }
+}
+:host ::ng-deep{
+  .chipsOne{
+    position: absolute;
+    margin-top: -0.2rem;
+    left: 3%;
+  }
+}

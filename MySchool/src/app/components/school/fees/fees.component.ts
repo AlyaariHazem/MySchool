@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { PageEvent } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 interface City {
   name: string;
@@ -22,36 +23,15 @@ export class FeesComponent {
   }
   form: FormGroup;
   cities: City[] | undefined;
+  
+  values = new FormControl<string[] | null>(null);
+  max = 2;
 
   selectedCity: City | undefined;
 
-  // Dropdown options
-  studentOptions: string[] = ['طالب 1', 'طالب 2', 'طالب 3'];
-  stageOptions: string[] = ['المرحلة الأولى', 'المرحلة الثانية', 'المرحلة الثالثة'];
-  classOptions: string[] = ['الصف الأول', 'الصف الثاني', 'الصف الثالث'];
 
-  // Selection states
-  selectedStudent: string | null = null;
-  selectedStage: string | null = null;
-  selectedClass: string | null = null;
-
-  isStudentSelected = false;
-  isStageSelected = false;
-  isClassSelected = false;
-
-  students = [
-    {
-      id: 1,
-      name: 'أحمد علي',
-      stage: 'المرحلة الأولى',
-      class: 'الصف الأول',
-      division: 'الشعبة أ',
-      age: 10,
-      gender: 'ذكر',
-      registrationDate: '2024-11-01',
-    },
-    // Add more student data as needed
-  ];
+  students =[1,2,3,4,5,6,7,8,9,10,];
+  displayedStudents: number[] = []; // Students for the current page
   
   isSmallScreen = false;
   private mediaSub: Subscription | null = null;
@@ -68,6 +48,8 @@ export class FeesComponent {
   }
 
   ngOnInit(): void {
+    this.length = this.students.length; // Set the total number of items
+    this.updateDisplayedStudents(); // Initialize the displayed students
     this.mediaSub = this.mediaObserver.asObservable().subscribe((changes: MediaChange[]) => {
       this.isSmallScreen = changes.some(
         (change) => change.mqAlias === 'xs' || change.mqAlias === 'sm'
@@ -88,32 +70,18 @@ export class FeesComponent {
     }
   }
 
-  // Track selection changes
-  onSelectionChange(type: string, value: string): void {
-    if (type === 'student') {
-      this.selectedStudent = value;
-      this.isStudentSelected = value !== null;
-    } else if (type === 'stage') {
-      this.selectedStage = value;
-      this.isStageSelected = value !== null;
-    } else if (type === 'class') {
-      this.selectedClass = value;
-      this.isClassSelected = value !== null;
-    }
+  currentPage: number = 0; // Current page index
+  pageSize: number = 5; // Number of items per page
+  length: number = 0; // Total number of items
+  updateDisplayedStudents(): void {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.displayedStudents = this.students.slice(startIndex, endIndex);
   }
-
-  // Clear the selection
-  clearSelection(type: string): void {
-    if (type === 'student') {
-      this.selectedStudent = null;
-      this.isStudentSelected = false;
-    } else if (type === 'stage') {
-      this.selectedStage = null;
-      this.isStageSelected = false;
-    } else if (type === 'class') {
-      this.selectedClass = null;
-      this.isClassSelected = false;
-    }
-  }
-
+ // Handle paginator events
+ onPageChange(event: PageEvent): void {
+  this.currentPage = event.pageIndex;
+  this.pageSize = event.pageSize;
+  this.updateDisplayedStudents();
+}
 }

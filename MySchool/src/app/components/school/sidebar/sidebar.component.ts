@@ -27,8 +27,10 @@ export class SidebarComponent implements OnInit {
     teachersSubmenu: false,
     studentsSubmenu: false,
     guardianSubmenu: false,
+    accountSubmenu:false,
     accountsSubmenu: false,
     blogSubmenu: false,
+    courses: false,
     payrollSubmenu: false,
     mangmentSubmenu: false,
     employeesSubmenu: false,
@@ -49,14 +51,12 @@ export class SidebarComponent implements OnInit {
       this.closeOtherSubmenus(parentSubmenu, submenu);
     }
     this.isSubmenuOpen[submenu] = !this.isSubmenuOpen[submenu];
-    localStorage.setItem(submenu, this.isSubmenuOpen[submenu] ? 'open' : 'closed');
   }
 
   closeOtherSubmenus(parentSubmenu: string, currentSubmenu: string) {
     for (const submenu in this.isSubmenuOpen) {
       if (submenu !== currentSubmenu && submenu.startsWith(parentSubmenu)) {
         this.isSubmenuOpen[submenu] = false;
-        localStorage.setItem(submenu, 'closed');
       }
     }
   }

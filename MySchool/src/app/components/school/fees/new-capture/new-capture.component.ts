@@ -23,11 +23,11 @@ export class NewCaptureComponent {
 
   ngOnInit() {
       this.cities = [
-          { name: 'New Yorkaaaaaaaaaaa', code: 'NY' },
-          { name: 'Rome', code: 'RM' },
-          { name: 'London', code: 'LDN' },
-          { name: 'Istanbul', code: 'IST' },
-          { name: 'Paris', code: 'PRS' }
+          { name: 'حازم عبدالله اليعري', code: 'NY' },
+          { name: 'علي عبدالله اليعري', code: 'RM' },
+          { name: 'محمد عبدالله اليعري', code: 'LDN' },
+          { name: 'فاهم عبدالله اليعري', code: 'IST' },
+          { name: 'أحمد فتحي مسفر', code: 'PRS' }
       ];
   }
 }

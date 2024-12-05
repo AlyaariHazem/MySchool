@@ -17,6 +17,7 @@ import { PanelModule } from 'primeng/panel';
 import { ChipsModule } from 'primeng/chips';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
+import { EditorModule } from 'primeng/editor';
 
 import { SchoolRoutingModule } from './school-routing.module';
 import { HeaderComponent } from './header/header.component';
@@ -24,7 +25,6 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { PageHeaderComponent } from './page-header/page-header.component';
 import { ChartForStudentComponent } from './students/chart-for-student/chart-for-student.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { AddParentsComponent } from './parents/add-parents/add-parents.component';
 import { AllParentsComponent } from './parents/all-parents/all-parents.component';
 import { EditParentsComponent } from './parents/edit-parents/edit-parents.component';
 import { AboutStudentComponent } from './students/about-student/about-student.component';
@@ -53,6 +53,14 @@ import { NewYearComponent } from './sittings/study-year/new-year/new-year.compon
 import { NewCaptureComponent } from './fees/new-capture/new-capture.component';
 import { FeesComponent } from './fees/fees.component';
 import { FeeComponent } from './students/new-student/fee/fee.component';
+import { CoursesComponent } from './courses-and-plains/courses/courses.component';
+import { PlainsComponent } from './courses-and-plains/plains/plains.component';
+import { CoursesAndPlains } from './courses-and-plains/courses-and-plains.component';
+import { BooksComponent } from './courses-and-plains/books/books.component';
+import { AccountsComponent } from './accounts/accounts.component';
+import { BillsComponent } from './accounts/bills/bills.component';
+import { AddAccountComponent } from './accounts/add-account/add-account.component';
+import { AllotmentComponent } from './allotment-report/allotment/allotment.component';
 
 
 
@@ -60,7 +68,6 @@ const components = [
   DashboardComponent,
   HeaderComponent,
   PageHeaderComponent,
-  AddParentsComponent,
   AllParentsComponent,
   EditParentsComponent,
   SidebarComponent,
@@ -89,7 +96,14 @@ const components = [
   NewCaptureComponent,
   FeeClassComponent,
   FeeComponent,
-  
+  CoursesComponent,
+  PlainsComponent,
+  CoursesAndPlains,
+  BooksComponent,
+  AccountsComponent,
+  BillsComponent,
+  AddAccountComponent,
+  AllotmentComponent
 
 ];
 
@@ -100,6 +114,7 @@ const modules = [
   MatPaginatorModule,
   MatInputModule,
   MatOption,
+  EditorModule,
   FormsModule,
   DropdownModule,
   MatSelectModule,
