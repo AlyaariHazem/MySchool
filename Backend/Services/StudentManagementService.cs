@@ -18,6 +18,7 @@ public class StudentManagementService
     private readonly IGuardianRepository _guardianRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly DatabaseContext _dbContext;
+    private readonly IAccountRepository _accountRepository;
     private readonly IMapper _mapper;
 
     public StudentManagementService(
@@ -25,18 +26,21 @@ public class StudentManagementService
         IGuardianRepository guardianRepository,
         IStudentRepository studentRepository,
         DatabaseContext dbContext,
+        IAccountRepository accountRepository,
         IMapper mapper)
     {
         _userRepository = userRepository;
         _guardianRepository = guardianRepository;
         _studentRepository = studentRepository;
         _dbContext = dbContext;
+        _accountRepository = accountRepository;
         _mapper = mapper;
     }
 
     public async Task<Student> AddStudentWithGuardianAsync(
         ApplicationUser guardianUser, string guardianPassword, Guardian guardian,
-        ApplicationUser studentUser, string studentPassword, Student student)
+        ApplicationUser studentUser, string studentPassword, Student student,
+    Accounts account, AccountStudentGuardian accountStudentGuardian)
     {
         // Step 1: Add Guardian's User
         var createdGuardianUser = await _userRepository.CreateUserAsync(guardianUser, guardianPassword, "Guardian");
@@ -44,20 +48,31 @@ public class StudentManagementService
 
         // Step 2: Add Guardian
         var addedGuardian = await _guardianRepository.AddGuardianAsync(guardian);
-        student.GuardianID = addedGuardian.GuardianID;
+        // student.GuardianID = addedGuardian.GuardianID;
 
         // Step 3: Add Student's User
         var createdStudentUser = await _userRepository.CreateUserAsync(studentUser, studentPassword, "Student");
         student.UserID = createdStudentUser.Id;
+         var addedStudent = await _studentRepository.AddStudentAsync(student);
 
-        // Step 4: Add Student
-        return await _studentRepository.AddStudentAsync(student);
+
+         // Step 4: Create Account
+            var createdAccount = await _accountRepository.AddAccountAsync(account);
+
+            // Step 5: Create AccountStudentGuardian Mapping
+            accountStudentGuardian.AccountID = createdAccount.AccountID;
+            accountStudentGuardian.GuardianID = addedGuardian.GuardianID;
+            accountStudentGuardian.StudentID = addedStudent.StudentID;
+            await _accountRepository.AddAccountStudentGuardianAsync(accountStudentGuardian);
+
+
+        return addedStudent;
+        
     }
     public async Task<StudentDetailsDTO?> GetStudentByIdAsync(int id)
     {
         var student = await _dbContext.Students
             .Include(s => s.ApplicationUser) // Include ApplicationUser details
-            .Include(s => s.Guardian)        // Include Guardian details
             .Include(s => s.Division)       // Include Division details if needed
             .FirstOrDefaultAsync(s => s.StudentID == id);
 
@@ -83,7 +98,6 @@ public class StudentManagementService
             },
             DivisionID = student.DivisionID,
             PlaceBirth = student.PlaceBirth,
-            GuardianID = student.GuardianID,
             UserID = student.UserID,
             ApplicationUser = new ApplicationUserDTO
             {
@@ -94,11 +108,11 @@ public class StudentManagementService
             }
         };
     }
+
 public async Task<List<StudentDetailsDTO>> GetAllStudentsAsync()
 {
     var students = await _dbContext.Students
         .Include(s => s.ApplicationUser) // Include ApplicationUser details
-        .Include(s => s.Guardian)        // Include Guardian details
         .Include(s => s.Division)       // Include Division details
         .ToListAsync();
 
@@ -122,7 +136,6 @@ public async Task<List<StudentDetailsDTO>> GetAllStudentsAsync()
         },
         DivisionID = student.DivisionID,
         PlaceBirth = student.PlaceBirth,
-        GuardianID = student.GuardianID,
         UserID = student.UserID,
         ApplicationUser = new ApplicationUserDTO
         {

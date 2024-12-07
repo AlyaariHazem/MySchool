@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Backend.DTOS;
+using Backend.DTOS.School;
 using Backend.DTOS.School.Fees;
 using Backend.DTOS.School.Stages;
+using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
 using Backend.Models;
 
@@ -20,7 +22,6 @@ public class MappingConfig : Profile
             .ForMember(dest => dest.StudentCount, opt => opt.MapFrom(src => src.Divisions.Sum(c => c.Students.Count))) // Calculate total student count per class
             .ForMember(dest => dest.StageName, opt => opt.MapFrom(src => src.Stage.StageName)); 
 
-        // Mapping Stage -> StageDTO with ClassDTO for Classes property
         CreateMap<Stage, StageDTO>()
             .ForMember(dest => dest.Classes, opt => opt.MapFrom(src => src.Classes)) // Mapping to ClassDTO
             .ForMember(dest => dest.StudentCount,opt => opt.MapFrom(src => src.Classes.Sum(c => c.FeeClasses != null? c.FeeClasses
@@ -29,11 +30,9 @@ public class MappingConfig : Profile
         
         CreateMap<Class, AddClassDTO>().ReverseMap();
         
-        // Map Class -> ClassInStageDTO
         CreateMap<Class, ClassInStageDTO>()
             .ForMember(dest => dest.StudentCount, opt => opt.MapFrom(src => src.FeeClasses.Sum(s=>s.StudentClassFees.Count))); // Counting students in each class
 
-        // Map Division -> DivisionINClassDTO
         CreateMap<Division, DivisionINClassDTO>();
 
         CreateMap<StagesDTO, Stage>()
@@ -44,6 +43,8 @@ public class MappingConfig : Profile
         CreateMap<Division,UpdateDivisionDTO>().ReverseMap();
         CreateMap<Fee,GetFeeDTO>().ReverseMap();
         CreateMap<Student,StudentDetailsDTO>().ReverseMap();
+        CreateMap<School,SchoolDTO>().ReverseMap();
+        CreateMap<StudentClassFees,StudentClassFeeDTO>().ReverseMap();
         
         CreateMap<Fee,FeeDTO>().ReverseMap();
         CreateMap<FeeClass,AddFeeClassDTO>().ReverseMap();
@@ -55,6 +56,7 @@ public class MappingConfig : Profile
         CreateMap<FeeClass, AddFeeClassDTO>().ReverseMap()
         .ForMember(dest => dest.FeeID, opt => opt.MapFrom(src => src.FeeID))
         .ForMember(dest => dest.ClassID, opt => opt.MapFrom(src => src.ClassID));
+
 
         
     }

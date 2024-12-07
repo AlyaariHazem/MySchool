@@ -6,14 +6,14 @@ using Backend.Models;
 
 namespace Backend.DTOS.School.Students;
 
-public class StudentDetailsDTO
+public class StudentDto
 {
-    public int StudentID { get; set; }
-    public NameDTO FullName { get; set; }
-    public NameAlisDTO? FullNameAlis { get; set; }
+    public Name FullName { get; set; }
+    public NameAlis? FullNameAlis { get; set; }
+    public string? ImageURL { get; set; }
     public string? PlaceBirth { get; set; }
     public int DivisionID { get; set; }
     public string UserID { get; set; }
-    public ApplicationUserDTO ApplicationUser { get; set; }
-    public Guardian Guardian { get; set; }
+    public string Email { get; set; }
+    public string Password { get; set; }
 }

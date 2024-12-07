@@ -28,6 +28,16 @@ export class StudentsComponent implements OnInit {
   isStageSelected = false;
   isClassSelected = false;
 
+  showGrid:boolean=true;
+  showCulomn:boolean=false;
+  showStudentCulomn():void{
+    this.showCulomn=true;
+    this.showGrid=false;
+  }
+  showStudentGrid():void{
+    this.showCulomn=false;
+    this.showGrid=true;
+  }
   students = [
     {
       id: 1,
@@ -53,7 +63,7 @@ export class StudentsComponent implements OnInit {
       gradeName: ['', Validators.required],
     });
   }
-  
+
   id!:number;
   ngOnInit(): void {
     this.id = Number(this.route.snapshot.paramMap.get('id'));
@@ -107,8 +117,15 @@ export class StudentsComponent implements OnInit {
   }
 
   deleteStudent(studentId: number): void {
+    const confirmDelete = confirm('هل أنت متأكد من حذف هذا الطالب؟');
+  if (confirmDelete) {
+    // Filter out the student with the given ID
     this.students = this.students.filter((student) => student.id !== studentId);
-    this.toastr.warning('تم حذف الطالب');
+
+    // Show success notification
+    this.toastr.warning('تم حذف الطالب بنجاح');
+  }
   }
   cards:number[]=[1,2,3,4,5,6,7,8,9];
+  
 }

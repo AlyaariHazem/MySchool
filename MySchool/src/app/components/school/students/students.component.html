@@ -3,6 +3,10 @@
     <h2 class="school">عرض جميع الطلاب</h2>
     <div class="container">
       <div class="tabcontent">
+        <div class="col-4">
+          <i class="pi col-2 pi-bars"  (click)="showStudentCulomn()"></i>
+          <i class="bi col-2 bi-grid"  (click)="showStudentGrid()"></i>
+        </div>
         <form [formGroup]="form">
           <!-- First Dropdown -->
           <mat-form-field appearance="outline">
@@ -52,94 +56,98 @@
           إضافة طالب+
         </button>
         <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
-        <div class="group group2">
-          @for (card of cards; track $index) {
-          <div class="form-control">
-            <p-card class="responsive-card">
-              <ng-template pTemplate="header">
-                @if (card%2 == 0) {
-                  <img alt="Card" src="./../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" />
-                }@else{
-                  <img alt="Card" src="./../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.jpg" />
-                }
-              </ng-template>
-              <div>
-                Hazem.{{card}}
-                الصف:الأول
-                <hr>
-                النوع:ذكر
-                المرحلة:الثانية
-                الرسوم المطلوبة:10000
-                <hr>
-                
-              </div>
-              <ng-template pTemplate="footer">
-                <div class="flex gap-3 mt-1">
-                  <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
-                  <p-button label="ولي أمر" class="w-full" styleClass="custom-button guardain" />
-
+        @if (showGrid) {
+          <div class="group group2">
+            @for (card of cards; track $index) {
+            <div class="form-control">
+              <p-card class="responsive-card">
+                <ng-template pTemplate="header">
+                  @if (card%2 == 0) {
+                    <img alt="Card" src="./../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" />
+                  }@else{
+                    <img alt="Card" src="./../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.jpg" />
+                  }
+                </ng-template>
+                <div>
+                  Hazem.{{card}}
+                  الصف:الأول
+                  <hr>
+                  النوع:ذكر
+                  المرحلة:الثانية
+                  الرسوم المطلوبة:10000
+                  <hr>
+                  
                 </div>
-              </ng-template>
-            </p-card>
+                <ng-template pTemplate="footer">
+                  <div class="flex gap-3 mt-1">
+                    <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
+                    <p-button label="ولي أمر" class="w-full" styleClass="custom-button guardain" />
+  
+                  </div>
+                </ng-template>
+              </p-card>
+            </div>
+          }
           </div>
         }
-        </div>
         
        
-        <!-- <div class="table-container">
+        @if (showCulomn) {
           <div class="table-container">
-            <mat-card>
-              <table class="styled-table">
-                <thead>
-                  <tr>
-                    <th>رقم الطالب</th>
-                    <th>اسم الطالب</th>
-                    <th>المرحلة</th>
-                    <th>الصف</th>
-                    <th>الشعبة</th>
-                    <th>العمر</th>
-                    <th>النوع</th>
-                    <th>تاريخ التسجيل</th>
-                    <th>العملية</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (item of cards; track $index) {
-                  <tr *ngFor="let student of students">
-                    <td>{{ student.id }}</td>
-                    <td>حازم اليعري</td>
-                    <td>{{ student.stage }}</td>
-                    <td>{{ student.class }}</td>
-                    <td>{{ student.division }}</td>
-                    <td>{{ student.age }}</td>
-                    <td>{{ student.gender }}</td>
-                    <td>{{ student.registrationDate }}</td>
-                    <td>
-                      <div class="col text-left">
-                        <div class="mt-sm-0 mt-2">
-                          <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false">
-                            <i class="fas fa-ellipsis-h"></i>
-                          </button>
-                          <div class="dropdown-menu dropdown-menu-left">
-                            <a class="dropdown-item" ><i
-                                class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                            <div role="separator" class="dropdown-divider"></div>
-                            <a class="dropdown-item" ><i
-                                class="bi bi-trash IconDelete" (click)="deleteStudent(student.id)"></i>حذف</a>
+            <div class="table-container">
+              <mat-card>
+                <table class="styled-table">
+                  <thead>
+                    <tr>
+                      <th>رقم الطالب</th>
+                      <th>اسم الطالب</th>
+                      <th>المرحلة</th>
+                      <th>الصف</th>
+                      <th>الشعبة</th>
+                      <th>العمر</th>
+                      <th>النوع</th>
+                      <th>تاريخ التسجيل</th>
+                      <th>العملية</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of cards; track $index) {
+                    <tr *ngFor="let student of students">
+                      <td>{{ student.id }}</td>
+                      <td>حازم اليعري</td>
+                      <td>{{ student.stage }}</td>
+                      <td>{{ student.class }}</td>
+                      <td>{{ student.division }}</td>
+                      <td>{{ student.age }}</td>
+                      <td>{{ student.gender }}</td>
+                      <td>{{ student.registrationDate }}</td>
+                      <td>
+                        <div class="col text-left">
+                          <div class="mt-sm-0 mt-2">
+                            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                              aria-expanded="false">
+                              <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-left">
+                              <a class="dropdown-item" ><i
+                                  class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                              <div role="separator" class="dropdown-divider"></div>
+                              <a class="dropdown-item" ><i
+                                  class="bi bi-trash IconDelete" (click)="deleteStudent(student.id)"></i>حذف</a>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                }
-                </tbody>
-              </table>
-
-            </mat-card>
+                      </td>
+                    </tr>
+                  }
+                  </tbody>
+                </table>
+  
+              </mat-card>
+            </div>
+  
           </div>
-
-        </div> -->
+        }
       </div>
     </div>
   </div>

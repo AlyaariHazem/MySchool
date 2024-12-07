@@ -24,14 +24,15 @@ namespace Backend.Data
         public DbSet<Salary> Salarys { get; set; }
         public DbSet<Stage> Stages { get; set; }
         public DbSet<Year> Years { get; set; }
-        public DbSet<Vouchers> vouchers  { get; set; }
-        public DbSet<TypeAccount> TypeAccounts { get; set; }
         public DbSet<Fee> Fees { get; set; }
         public DbSet<FeeClass> FeeClass { get; set; }
-        public DbSet<StudentClassFees> StudentClassFees { get; set; }
+        public DbSet<Vouchers> vouchers  { get; set; }
         public DbSet<Guardian> Guardians { get; set; }
+        public DbSet<TypeAccount> TypeAccounts { get; set; }
         public DbSet<SubjectStudent> SubjectStudents { get; set; }
+        public DbSet<StudentClassFees> StudentClassFees { get; set; }
         public DbSet<TeacherStudent> TeacherStudents { get; set; }
+        public DbSet<AccountStudentGuardian> AccountStudentGuardians { get; set; }
         // public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -159,12 +160,12 @@ namespace Backend.Data
             .HasForeignKey(S => S.TeacherID)
             .OnDelete(DeleteBehavior.Restrict);
 
-            // one to many relationship for Guardian and Students
-            modelBuilder.Entity<Guardian>()
-                .HasMany<Student>(S => S.Students)
-                .WithOne(G => G.Guardian)
-                .HasForeignKey(S => S.GuardianID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // // one to many relationship for Guardian and Students
+            // modelBuilder.Entity<Guardian>()
+            //     .HasMany<Student>(S => S.Students)
+            //     .WithOne(G => G.Guardian)
+            //     .HasForeignKey(S => S.GuardianID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
             //composite Atribute for Student and Name
             modelBuilder.Entity<Student>()
@@ -182,19 +183,19 @@ namespace Backend.Data
             modelBuilder.Entity<Manager>()
             .OwnsOne(M => M.FullName);
 
-            // One-to-many: Guardian ↔ Account
-            modelBuilder.Entity<Guardian>()
-                .HasMany(g => g.Accounts)
-                .WithOne(a => a.Guardian)
-                .HasForeignKey(a => a.GuardianID)
-                .OnDelete(DeleteBehavior.Cascade);
+            // // One-to-many: Guardian ↔ Account
+            // modelBuilder.Entity<Guardian>()
+            //     .HasMany(g => g.Accounts)
+            //     .WithOne(a => a.Guardian)
+            //     .HasForeignKey(a => a.GuardianID)
+            //     .OnDelete(DeleteBehavior.Cascade);
             
             // One-to-many: Guardian ↔ Account
-            modelBuilder.Entity<Student>()
-                .HasMany(S => S.Accounts)
-                .WithOne(a => a.Student)
-                .HasForeignKey(a => a.StudentID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<Student>()
+            //     .HasMany(S => S.Accounts)
+            //     .WithOne(a => a.Student)
+            //     .HasForeignKey(a => a.StudentID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Attachments>()
                .HasOne(a => a.Student)
@@ -230,11 +231,11 @@ namespace Backend.Data
                 .HasForeignKey<Guardian>(g => g.UserID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Vouchers>()
-                .HasOne(v => v.Accounts)
-                .WithMany(a => a.Vouchers)
-                .HasForeignKey(v => v.AccountID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<Vouchers>()
+            //     .HasOne(v => v.Accounts)
+            //     .WithMany(a => a.Vouchers)
+            //     .HasForeignKey(v => v.AccountID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
             // One-to-One: ApplicationUser ↔ Manager
             modelBuilder.Entity<ApplicationUser>()
@@ -262,6 +263,31 @@ namespace Backend.Data
                 .HasForeignKey(tss => tss.SubjectID)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Ternary relationship between Guardian, Students,Vouchers, and Accounts
+            modelBuilder.Entity<AccountStudentGuardian>()
+                .HasOne(ASG => ASG.Accounts)
+                .WithMany(a => a.AccountStudentGuardians)
+                .HasForeignKey(ASG => ASG.AccountID)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            modelBuilder.Entity<Vouchers>()
+                .HasOne(v => v.AccountStudentGuardians)
+                .WithMany(ASG => ASG.Vouchers)
+                .HasForeignKey(v => v.AccountStudentGuardianID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+             modelBuilder.Entity<AccountStudentGuardian>()
+                .HasOne(ASG => ASG.Guardian)
+                .WithMany(a => a.AccountStudentGuardians)
+                .HasForeignKey(ASG => ASG.GuardianID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+             modelBuilder.Entity<AccountStudentGuardian>()
+                .HasOne(ASG => ASG.Student)
+                .WithMany(a => a.AccountStudentGuardians)
+                .HasForeignKey(ASG => ASG.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
                  // FeeClass to StudentClassFees
             modelBuilder.Entity<StudentClassFees>()
                 .HasOne(scf => scf.FeeClass)
@@ -288,7 +314,7 @@ namespace Backend.Data
                 .Property(v => v.OpenBalance)
                 .HasColumnType("decimal(18,2)"); 
             
-            modelBuilder.Entity<Accounts>()
+            modelBuilder.Entity<AccountStudentGuardian>()
                 .Property(v => v.Amount)
                 .HasColumnType("decimal(18,2)"); 
 

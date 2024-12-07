@@ -30,4 +30,6 @@ public class AddStudentWithGuardianRequest
     public string? StudentLastNameEng { get; set; }
     public int DivisionID { get; set; }
     public string? PlaceBirth { get; set; }
+    public decimal Amount { get; set; } = 0;
+    //
     }

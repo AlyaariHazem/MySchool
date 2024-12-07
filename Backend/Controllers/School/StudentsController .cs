@@ -71,11 +71,23 @@ namespace Backend.Controllers
                     DivisionID = request.DivisionID,
                     PlaceBirth = request.PlaceBirth
                 };
+                //Add Account
+                 var account = new Accounts
+                    {
+                        Note = "",
+                        State=true,
+                        TypeAccountID = 1
+                    };
 
+                 var accountStudentGuardian = new AccountStudentGuardian
+                    {
+                        Amount = request.Amount
+                    };
                 // Add Student and Guardian
                 var createdStudent = await _studentManagementService.AddStudentWithGuardianAsync(
                     guardianUser, request.GuardianPassword, guardian,
-                    studentUser, request.StudentPassword, student);
+                    studentUser, request.StudentPassword, student,
+                account, accountStudentGuardian);
 
                 return CreatedAtAction(nameof(GetStudentById), new { id = createdStudent.StudentID }, createdStudent);
             }

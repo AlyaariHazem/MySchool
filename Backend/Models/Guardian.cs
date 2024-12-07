@@ -16,8 +16,7 @@ namespace Backend.Models
         public string? Type{ get; set; }
         public string UserID { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
-        public virtual ICollection<Accounts> Accounts { get; set; }
-        public virtual ICollection<Student> Students { get; set; }
+        public virtual ICollection<AccountStudentGuardian> AccountStudentGuardians { get; set; }
          
     }
 }

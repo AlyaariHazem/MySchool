@@ -1,96 +1,96 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
-import { PageEvent } from '@angular/material/paginator';
-interface City {
-  name: string;
-  code: string;
-}
+import { Component, inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { SchoolService } from '../../../../core/services/school.service';
+import { School } from '../../../../core/models/school.modul';
 
 @Component({
   selector: 'app-school-info',
   templateUrl: './school-info.component.html',
   styleUrls: ['./school-info.component.scss',
     './../../../../shared/styles/style-primeng-input.scss',
-    './../../../../shared/styles/style-select.scss'
-  ]
+    './../../../../shared/styles/style-select.scss',
+  ],
 })
 export class SchoolInfoComponent implements OnInit {
+  private schoolService = inject(SchoolService);
 
-  showDialog() {
-    console.log('the Book is added successfully!');
-  }
   form: FormGroup;
-  Books: City[] | undefined;
-  classes: City[] | undefined;
+  Books: any[] = [];
+  classes: any[] = [];
+  school: School[] = [];
 
-  values = new FormControl<string[] | null>(null);
-  max = 2;
-  SelectBook:boolean=false;
-  SelectClass:boolean=false;
-  selectedCity: City | undefined;
-  selectedBook:City | undefined;
-
-  selectBook():void{
-    this.SelectBook=true;
-  }
-  selectClass():void{
-    this.SelectClass=true;
-  }
-  students = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,];
-  displayedStudents: number[] = []; // Students for the current page
-
-  isSmallScreen = false;
-
-  constructor(
-    private formBuilder: FormBuilder,
-    public dialog: MatDialog
-  ) {
-    this.form = this.formBuilder.group({
-      BookID: ['', Validators.required],
-      ClassID: ['', Validators.required],
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      schoolID:[1],
+      schoolName:[''],
+      schoolNameEn: [''],
+      schoolVison: [''],
+      schoolType: [''],
+      hireDate: ['2024-01-01'],
+      schoolGoal: [''],
+      notes: [''],
+      country: [''],
+      city: [''],
+      schoolPhone: [''],
+      schoolMission: [''],
+      street: [''],
+      email: [''],
+      fax: [''],
+      zone: [''],
     });
   }
 
   ngOnInit(): void {
-    this.length = this.students.length;
-    this.updateDisplayedStudents(); 
-    this.form = this.formBuilder.group({
-      BookID: [null, Validators.required],
-      ClassID: [null, Validators.required],
+    this.schoolService.getAllSchools().subscribe((res) => {
+      this.school = res;
+      console.log('the schools are', this.school)
+      if (res.length > 0) {
+        this.initializeForm(res[0]); // Initialize the form with the first school data
+      }
     });
-    
+
     this.Books = [
-      { name: 'Math', code: 'MATH' },
-      { name: 'Science', code: 'SCI' },
-      { name: 'History', code: 'HIST' },
-      { name: 'Geography', code: 'GEO' },
-      { name: 'English', code: 'ENG' },
+      { name: 'Public', code: 'PUBLIC' },
+      { name: 'Private', code: 'PRIVATE' },
     ];
+
     this.classes = [
-      { name: 'Grade 1', code: 'G1' },
-      { name: 'Grade 2', code: 'G2' },
-      { name: 'Grade 3', code: 'G3' },
-      { name: 'Grade 4', code: 'G4' },
-      { name: 'Grade 5', code: 'G5' },
+      { name: 'Primary', code: 'PRIMARY' },
+      { name: 'Secondary', code: 'SECONDARY' },
     ];
   }
 
-  currentPage: number = 0; // Current page index
-  pageSize: number = 5; // Number of items per page
-  length: number = 0; // Total number of items
-  updateDisplayedStudents(): void {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.displayedStudents = this.students.slice(startIndex, endIndex);
-  }
-  // Handle paginator events
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateDisplayedStudents();
-  }
-  uploadPhoto(event:Event):void{
+ initializeForm(school: School): void {
+  this.form.patchValue({
+    schoolName: school.schoolName,
+    schoolNameEn: school.schoolNameEn,
+    schoolType: school.schoolType,
+    email: school.email,
+    country: school.country,
+    schoolPhone: school.schoolPhone,
+    city: school.city,
+    zone: school.zone,
+    street: school.street,
+    fax: school.fax,
+    schoolVison: school.schoolVison,
+    schoolMission: school.schoolMission
+  });
+}
 
+
+  uploadPhoto(event: Event): void {
+    // Logic for uploading photos
+    console.log('Photo uploaded!');
+  }
+
+  onSubmit(): void {
+    if (this.form.valid) {
+      console.log('added successfully',this.form);
+      this.schoolService.updateSchool(this.school[0].schoolID,this.form.value).subscribe(res=>{
+        console.log('added successfully',res);
+      })
+    } else {
+      console.log('Form is invalid!',this.form.value);
+    }
   }
 }

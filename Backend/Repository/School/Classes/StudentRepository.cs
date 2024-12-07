@@ -1,4 +1,5 @@
 using Backend.Data;
+using Backend.DTOS.School.Students;
 using Backend.Models;
 using Backend.Repository.School.Interfaces;
 using Microsoft.EntityFrameworkCore;
