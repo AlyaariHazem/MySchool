@@ -17,6 +17,6 @@ namespace Backend.Models
         public string UserID { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual ICollection<AccountStudentGuardian> AccountStudentGuardians { get; set; }
-         
+        public ICollection<Student> Students { get; set; } // Navigation Property 
     }
 }

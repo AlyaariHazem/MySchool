@@ -46,6 +46,20 @@ public class FeeClassRepostory:IFeeClassRepository
             }
             return FeeClassDTO;
         }
+        public async Task<List<FeeClassDTO>> GetByIdAsync(int classId)
+        {
+            var FeeClass= await _db.FeeClass
+                .Include(fc => fc.Class)
+                .Include(fc => fc.Fee)  
+                .Where(fc => fc.ClassID == classId)
+                .ToListAsync();
+            var FeeClassDTO=_mapper.Map<List<FeeClassDTO>>(FeeClass);
+            if (FeeClassDTO == null)
+            {
+                return null!;
+            }
+            return FeeClassDTO;
+        }
         public async Task<bool> checkIfExist(int classId, int feeId){
             var FeeClass= await _db.FeeClass.FirstOrDefaultAsync(fc=>fc.ClassID == classId && fc.FeeID==feeId);
             if(FeeClass == null)

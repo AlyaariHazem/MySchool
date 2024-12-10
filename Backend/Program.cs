@@ -79,7 +79,7 @@ builder.Services.AddSwaggerGen(swagger =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().
 AddEntityFrameworkStores<DatabaseContext>();
 builder.Services.AddScoped<StudentManagementService>();
-
+builder.Services.AddScoped<StudentClassFeesRepository>();
 
 // Register custom repositories
 builder.Services.AddScoped<IClassesRepository, ClassesRepository>();
@@ -93,6 +93,8 @@ builder.Services.AddScoped<IUserRepository, UsersRepository>();
 builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
 builder.Services.AddScoped<IStudentClassFeeRepository, StudentClassFeeRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IStudentClassFeesRepository, StudentClassFeesRepository>();
+
 
 // Configure Identity and JWT Authentication
 builder.Services.AddAuthentication(options =>

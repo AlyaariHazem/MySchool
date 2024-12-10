@@ -8,18 +8,18 @@ namespace Backend.DTOS;
 public class AddStudentWithGuardianRequest
 {
      // Guardian details
-    public string GuardianUserName { get; set; }
     public string GuardianEmail { get; set; }
-    public string GuardianPassword { get; set; }
+    public string GuardianPassword { get; set; } = string.Empty;
     public string GuardianAddress { get; set; }
-    public string GuardianGender { get; set; }
+    public string GuardianGender { get; set; } = "Guardian";
     public string GuardianFullName { get; set; }
     public string? GuardianType { get; set; }
+    public string GuardianPhone { get; set; } = string.Empty;
+    public DateTime GuardianDOB { get; set; }=DateTime.Now;
 
     // Student details
-    public string StudentUserName { get; set; }
-    public string StudentEmail { get; set; }
-    public string StudentPassword { get; set; }
+    public string? StudentEmail { get; set; }
+    public string StudentPassword { get; set; }=string.Empty;
     public string StudentAddress { get; set; }
     public string StudentGender { get; set; }
     public string StudentFirstName { get; set; }
@@ -30,6 +30,20 @@ public class AddStudentWithGuardianRequest
     public string? StudentLastNameEng { get; set; }
     public int DivisionID { get; set; }
     public string? PlaceBirth { get; set; }
+     public string StudentPhone { get; set; } = string.Empty;
+    public DateTime StudentDOB { get; set; }
+
     public decimal Amount { get; set; } = 0;
+    public int ClassID { get; set; }
+    public List<string>? Attachments { get; set; }
+    public List<DisCount>? Discounts { get; set; }
+
     //
     }
+
+public class DisCount{
+     public int ClassID { get; set; }
+    public int FeeID  { get; set; }
+    public decimal? AmountDiscount { get; set; }
+    public string? NoteDiscount { get; set; }
+}

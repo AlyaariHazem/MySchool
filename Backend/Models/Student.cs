@@ -18,6 +18,8 @@ namespace Backend.Models
         public string? PlaceBirth { get; set; }
         [Required]
         public int DivisionID { get; set; }
+        public int GuardianID { get; set; } // Foreign Key
+        public Guardian Guardian { get; set; } // Navigation Property
         [JsonIgnore]
         public Division Division { get; set; }
         public string UserID { get; set; }

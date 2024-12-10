@@ -11,6 +11,7 @@ public interface IFeeClassRepository
 {  
         Task<List<FeeClassDTO>> GetAllAsync();
         Task<FeeClassDTO> GetByIdAsync(int classId, int feeId);
+        Task<List<FeeClassDTO>> GetByIdAsync(int classId);
         Task AddAsync(AddFeeClassDTO feeClass);
         Task UpdateAsync(AddFeeClassDTO feeClass);
         Task DeleteAsync(int classId, int feeId);

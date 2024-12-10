@@ -15,5 +15,5 @@ public class StudentDetailsDTO
     public int DivisionID { get; set; }
     public string UserID { get; set; }
     public ApplicationUserDTO ApplicationUser { get; set; }
-    public Guardian Guardian { get; set; }
+    public GuardianDto Guardians { get; set; }
 }

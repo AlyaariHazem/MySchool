@@ -37,6 +37,18 @@ public class FeeClassController : ControllerBase
 
         return Ok(new { success = true, data = feeClass });
     }
+    // GET: api/FeeClass/{classId}
+    [HttpGet("{classId}")]
+    public async Task<IActionResult> GetFeeClassById(int classId)
+    {
+        var feeClass = await _feeClassRepository.GetByIdAsync(classId);
+        if (feeClass == null)
+        {
+            return NotFound(new {success = false, data = "FeeClass not found" });
+        }
+
+        return Ok(new { success = true, data = feeClass });
+    }
 
     // POST: api/FeeClass
     [HttpPost]

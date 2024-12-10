@@ -41,7 +41,7 @@ namespace Backend.Data
 
             modelBuilder.Entity<TeacherStudent>().HasKey(TS => new { TS.StudentID, TS.TeacherID });
             modelBuilder.Entity<FeeClass>().HasKey(SC => new { SC.FeeID, SC.ClassID });
-            modelBuilder.Entity<StudentClassFees>().HasKey(SCF=>new{SCF.ClassID,SCF.StudentID});
+            modelBuilder.Entity<StudentClassFees>().HasKey(SCF=>new{SCF.ClassID,SCF.FeeID,SCF.StudentID});
             modelBuilder.Entity<SubjectStudent>().HasKey(SS => new { SS.SubjectID, SS.StudentID });
 
             modelBuilder.Entity<Accounts>()
@@ -159,6 +159,16 @@ namespace Backend.Data
             .WithOne(T => T.Teacher)
             .HasForeignKey(S => S.TeacherID)
             .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Student>()
+            .HasOne(s => s.Guardian)
+            .WithMany(g => g.Students)
+            .HasForeignKey(s => s.GuardianID)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Student>()
+            .Property(s => s.GuardianID)
+            .HasDefaultValue(1012); // Default GuardianID value
 
             // // one to many relationship for Guardian and Students
             // modelBuilder.Entity<Guardian>()

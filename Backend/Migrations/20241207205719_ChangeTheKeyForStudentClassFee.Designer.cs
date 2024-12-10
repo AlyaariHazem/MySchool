@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241207205719_ChangeTheKeyForStudentClassFee")]
+    partial class ChangeTheKeyForStudentClassFee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -488,11 +491,6 @@ namespace Backend.Migrations
                     b.Property<int>("DivisionID")
                         .HasColumnType("int");
 
-                    b.Property<int>("GuardianID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1012);
-
                     b.Property<string>("ImageURL")
                         .HasColumnType("nvarchar(max)");
 
@@ -506,8 +504,6 @@ namespace Backend.Migrations
                     b.HasKey("StudentID");
 
                     b.HasIndex("DivisionID");
-
-                    b.HasIndex("GuardianID");
 
                     b.HasIndex("UserID")
                         .IsUnique();
@@ -1066,12 +1062,6 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.Guardian", "Guardian")
-                        .WithMany("Students")
-                        .HasForeignKey("GuardianID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Backend.Models.ApplicationUser", "ApplicationUser")
                         .WithOne("Student")
                         .HasForeignKey("Backend.Models.Student", "UserID")
@@ -1133,8 +1123,6 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("FullNameAlis");
-
-                    b.Navigation("Guardian");
                 });
 
             modelBuilder.Entity("Backend.Models.StudentClassFees", b =>
@@ -1400,8 +1388,6 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.Guardian", b =>
                 {
                     b.Navigation("AccountStudentGuardians");
-
-                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("Backend.Models.Manager", b =>
