@@ -12,6 +12,9 @@ public class StudentDetailsDTO
     public NameDTO FullName { get; set; }
     public NameAlisDTO? FullNameAlis { get; set; }
     public string? PlaceBirth { get; set; }
+    public string? StudentAddress { get; set; }
+    public string? StudentPhone { get; set; }
+    public DateTime StudnetDOB { get; set; }
     public int DivisionID { get; set; }
     public string UserID { get; set; }
     public ApplicationUserDTO ApplicationUser { get; set; }

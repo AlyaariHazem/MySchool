@@ -40,18 +40,34 @@ namespace Backend.Data
             base.OnModelCreating(modelBuilder); // Call the base method
 
             modelBuilder.Entity<TeacherStudent>().HasKey(TS => new { TS.StudentID, TS.TeacherID });
-            modelBuilder.Entity<FeeClass>().HasKey(SC => new { SC.FeeID, SC.ClassID });
-            modelBuilder.Entity<StudentClassFees>().HasKey(SCF=>new{SCF.ClassID,SCF.FeeID,SCF.StudentID});
             modelBuilder.Entity<SubjectStudent>().HasKey(SS => new { SS.SubjectID, SS.StudentID });
+
+            modelBuilder.Entity<Student>(entity =>
+            {
+                entity.HasKey(s => s.StudentID); // Primary key
+                entity.Property(s => s.StudentID)
+                    .ValueGeneratedNever(); // Disables auto-increment
+            });
+            modelBuilder.Entity<FeeClass>(entity =>
+            {
+                entity.HasKey(e => e.FeeClassID); // Single-column primary key
+                entity.Property(e => e.FeeClassID).ValueGeneratedOnAdd();
+                entity.Property(fc => fc.ClassID).IsRequired();
+                entity.Property(fc => fc.FeeID).IsRequired();
+            });
+
 
             modelBuilder.Entity<Accounts>()
                 .HasKey(a => a.AccountID);
-
+                
             modelBuilder.Entity<Fee>()
                 .HasKey(a => a.FeeID);
 
             modelBuilder.Entity<Attachments>()
                 .HasKey(a => a.AttachmentID);
+
+            modelBuilder.Entity<StudentClassFees>()
+                .HasKey(a => a.StudentClassFeesID);
 
             modelBuilder.Entity<Vouchers>()
                 .HasKey(v => v.VoucherID);
@@ -122,14 +138,14 @@ namespace Backend.Data
 
             // many to many relationship for Classes and Fees
             modelBuilder.Entity<FeeClass>()
-                .HasOne<Fee>(F => F.Fee)
-                .WithMany(FC => FC.FeeClasses)
-                .HasForeignKey(F => F.FeeID)
+                .HasOne(fc => fc.Class)
+                .WithMany(c => c.FeeClasses)
+                .HasForeignKey(fc => fc.ClassID)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<FeeClass>()
-                .HasOne<Class>(C => C.Class)
-                .WithMany(SC => SC.FeeClasses)
-                .HasForeignKey(F => F.ClassID)
+                .HasOne(fc => fc.Fee)
+                .WithMany(f => f.FeeClasses)
+                .HasForeignKey(fc => fc.FeeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // one to many relationship for Class and Subject
@@ -302,7 +318,8 @@ namespace Backend.Data
             modelBuilder.Entity<StudentClassFees>()
                 .HasOne(scf => scf.FeeClass)
                 .WithMany(fc => fc.StudentClassFees)
-                .HasForeignKey(scf => new { scf.ClassID, scf.FeeID });
+                .HasForeignKey(scf => scf.FeeClassID)
+                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<TypeAccount>()
                 .HasMany(t => t.Accounts)
@@ -314,7 +331,8 @@ namespace Backend.Data
             modelBuilder.Entity<StudentClassFees>()
                 .HasOne(scf => scf.Student)
                 .WithMany(s => s.StudentClassFees)
-                .HasForeignKey(scf => scf.StudentID);
+                .HasForeignKey(scf => scf.StudentID)
+                .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<Vouchers>()
                 .Property(v => v.Receipt)

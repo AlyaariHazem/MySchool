@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241102221730_chanageNameAllowNull")]
-    partial class chanageNameAllowNull
+    [Migration("20241213114028_EditFOreignKeyFOrFeeClass")]
+    partial class EditFOreignKeyFOrFeeClass
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,70 @@ namespace Backend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Backend.Models.AccountStudentGuardian", b =>
+                {
+                    b.Property<int>("AccountStudentGuardianID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountStudentGuardianID"));
+
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("GuardianID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentID")
+                        .HasColumnType("int");
+
+                    b.HasKey("AccountStudentGuardianID");
+
+                    b.HasIndex("AccountID");
+
+                    b.HasIndex("GuardianID");
+
+                    b.HasIndex("StudentID");
+
+                    b.ToTable("AccountStudentGuardians");
+                });
+
+            modelBuilder.Entity("Backend.Models.Accounts", b =>
+                {
+                    b.Property<int>("AccountID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountID"));
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("OpenBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("State")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TypeAccountID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("TypeOpenBalance")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AccountID");
+
+                    b.HasIndex("TypeAccountID");
+
+                    b.ToTable("Accounts");
+                });
+
             modelBuilder.Entity("Backend.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -32,6 +96,9 @@ namespace Backend.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -43,6 +110,12 @@ namespace Backend.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -61,9 +134,6 @@ namespace Backend.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Phone")
-                        .HasColumnType("int");
-
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -80,6 +150,10 @@ namespace Backend.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("UserType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -91,6 +165,36 @@ namespace Backend.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Backend.Models.Attachments", b =>
+                {
+                    b.Property<int>("AttachmentID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AttachmentID"));
+
+                    b.Property<string>("AttachmentURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("StudentID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("VoucherID")
+                        .HasColumnType("int");
+
+                    b.HasKey("AttachmentID");
+
+                    b.HasIndex("StudentID");
+
+                    b.HasIndex("VoucherID");
+
+                    b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("Backend.Models.Class", b =>
@@ -112,6 +216,9 @@ namespace Backend.Migrations
                     b.Property<int>("StageID")
                         .HasColumnType("int");
 
+                    b.Property<bool>("State")
+                        .HasColumnType("bit");
+
                     b.HasKey("ClassID");
 
                     b.HasIndex("StageID");
@@ -127,9 +234,6 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DivisionID"));
 
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
                     b.Property<int>("ClassID")
                         .HasColumnType("int");
 
@@ -137,11 +241,72 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("State")
+                        .HasColumnType("bit");
+
                     b.HasKey("DivisionID");
 
                     b.HasIndex("ClassID");
 
                     b.ToTable("Divisions");
+                });
+
+            modelBuilder.Entity("Backend.Models.Fee", b =>
+                {
+                    b.Property<int>("FeeID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FeeID"));
+
+                    b.Property<string>("FeeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FeeNameAlis")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("State")
+                        .HasColumnType("bit");
+
+                    b.HasKey("FeeID");
+
+                    b.ToTable("Fees");
+                });
+
+            modelBuilder.Entity("Backend.Models.FeeClass", b =>
+                {
+                    b.Property<int>("FeeClassID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FeeClassID"));
+
+                    b.Property<double?>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<int>("ClassID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FeeID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Mandatory")
+                        .HasColumnType("bit");
+
+                    b.HasKey("FeeClassID");
+
+                    b.HasIndex("ClassID");
+
+                    b.HasIndex("FeeID");
+
+                    b.ToTable("FeeClass");
                 });
 
             modelBuilder.Entity("Backend.Models.Guardian", b =>
@@ -152,23 +317,16 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GuardianID"));
 
-                    b.Property<string>("Description")
+                    b.Property<string>("FullName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("Type")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Job")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TypeGuardian")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
+                    b.Property<string>("UserID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("GuardianID");
 
@@ -186,21 +344,12 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ManagerID"));
 
-                    b.Property<int?>("Age")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("SchoolID")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
+                    b.Property<string>("UserID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ManagerID");
 
@@ -227,11 +376,11 @@ namespace Backend.Migrations
                     b.Property<int>("SalaryAmount")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("SalaryHireDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("SalaryHireDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<DateOnly>("SalaryMonth")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("SalaryMonth")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("TeacherID")
                         .HasColumnType("int");
@@ -262,6 +411,9 @@ namespace Backend.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
@@ -289,9 +441,6 @@ namespace Backend.Migrations
 
                     b.Property<string>("SchoolVison")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly>("School_Crea_Date")
-                        .HasColumnType("date");
 
                     b.Property<string>("Street")
                         .IsRequired()
@@ -342,29 +491,25 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.Student", b =>
                 {
                     b.Property<int>("StudentID")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentID"));
-
-                    b.Property<DateOnly>("DateOfBirth")
-                        .HasColumnType("date");
 
                     b.Property<int>("DivisionID")
                         .HasColumnType("int");
 
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("GuardianID")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1012);
 
-                    b.Property<string>("Phone")
+                    b.Property<string>("ImageURL")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
+                    b.Property<string>("PlaceBirth")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("StudentID");
 
@@ -378,19 +523,33 @@ namespace Backend.Migrations
                     b.ToTable("Students");
                 });
 
-            modelBuilder.Entity("Backend.Models.StudentClass", b =>
+            modelBuilder.Entity("Backend.Models.StudentClassFees", b =>
                 {
+                    b.Property<int>("StudentClassFeesID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentClassFeesID"));
+
+                    b.Property<decimal?>("AmountDiscount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("FeeClassID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NoteDiscount")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("StudentID")
                         .HasColumnType("int");
 
-                    b.Property<int>("ClassID")
-                        .HasColumnType("int");
+                    b.HasKey("StudentClassFeesID");
 
-                    b.HasKey("StudentID", "ClassID");
+                    b.HasIndex("FeeClassID");
 
-                    b.HasIndex("ClassID");
+                    b.HasIndex("StudentID");
 
-                    b.ToTable("StudentClass");
+                    b.ToTable("StudentClassFees");
                 });
 
             modelBuilder.Entity("Backend.Models.Subject", b =>
@@ -441,28 +600,12 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeacherID"));
 
-                    b.Property<int?>("Age")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly>("HireDate")
-                        .HasColumnType("date");
-
                     b.Property<int>("ManagerID")
                         .HasColumnType("int");
 
-                    b.Property<string>("PhoneNum")
+                    b.Property<string>("UserID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("TeacherID");
 
@@ -509,39 +652,84 @@ namespace Backend.Migrations
                     b.ToTable("TeacherSubjectStudent");
                 });
 
-            modelBuilder.Entity("Backend.Models.User", b =>
+            modelBuilder.Entity("Backend.Models.TypeAccount", b =>
                 {
-                    b.Property<int>("UserID")
+                    b.Property<int>("TypeAccountID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TypeAccountID"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<byte[]>("PasswordSalt")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserName")
+                    b.Property<string>("TypeAccountName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserType")
+                    b.HasKey("TypeAccountID");
+
+                    b.ToTable("TypeAccounts");
+
+                    b.HasData(
+                        new
+                        {
+                            TypeAccountID = 1,
+                            TypeAccountName = "Guardain"
+                        },
+                        new
+                        {
+                            TypeAccountID = 2,
+                            TypeAccountName = "School"
+                        },
+                        new
+                        {
+                            TypeAccountID = 3,
+                            TypeAccountName = "Branches"
+                        },
+                        new
+                        {
+                            TypeAccountID = 4,
+                            TypeAccountName = "Funds"
+                        },
+                        new
+                        {
+                            TypeAccountID = 5,
+                            TypeAccountName = "Employees"
+                        },
+                        new
+                        {
+                            TypeAccountID = 6,
+                            TypeAccountName = "Banks"
+                        });
+                });
+
+            modelBuilder.Entity("Backend.Models.Vouchers", b =>
+                {
+                    b.Property<int>("VoucherID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VoucherID"));
+
+                    b.Property<int>("AccountStudentGuardianID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UserID");
+                    b.Property<decimal>("Receipt")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("Users");
+                    b.HasKey("VoucherID");
+
+                    b.HasIndex("AccountStudentGuardianID");
+
+                    b.ToTable("vouchers");
                 });
 
             modelBuilder.Entity("Backend.Models.Year", b =>
@@ -555,17 +743,17 @@ namespace Backend.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<DateOnly>("HireDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("SchoolID")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly?>("YearDateEnd")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("YearDateEnd")
+                        .HasColumnType("datetime2");
 
-                    b.Property<DateOnly>("YearDateStart")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("YearDateStart")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("YearID");
 
@@ -707,6 +895,61 @@ namespace Backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Backend.Models.AccountStudentGuardian", b =>
+                {
+                    b.HasOne("Backend.Models.Accounts", "Accounts")
+                        .WithMany("AccountStudentGuardians")
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.Guardian", "Guardian")
+                        .WithMany("AccountStudentGuardians")
+                        .HasForeignKey("GuardianID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.Student", "Student")
+                        .WithMany("AccountStudentGuardians")
+                        .HasForeignKey("StudentID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Accounts");
+
+                    b.Navigation("Guardian");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Backend.Models.Accounts", b =>
+                {
+                    b.HasOne("Backend.Models.TypeAccount", "TypeAccount")
+                        .WithMany("Accounts")
+                        .HasForeignKey("TypeAccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TypeAccount");
+                });
+
+            modelBuilder.Entity("Backend.Models.Attachments", b =>
+                {
+                    b.HasOne("Backend.Models.Student", "Student")
+                        .WithMany("Attachments")
+                        .HasForeignKey("StudentID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Backend.Models.Vouchers", "Vouchers")
+                        .WithMany("Attachments")
+                        .HasForeignKey("VoucherID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Vouchers");
+                });
+
             modelBuilder.Entity("Backend.Models.Class", b =>
                 {
                     b.HasOne("Backend.Models.Stage", "Stage")
@@ -729,43 +972,34 @@ namespace Backend.Migrations
                     b.Navigation("Class");
                 });
 
-            modelBuilder.Entity("Backend.Models.Guardian", b =>
+            modelBuilder.Entity("Backend.Models.FeeClass", b =>
                 {
-                    b.HasOne("Backend.Models.User", "User")
-                        .WithOne("Guardian")
-                        .HasForeignKey("Backend.Models.Guardian", "UserID")
+                    b.HasOne("Backend.Models.Class", "Class")
+                        .WithMany("FeeClasses")
+                        .HasForeignKey("ClassID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
-                        {
-                            b1.Property<int>("GuardianID")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("MiddleName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("GuardianID");
-
-                            b1.ToTable("Guardians");
-
-                            b1.WithOwner()
-                                .HasForeignKey("GuardianID");
-                        });
-
-                    b.Navigation("FullName")
+                    b.HasOne("Backend.Models.Fee", "Fee")
+                        .WithMany("FeeClasses")
+                        .HasForeignKey("FeeID")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Class");
+
+                    b.Navigation("Fee");
+                });
+
+            modelBuilder.Entity("Backend.Models.Guardian", b =>
+                {
+                    b.HasOne("Backend.Models.ApplicationUser", "ApplicationUser")
+                        .WithOne("Guardian")
+                        .HasForeignKey("Backend.Models.Guardian", "UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Backend.Models.Manager", b =>
@@ -776,10 +1010,10 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.User", "User")
+                    b.HasOne("Backend.Models.ApplicationUser", "ApplicationUser")
                         .WithOne("Manager")
                         .HasForeignKey("Backend.Models.Manager", "UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
@@ -807,12 +1041,12 @@ namespace Backend.Migrations
                                 .HasForeignKey("ManagerID");
                         });
 
+                    b.Navigation("ApplicationUser");
+
                     b.Navigation("FullName")
                         .IsRequired();
 
                     b.Navigation("School");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Backend.Models.Salary", b =>
@@ -848,14 +1082,36 @@ namespace Backend.Migrations
                     b.HasOne("Backend.Models.Guardian", "Guardian")
                         .WithMany("Students")
                         .HasForeignKey("GuardianID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.ApplicationUser", "ApplicationUser")
+                        .WithOne("Student")
+                        .HasForeignKey("Backend.Models.Student", "UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.User", "User")
-                        .WithOne("Student")
-                        .HasForeignKey("Backend.Models.Student", "UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.OwnsOne("Backend.Models.NameAlis", "FullNameAlis", b1 =>
+                        {
+                            b1.Property<int>("StudentID")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("FirstNameEng")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("LastNameEng")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("MiddleNameEng")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("StudentID");
+
+                            b1.ToTable("Students");
+
+                            b1.WithOwner()
+                                .HasForeignKey("StudentID");
+                        });
 
                     b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
                         {
@@ -882,31 +1138,33 @@ namespace Backend.Migrations
                                 .HasForeignKey("StudentID");
                         });
 
+                    b.Navigation("ApplicationUser");
+
                     b.Navigation("Division");
 
                     b.Navigation("FullName")
                         .IsRequired();
 
-                    b.Navigation("Guardian");
+                    b.Navigation("FullNameAlis");
 
-                    b.Navigation("User");
+                    b.Navigation("Guardian");
                 });
 
-            modelBuilder.Entity("Backend.Models.StudentClass", b =>
+            modelBuilder.Entity("Backend.Models.StudentClassFees", b =>
                 {
-                    b.HasOne("Backend.Models.Class", "Class")
-                        .WithMany("StudentClass")
-                        .HasForeignKey("ClassID")
+                    b.HasOne("Backend.Models.FeeClass", "FeeClass")
+                        .WithMany("StudentClassFees")
+                        .HasForeignKey("FeeClassID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Backend.Models.Student", "Student")
-                        .WithMany("StudentClass")
+                        .WithMany("StudentClassFees")
                         .HasForeignKey("StudentID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Class");
+                    b.Navigation("FeeClass");
 
                     b.Navigation("Student");
                 });
@@ -949,10 +1207,10 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.User", "User")
+                    b.HasOne("Backend.Models.ApplicationUser", "ApplicationUser")
                         .WithOne("Teacher")
                         .HasForeignKey("Backend.Models.Teacher", "UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
@@ -980,12 +1238,12 @@ namespace Backend.Migrations
                                 .HasForeignKey("TeacherID");
                         });
 
+                    b.Navigation("ApplicationUser");
+
                     b.Navigation("FullName")
                         .IsRequired();
 
                     b.Navigation("Manager");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Backend.Models.TeacherStudent", b =>
@@ -1032,6 +1290,17 @@ namespace Backend.Migrations
                     b.Navigation("Subject");
 
                     b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("Backend.Models.Vouchers", b =>
+                {
+                    b.HasOne("Backend.Models.AccountStudentGuardian", "AccountStudentGuardians")
+                        .WithMany("Vouchers")
+                        .HasForeignKey("AccountStudentGuardianID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AccountStudentGuardians");
                 });
 
             modelBuilder.Entity("Backend.Models.Year", b =>
@@ -1096,11 +1365,32 @@ namespace Backend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Backend.Models.AccountStudentGuardian", b =>
+                {
+                    b.Navigation("Vouchers");
+                });
+
+            modelBuilder.Entity("Backend.Models.Accounts", b =>
+                {
+                    b.Navigation("AccountStudentGuardians");
+                });
+
+            modelBuilder.Entity("Backend.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Guardian");
+
+                    b.Navigation("Manager");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
+                });
+
             modelBuilder.Entity("Backend.Models.Class", b =>
                 {
                     b.Navigation("Divisions");
 
-                    b.Navigation("StudentClass");
+                    b.Navigation("FeeClasses");
 
                     b.Navigation("Subjects");
                 });
@@ -1110,8 +1400,20 @@ namespace Backend.Migrations
                     b.Navigation("Students");
                 });
 
+            modelBuilder.Entity("Backend.Models.Fee", b =>
+                {
+                    b.Navigation("FeeClasses");
+                });
+
+            modelBuilder.Entity("Backend.Models.FeeClass", b =>
+                {
+                    b.Navigation("StudentClassFees");
+                });
+
             modelBuilder.Entity("Backend.Models.Guardian", b =>
                 {
+                    b.Navigation("AccountStudentGuardians");
+
                     b.Navigation("Students");
                 });
 
@@ -1135,7 +1437,11 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.Student", b =>
                 {
-                    b.Navigation("StudentClass");
+                    b.Navigation("AccountStudentGuardians");
+
+                    b.Navigation("Attachments");
+
+                    b.Navigation("StudentClassFees");
 
                     b.Navigation("SubjectStudents");
 
@@ -1160,19 +1466,14 @@ namespace Backend.Migrations
                     b.Navigation("TeacherSubjectStudents");
                 });
 
-            modelBuilder.Entity("Backend.Models.User", b =>
+            modelBuilder.Entity("Backend.Models.TypeAccount", b =>
                 {
-                    b.Navigation("Guardian")
-                        .IsRequired();
+                    b.Navigation("Accounts");
+                });
 
-                    b.Navigation("Manager")
-                        .IsRequired();
-
-                    b.Navigation("Student")
-                        .IsRequired();
-
-                    b.Navigation("Teacher")
-                        .IsRequired();
+            modelBuilder.Entity("Backend.Models.Vouchers", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("Backend.Models.Year", b =>

@@ -3,19 +3,19 @@
     <div class="form-control">
       <mat-form-field class="inputText">
         <mat-label>إجمالي الرسوم</mat-label>
-        <input class="input1" disabled value="50000" type="text" matInput />
+        <input class="input1" disabled [value]="getTotalFees()" type="text" matInput />
       </mat-form-field>
     </div>
     <div class="form-control">
       <mat-form-field class="inputText">
         <mat-label>إجمالي الخصومات</mat-label>
-        <input class="input1" disabled value="20000" type="text" matInput />
+        <input class="input1" disabled [value]="getTotalDiscounts()" type="text" matInput />
       </mat-form-field>
     </div>
     <div class="form-control">
       <mat-form-field class="inputText">
         <mat-label>الرسوم المطلوبة</mat-label>
-        <input class="input1" disabled value="30000" type="text" matInput />
+        <input class="input1" disabled  [value]="getRequiredFees()" type="text" matInput />
       </mat-form-field>
     </div>
 
@@ -28,8 +28,8 @@
         ✖
       </label>
       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
-        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
-          {{ option }}
+        <mat-option *ngFor="let option of classes" [value]="option.classID">
+          {{ option.className }}
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>
@@ -50,60 +50,28 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td class="ID-colum">1</td>
-        <td>رسوم تسجيل</td>
-        <td>50000</td>
+      <tr *ngFor="let feeClass of feeClasses; let i = index">
+        <td class="ID-colum">{{ i + 1 }}</td>
+        <td>{{ feeClass.feeName }}</td>
+        <td>{{ feeClass.amount }}</td>
         <td>
-          <input class="InCount" type="number">
+          <input class="InCount" type="number" [(ngModel)]="feeClass.amountDiscount"
+            (ngModelChange)="handleDiscountChange($event, feeClass)" />
+          <input class="InCount" type="hidden" [(ngModel)]="feeClass.feeClassID" />
         </td>
         <td>
-          <input class="Note" type="text">
+          <input class="Note" type="text" [(ngModel)]="feeClass.noteDiscount"
+            (ngModelChange)="handleNoteChange($event, feeClass)" />
         </td>
-        <td>أول</td>
+        <td>{{ feeClass.className }}</td>
         <td>
           <label>
-            <input type="checkbox">
-            <span class="custom-checkbox"></span>
-          </label>
-        </td>
-      </tr>
-      <tr>
-        <td class="ID-colum">1</td>
-        <td>رسوم تسجيل</td>
-        <td>50000</td>
-        <td>
-          <input class="InCount" type="text">
-        </td>
-        <td>
-          <input class="Note" type="text">
-        </td>
-        <td>أول</td>
-        <td>
-          <label>
-            <input type="checkbox">
-            <span class="custom-checkbox"></span>
-          </label>
-        </td>
-      </tr>
-      <tr>
-        <td class="ID-colum">1</td>
-        <td>رسوم تسجيل</td>
-        <td>50000</td>
-        <td>
-          <input class="InCount" type="text">
-        </td>
-        <td>
-          <input class="Note" type="text">
-        </td>
-        <td>أول</td>
-        <td>
-          <label>
-            <input type="checkbox">
-            <span class="custom-checkbox"></span>
+            <input type="checkbox" [checked]="feeClass.mandatory" (change)="changeMandatory($event, feeClass)" />
+            <span class="custom-checkbox" [ngClass]="feeClass.mandatory ? 'mandatory' : ''"></span>
           </label>
         </td>
       </tr>
     </tbody>
+
   </table>
 </div>

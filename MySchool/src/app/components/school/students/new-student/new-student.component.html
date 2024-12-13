@@ -1,16 +1,15 @@
-<form class="group5" [formGroup]="mainForm" (ngSubmit)="onSubmit()">
+<form class="group5" [formGroup]="formGroup">
   <button class="close-btn" (click)="closeModal()">×</button>
   <!-- <app-head></app-head> -->
   <div class="student-header rtl-direction">
     <div class="student-photo-section">
+      <h2 class="school">إضافة طالب جديد</h2>
       <div class="student-photo">
         <label for="fileInput">
           <img src="assets/img/user.jpg" alt="Student Photo" />
         </label>
-        <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
-        <button (click)="takePhoto()" class="btn btn-primary">
-          التقاط صورة
-        </button>
+        <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)"  style="display: none" />
+        <button class="btn btn-primary">التقاط صورة</button>
       </div>
     </div>
 
@@ -21,21 +20,21 @@
           <!-- <span>{{ student?.name }}</span> -->
         </div>
         <div class="student-id">
-          <label>رقم الطالب:</label>
+          <label>رقم الطالب: {{studentID}}</label>
           <!-- <span>{{ student?.id }}</span> -->
         </div>
       </div>
 
       <div class="buttons">
-        <button class="btn btn-success" type="submit" (click)="onSubmit()">إضافة</button>
+        <button class="btn btn-success" type="submit" [disabled]="!formGroup.valid" (click)="onSubmit()">إضافة</button>
         <button class="btn btn-info">جديد</button>
         <button class="btn btn-warning">الشهادة</button>
       </div>
     </div>
   </div>
 
+  
   <div id="id01" class="" dir="rtl">
-    <h2 class="school">إضافة طالب جديد</h2>
     <div class="modal-content" style="background-color: #ffffff !important">
       <div class="container">
         <button [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }" id="defaultOpen"
@@ -63,24 +62,27 @@
 
     @if (activeTab === 'DataStudent') {
     <div class="tabcontent">
-      <app-primary-data [formGroup]="$any(mainForm.get('primaryData'))"></app-primary-data>
+      <app-primary-data [formGroup]="$any(formGroup.get('primaryData'))"></app-primary-data>
       <!-- this is not work when I add fromGroup but can I do that with anuther way?  -->
     </div>
     } @if (activeTab === 'OptionData') {
     <div class="tabcontent">
-      <app-option-data [formGroup]="$any(mainForm.get('optionData'))"></app-option-data>
+      <app-option-data [formGroup]="$any(formGroup.get('optionData'))"></app-option-data>
     </div>
     } @if (activeTab === 'guardian') {
     <div class="tabcontent">
-      <app-guardian [formGroup]="$any(mainForm.get('guardian'))"></app-guardian>
+      <app-guardian [formGroup]="$any(formGroup.get('guardian'))"></app-guardian>
     </div>
     } @if (activeTab === 'fees') {
     <div class="tabcontent">
-      <app-fee [formGroup]="$any(mainForm.get('fees'))"></app-fee>
+      <app-fee [formGroup]="$any(formGroup.get('fees'))"
+      (feeClassesChanged)="loadFeesForClass($event)"
+      (requiredFeesChanged)="onRequiredFeesChanged($event)"></app-fee>
     </div>
     } @if (activeTab === 'document') {
     <div class="tabcontent">
-      <app-document [formGroup]="$any(mainForm.get('document'))"></app-document>
+      <app-document [formGroup]="$any(formGroup.get('documents'))"
+      (filesChanged)="updateAttachments($event)"></app-document>
     </div>
     }
   </div>

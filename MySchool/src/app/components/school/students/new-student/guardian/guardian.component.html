@@ -5,7 +5,7 @@
       <div class="group group1">
         <div class="form-control">
           <label for="guardianName" class="label1">اسم ولي الأمر<span style="color:red;"> *</span></label>
-          <input type="text" id="guardianName" name="guardianName" formControlName="guardianName" />
+          <input type="text" id="guardianName" name="guardianName" formControlName="guardianFullName" />
         </div>
         <div class="form-control">
           <label for="relationship" class="label1">صلة القرابة</label>
@@ -21,24 +21,24 @@
       <!-- Group 2: Contact Information -->
       <div class="group group1">
         <div class="form-control">
-          <label for="email" class="label1">البريد الإلكتروني</label>
-          <input type="email" id="email" name="email" formControlName="email" />
+          <label for="guardianEmail"class="label1">البريد الإلكتروني</label>
+          <input type="email" id="email" name="email" formControlName="guardianEmail" />
         </div>
         <div class="form-control">
-          <label for="phone" class="label1">الجوال</label>
-          <input type="number" formControlName="phone" placeholder="999-999-999" />
+          <label for="guardianPhone" class="label1">الجوال</label>
+          <input type="number" formControlName="guardianPhone" placeholder="999-999-999" />
         </div>
       </div>
 
       <!-- Group 3: Birth Date and Address -->
       <div class="group group1">
         <div class="form-control">
-          <label for="dob" class="label1">تاريخ الميلاد</label>
-          <input type="date" id="dob" name="dob" formControlName="dob" />
+          <label for="guardianDOB" class="label1">تاريخ الميلاد</label>
+          <input type="date" id="guardianDOB" name="guardianDOB" formControlName="guardianDOB" />
         </div>
         <div class="form-control">
-          <label for="address" class="label1">العنوان</label>
-          <input type="text" id="address" name="address" formControlName="address" />
+          <label for="guardianAddress" class="label1">العنوان</label>
+          <input type="text" id="guardianAddress" name="guardianAddress" formControlName="guardianAddress" />
         </div>
       </div>
     </div>

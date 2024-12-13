@@ -1,7 +1,12 @@
-import { Component, AfterViewInit, OnInit, Inject, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, AfterViewInit, OnInit, Inject, ChangeDetectorRef, inject } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Observable} from 'rxjs';
+import { Observable } from 'rxjs';
+
+import { AddStudent } from '../../../../core/models/students.model';
+import { Discount, FeeClasses } from '../../../../core/models/Fee.model';
+import { StudentService } from '../../../../core/services/student.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-new-student',
@@ -10,10 +15,12 @@ import { Observable} from 'rxjs';
 })
 export class NewStudentComponent implements OnInit, AfterViewInit {
   activeTab: string = 'DataStudent'; // Default active tab
-  mainForm: FormGroup;
+  formGroup: FormGroup;
+  toastr = inject(ToastrService)
   combinedData$: Observable<any[]> | undefined;
   currentPage: { [key: string]: number } = {};
-
+  studentService = inject(StudentService);
+  studentID: number = 0; // Initialize with a default placeholder value
   constructor(
     private formBuilder: FormBuilder,
     private changeDetectorRef: ChangeDetectorRef,
@@ -21,66 +28,122 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     // Create the main form
-    this.mainForm = this.formBuilder.group({
+
+    this.formGroup = this.formBuilder.group({
+      studentID: [this.studentID],
       primaryData: this.formBuilder.group({
-        // Full Names
-        fullNameAr: [{ value: '', disabled: true }, Validators.required],
-        fullNameEn: [{ value: '', disabled: true }, Validators.required],
-
-        // Arabic Names
-        firstNameAr: ['', Validators.required],
-        secondNameAr: ['', Validators.required],
-        lastNameAr: ['', Validators.required],
-
-        // English Names
-        firstNameEn: ['', Validators.required],
-        secondNameEn: ['', Validators.required],
-        lastNameEn: ['', Validators.required],
-
-        // Other Information
-        dob: ['', Validators.required],
-        grade: ['', [Validators.required, Validators.maxLength(50)]],
-        division: ['', [Validators.required, Validators.maxLength(50)]],
-        sex: ['', Validators.required]
-
+        studentFirstName: ['', Validators.required],
+        studentMiddleName: ['', Validators.required],
+        studentLastName: ['', Validators.required],
+        studentFirstNameEng: [''],
+        studentMiddleNameEng: [''],
+        studentLastNameEng: [''],
+        studentGender: ['Male', Validators.required],
+        studentDOB: ['', Validators.required],
+        studentPassword: ['Student'],
+        classID: [null, Validators.required],
+        amount: [0, Validators.required],
+        divisionID: [null, Validators.required],
+        studentAddress: ['Sana\'a'],
       }),
       optionData: this.formBuilder.group({
-        placeOfBirth: ['', [Validators.required, Validators.maxLength(100)]],
-        mobileNumber: ['', [Validators.required]],
-        address: ['', [Validators.required, Validators.maxLength(200)]]
-
+        placeBirth: ['Sana\'a'],
+        studentPhone: [77],
+        studentAddress: ['Sana\'a'],
       }),
       guardian: this.formBuilder.group({
-        guardianName: ['', [Validators.required]],         // Guardian's full name
-        relationship: ['', [Validators.required]],         // Relationship to the student
-        email: ['', [Validators.required]], // Email
-        phone: ['', [Validators.required]],  // Phone number (10 digits)
-        dob: ['', [Validators.required]],                  // Date of Birth
-        address: ['', [Validators.required]],
+        guardianFullName: ['', Validators.required],
+        guardianType: ['Guardian'],
+        relationship: ['', Validators.required],
+        guardianEmail: ['', [Validators.required, Validators.email]],
+        guardianPassword: ['Guardian'],
+        guardianPhone: ['', Validators.required],
+        guardianGender: ['Male'],
+        guardianDOB: ['', Validators.required],
+        guardianAddress: ['', Validators.required]
       }),
       fees: this.formBuilder.group({
-        
+        discounts: this.formBuilder.array([], Validators.required) // Initialize as a FormArray
       }),
-      document: this.formBuilder.group({
-        ImageURL: ['', [Validators.required]],
-
+      documents: this.formBuilder.group({
+        attachments: [[]], // Array of strings for URLs
       })
     });
   }
+
+  get discountsArray() {
+    return this.formGroup.get('fees.discounts') as FormArray;
+  }
+  loadFeesForClass(feeClasses: FeeClasses[]) {
+    const discountsArray = this.discountsArray; // Access FormArray for discounts
+    discountsArray.clear(); // Clear any existing discounts
+
+    feeClasses.forEach((fee) => {
+      discountsArray.push(
+        this.formBuilder.group({
+          noteDiscount: [fee.noteDiscount || ''],
+          amountDiscount: [fee.amountDiscount || 0],
+          feeClassID: [fee.feeClassID, Validators.required],
+        })
+      );
+    });
+  }
+
+  // Submit form data as an `AddStudent` object
   onSubmit() {
-    if (this.mainForm.valid) {
-      console.log('Form Submitted', this.mainForm.value);
+    if (this.formGroup.valid) {
+      const fees = this.formGroup.get('fees')?.value;
+      const discounts = fees.discounts; // Access submitted discounts
+
+      // Process each discount
+      discounts.forEach((discount: Discount) => {
+        console.log('Discount Amount:', discount.amount);
+      });
+
+      const formData: AddStudent = {
+        studentID: this.formGroup.get('studentID')?.value,
+        ...this.formGroup.get('primaryData')?.value,
+        ...this.formGroup.get('guardian')?.value,
+        ...this.formGroup.get('fees')?.value,
+        attachments: this.formGroup.get('documents.attachments')?.value || [],
+      };
+      console.log('the data for form', formData);
+      this.studentService.addStudent(formData).subscribe({
+        next: (res) => {
+          this.toastr.success('student added successfully', res.message);
+        }
+      })
     } else {
-      console.log('Form is not valid', this.mainForm.value);
+      console.log('Form is not valid', this.formGroup.value);
     }
   }
 
-  ngOnInit(): void {
-    console.log(this.mainForm.get('primaryData')); // Should log a FormGroup object
+  onRequiredFeesChanged(requiredFees: number): void {
+    this.formGroup.get('primaryData.amount')?.patchValue(requiredFees);
+    console.log('Required Fees:', requiredFees);
   }
-  
-  check(){
-    console.log("the form",this.mainForm.value)
+
+  ngOnInit(): void {
+    console.log(this.formGroup.get('primaryData')); // Should log a FormGroup object
+    this.generateStudentID();
+  }
+
+  private generateStudentID(): void {
+    this.studentService.MaxStudentID().subscribe({
+      next: (res) => {
+        const maxValue = (res && typeof res === 'number') ? res + 1 : 1; // Default to 1 if invalid
+        this.studentID = maxValue;
+        this.formGroup.patchValue({ studentID: maxValue });
+      },
+      error: (err) => {
+        this.toastr.error('Could not fetch maximum student ID. Defaulting to 1.');
+        this.formGroup.patchValue({ studentID: 1 });
+      }
+    });
+  }
+
+  check() {
+    console.log("the form", this.formGroup.value)
   }
   ngAfterViewInit(): void {
     setTimeout(() => {
@@ -163,26 +226,32 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     }
   }
 
+  updateAttachments(fileNames: string[]): void {
+    // Update the attachments array in the parent form
+    this.formGroup.get('documents.attachments')?.setValue(fileNames);
+  }
+
   getTotalPages(item: any): number {
     return Math.ceil(item.grades.length / this.maxRowsPerPage);
   }
-  // Method to handle the photo upload (file selection)
-  uploadPhoto(event: Event): void {
+  selectedFiles: File[] = [];
+  attachments: string[] = [];
+
+  onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input?.files?.[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
 
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        const photoUrl = e.target?.result as string;
-        // Logic to update student photo
-        console.log('Photo uploaded:', photoUrl);
-      };
+    if (input.files && input.files.length > 0) {
+      const selectedFile = input.files[0];
 
-      reader.readAsDataURL(file);
+      // Avoid duplicate files
+      const fileExists = this.selectedFiles.some(file => file.name === selectedFile.name);
+      if (!fileExists) {
+        this.selectedFiles.push(selectedFile);
+        this.attachments.push(selectedFile.name);
+
+      } else {
+        alert('This file has already been selected.');
+      }
     }
-  }
-  takePhoto() {
-    // Implement logic to open camera and take a photo
   }
 }

@@ -1,9 +1,7 @@
 import { Component} from '@angular/core';
 
-import { Students } from '../../../core/models/students.model';
 
 export interface DialogData {
-    student: Students;
   }
 
 @Component({

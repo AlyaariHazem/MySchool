@@ -10,4 +10,5 @@ namespace Backend.Repository.School.Interfaces;
 public interface IStudentRepository
 {
     Task<Student> AddStudentAsync(Student student);
+    Task<int> MaxValue();
 }

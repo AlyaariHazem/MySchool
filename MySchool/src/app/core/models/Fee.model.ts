@@ -15,6 +15,7 @@ export class Fee{
 }
 
 export class FeeClasses {
+    feeClassID!:number;
     feeID!: number; 
     feeName: string = '';
     feeNameAlis?: string;
@@ -22,6 +23,8 @@ export class FeeClasses {
     className: string = '';
     classYear!: Date;
     amount?: number;
+    noteDiscount?: string;
+    amountDiscount?: number;
     mandatory: boolean = false;
   }
 export class FeeClass{
@@ -30,3 +33,10 @@ export class FeeClass{
     amount?:number;
     mandatory:boolean=true;
 }
+
+export interface Discount {
+    amount: number;
+    note: string;
+    feeClassID: number;
+}
+  

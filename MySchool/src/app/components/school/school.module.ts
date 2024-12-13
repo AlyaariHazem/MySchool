@@ -61,6 +61,7 @@ import { AccountsComponent } from './accounts/accounts.component';
 import { BillsComponent } from './accounts/bills/bills.component';
 import { AddAccountComponent } from './accounts/add-account/add-account.component';
 import { AllotmentComponent } from './allotment-report/allotment/allotment.component';
+import { CountDirective } from '../../directives/count.directive';
 
 
 
@@ -134,7 +135,8 @@ const modules = [
   PanelModule,
   ChipsModule,
   InputMaskModule,
-  CardModule, 
+  CardModule,
+  CountDirective, 
 ];
 
 @NgModule({

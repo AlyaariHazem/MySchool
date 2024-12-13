@@ -8,6 +8,7 @@ namespace Backend.Models;
 
 public class FeeClass
 {
+    public int FeeClassID { get; set; }
     public int ClassID { get; set; }
     public Class Class { get; set; }
     public int FeeID { get; set; }

@@ -25,8 +25,6 @@ export class SchoolService {
     )
     }
       
-  
-
   addSchool(school: School): Observable<School> {
     return this.http.post<School>(`${this.ApI.baseUrl}/School`, school).pipe(
       catchError((error) => {

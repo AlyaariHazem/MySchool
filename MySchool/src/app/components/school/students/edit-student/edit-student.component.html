@@ -2,7 +2,7 @@
     <form class="modal-content" [formGroup]="form" style="background-color:#ffffff!important;">
         <div class="container">
             <mat-dialog-actions>
-                <button mat-button [mat-dialog-close]="data.student" cdkFocusInitial class="btn btn-success signupbtn" type="submit" (click)="onSubmit()">حفظ التعديل</button>
+                <button mat-button [mat-dialog-close]="" cdkFocusInitial class="btn btn-success signupbtn" type="submit" (click)="onSubmit()">حفظ التعديل</button>
             </mat-dialog-actions>
             <div class="info" dir="rtl">
                 <h2>إدخل البيانات الشخصية</h2>
@@ -133,7 +133,7 @@
             </div>
 
             <mat-dialog-actions>
-                <button mat-button class="btn btn-success signupbtn" [mat-dialog-close]="data.student" cdkFocusInitial type="submit" (click)="onSubmit()">حفظ التعديل</button>
+                <button mat-button class="btn btn-success signupbtn" [mat-dialog-close]="" cdkFocusInitial type="submit" (click)="onSubmit()">حفظ التعديل</button>
             </mat-dialog-actions>
 
             <!-- *******************************           parent **************************** -->
@@ -183,7 +183,7 @@
                 </div>
             </div>
             <mat-dialog-actions>
-                <button mat-button class="btn btn-success signupbtn" [mat-dialog-close]="data.student" cdkFocusInitial type="submit" (click)="onSubmit()">حفظ التعديل</button>
+                <button mat-button class="btn btn-success signupbtn" [mat-dialog-close]="" cdkFocusInitial type="submit" (click)="onSubmit()">حفظ التعديل</button>
                 <button mat-button class="cancel" style="background-color: none;" (click)="closeEdit()">X</button>
             </mat-dialog-actions>
 

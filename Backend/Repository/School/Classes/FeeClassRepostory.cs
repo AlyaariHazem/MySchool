@@ -33,12 +33,12 @@ public class FeeClassRepostory:IFeeClassRepository
                 
         }
 
-        public async Task<FeeClassDTO> GetByIdAsync(int classId, int feeId)
+        public async Task<FeeClassDTO> GetByIdAsync(int feeClassID)
         {
             var FeeClass= await _db.FeeClass
                 .Include(fc => fc.Class) // Include related Class
                 .Include(fc => fc.Fee)  // Include related Fee
-                .FirstOrDefaultAsync(fc => fc.ClassID == classId && fc.FeeID == feeId);
+                .FirstOrDefaultAsync(fc => fc.FeeClassID == feeClassID);
             var FeeClassDTO=_mapper.Map<FeeClassDTO>(FeeClass);
             if (FeeClassDTO == null)
             {
@@ -46,11 +46,12 @@ public class FeeClassRepostory:IFeeClassRepository
             }
             return FeeClassDTO;
         }
-        public async Task<List<FeeClassDTO>> GetByIdAsync(int classId)
+
+        public async Task<List<FeeClassDTO>> GetAllByClassIdAsync(int classId)
         {
             var FeeClass= await _db.FeeClass
                 .Include(fc => fc.Class)
-                .Include(fc => fc.Fee)  
+                .Include(fc => fc.Fee)
                 .Where(fc => fc.ClassID == classId)
                 .ToListAsync();
             var FeeClassDTO=_mapper.Map<List<FeeClassDTO>>(FeeClass);
@@ -60,8 +61,9 @@ public class FeeClassRepostory:IFeeClassRepository
             }
             return FeeClassDTO;
         }
-        public async Task<bool> checkIfExist(int classId, int feeId){
-            var FeeClass= await _db.FeeClass.FirstOrDefaultAsync(fc=>fc.ClassID == classId && fc.FeeID==feeId);
+        
+        public async Task<bool> checkIfExist(int feeClassID){
+            var FeeClass= await _db.FeeClass.FirstOrDefaultAsync(fc => fc.FeeClassID==feeClassID);
             if(FeeClass == null)
             return false;
         return true;
@@ -74,10 +76,10 @@ public class FeeClassRepostory:IFeeClassRepository
             await _db.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(AddFeeClassDTO feeClass)
+        public async Task UpdateAsync(int feeClassID,AddFeeClassDTO feeClass)
         {
             var existingFeeClass = await _db.FeeClass
-                .FirstOrDefaultAsync(fc => fc.ClassID == feeClass.ClassID && fc.FeeID == feeClass.FeeID);
+                .FirstOrDefaultAsync(fc => fc.FeeClassID==feeClassID);
 
             if (existingFeeClass != null)
             {
@@ -90,10 +92,10 @@ public class FeeClassRepostory:IFeeClassRepository
             }
         }
 
-        public async Task DeleteAsync(int classId, int feeId)
+        public async Task DeleteAsync(int feeClassID)
         {
             var feeClass = await _db.FeeClass
-                .FirstOrDefaultAsync(fc => fc.ClassID == classId && fc.FeeID == feeId);
+                .FirstOrDefaultAsync(fc => fc.FeeClassID == feeClassID);
 
             if (feeClass != null)
             {

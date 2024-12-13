@@ -213,7 +213,18 @@ input[type="checkbox"] {
 }
 
 /* Add checkmark when checked */
-input[type="checkbox"]:checked + .custom-checkbox::after {
+input[type="checkbox"]:checked {
+  content: '';
+  position: absolute;
+  left: 4px; /* Adjust checkmark position */
+  top: 0;
+  width: 8px; /* Checkmark width */
+  height: 15px; /* Checkmark height */
+  border: solid #007bff; /* Checkmark color */
+  border-width: 0 3px 3px 0; /* Create checkmark shape */
+  transform: rotate(45deg); /* Rotate to form a checkmark */
+}
+.mandatory::after{
   content: '';
   position: absolute;
   left: 4px; /* Adjust checkmark position */

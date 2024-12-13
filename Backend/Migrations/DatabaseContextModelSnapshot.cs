@@ -279,21 +279,29 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.FeeClass", b =>
                 {
-                    b.Property<int>("FeeID")
+                    b.Property<int>("FeeClassID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("ClassID")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FeeClassID"));
 
                     b.Property<double?>("Amount")
                         .HasColumnType("float");
 
+                    b.Property<int>("ClassID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FeeID")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Mandatory")
                         .HasColumnType("bit");
 
-                    b.HasKey("FeeID", "ClassID");
+                    b.HasKey("FeeClassID");
 
                     b.HasIndex("ClassID");
+
+                    b.HasIndex("FeeID");
 
                     b.ToTable("FeeClass");
                 });
@@ -480,10 +488,7 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.Student", b =>
                 {
                     b.Property<int>("StudentID")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentID"));
 
                     b.Property<int>("DivisionID")
                         .HasColumnType("int");
@@ -517,22 +522,27 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.StudentClassFees", b =>
                 {
-                    b.Property<int>("ClassID")
+                    b.Property<int>("StudentClassFeesID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("FeeID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StudentID")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentClassFeesID"));
 
                     b.Property<decimal?>("AmountDiscount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("FeeClassID")
+                        .HasColumnType("int");
+
                     b.Property<string>("NoteDiscount")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ClassID", "FeeID", "StudentID");
+                    b.Property<int>("StudentID")
+                        .HasColumnType("int");
+
+                    b.HasKey("StudentClassFeesID");
+
+                    b.HasIndex("FeeClassID");
 
                     b.HasIndex("StudentID");
 
@@ -1139,16 +1149,16 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.StudentClassFees", b =>
                 {
+                    b.HasOne("Backend.Models.FeeClass", "FeeClass")
+                        .WithMany("StudentClassFees")
+                        .HasForeignKey("FeeClassID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Backend.Models.Student", "Student")
                         .WithMany("StudentClassFees")
                         .HasForeignKey("StudentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.FeeClass", "FeeClass")
-                        .WithMany("StudentClassFees")
-                        .HasForeignKey("ClassID", "FeeID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("FeeClass");

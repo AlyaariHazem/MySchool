@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Backend.Data;
 using Backend.DTOS;
+using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
 using Backend.Models;
 using Backend.Repository.School.Implements;
@@ -20,6 +21,7 @@ public class StudentManagementService
     private readonly IStudentRepository _studentRepository;
     private readonly DatabaseContext _dbContext;
     private readonly IAccountRepository _accountRepository;
+    private readonly IStudentClassFeeRepository _studentClassFeeRepository;
     private readonly IMapper _mapper;
 
     public StudentManagementService(
@@ -28,6 +30,7 @@ public class StudentManagementService
         IStudentRepository studentRepository,
         DatabaseContext dbContext,
         IAccountRepository accountRepository,
+        IStudentClassFeeRepository studentClassFeeRepository,
         IMapper mapper)
     {
         _userRepository = userRepository;
@@ -35,13 +38,14 @@ public class StudentManagementService
         _studentRepository = studentRepository;
         _dbContext = dbContext;
         _accountRepository = accountRepository;
+        _studentClassFeeRepository = studentClassFeeRepository;
         _mapper = mapper;
     }
 
     public async Task<Student> AddStudentWithGuardianAsync(
         ApplicationUser guardianUser, string guardianPassword, Guardian guardian,
         ApplicationUser studentUser, string studentPassword, Student student,
-    Accounts account, AccountStudentGuardian accountStudentGuardian,  List<Attachments> attachments,List<DisCount> studentClassFees)
+    Accounts account, AccountStudentGuardian accountStudentGuardian,  List<Attachments> attachments,List<StudentClassFeeDTO> studentClassFees)
     {
         // Step 1: Add Guardian's User
         var createdGuardianUser = await _userRepository.CreateUserAsync(guardianUser, guardianPassword, "Guardian");
@@ -70,30 +74,28 @@ public class StudentManagementService
              if (attachments != null && attachments.Any())
                 {
                     foreach (var attachment in attachments)
-                    {
-                        attachment.StudentID = student.StudentID; // Associate with student
-                        _dbContext.Attachments.Add(attachment);  // Add to database
+                    { // Associate with student
+                         await  _dbContext.Attachments.AddAsync(attachment); 
+                         await _dbContext.SaveChangesAsync();
                     }
                 }
-                //this is for DisCount 
-             if (studentClassFees != null && studentClassFees.Any())
+
+           try
+            {
+                foreach(var studentClassFee in studentClassFees)
                 {
-                    foreach (var studentClassFee in studentClassFees)
-                    {
-                        var  studentClassFees1 = new StudentClassFees(); 
-                        studentClassFees1.AmountDiscount = studentClassFee.AmountDiscount;
-                        studentClassFees1.ClassID = studentClassFee.ClassID;
-                        studentClassFees1.StudentID = studentClassFees1.StudentID;
-                        studentClassFees1.FeeID = studentClassFee.FeeID;
-                        studentClassFees1.NoteDiscount = studentClassFee.NoteDiscount;
-                        _dbContext.StudentClassFees.Add(studentClassFees1);  // Add to database
-                    }
+                    var studentClassFeeMapped = _mapper.Map<StudentClassFees>(studentClassFee);
+                    await _dbContext.StudentClassFees.AddAsync(studentClassFeeMapped);
+                    await _dbContext.SaveChangesAsync();
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving StudentClassFees: {ex.Message}");
+            }
 
-
-        return addedStudent;
-        
-    }
+            return addedStudent;
+        }
     public async Task<StudentDetailsDTO?> GetStudentByIdAsync(int id)
     {
         var student = await _dbContext.Students
@@ -162,7 +164,10 @@ public async Task<List<StudentDetailsDTO>> GetAllStudentsAsync()
             LastNameEng = student.FullNameAlis.LastNameEng
         },
         DivisionID = student.DivisionID,
+        StudnetDOB=student.ApplicationUser.HireDate,
+        StudentAddress=student.ApplicationUser.Address,
         PlaceBirth = student.PlaceBirth,
+        StudentPhone = student.ApplicationUser.PhoneNumber,
         UserID = student.UserID,
         ApplicationUser = new ApplicationUserDTO
         {
@@ -173,14 +178,14 @@ public async Task<List<StudentDetailsDTO>> GetAllStudentsAsync()
         },
         Guardians = new GuardianDto
         {
+            guardianFullName=student.Guardian.FullName,
+            guardianType=student.Guardian.Type!,
             guardianEmail=student.ApplicationUser.Email,
             guardianPhone=student.ApplicationUser.PhoneNumber!,
-            guardianType=student.ApplicationUser.UserType,
             guardianDOB=student.ApplicationUser.HireDate,
-            guardianFullName=student.Guardian.FullName,
             guardianAddress=student.ApplicationUser.Address!
         }
     }).ToList();
-}
 
+}
 }

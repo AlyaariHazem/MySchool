@@ -94,7 +94,7 @@
                     <div class="form-control1">
                         <mat-form-field appearance="outline">
                             <mat-label>إختار الصـف</mat-label>
-                            <mat-select (selectionChange)="GetFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"[(ngModel)]="FeeClassDTO.classID" 
+                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"[(ngModel)]="FeeClassDTO.classID" 
                                 name="classID" #classSelector="ngModel" required>
                                 <mat-option [value]="null">None</mat-option>
                                 @for (Class of classDTO; track $index) {
@@ -107,7 +107,7 @@
                     <div class="form-control1">
                         <mat-form-field class="button1" appearance="outline">
                             <mat-label>إختار بند الرسوم</mat-label>
-                            <mat-select (selectionChange)="GetFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" name="feeID"
+                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" name="feeID"
                                 [(ngModel)]="FeeClassDTO.feeID" required>
                                 <mat-option [value]="null">None</mat-option>
                                 @for (fee of Fees; track $index) {
@@ -175,7 +175,7 @@
                                                 </a>
                                                 <div role="separator" class="dropdown-divider"></div>
                                                 <a class="dropdown-item"
-                                                    (click)="deleteFeeClass(fee.classID,fee.feeID)"><i
+                                                    (click)="deleteFeeClass(fee.classID)"><i
                                                         class="bi bi-trash IconDelete"></i>حذف</a>
                                             </div>
                                         </div>

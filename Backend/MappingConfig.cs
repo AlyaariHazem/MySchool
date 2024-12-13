@@ -44,8 +44,7 @@ public class MappingConfig : Profile
         CreateMap<Fee,GetFeeDTO>().ReverseMap();
         CreateMap<Student,StudentDetailsDTO>().ReverseMap();
         CreateMap<School,SchoolDTO>().ReverseMap();
-        CreateMap<StudentClassFees,StudentClassFeeDTO>().ReverseMap();
-        
+        CreateMap<StudentClassFeeDTO,StudentClassFees>().ReverseMap();
         CreateMap<Fee,FeeDTO>().ReverseMap();
         CreateMap<FeeClass,AddFeeClassDTO>().ReverseMap();
         CreateMap<FeeClass, FeeClassDTO>()
@@ -53,9 +52,7 @@ public class MappingConfig : Profile
         .ForMember(dest => dest.FeeNameAlis, opt => opt.MapFrom(src => src.Fee.FeeNameAlis)) 
         .ForMember(dest => dest.FeeName, opt => opt.MapFrom(src => src.Fee.FeeName)) 
         .ForMember(dest => dest.ClassYear, opt => opt.MapFrom(src => src.Class.ClassYear));
-        CreateMap<FeeClass, AddFeeClassDTO>().ReverseMap()
-        .ForMember(dest => dest.FeeID, opt => opt.MapFrom(src => src.FeeID))
-        .ForMember(dest => dest.ClassID, opt => opt.MapFrom(src => src.ClassID));
+        CreateMap<FeeClass, AddFeeClassDTO>().ReverseMap();
 
 
         

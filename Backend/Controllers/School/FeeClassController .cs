@@ -25,11 +25,11 @@ public class FeeClassController : ControllerBase
         return Ok(new { success = true, data = feeClasses });
     }
 
-    // GET: api/FeeClass/{classId}/{feeId}
-    [HttpGet("{classId:int}/{feeId:int}")]
-    public async Task<IActionResult> GetFeeClassById(int classId, int feeId)
+    // GET: api/FeeClass/Fee/{feeClassID:int}
+    [HttpGet("Fee/{feeClassID:int}")]
+    public async Task<IActionResult> GetFeeClassById(int feeClassID)
     {
-        var feeClass = await _feeClassRepository.GetByIdAsync(classId, feeId);
+        var feeClass = await _feeClassRepository.GetByIdAsync(feeClassID);
         if (feeClass == null)
         {
             return NotFound(new {success = false, data = "FeeClass not found" });
@@ -37,11 +37,11 @@ public class FeeClassController : ControllerBase
 
         return Ok(new { success = true, data = feeClass });
     }
-    // GET: api/FeeClass/{classId}
-    [HttpGet("{classId}")]
-    public async Task<IActionResult> GetFeeClassById(int classId)
+    // GET: api/FeeClass/Class/{classId:int}
+    [HttpGet("Class/{classId:int}")]
+    public async Task<IActionResult> GetAllFeeClassById(int classId)
     {
-        var feeClass = await _feeClassRepository.GetByIdAsync(classId);
+        var feeClass = await _feeClassRepository.GetAllByClassIdAsync(classId);
         if (feeClass == null)
         {
             return NotFound(new {success = false, data = "FeeClass not found" });
@@ -63,31 +63,31 @@ public class FeeClassController : ControllerBase
         return Ok(new { success = true, data = "FeeClass created successfully." });
     }
 
-    // PUT: api/FeeClass/{classId}/{feeId}
-    [HttpPut("{classId:int}/{feeId:int}")]
-    public async Task<IActionResult> UpdateFeeClass(int classId, int feeId, [FromBody] AddFeeClassDTO updatedFeeClass)
+    // PUT: api/FeeClass/{feeClassID}
+    [HttpPut("{feeClassID:int}")]
+    public async Task<IActionResult> UpdateFeeClass(int feeClassID, [FromBody] AddFeeClassDTO updatedFeeClass)
     {
        
-        var existingFeeClass = await _feeClassRepository.GetByIdAsync(classId, feeId);
+        var existingFeeClass = await _feeClassRepository.GetByIdAsync(feeClassID);
         if (existingFeeClass == null)
         {
             return NotFound(new {success=false, data = "FeeClass not found" });
         }
 
-        await _feeClassRepository.UpdateAsync(updatedFeeClass);
+        await _feeClassRepository.UpdateAsync(feeClassID,updatedFeeClass);
         return Ok(new{success=true,data="updated successfully"});
     }
 
-    // DELETE: api/FeeClass/{classId}/{feeId}
-    [HttpDelete("{classId:int}/{feeId:int}")]
-    public async Task<IActionResult> DeleteFeeClass(int classId, int feeId)
+    // DELETE: api/FeeClass/{feeClassID}}
+    [HttpDelete("{FeeClassId:int}")]
+    public async Task<IActionResult> DeleteFeeClass(int FeeClassId)
     {
         
-     var check=  await _feeClassRepository.checkIfExist(classId,feeId);
+     var check=  await _feeClassRepository.checkIfExist(FeeClassId);
      if(!check){
         return Ok(new{success=true,data="FeeClass not found"});    
      }else{
-        await _feeClassRepository.DeleteAsync(classId, feeId);
+        await _feeClassRepository.DeleteAsync(FeeClassId);
         return Ok(new{success=true,data="deleted successfully"});
      }
 

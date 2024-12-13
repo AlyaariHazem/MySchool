@@ -7,6 +7,7 @@ namespace Backend.DTOS.School.Fees;
 
 public class FeeClassDTO
 {
+    public int FeeClassID { get; set; }
     public int FeeID { get; set; }
     public string FeeName { get; set;}=string.Empty;
     public string? FeeNameAlis { get; set;}

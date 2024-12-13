@@ -1,43 +1,24 @@
-// import { inject, Injectable } from '@angular/core';
-// import { map, Observable } from 'rxjs';
-// import { v4 as uuidv4 } from 'uuid';
+import { inject, Injectable } from '@angular/core';
+import { catchError, Observable } from 'rxjs';
 
-// import { FirebaseService } from '../../firebase/firebase.service';
-// import { Students } from '../models/students.model';
-// import { firebaseUrl } from '../../firebase/firebase-config';
+import { AddStudent } from '../models/students.model';
+import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
 
-// @Injectable({
-//   providedIn: 'root'
-// })
-// export class StudentsServicesService {
+@Injectable({
+    providedIn: 'root'
+})
+export class StudentService {
+    private API = inject(BackendAspService);
 
-//   firebase = inject(FirebaseService);
-
-//   // Get all users from Firebase
-//   getStudents(): Observable<Array<Students>> {
-//     return this.firebase.getRequest<{ [key: string]: Students }>('students').pipe(
-//       map(studentsObj => {
-//         const studentsArray: Students[] = [];
-//         for (const key in studentsObj) {
-//           if (studentsObj.hasOwnProperty(key)) {
-//             studentsArray.push({ ...studentsObj[key], id: key });
-//           }
-//         }
-//         return studentsArray;
-//       })
-//     );
-//   }
-//   addStudent(student: Students): Observable<any> {
-//     const newStudent = { ...student, id: uuidv4() };
-//     return this.firebase.postRequest(`${firebaseUrl}students.json`, newStudent, { 'content-type': 'application/json' });
-//   }
-
-//   editStudent(student: Students): Observable<any> {
-//     return this.firebase.patchRequest(`${firebaseUrl}students/${student.id}.json`, student, { 'content-type': 'application/json' });
-//   }
-
-//   deleteStudent(id: string): Observable<any> {
-//     return this.firebase.deleteRequest(`${firebaseUrl}students/${id}.json`, { 'content-type': 'application/json' });
-//   }
-
-// }
+    addStudent(student: AddStudent): Observable<any> {
+        return this.API.http.post(`${this.API.baseUrl}/Students`, student).pipe(
+            catchError(error => {
+                console.error("Error adding student:", error);
+                throw error;
+            })
+        );  
+    }
+    MaxStudentID():Observable<any>{
+        return this.API.http.get(`${this.API.baseUrl}/students/MaxValue`);
+    }
+}

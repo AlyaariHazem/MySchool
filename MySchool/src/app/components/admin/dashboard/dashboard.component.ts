@@ -1,11 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 
-import { Students } from '../../../core/models/students.model';
 import { ToastrService } from 'ngx-toastr';
 import { MatDialog } from '@angular/material/dialog';
 
 export interface DialogData {
-    student: Students;
   }
 
 @Component({
@@ -14,7 +12,6 @@ export interface DialogData {
     styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
-    students: Students[] = [];
     
   toastr = inject(ToastrService);
   constructor(public dialog: MatDialog) {}

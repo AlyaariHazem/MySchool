@@ -7,6 +7,7 @@ namespace Backend.DTOS;
 
 public class AddStudentWithGuardianRequest
 {
+    public int StudentID { get; set; }
      // Guardian details
     public string GuardianEmail { get; set; }
     public string GuardianPassword { get; set; } = string.Empty;
@@ -34,7 +35,6 @@ public class AddStudentWithGuardianRequest
     public DateTime StudentDOB { get; set; }
 
     public decimal Amount { get; set; } = 0;
-    public int ClassID { get; set; }
     public List<string>? Attachments { get; set; }
     public List<DisCount>? Discounts { get; set; }
 
@@ -42,8 +42,7 @@ public class AddStudentWithGuardianRequest
     }
 
 public class DisCount{
-     public int ClassID { get; set; }
-    public int FeeID  { get; set; }
+    public int FeeClassID  { get; set; }
     public decimal? AmountDiscount { get; set; }
     public string? NoteDiscount { get; set; }
 }

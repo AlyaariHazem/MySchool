@@ -16,12 +16,20 @@ import { divisions } from '../../../../../core/models/division.model';
 export class PrimaryDataComponent implements OnInit {
   @Input() formGroup!: FormGroup;
 
+  get fullNameAr(): string {
+    return `${this.formGroup.get('studentFirstName')?.value} ${this.formGroup.get('studentMiddleName')?.value} ${this.formGroup.get('studentLastName')?.value}`.trim();
+  }
+  
+  get fullNameEn(): string {
+    return `${this.formGroup.get('studentFirstNameEng')?.value} ${this.formGroup.get('studentMiddleNameEng')?.value} ${this.formGroup.get('studentLastNameEng')?.value}`.trim();
+  }
+  
   selectedClass!: string;
   selectedDivision!: string;
   selectedSex!: string;
 
   classes: ClassDTO[] = [];
-  divisiones: divisions[] = [];
+  divisions: divisions[] = [];
   allDivisions: divisions[] = []; // Store all divisions
 
   Classes = inject(ClassService);
@@ -31,9 +39,9 @@ export class PrimaryDataComponent implements OnInit {
   isDivisionSelected: boolean = false;
   isSexSelected: boolean = false;
 
-  sexOptions: { value: string; label: string }[] = [
-    { value: 'male', label: 'ذكر' },
-    { value: 'female', label: 'أنثى' }
+  genderOptions: { value: string; label: string }[] = [
+    { value: 'Male', label: 'ذكر' },
+    { value: 'Female', label: 'أنثى' }
   ];
 
   ngOnInit(): void {
@@ -60,10 +68,10 @@ export class PrimaryDataComponent implements OnInit {
       this.selectedClass = value;
       this.isClassSelected = !!value;
       this.updateDivisionsByClass(value); // Filter divisions
-    } else if (type === 'division') {
+    } else if (type === 'divisionID') {
       this.selectedDivision = value;
       this.isDivisionSelected = !!value;
-    } else if (type === 'sex') {
+    } else if (type === 'studentGender') {
       this.selectedSex = value;
       this.isSexSelected = !!value;
     }
@@ -71,7 +79,7 @@ export class PrimaryDataComponent implements OnInit {
 
   updateDivisionsByClass(classId: string): void {
     // Filter divisions based on selected class
-    this.divisiones = this.allDivisions.filter(
+    this.divisions = this.allDivisions.filter(
       (division) => division.classID === +classId
     );
   }
@@ -81,15 +89,15 @@ export class PrimaryDataComponent implements OnInit {
       this.selectedClass = '';
       this.isClassSelected = false;
       this.formGroup.get('Class')?.setValue(null);
-      this.divisiones = []; // Clear divisions when class is cleared
-    } else if (type === 'division') {
+      this.divisions = []; // Clear divisions when class is cleared
+    } else if (type === 'divisionID') {
       this.selectedDivision = '';
       this.isDivisionSelected = false;
-      this.formGroup.get('division')?.setValue(null);
-    } else if (type === 'sex') {
+      this.formGroup.get('divisionID')?.setValue(null);
+    } else if (type === 'studentGender') {
       this.selectedSex = '';
       this.isSexSelected = false;
-      this.formGroup.get('sex')?.setValue(null);
+      this.formGroup.get('studentGender')?.setValue(null);
     }
   }
 }

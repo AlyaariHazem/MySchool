@@ -1,6 +1,8 @@
 using Backend.DTOS;
+using Backend.DTOS.School.StudentClassFee;
 using Backend.Models;
 using Backend.Repository.School.Classes;
+using Backend.Repository.School.Interfaces;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,11 +14,13 @@ namespace Backend.Controllers
     {
         private readonly StudentManagementService _studentManagementService;
         private readonly StudentClassFeesRepository _studentClassFeesRepository;
+        private readonly IStudentRepository _studentRepository;
 
-        public StudentsController(StudentManagementService studentManagementService, StudentClassFeesRepository studentClassFeesRepository)
+        public StudentsController(StudentManagementService studentManagementService, StudentClassFeesRepository studentClassFeesRepository, IStudentRepository studentRepository)
         {
             _studentManagementService = studentManagementService;
             _studentClassFeesRepository = studentClassFeesRepository;
+            _studentRepository = studentRepository;
         }
 
         [HttpPost]
@@ -61,6 +65,7 @@ namespace Backend.Controllers
                 // Create Student Entity
                 var student = new Student
                 {
+                    StudentID=request.StudentID,
                     FullName = new Name
                     {
                         FirstName = request.StudentFirstName,
@@ -99,6 +104,7 @@ namespace Backend.Controllers
                         {
                             attachments.Add(new Attachments
                             {
+                                StudentID=request.StudentID,
                                 AttachmentURL = fileUrl,
                                 Note = ""
                             });
@@ -106,23 +112,24 @@ namespace Backend.Controllers
                     }
 
                     // Map FeeClass data to StudentClassFees and assign to the student
-                    var studentClassFees = new List<DisCount>();
+                    var studentClassFees = new List<StudentClassFeeDTO>();
                     if(request.Discounts != null && request.Discounts.Any())
+                    {
                         foreach(var discount in request.Discounts)
-                            studentClassFees.Add(new DisCount{
-                                ClassID = discount.ClassID,
-                                FeeID = discount.FeeID,
+                            studentClassFees.Add(new StudentClassFeeDTO
+                            {
+                                StudentID=request.StudentID,
+                                FeeClassID = discount.FeeClassID,
                                 AmountDiscount = discount.AmountDiscount,
                                 NoteDiscount = discount.NoteDiscount
                             });
-
+                    }
                 // Add Student and Guardian
                 var createdStudent = await _studentManagementService.AddStudentWithGuardianAsync(
                     guardianUser, request.GuardianPassword, guardian,
                     studentUser, request.StudentPassword, student,
                     account, accountStudentGuardian, attachments, studentClassFees);
-                // Fetch all fees for the selected class
-                var feeClasses = await _studentClassFeesRepository.GetFeesForClassAsync(request.ClassID);
+                
 
                 return Ok(new { success = true, message = "Student deleted successfully." });
             }
@@ -151,7 +158,12 @@ namespace Backend.Controllers
 
             return Ok(students);
         }
-        
-
+        [HttpGet("MaxValue")]
+        public async Task<IActionResult> GetMaxValue()
+        {
+            var students = await _studentRepository.MaxValue();
+            
+            return Ok(students);
+        }
     }
 }

@@ -22,4 +22,10 @@ public class StudentRepository : IStudentRepository
         await _context.SaveChangesAsync();
         return student;
     }
+
+    public async Task<int> MaxValue()
+    {
+        var maxValue = await _context.Students.MaxAsync(s => (int?)s.StudentID) ?? 0;
+        return maxValue;
+    }
 }
