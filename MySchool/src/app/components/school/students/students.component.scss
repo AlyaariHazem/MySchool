@@ -13,6 +13,14 @@
   outline: 0;
   transform: scale(0.8); // Custom transform
 }
+.styled-table th:nth-child(3), 
+.styled-table td:nth-child(3) {
+    width: 400px; /* Adjust the width as needed */
+}
+.student-name-column {
+  width: 280px; /* Set your desired width */
+}
+
 form {
   position: absolute;
   right: 0rem;
@@ -160,11 +168,10 @@ h2 {
   .school{
     color:rgb(95, 220, 105);
   }
-  .styled-table th,
-  .styled-table td {
-    padding: auto 10% !important;
-    border: 1px solid #dddddd;
-  }
+  .styled-table th:nth-child(3), 
+.styled-table td:nth-child(3) {
+    width: 400px; /* Adjust the width as needed */
+}
 }
 @media (max-width: 900px) {
   form {
@@ -179,10 +186,10 @@ h2 {
     }
   }
   .styled-table th,
-  .styled-table td {
-    padding: 15px 2px !important;
-    border: 1px solid #dddddd;
-  }
+.styled-table td {
+  padding: 12px 1px;
+  border: 1px solid #dddddd;
+}
 }
 
 @media (max-width: 600px) {
@@ -209,7 +216,7 @@ h2 {
 
 .styled-table th,
 .styled-table td {
-  padding: 12px 2rem;
+  padding: 12px 1rem;
   border: 1px solid #dddddd;
 }
 

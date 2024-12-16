@@ -15,6 +15,7 @@ namespace Backend.Models
         public string FullName { get; set; }
         public string? Type{ get; set; }
         public string UserID { get; set; }
+        public DateTime? GuardianDOB { get; set; }=DateTime.Now;
         public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual ICollection<AccountStudentGuardian> AccountStudentGuardians { get; set; }
         public ICollection<Student> Students { get; set; } // Navigation Property 

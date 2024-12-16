@@ -22,7 +22,7 @@ export class LoginComponent {
       next: (response: any) => {
         if (response && response.token) {
           this.authService.router.navigateByUrl('school');
-          this.toastr.success('Login successful');
+          this.toastr.success('Login successful');// this message appear but I can't navigate to school?
         }
       },
       error: () => {

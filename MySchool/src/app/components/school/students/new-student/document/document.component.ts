@@ -8,7 +8,7 @@ import { FormGroup } from '@angular/forms';
 })
 export class DocumentComponent {
   @Input() formGroup!: FormGroup;
-  @Output() filesChanged = new EventEmitter<string[]>(); // Emit file names to parent
+  @Output() filesChanged = new EventEmitter<{ attachments: string[]; files: File[] }>(); // Emit both file names and files
 
   selectedFiles: File[] = [];
   attachments: string[] = [];
@@ -25,8 +25,11 @@ export class DocumentComponent {
         this.selectedFiles.push(selectedFile);
         this.attachments.push(selectedFile.name);
 
-        // Emit updated attachments to parent
-        this.filesChanged.emit(this.attachments);
+        // Emit updated attachments and files to parent
+        this.filesChanged.emit({
+          attachments: this.attachments,
+          files: this.selectedFiles,
+        });
       } else {
         alert('This file has already been selected.');
       }

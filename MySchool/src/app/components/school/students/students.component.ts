@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ToastrService } from 'ngx-toastr';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NewStudentComponent } from './new-student/new-student.component';
 import { ActivatedRoute } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+
+import { StudentDetailsDTO } from '../../../core/models/students.model';
+import { StudentService } from '../../../core/services/student.service';
 
 @Component({
   selector: 'app-students',
@@ -12,8 +15,12 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class StudentsComponent implements OnInit {
   form: FormGroup;
+  Students:StudentDetailsDTO[]=[]
   values = new FormControl<string[] | null>(null);
   max = 2;
+
+  studentService=inject(StudentService);
+
   // Dropdown options
   studentOptions: string[] = ['طالب 1', 'طالب 2', 'طالب 3'];
   stageOptions: string[] = ['المرحلة الأولى', 'المرحلة الثانية', 'المرحلة الثالثة'];
@@ -38,20 +45,7 @@ export class StudentsComponent implements OnInit {
     this.showCulomn=false;
     this.showGrid=true;
   }
-  students = [
-    {
-      id: 1,
-      name: 'أحمد علي',
-      stage: 'المرحلة الأولى',
-      class: 'الصف الأول',
-      division: 'الشعبة أ',
-      age: 10,
-      gender: 'ذكر',
-      registrationDate: '2024-11-01',
-    },
-    // Add more student data as needed
-  ];
-
+ 
   constructor(
     private formBuilder: FormBuilder,
     private toastr: ToastrService,
@@ -71,8 +65,13 @@ export class StudentsComponent implements OnInit {
       //this for add student 
       this.openDialog();
     }
+    this.getAllStudents();
   }
-
+getAllStudents():void{
+  this.studentService.getAllStudents().subscribe((res)=>{
+    this.Students=res;
+  })
+}
 
   // Track selection changes
   onSelectionChange(type: string, value: string): void {
@@ -120,12 +119,11 @@ export class StudentsComponent implements OnInit {
     const confirmDelete = confirm('هل أنت متأكد من حذف هذا الطالب؟');
   if (confirmDelete) {
     // Filter out the student with the given ID
-    this.students = this.students.filter((student) => student.id !== studentId);
-
-    // Show success notification
+   this.studentService.DeleteStudent(studentId).subscribe(()=>{
     this.toastr.warning('تم حذف الطالب بنجاح');
+    this.getAllStudents();
+   })
   }
   }
-  cards:number[]=[1,2,3,4,5,6,7,8,9];
   
 }

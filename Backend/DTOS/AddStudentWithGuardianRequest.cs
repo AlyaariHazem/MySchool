@@ -16,7 +16,7 @@ public class AddStudentWithGuardianRequest
     public string GuardianFullName { get; set; }
     public string? GuardianType { get; set; }
     public string GuardianPhone { get; set; } = string.Empty;
-    public DateTime GuardianDOB { get; set; }=DateTime.Now;
+    public DateTime? GuardianDOB { get; set; }
 
     // Student details
     public string? StudentEmail { get; set; }
@@ -29,10 +29,13 @@ public class AddStudentWithGuardianRequest
     public string? StudentFirstNameEng { get; set; }
     public string? StudentMiddleNameEng { get; set; }
     public string? StudentLastNameEng { get; set; }
+    public string? StudentImageURL { get; set; }
     public int DivisionID { get; set; }
     public string? PlaceBirth { get; set; }
      public string StudentPhone { get; set; } = string.Empty;
     public DateTime StudentDOB { get; set; }
+    public DateTime HireDate { get; set; }= DateTime.Now;
+    public List<IFormFile>? Files { get; set; }// I want to use this in angular how can I handle it?
 
     public decimal Amount { get; set; } = 0;
     public List<string>? Attachments { get; set; }

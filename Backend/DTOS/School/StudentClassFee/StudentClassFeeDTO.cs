@@ -12,4 +12,5 @@ public class StudentClassFeeDTO
     public int FeeClassID  { get; set; }
     public decimal? AmountDiscount { get; set; }
     public string? NoteDiscount { get; set; }
+    public List<string>?  Files { get; set; }
 }

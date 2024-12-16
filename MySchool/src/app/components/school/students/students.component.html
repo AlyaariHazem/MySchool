@@ -58,23 +58,19 @@
         <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
         @if (showGrid) {
           <div class="group group2">
-            @for (card of cards; track $index) {
+            @for (student of Students; track $index) {
             <div class="form-control">
               <p-card class="responsive-card">
                 <ng-template pTemplate="header">
-                  @if (card%2 == 0) {
-                    <img alt="Card" src="./../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" />
-                  }@else{
-                    <img alt="Card" src="./../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.jpg" />
-                  }
+                    <img alt="Card" [src]="student.photoUrl"  />
                 </ng-template>
                 <div>
-                  Hazem.{{card}}
-                  الصف:الأول
+                  الاسم:{{student.fullName.firstName +" "+ student.fullName.middleName+" "+ student.fullName.lastName}}
+                  الصف:{{student.className}}
                   <hr>
-                  النوع:ذكر
-                  المرحلة:الثانية
-                  الرسوم المطلوبة:10000
+                  النوع:{{student.gender=="Male"?"ذكر":"إنثى"}}
+                  المرحلة:{{student.stageName}}
+                  الرسوم المطلوبة:{{student.fee}}
                   <hr>
                   
                 </div>
@@ -99,8 +95,9 @@
                 <table class="styled-table">
                   <thead>
                     <tr>
+                      <th>#</th>
                       <th>رقم الطالب</th>
-                      <th>اسم الطالب</th>
+                      <th class="student-name-column">اسم الطالب</th>
                       <th>المرحلة</th>
                       <th>الصف</th>
                       <th>الشعبة</th>
@@ -111,16 +108,17 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (item of cards; track $index) {
-                    <tr *ngFor="let student of students">
-                      <td>{{ student.id }}</td>
-                      <td>حازم اليعري</td>
-                      <td>{{ student.stage }}</td>
-                      <td>{{ student.class }}</td>
-                      <td>{{ student.division }}</td>
+                    @for (student of Students; track $index) {
+                    <tr>
+                      <td>{{ $index+1 }}</td>
+                      <td>{{ student.studentID}}</td>
+                      <td class="student-name-column">{{student.fullName.firstName +" "+ student.fullName.middleName+" "+ student.fullName.lastName}}</td>
+                      <td>{{ student.stageName }}</td>
+                      <td>{{ student.className}}</td>
+                      <td>{{ student.divisionName }}</td>
                       <td>{{ student.age }}</td>
                       <td>{{ student.gender }}</td>
-                      <td>{{ student.registrationDate }}</td>
+                      <td>{{ student.hireDate | date:"MM-yyyy" }}</td>
                       <td>
                         <div class="col text-left">
                           <div class="mt-sm-0 mt-2">
@@ -133,7 +131,7 @@
                                   class="bi bi-pencil-square IconEdit"></i>تعديل</a>
                               <div role="separator" class="dropdown-divider"></div>
                               <a class="dropdown-item" ><i
-                                  class="bi bi-trash IconDelete" (click)="deleteStudent(student.id)"></i>حذف</a>
+                                  class="bi bi-trash IconDelete" (click)="deleteStudent(student.studentID)"></i>حذف</a>
                             </div>
                           </div>
                         </div>

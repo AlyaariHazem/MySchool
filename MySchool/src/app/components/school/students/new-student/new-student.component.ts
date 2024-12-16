@@ -21,6 +21,8 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
   currentPage: { [key: string]: number } = {};
   studentService = inject(StudentService);
   studentID: number = 0; // Initialize with a default placeholder value
+  files!:File[];
+
   constructor(
     private formBuilder: FormBuilder,
     private changeDetectorRef: ChangeDetectorRef,
@@ -44,12 +46,12 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
         classID: [null, Validators.required],
         amount: [0, Validators.required],
         divisionID: [null, Validators.required],
-        studentAddress: ['Sana\'a'],
+        studentAddress: [''],
       }),
       optionData: this.formBuilder.group({
-        placeBirth: ['Sana\'a'],
+        placeBirth: [''],
         studentPhone: [77],
-        studentAddress: ['Sana\'a'],
+        studentAddress: [''],
       }),
       guardian: this.formBuilder.group({
         guardianFullName: ['', Validators.required],
@@ -63,11 +65,12 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
         guardianAddress: ['', Validators.required]
       }),
       fees: this.formBuilder.group({
-        discounts: this.formBuilder.array([], Validators.required) // Initialize as a FormArray
+        discounts: this.formBuilder.array([], Validators.required)
       }),
       documents: this.formBuilder.group({
         attachments: [[]], // Array of strings for URLs
-      })
+      }),
+      studentImageURL: [''],
     });
   }
 
@@ -106,13 +109,26 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
         ...this.formGroup.get('guardian')?.value,
         ...this.formGroup.get('fees')?.value,
         attachments: this.formGroup.get('documents.attachments')?.value || [],
+        studentImageURL: this.studentImageURL
       };
-      console.log('the data for form', formData);
       this.studentService.addStudent(formData).subscribe({
         next: (res) => {
           this.toastr.success('student added successfully', res.message);
         }
-      })
+      });
+      this.studentService.uploadStudentImage(this.StudentImage,this.studentID).subscribe(()=>{
+        console.log('Image is upload successfully!');
+      });
+      this.studentService.uploadAttachments(this.files, this.studentID).subscribe({
+        next: () => {
+          this.toastr.success('Files uploaded successfully!');
+        },
+        error: (error) => {
+          console.error('File upload failed:', error);
+          this.toastr.error('Failed to upload files.');
+        }
+      });
+      this.generateStudentID();
     } else {
       console.log('Form is not valid', this.formGroup.value);
     }
@@ -225,33 +241,32 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
       this.currentPage[item.id]--;
     }
   }
-
-  updateAttachments(fileNames: string[]): void {
-    // Update the attachments array in the parent form
-    this.formGroup.get('documents.attachments')?.setValue(fileNames);
+  updateAttachments(event: { attachments: string[]; files: File[] }): void {
+    this.formGroup.get('documents.attachments')?.setValue(event.attachments);
+    this.attachments = event.attachments;
+    this.files=event.files;
+    
+    console.log('Updated Attachments:', this.attachments);
+    console.log('Updated files:', this.files);
   }
 
   getTotalPages(item: any): number {
     return Math.ceil(item.grades.length / this.maxRowsPerPage);
   }
-  selectedFiles: File[] = [];
   attachments: string[] = [];
+  
+  StudentImage!: File;
+  studentImageURL:string='';
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-
-    if (input.files && input.files.length > 0) {
-      const selectedFile = input.files[0];
-
-      // Avoid duplicate files
-      const fileExists = this.selectedFiles.some(file => file.name === selectedFile.name);
-      if (!fileExists) {
-        this.selectedFiles.push(selectedFile);
-        this.attachments.push(selectedFile.name);
-
-      } else {
-        alert('This file has already been selected.');
-      }
+  
+    if (input.files?.[0]) {
+      this.StudentImage = input.files[0]; // Assign the single file
+      this.studentImageURL=`${this.studentID}_${this.StudentImage.name}`;
+    } else {
+      console.error('No file selected');
     }
   }
-}
+  
+  }

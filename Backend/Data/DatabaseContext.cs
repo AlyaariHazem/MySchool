@@ -268,7 +268,7 @@ namespace Backend.Data
                 .HasOne(u => u.Manager)
                 .WithOne(m => m.ApplicationUser)
                 .HasForeignKey<Manager>(m => m.UserID)
-                .OnDelete(DeleteBehavior.Cascade); ;
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Ternary relationship between Teachers, Students, and Subjects
             modelBuilder.Entity<TeacherSubjectStudent>()

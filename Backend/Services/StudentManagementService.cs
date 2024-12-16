@@ -96,96 +96,73 @@ public class StudentManagementService
 
             return addedStudent;
         }
-    public async Task<StudentDetailsDTO?> GetStudentByIdAsync(int id)
+
+    public async Task<List<string>> UploadAttachments(List<IFormFile> files, int studentId)
     {
-        var student = await _dbContext.Students
-            .Include(s => s.ApplicationUser) // Include ApplicationUser details
-            .Include(s => s.Division)       // Include Division details if needed
-            .FirstOrDefaultAsync(s => s.StudentID == id);
-
-        if (student == null)
-        {
+        if (files == null || !files.Any())
             return null;
-        }
 
-        return new StudentDetailsDTO
+        var uploadsFolder = Path.Combine("wwwroot", "uploads", "Attachments");
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+
+        var filePaths = new List<string>();
+        foreach (var file in files)
         {
-            StudentID = student.StudentID,
-            FullName = new NameDTO
+            if (file.Length > 0)
             {
-                FirstName = student.FullName.FirstName,
-                MiddleName = student.FullName.MiddleName,
-                LastName = student.FullName.LastName
-            },
-            FullNameAlis = student.FullNameAlis == null ? null : new NameAlisDTO
-            {
-                FirstNameEng = student.FullNameAlis.FirstNameEng,
-                MiddleNameEng = student.FullNameAlis.MiddleNameEng,
-                LastNameEng = student.FullNameAlis.LastNameEng
-            },
-            DivisionID = student.DivisionID,
-            PlaceBirth = student.PlaceBirth,
-            UserID = student.UserID,
-            ApplicationUser = new ApplicationUserDTO
-            {
-                Id = student.ApplicationUser.Id,
-                UserName = student.ApplicationUser.UserName!,
-                Email = student.ApplicationUser.Email!,
-                Gender = student.ApplicationUser.Gender
+                var fileExtension = Path.GetExtension(file.FileName);
+                if (!new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf" }.Contains(fileExtension.ToLower()))
+                    throw new InvalidOperationException("Invalid file type.");
+
+                var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
+                try
+                {
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    filePaths.Add(filePath);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error uploading file {file.FileName}: {ex.Message}");
+                }
             }
-        };
+        }
+        return filePaths;
+    }
+    public async Task<List<string>> UploadStudentImage(IFormFile file, int studentId)
+    {
+        if (file == null)
+            return null;
+
+        var uploadsFolder = Path.Combine("wwwroot", "uploads", "StudentPhotos");
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+
+        var filePaths = new List<string>();
+        if (file.Length > 0)
+        {
+            var fileExtension = Path.GetExtension(file.FileName);
+            if (!new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(fileExtension.ToLower()))
+                throw new InvalidOperationException("Invalid file type.");
+
+                var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
+                try
+                {
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    filePaths.Add(filePath);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error uploading file {file.FileName}: {ex.Message}");
+                }
+            }
+        return filePaths;
     }
 
-public async Task<List<StudentDetailsDTO>> GetAllStudentsAsync()
-{
-    var students = await _dbContext.Students
-        .Include(s => s.ApplicationUser) // Include ApplicationUser details
-        .Include(s => s.Division)       // Include Division details
-        .Include(s => s.AccountStudentGuardians)
-        .Include(s=>s.Guardian)       // Include Division details
-        .ToListAsync();
-
-    if (students == null || !students.Any())
-        return new List<StudentDetailsDTO>();
-
-    return students.Select(student => new StudentDetailsDTO
-    {
-        StudentID = student.StudentID,
-        FullName = new NameDTO
-        {
-            FirstName = student.FullName.FirstName,
-            MiddleName = student.FullName.MiddleName,
-            LastName = student.FullName.LastName
-        },
-        FullNameAlis = student.FullNameAlis == null ? null : new NameAlisDTO
-        {
-            FirstNameEng = student.FullNameAlis.FirstNameEng,
-            MiddleNameEng = student.FullNameAlis.MiddleNameEng,
-            LastNameEng = student.FullNameAlis.LastNameEng
-        },
-        DivisionID = student.DivisionID,
-        StudnetDOB=student.ApplicationUser.HireDate,
-        StudentAddress=student.ApplicationUser.Address,
-        PlaceBirth = student.PlaceBirth,
-        StudentPhone = student.ApplicationUser.PhoneNumber,
-        UserID = student.UserID,
-        ApplicationUser = new ApplicationUserDTO
-        {
-            Id = student.ApplicationUser.Id,
-            UserName = student.ApplicationUser.UserName!,
-            Email = student.ApplicationUser.Email!,
-            Gender = student.ApplicationUser.Gender
-        },
-        Guardians = new GuardianDto
-        {
-            guardianFullName=student.Guardian.FullName,
-            guardianType=student.Guardian.Type!,
-            guardianEmail=student.ApplicationUser.Email,
-            guardianPhone=student.ApplicationUser.PhoneNumber!,
-            guardianDOB=student.ApplicationUser.HireDate,
-            guardianAddress=student.ApplicationUser.Address!
-        }
-    }).ToList();
-
-}
 }

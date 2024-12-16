@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241214234327_addedDOB")]
+    partial class addedDOB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,7 +53,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("StudentID");
 
-                    b.ToTable("AccountStudentGuardians", (string)null);
+                    b.ToTable("AccountStudentGuardians");
                 });
 
             modelBuilder.Entity("Backend.Models.Accounts", b =>
@@ -83,7 +86,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("TypeAccountID");
 
-                    b.ToTable("Accounts", (string)null);
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("Backend.Models.ApplicationUser", b =>
@@ -191,7 +194,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("VoucherID");
 
-                    b.ToTable("Attachments", (string)null);
+                    b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("Backend.Models.Class", b =>
@@ -220,7 +223,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("StageID");
 
-                    b.ToTable("Classes", (string)null);
+                    b.ToTable("Classes");
                 });
 
             modelBuilder.Entity("Backend.Models.Division", b =>
@@ -245,7 +248,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("ClassID");
 
-                    b.ToTable("Divisions", (string)null);
+                    b.ToTable("Divisions");
                 });
 
             modelBuilder.Entity("Backend.Models.Fee", b =>
@@ -274,7 +277,7 @@ namespace Backend.Migrations
 
                     b.HasKey("FeeID");
 
-                    b.ToTable("Fees", (string)null);
+                    b.ToTable("Fees");
                 });
 
             modelBuilder.Entity("Backend.Models.FeeClass", b =>
@@ -303,7 +306,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("FeeID");
 
-                    b.ToTable("FeeClass", (string)null);
+                    b.ToTable("FeeClass");
                 });
 
             modelBuilder.Entity("Backend.Models.Guardian", b =>
@@ -333,7 +336,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserID")
                         .IsUnique();
 
-                    b.ToTable("Guardians", (string)null);
+                    b.ToTable("Guardians");
                 });
 
             modelBuilder.Entity("Backend.Models.Manager", b =>
@@ -359,7 +362,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserID")
                         .IsUnique();
 
-                    b.ToTable("Managers", (string)null);
+                    b.ToTable("Managers");
                 });
 
             modelBuilder.Entity("Backend.Models.Salary", b =>
@@ -389,7 +392,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("TeacherID");
 
-                    b.ToTable("Salarys", (string)null);
+                    b.ToTable("Salarys");
                 });
 
             modelBuilder.Entity("Backend.Models.School", b =>
@@ -454,7 +457,7 @@ namespace Backend.Migrations
 
                     b.HasKey("SchoolID");
 
-                    b.ToTable("Schools", (string)null);
+                    b.ToTable("Schools");
                 });
 
             modelBuilder.Entity("Backend.Models.Stage", b =>
@@ -485,7 +488,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("YearID");
 
-                    b.ToTable("Stages", (string)null);
+                    b.ToTable("Stages");
                 });
 
             modelBuilder.Entity("Backend.Models.Student", b =>
@@ -523,7 +526,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserID")
                         .IsUnique();
 
-                    b.ToTable("Students", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("Backend.Models.StudentClassFees", b =>
@@ -552,7 +555,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("StudentID");
 
-                    b.ToTable("StudentClassFees", (string)null);
+                    b.ToTable("StudentClassFees");
                 });
 
             modelBuilder.Entity("Backend.Models.Subject", b =>
@@ -574,7 +577,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("ClassID");
 
-                    b.ToTable("Subjects", (string)null);
+                    b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("Backend.Models.SubjectStudent", b =>
@@ -592,7 +595,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("StudentID");
 
-                    b.ToTable("SubjectStudents", (string)null);
+                    b.ToTable("SubjectStudents");
                 });
 
             modelBuilder.Entity("Backend.Models.Teacher", b =>
@@ -617,7 +620,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserID")
                         .IsUnique();
 
-                    b.ToTable("Teachers", (string)null);
+                    b.ToTable("Teachers");
                 });
 
             modelBuilder.Entity("Backend.Models.TeacherStudent", b =>
@@ -632,7 +635,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("TeacherID");
 
-                    b.ToTable("TeacherStudents", (string)null);
+                    b.ToTable("TeacherStudents");
                 });
 
             modelBuilder.Entity("Backend.Models.TeacherSubjectStudent", b =>
@@ -652,7 +655,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("SubjectID");
 
-                    b.ToTable("TeacherSubjectStudent", (string)null);
+                    b.ToTable("TeacherSubjectStudent");
                 });
 
             modelBuilder.Entity("Backend.Models.TypeAccount", b =>
@@ -669,7 +672,7 @@ namespace Backend.Migrations
 
                     b.HasKey("TypeAccountID");
 
-                    b.ToTable("TypeAccounts", (string)null);
+                    b.ToTable("TypeAccounts");
 
                     b.HasData(
                         new
@@ -732,7 +735,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("AccountStudentGuardianID");
 
-                    b.ToTable("vouchers", (string)null);
+                    b.ToTable("vouchers");
                 });
 
             modelBuilder.Entity("Backend.Models.Year", b =>
@@ -762,7 +765,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("SchoolID");
 
-                    b.ToTable("Years", (string)null);
+                    b.ToTable("Years");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -1019,7 +1022,7 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Backend.Models.Manager.FullName#Backend.Models.Name", "FullName", b1 =>
+                    b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
                         {
                             b1.Property<int>("ManagerID")
                                 .HasColumnType("int");
@@ -1038,7 +1041,7 @@ namespace Backend.Migrations
 
                             b1.HasKey("ManagerID");
 
-                            b1.ToTable("Managers", (string)null);
+                            b1.ToTable("Managers");
 
                             b1.WithOwner()
                                 .HasForeignKey("ManagerID");
@@ -1094,7 +1097,29 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Backend.Models.Student.FullName#Backend.Models.Name", "FullName", b1 =>
+                    b.OwnsOne("Backend.Models.NameAlis", "FullNameAlis", b1 =>
+                        {
+                            b1.Property<int>("StudentID")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("FirstNameEng")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("LastNameEng")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("MiddleNameEng")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("StudentID");
+
+                            b1.ToTable("Students");
+
+                            b1.WithOwner()
+                                .HasForeignKey("StudentID");
+                        });
+
+                    b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
                         {
                             b1.Property<int>("StudentID")
                                 .HasColumnType("int");
@@ -1113,29 +1138,7 @@ namespace Backend.Migrations
 
                             b1.HasKey("StudentID");
 
-                            b1.ToTable("Students", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("StudentID");
-                        });
-
-                    b.OwnsOne("Backend.Models.Student.FullNameAlis#Backend.Models.NameAlis", "FullNameAlis", b1 =>
-                        {
-                            b1.Property<int>("StudentID")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("FirstNameEng")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("LastNameEng")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("MiddleNameEng")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("StudentID");
-
-                            b1.ToTable("Students", (string)null);
+                            b1.ToTable("Students");
 
                             b1.WithOwner()
                                 .HasForeignKey("StudentID");
@@ -1216,7 +1219,7 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Backend.Models.Teacher.FullName#Backend.Models.Name", "FullName", b1 =>
+                    b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
                         {
                             b1.Property<int>("TeacherID")
                                 .HasColumnType("int");
@@ -1235,7 +1238,7 @@ namespace Backend.Migrations
 
                             b1.HasKey("TeacherID");
 
-                            b1.ToTable("Teachers", (string)null);
+                            b1.ToTable("Teachers");
 
                             b1.WithOwner()
                                 .HasForeignKey("TeacherID");

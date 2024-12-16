@@ -16,6 +16,7 @@ namespace Backend.Models
         public NameAlis? FullNameAlis { get; set; }
         public string? ImageURL { get; set; }
         public string? PlaceBirth { get; set; }
+        public DateTime? StudentDOB { get; set; }=DateTime.Now;
         [Required]
         public int DivisionID { get; set; }
         public int GuardianID { get; set; } // Foreign Key

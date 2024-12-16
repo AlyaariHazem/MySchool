@@ -18,6 +18,7 @@ import { ChipsModule } from 'primeng/chips';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { EditorModule } from 'primeng/editor';
+import { PaginatorModule } from 'primeng/paginator';
 
 import { SchoolRoutingModule } from './school-routing.module';
 import { HeaderComponent } from './header/header.component';
@@ -97,6 +98,8 @@ const components = [
   NewCaptureComponent,
   FeeClassComponent,
   FeeComponent,
+  NewStudentComponent,
+  EditStudentComponent,
   CoursesComponent,
   PlainsComponent,
   CoursesAndPlains,
@@ -129,6 +132,7 @@ const modules = [
   MatDialogModule,
   MatDialogClose,
   RouterOutlet,
+  PaginatorModule,
   RouterLinkActive,
   DialogModule,
   ButtonModule,

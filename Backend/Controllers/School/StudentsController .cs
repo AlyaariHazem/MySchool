@@ -1,5 +1,6 @@
 using Backend.DTOS;
 using Backend.DTOS.School.StudentClassFee;
+using Backend.DTOS.School.Students;
 using Backend.Models;
 using Backend.Repository.School.Classes;
 using Backend.Repository.School.Interfaces;
@@ -8,8 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class StudentsController : ControllerBase
     {
         private readonly StudentManagementService _studentManagementService;
@@ -38,7 +39,6 @@ namespace Backend.Controllers
                     Email = request.GuardianEmail,
                     Address = request.GuardianAddress,
                     Gender = request.GuardianGender,
-                    HireDate = request.GuardianDOB,
                     PhoneNumber=request.GuardianPhone,
                     UserType = "Guardian"
                 };
@@ -47,7 +47,8 @@ namespace Backend.Controllers
                 var guardian = new Guardian
                 {
                     FullName = request.GuardianFullName,
-                    Type = request.GuardianType
+                    Type = request.GuardianType,
+                    GuardianDOB=request.GuardianDOB,
                 };
             var userNameStudent ="Student_"+ Guid.NewGuid().ToString("N").Substring(0, 5);
                 // Create Student User
@@ -57,7 +58,7 @@ namespace Backend.Controllers
                     Email = request.StudentEmail,
                     Address = request.StudentAddress,
                     Gender = request.StudentGender,
-                    HireDate=request.StudentDOB,
+                    HireDate=request.HireDate,
                     PhoneNumber=request.StudentPhone,
                     UserType = "Student"
                 };
@@ -81,7 +82,9 @@ namespace Backend.Controllers
                             LastNameEng = request.StudentLastNameEng
                         },
                     DivisionID = request.DivisionID,
-                    PlaceBirth = request.PlaceBirth
+                    PlaceBirth = request.PlaceBirth,
+                    StudentDOB = request.StudentDOB,
+                    ImageURL = request.StudentImageURL
                 };
                 //Add Account
                  var account = new Accounts
@@ -105,12 +108,12 @@ namespace Backend.Controllers
                             attachments.Add(new Attachments
                             {
                                 StudentID=request.StudentID,
-                                AttachmentURL = fileUrl,
+                                AttachmentURL = $"{request.DivisionID}_{fileUrl}",
                                 Note = ""
                             });
                         }
                     }
-
+ 
                     // Map FeeClass data to StudentClassFees and assign to the student
                     var studentClassFees = new List<StudentClassFeeDTO>();
                     if(request.Discounts != null && request.Discounts.Any())
@@ -142,7 +145,7 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentById(int id)
         {
-            var student = await _studentManagementService.GetStudentByIdAsync(id);
+            var student = await _studentRepository.GetStudentByIdAsync(id);
             if (student == null)
                 return NotFound(new { message = "Student not found." });
 
@@ -152,7 +155,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllStudents()
         {
-            var students = await _studentManagementService.GetAllStudentsAsync();
+            var students = await _studentRepository.GetAllStudentsAsync();
             if (students == null)
                 return NotFound(new { message = "Students not found." });
 
@@ -164,6 +167,85 @@ namespace Backend.Controllers
             var students = await _studentRepository.MaxValue();
             
             return Ok(students);
+        }
+        
+       // DELETE: api/Students/{id}
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteStudent([FromRoute] int id)
+    {
+        var isDeleted = await _studentRepository.DeleteStudentAsync(id);
+        
+        if (isDeleted)
+        {
+            return NoContent(); // 204 No Content
+        }
+        else
+        {
+            return NotFound(new { message = $"Student with ID {id} not found." });
+        }
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateStudent(int id, [FromBody] UpdateStudentRequest updateRequest)
+    {
+        if (id != updateRequest.StudentID)
+        {
+            return BadRequest(new { message = "Student ID mismatch." });
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var isUpdated = await _studentRepository.UpdateStudentAsync(updateRequest);
+
+            if (!isUpdated)
+            {
+                return NotFound(new { message = $"Student with ID {id} not found." });
+            }
+
+            return NoContent(); // 204 No Content indicates successful update
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+     
+        [HttpPost("uploadAttachments")]
+        public async Task<IActionResult> UploadAttachments([FromForm] List<IFormFile> files, [FromForm] int studentId)
+        {
+            if (files == null || !files.Any())
+                return BadRequest("No files uploaded.");
+
+            try
+            {
+                var filePaths = await _studentManagementService.UploadAttachments(files, studentId);
+                return Ok(new { success = true, filePaths });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        [HttpPost("uploadImage")]
+        public async Task<IActionResult> UploadStudentImage([FromForm] IFormFile file, [FromForm] int studentId)
+        {
+            if (file == null)
+                return BadRequest("No files uploaded.");
+
+            try
+            {
+                var filePaths = await _studentManagementService.UploadStudentImage(file, studentId);
+                return Ok(new { success = true, filePaths });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
     }
 }

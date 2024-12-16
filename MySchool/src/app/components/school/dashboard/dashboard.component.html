@@ -1,12 +1,4 @@
 <div class="contant" style="margin-top: 0rem">
-  <!-- <div class="main-wrapper"> -->
-
-  <!-- this is the sidebar -->
-  <!-- <app-sidebar></app-sidebar> -->
-
-  <!-- <div class="page-wrapper"> -->
-  <!-- <div class="content container-fluid" dir="rtl"> -->
-
   <div class="row">
     <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
       <div class="dash-widget dash-widget5">
@@ -15,7 +7,7 @@
         /></span>
         <div class="dash-widget-info text-right">
           <span>الطلاب</span>
-          <h3>60,000</h3>
+          <h3>{{students.length}}</h3>
         </div>
       </div>
     </div>
@@ -307,6 +299,9 @@
   </div>
   <div class="row">
     <div class="col-lg-12">
+      <div class="card flex justify-center">
+        <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="120" [rowsPerPageOptions]="[10, 20, 30]" />
+    </div>
       <div class="card">
         <div class="card-header">
           <div class="row align-items-center">
@@ -617,33 +612,27 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <!-- @for (student of students; track $index) {
+                    @for (student of students; track $index) {
                     <tr>
                       <td>
                         <h2>
                           <a href="#" class="avatar text-white"
                             ><img
-                              src="assets/img/profile/img-2.jpg"
+                              [src]="student.photoUrl"
                               alt="" /></a
                           ><a href="#"
                             >{{
-                              student.fname +
-                                " " +
-                                student.Sname +
-                                " " +
-                                student.Tname +
-                                " " +
-                                student.Lname
+                              student.fullName.firstName+" "+student.fullName.lastName
                             }}<span></span
                           ></a>
                         </h2>
                       </td>
-                      <td>{{ student.ContryNum }}</td>
-                      <td>{{ student.ParantName }}</td>
-                      <td>{{ student.phone }}</td>
-                      <td>{{ student.PlacePD }}</td>
-                      <td>{{ student.PirthDate }}</td>
-                      <td>$20000</td>
+                      <td>{{ student.studentPhone }}</td>
+                      <td>{{ student.guardians.guardianFullName }}</td>
+                      <td>{{ student.guardians.guardianPhone }}</td>
+                      <td>{{ student.placeBirth }}</td>
+                      <td>{{ student.hireDate|date:"dd-MM-yyyy" }}</td>
+                      <td>{{ student.fee }}</td>
                       <td>
                         <img
                           class="imageGreade"
@@ -653,14 +642,12 @@
                       </td>
                       <td class="text-right">
                         <button
-                          (click)="openDialog(student)"
                           mat-raised-button
                           class="btn btn-primary btn-sm mb-1"
                         >
                           <i class="far fa-edit"></i>
                         </button>
                         <button
-                          (click)="deleteStudent(student)"
                           type="submit"
                           data-toggle="modal"
                           data-target="#delete_employee"
@@ -670,7 +657,7 @@
                         </button>
                       </td>
                     </tr>
-                    } -->
+                    }
                   </tbody>
                 </table>
               </div>
@@ -916,6 +903,3 @@
     </div>
   </div>
 </div>
-<!-- </div> -->
-<!-- </div> -->
-<!-- </div> -->

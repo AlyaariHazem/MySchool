@@ -56,7 +56,7 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ fee.feeName }}</td>
                                 <td>{{ fee.feeNameAlis }}</td>
-                                <td>{{ fee.hireDate }}</td>
+                                <td>{{ fee.hireDate|date:"dd-MM-yyyy" }}</td>
                                 <td>{{ fee.note }}</td>
                                 <td>{{ fee.state }}</td>
                                 <td>
@@ -159,7 +159,7 @@
                                 <td>{{ fee.feeName }}</td>
                                 <td>{{ fee.amount }}</td>
                                 <td>{{ fee.className }}</td>
-                                <td>{{ fee.classYear }}</td>
+                                <td>{{ fee.classYear|date:"dd-MM-yyyy" }}</td>
                                 <td>{{ fee.mandatory }}</td>
                                 <td>
                                     <div class="col text-left">
