@@ -9,9 +9,9 @@ import { ClassService } from '../../../../../core/services/class.service';
 import { ClassDTO } from '../../../../../core/models/class.model';
 
 @Component({
-  selector: 'app-division',
-  templateUrl: './division.component.html',
-  styleUrls: ['./division.component.scss']
+    selector: 'app-division',
+    templateUrl: './division.component.html',
+    styleUrls: ['./division.component.scss']
 })
 export class DivisionComponent implements OnInit {
   divisions: Array<divisions> = [];

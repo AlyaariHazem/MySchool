@@ -14,7 +14,7 @@ import { DialogModule } from 'primeng/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatOption } from '@angular/material/core';
 import { PanelModule } from 'primeng/panel';
-import { ChipsModule } from 'primeng/chips';
+import { Chip } from 'primeng/chip';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { EditorModule } from 'primeng/editor';
@@ -137,7 +137,7 @@ const modules = [
   DialogModule,
   ButtonModule,
   PanelModule,
-  ChipsModule,
+  Chip,
   InputMaskModule,
   CardModule,
   CountDirective, 

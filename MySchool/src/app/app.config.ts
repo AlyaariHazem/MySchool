@@ -8,6 +8,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi
 import { provideToastr } from 'ngx-toastr';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TokenInterceptor } from './auth/interceptors/token.interceptor';
+import { providePrimeNG } from 'primeng/config';
 // import { IntercepterService } from './core/services/intercepter.service';
 
 export const appConfig: ApplicationConfig = {
@@ -17,6 +18,11 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     provideHttpClient(withFetch()),
     provideAnimations(), // required animations providers
+    providePrimeNG({ 
+      theme: {
+          preset: 'aura'
+      }
+  }),
     // Toastr providers
     provideToastr({
       timeOut: 5000,

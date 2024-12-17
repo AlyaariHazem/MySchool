@@ -9,9 +9,9 @@ import { StudentService } from '../../../../core/services/student.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  selector: 'app-new-student',
-  templateUrl: './new-student.component.html',
-  styleUrls: ['./new-student.component.scss']
+    selector: 'app-new-student',
+    templateUrl: './new-student.component.html',
+    styleUrls: ['./new-student.component.scss']
 })
 export class NewStudentComponent implements OnInit, AfterViewInit {
   activeTab: string = 'DataStudent'; // Default active tab

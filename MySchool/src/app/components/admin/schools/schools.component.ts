@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-schools',
-  templateUrl: './schools.component.html',
-  styleUrls: ['./schools.component.scss']
+    selector: 'app-schools',
+    templateUrl: './schools.component.html',
+    styleUrls: ['./schools.component.scss']
 })
 export class SchoolsComponent implements OnInit {
   schoolForm: FormGroup;

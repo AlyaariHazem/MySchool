@@ -9,9 +9,9 @@ import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { StudentService } from '../../../core/services/student.service';
 
 @Component({
-  selector: 'app-students',
-  templateUrl: './students.component.html',
-  styleUrls: ['./students.component.scss'],
+    selector: 'app-students',
+    templateUrl: './students.component.html',
+    styleUrls: ['./students.component.scss']
 })
 export class StudentsComponent implements OnInit {
   form: FormGroup;

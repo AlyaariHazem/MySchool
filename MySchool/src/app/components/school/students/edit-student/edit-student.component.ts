@@ -6,9 +6,9 @@ import { ToastrService } from 'ngx-toastr';
 import { DialogData } from '../all-students/all-students.component';
 
 @Component({
-  selector: 'app-edit-student',
-  templateUrl: './edit-student.component.html',
-  styleUrls: ['./edit-student.component.scss']
+    selector: 'app-edit-student',
+    templateUrl: './edit-student.component.html',
+    styleUrls: ['./edit-student.component.scss']
 })
 export class EditStudentComponent implements OnInit {
   form: FormGroup;

@@ -9,9 +9,9 @@ import { ClassDTO } from '../../../../core/models/class.model';
 import { FeeClassService } from '../../../../core/services/fee-class.service';
 
 @Component({
-  selector: 'app-fee-class',
-  templateUrl: './fee-class.component.html',
-  styleUrls: ['./fee-class.component.scss']
+    selector: 'app-fee-class',
+    templateUrl: './fee-class.component.html',
+    styleUrls: ['./fee-class.component.scss']
 })
 export class FeeClassComponent implements OnInit {
   // Model properties

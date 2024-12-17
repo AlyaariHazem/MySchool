@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 
 @Component({
-  selector: 'app-allotment',
-  templateUrl: './allotment.component.html',
-  styleUrls: ['./allotment.component.scss']
+    selector: 'app-allotment',
+    templateUrl: './allotment.component.html',
+    styleUrls: ['./allotment.component.scss']
 })
 export class AllotmentComponent implements OnInit {
   formGroup: FormGroup; // No need for undefined

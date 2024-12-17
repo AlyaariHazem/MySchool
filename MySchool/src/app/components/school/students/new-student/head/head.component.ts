@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-head',
-  templateUrl: './head.component.html',
-  styleUrl: './head.component.scss'
+    selector: 'app-head',
+    templateUrl: './head.component.html',
+    styleUrl: './head.component.scss'
 })
 export class HeadComponent {
   activeTab = 'DataStudent';

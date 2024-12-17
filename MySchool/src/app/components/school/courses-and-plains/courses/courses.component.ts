@@ -7,12 +7,12 @@ interface City {
   code: string;
 }
 @Component({
-  selector: 'app-courses',
-  templateUrl: './courses.component.html',
-  styleUrls: ['./courses.component.scss',
-              './../../../../shared/styles/style-table.scss',
-              './../../../../shared/styles/style-select.scss'
-            ]
+    selector: 'app-courses',
+    templateUrl: './courses.component.html',
+    styleUrls: ['./courses.component.scss',
+        './../../../../shared/styles/style-table.scss',
+        './../../../../shared/styles/style-select.scss'
+    ]
 })
 export class CoursesComponent {
 

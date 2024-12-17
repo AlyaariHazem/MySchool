@@ -8,11 +8,11 @@ interface City {
 }
 
 @Component({
-  selector: 'app-books',
-  templateUrl: './books.component.html',
-  styleUrls: ['./books.component.scss',
-              './../../../../shared/styles/style-table.scss'
-  ]
+    selector: 'app-books',
+    templateUrl: './books.component.html',
+    styleUrls: ['./books.component.scss',
+        './../../../../shared/styles/style-table.scss'
+    ]
 })
 export class BooksComponent {
 

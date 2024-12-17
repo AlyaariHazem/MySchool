@@ -6,11 +6,11 @@ interface City {
 }
 
 @Component({
-  selector: 'app-action',
-  templateUrl: './action.component.html',
-  styleUrls: ['./action.component.scss',
-    './../../../shared/styles/style-select.scss',
-    './../../../shared/styles/style-primeng-input.scss'],
+    selector: 'app-action',
+    templateUrl: './action.component.html',
+    styleUrls: ['./action.component.scss',
+        './../../../shared/styles/style-select.scss',
+        './../../../shared/styles/style-primeng-input.scss']
 })
 export class ActionComponent implements OnInit {
   cities: City[] | undefined;

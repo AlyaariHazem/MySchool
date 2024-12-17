@@ -8,12 +8,12 @@ interface City {
 }
 
 @Component({
-  selector: 'app-add-account',
-  templateUrl: './add-account.component.html',
-  styleUrls: ['./add-account.component.scss',
-    './../../../../shared/styles/style-primeng-input.scss',
-    './../../../../shared/styles/style-select.scss'
-  ]
+    selector: 'app-add-account',
+    templateUrl: './add-account.component.html',
+    styleUrls: ['./add-account.component.scss',
+        './../../../../shared/styles/style-primeng-input.scss',
+        './../../../../shared/styles/style-select.scss'
+    ]
 })
 export class AddAccountComponent implements OnInit {
   showDialog() {

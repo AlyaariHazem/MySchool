@@ -2,9 +2,9 @@ import { Component, inject } from '@angular/core';
 import { AuthAPIService } from '../../../auth/authAPI.service';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrl: './header.component.scss'
 })
 export class HeaderComponent {
   toggle:boolean=false;
