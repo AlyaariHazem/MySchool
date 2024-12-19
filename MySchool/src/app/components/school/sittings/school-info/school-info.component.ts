@@ -4,12 +4,12 @@ import { SchoolService } from '../../../../core/services/school.service';
 import { School } from '../../../../core/models/school.modul';
 
 @Component({
-    selector: 'app-school-info',
-    templateUrl: './school-info.component.html',
-    styleUrls: ['./school-info.component.scss',
-        './../../../../shared/styles/style-primeng-input.scss',
-        './../../../../shared/styles/style-select.scss',
-    ]
+  selector: 'app-school-info',
+  templateUrl: './school-info.component.html',
+  styleUrls: ['./school-info.component.scss',
+    './../../../../shared/styles/style-primeng-input.scss',
+    './../../../../shared/styles/style-select.scss',
+  ],
 })
 export class SchoolInfoComponent implements OnInit {
   private schoolService = inject(SchoolService);

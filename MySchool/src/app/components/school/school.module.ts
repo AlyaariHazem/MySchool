@@ -14,7 +14,7 @@ import { DialogModule } from 'primeng/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatOption } from '@angular/material/core';
 import { PanelModule } from 'primeng/panel';
-import { Chip } from 'primeng/chip';
+import { ChipsModule } from 'primeng/chips';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { EditorModule } from 'primeng/editor';
@@ -98,8 +98,6 @@ const components = [
   NewCaptureComponent,
   FeeClassComponent,
   FeeComponent,
-  NewStudentComponent,
-  EditStudentComponent,
   CoursesComponent,
   PlainsComponent,
   CoursesAndPlains,
@@ -121,6 +119,7 @@ const modules = [
   EditorModule,
   FormsModule,
   DropdownModule,
+  PaginatorModule,
   MatSelectModule,
   MatTabsModule,
   MatAutocompleteModule,
@@ -132,12 +131,11 @@ const modules = [
   MatDialogModule,
   MatDialogClose,
   RouterOutlet,
-  PaginatorModule,
   RouterLinkActive,
   DialogModule,
   ButtonModule,
   PanelModule,
-  Chip,
+  ChipsModule,
   InputMaskModule,
   CardModule,
   CountDirective, 

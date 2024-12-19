@@ -6,11 +6,11 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { ShardModule } from '../../shared/shard.module';
 
 @Component({
-    selector: 'app-register',
-    standalone: true,
-    imports: [ShardModule, MatDialogModule],
-    templateUrl: './register.component.html',
-    styleUrls: ['./register.component.scss']
+  selector: 'app-register',
+  standalone: true,
+  imports: [ShardModule, MatDialogModule],
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
   registerError: string | null = null;

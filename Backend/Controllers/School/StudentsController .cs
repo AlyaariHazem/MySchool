@@ -3,6 +3,7 @@ using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
 using Backend.Models;
 using Backend.Repository.School.Classes;
+using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -15,132 +16,174 @@ namespace Backend.Controllers
     {
         private readonly StudentManagementService _studentManagementService;
         private readonly StudentClassFeesRepository _studentClassFeesRepository;
+        private readonly IGuardianRepository _guardianRepository;
         private readonly IStudentRepository _studentRepository;
 
-        public StudentsController(StudentManagementService studentManagementService, StudentClassFeesRepository studentClassFeesRepository, IStudentRepository studentRepository)
+        public StudentsController(StudentManagementService studentManagementService,
+         StudentClassFeesRepository studentClassFeesRepository, IStudentRepository studentRepository,
+         IGuardianRepository guardianRepository)
         {
             _studentManagementService = studentManagementService;
             _studentClassFeesRepository = studentClassFeesRepository;
             _studentRepository = studentRepository;
+            _guardianRepository = guardianRepository;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddStudentWithGuardian([FromBody] AddStudentWithGuardianRequest request)
+       [HttpPost]
+    public async Task<IActionResult> AddStudentWithGuardian([FromBody] AddStudentWithGuardianRequest request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var userName ="Guardain_"+ Guid.NewGuid().ToString("N").Substring(0, 5);
-            try
+            Guardian existingGuardian = null;
+
+            // Step 1: Check if we are adding a student to an existing guardian.
+            if (request.ExistingGuardianId.HasValue&&!request.ExistingGuardianId.Value.Equals(0))
             {
-                // Create Guardian User
-                var guardianUser = new ApplicationUser
+                existingGuardian = await _guardianRepository.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
+                if (existingGuardian == null)
+                {
+                    return NotFound(new { message = "Existing Guardian not found." });
+                }
+            }
+
+            // If no existing guardian is provided, create a new guardian and guardian user
+            ApplicationUser guardianUser = null;
+            Guardian guardian = null;
+            Accounts account = null;
+
+            if (existingGuardian == null)
+            {
+                var userName = "Guardain_" + Guid.NewGuid().ToString("N").Substring(0, 5);
+                guardianUser = new ApplicationUser
                 {
                     UserName = userName,
                     Email = request.GuardianEmail,
                     Address = request.GuardianAddress,
                     Gender = request.GuardianGender,
-                    PhoneNumber=request.GuardianPhone,
+                    PhoneNumber = request.GuardianPhone,
                     UserType = "Guardian"
                 };
 
-                // Create Guardian Entity
-                var guardian = new Guardian
+                guardian = new Guardian
                 {
                     FullName = request.GuardianFullName,
                     Type = request.GuardianType,
-                    GuardianDOB=request.GuardianDOB,
+                    GuardianDOB = request.GuardianDOB
                 };
-            var userNameStudent ="Student_"+ Guid.NewGuid().ToString("N").Substring(0, 5);
-                // Create Student User
-                var studentUser = new ApplicationUser
-                {
-                    UserName = userNameStudent,
-                    Email = request.StudentEmail,
-                    Address = request.StudentAddress,
-                    Gender = request.StudentGender,
-                    HireDate=request.HireDate,
-                    PhoneNumber=request.StudentPhone,
-                    UserType = "Student"
-                };
+                // Add Account
+            account = new Accounts
+            {
+                Note = "",
+                State = true,
+                TypeAccountID = 1
+            };
+            }
+            else
+            {
+                // We already have a guardian, so no new guardian user or guardian entity needed
+                // If the guardian was created previously, its user should also already exist.
+            }
 
-                // Create Student Entity
-                var student = new Student
+            var userNameStudent = "St_" + Guid.NewGuid().ToString("N").Substring(0, 5);
+
+            // Create Student User
+            var studentUser = new ApplicationUser
+            {
+                UserName = userNameStudent,
+                Email = request.StudentEmail,
+                Address = request.StudentAddress,
+                Gender = request.StudentGender,
+                HireDate = request.HireDate,
+                PhoneNumber = request.StudentPhone,
+                UserType = "Student"
+            };
+
+            // Create Student Entity
+            var student = new Student
+            {
+                StudentID = request.StudentID,
+                FullName = new Name
                 {
-                    StudentID=request.StudentID,
-                    FullName = new Name
+                    FirstName = request.StudentFirstName,
+                    MiddleName = request.StudentMiddleName,
+                    LastName = request.StudentLastName
+                },
+                FullNameAlis = string.IsNullOrWhiteSpace(request.StudentFirstNameEng)
+                    ? null
+                    : new NameAlis
                     {
-                        FirstName = request.StudentFirstName,
-                        MiddleName = request.StudentMiddleName,
-                        LastName = request.StudentLastName
+                        FirstNameEng = request.StudentFirstNameEng,
+                        MiddleNameEng = request.StudentMiddleNameEng,
+                        LastNameEng = request.StudentLastNameEng
                     },
-                    FullNameAlis = string.IsNullOrWhiteSpace(request.StudentFirstNameEng)
-                        ? null
-                        : new NameAlis
-                        {
-                            FirstNameEng = request.StudentFirstNameEng,
-                            MiddleNameEng = request.StudentMiddleNameEng,
-                            LastNameEng = request.StudentLastNameEng
-                        },
-                    DivisionID = request.DivisionID,
-                    PlaceBirth = request.PlaceBirth,
-                    StudentDOB = request.StudentDOB,
-                    ImageURL = request.StudentImageURL
-                };
-                //Add Account
-                 var account = new Accounts
-                    {
-                        Note = "",
-                        State=true,
-                        TypeAccountID = 1
-                    };
+                DivisionID = request.DivisionID,
+                PlaceBirth = request.PlaceBirth,
+                StudentDOB = request.StudentDOB,
+                ImageURL = request.StudentImageURL
+            };
 
-                 var accountStudentGuardian = new AccountStudentGuardian
-                    {
-                        Amount = request.Amount
-                    };
+        
+            var accountStudentGuardian = new AccountStudentGuardian
+            {
+                Amount = request.Amount
+            };
 
-                    // Process attachments
-                    var attachments = new List<Attachments>();
-                    if (request.Attachments != null && request.Attachments.Any())
+            // Process attachments
+            var attachments = new List<Attachments>();
+            if (request.Attachments != null && request.Attachments.Any())
+            {
+                foreach (var fileUrl in request.Attachments)
+                {
+                    attachments.Add(new Attachments
                     {
-                        foreach (var fileUrl in request.Attachments)
-                        {
-                            attachments.Add(new Attachments
-                            {
-                                StudentID=request.StudentID,
-                                AttachmentURL = $"{request.DivisionID}_{fileUrl}",
-                                Note = ""
-                            });
-                        }
-                    }
- 
-                    // Map FeeClass data to StudentClassFees and assign to the student
-                    var studentClassFees = new List<StudentClassFeeDTO>();
-                    if(request.Discounts != null && request.Discounts.Any())
+                        StudentID = request.StudentID,
+                        AttachmentURL = $"{request.DivisionID}_{fileUrl}",
+                        Note = ""
+                    });
+                }
+            }
+
+            // Map FeeClass data to StudentClassFees
+            var studentClassFees = new List<StudentClassFeeDTO>();
+            if (request.Discounts != null && request.Discounts.Any())
+            {
+                foreach (var discount in request.Discounts)
+                    studentClassFees.Add(new StudentClassFeeDTO
                     {
-                        foreach(var discount in request.Discounts)
-                            studentClassFees.Add(new StudentClassFeeDTO
-                            {
-                                StudentID=request.StudentID,
-                                FeeClassID = discount.FeeClassID,
-                                AmountDiscount = discount.AmountDiscount,
-                                NoteDiscount = discount.NoteDiscount
-                            });
-                    }
-                // Add Student and Guardian
-                var createdStudent = await _studentManagementService.AddStudentWithGuardianAsync(
+                        StudentID = request.StudentID,
+                        FeeClassID = discount.FeeClassID,
+                        AmountDiscount = discount.AmountDiscount,
+                        NoteDiscount = discount.NoteDiscount
+                    });
+            }
+
+            Student createdStudent;
+            if (existingGuardian == null)
+            {
+                createdStudent = await _studentManagementService.AddStudentWithGuardianAsync(
                     guardianUser, request.GuardianPassword, guardian,
                     studentUser, request.StudentPassword, student,
                     account, accountStudentGuardian, attachments, studentClassFees);
-                
-
-                return Ok(new { success = true, message = "Student deleted successfully." });
             }
-            catch (Exception ex)
+            else
             {
-                return StatusCode(500, new { error = ex.Message });
+                //if guardian exist
+                createdStudent = await _studentManagementService.AddStudentToExistingGuardianAsync(
+                    existingGuardian, 
+                    studentUser, request.StudentPassword, student,
+                    attachments, studentClassFees,accountStudentGuardian);
             }
+
+            return Ok(new { success = true, message = "Student added successfully.", student = createdStudent });
         }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentById(int id)

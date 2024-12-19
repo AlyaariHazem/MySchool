@@ -91,6 +91,7 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IGuardianRepository, GuardianRepository>();
 builder.Services.AddScoped<IUserRepository, UsersRepository>();
 builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
+builder.Services.AddScoped<IGuardianRepository, GuardianRepository>();
 builder.Services.AddScoped<IStudentClassFeeRepository, StudentClassFeeRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IStudentClassFeesRepository, StudentClassFeesRepository>();

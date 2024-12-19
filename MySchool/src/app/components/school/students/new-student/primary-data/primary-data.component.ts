@@ -7,13 +7,11 @@ import { ClassDTO } from '../../../../../core/models/class.model';
 import { divisions } from '../../../../../core/models/division.model';
 
 @Component({
-    selector: 'app-primary-data',
-    templateUrl: './primary-data.component.html',
-    styleUrls: [
-        './primary-data.component.scss',
-        '../../../../../shared/styles/style-input.scss'
-    ] // this is very important
-    
+  selector: 'app-primary-data',
+  templateUrl: './primary-data.component.html',
+  styleUrls: [
+    './primary-data.component.scss',
+    '../../../../../shared/styles/style-input.scss']// this is very important
 })
 export class PrimaryDataComponent implements OnInit {
   @Input() formGroup!: FormGroup;

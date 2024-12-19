@@ -7,6 +7,7 @@ namespace Backend.DTOS;
 
 public class AddStudentWithGuardianRequest
 {
+    public int? ExistingGuardianId { get; set; }
     public int StudentID { get; set; }
      // Guardian details
     public string GuardianEmail { get; set; }

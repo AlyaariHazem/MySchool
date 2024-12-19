@@ -10,10 +10,10 @@ interface City {
 }
 
 @Component({
-    selector: 'app-accounts',
-    templateUrl: './accounts.component.html',
-    styleUrls: ['./accounts.component.scss',
-        './../../../shared/styles/style-select.scss']
+  selector: 'app-accounts',
+  templateUrl: './accounts.component.html',
+  styleUrls: ['./accounts.component.scss',
+    './../../../shared/styles/style-select.scss']
 })
 export class AccountsComponent {
   visible: boolean = false;

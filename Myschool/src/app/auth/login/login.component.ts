@@ -6,10 +6,11 @@ import { ShardModule } from '../../shared/shard.module';
 import { AuthAPIService } from '../authAPI.service';
 
 @Component({
-    selector: 'app-login',
-    imports: [ShardModule, MatDialogModule],
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss']
+  selector: 'app-login',
+  standalone: true,
+  imports: [ShardModule, MatDialogModule],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
   private authService = inject(AuthAPIService);

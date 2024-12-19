@@ -13,6 +13,19 @@
   outline: 0;
   transform: scale(0.8); // Custom transform
 }
+p-paginator{
+  position: absolute;
+  top: 0rem !important;
+  width: 65%;
+  right: 10rem;
+  z-index: 1;
+}
+:host ::ng-deep {
+  #pn_id_3_list {
+     padding-left: 0px!important;
+  }
+}
+
 .styled-table th:nth-child(3), 
 .styled-table td:nth-child(3) {
     width: 400px; /* Adjust the width as needed */
@@ -28,8 +41,8 @@ form {
 }
  .col-4{
   position: absolute;
-  left: 2rem;
-  top: 2rem;
+  left: -5rem;
+  top: 4rem;
 }
 .col-4{
   i:hover{
@@ -58,17 +71,14 @@ mat-form-field {
 .modal-content {
   border-radius: 1.5%;
 }
-
-h2 {
-  font-family: "Changa", sans-serif;
-}
-
 .container {
   border-radius: 23px;
 }
 
 .school {
   text-align: right;
+  width: 11rem;
+  z-index: 2;
 }
 
 .line {
@@ -165,9 +175,6 @@ h2 {
   .add {
     width: 10%;
   }
-  .school{
-    color:rgb(95, 220, 105);
-  }
   .styled-table th:nth-child(3), 
 .styled-table td:nth-child(3) {
     width: 400px; /* Adjust the width as needed */
@@ -177,13 +184,18 @@ h2 {
   form {
     right: -1rem;
   }
-  .school{
-    color: red;
-  }
   :host ::ng-deep{
     .chipsOne{
       display: none;
     }
+  }
+  p-paginator{
+    display: none;
+  }
+  .col-4{
+    position: absolute;
+    left: 3rem;
+    top: 2rem;
   }
   .styled-table th,
 .styled-table td {
@@ -393,8 +405,12 @@ p-card img {
 :host ::ng-deep{
   .chipsOne{
     position: absolute;
-    margin-top: -0.2rem;
+    margin-top: 0rem;
     left: 3%;
-    width: 15%;
+    width: 14rem;
+    z-index: 1;
+    .p-chips-multiple-container{
+      height: 38px;
+    }
   }
 }

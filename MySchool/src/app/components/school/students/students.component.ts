@@ -7,18 +7,34 @@ import { ToastrService } from 'ngx-toastr';
 
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { StudentService } from '../../../core/services/student.service';
+import { PaginatorState } from 'primeng/paginator';
 
 @Component({
-    selector: 'app-students',
-    templateUrl: './students.component.html',
-    styleUrls: ['./students.component.scss']
+  selector: 'app-students',
+  templateUrl: './students.component.html',
+  styleUrls: ['./students.component.scss'],
 })
 export class StudentsComponent implements OnInit {
   form: FormGroup;
   Students:StudentDetailsDTO[]=[]
   values = new FormControl<string[] | null>(null);
   max = 2;
+  paginatedStudents: StudentDetailsDTO[] = []; // Paginated data
 
+  first: number = 0; // Current starting index
+  rows: number = 4; // Number of rows per page
+  updatePaginatedData(): void {
+    const start = this.first;
+    const end = this.first + this.rows;
+    this.paginatedStudents = this.Students.slice(start, end);
+  }
+
+  // Handle page change event from PrimeNG paginator
+  onPageChange(event: PaginatorState): void {
+    this.first = event.first || 0; // Default to 0 if undefined
+    this.rows = event.rows || 4; // Default to 4 rows
+    this.updatePaginatedData();
+  }
   studentService=inject(StudentService);
 
   // Dropdown options
@@ -70,6 +86,7 @@ export class StudentsComponent implements OnInit {
 getAllStudents():void{
   this.studentService.getAllStudents().subscribe((res)=>{
     this.Students=res;
+    this.updatePaginatedData(); // Initial slicing
   })
 }
 

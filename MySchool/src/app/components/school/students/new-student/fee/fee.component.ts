@@ -8,9 +8,9 @@ import { ClassService } from '../../../../../core/services/class.service';
 import { ClassDTO } from '../../../../../core/models/class.model';
 
 @Component({
-    selector: 'app-fee',
-    templateUrl: './fee.component.html',
-    styleUrls: ['./fee.component.scss']
+  selector: 'app-fee',
+  templateUrl: './fee.component.html',
+  styleUrls: ['./fee.component.scss']
 })
 export class FeeComponent implements OnInit {
   @Input() formGroup!: FormGroup;

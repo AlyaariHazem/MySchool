@@ -4,8 +4,8 @@
     <div class="container">
       <div class="tabcontent">
         <div class="col-4">
-          <i class="pi col-2 pi-bars"  (click)="showStudentCulomn()"></i>
-          <i class="bi col-2 bi-grid"  (click)="showStudentGrid()"></i>
+          <i class="pi col-2 pi-bars" (click)="showStudentCulomn()"></i>
+          <i class="bi col-2 bi-grid" (click)="showStudentGrid()"></i>
         </div>
         <form [formGroup]="form">
           <!-- First Dropdown -->
@@ -51,100 +51,102 @@
           </mat-form-field>
         </form>
 
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 8, 16]" />
 
         <button mat-raised-button color="primary" class="add" (click)="openDialog()">
           إضافة طالب+
         </button>
+
         <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
         @if (showGrid) {
-          <div class="group group2">
-            @for (student of Students; track $index) {
-            <div class="form-control">
-              <p-card class="responsive-card">
-                <ng-template pTemplate="header">
-                    <img alt="Card" [src]="student.photoUrl"  />
-                </ng-template>
-                <div>
-                  الاسم:{{student.fullName.firstName +" "+ student.fullName.middleName+" "+ student.fullName.lastName}}
-                  الصف:{{student.className}}
-                  <hr>
-                  النوع:{{student.gender=="Male"?"ذكر":"إنثى"}}
-                  المرحلة:{{student.stageName}}
-                  الرسوم المطلوبة:{{student.fee}}
-                  <hr>
-                  
+        <div class="group group2">
+          @for (student of paginatedStudents; track $index) {
+          <div class="form-control">
+            <p-card class="responsive-card">
+              <ng-template pTemplate="header">
+                <img alt="Card" [src]="student.photoUrl" />
+              </ng-template>
+              <div>
+                الاسم:{{student.fullName.firstName +" "+ student.fullName.middleName+" "+ student.fullName.lastName}}
+                الصف:{{student.className}}
+                <hr>
+                النوع:{{student.gender=="Male"?"ذكر":"إنثى"}}
+                المرحلة:{{student.stageName}}
+                الرسوم المطلوبة:{{student.fee}}
+                <hr>
+
+              </div>
+              <ng-template pTemplate="footer">
+                <div class="flex gap-3 mt-1">
+                  <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
+                  <p-button label="ولي أمر" class="w-full" styleClass="custom-button guardain" />
+
                 </div>
-                <ng-template pTemplate="footer">
-                  <div class="flex gap-3 mt-1">
-                    <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
-                    <p-button label="ولي أمر" class="w-full" styleClass="custom-button guardain" />
-  
-                  </div>
-                </ng-template>
-              </p-card>
-            </div>
-          }
+              </ng-template>
+            </p-card>
           </div>
+          }
+        </div>
         }
-        
-       
+
         @if (showCulomn) {
+        <div class="table-container">
           <div class="table-container">
-            <div class="table-container">
-              <mat-card>
-                <table class="styled-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>رقم الطالب</th>
-                      <th class="student-name-column">اسم الطالب</th>
-                      <th>المرحلة</th>
-                      <th>الصف</th>
-                      <th>الشعبة</th>
-                      <th>العمر</th>
-                      <th>النوع</th>
-                      <th>تاريخ التسجيل</th>
-                      <th>العملية</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (student of Students; track $index) {
-                    <tr>
-                      <td>{{ $index+1 }}</td>
-                      <td>{{ student.studentID}}</td>
-                      <td class="student-name-column">{{student.fullName.firstName +" "+ student.fullName.middleName+" "+ student.fullName.lastName}}</td>
-                      <td>{{ student.stageName }}</td>
-                      <td>{{ student.className}}</td>
-                      <td>{{ student.divisionName }}</td>
-                      <td>{{ student.age }}</td>
-                      <td>{{ student.gender }}</td>
-                      <td>{{ student.hireDate | date:"MM-yyyy" }}</td>
-                      <td>
-                        <div class="col text-left">
-                          <div class="mt-sm-0 mt-2">
-                            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                              aria-expanded="false">
-                              <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-left">
-                              <a class="dropdown-item" ><i
-                                  class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                              <div role="separator" class="dropdown-divider"></div>
-                              <a class="dropdown-item" ><i
-                                  class="bi bi-trash IconDelete" (click)="deleteStudent(student.studentID)"></i>حذف</a>
-                            </div>
+            <mat-card>
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>رقم الطالب</th>
+                    <th class="student-name-column">اسم الطالب</th>
+                    <th>المرحلة</th>
+                    <th>الصف</th>
+                    <th>الشعبة</th>
+                    <th>العمر</th>
+                    <th>النوع</th>
+                    <th>تاريخ التسجيل</th>
+                    <th>العملية</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (student of paginatedStudents; track $index) {
+                  <tr>
+                    <td>{{ $index+1 }}</td>
+                    <td>{{ student.studentID}}</td>
+                    <td class="student-name-column">{{student.fullName.firstName +" "+ student.fullName.middleName+" "+
+                      student.fullName.lastName}}</td>
+                    <td>{{ student.stageName }}</td>
+                    <td>{{ student.className}}</td>
+                    <td>{{ student.divisionName }}</td>
+                    <td>{{ student.age }}</td>
+                    <td>{{ student.gender }}</td>
+                    <td>{{ student.hireDate | date:"MM-yyyy" }}</td>
+                    <td>
+                      <div class="col text-left">
+                        <div class="mt-sm-0 mt-2">
+                          <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <i class="fas fa-ellipsis-h"></i>
+                          </button>
+                          <div class="dropdown-menu dropdown-menu-left">
+                            <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                            <div role="separator" class="dropdown-divider"></div>
+                            <a class="dropdown-item" (click)="deleteStudent(student.studentID)">
+                              <i class="bi bi-trash IconDelete"></i>حذف</a>
                           </div>
                         </div>
-                      </td>
-                    </tr>
+                      </div>
+                    </td>
+                  </tr>
                   }
-                  </tbody>
-                </table>
-  
-              </mat-card>
-            </div>
-  
+                </tbody>
+              </table>
+
+            </mat-card>
           </div>
+
+        </div>
         }
       </div>
     </div>

@@ -3,11 +3,11 @@ import { FormControl } from '@angular/forms';
 import { PageEvent } from '@angular/material/paginator';
 
 @Component({
-    selector: 'app-study-year',
-    templateUrl: './study-year.component.html',
-    styleUrls: ['./study-year.component.scss',
-        './../../../../shared/styles/style-input.scss'
-    ]
+  selector: 'app-study-year',
+  templateUrl: './study-year.component.html',
+  styleUrls: ['./study-year.component.scss',
+    './../../../../shared/styles/style-input.scss'
+  ]
 })
 export class StudyYearComponent implements OnInit {
   constructor() { }

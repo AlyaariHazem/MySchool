@@ -1,17 +1,17 @@
 import { AfterViewInit, Component, HostListener, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { PageEvent } from '@angular/material/paginator';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 
 import { AddStage, Stage, updateStage } from '../../../../core/models/stages-grades.modul';
 import { StageService } from '../../../../core/services/stage.service';
 import { ClassService } from '../../../../core/services/class.service';
-import { PageEvent } from '@angular/material/paginator';
 
 @Component({
-    selector: 'app-stages-grades',
-    templateUrl: './stages-grades.component.html',
-    styleUrls: ['./stages-grades.component.scss']
+  selector: 'app-stages-grades',
+  templateUrl: './stages-grades.component.html',
+  styleUrls: ['./stages-grades.component.scss']
 })
 export class StagesGradesComponent implements AfterViewInit, OnInit {
   activeTab: string = 'News';

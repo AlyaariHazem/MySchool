@@ -10,4 +10,6 @@ public interface IAccountRepository
 {
     Task<Accounts> AddAccountAsync(Accounts account);
     Task<AccountStudentGuardian> AddAccountStudentGuardianAsync(AccountStudentGuardian accountStudentGuardian);
+    Task<AccountStudentGuardian> GetAccountStudentGuardianByGuardianIdAsync(int guardianId);
+
 }

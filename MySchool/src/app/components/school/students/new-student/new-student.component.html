@@ -6,10 +6,9 @@
       <h2 class="school">إضافة طالب جديد</h2>
       <div class="student-photo">
         <label for="fileInput">
-          <img src="assets/img/user.jpg" alt="Student Photo" />
+          <img [src]="studentImageURL ? studentImageURL : 'assets/img/user.jpg'" alt="Student Photo" />
         </label>
-        <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)"  style="display: none" />
-        <button class="btn btn-primary">التقاط صورة</button>
+        <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)" style="display: none" />
       </div>
     </div>
 
@@ -33,7 +32,7 @@
     </div>
   </div>
 
-  
+
   <div id="id01" class="" dir="rtl">
     <div class="modal-content" style="background-color: #ffffff !important">
       <div class="container">
@@ -75,14 +74,13 @@
     </div>
     } @if (activeTab === 'fees') {
     <div class="tabcontent">
-      <app-fee [formGroup]="$any(formGroup.get('fees'))"
-      (feeClassesChanged)="loadFeesForClass($event)"
-      (requiredFeesChanged)="onRequiredFeesChanged($event)"></app-fee>
+      <app-fee [formGroup]="$any(formGroup.get('fees'))" (feeClassesChanged)="loadFeesForClass($event)"
+        (requiredFeesChanged)="onRequiredFeesChanged($event)"></app-fee>
     </div>
     } @if (activeTab === 'document') {
     <div class="tabcontent">
       <app-document [formGroup]="$any(formGroup.get('documents'))"
-      (filesChanged)="updateAttachments($event)"></app-document>
+        (filesChanged)="updateAttachments($event)"></app-document>
     </div>
     }
   </div>

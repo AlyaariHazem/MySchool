@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Backend.Data;
 using Backend.Models;
 using Backend.Repository.School.Implements;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository.School.Classes;
 
@@ -29,5 +30,10 @@ public class AccountRepository : IAccountRepository
       await  _dbContext.AccountStudentGuardians.AddAsync(accountStudentGuardian);
         await _dbContext.SaveChangesAsync();
         return accountStudentGuardian;
+    }
+
+    public async Task<AccountStudentGuardian> GetAccountStudentGuardianByGuardianIdAsync(int guardianId)
+    {
+        return await _dbContext.AccountStudentGuardians.FirstOrDefaultAsync(a => a.GuardianID == guardianId);
     }
 }

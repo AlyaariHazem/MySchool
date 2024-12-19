@@ -8,9 +8,9 @@ interface Breadcrumb {
 }
 
 @Component({
-    selector: 'app-page-header',
-    templateUrl: './page-header.component.html',
-    styleUrl: './page-header.component.scss'
+  selector: 'app-page-header',
+  templateUrl: './page-header.component.html',
+  styleUrl: './page-header.component.scss'
 })
 export class PageHeaderComponent implements OnInit{
   breadcrumbs: Breadcrumb[] = [];

@@ -7,11 +7,12 @@ import { Fees, FeeClasses, Fee, FeeClass } from '../../../../core/models/Fee.mod
 import { ClassService } from '../../../../core/services/class.service';
 import { ClassDTO } from '../../../../core/models/class.model';
 import { FeeClassService } from '../../../../core/services/fee-class.service';
+import { PaginatorState } from 'primeng/paginator';
 
 @Component({
-    selector: 'app-fee-class',
-    templateUrl: './fee-class.component.html',
-    styleUrls: ['./fee-class.component.scss']
+  selector: 'app-fee-class',
+  templateUrl: './fee-class.component.html',
+  styleUrls: ['./fee-class.component.scss']
 })
 export class FeeClassComponent implements OnInit {
   // Model properties
@@ -36,10 +37,27 @@ export class FeeClassComponent implements OnInit {
   private feeClassService = inject(FeeClassService);
 
   constructor(private feeService: FeeService, private toastr: ToastrService) {}
+  paginatedClassFee: FeeClasses[] = []; // Paginated data
+
+  first: number = 0; 
+  rows: number = 4; 
+  updatePaginatedData(): void {
+    const start = this.first;
+    const end = this.first + this.rows;
+    this.paginatedClassFee = this.FeeClass.slice(start, end);
+  }
+
+  // Handle page change event from PrimeNG paginator
+  onPageChange(event: PaginatorState): void {
+    this.first = event.first || 0; // Default to 0 if undefined
+    this.rows = event.rows || 4; // Default to 4 rows
+    this.updatePaginatedData();
+  }
 
   ngOnInit(): void {
     this.getAllFees();
     this.getClasses();
+    this.updatePaginatedData();
     this.getAllClassFees();
   }
 
@@ -159,9 +177,13 @@ export class FeeClassComponent implements OnInit {
 
   getAllClassFees(): void {
     this.feeClassService.getAllFeeClass().subscribe({
-      next: (res) => (this.FeeClass = res.data),
+      next: (res) =>{
+        (this.FeeClass = res.data);
+         this.updatePaginatedData();
+      },
       error: (err) => this.toastr.error('Error fetching class fees'),
     });
+    
   }
 
   resetClassFeeForm(): void {

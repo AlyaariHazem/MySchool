@@ -9,9 +9,9 @@ import { StageService } from '../../../../../core/services/stage.service';
 import { PageEvent } from '@angular/material/paginator';
 
 @Component({
-    selector: 'app-grades',
-    templateUrl: './grades.component.html',
-    styleUrls: ['./grades.component.scss']
+  selector: 'app-grades',
+  templateUrl: './grades.component.html',
+  styleUrls: ['./grades.component.scss']
 })
 export class GradesComponent implements OnInit {
   stages: Array<Stage> = [];

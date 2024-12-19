@@ -46,7 +46,7 @@
     </div>
   </div>
   <!-- <app-chart-for-student></app-chart-for-student> -->
-  <div class="row">
+  <div class="row"> 
     <div class="col-lg-6 col-md-12 col-12 d-flex">
       <div class="card flex-fill">
         <div class="card-header">
@@ -299,9 +299,6 @@
   </div>
   <div class="row">
     <div class="col-lg-12">
-      <div class="card flex justify-center">
-        <!-- <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="120" [rowsPerPageOptions]="[10, 20, 30]" /> -->
-    </div>
       <div class="card">
         <div class="card-header">
           <div class="row align-items-center">
@@ -594,6 +591,13 @@
           </div>
         </div>
         <div class="card-body">
+          
+          <p-paginator dir="ltr"
+          (onPageChange)="onPageChange($event)" 
+          [first]="first"
+          [rows]="rows" 
+          [totalRecords]="120" 
+          [rowsPerPageOptions]="[10, 20, 30]" />
           <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-12">
               <div class="table-responsive">

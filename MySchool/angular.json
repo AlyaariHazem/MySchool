@@ -34,8 +34,9 @@
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "./node_modules/bootstrap/dist/css/bootstrap.css",
               "node_modules/ngx-toastr/toastr.css",
-              "node_modules/quill/dist/quill.snow.css",
-              "node_modules/quill/dist/quill.bubble.css",
+              "node_modules/primeicons/primeicons.css",
+              "node_modules/primeng/resources/themes/lara-light-blue/theme.css",
+              "node_modules/primeng/resources/primeng.min.css",
 
               "src/styles.scss"
             ],

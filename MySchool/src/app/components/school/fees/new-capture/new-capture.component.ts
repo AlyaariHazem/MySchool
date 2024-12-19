@@ -4,10 +4,10 @@ interface City {
   code: string;
 }
 @Component({
-    selector: 'app-new-capture',
-    templateUrl: './new-capture.component.html',
-    styleUrls: ['./new-capture.component.scss',
-        './../../../../shared/styles/style-select.scss']
+  selector: 'app-new-capture',
+  templateUrl: './new-capture.component.html',
+  styleUrls: ['./new-capture.component.scss',
+              './../../../../shared/styles/style-select.scss']
 })
 export class NewCaptureComponent {
   showDiv2 = false;  // Initially Div 2 is hidden

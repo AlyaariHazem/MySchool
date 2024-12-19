@@ -2,9 +2,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
-    selector: 'app-document',
-    templateUrl: './document.component.html',
-    styleUrls: ['./document.component.scss']
+  selector: 'app-document',
+  templateUrl: './document.component.html',
+  styleUrls: ['./document.component.scss'],
 })
 export class DocumentComponent {
   @Input() formGroup!: FormGroup;

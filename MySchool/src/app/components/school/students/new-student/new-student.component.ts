@@ -9,9 +9,9 @@ import { StudentService } from '../../../../core/services/student.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-    selector: 'app-new-student',
-    templateUrl: './new-student.component.html',
-    styleUrls: ['./new-student.component.scss']
+  selector: 'app-new-student',
+  templateUrl: './new-student.component.html',
+  styleUrls: ['./new-student.component.scss']
 })
 export class NewStudentComponent implements OnInit, AfterViewInit {
   activeTab: string = 'DataStudent'; // Default active tab
@@ -54,9 +54,10 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
         studentAddress: [''],
       }),
       guardian: this.formBuilder.group({
+        existingGuardianId:[null],//this I want it to be correctlly?
         guardianFullName: ['', Validators.required],
         guardianType: ['Guardian'],
-        relationship: ['', Validators.required],
+        relationship: [''],
         guardianEmail: ['', [Validators.required, Validators.email]],
         guardianPassword: ['Guardian'],
         guardianPhone: ['', Validators.required],
@@ -109,7 +110,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
         ...this.formGroup.get('guardian')?.value,
         ...this.formGroup.get('fees')?.value,
         attachments: this.formGroup.get('documents.attachments')?.value || [],
-        studentImageURL: this.studentImageURL
+        studentImageURL: this.studentImageURL2
       };
       this.studentService.addStudent(formData).subscribe({
         next: (res) => {
@@ -158,9 +159,6 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     });
   }
 
-  check() {
-    console.log("the form", this.formGroup.value)
-  }
   ngAfterViewInit(): void {
     setTimeout(() => {
       const defaultOpen = document.getElementById('defaultOpen');
@@ -192,55 +190,6 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     this.dialogRef.close(); // Close the modal
   }
 
-  openOuterDropdown: any = null;
-  openInnerDropdown: any = null;
-  openInnerDivision: any = null;
-
-  toggleOuterDropdown(item: any): void {
-    if (this.openOuterDropdown === item) {
-      this.openOuterDropdown = null;
-    } else {
-      this.openOuterDropdown = item;
-    }
-  }
-
-  isOuterDropdownOpen(item: any): boolean {
-    return this.openOuterDropdown === item;
-  }
-
-  toggleInnerDropdown(item: any, division: any): void {
-    if (this.openInnerDropdown === item && this.openInnerDivision === division) {
-      this.openInnerDropdown = null;
-      this.openInnerDivision = null;
-    } else {
-      this.openInnerDropdown = item;
-      this.openInnerDivision = division;
-    }
-  }
-
-  isInnerDropdownOpen(item: any, division: any): boolean {
-    return this.openInnerDropdown === item && this.openInnerDivision === division;
-  }
-
-  maxRowsPerPage = 3;
-
-  getPaginatedGrades(item: any) {
-    const startIndex = this.currentPage[item.id] * this.maxRowsPerPage;
-    const endIndex = startIndex + this.maxRowsPerPage;
-    return item.grades.slice(startIndex, endIndex);
-  }
-
-  nextPage(item: any) {
-    if ((this.currentPage[item.id] + 1) * this.maxRowsPerPage < item.grades.length) {
-      this.currentPage[item.id]++;
-    }
-  }
-
-  previousPage(item: any) {
-    if (this.currentPage[item.id] > 0) {
-      this.currentPage[item.id]--;
-    }
-  }
   updateAttachments(event: { attachments: string[]; files: File[] }): void {
     this.formGroup.get('documents.attachments')?.setValue(event.attachments);
     this.attachments = event.attachments;
@@ -250,23 +199,27 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     console.log('Updated files:', this.files);
   }
 
-  getTotalPages(item: any): number {
-    return Math.ceil(item.grades.length / this.maxRowsPerPage);
-  }
   attachments: string[] = [];
   
   StudentImage!: File;
   studentImageURL:string='';
+  studentImageURL2:string='';
+    onFileSelected(event: Event): void {
+      const input = event.target as HTMLInputElement;
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-  
-    if (input.files?.[0]) {
-      this.StudentImage = input.files[0]; // Assign the single file
-      this.studentImageURL=`${this.studentID}_${this.StudentImage.name}`;
-    } else {
-      console.error('No file selected');
+      if (input.files?.[0]) {
+        this.StudentImage = input.files[0]; // Assign the single file
+
+        // Generate a preview URL
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.studentImageURL = e.target.result;
+        };
+        this.studentImageURL2=`${this.studentID}_${this.StudentImage.name}`;
+        reader.readAsDataURL(this.StudentImage);
+      } else {
+        console.error('No file selected');
+      }
     }
-  }
   
   }

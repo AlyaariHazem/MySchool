@@ -2,24 +2,24 @@ import { Component, OnInit, Input } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
-    selector: 'app-sidebar',
-    templateUrl: './sidebar.component.html',
-    styleUrls: ['./sidebar.component.scss'],
-    animations: [
-        trigger('submenuToggle', [
-            state('closed', style({
-                height: '0',
-                opacity: 0
-            })),
-            state('open', style({
-                height: '*',
-                opacity: 1
-            })),
-            transition('closed <=> open', [
-                animate('300ms ease-in-out')
-            ])
-        ])
-    ]
+  selector: 'app-sidebar',
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.scss'],
+  animations: [
+    trigger('submenuToggle', [
+      state('closed', style({
+        height: '0',
+        opacity: 0
+      })),
+      state('open', style({
+        height: '*',
+        opacity: 1
+      })),
+      transition('closed <=> open', [
+        animate('300ms ease-in-out')
+      ])
+    ])
+  ]
 })
 export class SidebarComponent implements OnInit {
   isSubmenuOpen: { [key: string]: boolean } = {
@@ -40,10 +40,7 @@ export class SidebarComponent implements OnInit {
   @Input() sidebar: boolean = false;
 
   ngOnInit() {
-    for (const submenu in this.isSubmenuOpen) {
-      const state = localStorage.getItem(submenu);
-      this.isSubmenuOpen[submenu] = state === 'open';
-    }
+    this.isSubmenuOpen["sittings"] =true;
   }
 
   toggleSubmenu(submenu: string, parentSubmenu?: string) {

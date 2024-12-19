@@ -1,5 +1,11 @@
 <div class="Fee">
     <h2 class="school">إعدادات الرسوم</h2>
+    <p-paginator dir="ltr"
+            (onPageChange)="onPageChange($event)" 
+            [first]="first"
+            [rows]="rows" 
+            [totalRecords]="FeeClass.length"
+            [rowsPerPageOptions]="[4, 8, 16]" />
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
         <!-- Tab 1: بند الرسوم -->
         <mat-tab label="بند الرسوم">
@@ -153,7 +159,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @for (fee of FeeClass; track $index) {
+                            @for (fee of paginatedClassFee; track $index) {
                             <tr>
                                 <td>{{ $index+ 1 }}</td>
                                 <td>{{ fee.feeName }}</td>

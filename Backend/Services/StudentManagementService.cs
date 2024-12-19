@@ -96,6 +96,58 @@ public class StudentManagementService
 
             return addedStudent;
         }
+  public async Task<Student> AddStudentToExistingGuardianAsync(
+    Guardian existingGuardian,
+    ApplicationUser studentUser, string studentPassword, Student student,
+    List<Attachments> attachments, List<StudentClassFeeDTO> studentClassFees,AccountStudentGuardian accountStudentGuardianPram)
+    {
+        // 1. Create student user
+        var createdStudentUser = await _userRepository.CreateUserAsync(studentUser, studentPassword, "Student");
+        student.UserID = createdStudentUser.Id;
+        student.GuardianID = existingGuardian.GuardianID;
+
+        // 2. Add Student
+        var addedStudent = await _studentRepository.AddStudentAsync(student);
+
+        // 3. Retrieve the existing account ID associated with the guardian
+        var existingAccountStudentGuardian = await _accountRepository.GetAccountStudentGuardianByGuardianIdAsync(existingGuardian.GuardianID);
+        if (existingAccountStudentGuardian == null)
+        {
+            throw new Exception("No account found for the existing guardian.");
+        }
+
+        // 4. Create AccountStudentGuardian Mapping using the existing account ID
+        var accountStudentGuardian = new AccountStudentGuardian
+        {
+            AccountID = existingAccountStudentGuardian.AccountID, // Use the existing account ID
+            GuardianID = existingGuardian.GuardianID,
+            StudentID = addedStudent.StudentID,
+            Amount=accountStudentGuardianPram.Amount
+        };
+
+        await _accountRepository.AddAccountStudentGuardianAsync(accountStudentGuardian);
+
+        // 5. Handle attachments
+         if (attachments != null && attachments.Any())
+            {
+                foreach (var attachment in attachments)
+                { // Associate with student
+                        attachment.StudentID = addedStudent.StudentID;
+                        await  _dbContext.Attachments.AddAsync(attachment); 
+                        await _dbContext.SaveChangesAsync();
+                }
+            }
+
+        // 6. Handle class fees
+          foreach(var studentClassFee in studentClassFees)
+            {
+                var studentClassFeeMapped = _mapper.Map<StudentClassFees>(studentClassFee);
+                await _dbContext.StudentClassFees.AddAsync(studentClassFeeMapped);
+                await _dbContext.SaveChangesAsync();
+            }
+
+        return addedStudent;
+    }
 
     public async Task<List<string>> UploadAttachments(List<IFormFile> files, int studentId)
     {

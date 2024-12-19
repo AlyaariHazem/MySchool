@@ -5,9 +5,9 @@ import { ToastrService } from 'ngx-toastr';
 import { NewStudentComponent } from '../../students/new-student/new-student.component';
 
 @Component({
-    selector: 'app-all-parents',
-    templateUrl: './all-parents.component.html',
-    styleUrl: './all-parents.component.scss'
+  selector: 'app-all-parents',
+  templateUrl: './all-parents.component.html',
+  styleUrl: './all-parents.component.scss'
 })
 export class AllParentsComponent {
   form: FormGroup;

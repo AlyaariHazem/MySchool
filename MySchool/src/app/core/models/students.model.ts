@@ -1,4 +1,5 @@
 export interface AddStudent{
+    existingGuardianId?:number;
     studentID:number;
     guardianEmail: string;
     guardianPassword: string;

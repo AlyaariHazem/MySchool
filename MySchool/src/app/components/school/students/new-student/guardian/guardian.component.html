@@ -47,14 +47,16 @@
     <!-- Group 3: Birth Date and Address -->
     <div class="group group1">
       <div class="form-control">
-        <label for="dob" class="label1">اختر ولي أمر</label>
-        <select name="Guardian" id="">
-          <option value="value1">حازم عبدالله</option>
+        <label for="existingGuardianId" class="label1">اختر ولي أمر</label>
+        <select name="existingGuardianId" id="existingGuardianId" (change)="onGuardianChange($event)" formControlName="existingGuardianId">
+          @for (guardian of guardians; track $index) {
+            <option [value]="guardian.guardianID">{{guardian.fullName}}</option>
+          }
         </select>
       </div>
       <div class="form-control">
-        <label for="address" class="label1">العنوان</label>
-        <input type="text" id="address" name="address" />
+        <label for="guardianAddress" class="label1">العنوان</label>
+        <input type="text" id="guardianAddress" name="guardianAddress" formControlName="guardianAddress" />
       </div>
     </div>
   </mat-tab>
