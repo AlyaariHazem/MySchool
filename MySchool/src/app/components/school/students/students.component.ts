@@ -89,6 +89,11 @@ getAllStudents():void{
     this.updatePaginatedData(); // Initial slicing
   })
 }
+getStudentByID(id:number):void{
+  this.studentService.getStudentById(id).subscribe({
+    next:(res)=>res,
+  });
+}
 
   // Track selection changes
   onSelectionChange(type: string, value: string): void {
@@ -131,6 +136,32 @@ getAllStudents():void{
       }
     });
   }
+ // students.component.ts
+EditDialog(id: number): void {
+  this.studentService.getStudentById(id).subscribe((res) => {
+    console.log("Editing student data:", res);
+
+    // Pass the student data and a 'mode' flag to the dialog
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.width = '80%';
+    dialogConfig.panelClass = 'custom-dialog-container';
+
+    // IMPORTANT: Pass data to the dialog using 'data' property
+    dialogConfig.data = {
+      mode: 'edit',
+      student: res, // the object you received from the server
+    };
+
+    const dialogRef = this.dialog.open(NewStudentComponent, dialogConfig);
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.toastr.success('تم تعديل الطالب بنجاح');
+        this.getAllStudents(); // Refresh table or handle updates
+      }
+    });
+  });
+}
 
   deleteStudent(studentId: number): void {
     const confirmDelete = confirm('هل أنت متأكد من حذف هذا الطالب؟');

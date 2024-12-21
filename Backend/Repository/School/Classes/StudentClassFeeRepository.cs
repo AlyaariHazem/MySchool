@@ -7,6 +7,7 @@ using Backend.Data;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.Models;
 using Backend.Repository.School.Implements;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository.School.Classes;
 
@@ -41,4 +42,15 @@ public class StudentClassFeeRepository : IStudentClassFeeRepository
     {
         throw new NotImplementedException();
     }
+    public async Task<IEnumerable<StudentClassFees>> GetFeesByStudentIdAsync(int studentId)
+
+        {
+
+            return await _db.StudentClassFees
+
+                .Where(fee => fee.StudentID == studentId)
+
+                .ToListAsync();
+
+        }
 }

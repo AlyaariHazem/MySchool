@@ -3,6 +3,7 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 
 import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
 import { FeeClass, FeeClasses } from '../models/Fee.model';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import { FeeClass, FeeClasses } from '../models/Fee.model';
 export class FeeClassService {
   private API = inject(BackendAspService);
 
-  constructor() {}
+  constructor(private fb: FormBuilder) {}
 
   getAllFeeClass(): Observable<any> {
     return this.API.http.get(`${this.API.baseUrl}/FeeClass`).pipe(
@@ -48,7 +49,18 @@ export class FeeClassService {
       catchError(err => this.handleError(err, "Failed to fetch fee classes by class ID"))
     );
   }
-
+  
+  buildFeeClassFormGroup(feeClass: FeeClasses): FormGroup {
+    return this.fb.group({
+      feeName: [feeClass.feeName || ''],
+      amount: [feeClass.amount || 0],
+      amountDiscount: [feeClass.amountDiscount || 0],
+      noteDiscount: [feeClass.noteDiscount || ''],
+      feeClassID: [feeClass.feeClassID || null],
+      className: [feeClass.className || ''],
+      mandatory: [feeClass.mandatory || false],
+    });
+  }
   private handleError(error: any, message: string): Observable<never> {
     console.error(message, error);
     return throwError(() => new Error(message));

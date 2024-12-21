@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { GuardianService } from '../../../../../core/services/guardian.service';
@@ -11,6 +11,7 @@ import { Guardians } from '../../../../../core/models/guardian.model';
 })
 export class GuardianComponent implements OnInit {
   @Input() formGroup!: FormGroup;
+  @Output() existingGuardianId = new EventEmitter<number>();
 
   guardians:Guardians[]=[];
 
@@ -27,7 +28,8 @@ export class GuardianComponent implements OnInit {
   });
 }
 onGuardianChange(event: Event): void {
-  const selectedValue = (event.target as HTMLSelectElement).value;
+  const selectedValue = +(event.target as HTMLSelectElement).value;
+  this.existingGuardianId.emit(selectedValue);
   console.log('Selected Guardian ID:', selectedValue);
 }
 

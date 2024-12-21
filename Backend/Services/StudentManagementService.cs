@@ -10,6 +10,7 @@ using Backend.DTOS.School.Students;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
@@ -23,6 +24,7 @@ public class StudentManagementService
     private readonly IAccountRepository _accountRepository;
     private readonly IStudentClassFeeRepository _studentClassFeeRepository;
     private readonly IMapper _mapper;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public StudentManagementService(
         IUserRepository userRepository,
@@ -31,7 +33,9 @@ public class StudentManagementService
         DatabaseContext dbContext,
         IAccountRepository accountRepository,
         IStudentClassFeeRepository studentClassFeeRepository,
-        IMapper mapper)
+        IMapper mapper,
+        UserManager<ApplicationUser> userManager) // Inject UserManager
+
     {
         _userRepository = userRepository;
         _guardianRepository = guardianRepository;
@@ -40,6 +44,7 @@ public class StudentManagementService
         _accountRepository = accountRepository;
         _studentClassFeeRepository = studentClassFeeRepository;
         _mapper = mapper;
+        _userManager = userManager;
     }
 
     public async Task<Student> AddStudentWithGuardianAsync(
@@ -148,73 +153,186 @@ public class StudentManagementService
 
         return addedStudent;
     }
+    
+public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentId, UpdateStudentWithGuardianRequest request)
+{
+    using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
-    public async Task<List<string>> UploadAttachments(List<IFormFile> files, int studentId)
+    try
     {
-        if (files == null || !files.Any())
-            return null;
-
-        var uploadsFolder = Path.Combine("wwwroot", "uploads", "Attachments");
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
-
-        var filePaths = new List<string>();
-        foreach (var file in files)
+        // **Update Student User**
+        var studentUser = await _userManager.Users
+            .FirstOrDefaultAsync(u => u.Student != null && u.Student.StudentID == studentId);
+        if (studentUser == null)
         {
-            if (file.Length > 0)
-            {
-                var fileExtension = Path.GetExtension(file.FileName);
-                if (!new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf" }.Contains(fileExtension.ToLower()))
-                    throw new InvalidOperationException("Invalid file type.");
+            throw new Exception("Student user not found.");
+        }
 
-                var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
-                try
+        studentUser.Email = request.StudentEmail ?? studentUser.Email;
+        studentUser.PhoneNumber = request.StudentPhone ?? studentUser.PhoneNumber;
+        studentUser.Address = request.StudentAddress ?? studentUser.Address;
+
+        _dbContext.Entry(studentUser).State = EntityState.Modified;
+
+        // **Update Student Entity**
+        var student = await _studentRepository.GetStudentAsync(studentId);
+        if (student == null)
+        {
+            throw new Exception("Student not found.");
+        }
+
+        student.FullName.FirstName = request.StudentFirstName ?? student.FullName.FirstName;
+        student.FullName.MiddleName = request.StudentMiddleName ?? student.FullName.MiddleName;
+        student.FullName.LastName = request.StudentLastName ?? student.FullName.LastName;
+
+        if (student.FullNameAlis != null)
+        {
+            student.FullNameAlis.FirstNameEng = request.StudentFirstNameEng ?? student.FullNameAlis.FirstNameEng;
+            student.FullNameAlis.MiddleNameEng = request.StudentMiddleNameEng ?? student.FullNameAlis.MiddleNameEng;
+            student.FullNameAlis.LastNameEng = request.StudentLastNameEng ?? student.FullNameAlis.LastNameEng;
+        }
+
+        student.DivisionID = request.DivisionID != 0 ? request.DivisionID : student.DivisionID;
+        student.PlaceBirth = request.PlaceBirth ?? student.PlaceBirth;
+        student.ImageURL = request.StudentImageURL ?? student.ImageURL;
+        student.StudentDOB = request.StudentDOB != default ? request.StudentDOB : student.StudentDOB;
+
+        _dbContext.Entry(student).State = EntityState.Modified;
+
+        // **Update Guardian User and Entity**
+        if (request.ExistingGuardianId.HasValue)
+        {
+            var guardian = await _guardianRepository.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
+            if (guardian != null)
+            {
+                guardian.FullName = request.GuardianFullName ?? guardian.FullName;
+                guardian.GuardianDOB = request.GuardianDOB != default ? request.GuardianDOB : guardian.GuardianDOB;
+                guardian.Type = request.GuardianType ?? guardian.Type;
+
+                _dbContext.Entry(guardian).State = EntityState.Modified;
+
+                var guardianUser = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.Id == guardian.UserID);
+                if (guardianUser != null)
                 {
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-                    filePaths.Add(filePath);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error uploading file {file.FileName}: {ex.Message}");
+                    guardianUser.Email = request.GuardianEmail ?? guardianUser.Email;
+                    guardianUser.PhoneNumber = request.GuardianPhone ?? guardianUser.PhoneNumber;
+                    guardianUser.Address = request.GuardianAddress ?? guardianUser.Address;
+
+                    _dbContext.Entry(guardianUser).State = EntityState.Modified;
                 }
             }
         }
-        return filePaths;
-    }
-    public async Task<List<string>> UploadStudentImage(IFormFile file, int studentId)
-    {
-        if (file == null)
-            return null;
 
-        var uploadsFolder = Path.Combine("wwwroot", "uploads", "StudentPhotos");
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
-
-        var filePaths = new List<string>();
-        if (file.Length > 0)
+        // **Handle Attachments**
+        if (request.Files != null && request.Files.Any())
         {
-            var fileExtension = Path.GetExtension(file.FileName);
-            if (!new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(fileExtension.ToLower()))
-                throw new InvalidOperationException("Invalid file type.");
+            var filePaths = await UploadAttachments(request.Files, student.StudentID);
+            var attachments = filePaths.Select(filePath => new Attachments
+            {
+                StudentID = student.StudentID,
+                AttachmentURL = filePath,
+                Note = ""
+            }).ToList();
 
-                var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
-                try
+            await _dbContext.Attachments.AddRangeAsync(attachments);
+        }
+
+        // **Update Discounts**
+        if (request.UpdateDiscounts != null && request.UpdateDiscounts.Any())
+        {
+            var existingDiscounts = await _studentClassFeeRepository.GetFeesByStudentIdAsync(student.StudentID);
+            _dbContext.StudentClassFees.RemoveRange(existingDiscounts);
+
+            var newDiscounts = _mapper.Map<List<StudentClassFees>>(request.UpdateDiscounts);
+            newDiscounts.ForEach(discount => discount.StudentID = student.StudentID);
+
+            await _dbContext.StudentClassFees.AddRangeAsync(newDiscounts);
+        }
+
+        // **Save Changes and Commit Transaction**
+        await _dbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        // Return updated student details
+            var updatedStudent = await _studentRepository.GetStudentByIdAsync(studentId);
+            if (updatedStudent == null)
+                throw new Exception("Student data not found after update.");
+            return updatedStudent;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            throw new Exception($"Error updating student: {ex.Message}");
+        }
+}
+        public async Task<List<string>> UploadAttachments(List<IFormFile> files, int studentId)
+        {
+            if (files == null || !files.Any())
+                return null!;
+
+            var uploadsFolder = Path.Combine("wwwroot", "uploads", "Attachments");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var filePaths = new List<string>();
+            foreach (var file in files)
+            {
+                if (file.Length > 0)
                 {
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    var fileExtension = Path.GetExtension(file.FileName);
+                    if (!new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf" }.Contains(fileExtension.ToLower()))
+                        throw new InvalidOperationException("Invalid file type.");
+
+                    var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
+                    try
                     {
-                        await file.CopyToAsync(stream);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+                        filePaths.Add(filePath);
                     }
-                    filePaths.Add(filePath);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error uploading file {file.FileName}: {ex.Message}");
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error uploading file {file.FileName}: {ex.Message}");
+                    }
                 }
             }
-        return filePaths;
-    }
+            return filePaths;
+        }
+        
+        public async Task<List<string>> UploadStudentImage(IFormFile file, int studentId)
+        {
+            if (file == null)
+                return null!;
+
+            var uploadsFolder = Path.Combine("wwwroot", "uploads", "StudentPhotos");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var filePaths = new List<string>();
+            if (file.Length > 0)
+            {
+                var fileExtension = Path.GetExtension(file.FileName);
+                if (!new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(fileExtension.ToLower()))
+                    throw new InvalidOperationException("Invalid file type.");
+
+                    var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
+                    try
+                    {
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+                        filePaths.Add(filePath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error uploading file {file.FileName}: {ex.Message}");
+                    }
+                }
+            return filePaths;
+        }
 
 }

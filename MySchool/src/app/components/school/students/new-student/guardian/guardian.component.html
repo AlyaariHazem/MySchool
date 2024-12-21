@@ -48,7 +48,7 @@
     <div class="group group1">
       <div class="form-control">
         <label for="existingGuardianId" class="label1">اختر ولي أمر</label>
-        <select name="existingGuardianId" id="existingGuardianId" (change)="onGuardianChange($event)" formControlName="existingGuardianId">
+        <select name="existingGuardianId" id="existingGuardianId" (change)="onGuardianChange($event)">
           @for (guardian of guardians; track $index) {
             <option [value]="guardian.guardianID">{{guardian.fullName}}</option>
           }

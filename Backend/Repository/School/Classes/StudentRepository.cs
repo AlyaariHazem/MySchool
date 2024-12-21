@@ -1,4 +1,5 @@
 using Backend.Data;
+using Backend.DTOS;
 using Backend.DTOS.School.Students;
 using Backend.Models;
 using Backend.Repository.School.Interfaces;
@@ -64,6 +65,17 @@ public async Task<StudentDetailsDTO?> GetStudentByIdAsync(int id)
         }
     };
 }
+public async Task<Student?> GetStudentAsync(int id)
+{
+    var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentID == id);
+
+    if (student == null)
+    {
+        return null;
+    }
+        return student;
+
+}
 
   public async Task<List<StudentDetailsDTO>> GetAllStudentsAsync()
 {
@@ -126,120 +138,102 @@ public async Task<StudentDetailsDTO?> GetStudentByIdAsync(int id)
     }).ToList();
 }
 
-
-
-    // Update: Update an existing student
-public async Task<bool> UpdateStudentAsync(UpdateStudentRequest updateRequest)
-{
-    using var transaction = await _context.Database.BeginTransactionAsync();
-    try
+    public async Task<AddStudentWithGuardianRequest?> GetAddStudentWithGuardianRequestData(int studentId)
     {
-        // Load the student and related entities
         var student = await _context.Students
             .Include(s => s.ApplicationUser)
             .Include(s => s.Guardian)
+            .Include(s => s.Attachments)
+            .Include(s => s.Division)
             .Include(s => s.StudentClassFees)
-            .FirstOrDefaultAsync(s => s.StudentID == updateRequest.StudentID);
+            .FirstOrDefaultAsync(s => s.StudentID == studentId);
 
         if (student == null)
         {
-            return false; // Student not found
-        }
-
-        // Update Guardian Details
-        if (student.Guardian != null)
-        {
-            student.Guardian.FullName = updateRequest.GuardianFullName ?? student.Guardian.FullName;
-            student.Guardian.Type = updateRequest.GuardianType ?? student.Guardian.Type;
-            student.Guardian.GuardianDOB = updateRequest.GuardianDOB ?? student.Guardian.GuardianDOB;
-
-            if (student.Guardian.ApplicationUser != null)
+            // Provide default values when student is not found
+            return new AddStudentWithGuardianRequest
             {
-                student.Guardian.ApplicationUser.Email = updateRequest.GuardianEmail ?? student.Guardian.ApplicationUser.Email;
-                student.Guardian.ApplicationUser.Address = updateRequest.GuardianAddress ?? student.Guardian.ApplicationUser.Address;
-                student.Guardian.ApplicationUser.Gender = updateRequest.GuardianGender ?? student.Guardian.ApplicationUser.Gender;
-                student.Guardian.ApplicationUser.PhoneNumber = updateRequest.GuardianPhone ?? student.Guardian.ApplicationUser.PhoneNumber;
-            }
+                ExistingGuardianId = null,
+                GuardianEmail = string.Empty,
+                GuardianPassword = string.Empty,
+                GuardianAddress = string.Empty,
+                GuardianGender = "Guardian",
+                GuardianFullName = string.Empty,
+                GuardianType = null,
+                GuardianPhone = string.Empty,
+                GuardianDOB = null,
+                StudentID = studentId,
+                StudentEmail = string.Empty,
+                StudentPassword = string.Empty,
+                StudentAddress = string.Empty,
+                StudentGender = "Not Specified",
+                StudentFirstName = string.Empty,
+                StudentMiddleName = string.Empty,
+                StudentLastName = string.Empty,
+                StudentFirstNameEng = string.Empty,
+                StudentMiddleNameEng = string.Empty,
+                StudentLastNameEng = string.Empty,
+                StudentImageURL = string.Empty,
+                DivisionID = 0,
+                PlaceBirth = string.Empty,
+                StudentPhone = string.Empty,
+                StudentDOB = DateTime.MinValue,
+                HireDate = DateTime.MinValue,
+                Files = new List<IFormFile>(),
+                Amount = 0,
+                Attachments = new List<string>(),
+                Discounts = new List<DisCount>()
+            };
         }
 
-        // Update Student Details
-        student.FullName.FirstName = updateRequest.StudentFirstName ?? student.FullName.FirstName;
-        student.FullName.MiddleName = updateRequest.StudentMiddleName ?? student.FullName.MiddleName;
-        student.FullName.LastName = updateRequest.StudentLastName ?? student.FullName.LastName;
+        var guardian = student.Guardian;
 
-        if (student.FullNameAlis != null)
+        return new AddStudentWithGuardianRequest
         {
-            student.FullNameAlis.FirstNameEng = updateRequest.StudentFirstNameEng ?? student.FullNameAlis.FirstNameEng;
-            student.FullNameAlis.MiddleNameEng = updateRequest.StudentMiddleNameEng ?? student.FullNameAlis.MiddleNameEng;
-            student.FullNameAlis.LastNameEng = updateRequest.StudentLastNameEng ?? student.FullNameAlis.LastNameEng;
-        }
+            // Guardian Details
+            ExistingGuardianId = guardian?.GuardianID,
+            GuardianEmail = guardian?.ApplicationUser?.Email ?? string.Empty,
+            GuardianPassword = string.Empty, // Passwords are not retrievable
+            GuardianAddress = guardian?.ApplicationUser?.Address ?? string.Empty,
+            GuardianGender = guardian?.ApplicationUser?.Gender ?? "Guardian",
+            GuardianFullName = guardian?.FullName ?? string.Empty,
+            GuardianType = guardian?.Type,
+            GuardianPhone = guardian?.ApplicationUser?.PhoneNumber ?? string.Empty,
+            GuardianDOB = guardian?.GuardianDOB,
 
-        student.PlaceBirth = updateRequest.PlaceBirth ?? student.PlaceBirth;
-        student.StudentDOB = updateRequest.StudentDOB ?? student.StudentDOB;
-        student.ImageURL = updateRequest.StudentImageURL ?? student.ImageURL;
-        student.DivisionID = updateRequest.DivisionID ?? student.DivisionID;
+            // Student Details
+            StudentID = student.StudentID,
+            StudentEmail = student.ApplicationUser?.Email ?? string.Empty,
+            StudentPassword = string.Empty, // Passwords are not retrievable
+            StudentAddress = student.ApplicationUser?.Address ?? string.Empty,
+            StudentGender = student.ApplicationUser?.Gender ?? "Not Specified",
+            StudentFirstName = student.FullName?.FirstName ?? string.Empty,
+            StudentMiddleName = student.FullName?.MiddleName ?? string.Empty,
+            StudentLastName = student.FullName?.LastName ?? string.Empty,
+            StudentFirstNameEng = student.FullNameAlis?.FirstNameEng ?? string.Empty,
+            StudentMiddleNameEng = student.FullNameAlis?.MiddleNameEng ?? string.Empty,
+            StudentLastNameEng = student.FullNameAlis?.LastNameEng ?? string.Empty,
+            StudentImageURL = student.ImageURL ?? string.Empty,
+            ClassID = student.Division?.ClassID ?? 0,
+            DivisionID = student.DivisionID,
+            PlaceBirth = student.PlaceBirth ?? string.Empty,
+            StudentPhone = student.ApplicationUser?.PhoneNumber ?? string.Empty,
+            StudentDOB = student.StudentDOB ?? DateTime.MinValue,
+            HireDate = student.ApplicationUser?.HireDate ?? DateTime.MinValue,
 
-        if (student.ApplicationUser != null)
-        {
-            student.ApplicationUser.Email = updateRequest.StudentEmail ?? student.ApplicationUser.Email;
-            student.ApplicationUser.Address = updateRequest.StudentAddress ?? student.ApplicationUser.Address;
-            student.ApplicationUser.Gender = updateRequest.StudentGender ?? student.ApplicationUser.Gender;
-            student.ApplicationUser.HireDate = updateRequest.HireDate ?? student.ApplicationUser.HireDate;
-            student.ApplicationUser.PhoneNumber = updateRequest.StudentPhone ?? student.ApplicationUser.PhoneNumber;
-        }
-
-        // Update Discounts
-        if (updateRequest.Discounts != null && updateRequest.Discounts.Any())
-        {
-            foreach (var discount in updateRequest.Discounts)
+            // Attachments and Discounts
+            Files = new List<IFormFile>(), // Default empty list
+            Amount = student.AccountStudentGuardians?.Sum(asg => asg.Amount) ?? 0,
+            Attachments = student.Attachments?.Select(a => a.AttachmentURL).ToList() ?? new List<string>(),
+            Discounts = student.StudentClassFees?.Select(f => new DisCount
             {
-                var existingFee = student.StudentClassFees.FirstOrDefault(f => f.FeeClassID == discount.FeeClassID);
-                if (existingFee != null)
-                {
-                    existingFee.AmountDiscount = discount.AmountDiscount ?? existingFee.AmountDiscount;
-                    existingFee.NoteDiscount = discount.NoteDiscount ?? existingFee.NoteDiscount;
-                }
-                else
-                {
-                    var newFee = new StudentClassFees
-                    {
-                        StudentID = student.StudentID,
-                        FeeClassID = discount.FeeClassID,
-                        AmountDiscount = discount.AmountDiscount,
-                        NoteDiscount = discount.NoteDiscount
-                    };
-                    _context.StudentClassFees.Add(newFee);
-                }
-            }
-        }
-
-        // Update Attachments
-        if (updateRequest.Attachments != null && updateRequest.Attachments.Any())
-        {
-            _context.Attachments.RemoveRange(student.Attachments);
-            foreach (var file in updateRequest.Attachments)
-            {
-                _context.Attachments.Add(new Attachments
-                {
-                    StudentID = student.StudentID,
-                    AttachmentURL = file
-                });
-            }
-        }
-
-        // Save changes and commit transaction
-        await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
-
-        return true;
+                FeeClassID = f.FeeClassID,
+                AmountDiscount = f.AmountDiscount ?? 0,
+                NoteDiscount = f.NoteDiscount ?? string.Empty
+            }).ToList() ?? new List<DisCount>()
+        };
     }
-    catch (Exception ex)
-    {
-        await transaction.RollbackAsync();
-        // Log exception as needed
-        throw new Exception("An error occurred while updating the student.", ex);
-    }
-}
+
 
     // Delete: Delete a student by ID with Cascade Delete
     public async Task<bool> DeleteStudentAsync(int id)

@@ -37,13 +37,14 @@ export class StudentService {
         );
     }
     getStudentById(id: number): Observable<any> {
-        return this.API.http.get(`${this.API.baseUrl}/Students/${id}`).pipe(
+        return this.API.http.get(`${this.API.baseUrl}/Students/id?studentId=${id}`).pipe(
             catchError(error => {
                 console.error("Error fetched Student:", error);
                 throw error; // Rethrow error to propagate it to the caller
             })
         );
     }
+    
     // Update an existing student
     updateStudent(student: UpdateStudent): Observable<any> {
         return this.API.http.put(`${this.API.baseUrl}/Students/${student.studentID}`, student).pipe(

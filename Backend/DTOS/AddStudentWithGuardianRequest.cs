@@ -32,6 +32,7 @@ public class AddStudentWithGuardianRequest
     public string? StudentLastNameEng { get; set; }
     public string? StudentImageURL { get; set; }
     public int DivisionID { get; set; }
+    public int? ClassID { get; set; }
     public string? PlaceBirth { get; set; }
      public string StudentPhone { get; set; } = string.Empty;
     public DateTime StudentDOB { get; set; }

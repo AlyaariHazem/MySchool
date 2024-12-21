@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Backend.DTOS.School.StudentClassFee;
+using Backend.Models;
 
 namespace Backend.Repository.School.Implements;
 
@@ -15,4 +16,5 @@ public interface IStudentClassFeeRepository
         Task UpdateAsync(StudentClassFeeDTO studentClassFee);
         Task DeleteAsync(int classId, int feeId);
         Task<bool> checkIfExist(int classId, int feeId);
+        Task<IEnumerable<StudentClassFees>> GetFeesByStudentIdAsync(int studentId);
 }

@@ -70,11 +70,13 @@
     </div>
     } @if (activeTab === 'guardian') {
     <div class="tabcontent">
-      <app-guardian [formGroup]="$any(formGroup.get('guardian'))"></app-guardian>
+      <app-guardian [formGroup]="$any(formGroup.get('guardian'))"
+      (existingGuardianId)="existingGuardian($event)"></app-guardian>
     </div>
     } @if (activeTab === 'fees') {
     <div class="tabcontent">
-      <app-fee [formGroup]="$any(formGroup.get('fees'))" (feeClassesChanged)="loadFeesForClass($event)"
+      <app-fee [formGroup]="$any(formGroup.get('fees'))"
+       (feeClassesChanged)="loadFeesForClass($event)"
         (requiredFeesChanged)="onRequiredFeesChanged($event)"></app-fee>
     </div>
     } @if (activeTab === 'document') {

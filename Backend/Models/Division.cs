@@ -13,7 +13,7 @@ namespace Backend.Models
         public int DivisionID { get; set; }
         public string DivisionName { get; set; } = string.Empty;
         public bool State { get; set; }
-        public int ClassID { get; set; } // Fix here
+        public int ClassID { get; set; }
         [JsonIgnore]
         public Class Class { get; set; }
         public virtual ICollection<Student> Students { get; set; }

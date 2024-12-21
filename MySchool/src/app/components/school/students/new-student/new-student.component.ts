@@ -1,4 +1,5 @@
-import { Component, AfterViewInit, OnInit, Inject, ChangeDetectorRef, inject } from '@angular/core';
+// new-student.component.ts (Parent Component)
+import { Component, AfterViewInit, OnInit, Inject, ChangeDetectorRef, SimpleChanges, OnChanges, inject, EventEmitter } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
@@ -13,7 +14,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './new-student.component.html',
   styleUrls: ['./new-student.component.scss']
 })
-export class NewStudentComponent implements OnInit, AfterViewInit {
+export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
   activeTab: string = 'DataStudent'; // Default active tab
   formGroup: FormGroup;
   toastr = inject(ToastrService)
@@ -33,6 +34,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
 
     this.formGroup = this.formBuilder.group({
       studentID: [this.studentID],
+      existingGuardianId:[null],
       primaryData: this.formBuilder.group({
         studentFirstName: ['', Validators.required],
         studentMiddleName: ['', Validators.required],
@@ -54,7 +56,6 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
         studentAddress: [''],
       }),
       guardian: this.formBuilder.group({
-        existingGuardianId:[null],//this I want it to be correctlly?
         guardianFullName: ['', Validators.required],
         guardianType: ['Guardian'],
         relationship: [''],
@@ -78,6 +79,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
   get discountsArray() {
     return this.formGroup.get('fees.discounts') as FormArray;
   }
+
   loadFeesForClass(feeClasses: FeeClasses[]) {
     const discountsArray = this.discountsArray; // Access FormArray for discounts
     discountsArray.clear(); // Clear any existing discounts
@@ -88,9 +90,17 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
           noteDiscount: [fee.noteDiscount || ''],
           amountDiscount: [fee.amountDiscount || 0],
           feeClassID: [fee.feeClassID, Validators.required],
+          feeName: [fee.feeName || ''], // Add feeName if needed
+          amount: [fee.amount || 0],
+          className: [fee.className || ''], // Add className if needed
+          mandatory: [fee.mandatory || false],
         })
       );
     });
+  }
+
+  existingGuardian(event:number){
+    this.formGroup.get('existingGuardianId')?.patchValue(event);
   }
 
   // Submit form data as an `AddStudent` object
@@ -106,6 +116,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
 
       const formData: AddStudent = {
         studentID: this.formGroup.get('studentID')?.value,
+        existingGuardianId: this.formGroup.get('existingGuardianId')?.value,
         ...this.formGroup.get('primaryData')?.value,
         ...this.formGroup.get('guardian')?.value,
         ...this.formGroup.get('fees')?.value,
@@ -114,11 +125,11 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
       };
       this.studentService.addStudent(formData).subscribe({
         next: (res) => {
-          this.toastr.success('student added successfully', res.message);
+          this.toastr.success('Student added successfully', res.message);
         }
       });
       this.studentService.uploadStudentImage(this.StudentImage,this.studentID).subscribe(()=>{
-        console.log('Image is upload successfully!');
+        console.log('Image is uploaded successfully!');
       });
       this.studentService.uploadAttachments(this.files, this.studentID).subscribe({
         next: () => {
@@ -140,10 +151,64 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
     console.log('Required Fees:', requiredFees);
   }
 
+  isEditMode = false;
   ngOnInit(): void {
-    console.log(this.formGroup.get('primaryData')); // Should log a FormGroup object
-    this.generateStudentID();
+    // If we have data passed in from the dialog:
+    if (this.data) {
+      if (this.data.mode === 'edit' && this.data.student) {
+        // We are in EDIT mode, patch the form with existing student data
+        const student = this.data.student;
+        
+        // StudentID
+        this.formGroup.patchValue({
+          studentID: student.studentID,
+          // Fill primaryData
+          primaryData: {
+            studentFirstName: student.studentFirstName || '',
+            studentMiddleName: student.studentMiddleName || '',
+            studentLastName: student.studentLastName || '',
+            studentGender: student.gender || 'Male',
+            studentDOB: student.dateOfBirth,
+            classID: student.classID,
+            divisionID: student.divisionID,
+            studentAddress: student.address || '',
+            // ...any other fields you have
+          },
+          // Fill optional data
+          optionData: {
+            placeBirth: student.placeBirth || '',
+            studentPhone: student.phoneNumber || '',
+            studentAddress: student.address || '',
+          },
+          // Guardian
+          guardian: {
+            guardianFullName: student.guardianName || '',
+            guardianGender: student.guardianGender || 'Male',
+            guardianDOB: student.guardianDOB || '',
+            guardianAddress: student.guardianAddress || '',
+            guardianEmail: student.guardianEmail || '',
+            guardianPhone: student.guardianPhone || '',
+            // ...etc.
+          },
+          // If you also want to patch fees data
+          fees: {
+            discounts: [] // You can dynamically patch fees if needed
+          },
+          // If you have documents or other fields
+        });
+          this.isEditMode = true; // a local flag you can define
+      } else {
+        // Default behavior for ADD mode
+        this.isEditMode = false;
+        this.generateStudentID();
+      }
+    } else {
+      // No data => default to ADD mode
+      this.isEditMode = false;
+      this.generateStudentID();
+    }
   }
+  
 
   private generateStudentID(): void {
     this.studentService.MaxStudentID().subscribe({
@@ -193,8 +258,8 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
   updateAttachments(event: { attachments: string[]; files: File[] }): void {
     this.formGroup.get('documents.attachments')?.setValue(event.attachments);
     this.attachments = event.attachments;
-    this.files=event.files;
-    
+    this.files = event.files;
+
     console.log('Updated Attachments:', this.attachments);
     console.log('Updated files:', this.files);
   }
@@ -204,22 +269,38 @@ export class NewStudentComponent implements OnInit, AfterViewInit {
   StudentImage!: File;
   studentImageURL:string='';
   studentImageURL2:string='';
-    onFileSelected(event: Event): void {
-      const input = event.target as HTMLInputElement;
 
-      if (input.files?.[0]) {
-        this.StudentImage = input.files[0]; // Assign the single file
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
 
-        // Generate a preview URL
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.studentImageURL = e.target.result;
-        };
-        this.studentImageURL2=`${this.studentID}_${this.StudentImage.name}`;
-        reader.readAsDataURL(this.StudentImage);
-      } else {
-        console.error('No file selected');
-      }
+    if (input.files?.[0]) {
+      this.StudentImage = input.files[0]; // Assign the single file
+
+      // Generate a preview URL
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.studentImageURL = e.target.result;
+      };
+      this.studentImageURL2 = `${this.studentID}_${this.StudentImage.name}`;
+      reader.readAsDataURL(this.StudentImage);
+    } else {
+      console.error('No file selected');
     }
-  
   }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['activeTab'] && this.activeTab === 'fees') {
+      // Refresh fees data if needed
+      this.refreshFees();
+    }
+  }
+
+  feeClassesChanged = new EventEmitter<any[]>();
+
+  refreshFees(): void {
+    console.log('Refreshing fees data...');
+    // Optional: Implement any additional logic needed to refresh fees
+    // For example, you could emit the current fees to ensure synchronization
+    this.feeClassesChanged.emit(this.formGroup.get('fees.discounts')?.value);
+  }
+}

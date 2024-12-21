@@ -11,4 +11,5 @@ public interface IGuardianRepository
     Task<Guardian> AddGuardianAsync(Guardian guardian);
     Task<List<Guardian>> GetAllGuardiansAsync();
     Task<Guardian> GetGuardianByIdAsync(int guardianId);
+    Task UpdateGuardianAsync(Guardian guardian);
 }

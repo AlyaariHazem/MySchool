@@ -1,43 +1,51 @@
+using Backend.DTOS.School.StudentClassFee;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
-namespace Backend.DTOS.School.Students;
-
-public class UpdateStudentWithGuardianRequestDTO
+namespace Backend.DTOS.School.Students
 {
-  public int StudentId { get; set; }
-    public string StudentFirstName { get; set; }
-    public string StudentMiddleName { get; set; }
-    public string StudentLastName { get; set; }
-    public string StudentFirstNameEng { get; set; }
-    public string StudentMiddleNameEng { get; set; }
-    public string StudentLastNameEng { get; set; }
-    public string StudentEmail { get; set; }
-    public string StudentAddress { get; set; }
-    public string StudentGender { get; set; }
-    public DateTime StudentDOB { get; set; }
-    public string StudentPhone { get; set; }
-    public int DivisionID { get; set; }
-    public string PlaceBirth { get; set; }
+    public class UpdateStudentWithGuardianRequest
+    {
+        [Required]
+        public int StudentID { get; set; }
 
-    public string GuardianFullName { get; set; }
-    public string GuardianType { get; set; }
-    public string GuardianEmail { get; set; }
-    public string GuardianAddress { get; set; }
-    public string GuardianGender { get; set; }
-    public DateTime GuardianDOB { get; set; }
-    public string GuardianPhone { get; set; }
+        // Student Fields
+        public string StudentEmail { get; set; }
+        public string StudentPhone { get; set; }
+        public string StudentAddress { get; set; }
+        public string StudentPassword { get; set; }
 
-    public List<string> Attachments { get; set; }
-    public List<DiscountRequest> Discounts { get; set; }   
-}
+        public string StudentFirstName { get; set; }
+        public string StudentMiddleName { get; set; }
+        public string StudentLastName { get; set; }
+        public string StudentFirstNameEng { get; set; }
+        public string StudentMiddleNameEng { get; set; }
+        public string StudentLastNameEng { get; set; }
+        public int DivisionID { get; set; }
+        public string PlaceBirth { get; set; }
+        public DateTime StudentDOB { get; set; }
+        public string? StudentImageURL { get; set; }
+        public string? StudentGender { get; set; }
+        public DateTime HireDate { get; set; }= DateTime.Now;
 
-public class DiscountRequest
-{
-    public int ClassID { get; set; }
-    public int FeeID { get; set; }
-    public decimal AmountDiscount { get; set; }
-    public string NoteDiscount { get; set; }
+        // Guardian Fields
+        public int GuardianID { get; set; }
+        public int? ExistingGuardianId { get; set; }
+        public string GuardianEmail { get; set; }
+        public string GuardianPhone { get; set; }
+        public string GuardianAddress { get; set; }
+        public string GuardianFullName { get; set; }
+        public string GuardianGender { get; set; }
+        public DateTime GuardianDOB { get; set; }
+        public string GuardianType { get; set; }
+
+        // Attachments
+        public List<string>? Attachments { get; set; }
+        public List<IFormFile>? Files { get; set; }
+
+        // Discounts
+        public List<StudentClassFeeDTO> UpdateDiscounts { get; set; }
+    }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository.School.Classes;
 
@@ -33,4 +34,36 @@ public class UsersRepository : IUserRepository
     {
         return await _userManager.FindByIdAsync(userId);
     }
+    public async Task<IEnumerable<ApplicationUser>> GetAllAsync()
+        {
+            return await _userManager.Users.ToListAsync();
+        }
+
+        public async Task AddAsync(ApplicationUser user)
+        {
+            await _userManager.CreateAsync(user);
+        }
+
+        public async Task UpdateAsync(ApplicationUser user)
+        {
+            var existingUser = await _userManager.FindByIdAsync(user.Id);
+            if (existingUser != null)
+            {
+                existingUser.Address = user.Address;
+                existingUser.Gender = user.Gender;
+                existingUser.HireDate = user.HireDate;
+                existingUser.UserType = user.UserType;
+                // Update other properties if needed
+                await _userManager.UpdateAsync(existingUser);
+            }
+        }
+
+        public async Task DeleteAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                await _userManager.DeleteAsync(user);
+            }
+        }
 }

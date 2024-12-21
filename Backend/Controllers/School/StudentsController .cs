@@ -37,7 +37,7 @@ namespace Backend.Controllers
 
         try
         {
-            Guardian existingGuardian = null;
+            Guardian existingGuardian = null!;
 
             // Step 1: Check if we are adding a student to an existing guardian.
             if (request.ExistingGuardianId.HasValue&&!request.ExistingGuardianId.Value.Equals(0))
@@ -50,9 +50,9 @@ namespace Backend.Controllers
             }
 
             // If no existing guardian is provided, create a new guardian and guardian user
-            ApplicationUser guardianUser = null;
-            Guardian guardian = null;
-            Accounts account = null;
+            ApplicationUser guardianUser = null!;
+            Guardian guardian = null!;
+            Accounts account = null!;
 
             if (existingGuardian == null)
             {
@@ -108,7 +108,7 @@ namespace Backend.Controllers
                 FullName = new Name
                 {
                     FirstName = request.StudentFirstName,
-                    MiddleName = request.StudentMiddleName,
+                    MiddleName = request.StudentMiddleName!,
                     LastName = request.StudentLastName
                 },
                 FullNameAlis = string.IsNullOrWhiteSpace(request.StudentFirstNameEng)
@@ -164,9 +164,9 @@ namespace Backend.Controllers
             if (existingGuardian == null)
             {
                 createdStudent = await _studentManagementService.AddStudentWithGuardianAsync(
-                    guardianUser, request.GuardianPassword, guardian,
+                    guardianUser!, request.GuardianPassword, guardian!,
                     studentUser, request.StudentPassword, student,
-                    account, accountStudentGuardian, attachments, studentClassFees);
+                    account!, accountStudentGuardian, attachments, studentClassFees);
             }
             else
             {
@@ -184,8 +184,37 @@ namespace Backend.Controllers
             return StatusCode(500, new { error = ex.Message });
         }
     }
+    [HttpPut("updateStudentWithGuardian/{id}")]
+    public async Task<IActionResult> UpdateStudentWithGuardian(int id, [FromBody] UpdateStudentWithGuardianRequest request)
+    {
+        if (id != request.StudentID)
+        {
+            return BadRequest("Student ID mismatch.");
+        }
 
-        [HttpGet("{id}")]
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            
+            var updatedStudent = await _studentManagementService.UpdateStudentWithGuardianAsync(id, request);
+            if (updatedStudent == null)
+            {
+                return NotFound(new { message = "Student or Guardian not found." });
+            }
+
+            return Ok(new { success = true, message = "Student updated successfully.", student = updatedStudent });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+        
+       [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentById(int id)
         {
             var student = await _studentRepository.GetStudentByIdAsync(id);
@@ -228,36 +257,19 @@ namespace Backend.Controllers
         }
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateStudent(int id, [FromBody] UpdateStudentRequest updateRequest)
+    [HttpGet("id")]
+    public async Task<IActionResult> GetStudentDataAsRequest(int studentId)
     {
-        if (id != updateRequest.StudentID)
+        var requestData = await _studentRepository.GetAddStudentWithGuardianRequestData(studentId);
+
+        if (requestData == null)
         {
-            return BadRequest(new { message = "Student ID mismatch." });
+            return NotFound(new { message = "Student not found." });
         }
 
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        try
-        {
-            var isUpdated = await _studentRepository.UpdateStudentAsync(updateRequest);
-
-            if (!isUpdated)
-            {
-                return NotFound(new { message = $"Student with ID {id} not found." });
-            }
-
-            return NoContent(); // 204 No Content indicates successful update
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
+        return Ok(requestData);
     }
-     
+  
         [HttpPost("uploadAttachments")]
         public async Task<IActionResult> UploadAttachments([FromForm] List<IFormFile> files, [FromForm] int studentId)
         {

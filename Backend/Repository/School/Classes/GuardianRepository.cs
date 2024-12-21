@@ -44,4 +44,21 @@ public class GuardianRepository : IGuardianRepository
         }
         return guardianData;
     }
+
+     public async Task UpdateGuardianAsync(Guardian? guardian)
+    {
+        var guardianExist = await _db.Guardians.FirstOrDefaultAsync(g => g.GuardianID == guardian.GuardianID);
+        if(guardianExist!=null){
+            guardianExist.FullName = guardian.FullName;
+            guardianExist.GuardianDOB = guardian.GuardianDOB;
+            guardianExist.Type = guardian.Type;
+            guardianExist.ApplicationUser.Address = guardian.ApplicationUser.Address;
+            guardianExist.ApplicationUser.Email = guardian.ApplicationUser.Email;
+            guardianExist.ApplicationUser.PhoneNumber = guardian.ApplicationUser.PhoneNumber;
+            _db.Entry(guardian).State = EntityState.Modified;
+           await _db.SaveChangesAsync();
+        }
+
+
+    }
 }

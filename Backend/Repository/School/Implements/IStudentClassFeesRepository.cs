@@ -8,5 +8,6 @@ namespace Backend.Repository.School.Classes
     {
         Task AddStudentFeesAsync(List<StudentClassFees> studentClassFees);
         Task<List<FeeClass>> GetFeesForClassAsync(int classId);
+        
     }
 }
