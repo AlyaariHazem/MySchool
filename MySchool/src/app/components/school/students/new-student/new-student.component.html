@@ -15,11 +15,27 @@
     <div class="student-info-section">
       <div class="student-name-id">
         <div class="student-name">
-          <label>اسم الطالب:</label>
-          <!-- <span>{{ student?.name }}</span> -->
+          <div class="form-group StudentName">
+            <label for="studentName">اسم الطالب:</label>
+            <input 
+             [disabled]="true"
+              type="text"
+              id="studentName"
+              [readonly]="true"
+            />
+          </div>
         </div>
         <div class="student-id">
-          <label>رقم الطالب: {{studentID}}</label>
+          <div class="form-group">
+            <label for="studentID">رقم الطالب:</label>
+            <input 
+             [disabled]="true"
+              type="text"
+              id="studentID"
+              formControlName="studentID"
+              [readonly]="true"
+            />
+          </div>
           <!-- <span>{{ student?.id }}</span> -->
         </div>
       </div>

@@ -233,6 +233,7 @@ namespace Backend.Controllers
 
             return Ok(students);
         }
+
         [HttpGet("MaxValue")]
         public async Task<IActionResult> GetMaxValue()
         {
@@ -260,7 +261,7 @@ namespace Backend.Controllers
     [HttpGet("id")]
     public async Task<IActionResult> GetStudentDataAsRequest(int studentId)
     {
-        var requestData = await _studentRepository.GetAddStudentWithGuardianRequestData(studentId);
+        var requestData = await _studentRepository.GetUpdateStudentWithGuardianRequestData(studentId);
 
         if (requestData == null)
         {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Backend.Data;
+using Backend.DTOS.School.Guardians;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Identity;
@@ -43,6 +44,29 @@ public class GuardianRepository : IGuardianRepository
             return null;
         }
         return guardianData;
+    }
+     public async Task<GetGuardianDTO> GetGuardianByIdForUpdateAsync(int guardianId)
+    {
+        var guardianData=await _db.Guardians
+        .Include(g=>g.ApplicationUser)
+        .FirstOrDefaultAsync(g=>g.GuardianID==guardianId);
+        if (guardianData == null)
+        {
+            return null;
+        }
+        var guardian = new GetGuardianDTO
+        {
+            GuardianID = guardianData.GuardianID,
+            GuardianFullName = guardianData.FullName,
+            Gender = guardianData.ApplicationUser.Gender,
+            Type = guardianData.Type,
+            UserID = guardianData.UserID,
+            GuardianAddress=guardianData.ApplicationUser.Address!,
+            GuardianDOB=guardianData.GuardianDOB,
+            GuardianEmail=guardianData.ApplicationUser.Email!,
+            GuardianPhone=guardianData.ApplicationUser.PhoneNumber
+        };
+        return guardian;
     }
 
      public async Task UpdateGuardianAsync(Guardian? guardian)

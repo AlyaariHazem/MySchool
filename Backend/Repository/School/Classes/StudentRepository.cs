@@ -2,6 +2,7 @@ using Backend.Data;
 using Backend.DTOS;
 using Backend.DTOS.School.Students;
 using Backend.Models;
+using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,10 +13,12 @@ using System.Threading.Tasks;
 public class StudentRepository : IStudentRepository
 {
     private readonly DatabaseContext _context;
+     private readonly IGuardianRepository _guardianRepo;
 
-    public StudentRepository(DatabaseContext context)
+    public StudentRepository(DatabaseContext context,IGuardianRepository guardianRepo)
     {
         _context = context;
+        _guardianRepo = guardianRepo;
     }
 
     // Create: Add a new student
@@ -138,7 +141,7 @@ public async Task<Student?> GetStudentAsync(int id)
     }).ToList();
 }
 
-    public async Task<AddStudentWithGuardianRequest?> GetAddStudentWithGuardianRequestData(int studentId)
+    public async Task<AddStudentWithGuardianRequest?> GetUpdateStudentWithGuardianRequestData(int studentId)
     {
         var student = await _context.Students
             .Include(s => s.ApplicationUser)
@@ -148,20 +151,21 @@ public async Task<Student?> GetStudentAsync(int id)
             .Include(s => s.StudentClassFees)
             .FirstOrDefaultAsync(s => s.StudentID == studentId);
 
+        var guardianInfo =_guardianRepo.GetGuardianByIdForUpdateAsync(student!.GuardianID);
         if (student == null)
         {
             // Provide default values when student is not found
             return new AddStudentWithGuardianRequest
             {
                 ExistingGuardianId = null,
-                GuardianEmail = string.Empty,
+                GuardianEmail = guardianInfo.Result.GuardianEmail,
                 GuardianPassword = string.Empty,
-                GuardianAddress = string.Empty,
-                GuardianGender = "Guardian",
-                GuardianFullName = string.Empty,
-                GuardianType = null,
-                GuardianPhone = string.Empty,
-                GuardianDOB = null,
+                GuardianAddress =guardianInfo.Result.GuardianAddress,
+                GuardianGender = guardianInfo.Result.Type!,
+                GuardianFullName = guardianInfo.Result.GuardianFullName,
+                GuardianType = guardianInfo.Result.Type!,
+                GuardianPhone = guardianInfo.Result.GuardianPhone!,
+                GuardianDOB = guardianInfo.Result.GuardianDOB,
                 StudentID = studentId,
                 StudentEmail = string.Empty,
                 StudentPassword = string.Empty,
@@ -192,14 +196,14 @@ public async Task<Student?> GetStudentAsync(int id)
         {
             // Guardian Details
             ExistingGuardianId = guardian?.GuardianID,
-            GuardianEmail = guardian?.ApplicationUser?.Email ?? string.Empty,
-            GuardianPassword = string.Empty, // Passwords are not retrievable
-            GuardianAddress = guardian?.ApplicationUser?.Address ?? string.Empty,
-            GuardianGender = guardian?.ApplicationUser?.Gender ?? "Guardian",
-            GuardianFullName = guardian?.FullName ?? string.Empty,
-            GuardianType = guardian?.Type,
-            GuardianPhone = guardian?.ApplicationUser?.PhoneNumber ?? string.Empty,
-            GuardianDOB = guardian?.GuardianDOB,
+            GuardianEmail = guardianInfo.Result.GuardianEmail,
+            GuardianPassword = string.Empty,
+            GuardianAddress =guardianInfo.Result.GuardianAddress,
+            GuardianGender = guardianInfo.Result.Gender!,
+            GuardianFullName = guardianInfo.Result.GuardianFullName,
+            GuardianType = guardianInfo.Result.Type!,
+            GuardianPhone = guardianInfo.Result.GuardianPhone!,
+            GuardianDOB = guardianInfo.Result.GuardianDOB,
 
             // Student Details
             StudentID = student.StudentID,

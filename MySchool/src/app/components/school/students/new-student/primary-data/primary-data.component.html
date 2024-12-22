@@ -56,13 +56,13 @@
       <label for="class" class="label2">الصـف<span style="color:red;"> *</span></label>
       <mat-form-field appearance="outline">
         <mat-label>إختار الصف</mat-label>
-        <mat-select formControlName="classID" (selectionChange)="onSelectionChange('Class', $event.value)">
+        <mat-select formControlName="classID" (selectionChange)="onSelectionChange('classID', $event.value)">
           <mat-option [value]="null">None</mat-option>
           <mat-option *ngFor="let classItem of classes" [value]="classItem.classID">
             {{ classItem.className }}
           </mat-option>
         </mat-select>
-        <span *ngIf="isClassSelected" mat-icon-button class="cancel" (click)="clearSelection('Class')">✖</span>
+        <span *ngIf="isClassSelected" mat-icon-button class="cancel" (click)="clearSelection('classID')">✖</span>
       </mat-form-field>
     </div>
 

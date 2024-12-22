@@ -19,11 +19,11 @@ export class PrimaryDataComponent implements OnInit {
   get fullNameAr(): string {
     return `${this.formGroup.get('studentFirstName')?.value} ${this.formGroup.get('studentMiddleName')?.value} ${this.formGroup.get('studentLastName')?.value}`.trim();
   }
-  
+
   get fullNameEn(): string {
     return `${this.formGroup.get('studentFirstNameEng')?.value} ${this.formGroup.get('studentMiddleNameEng')?.value} ${this.formGroup.get('studentLastNameEng')?.value}`.trim();
   }
-  
+
   selectedClass!: string;
   selectedDivision!: string;
   selectedSex!: string;
@@ -45,29 +45,62 @@ export class PrimaryDataComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.getAllClass();
     this.getAllDivision();
+    this.getAllClass();
+
+    const dobValue = this.formGroup.get('studentDOB')?.value;
+    if (dobValue) {
+      this.formGroup.get('studentDOB')?.setValue(this.formatDateForInput(dobValue));
+    }
+
+    const initialClass = this.formGroup.get('classID')?.value;
+    if (initialClass) {
+      this.onSelectionChange('classID', initialClass);
+    }
+
+    console.log('Class id is:', this.formGroup.get('classID')?.value);
+    console.log('Primary Data Group:', this.formGroup.value);
+  }
+
+  formatDateForInput(isoDate: string): string {
+    const date = new Date(isoDate);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure 2 digits
+    const day = String(date.getDate()).padStart(2, '0'); // Ensure 2 digits
+    return `${year}-${month}-${day}`;
   }
 
   getAllDivision(): void {
     this.Divisions.GetAll().subscribe({
       next: (res) => {
-        this.allDivisions = res.divisionInfo; // Store all divisions
-      }
+        this.allDivisions = res.divisionInfo;
+
+        const initialClassId = this.formGroup.get('classID')?.value;
+        if (initialClassId) {
+          this.updateDivisionsByClass(initialClassId);
+        }
+      },
+      error: (err) => console.error('Error loading divisions:', err)
     });
   }
+
 
   getAllClass(): void {
     this.Classes.GetAll().subscribe({
-      next: (res) => (this.classes = res)
+      next: (res) => {
+        this.classes = res;
+      },
+      error: (err) => console.error('Error loading classes:', err)
     });
   }
 
+
   onSelectionChange(type: string, value: string): void {
-    if (type === 'Class') {
+    if (type === 'classID') {
       this.selectedClass = value;
       this.isClassSelected = !!value;
       this.updateDivisionsByClass(value); // Filter divisions
+      this.onSelectionChange('divisionID', this.formGroup.get('divisionID')?.value);
     } else if (type === 'divisionID') {
       this.selectedDivision = value;
       this.isDivisionSelected = !!value;
@@ -85,10 +118,10 @@ export class PrimaryDataComponent implements OnInit {
   }
 
   clearSelection(type: string): void {
-    if (type === 'Class') {
+    if (type === 'classID') {
       this.selectedClass = '';
       this.isClassSelected = false;
-      this.formGroup.get('Class')?.setValue(null);
+      this.formGroup.get('classID')?.setValue(null);
       this.divisions = []; // Clear divisions when class is cleared
     } else if (type === 'divisionID') {
       this.selectedDivision = '';

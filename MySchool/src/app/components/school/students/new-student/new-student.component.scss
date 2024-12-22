@@ -4,7 +4,10 @@
   max-height: 75vh; /* I want t */
   overflow-y: hidden;
 }
-
+input[readonly]{
+  background-color:#eeee;
+  border:none;
+}
 .modal-content {
   border-radius: 1.5%;
 }
@@ -430,7 +433,12 @@ select:focus {
   margin-left: 10px;
   font-weight: bold;
 }
-
+.form-group{
+  left: -155px;
+ }
+.StudentName{
+  right: -20px;
+ }
 .buttons {
   display: flex;
   justify-content: flex-end;
@@ -498,7 +506,12 @@ select:focus {
   .student-photo-section {
       margin-bottom: 20px;
   }
-
+ .form-group{
+  left: -155px;
+ }
+ .StudentName{
+  right: 0;
+ }
   .student-info-section {
       margin-right: 0;
   }
@@ -516,7 +529,12 @@ select:focus {
   .student-header {
       flex-direction: column; /* Stack elements vertically */
   }
-
+  .form-group{
+    left: 0;
+   }
+   .StudentName{
+    right: 0;
+   }
   .student-photo-section {
       margin-bottom: 20px; /* Add spacing between sections */
   }

@@ -22,7 +22,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
   currentPage: { [key: string]: number } = {};
   studentService = inject(StudentService);
   studentID: number = 0; // Initialize with a default placeholder value
-  files!:File[];
+  files!: File[];
 
   constructor(
     private formBuilder: FormBuilder,
@@ -34,7 +34,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
 
     this.formGroup = this.formBuilder.group({
       studentID: [this.studentID],
-      existingGuardianId:[null],
+      existingGuardianId: [null],
       primaryData: this.formBuilder.group({
         studentFirstName: ['', Validators.required],
         studentMiddleName: ['', Validators.required],
@@ -57,8 +57,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
       }),
       guardian: this.formBuilder.group({
         guardianFullName: ['', Validators.required],
-        guardianType: ['Guardian'],
-        relationship: [''],
+        guardianType: [''],
         guardianEmail: ['', [Validators.required, Validators.email]],
         guardianPassword: ['Guardian'],
         guardianPhone: ['', Validators.required],
@@ -99,7 +98,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
     });
   }
 
-  existingGuardian(event:number){
+  existingGuardian(event: number) {
     this.formGroup.get('existingGuardianId')?.patchValue(event);
   }
 
@@ -119,6 +118,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
         existingGuardianId: this.formGroup.get('existingGuardianId')?.value,
         ...this.formGroup.get('primaryData')?.value,
         ...this.formGroup.get('guardian')?.value,
+        ...this.formGroup.get('optionData')?.value,
         ...this.formGroup.get('fees')?.value,
         attachments: this.formGroup.get('documents.attachments')?.value || [],
         studentImageURL: this.studentImageURL2
@@ -128,7 +128,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
           this.toastr.success('Student added successfully', res.message);
         }
       });
-      this.studentService.uploadStudentImage(this.StudentImage,this.studentID).subscribe(()=>{
+      this.studentService.uploadStudentImage(this.StudentImage, this.studentID).subscribe(() => {
         console.log('Image is uploaded successfully!');
       });
       this.studentService.uploadAttachments(this.files, this.studentID).subscribe({
@@ -158,7 +158,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
       if (this.data.mode === 'edit' && this.data.student) {
         // We are in EDIT mode, patch the form with existing student data
         const student = this.data.student;
-        
+        console.log("the student that want to edit is", student);
         // StudentID
         this.formGroup.patchValue({
           studentID: student.studentID,
@@ -167,37 +167,45 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
             studentFirstName: student.studentFirstName || '',
             studentMiddleName: student.studentMiddleName || '',
             studentLastName: student.studentLastName || '',
+            studentFirstNameEng: student.studentFirstNameEng || '',
+            studentMiddleNameEng: student.studentMiddleNameEng || '',
+            studentLastNameEng: student.studentLastNameEng || '',
             studentGender: student.gender || 'Male',
-            studentDOB: student.dateOfBirth,
+            studentDOB: student.studentDOB,
             classID: student.classID,
             divisionID: student.divisionID,
-            studentAddress: student.address || '',
             // ...any other fields you have
           },
           // Fill optional data
           optionData: {
             placeBirth: student.placeBirth || '',
-            studentPhone: student.phoneNumber || '',
-            studentAddress: student.address || '',
+            studentPhone: student.studentPhone || '',
+            studentAddress: student.studentAddress || '',
           },
           // Guardian
           guardian: {
-            guardianFullName: student.guardianName || '',
+            guardianFullName: student.guardianFullName || '',
             guardianGender: student.guardianGender || 'Male',
-            guardianDOB: student.guardianDOB || '',
+            guardianDOB: student.guardianDOB,
             guardianAddress: student.guardianAddress || '',
             guardianEmail: student.guardianEmail || '',
             guardianPhone: student.guardianPhone || '',
+            guardianType: student.guardianType || '',
             // ...etc.
           },
           // If you also want to patch fees data
           fees: {
-            discounts: [] // You can dynamically patch fees if needed
+            discounts: student.discounts
           },
-          // If you have documents or other fields
+          documents: {
+            attachments: student.attachments
+          },
+          studentImageURL: student.studentImageURL
         });
-          this.isEditMode = true; // a local flag you can define
-      } else {
+        this.isEditMode = true; // a local flag you can define
+        this.refreshFees();
+      }
+      else {
         // Default behavior for ADD mode
         this.isEditMode = false;
         this.generateStudentID();
@@ -208,7 +216,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
       this.generateStudentID();
     }
   }
-  
+
 
   private generateStudentID(): void {
     this.studentService.MaxStudentID().subscribe({
@@ -265,10 +273,10 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   attachments: string[] = [];
-  
+
   StudentImage!: File;
-  studentImageURL:string='';
-  studentImageURL2:string='';
+  studentImageURL: string = '';
+  studentImageURL2: string = '';
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

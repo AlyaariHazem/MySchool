@@ -8,9 +8,9 @@
           <input type="text" id="guardianName" name="guardianName" formControlName="guardianFullName" />
         </div>
         <div class="form-control">
-          <label for="relationship" class="label1">صلة القرابة</label>
-          <input type="text" id="relationship" name="relationship" formControlName="relationship" />
-          @if (formGroup.get('relationship')?.hasError('required') && formGroup.get('relationship')?.touched) {
+          <label for="guardianType" class="label1">صلة القرابة</label>
+          <input type="text" id="guardianType" name="guardianType" formControlName="guardianType" />
+          @if (formGroup.get('guardianType')?.hasError('required') && formGroup.get('guardianType')?.touched) {
           <label style="color:red;">
             صلة القرابة مطلوبة
           </label>
@@ -56,7 +56,7 @@
       </div>
       <div class="form-control">
         <label for="guardianAddress" class="label1">العنوان</label>
-        <input type="text" id="guardianAddress" name="guardianAddress" formControlName="guardianAddress" />
+        <input type="text" id="guardianAddress" name="guardianAddress" />
       </div>
     </div>
   </mat-tab>

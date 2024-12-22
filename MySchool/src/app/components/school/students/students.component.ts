@@ -149,7 +149,7 @@ EditDialog(id: number): void {
     // IMPORTANT: Pass data to the dialog using 'data' property
     dialogConfig.data = {
       mode: 'edit',
-      student: res, // the object you received from the server
+      student: res, // edit student
     };
 
     const dialogRef = this.dialog.open(NewStudentComponent, dialogConfig);
