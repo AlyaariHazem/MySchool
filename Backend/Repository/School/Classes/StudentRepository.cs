@@ -1,9 +1,11 @@
 using Backend.Data;
 using Backend.DTOS;
+using Backend.DTOS.School.Attachments;
 using Backend.DTOS.School.Students;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
+using Backend.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -14,11 +16,13 @@ public class StudentRepository : IStudentRepository
 {
     private readonly DatabaseContext _context;
      private readonly IGuardianRepository _guardianRepo;
+     private readonly mangeFilesService _mangeFilesService;
 
-    public StudentRepository(DatabaseContext context,IGuardianRepository guardianRepo)
+    public StudentRepository(DatabaseContext context,IGuardianRepository guardianRepo,mangeFilesService mangeFilesService)
     {
         _context = context;
         _guardianRepo = guardianRepo;
+        _mangeFilesService = mangeFilesService;
     }
 
     // Create: Add a new student
@@ -141,58 +145,29 @@ public async Task<Student?> GetStudentAsync(int id)
     }).ToList();
 }
 
-    public async Task<AddStudentWithGuardianRequest?> GetUpdateStudentWithGuardianRequestData(int studentId)
+    public async Task<GetStudentForUpdateDTO?> GetUpdateStudentWithGuardianRequestData(int studentId)
     {
         var student = await _context.Students
             .Include(s => s.ApplicationUser)
             .Include(s => s.Guardian)
             .Include(s => s.Attachments)
             .Include(s => s.Division)
-            .Include(s => s.StudentClassFees)
+             .Include(s => s.StudentClassFees)
+                .ThenInclude(f => f.FeeClass)
+                  .ThenInclude(fc => fc.Class)
             .FirstOrDefaultAsync(s => s.StudentID == studentId);
 
-        var guardianInfo =_guardianRepo.GetGuardianByIdForUpdateAsync(student!.GuardianID);
         if (student == null)
         {
-            // Provide default values when student is not found
-            return new AddStudentWithGuardianRequest
-            {
-                ExistingGuardianId = null,
-                GuardianEmail = guardianInfo.Result.GuardianEmail,
-                GuardianPassword = string.Empty,
-                GuardianAddress =guardianInfo.Result.GuardianAddress,
-                GuardianGender = guardianInfo.Result.Type!,
-                GuardianFullName = guardianInfo.Result.GuardianFullName,
-                GuardianType = guardianInfo.Result.Type!,
-                GuardianPhone = guardianInfo.Result.GuardianPhone!,
-                GuardianDOB = guardianInfo.Result.GuardianDOB,
-                StudentID = studentId,
-                StudentEmail = string.Empty,
-                StudentPassword = string.Empty,
-                StudentAddress = string.Empty,
-                StudentGender = "Not Specified",
-                StudentFirstName = string.Empty,
-                StudentMiddleName = string.Empty,
-                StudentLastName = string.Empty,
-                StudentFirstNameEng = string.Empty,
-                StudentMiddleNameEng = string.Empty,
-                StudentLastNameEng = string.Empty,
-                StudentImageURL = string.Empty,
-                DivisionID = 0,
-                PlaceBirth = string.Empty,
-                StudentPhone = string.Empty,
-                StudentDOB = DateTime.MinValue,
-                HireDate = DateTime.MinValue,
-                Files = new List<IFormFile>(),
-                Amount = 0,
-                Attachments = new List<string>(),
-                Discounts = new List<DisCount>()
-            };
+            return null;
         }
+        string PhotoUrl = "https://localhost:7258/uploads/StudentPhotos";
+        string AttachmentUrl = "https://localhost:7258/uploads/Attachments";
+         var guardianInfo =_guardianRepo.GetGuardianByIdForUpdateAsync(student!.GuardianID);
 
         var guardian = student.Guardian;
 
-        return new AddStudentWithGuardianRequest
+        return new GetStudentForUpdateDTO
         {
             // Guardian Details
             ExistingGuardianId = guardian?.GuardianID,
@@ -217,7 +192,7 @@ public async Task<Student?> GetStudentAsync(int id)
             StudentFirstNameEng = student.FullNameAlis?.FirstNameEng ?? string.Empty,
             StudentMiddleNameEng = student.FullNameAlis?.MiddleNameEng ?? string.Empty,
             StudentLastNameEng = student.FullNameAlis?.LastNameEng ?? string.Empty,
-            StudentImageURL = student.ImageURL ?? string.Empty,
+            StudentImageURL = student.ImageURL!=null?$"{PhotoUrl}/{student.ImageURL}": string.Empty,
             ClassID = student.Division?.ClassID ?? 0,
             DivisionID = student.DivisionID,
             PlaceBirth = student.PlaceBirth ?? string.Empty,
@@ -228,18 +203,24 @@ public async Task<Student?> GetStudentAsync(int id)
             // Attachments and Discounts
             Files = new List<IFormFile>(), // Default empty list
             Amount = student.AccountStudentGuardians?.Sum(asg => asg.Amount) ?? 0,
-            Attachments = student.Attachments?.Select(a => a.AttachmentURL).ToList() ?? new List<string>(),
-            Discounts = student.StudentClassFees?.Select(f => new DisCount
+            Attachments=student.Attachments?.Select(a=> new AttachmentDTO{
+            AttachmentID=a.AttachmentID,
+            AttachmentURL=a.AttachmentURL!=null?$"{AttachmentUrl}/{a.AttachmentURL}":string.Empty,
+            Note=a.Note!,
+            VoucherID=a.VoucherID
+            }).ToList()?? new List<AttachmentDTO>(),
+            Discounts = student.StudentClassFees?.Select(f => new DisCountUpdate
             {
                 FeeClassID = f.FeeClassID,
                 AmountDiscount = f.AmountDiscount ?? 0,
-                NoteDiscount = f.NoteDiscount ?? string.Empty
-            }).ToList() ?? new List<DisCount>()
+                NoteDiscount = f.NoteDiscount ?? string.Empty,
+                ClassName = f.FeeClass?.Class?.ClassName ?? string.Empty, // Check if FeeClass or Class is null
+                FeeName=f.FeeClass?.Fee?.FeeName ?? string.Empty,
+                Mandatory=f.FeeClass?.Mandatory ?? false
+            }).ToList() ?? new List<DisCountUpdate>()
         };
     }
 
-
-    // Delete: Delete a student by ID with Cascade Delete
     public async Task<bool> DeleteStudentAsync(int id)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();
@@ -289,6 +270,9 @@ public async Task<Student?> GetStudentAsync(int id)
             // Save changes
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+            
+             _mangeFilesService.RemoveStudentImage(student.StudentID);
+            await _mangeFilesService.RemoveAttachmentsAsync(student.StudentID);
 
             return true; // Student and related entities successfully deleted
         }
@@ -300,8 +284,6 @@ public async Task<Student?> GetStudentAsync(int id)
         }
 }
 
-
-    // Get MaxValue: Get the maximum value of StudentID
     public async Task<int> MaxValue()
     {
         var maxValue = await _context.Students.MaxAsync(s => (int?)s.StudentID) ?? 0;

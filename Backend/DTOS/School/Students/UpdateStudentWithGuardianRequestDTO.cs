@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.DTOS.School.Students
 {
-    public class UpdateStudentWithGuardianRequest
+    public class UpdateStudentWithGuardianRequestDTO
     {
         [Required]
         public int StudentID { get; set; }
@@ -46,6 +46,6 @@ namespace Backend.DTOS.School.Students
         public List<IFormFile>? Files { get; set; }
 
         // Discounts
-        public List<StudentClassFeeDTO> UpdateDiscounts { get; set; }
+        public List<StudentClassFeeDTO>? UpdateDiscounts { get; set; }
     }
 }

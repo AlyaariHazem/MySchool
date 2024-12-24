@@ -23,6 +23,7 @@ public class StudentManagementService
     private readonly DatabaseContext _dbContext;
     private readonly IAccountRepository _accountRepository;
     private readonly IStudentClassFeeRepository _studentClassFeeRepository;
+    private readonly mangeFilesService _mangeFilesService;
     private readonly IMapper _mapper;
     private readonly UserManager<ApplicationUser> _userManager;
 
@@ -34,6 +35,7 @@ public class StudentManagementService
         IAccountRepository accountRepository,
         IStudentClassFeeRepository studentClassFeeRepository,
         IMapper mapper,
+        mangeFilesService mangeFilesService,
         UserManager<ApplicationUser> userManager) // Inject UserManager
 
     {
@@ -45,6 +47,7 @@ public class StudentManagementService
         _studentClassFeeRepository = studentClassFeeRepository;
         _mapper = mapper;
         _userManager = userManager;
+        _mangeFilesService = mangeFilesService;
     }
 
     public async Task<Student> AddStudentWithGuardianAsync(
@@ -154,7 +157,7 @@ public class StudentManagementService
         return addedStudent;
     }
     
-public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentId, UpdateStudentWithGuardianRequest request)
+public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentId, UpdateStudentWithGuardianRequestDTO request)
 {
     using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
@@ -227,7 +230,7 @@ public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentI
         // **Handle Attachments**
         if (request.Files != null && request.Files.Any())
         {
-            var filePaths = await UploadAttachments(request.Files, student.StudentID);
+            var filePaths = await this._mangeFilesService.UploadAttachments(request.Files, student.StudentID);
             var attachments = filePaths.Select(filePath => new Attachments
             {
                 StudentID = student.StudentID,
@@ -265,74 +268,6 @@ public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentI
             await transaction.RollbackAsync();
             throw new Exception($"Error updating student: {ex.Message}");
         }
-}
-        public async Task<List<string>> UploadAttachments(List<IFormFile> files, int studentId)
-        {
-            if (files == null || !files.Any())
-                return null!;
-
-            var uploadsFolder = Path.Combine("wwwroot", "uploads", "Attachments");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
-            var filePaths = new List<string>();
-            foreach (var file in files)
-            {
-                if (file.Length > 0)
-                {
-                    var fileExtension = Path.GetExtension(file.FileName);
-                    if (!new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf" }.Contains(fileExtension.ToLower()))
-                        throw new InvalidOperationException("Invalid file type.");
-
-                    var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
-                    try
-                    {
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
-                        filePaths.Add(filePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error uploading file {file.FileName}: {ex.Message}");
-                    }
-                }
-            }
-            return filePaths;
-        }
-        
-        public async Task<List<string>> UploadStudentImage(IFormFile file, int studentId)
-        {
-            if (file == null)
-                return null!;
-
-            var uploadsFolder = Path.Combine("wwwroot", "uploads", "StudentPhotos");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
-            var filePaths = new List<string>();
-            if (file.Length > 0)
-            {
-                var fileExtension = Path.GetExtension(file.FileName);
-                if (!new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(fileExtension.ToLower()))
-                    throw new InvalidOperationException("Invalid file type.");
-
-                    var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
-                    try
-                    {
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
-                        filePaths.Add(filePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error uploading file {file.FileName}: {ex.Message}");
-                    }
-                }
-            return filePaths;
-        }
-
+   }
+      
 }

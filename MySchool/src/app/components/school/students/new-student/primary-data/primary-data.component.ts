@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { ClassService } from '../../../../../core/services/class.service';
@@ -15,6 +15,7 @@ import { divisions } from '../../../../../core/models/division.model';
 })
 export class PrimaryDataComponent implements OnInit {
   @Input() formGroup!: FormGroup;
+  @Output() classSelected = new EventEmitter<number>();
 
   get fullNameAr(): string {
     return `${this.formGroup.get('studentFirstName')?.value} ${this.formGroup.get('studentMiddleName')?.value} ${this.formGroup.get('studentLastName')?.value}`.trim();
@@ -99,8 +100,8 @@ export class PrimaryDataComponent implements OnInit {
     if (type === 'classID') {
       this.selectedClass = value;
       this.isClassSelected = !!value;
-      this.updateDivisionsByClass(value); // Filter divisions
-      this.onSelectionChange('divisionID', this.formGroup.get('divisionID')?.value);
+      this.classSelected.emit(+value);
+      this.updateDivisionsByClass(value); // Automatically set the first division
     } else if (type === 'divisionID') {
       this.selectedDivision = value;
       this.isDivisionSelected = !!value;
@@ -109,14 +110,25 @@ export class PrimaryDataComponent implements OnInit {
       this.isSexSelected = !!value;
     }
   }
-
+  
   updateDivisionsByClass(classId: string): void {
     // Filter divisions based on selected class
     this.divisions = this.allDivisions.filter(
       (division) => division.classID === +classId
     );
+    
+    if (this.divisions.length > 0) {
+      const firstDivisionId = this.divisions[0].divisionID;
+      this.formGroup.get('divisionID')?.setValue(firstDivisionId);
+      this.selectedDivision = firstDivisionId.toString(); // Convert to string
+      this.isDivisionSelected = true;
+    } else {
+      this.formGroup.get('divisionID')?.setValue(null);
+      this.selectedDivision = '';
+      this.isDivisionSelected = false;
+    }
   }
-
+  
   clearSelection(type: string): void {
     if (type === 'classID') {
       this.selectedClass = '';

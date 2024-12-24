@@ -15,24 +15,10 @@
     <div class="form-control">
       <mat-form-field class="inputText">
         <mat-label>الرسوم المطلوبة</mat-label>
-        <input class="input1" disabled  [value]="getRequiredFees()" type="text" matInput />
+        <input class="input1" disabled [value]="getRequiredFees()" type="text" matInput />
       </mat-form-field>
     </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>إختار الصـف</mat-label>
-      <input type="text" aria-label="Number" matInput [formControl]="myControl" [matAutocomplete]="auto" />
-      <!-- Cancel Icon -->
-      <label class="dropdown13">x </label>
-      <label class="cancel" *ngIf="isOptionSelected" (click)="clearSelection()">
-        ✖
-      </label>
-      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
-        <mat-option *ngFor="let option of classes" [value]="option.classID">
-          {{ option.className }}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
   </div>
 </form>
 <p class="writeMoney">المبلغ المتوجب دفعة كتابة:</p>

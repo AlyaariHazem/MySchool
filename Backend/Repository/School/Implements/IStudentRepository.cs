@@ -16,5 +16,5 @@ public interface IStudentRepository
     Task<Student?> GetStudentAsync(int id);
     Task<int> MaxValue();
     Task<bool> DeleteStudentAsync(int id);
-     Task<AddStudentWithGuardianRequest?> GetUpdateStudentWithGuardianRequestData(int studentData);
+     Task<GetStudentForUpdateDTO?> GetUpdateStudentWithGuardianRequestData(int studentData);
 }

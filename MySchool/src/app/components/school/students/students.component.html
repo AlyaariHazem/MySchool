@@ -59,6 +59,7 @@
         </button>
 
         <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
+        
         @if (showGrid) {
         <div class="group group2">
           @for (student of paginatedStudents; track $index) {

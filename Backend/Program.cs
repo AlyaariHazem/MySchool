@@ -79,6 +79,7 @@ builder.Services.AddSwaggerGen(swagger =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().
 AddEntityFrameworkStores<DatabaseContext>();
 builder.Services.AddScoped<StudentManagementService>();
+builder.Services.AddScoped<mangeFilesService>();
 builder.Services.AddScoped<StudentClassFeesRepository>();
 
 // Register custom repositories

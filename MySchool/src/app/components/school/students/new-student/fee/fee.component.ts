@@ -17,6 +17,7 @@ export class FeeComponent implements OnInit, OnChanges {
   @Input() formGroup!: FormGroup;
   @Output() feeClassesChanged = new EventEmitter<FeeClasses[]>(); // Output for notifying parent
   @Output() requiredFeesChanged = new EventEmitter<number>(); // Output for notifying parent about required fees
+  @Input() selectedClassID!: number | string;
 
   myControl = new FormControl('');
   classes: ClassDTO[] = [];
@@ -30,24 +31,24 @@ export class FeeComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.GetAllClasses();
-    this.initializeFeeClasses();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['formGroup'] && !changes['formGroup'].firstChange) {
-      this.initializeFeeClasses();
+    if (changes['selectedClassID'] && this.selectedClassID) {
+      // Ensure it's a string before setting it in the autocomplete control
+      const classIDValue = typeof this.selectedClassID === 'number'
+        ? this.selectedClassID.toString()
+        : this.selectedClassID;
+  
+      this.myControl.setValue(classIDValue);
+  
+      // Call the existing method
+      this.onOptionSelected({ option: { value: classIDValue } });
     }
   }
 
   GetAllClasses(): void {
     this.classService.GetAll().subscribe((res) => (this.classes = res));
-  }
-
-  initializeFeeClasses(): void {
-    const discountsArray = this.formGroup.get('discounts') as FormArray;
-    if (discountsArray && discountsArray.length > 0) {
-      this.feeClasses = discountsArray.value;
-    }
   }
 
   onOptionSelected(event: any) {

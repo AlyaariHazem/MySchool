@@ -17,24 +17,13 @@
         <div class="student-name">
           <div class="form-group StudentName">
             <label for="studentName">اسم الطالب:</label>
-            <input 
-             [disabled]="true"
-              type="text"
-              id="studentName"
-              [readonly]="true"
-            />
+            <input [disabled]="true" type="text" id="studentName" [readonly]="true" />
           </div>
         </div>
         <div class="student-id">
           <div class="form-group">
             <label for="studentID">رقم الطالب:</label>
-            <input 
-             [disabled]="true"
-              type="text"
-              id="studentID"
-              formControlName="studentID"
-              [readonly]="true"
-            />
+            <input [disabled]="true" type="text" id="studentID" formControlName="studentID" [readonly]="true" />
           </div>
           <!-- <span>{{ student?.id }}</span> -->
         </div>
@@ -77,7 +66,8 @@
 
     @if (activeTab === 'DataStudent') {
     <div class="tabcontent">
-      <app-primary-data [formGroup]="$any(formGroup.get('primaryData'))"></app-primary-data>
+      <app-primary-data [formGroup]="$any(formGroup.get('primaryData'))" (classSelected)="onClassSelected($event)">
+      </app-primary-data>
       <!-- this is not work when I add fromGroup but can I do that with anuther way?  -->
     </div>
     } @if (activeTab === 'OptionData') {
@@ -87,13 +77,15 @@
     } @if (activeTab === 'guardian') {
     <div class="tabcontent">
       <app-guardian [formGroup]="$any(formGroup.get('guardian'))"
-      (existingGuardianId)="existingGuardian($event)"></app-guardian>
+        (existingGuardianId)="existingGuardian($event)"></app-guardian>
     </div>
     } @if (activeTab === 'fees') {
     <div class="tabcontent">
-      <app-fee [formGroup]="$any(formGroup.get('fees'))"
-       (feeClassesChanged)="loadFeesForClass($event)"
-        (requiredFeesChanged)="onRequiredFeesChanged($event)"></app-fee>
+      <!-- new-student.component.html -->
+      <app-fee [formGroup]="$any(formGroup.get('fees'))" [selectedClassID]="selectedClassID"
+        (feeClassesChanged)="loadFeesForClass($event)" (requiredFeesChanged)="onRequiredFeesChanged($event)">
+      </app-fee>
+
     </div>
     } @if (activeTab === 'document') {
     <div class="tabcontent">

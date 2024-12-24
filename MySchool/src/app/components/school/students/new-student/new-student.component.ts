@@ -69,7 +69,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
         discounts: this.formBuilder.array([], Validators.required)
       }),
       documents: this.formBuilder.group({
-        attachments: [[]], // Array of strings for URLs
+        attachments: [[],Validators.required], // Array of strings for URLs
       }),
       studentImageURL: [''],
     });
@@ -77,25 +77,6 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
 
   get discountsArray() {
     return this.formGroup.get('fees.discounts') as FormArray;
-  }
-
-  loadFeesForClass(feeClasses: FeeClasses[]) {
-    const discountsArray = this.discountsArray; // Access FormArray for discounts
-    discountsArray.clear(); // Clear any existing discounts
-
-    feeClasses.forEach((fee) => {
-      discountsArray.push(
-        this.formBuilder.group({
-          noteDiscount: [fee.noteDiscount || ''],
-          amountDiscount: [fee.amountDiscount || 0],
-          feeClassID: [fee.feeClassID, Validators.required],
-          feeName: [fee.feeName || ''], // Add feeName if needed
-          amount: [fee.amount || 0],
-          className: [fee.className || ''], // Add className if needed
-          mandatory: [fee.mandatory || false],
-        })
-      );
-    });
   }
 
   existingGuardian(event: number) {
@@ -194,15 +175,17 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
             // ...etc.
           },
           // If you also want to patch fees data
-          fees: {
-            discounts: student.discounts
-          },
+          fees: this.formBuilder.group({
+            discounts: this.formBuilder.array([], Validators.required)
+          }),
           documents: {
             attachments: student.attachments
           },
-          studentImageURL: student.studentImageURL
+          studentImageURL: student.photoUrl
         });
+        this.patchFees(student.discounts);
         this.isEditMode = true; // a local flag you can define
+        this.studentImageURL= student.studentImageURL;
         this.refreshFees();
       }
       else {
@@ -217,6 +200,29 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
+  private patchFees(discounts: FeeClasses[]): void {
+   
+    this.refreshFees();
+  }
+  
+  loadFeesForClass(feeClasses: FeeClasses[]) {
+    const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
+    discountsArray.clear(); // Clear any existing discounts
+
+    feeClasses.forEach((fee) => {
+      discountsArray.push(
+        this.formBuilder.group({
+          noteDiscount: [fee.noteDiscount || ''],
+          amountDiscount: [fee.amountDiscount || 0],
+          feeClassID: [fee.feeClassID, Validators.required],
+          feeName: [fee.feeName || ''], // Add feeName if needed
+          amount: [fee.amount || 0],
+          className: [fee.className || ''], // Add className if needed
+          mandatory: [fee.mandatory || false],
+        })
+      );
+    });
+  }
 
   private generateStudentID(): void {
     this.studentService.MaxStudentID().subscribe({
@@ -303,12 +309,16 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
+  selectedClassID: number | string = '';
+  onClassSelected(classID: number | string) {
+    this.selectedClassID = classID;
+    this.formGroup.get('primaryData.classID')?.setValue(classID);
+  }
+
   feeClassesChanged = new EventEmitter<any[]>();
 
   refreshFees(): void {
     console.log('Refreshing fees data...');
-    // Optional: Implement any additional logic needed to refresh fees
-    // For example, you could emit the current fees to ensure synchronization
     this.feeClassesChanged.emit(this.formGroup.get('fees.discounts')?.value);
   }
 }

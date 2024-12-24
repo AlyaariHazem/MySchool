@@ -15,18 +15,20 @@ namespace Backend.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly StudentManagementService _studentManagementService;
+        private readonly mangeFilesService _mangeFilesService;
         private readonly StudentClassFeesRepository _studentClassFeesRepository;
         private readonly IGuardianRepository _guardianRepository;
         private readonly IStudentRepository _studentRepository;
 
         public StudentsController(StudentManagementService studentManagementService,
          StudentClassFeesRepository studentClassFeesRepository, IStudentRepository studentRepository,
-         IGuardianRepository guardianRepository)
+         IGuardianRepository guardianRepository,mangeFilesService mangeFilesService)
         {
             _studentManagementService = studentManagementService;
             _studentClassFeesRepository = studentClassFeesRepository;
             _studentRepository = studentRepository;
             _guardianRepository = guardianRepository;
+            _mangeFilesService = mangeFilesService;
         }
 
        [HttpPost]
@@ -140,7 +142,7 @@ namespace Backend.Controllers
                     attachments.Add(new Attachments
                     {
                         StudentID = request.StudentID,
-                        AttachmentURL = $"{request.DivisionID}_{fileUrl}",
+                        AttachmentURL = $"{request.StudentID}_{fileUrl}",
                         Note = ""
                     });
                 }
@@ -185,7 +187,7 @@ namespace Backend.Controllers
         }
     }
     [HttpPut("updateStudentWithGuardian/{id}")]
-    public async Task<IActionResult> UpdateStudentWithGuardian(int id, [FromBody] UpdateStudentWithGuardianRequest request)
+    public async Task<IActionResult> UpdateStudentWithGuardian(int id, [FromBody] UpdateStudentWithGuardianRequestDTO request)
     {
         if (id != request.StudentID)
         {
@@ -213,16 +215,6 @@ namespace Backend.Controllers
             return StatusCode(500, new { error = ex.Message });
         }
     }
-        
-       [HttpGet("{id}")]
-        public async Task<IActionResult> GetStudentById(int id)
-        {
-            var student = await _studentRepository.GetStudentByIdAsync(id);
-            if (student == null)
-                return NotFound(new { message = "Student not found." });
-
-            return Ok(student);
-        }
         
         [HttpGet]
         public async Task<IActionResult> GetAllStudents()
@@ -258,10 +250,10 @@ namespace Backend.Controllers
         }
     }
 
-    [HttpGet("id")]
-    public async Task<IActionResult> GetStudentDataAsRequest(int studentId)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetStudentDataAsRequest(int id)
     {
-        var requestData = await _studentRepository.GetUpdateStudentWithGuardianRequestData(studentId);
+        var requestData = await _studentRepository.GetUpdateStudentWithGuardianRequestData(id);
 
         if (requestData == null)
         {
@@ -279,7 +271,7 @@ namespace Backend.Controllers
 
             try
             {
-                var filePaths = await _studentManagementService.UploadAttachments(files, studentId);
+                var filePaths =await _mangeFilesService.UploadAttachments(files, studentId);
                 return Ok(new { success = true, filePaths });
             }
             catch (Exception ex)
@@ -295,7 +287,7 @@ namespace Backend.Controllers
 
             try
             {
-                var filePaths = await _studentManagementService.UploadStudentImage(file, studentId);
+                var filePaths = await _mangeFilesService.UploadStudentImage(file, studentId);
                 return Ok(new { success = true, filePaths });
             }
             catch (Exception ex)
