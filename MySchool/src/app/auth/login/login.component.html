@@ -1,0 +1,32 @@
+<div class="form">
+  <form class="form-inline" action="" dir="rtl" #loginForm="ngForm" (ngSubmit)="login(loginForm.value)">
+    <h2 style="margin-right:3rem;">تسجيل الدخول لنظام مدرستي</h2>
+    <!-- Phone Input Field -->
+    <mat-form-field appearance="outline" class="input2">
+      <mat-label>إدخل رقم الهاتف</mat-label>
+      <input matInput placeholder="الهاتف" #phone="ngModel" ngModel name="userName" required minlength="3"
+        maxlength="22" />
+      <mat-error *ngIf="phone.errors?.['required']">يجب إدخل رقم الهاتف</mat-error>
+      <mat-error *ngIf="phone.errors?.['minlength']">رقم الهاتف يجب أن يكون 3 أرقام</mat-error>
+    </mat-form-field>
+
+    <!-- Password Input Field -->
+    <mat-form-field appearance="outline" class="input2">
+      <mat-label>كلمة السر</mat-label>
+      <input matInput placeholder="كلمة السر" ngModel name="password" type="password" required minlength="3"
+        maxlength="22" #pass="ngModel" />
+      <mat-error *ngIf="pass.errors?.['required']">كلمة السر مطلوبة</mat-error>
+      <mat-error *ngIf="pass.errors?.['minlength']">يجب أن تكون كلمة السر أكبر من 3</mat-error>
+    </mat-form-field>
+
+    <!-- Login and Register Buttons -->
+    <br />
+    <button type="submit" class="btn btn-success mb-2 buttonSend">تسجيل دخول</button>
+    <button type="button" class="btn btn-success mb-2 buttonSend" mat-raised-button (click)="openRegisterDialog()">
+      طالب جديد
+    </button>
+    <a href="#">هل نسيت كلمة السر؟</a>
+    <!-- here I use custom directive -->
+    <!-- <p appTranslate='rtl' Color='red'>hello</p> -->
+  </form>
+</div>

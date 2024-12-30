@@ -1,0 +1,111 @@
+<div class="schoolInfo">
+    <h2 class="schoolTitle">معلومات المدرسة</h2>
+    <form [formGroup]="form"  (ngSubmit)="onSubmit()">
+        <div class="contant">
+            <label for="fileInput">
+                <img class="photo" src="assets/img/user.jpg" alt="school Photo" />
+            </label>
+            <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
+            <button class="btn btn-success save" type="submit">حفظ التغيرات+</button>
+
+            <div class="group">
+                <div class="form-control">
+                    <label for="schoolName" class="label2">اسم المدرسة<span style="color:red;"> *</span></label>
+                    <input formControlName="schoolName"   pInputText />
+                </div>
+                <div class="form-control">
+                    <label for="schoolNameEn" class="label2">اسم البديل للمدرسة</label>
+                    <input formControlName="schoolNameEn" pInputText />
+                </div>
+            </div>
+
+            <div class="group">
+                <div class="form-control">
+                    <label for="schoolType" class="label2">نوع المدرسة</label>
+                    <p-dropdown formControlName="schoolType" [options]="Books" optionLabel="name" [editable]="true" [showClear]="true" placeholder="إختار النوع"></p-dropdown>
+                </div>
+                <div class="form-control">
+                    <label for="schoolClass" class="label2">فئة المدرسة</label>
+                    <p-dropdown  [options]="classes"  optionLabel="name" [editable]="true" [showClear]="true" placeholder="إختار الفئة"></p-dropdown>
+                </div>
+            </div>
+
+            <div class="group">
+                <div class="form-control">
+                    <label for="street" class="label2">العنوان</label>
+                    <input  type="text" id="street" placeholder="العنوان" />
+                </div>
+            </div>
+
+            <div class="group">
+                <div class="form-control">
+                    <label for="country" class="label2">الدولة</label>
+                    <input formControlName="country" pInputText />
+                </div>
+                <div class="form-control">
+                    <label for="city" class="label2">المدينة</label>
+                    <input formControlName="city" pInputText />
+                </div>
+                <div class="form-control">
+                    <label for="zone" class="label2">المنطقة</label>
+                    <input formControlName="zone" pInputText />
+                </div>
+                <div class="form-control">
+                    <label for="street" class="label2">الشارع</label>
+                    <input formControlName="street" pInputText />
+                </div>
+            </div>
+
+            <div class="group">
+                <div class="form-control">
+                    <label for="email" class="label2">البريد الإلكتروني</label>
+                    <input formControlName="email" pInputText />
+                </div>
+                <div class="form-control">
+                    <label for="fax" class="label2">فاكس</label>
+                    <input formControlName="fax" pInputText />
+                </div>
+            </div>
+
+            <div class="group">
+                <div class="form-control">
+                    <label for="schoolPhone" class="label2">الهاتف</label>
+                    <input formControlName="schoolPhone" pInputText />
+                </div>
+                <div class="form-control">
+                    <label for="mobile" class="label2">الجوال</label>
+                    <input  pInputText />
+                </div>
+            </div>
+
+            <div class="group">
+                <div class="form-control">
+                    <label for="website" class="label2">رابط موقع المدرسة</label>
+                    <input  pInputText />
+                </div>
+            </div>
+
+            <div class="group">
+                <div class="form-control">
+                    <label for="description" class="label2">وصف المدرسة</label>
+                    <textarea  id="description"></textarea>
+                </div>
+                <div class="form-control">
+                    <label for="schoolGoal" class="label2">أهداف المدرسة</label>
+                    <textarea formControlName="schoolGoal" id="schoolGoal"></textarea>
+                </div>
+            </div>
+
+            <div class="group">
+                <div class="form-control">
+                    <label for="schoolVison" class="label2">رؤية المدرسة</label>
+                    <textarea formControlName="schoolVison" id="schoolVison"></textarea>
+                </div>
+                <div class="form-control">
+                    <label for="schoolMission" class="label2">رسالة المدرسة</label>
+                    <textarea formControlName="schoolMission" id="schoolMission"></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

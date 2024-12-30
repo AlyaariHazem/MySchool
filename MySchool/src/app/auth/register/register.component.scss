@@ -1,0 +1,51 @@
+/* Center the form and add padding around it */
+.register-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    // min-height: 100vh;
+    padding: 20px;
+    background-color: #f7f9fc;
+  }
+  
+  form {
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .input-field {
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Customize the error messages */
+  .error-message, mat-error {
+    color: #d32f2f;
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+    padding-top: 0.5rem;
+    font-weight: 500;
+  }
+  
+  /* Customize the button */
+  button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+    border-radius: 4px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    form {
+      padding: 1.5rem;
+    }
+  }
+  

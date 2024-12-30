@@ -1,0 +1,30 @@
+.add-school-card {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.title {
+  font-size: 21px;
+  /* font-weight: bold; Uncomment if needed */
+}
+
+.school-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.form-field {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .form-field {
+    width: calc(33.33% - 20px);
+  }
+}
+.mat-card-content {
+  max-height: 70vh; /* Set the maximum height of the content */
+  overflow-y: auto; /* Add a vertical scroll */
+}

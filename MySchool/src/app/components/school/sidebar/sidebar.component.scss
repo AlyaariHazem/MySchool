@@ -1,0 +1,65 @@
+.d-none {
+  display: none;
+}
+
+.sidebar {
+  overflow-y: scroll;
+  // left: 10px!important;
+}
+
+.sidebar-ul {
+  overflow: hidden;
+}
+/* Hide scrollbar for WebKit browsers */
+.sidebar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Hide scrollbar for Firefox */
+.sidebar {
+  scrollbar-width: none;
+}
+
+.menu-arrow {
+  transition: transform 0.3s ease-in-out;
+}
+
+.rotate-arrow {
+  transform: rotate(-90deg);
+}
+.sidebar-menu .menu-arrow{
+  rotate:(180deg)
+}
+
+//this is for mobile menu 
+@media only screen and (max-width:991.98px) {
+  .sidebar.active {
+    top: 0;
+    height:100%;
+    right: 0;
+    display: block;
+    border-radius: 0
+  }
+  .cancel{
+    position: absolute;
+    z-index: 100000;
+    right: 14rem;
+    border:2px solid red;
+    border-radius: 4px;
+    padding:0 5px;
+    top:5px;
+  }
+  .cancel:hover{
+    color:red;
+    cursor:pointer;
+  }
+}
+@media only screen and (min-width:991.98px) {
+.cancel{
+  visibility: hidden;
+}
+.sidebar .header-left {
+  position: fixed!important;
+}
+}

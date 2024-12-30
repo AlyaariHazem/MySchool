@@ -1,0 +1,155 @@
+<div id="id01" class="modal-container">
+  <div class="modal-content">
+    <h2 class="school">عرض جميع الطلاب</h2>
+    <div class="container">
+      <div class="tabcontent">
+        <div class="col-4">
+          <i class="pi col-2 pi-bars" (click)="showStudentCulomn()"></i>
+          <i class="bi col-2 bi-grid" (click)="showStudentGrid()"></i>
+        </div>
+        <form [formGroup]="form">
+          <!-- First Dropdown -->
+          <mat-form-field appearance="outline">
+            <mat-label>إختار طالب</mat-label>
+            <mat-select [value]="selectedStudent" (selectionChange)="onSelectionChange('student', $event.value)">
+              <mat-option [value]="null">None</mat-option>
+              <mat-option *ngFor="let option of studentOptions" [value]="option">
+                {{ option }}
+              </mat-option>
+            </mat-select>
+            <span mat-icon-button class="cancel" *ngIf="isStudentSelected" (click)="clearSelection('student')">
+              ✖
+            </span>
+          </mat-form-field>
+
+          <!-- Second Dropdown -->
+          <mat-form-field appearance="outline">
+            <mat-label>إختار المرحلة</mat-label>
+            <mat-select [value]="selectedStage" (selectionChange)="onSelectionChange('stage', $event.value)">
+              <mat-option [value]="null">None</mat-option>
+              <mat-option *ngFor="let option of stageOptions" [value]="option">
+                {{ option }}
+              </mat-option>
+            </mat-select>
+            <span mat-icon-button class="cancel" *ngIf="isStageSelected" (click)="clearSelection('stage')">
+              ✖
+            </span>
+          </mat-form-field>
+
+          <!-- Third Dropdown -->
+          <mat-form-field appearance="outline">
+            <mat-label>إختار الصـف</mat-label>
+            <mat-select [value]="selectedClass" (selectionChange)="onSelectionChange('class', $event.value)">
+              <mat-option [value]="null">None</mat-option>
+              <mat-option *ngFor="let option of classOptions" [value]="option">
+                {{ option }}
+              </mat-option>
+            </mat-select>
+            <span mat-icon-button class="cancel" *ngIf="isClassSelected" (click)="clearSelection('class')">
+              ✖
+            </span>
+          </mat-form-field>
+        </form>
+
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 8, 16]" />
+
+        <button mat-raised-button color="primary" class="add" (click)="openDialog()">
+          إضافة طالب+
+        </button>
+
+        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
+        
+        @if (showGrid) {
+        <div class="group group2">
+          @for (student of paginatedStudents; track $index) {
+          <div class="form-control">
+            <p-card class="responsive-card">
+              <ng-template pTemplate="header">
+                <img alt="Card" [src]="student.photoUrl" />
+              </ng-template>
+              <div>
+                الاسم:{{student.fullName.firstName +" "+ student.fullName.middleName+" "+ student.fullName.lastName}}
+                الصف:{{student.className}}
+                <hr>
+                النوع:{{student.gender=="Male"?"ذكر":"إنثى"}}
+                المرحلة:{{student.stageName}}
+                الرسوم المطلوبة:{{student.fee}}
+                <hr>
+
+              </div>
+              <ng-template pTemplate="footer">
+                <div class="flex gap-3 mt-1">
+                  <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
+                  <p-button label="ولي أمر" class="w-full" styleClass="custom-button guardain" />
+
+                </div>
+              </ng-template>
+            </p-card>
+          </div>
+          }
+        </div>
+        }
+
+        @if (showCulomn) {
+        <div class="table-container">
+          <div class="table-container">
+            <mat-card>
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>رقم الطالب</th>
+                    <th class="student-name-column">اسم الطالب</th>
+                    <th>المرحلة</th>
+                    <th>الصف</th>
+                    <th>الشعبة</th>
+                    <th>العمر</th>
+                    <th>النوع</th>
+                    <th>تاريخ التسجيل</th>
+                    <th>العملية</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (student of paginatedStudents; track $index) {
+                  <tr>
+                    <td>{{ $index+1 }}</td>
+                    <td>{{ student.studentID}}</td>
+                    <td class="student-name-column">{{student.fullName.firstName +" "+ student.fullName.middleName+" "+
+                      student.fullName.lastName}}</td>
+                    <td>{{ student.stageName }}</td>
+                    <td>{{ student.className}}</td>
+                    <td>{{ student.divisionName }}</td>
+                    <td>{{ student.age }}</td>
+                    <td>{{ student.gender }}</td>
+                    <td>{{ student.hireDate | date:"MM-yyyy" }}</td>
+                    <td>
+                      <div class="col text-left">
+                        <div class="mt-sm-0 mt-2">
+                          <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <i class="fas fa-ellipsis-h"></i>
+                          </button>
+                          <div class="dropdown-menu dropdown-menu-left">
+                            <a class="dropdown-item" (click)="EditDialog(student.studentID)"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                            <div role="separator" class="dropdown-divider"></div>
+                            <a class="dropdown-item" (click)="deleteStudent(student.studentID)">
+                              <i class="bi bi-trash IconDelete"></i>حذف</a>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+
+            </mat-card>
+          </div>
+
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

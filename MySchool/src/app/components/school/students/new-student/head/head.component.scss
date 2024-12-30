@@ -1,0 +1,175 @@
+.student-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 20px;
+  margin-bottom: -28px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rtl-direction {
+  direction: rtl;
+  text-align: right;
+}
+
+.student-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.student-photo {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  overflow: hidden;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.student-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-section {
+  margin-top: 10px;
+}
+
+.camera-section input[type="file"] {
+  display: none;
+}
+
+.camera-section label {
+  cursor: pointer;
+}
+
+.student-info-section {
+  flex-grow: 1;
+  margin-right: 30px;
+}
+
+.student-name-id {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.student-name,
+.student-id {
+  display: flex;
+  align-items: center;
+}
+
+.student-name label,
+.student-id label {
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #494d51;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.btn-success:hover {
+  background-color: #1e7e34;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  color: #fff;
+}
+
+.btn-info:hover {
+  background-color: #117a8b;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+@media (max-width: 768px) {
+  .student-header {
+      flex-direction: column;
+  }
+
+  .student-photo-section {
+      margin-bottom: 20px;
+  }
+
+  .student-info-section {
+      margin-right: 0;
+  }
+
+  .student-name-id {
+      flex-direction: column;
+      margin-bottom: 10px;
+  }
+
+  .buttons {
+      justify-content: center;
+  }
+}
+@media (max-width: 768px) { /* Adjust this breakpoint as needed */
+  .student-header {
+      flex-direction: column; /* Stack elements vertically */
+  }
+
+  .student-photo-section {
+      margin-bottom: 20px; /* Add spacing between sections */
+  }
+
+  .student-info-section {
+      margin-right: 0; /* Remove right margin */
+  }
+
+  .student-name-id {
+      flex-direction: column; /* Stack name and ID */
+      margin-bottom: 10px; /* Adjust spacing */
+  }
+
+  .buttons {
+      justify-content: center; /* Center buttons */
+  }
+}

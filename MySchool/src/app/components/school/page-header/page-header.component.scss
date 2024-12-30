@@ -1,0 +1,14 @@
+.page-header {
+    border: 1px solid #d5dbe1;
+    padding: 6px;
+    border-radius: 9px;
+    margin-bottom: 16px;
+}
+.page-header li{
+    margin-top: 12px;
+}
+@media (max-width: 900.98px) {
+    .page-header{
+        display: none;
+    }
+}

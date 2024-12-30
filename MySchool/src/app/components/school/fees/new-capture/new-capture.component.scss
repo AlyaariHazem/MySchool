@@ -1,0 +1,136 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.button-container{
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+}
+.image{
+    position: relative;
+    top: 1px;
+    width: 4.5rem;
+    border-radius: 28px;
+    right: 1%;
+}
+.details{
+  position: absolute;
+  right: 46%;
+  border: none;
+  border-radius: 3px;
+  background-color: #e7e7e7;
+  color: #705252;
+}
+.name{
+  position: absolute;
+  top: 19px;
+  right: 5rem;
+}
+.typeFee{
+   background-color: #caffca;
+    position: absolute;
+    color: #04b204;
+    top: 5.5rem;
+    left: 1rem;
+}
+.content {
+  display: flex;
+  flex-direction: row;  /* Align divs side by side */
+  width: 100%;
+  height: 100%;
+}
+p-panel {
+  flex: 1;  /* Both panels take equal width */
+  margin: 5px;
+}
+
+.p-button-rounded {
+  border-radius: 50%;
+}
+
+.p-button-text {
+  color: #4CAF50;  /* Green icon color */
+}
+.print{
+  color: #2d2e2d;
+  position: absolute;
+  left: 6%;
+  top: 6rem;
+}
+
+.group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+.group1{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.group2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+}
+.form-control {
+  display: flex;
+  border:none;
+  flex-direction: column;
+  gap: 5px; /* Space between label and input */
+}
+input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+// for Attachment
+/* Hide the default file input */
+.hidden-file-input {
+  display: none; /* Completely hides the input field */
+}
+.custom-button:hover {
+  background-color: #0f6c00;
+}
+/* Hide the default file input */
+.hidden-file-input {
+  display: none; /* Completely hides the input field */
+}
+
+/* Style the custom button (label) */
+.custom-button {
+  background-color: #228113;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  text-align: center;
+  cursor: pointer;
+  display: inline-flex; /* Use flexbox for icon + text alignment */
+  align-items: center; /* Center align items vertically */
+  gap: 10px; /* Add space between icon and text */
+  transition: background-color 0.3s;
+}
+
+.custom-button:hover {
+  background-color: #0f6c00;
+}
+
+/* Style the upload icon */
+.upload-icon {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) saturate(100%) invert(100%); /* Make icon white */
+  transition: filter 0.3s;
+}
+
+.custom-button:hover .upload-icon {
+  filter: brightness(0) saturate(100%) invert(80%) sepia(50%) saturate(500%) hue-rotate(100deg); /* Change color on hover */
+}

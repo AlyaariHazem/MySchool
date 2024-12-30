@@ -1,0 +1,63 @@
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+  <mat-tab label="+ولي أمر جديد">
+    <div id="guardian" class="group5" [formGroup]="formGroup">
+      <!-- Group 1: Guardian's Full Name and Relationship -->
+      <div class="group group1">
+        <div class="form-control">
+          <label for="guardianName" class="label1">اسم ولي الأمر<span style="color:red;"> *</span></label>
+          <input type="text" id="guardianName" name="guardianName" formControlName="guardianFullName" />
+        </div>
+        <div class="form-control">
+          <label for="guardianType" class="label1">صلة القرابة</label>
+          <input type="text" id="guardianType" name="guardianType" formControlName="guardianType" />
+          @if (formGroup.get('guardianType')?.hasError('required') && formGroup.get('guardianType')?.touched) {
+          <label style="color:red;">
+            صلة القرابة مطلوبة
+          </label>
+          }
+        </div>
+      </div>
+
+      <!-- Group 2: Contact Information -->
+      <div class="group group1">
+        <div class="form-control">
+          <label for="guardianEmail"class="label1">البريد الإلكتروني</label>
+          <input type="email" id="email" name="email" formControlName="guardianEmail" />
+        </div>
+        <div class="form-control">
+          <label for="guardianPhone" class="label1">الجوال</label>
+          <input type="number" formControlName="guardianPhone" placeholder="999-999-999" />
+        </div>
+      </div>
+
+      <!-- Group 3: Birth Date and Address -->
+      <div class="group group1">
+        <div class="form-control">
+          <label for="guardianDOB" class="label1">تاريخ الميلاد</label>
+          <input type="date" id="guardianDOB" name="guardianDOB" formControlName="guardianDOB" />
+        </div>
+        <div class="form-control">
+          <label for="guardianAddress" class="label1">العنوان</label>
+          <input type="text" id="guardianAddress" name="guardianAddress" formControlName="guardianAddress" />
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  <mat-tab label="إختيار ولي أمر">
+    <!-- Group 3: Birth Date and Address -->
+    <div class="group group1">
+      <div class="form-control">
+        <label for="existingGuardianId" class="label1">اختر ولي أمر</label>
+        <select name="existingGuardianId" id="existingGuardianId" (change)="onGuardianChange($event)">
+          @for (guardian of guardians; track $index) {
+            <option [value]="guardian.guardianID">{{guardian.fullName}}</option>
+          }
+        </select>
+      </div>
+      <div class="form-control">
+        <label for="guardianAddress" class="label1">العنوان</label>
+        <input type="text" id="guardianAddress" name="guardianAddress" />
+      </div>
+    </div>
+  </mat-tab>
+</mat-tab-group>

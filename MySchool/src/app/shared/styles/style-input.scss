@@ -1,0 +1,98 @@
+.cancel {
+    left: -8px;
+    padding-left: 19px;
+    position: absolute;
+    top: 16px;
+    color: #6f6d6d;
+  }
+  .cancel:hover {
+    color: rgb(70, 70, 70);
+    cursor: pointer;
+  }
+  .dropdown13 {
+    left: -8px;
+    color: white;
+    padding-left: 19px;
+    position: absolute;
+    top: 16px;
+  }
+  :host
+    ::ng-deep
+    .mdc-text-field--outlined.mdc-text-field--focused
+    .mdc-notched-outline__leading {
+    border-color: #2fdf85 !important;
+    // box-shadow: 0 0 5px 0 #2fdf85!important;
+    border-width: 2px 2px 2px 0 !important;
+    transition: border-color 0.2s;
+  }
+  :host
+    ::ng-deep
+    .mdc-text-field--outlined.mdc-text-field--focused
+    .mdc-notched-outline__trailing {
+    border-color: #2fdf85 !important;
+    // box-shadow: 0 0 5px 0 #2fdf85!important;
+    border-width: 2px 0 2px 2px !important;
+    transition: border-color 0.2s;
+  }
+  :host
+    ::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
+    .mdc-notched-outline__notch {
+    border-color: #2fdf85 !important;
+    // box-shadow: 2px 0 5px 0 #2fdf85!important;
+    border-width: 2px 0 2px 0 !important;
+    transition: border-color 0.2s;
+  }
+  
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: #2fdf85;
+    box-shadow: 0 0 5px #2fdf85;
+  }
+  
+  input[readonly] {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  input::placeholder, select::placeholder {
+    color: #aaa;
+  }
+  ::ng-deep{
+    .ng-valid{
+      &.ng-dirty {
+
+        .mdc-text-field--outlined
+        .mdc-notched-outline__trailing {
+          border-color: #2fdf85 !important;
+          // box-shadow: 0 0 5px 0 #2fdf85!important;
+          border-width: 2px 0 2px 2px !important;
+          transition: border-color 0.2s;
+         }
+
+        .mdc-text-field--outlined
+        .mdc-notched-outline__leading {
+          border-color: #2fdf85 !important;
+          // box-shadow: 0 0 5px 0 #2fdf85!important;
+          border-width: 2px 2px 2px 0 !important;
+          transition: border-color 0.2s;
+         }
+
+         .mdc-text-field--outlined
+    .mdc-notched-outline__notch {
+    border-color: #2fdf85 !important;
+    // box-shadow: 2px 0 5px 0 #2fdf85!important;
+    border-width: 2px 0 2px 0 !important;
+    transition: border-color 0.2s;
+  }
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: #2fdf85;
+    box-shadow: 0 0 5px #2fdf85;
+  }
+  
+      }
+    }
+  }  

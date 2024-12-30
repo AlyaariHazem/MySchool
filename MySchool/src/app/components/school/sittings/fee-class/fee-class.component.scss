@@ -1,0 +1,352 @@
+.Fee{
+    background-color: white;
+    border-radius: 5px;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  p-paginator{
+    position: absolute;
+    top: 13rem;
+    left: 45px;
+  }
+  .IconEdit {
+    color: #009879;
+  }
+  .IconDelete {
+    color: red;
+  }
+  .error{
+    position: absolute;
+    top: 0rem;
+    font-size: 12px;
+    right: 2rem;
+    color: red;
+  }
+  .dropdown-menu-left a {
+    text-align: right;
+  }
+  .school{
+    color:black;
+    margin:4px 6px;
+    padding: 1rem;
+  }
+  mat-tab-group{
+    background-color: white;
+    padding: 1rem;
+  }
+ :host ::ng-deep mat-tab-header{
+    border-bottom: 1.8px solid #676767!important;
+  }
+  mat-form-field {
+    margin-right: 1rem;
+    margin-top: 1rem
+  }
+  .button1{
+    width: 100%;
+    position: relative;
+    left: 85%;
+  }
+ :host ::ng-deep .mdc-tab-indicator__content{
+    border-color: #2fdf84!important;
+  }
+  .inputText {
+    width: 92%;
+  }
+  .example-full-width {
+    width: 10%;
+  }
+  
+:host
+::ng-deep
+.mdc-text-field--outlined.mdc-text-field--focused
+.mdc-notched-outline__leading {
+border-color: #2fdf85 !important;
+// box-shadow: 0 0 5px 0 #2fdf85!important;
+border-width: 2px 2px 2px 0 !important;
+transition: border-color 0.2s;
+}
+:host
+::ng-deep
+.mdc-text-field--outlined.mdc-text-field--focused
+.mdc-notched-outline__trailing {
+border-color: #2fdf85 !important;
+// box-shadow: 0 0 5px 0 #2fdf85!important;
+border-width: 2px 0 2px 2px !important;
+transition: border-color 0.2s;
+}
+:host
+::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
+.mdc-notched-outline__notch {
+border-color: #2fdf85 !important;
+// box-shadow: 2px 0 5px 0 #2fdf85!important;
+border-width: 2px 0 2px 0 !important;
+transition: border-color 0.2s;
+}
+
+  .group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .group5 {
+    margin-top: 1rem;
+  }
+  .form-control {
+    display: flex;
+    border: none;
+    width: 67%;
+    flex-direction: column;
+    gap: 5px; /* Space between label and input */
+  }
+  .form-control1 {
+    display: flex;
+    border: none;
+    width: 55%;
+    flex-direction: column;
+    gap: 5px; /* Space between label and input */
+  }
+  
+  label {
+    color: #333;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px;
+    }
+  
+    .group {
+      grid-template-columns: 1fr;
+    }
+  
+    label {
+      font-size: 0.9rem;
+    }
+  
+    input,
+    select {
+      font-size: 0.9rem;
+    }
+  
+    button {
+      width: 100%;
+      text-align: center;
+    }
+    .control2{
+        position: relative;
+        right: 0rem!important;
+    }
+    .control3{
+        position: relative;
+        right: 0rem!important;
+    }
+  }
+  
+.add {
+    position: absolute;
+    top: 2rem;
+    width: 11%;
+    border-radius: 32px;
+    left: 1rem;
+    padding: 8px 0;
+    border: none;
+    color: white;
+    background-color: #2fdf84;
+  }
+.disabledAdd {
+    position: absolute;
+    top: 2rem;
+    width: 11%;
+    border-radius: 32px;
+    left: 1rem;
+    padding: 8px 0;
+    border: none;
+    color: #987979;
+    background-color:#91ffc6;
+  }
+  .add:active {
+    background-color: #7fffbd;
+  }
+  .control2{
+    position: relative;
+    right: -10rem;
+  }
+  .control3{
+    position: relative;
+    left: 90%;
+    top: -0.3rem;
+  }
+  // table ---------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  .table-container {
+    margin-top: 3rem;
+  }
+  .styled-table{
+    position: relative;
+    top: -58px;
+  }
+  .styled-table th,
+  .styled-table td {
+    padding: auto 10% !important;
+    border: 1px solid #dddddd;
+  }
+  @media (max-width: 900px) {
+    form {
+      right: -1rem;
+    }
+    .school{
+      color: red;
+    }
+    .button1{
+        left:0%;
+    }
+    .control3{
+        left: 30%;
+    }
+    .styled-table th,
+    .styled-table td {
+      padding: 15px 2px !important;
+      border: 1px solid #dddddd;
+    }
+  }
+  //this is for talbes
+/* Resetting some default styles */
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .styled-table th,
+  .styled-table td {
+    padding: 12px 2rem;
+    border: 1px solid #dddddd;
+  }
+  
+  .styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+  }
+  
+  .styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+  }
+  
+  .styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+  }
+  
+  .styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+  }
+  
+  //-----------------------------------------------//--------------------
+  .input-group {
+    margin-bottom: 15px;
+    position: relative;
+  }
+  .label1 {
+    position: absolute;
+    left: 94px;
+    top: -37px;
+    font-size: 11px;
+    color: #141313;
+    transition: 0.2s;
+    pointer-events: none;
+  }
+  #clearIcon {
+    position: absolute;
+    left: 1.7rem;
+    top: -25px;
+    font-size: 12px !important;
+    color: #777;
+    transition: 0.2s;
+  }
+  #clearIcon1 {
+    position: absolute;
+    left: 11.7rem;
+    top: 27px;
+    font-size: 12px !important;
+    color: #777;
+    transition: 0.2s;
+  }
+  #clearIcon:hover,
+  #clearIcon1:hover {
+    cursor: pointer;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    width: 20%;
+    left: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  li {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  li:hover {
+    background-color: #f0f0f0;
+  }
+  
+  :host
+    ::ng-deep
+    .mdc-text-field--outlined.mdc-text-field--focused
+    .mdc-notched-outline__leading {
+    border-color: #2fdf85 !important;
+    // box-shadow: 0 0 5px 0 #2fdf85!important;
+    border-width: 2px 2px 2px 0 !important;
+    transition: border-color 0.2s;
+  }
+  :host
+    ::ng-deep
+    .mdc-text-field--outlined.mdc-text-field--focused
+    .mdc-notched-outline__trailing {
+    border-color: #2fdf85 !important;
+    // box-shadow: 0 0 5px 0 #2fdf85!important;
+    border-width: 2px 0 2px 2px !important;
+    transition: border-color 0.2s;
+  }
+  :host
+    ::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
+    .mdc-notched-outline__notch {
+    border-color: #2fdf85 !important;
+    // box-shadow: 2px 0 5px 0 #2fdf85!important;
+    border-width: 2px 0 2px 0 !important;
+    transition: border-color 0.2s;
+  }
+  
+  /* Cancel icon styles */
+  .cancel {
+    left: -8px;
+    padding-left: 19px;
+    position: absolute;
+    top: 16px;
+    color: #6f6d6d;
+  }
+  .cancel:hover {
+    color: rgb(70, 70, 70);
+    cursor: pointer;
+  }
+  .dropdown13 {
+    left: -8px;
+    color: white;
+    padding-left: 19px;
+    position: absolute;
+    top: 16px;
+  }
+  

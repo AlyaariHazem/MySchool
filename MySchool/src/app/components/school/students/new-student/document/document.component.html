@@ -1,0 +1,18 @@
+<div class="group group1" [formGroup]="formGroup">
+  <div class="form-control">
+    <label for="file" class="custom-button">
+      إستعراض الملفات
+      <img src="assets/img/cloud-arrow-up.svg" alt="Upload Icon" class="upload-icon" />
+    </label>
+    <input type="file" accept="image/*" id="file" class="hidden-file-input" (change)="onFileSelected($event)" />
+  </div>
+</div>
+
+<!-- Display Selected File Names -->
+<div *ngIf="selectedFiles.length > 0">
+  <ul>
+    <li *ngFor="let file of selectedFiles" class="attachment">
+      {{ file.name }}
+    </li>
+  </ul>
+</div>

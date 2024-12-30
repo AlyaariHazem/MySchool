@@ -1,0 +1,46 @@
+# Compiled output
+Backend/dist/
+Backend/tmp/
+Backend/out-tsc/
+Backend/bazel-out/
+
+# Node.js dependencies
+MySchool/node_modules/
+npm-debug.log
+yarn-error.log
+
+# ASP.NET build outputs
+Backend/bin/
+Backend/obj/
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Angular specific
+MySchool/.angular/cache/
+MySchool/coverage/
+MySchool/connect.lock
+MySchool/libpeerconnection.log
+MySchool/typings/
+.sass-cache/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log

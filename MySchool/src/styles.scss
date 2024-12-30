@@ -1,0 +1,36 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+@import "ngx-toastr/toastr";
+
+.toast-container {
+    pointer-events: none;
+    position: fixed;
+    right: 1rem;
+    z-index: 999999;
+    top: 2rem;
+    text-align: right;
+}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Changa:wght@400;700&display=swap');
+
+/* Primary font styles */
+body, h1, h2, h3,h4, span, td, a, button, th,li {
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    
+  }
+  
+  /* Secondary font styles */
+  .dropdown-item,h1,h2,h3,h5 td,a,li,td,span,div,input,label,mat-label,mat-card-title, .mat-error{
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    
+  }
+
+  .mat-text-field--outlined .mdc-notched-outline_leading{
+    border-color: red!important;
+  }
+  

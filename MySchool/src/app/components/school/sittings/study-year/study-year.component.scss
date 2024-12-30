@@ -1,0 +1,243 @@
+.custom-dialog-container .mdc-dialog__surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+  pointer-events: auto;
+  overflow-y: hidden; // Corrected to disable vertical scrolling
+  background-color: red;
+  outline: 0;
+  transform: scale(0.8); // Custom transform
+}
+form {
+  position: absolute;
+  right: 0rem;
+  top: 4rem;
+}
+.Title{
+  position: absolute;
+    top: 4px;
+}
+.table-container {
+    margin-top: 3rem;
+  }
+mat-form-field {
+  margin-right: 1rem;
+  width: 30%;
+}
+.inputText {
+  width: 24%;
+}
+.example-full-width {
+  width: 10%;
+}
+::-webkit-scrollbar form {
+  position: absolute;
+  right: 2rem;
+  top: 3rem;
+}
+.modal-content {
+  border-radius: 1.5%;
+}
+
+.showFee{
+  position: relative;
+  left: -44%;
+  top: -3rem;
+}
+.container {
+  border-radius: 23px;
+}
+
+.school {
+  text-align: right;
+}
+
+.styled-table{
+  position: relative;
+  top: -20px;
+}
+.New{
+  position: absolute;
+    top: 23px;
+    right: 33%;
+    width: 10%;
+    border: none;
+    padding: 8px 0;
+    background-color: #585858;
+    color: white;
+    border-radius: 4px;
+}
+.add {
+  position: absolute;
+    top: 1.4rem;
+    width: 11%;
+    border-radius: 4px;
+    right: 21%;
+    border:none;
+    padding: 8px 0;
+    color: white;
+    background-color: #2fdf84;
+}
+.add:active {
+  background-color: #2fdf85;
+}
+.modal-container {
+  background-color: white;
+}
+@media (max-width: 1600px) {
+  .add {
+    width: 10%;
+  }
+  .styled-table th,
+  .styled-table td {
+    padding: auto 10% !important;
+    border: 1px solid #dddddd;
+  }
+}
+@media (max-width: 900px) {
+  form {
+    right: -1rem;
+  }
+  .school{
+    color: red;
+  }
+  .styled-table th,
+  .styled-table td {
+    padding: 15px 2px !important;
+    border: 1px solid #dddddd;
+  }
+}
+
+@media (max-width: 600px) {
+  form {
+    right: -1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  // .tablink {
+  //     color: rgb(35, 22, 213);
+  // }
+}
+
+//this is for talbes
+/* Resetting some default styles */
+
+.styled-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 12px 2rem;
+  border: 1px solid #dddddd;
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+  font-weight: bold;
+  color: #009879;
+}
+
+//-----------------------------------------------//--------------------
+.input-group {
+  margin-bottom: 15px;
+  position: relative;
+}
+.label1 {
+  position: absolute;
+  left: 94px;
+  top: -37px;
+  font-size: 11px;
+  color: #141313;
+  transition: 0.2s;
+  pointer-events: none;
+}
+#clearIcon {
+  position: absolute;
+  left: 1.7rem;
+  top: -25px;
+  font-size: 12px !important;
+  color: #777;
+  transition: 0.2s;
+}
+#clearIcon1 {
+  position: absolute;
+  left: 11.7rem;
+  top: 27px;
+  font-size: 12px !important;
+  color: #777;
+  transition: 0.2s;
+}
+#clearIcon:hover,
+#clearIcon1:hover {
+  cursor: pointer;
+}
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 20%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 1000;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+li:hover {
+  background-color: #f0f0f0;
+}
+//for dialog *********
+:host ::ng-deep .p-ripple.p-button{
+  border-radius: 3rem!important;
+  height: 2rem !important;
+  background-color: #12a212;
+}
+:host ::ng-deep .p-dialog-header-close{
+  background-color: white!important;
+}//***********************
+
+// this for pagnator
+:host ::ng-deep{
+  .cPaginator{
+    position: absolute;
+    margin-top: -5rem;
+    left: 27%;
+  }
+}
+:host ::ng-deep{
+  .chipsOne{
+    position: absolute;
+    margin-top: -0.2rem;
+    left: 3%;
+  }
+}

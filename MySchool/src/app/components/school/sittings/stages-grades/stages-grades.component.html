@@ -1,0 +1,166 @@
+<div id="id01" class="">
+  <div class="modal-content" style="background-color: #ffffff !important">
+    <div class="container" dir="rtl">
+      <h2 class="school" dir="rtl">تخصيص المدرسة</h2>
+      <button [ngClass]="{ tablink: true, active: activeTab === 'News' }" (click)="openPage('News', $event.target)"
+        id="defaultOpen">
+        <span>المراحل</span>
+      </button>
+      <button [ngClass]="{ tablink: true, active: activeTab === 'Class' }" (click)="openPage('Class', $event.target)">
+        <span>الصفوف</span>
+      </button>
+      <button [ngClass]="{ tablink: true, active: activeTab === 'Contact' }"
+        (click)="openPage('Contact', $event.target)">
+        <span>الشعب</span>
+      </button>
+      <p class="line"></p>
+
+      <div id="News" class="tabcontent">
+        <mat-paginator [ngStyle]="{ position: 'relative', top: '-30px' }" [length]="length" [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
+        </mat-paginator>
+
+        <form [formGroup]="form" class="From">
+          <label for="stageName" class="termName">اسـم المرحـلة</label>
+          <input type="text" formControlName="StageName" class="term" placeholder="المرحـلة" />
+          
+          <label for="note" class="className">ملاحظة</label>
+          <input type="text" formControlName="Note" class="class" placeholder="ملاحظة" />
+          <!-- I want when I click on the edit change this for "تعديل" -->
+          <input type="submit" class="btn btn-primary add" [value]="isEditMode ? 'تعديل' : 'إضافة'"
+            (click)="isEditMode ? updateStage() : addStage()" [disabled]="!form.valid" />
+        </form>
+        @if( form.get('StageName')?.invalid && form.get('StageName')?.touched){
+        <span style="
+            position: absolute;
+            top: 14.6rem;
+            right: 4rem;
+            text-align: right;
+            width: 34%;
+            color: red;
+          " class="error">
+          اسم المرحلة مطلوب
+        </span>
+        }
+        <table class="styled-table" style="overflow-y: hidden; width: 105%">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>اسم المرحلة</th>
+              <th>صفوف</th>
+              <th>إجمالي الطلاب</th>
+              <th>ملاحظة</th>
+              <th>الحالة</th>
+              <th>العملية</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for ( item of displayedDivisions; track $index) {
+            <tr>
+              <td>{{ $index + 1 + currentStagePage * maxStagesPerPage }}</td>
+              <td>{{ item.stageName }}</td>
+              <td>
+                <!-- Classes dropdown with pagination for each stage -->
+                <button class="btn division" (click)="toggleOuterDropdown(item)">
+                  {{ item.classes.length }} الصفوف
+                  <i class="bi bi-caret-down-fill"></i>
+                </button>
+                @if (isOuterDropdownOpen(item)) {
+                <div class="dropdown-menu nested-dropdown">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>اسم الصف</th>
+                        <th>إجمالي الطلاب</th>
+                        <th>العملية</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for ( Class of getPaginatedClasses(item); track $index) {
+                      <tr>
+                        <td>{{ Class.className }}</td>
+                        <td>لا يوجد طلاب حالياً</td>
+                        <td>
+                          <!-- this is for edit and delete  -->
+                          <div class="col text-left">
+                            <div class="mt-sm-0 mt-2">
+                              <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">
+                                <i class="fas fa-ellipsis-h"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-left">
+                                <a class="dropdown-item" href="#"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                                <div role="separator" class="dropdown-divider"></div>
+                                <a class="dropdown-item" (click)="deleteClass(Class.ClassID)"><i
+                                    class="bi bi-trash IconDelete"></i>حذف</a>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      }
+                    </tbody>
+                  </table>
+                  <!-- Pagination controls for classes -->
+                  <div class="pagination-buttons">
+                    <button (click)="previousClassPage(item)" [disabled]="currentClassPage[item.stageID] === 0">
+                      السابق
+                    </button>
+                    <span>صفحة {{ currentClassPage[item.stageID] + 1 }} من
+                      {{ getTotalClassPages(item) }}</span>
+                    <button (click)="nextClassPage(item)" [disabled]="
+                        currentClassPage[item.stageID] >=
+                        getTotalClassPages(item) - 1
+                      ">
+                      التالي
+                    </button>
+                  </div>
+                </div>
+                }
+              </td>
+              <td>لا يوجد طلاب</td>
+              <td>{{ item.note }}</td>
+              <td>
+                <div class="dropdown dropdown-toggle" data-toggle="dropdown">
+                  @if (item.active) {
+                  <span>نشط </span>
+                  } @else {
+                  <span>خامل </span>
+
+                  }
+                  <div class="dropdown-menu" style="margin-left: 2rem">
+                    <span class="dropdown-item" (click)="changeState(item, true)">نشط</span>
+                    <span class="dropdown-item" (click)="changeState(item, false)">خامل</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <!-- this is for edit and delete  -->
+                <div class="col text-left">
+                  <div class="mt-sm-0 mt-2">
+                    <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                      aria-expanded="false">
+                      <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-left">
+                      <!-- when I click here chage in the form from "إضافة" to be like "تعديل"  -->
+                      <a class="dropdown-item" (click)="editStage(item)"><i
+                          class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                      <div role="separator" class="dropdown-divider"></div>
+                      <a class="dropdown-item" (click)="deleteStage(item.stageID)"><i
+                          class="bi bi-trash IconDelete"></i>حذف</a>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-grades></app-grades>
+      <app-division></app-division>
+      <!-- Add similar content for other tabs (Class and Contact) as needed -->
+    </div>
+  </div>
+</div>

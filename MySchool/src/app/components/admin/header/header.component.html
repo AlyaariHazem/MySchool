@@ -1,0 +1,130 @@
+<div class="header-outer" dir="rtl">
+    <div class="header">
+        <a id="mobile_btn" (click)="open()" class="mobile_btn float-left" href="#sidebar"><i class="fas fa-bars"></i></a>
+                <app-sidebar [sidebar]=toggle ></app-sidebar>
+                <a id="toggle_btn" class="float-right" href="javascript:void(0);">
+                    <img src="assets/img/sidebar/icon-21.png" alt="">
+                </a>
+        <ul class="nav float-right">
+            <li>
+                <div class="top-nav-search">
+                    <a href="javascript:void(0);" class="responsive-search">
+                        <i class="fa fa-search"></i>
+                    </a>
+                    <form action="inbox.html">
+                        <input class="form-control" type="text" placeholder="ابحث هنا ">
+                        <button class="btn" type="submit"><i class="fa fa-search"></i></button>
+                    </form>
+                </div>
+            </li>
+            <li>
+                <a href="#" class="mobile-logo d-md-block d-lg-none d-block"><img src="assets/img/logo1.png" alt=""
+                        width="30" height="30"></a>
+            </li>
+        </ul>
+        <ul class="nav user-menu float-right">
+            <li class="nav-item dropdown d-none d-sm-block">
+                <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+                    <img src="assets/img/sidebar/icon-22.png" alt="">
+                </a>
+                <div class="dropdown-menu notifications">
+                    <div class="topnav-dropdown-header">
+                        <span>Notifications</span>
+                    </div>
+                    <div class="drop-scroll">
+                        <ul class="notification-list">
+                            <li class="notification-message">
+                                <a href="#">
+                                    <div class="media">
+                                        <span class="avatar">
+                                            <img alt="John Doe" src="assets/img/user-06.jpg"
+                                                class="img-fluid rounded-circle">
+                                        </span>
+                                        <div class="media-body">
+                                            <p class="noti-details"><span class="noti-title">المدرسة</span> إشعار مهم  </p>
+                                            <p class="noti-time"><span class="notification-time">مند ساعتين</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="notification-message">
+                                <a href="#">
+                                    <div class="media">
+                                        <span class="avatar">T</span>
+                                        <div class="media-body">
+                                            <p class="noti-details"><span class="noti-title">حازم اليعري</span>
+                                                اعجب بصورة ملفك الشخصي.</p>
+                                            <p class="noti-time"><span class="notification-time">منذ يومين</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="notification-message">
+                                <a href="#">
+                                    <div class="media">
+                                        <span class="avatar">T</span>
+                                        <div class="media-body">
+                                            <p class="noti-details"><span class="noti-title">Tarah Shropshire</span>
+                                                sent you a message.</p>
+                                            <p class="noti-time"><span class="notification-time">6 mins ago</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="notification-message">
+                                <a href="#">
+                                    <div class="media">
+                                        <span class="avatar">L</span>
+                                        <div class="media-body">
+                                            <p class="noti-details"><span class="noti-title">Misty Tison</span> like
+                                                your photo.</p>
+                                            <p class="noti-time"><span class="notification-time">8 mins ago</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="notification-message">
+                                <a href="#">
+                                    <div class="media">
+                                        <span class="avatar">G</span>
+                                        <div class="media-body">
+                                            <p class="noti-details"><span class="noti-title">Rolland Webber</span>
+                                                booking appoinment for meeting.</p>
+                                            <p class="noti-time"><span class="notification-time">12 mins ago</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="topnav-dropdown-footer">
+                        <a href="#">عرض جميع الاشعارات</a>
+                    </div>
+                </div>
+            </li>
+            <li class="nav-item dropdown d-none d-sm-block">
+                <a href="javascript:void(0);" id="open_msg_box" class="hasnotifications nav-link"><img
+                        src="assets/img/sidebar/icon-23.png" alt=""> </a>
+            </li>
+            <li class="nav-item dropdown has-arrow">
+                <a href="#" class=" nav-link user-link" data-toggle="dropdown">
+                    <span class="user-img"><img class="rounded-circle" src="assets/img/user-06.jpg" width="30"
+                            alt="Admin">
+                        <span class="status online"></span></span>
+                    <span>Admin</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">الملف الشخصي</a>
+                    <a class="dropdown-item" href="#">تعديل الملف الشخصي</a>
+                    <a class="dropdown-item" href="inbox.html">الإعدادات</a>
+                    <a class="dropdown-item" href="inbox.html">خروج</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
