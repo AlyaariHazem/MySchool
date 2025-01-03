@@ -44,3 +44,6 @@ Thumbs.db
 
 # Log files
 *.log
+
+dist/
+bin/

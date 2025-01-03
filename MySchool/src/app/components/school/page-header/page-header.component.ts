@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
 interface Breadcrumb {
@@ -22,8 +23,19 @@ export class PageHeaderComponent implements OnInit{
       this.breadcrumbs = this.createBreadcrumbs(this.route.root);
     });
   }
-
-  ngOnInit(): void {}
+  langDir!:string;
+  languageStore=inject(Store);
+  dir:string="ltr";
+  currentLanguage():void{
+    this.languageStore.select("language").subscribe((res)=>{
+      this.langDir=res;
+      console.log("the language is",this.langDir);
+      this.dir=(res=="en")?"ltr":"rtl";
+    });
+  }
+  ngOnInit(): void {
+    this.currentLanguage();
+  }
 
   private createBreadcrumbs(route: ActivatedRoute, url: string = '', breadcrumbs: Breadcrumb[] = []): Breadcrumb[] {
     const children: ActivatedRoute[] = route.children;

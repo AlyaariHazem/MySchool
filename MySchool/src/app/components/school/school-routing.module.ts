@@ -22,6 +22,8 @@ import { AllParentsComponent } from './parents/all-parents/all-parents.component
 import { AccountsComponent } from './accounts/accounts.component';
 import { BillsComponent } from './accounts/bills/bills.component';
 import { AllotmentComponent } from './allotment-report/allotment/allotment.component';
+import { GradesMangeComponent } from './grades-mange/grades-mange-mange.component';
+import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.component';
 
 const routes: Routes = [
   {
@@ -53,6 +55,15 @@ const routes: Routes = [
         path: 'teacher', data: { breadcrumb: 'الإستاذ' }, children: [
           { path: '', component: TeachersComponent, data: { breadcrumb: 'الإستاذ' } },
           { path: 'action', component: ActionComponent, data: { breadcrumb: 'حدث' } },
+          { path: '**', redirectTo: 'action', pathMatch: 'full' }
+
+        ]
+      },
+      {
+        path: 'grade', data: { breadcrumb: 'الدرجات' }, children: [
+          { path: '', component: GradesMangeComponent, data: { breadcrumb: 'بنود الدرجات' } },
+          { path: 'GradeMonth', component: GradesMonthComponent, data: { breadcrumb: 'الدرجات الشهرية' } },
+          { path: 'GradeClass', component: ActionComponent, data: { breadcrumb: 'الدرجات الفصلية' } },
           { path: '**', redirectTo: 'action', pathMatch: 'full' }
 
         ]

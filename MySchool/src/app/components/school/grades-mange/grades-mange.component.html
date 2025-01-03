@@ -1,0 +1,82 @@
+<div id="id01" class="modal-container">
+  <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+    [totalRecords]="books.length" [rowsPerPageOptions]="[4, 8, 16]" />
+  <h2 class="school">بنود الدرجات</h2>
+  <form [formGroup]="form">
+    <div class="group group2">
+      <div class="form-control">
+        <mat-form-field appearance="outline" class="inputText">
+          <mat-label>اسم المادة</mat-label>
+          <input class="inputError" type="text" matInput />
+        </mat-form-field>
+      </div>
+      <div class="form-control">
+        <mat-form-field appearance="outline" class="inputText">
+          <mat-label>الدرجة العظمى</mat-label>
+          <input class="inputError" type="number" matInput />
+        </mat-form-field>
+      </div>
+      <div class="form-control">
+        <button class="active" (click)="toggleIsActive()">
+          <i class="bi bi-record-circle" [ngStyle]="{'color': isActive ? 'red' : '#2fdf85'}"></i>
+          نشط
+          <span class="bi bi-caret-down-fill"></span>
+        </button>
+
+      </div>
+    </div>
+    <p-button class="showFee" (onClick)="showDialog()" label="إضافة+" />
+    <p-chips class="chipsOne" [max]="search" placeholder="ابحث هنا..." />
+  </form>
+
+  <!-- Responsive Table -->
+  <div class="table-container">
+    <div class="table-container">
+      <mat-card>
+        <div class="responsive-table">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم البند</th>
+                <th>الدرجة العظمى</th>
+                <th>الحالة</th>
+                <th>العملية</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (student of paginatedBooks; track $index) {
+              <tr>
+                <td>{{ student }}</td>
+                <td>قران كريم</td>
+                <td>Quran</td>
+                <td><button class="active" (click)="toggleIsActive()">
+                    <i class="bi bi-record-circle" [ngStyle]="{'color': isActive ? 'red' : '#2fdf85'}"></i>
+                    نشط
+                    <span class="bi bi-caret-down-fill"></span>
+                  </button></td>
+                <td>
+                  <div class="col text-left">
+                    <div class="mt-sm-0 mt-2">
+                      <button class="btn btn-left update" type="button" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false">
+                        <i class="fas fa-ellipsis-h"></i>
+                      </button>
+                      <div class="dropdown-menu dropdown-menu-left">
+                        <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                        <div role="separator" class="dropdown-divider"></div>
+                        <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+            </tbody>
+          </table>
+        </div>
+      </mat-card>
+    </div>
+
+  </div>
+</div>

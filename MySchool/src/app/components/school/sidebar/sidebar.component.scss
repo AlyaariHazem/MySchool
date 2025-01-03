@@ -17,8 +17,9 @@
 }
 
 /* Hide scrollbar for Firefox */
-.sidebar {
+.sidebar,.sidebarEn {
   scrollbar-width: none;
+  right: 10px; 
 }
 
 .menu-arrow {
@@ -30,6 +31,19 @@
 }
 .sidebar-menu .menu-arrow{
   rotate:(180deg)
+}
+
+.sidebar.active {
+  right: 2px; /* Slide-in */
+  transition: transform 0.3s ease-in-out;
+}
+.cancel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  color: red;
+  font-size: 1.5rem;
 }
 
 //this is for mobile menu 

@@ -27,7 +27,11 @@
         </div>
         <div class="form-control">
           <label for="payBy" class="label2">الدفع بواسطة<span style="color:red;"> *</span></label>
-          <input type="text" id="payBy" formControlName="payBy" />
+          <p-dropdown [options]="[
+          { label: 'Cash', value: 'cash' },
+          { label: 'الكريمي', value: 'visa' }
+        ]" [(ngModel)]="selectedCity" optionLabel="label" formControlName="payBy" placeholder="الدفع بواسطة">
+        </p-dropdown>
         </div>
       </div>
       <div class="group group2">

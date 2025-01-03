@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { StudentService } from '../../../core/services/student.service';
 import { PaginatorState } from 'primeng/paginator';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-students',
@@ -51,8 +52,8 @@ export class StudentsComponent implements OnInit {
   isStageSelected = false;
   isClassSelected = false;
 
-  showGrid:boolean=true;
-  showCulomn:boolean=false;
+  showGrid:boolean=false;
+  showCulomn:boolean=true;
   showStudentCulomn():void{
     this.showCulomn=true;
     this.showGrid=false;
@@ -82,6 +83,7 @@ export class StudentsComponent implements OnInit {
       this.openDialog();
     }
     this.getAllStudents();
+    this.currentLanguage();
   }
 getAllStudents():void{
   this.studentService.getAllStudents().subscribe((res)=>{
@@ -172,6 +174,16 @@ EditDialog(id: number): void {
     this.getAllStudents();
    })
   }
+  }
+  langDir!:string;
+  languageStore=inject(Store);
+  dir:string="ltr";
+  currentLanguage():void{
+    this.languageStore.select("language").subscribe((res)=>{
+      this.langDir=res;
+      console.log("the diraction is ",this.dir);
+      this.dir=(res=="en")?"ltr":"rtl";
+    });
   }
   
 }

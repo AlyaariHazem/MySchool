@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { PageEvent } from '@angular/material/paginator';
+import { PaginatorState } from 'primeng/paginator';
 import { Subscription } from 'rxjs';
 interface City {
   name: string;
@@ -26,7 +26,12 @@ export class FeesComponent {
   
   values = new FormControl<string[] | null>(null);
   max = 2;
-
+  first: number = 0;
+  rows: number = 4;
+  onPageChange(event: PaginatorState) {
+    this.first = event.first || 0; // Default to 0 if undefined
+    this.rows = event.rows!;
+  }
   selectedCity: City | undefined;
 
 
@@ -78,10 +83,5 @@ export class FeesComponent {
     const endIndex = startIndex + this.pageSize;
     this.displayedStudents = this.students.slice(startIndex, endIndex);
   }
- // Handle paginator events
- onPageChange(event: PageEvent): void {
-  this.currentPage = event.pageIndex;
-  this.pageSize = event.pageSize;
-  this.updateDisplayedStudents();
-}
+
 }

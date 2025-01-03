@@ -1,81 +1,81 @@
 <div id="id01" class="modal-container">
-  <mat-paginator class="cPaginator" [ngStyle]="{ position: 'absolute'}" [length]="students.length"
-      [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
-  </mat-paginator>
-  <h2 class="school">المقررات الدراسية</h2>
-  <form [formGroup]="form">
-      <div class="group group2">
-          <div class="form-control">
-              <p-dropdown [options]="Books" formControlName="BookID"  optionLabel="name"
-                  [editable]="true" [showClear]="SelectBook" (onChange)="selectBook()" placeholder="إختار الكتاب">
-              </p-dropdown>
-          </div>
-          <div class="form-control">
-              <p-dropdown [options]="classes" formControlName="ClassID" [checkmark]="true" optionLabel="name"
-                  [editable]="true" [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الصف">
-              </p-dropdown>
-          </div>
-          <div class="form-control">
-              <mat-form-field appearance="outline" class="inputText">
-                  <mat-label>الملاحظة</mat-label>
-                  <input class="inputError" type="email" matInput />
-              </mat-form-field>
-          </div>
-      </div>
-      <p-button class="showFee" (onClick)="showDialog()" label="إضافة+" />
-      <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
-  </form>
+    <mat-paginator class="cPaginator" [ngStyle]="{ position: 'absolute'}" [length]="students.length"
+        [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
+    </mat-paginator>
+    <h2 class="school">المقررات الدراسية</h2>
+    <form [formGroup]="form">
+        <div class="group group2">
+            <div class="form-control">
+                <p-dropdown [options]="Books" formControlName="BookID" optionLabel="name" [editable]="true"
+                    [showClear]="SelectBook" (onChange)="selectBook()" placeholder="إختار الكتاب">
+                </p-dropdown>
+            </div>
+            <div class="form-control">
+                <p-dropdown [options]="classes" formControlName="ClassID" [checkmark]="true" optionLabel="name"
+                    [editable]="true" [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الصف">
+                </p-dropdown>
+            </div>
+            <div class="form-control">
+                <mat-form-field appearance="outline" class="inputText">
+                    <mat-label>الملاحظة</mat-label>
+                    <input class="inputError" type="email" matInput />
+                </mat-form-field>
+            </div>
+        </div>
+        <p-button class="showFee" (onClick)="showDialog()" label="إضافة+" />
+        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
+    </form>
 
-  <!-- Responsive Table -->
-  <div class="table-container">
-      <div class="table-container">
-          <mat-card>
-              <table class="styled-table">
-                  <thead>
-                      <tr>
-                          <th>#</th>
-                          <th>المقرر</th>
-                          <th>الاسم البديل</th>
-                          <th>الكتاب</th>
-                          <th>الصف</th>
-                          <th>الملاحظة</th>
-                          <th>تاريخ الإنشاء</th>
-                          <th>العملية</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                    @for (student of displayedStudents; track $index) {
-                      <tr>
-                          <td>{{ student }}</td>
-                          <td>قران كريم-أول</td>
-                          <td>Quran</td>
-                          <td>قران كريم</td>
-                          <td>أول</td>
-                          <td>لا يوجد</td>
-                          <td>2025-1-1</td>
-                          <td>
-                              <div class="col text-left">
-                                  <div class="mt-sm-0 mt-2">
-                                      <button class="btn btn-left update" type="button" data-toggle="dropdown"
-                                          aria-haspopup="true" aria-expanded="false">
-                                          <i class="fas fa-ellipsis-h"></i>
-                                      </button>
-                                      <div class="dropdown-menu dropdown-menu-left">
-                                          <a class="dropdown-item"><i
-                                                  class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                                          <div role="separator" class="dropdown-divider"></div>
-                                          <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
-                                      </div>
-                                  </div>
-                              </div>
-                          </td>
-                      </tr>
-                    }
-                  </tbody>
-              </table>
+    <!-- Responsive Table -->
+    <div class="table-container">
+        <div class="table-container">
+            <mat-card>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>المقرر</th>
+                            <th>الاسم البديل</th>
+                            <th>الكتاب</th>
+                            <th>الصف</th>
+                            <th>الملاحظة</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>العملية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (student of displayedStudents; track $index) {
+                        <tr>
+                            <td>{{ student }}</td>
+                            <td>قران كريم-أول</td>
+                            <td>Quran</td>
+                            <td>قران كريم</td>
+                            <td>أول</td>
+                            <td>لا يوجد</td>
+                            <td>2025-1-1</td>
+                            <td>
+                                <div class="col text-left">
+                                    <div class="mt-sm-0 mt-2">
+                                        <button class="btn btn-left update" type="button" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-left">
+                                            <a class="dropdown-item"><i
+                                                    class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                                            <div role="separator" class="dropdown-divider"></div>
+                                            <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
 
-          </mat-card>
-      </div>
+            </mat-card>
+        </div>
 
-  </div>
+    </div>
 </div>

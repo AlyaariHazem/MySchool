@@ -27,3 +27,51 @@
   font-weight: bold;
   color: #009879;
 }
+
+  /* 6) Highlight row on hover (optional) */
+  .styled-table tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  /* Basic responsive wrapper for tables */
+.responsive-table {
+  width: 100%;
+  overflow-x: auto; /* Enables horizontal scrolling */
+  margin-bottom: 2rem;
+  margin-right:5px;
+}
+/* 1) Container for responsive scrolling */
+.responsive-table {
+  width: 100%;
+  overflow-x: auto; 
+}
+
+/* 2) Base table styles */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* Ensure table can expand to accommodate columns comfortably */
+  min-width: 900px; /* Example width, adjust to your needs */
+  background-color: #fff; 
+  /* Optionally: box-shadow, border, etc. */
+}
+
+/* 3) Table header styles */
+.styled-table thead {
+  background-color: #f7f7f7; 
+  font-weight: bold;
+}
+
+/* 4) Table header cell styles */
+.styled-table thead th {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  white-space: nowrap; /* prevents header text from wrapping */
+}
+/* 5) Table body cell styles */
+.styled-table tbody td {
+  padding: 0.5rem 1rem;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid #ddd; 
+}
+  

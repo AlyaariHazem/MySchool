@@ -964,14 +964,6 @@ textarea.form-control {
     display: none
 }
 
-.user-menu {
-    margin: 0;
-    position: absolute;
-    left: 8px;
-    z-index: 99;
-    margin-top:-3rem;
-}
-
 .user-menu.nav>li>a {
     color: #000;
     font-size: 16px;
@@ -7341,11 +7333,6 @@ body[data-layout-mode=dark] .alertify .ajs-footer .ajs-buttons .ajs-button.ajs-o
 }
 
 @media only screen and (min-width:991px) {
-    #toggle_btn {
-        color: #999;
-        float: right
-    }
-
     .mini-sidebar .header-left .logo img {
         height: auto;
         max-height: 30px;

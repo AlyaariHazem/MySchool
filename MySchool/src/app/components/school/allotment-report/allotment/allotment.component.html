@@ -1,7 +1,10 @@
 <div class="allotment">
-    <p class="report">التقارير</p>
-    <form *ngIf="formGroup" [formGroup]="formGroup">
+    <p-dropdown [options]="reportOptions" optionLabel="label" [(ngModel)]="selectedReportType"
+        placeholder="Select a report" (onChange)="onReportSelect()"></p-dropdown>
+
+    <ng-template  #reportContainer></ng-template>
+
+    <form [formGroup]="formGroup">
         <p-editor formControlName="text" [style]="{ height: '320px' }"></p-editor>
     </form>
-
 </div>

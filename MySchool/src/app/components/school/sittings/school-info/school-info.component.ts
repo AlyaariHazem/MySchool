@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { SchoolService } from '../../../../core/services/school.service';
 import { School } from '../../../../core/models/school.modul';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-school-info',
@@ -13,6 +14,7 @@ import { School } from '../../../../core/models/school.modul';
 })
 export class SchoolInfoComponent implements OnInit {
   private schoolService = inject(SchoolService);
+  private toaster=inject(ToastrService);
 
   form: FormGroup;
   Books: any[] = [];
@@ -87,10 +89,10 @@ export class SchoolInfoComponent implements OnInit {
     if (this.form.valid) {
       console.log('added successfully',this.form);
       this.schoolService.updateSchool(this.school[0].schoolID,this.form.value).subscribe(res=>{
-        console.log('added successfully',res);
+        this.toaster.success("updated successfully");
       })
     } else {
-      console.log('Form is invalid!',this.form.value);
+      this.toaster.success("some thing is wrong");
     }
   }
 }

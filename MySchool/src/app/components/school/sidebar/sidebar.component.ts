@@ -1,5 +1,6 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, inject } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-sidebar',
@@ -27,21 +28,30 @@ export class SidebarComponent implements OnInit {
     teachersSubmenu: false,
     studentsSubmenu: false,
     guardianSubmenu: false,
-    accountSubmenu:false,
+    accountSubmenu: false,
     accountsSubmenu: false,
     blogSubmenu: false,
     courses: false,
+    GradeSubmenu: false,
     payrollSubmenu: false,
     mangmentSubmenu: false,
     employeesSubmenu: false,
     reportsSubmenu: false,
   };
+  langDir!:string;
+  languageStore=inject(Store);
+  dir:string="ltr";
+  currentLanguage():void{
+    this.languageStore.select("language").subscribe((res)=>{
+      this.langDir=res;
+      console.log("the language is",this.langDir);
+      this.dir=(res=="en")?"ltr":"rtl";
+    });
+  }
 
   @Input() sidebar: boolean = false;
 
-  ngOnInit() {
-    this.isSubmenuOpen["sittings"] =true;
-  }
+  ngOnInit() {}
 
   toggleSubmenu(submenu: string, parentSubmenu?: string) {
     if (parentSubmenu) {

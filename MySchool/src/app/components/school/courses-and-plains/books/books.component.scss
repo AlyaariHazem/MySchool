@@ -12,6 +12,9 @@
     left: 0%;
   }
 }
+.p-dropdown-items{
+  width:100%!important;
+}
 //for dialog *********
 :host ::ng-deep .p-ripple.p-button{
     border-radius: 3rem!important;
@@ -23,7 +26,7 @@
 }//***********************
 .school{
   margin-right: 5px;
-  font-weight: bold;
+  margin-top: -3rem;
 }
 
 // this for form
@@ -85,7 +88,14 @@
   left: 3rem!important; /* Align to the left */
   direction: rtl;
 }
-
+@media (max-width:900px){
+  p-paginator{
+    display: none;
+  }
+  .school{
+    margin-top: 0;
+  }
+}
 :host
   ::ng-deep
   .mdc-text-field--outlined.mdc-text-field--focused

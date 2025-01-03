@@ -8,6 +8,11 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi
 import { provideToastr } from 'ngx-toastr';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TokenInterceptor } from './auth/interceptors/token.interceptor';
+import { counterReducer } from './core/store/counter/counter.reducer';
+import { provideStore } from '@ngrx/store';
+import { languageReduser } from './core/store/language/language.reducer';
+import { provideEffects } from '@ngrx/effects';
+import { LanguageEffect } from './core/store/language/language.effect';
 // import { IntercepterService } from './core/services/intercepter.service';
 
 export const appConfig: ApplicationConfig = {
@@ -18,6 +23,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideAnimations(), // required animations providers
     // Toastr providers
+    provideStore({ counter: counterReducer }),
+    provideStore({ language: languageReduser }),
+    provideEffects([LanguageEffect]),
+
     provideToastr({
       timeOut: 5000,
     }), 

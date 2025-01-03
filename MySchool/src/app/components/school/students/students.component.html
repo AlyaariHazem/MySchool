@@ -61,7 +61,7 @@
         <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
         
         @if (showGrid) {
-        <div class="group group2">
+        <div class="group group2" [attr.dir]="dir">
           @for (student of paginatedStudents; track $index) {
           <div class="form-control">
             <p-card class="responsive-card">
@@ -92,7 +92,7 @@
         }
 
         @if (showCulomn) {
-        <div class="table-container">
+        <div class="table-container" [attr.dir]="dir">
           <div class="table-container">
             <mat-card>
               <table class="styled-table">

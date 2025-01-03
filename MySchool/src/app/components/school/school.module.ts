@@ -63,6 +63,9 @@ import { BillsComponent } from './accounts/bills/bills.component';
 import { AddAccountComponent } from './accounts/add-account/add-account.component';
 import { AllotmentComponent } from './allotment-report/allotment/allotment.component';
 import { CountDirective } from '../../directives/count.directive';
+import { GradesMangeComponent } from './grades-mange/grades-mange-mange.component';
+import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.component';
+import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
 
 
 
@@ -78,6 +81,7 @@ const components = [
   ChartForStudentComponent,
   EditStudentComponent,
   TeachersComponent,
+  StudentMonthResultComponent,
   NavigateComponent,
   StudyYearComponent,
   StagesGradesComponent,
@@ -104,7 +108,9 @@ const components = [
   BooksComponent,
   AccountsComponent,
   BillsComponent,
+  GradesMonthComponent,
   AddAccountComponent,
+  GradesMangeComponent,
   AllotmentComponent
 
 ];

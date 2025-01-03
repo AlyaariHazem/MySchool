@@ -4,6 +4,7 @@
 
 .sidebar {
   overflow-y: scroll;
+  // left: 10px!important;
 }
 
 .sidebar-ul {
@@ -44,6 +45,9 @@
     position: absolute;
     z-index: 100000;
     right: 14rem;
+    border:2px solid red;
+    border-radius: 4px;
+    padding:0 5px;
     top:5px;
   }
   .cancel:hover{
@@ -54,5 +58,8 @@
 @media only screen and (min-width:991.98px) {
 .cancel{
   visibility: hidden;
+}
+.sidebar .header-left {
+  position: fixed!important;
 }
 }

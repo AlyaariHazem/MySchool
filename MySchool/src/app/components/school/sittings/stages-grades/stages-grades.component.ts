@@ -1,12 +1,12 @@
 import { AfterViewInit, Component, HostListener, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PageEvent } from '@angular/material/paginator';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 
 import { AddStage, Stage, updateStage } from '../../../../core/models/stages-grades.modul';
 import { StageService } from '../../../../core/services/stage.service';
 import { ClassService } from '../../../../core/services/class.service';
+import { PaginatorState } from 'primeng/paginator';
 
 @Component({
   selector: 'app-stages-grades',
@@ -22,8 +22,8 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   outerDropdownState: { [key: string]: boolean } = {};
   innerDropdownState: { [key: string]: { [key: string]: boolean } } = {};
   currentPage: { [key: string]: number } = {};
-  stage: Stage[] = [];
-  displayedDivisions: Stage[] = [];
+  stages: Stage[] = [];
+  paginatedStage: Stage[] = [];
   update!: updateStage;
   errorMessage: string = '';
 
@@ -47,8 +47,8 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   getStage(): void {
     this.stageService.getAllStages().subscribe({
       next: (data) =>{
-        this.stage = data.stagesInfo;
-        this.length = this.stage.length; // Set total item count
+        this.stages = data.stagesInfo;
+        this.length = this.stages.length; // Set total item count
         this.updateDisplayedDivisions(); // Initialize displayed divisions
       },
       error: () => this.errorMessage = 'Failed to load stages'
@@ -226,7 +226,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   getPaginatedStages() {
     const startIndex = this.currentStagePage * this.maxStagesPerPage;
     const endIndex = startIndex + this.maxStagesPerPage;
-    return this.stage.slice(startIndex, endIndex);
+    return this.stages.slice(startIndex, endIndex);
   }
 
   // Get paginated classes for each stage based on current page
@@ -241,7 +241,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
 
   // Navigate to the next/previous stage page
   nextStagePage() {
-    if ((this.currentStagePage + 1) * this.maxStagesPerPage < this.stage.length) {
+    if ((this.currentStagePage + 1) * this.maxStagesPerPage < this.stages.length) {
       this.currentStagePage++;
     }
   }
@@ -267,7 +267,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
 
   // Total pages calculation
   getTotalStagePages(): number {
-    return Math.ceil(this.stage.length / this.maxStagesPerPage);
+    return Math.ceil(this.stages.length / this.maxStagesPerPage);
   }
 
   getTotalClassPages(item: any): number {
@@ -286,24 +286,33 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   }
 
   currentPages: number = 0; // Current page index
-  pageSize: number = 5; // Number of items per page
+  pageSize: number = 4; // Number of items per page
   length: number = 0; // Total number of items
 
   updateDisplayedDivisions(): void {
     const startIndex = this.currentPages * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.displayedDivisions = this.stage.slice(startIndex, endIndex);
+    this.paginatedStage = this.stages.slice(startIndex, endIndex);
   }
 
-  // Handle paginator events
-  onPageChange(event: PageEvent): void {
-    this.currentPages = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateDisplayedDivisions();
-  }
 
   toggleStateDropdown(item: any): void {
     item.isDropdownOpen = !item.isDropdownOpen;
+  }
+  
+  first: number = 0; // Current starting index
+  rows: number = 4; // Number of rows per page
+  updatePaginatedData(): void {
+    const start = this.first;
+    const end = this.first + this.rows;
+    this.paginatedStage = this.stages.slice(start, end);
+  }
+
+  // Handle page change event from PrimeNG paginator
+  onPageChange(event: PaginatorState): void {
+    this.first = event.first || 0; // Default to 0 if undefined
+    this.rows = event.rows || 4; // Default to 4 rows
+    this.updatePaginatedData();
   }
 
 }

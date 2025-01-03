@@ -2,6 +2,8 @@ import { Component, Input } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 
 import { AdminModule } from "./components/admin/admin.module";
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-root',
@@ -15,8 +17,10 @@ export class AppComponent {
   showOutlet: boolean = true;
 
   @Input() userIsAdmin=true;
-
-  constructor(private router: Router) {}
+  lang$:Observable<string>
+  constructor(private router: Router,private store:Store<{language:string}>) {
+    this.lang$=this.store.select("language");
+  }
 
   ngOnInit(): void {
     this.router.events.subscribe(event => {

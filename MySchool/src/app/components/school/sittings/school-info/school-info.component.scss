@@ -1,142 +1,159 @@
 h2 {
-    font-family: "Changa", sans-serif;
-    font-style: italic;
-  }
+  font-family: "Changa", sans-serif;
+  font-style: italic;
+}
 form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  .photo{
-    position: absolute;
-    left: 11rem;
-    width: 6rem;
-    top: 12rem;
-    border-radius: 5rem;
-  }
-  .save{
-    background-color: #2fdf85;
-    position: absolute;
-    top: 13rem;
-    left: 1rem;
-    border-radius: 2rem;
-  }
-  .schoolInfo{
-    background-color: white;
-  }
-  .schoolTitle{
-    margin-right: 1rem;
-    padding-top: 1rem;
-  }
-  .contant{
-    padding: 2rem 4rem 4rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.photo {
+  position: absolute;
+  left: 11rem;
+  width: 6rem;
+  top: 12rem;
+  border-radius: 5rem;
+}
+.save {
+  background-color: #2fdf85;
+  position: absolute;
+  top: 13rem;
+  left: 1rem;
+  border-radius: 2rem;
+}
+.schoolInfo {
+  background-color: white;
+}
+.schoolTitle {
+  margin-right: 1rem;
+  padding-top: 1rem;
+}
+.contant {
+  padding: 2rem 4rem 4rem 4rem;
+}
+.group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2px;
+}
 
+.form-control {
+  display: flex;
+  border: none;
+  flex-direction: column;
+  gap: 5px; /* Space between label and input */
+}
+
+label {
+  color: #333;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+.error {
+  color: red;
+  font-size: 0.9rem;
+}
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+input[readonly] {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+input::placeholder,
+select::placeholder {
+  color: #aaa;
+}
+textarea{
+  border: 2px solid #d6d6d6!important;
+  border-radius: 7px!important;
+}
+textarea:hover,
+textarea:focus {
+  border: 1px solid #2fdf85 !important;
+  border-radius: 7px !important;
+  box-shadow: 1px #04b204;
+}
+textarea:focus,
+textarea:hover {
+  outline: none;
+  border-color: #2fdf85;
+  box-shadow: 0 0 5px #2fdf85;
+}
+input:focus,
+input:hover,
+select:focus {
+  outline: none;
+  border-color: #2fdf85;
+  box-shadow: 0 0 5px #2fdf85;
+}
+
+#sexSelect {
+  height: 42px;
+}
+
+button {
+  align-self: flex-end;
+  padding: 12px 20px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
   }
+
   .group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2px;
+    grid-template-columns: 1fr;
   }
-  
-  .form-control {
-    display: flex;
-    border:none;
-    flex-direction: column;
-    gap: 5px; /* Space between label and input */
-  }
-  
+
   label {
-    color: #333;
-  }
-  
-  input, select {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    transition: border-color 0.3s, background-color 0.3s;
-  }
-  .error {
-    color: red;
     font-size: 0.9rem;
   }
-  button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+
+  input,
+  select {
+    font-size: 0.9rem;
   }
-  
-  input[readonly] {
-    background-color: #e9ecef;
-    color: #6c757d;
-    cursor: not-allowed;
-  }
-  
-  input::placeholder, select::placeholder {
-    color: #aaa;
-  }
- 
-  input:focus,
-  select:focus {
-    outline: none;
-    border-color: #2fdf85;
-    box-shadow: 0 0 5px #2fdf85;
-  }
-  
-  #sexSelect {
-    height: 42px;
-  }
-  
+
   button {
-    align-self: flex-end;
-    padding: 12px 20px;
-    font-size: 1rem;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  @media (max-width: 768px) {
-    .container {
-      padding: 15px;
-    }
-  
-    .group {
-      grid-template-columns: 1fr;
-    }
-  
-    label {
-      font-size: 0.9rem;
-    }
-  
-    input, select {
-      font-size: 0.9rem;
-    }
-  
-    button {
-      width: 100%;
-      text-align: center;
-    }
-  }
-//this for p-chip
-:host {
-    ::ng-deep {
-      .inputChip {
-        width: 100%!important;
-        .p-chips{
-            width:100%!important;
-            .p-inputtext{
-                width: 100%!important;
-            }
-        }
-   }
+    width: 100%;
+    text-align: center;
   }
 }
-  
+//this for p-chip
+:host {
+  ::ng-deep {
+    .inputChip {
+      width: 100% !important;
+      .p-chips {
+        width: 100% !important;
+        .p-inputtext {
+          width: 100% !important;
+        }
+      }
+    }
+  }
+}

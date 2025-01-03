@@ -1,6 +1,6 @@
-<div class="page-header">
+<div class="page-header" >
     <div class="row">
-        <nav aria-label="breadcrumb">
+        <nav aria-label="breadcrumb" [attr.dir]="dir">
             <ol class="breadcrumb">
                 @for (breadcrumb of breadcrumbs; track $index;let first=$first;let last = $last) {
                 <li class="breadcrumb-item" [ngClass]="{'lastInBreadcrub': last}">

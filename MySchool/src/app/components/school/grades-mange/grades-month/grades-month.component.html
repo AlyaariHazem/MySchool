@@ -1,0 +1,179 @@
+<div id="id01" class="modal-container">
+    <h2 class="school">الدرجات الشهرية</h2>
+
+    <form [formGroup]="form">
+        <div class="group group2">
+            <div class="form-control">
+                <p-dropdown [options]="Books"  optionLabel="name" [editable]="true"
+                    [showClear]="SelectBook" (onChange)="selectBook()" placeholder="إختار الصف">
+                </p-dropdown>
+            </div>
+
+            <div class="form-control">
+                <p-dropdown [options]="classes"  [checkmark]="true" optionLabel="name"
+                    [editable]="true" [showClear]="SelectClass" (onChange)="selectClass()"
+                    placeholder="إختار الفصل">
+                </p-dropdown>
+            </div>
+
+            <div class="form-control">
+                <p-dropdown [options]="Books" formControlName="BookID" optionLabel="name" [editable]="true"
+                    [showClear]="SelectBook" (onChange)="selectBook()" placeholder="إختار المقرر">
+                </p-dropdown>
+            </div>
+
+            <div class="form-control">
+                <p-dropdown [options]="classes" [checkmark]="true" optionLabel="name"
+                    [editable]="true" [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الشهر">
+                </p-dropdown>
+            </div>
+        </div>
+
+        <p-button class="adding" (onClick)="showDialog()" label="إضافة+"></p-button>
+        <div class="mange">
+            <span class="hidden" (click)="toggleHidden()"><i [class]="hidden?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
+        </div>
+
+        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا...">
+        </p-chips>
+    </form>
+
+    <div class="table-container" [style]="hidden ? 'display: none' : 'display: block'">
+        <mat-card>
+            <div class="responsive-table">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>التالي</th>
+                            <th>رقم الطالب</th>
+                            <th class="student-name-column">الاسم</th>
+                            <th>المقرر</th>
+                            <th>واجبا20</th>
+                            <th>مواضب 20</th>
+                            <th>مشارك 20</th>
+                            <th>شفهي 10</th>
+                            <th>تحرير40</th>
+                            <th>المجموع 100</th>
+                            <th>النسبة 100</th>
+                            <th>السابق</th>
+                            <th>العملية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (CurrentStudent) {
+                        <tr>
+                            <td>
+                                <i class="pi pi-angle-double-right" style="font-size:24px;color:#207133;cursor:pointer;"
+                                    (click)="goNextStudent()"></i>
+                            </td>
+
+                            <td>{{ CurrentStudent.id }}</td>
+                            <td>{{ CurrentStudent.name }}</td>
+                            <td>{{ CurrentStudent.book }}</td>
+
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td>100</td>
+                            <td>100</td>
+
+                            <!-- "Previous student" button/column -->
+                            <td>
+                                <i class="pi pi-angle-double-left" style="font-size:24px;color:#207133;cursor:pointer;"
+                                    (click)="goPreviousStudent()"></i>
+                            </td>
+
+                            <!-- Operation Buttons -->
+                            <td>
+                                <div class="col text-left">
+                                    <div class="mt-sm-0 mt-2">
+                                        <button class="btn btn-left update" type="button" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-left">
+                                            <a class="dropdown-item">
+                                                <i class="bi bi-pencil-square IconEdit"></i> تعديل
+                                            </a>
+                                            <div role="separator" class="dropdown-divider"></div>
+                                            <a class="dropdown-item">
+                                                <i class="bi bi-trash IconDelete"></i> حذف
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </mat-card>
+    </div>
+    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="studentsData.length" [rowsPerPageOptions]="[4, 8, 16]" />
+    <div class="table-container">
+        <mat-card>
+            <div class="responsive-table">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>رقم الطالب</th>
+                            <th class="student-name-column">الاسم</th>
+                            <th>المقرر</th>
+                            <th>واجبا20</th>
+                            <th>مواضب 20</th>
+                            <th>مشارك 20</th>
+                            <th>شفهي 10</th>
+                            <th>تحرير40</th>
+                            <th>المجموع 100</th>
+                            <th>النسبة 100</th>
+                            <th>العملية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (student of paginatedStudents; track $index) {
+                        <tr>
+                            <td>{{ $index+1 }}</td>
+                            <td>221</td>
+                            <td class="student-name-column">حازم عبدالله اليعري</td>
+                            <td>قران</td>
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td>100</td>
+                            <td>100</td>
+                            <td>
+                                <div class="col text-left">
+                                    <div class="mt-sm-0 mt-2">
+                                        <button class="btn btn-left update" type="button" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-left">
+                                            <a class="dropdown-item">
+                                                <i class="bi bi-pencil-square IconEdit"></i> تعديل
+                                            </a>
+                                            <div role="separator" class="dropdown-divider"></div>
+                                            <a class="dropdown-item">
+                                                <i class="bi bi-trash IconDelete"></i> حذف
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </mat-card>
+    </div>
+
+</div>

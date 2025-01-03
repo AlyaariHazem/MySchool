@@ -1,3 +1,55 @@
-.dropdown-menu a{
-    text-align: right;
+.dropdown-menu a {
+  text-align: right;
+}
+.user-menu-Ar {
+  margin: 0;
+  position: absolute;
+  left: 8px;
+  z-index: 99;
+  margin-top: -3rem;
+}
+.user-menu-En {
+  margin: 0;
+  position: absolute;
+  right: 8px;
+  z-index: 99;
+  margin-top: -3rem;
+}
+a.mobile_btn-En {
+  color: #2fdf84;
+  font-size: 24px;
+  height: 60px;
+  left: 0;
+  line-height: 60px;
+  padding: 0 20px;
+  position: absolute;
+  top: 0;
+  width: 60px;
+  z-index: 1;
+}
+.mobile_btn-Ar{
+    display: none;
+}
+@media only screen and (min-width: 991px) {
+  .toggle_btn {
+    color: #999;
+    float: right;
+  }
+  .toggle_btn-Ar {
+    color: #999;
+    float: right;
+  }
+  .toggle_btn-En {
+    color: #999;
+    float: left;
+  }
+
+  @media only screen and (max-width: 991px) {
+    .mobile_btn-En {
+      display: block;
+    }
+    .mobile_btn {
+      display: block;
+    }
+  }
 }

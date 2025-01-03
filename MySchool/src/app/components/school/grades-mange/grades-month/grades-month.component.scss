@@ -1,0 +1,135 @@
+.Title{
+    position: absolute;
+    top: 13px;
+}
+.add{
+    background-color: #12a212;
+}
+.hidden{
+    border: 2px solid #6b7280;
+    padding:0 4px;
+    margin-left: 11px;
+    border-radius: 3px;
+}
+/* Remove number input spinners for modern browsers */
+.no-spinner {
+    -moz-appearance: textfield; /* Firefox */
+    -webkit-appearance: none; /* Chrome, Safari, Edge, Opera */
+    appearance: none; /* General */
+  }
+  
+  // Remove the margin/padding that might appear due to spinner removal
+  .no-spinner::-webkit-inner-spin-button, 
+  .no-spinner::-webkit-outer-spin-button {
+    -webkit-appearance: none; /* Remove in WebKit browsers */
+    margin: 0; /* Optional: remove margin */
+  }
+  
+.mange{
+    position: absolute;
+    top: 12rem;
+    left: 11rem;
+}
+.hidden:hover{
+    cursor: pointer;
+    border: 2px solid #5c6066;
+}
+
+  
+  
+  
+  /* 7) Student name column — make it wider */
+  .student-name-column {
+    min-width: 250px;
+    text-align: start;
+  }
+  input:focus{
+    box-shadow: 0 0 5px 0 #12a212;
+    border-color: #2fdf85!important;
+  }
+  /* 8) Example styling for the input fields in table cells */
+  .form-control.input1 {
+    width: 60px;  /* Adjust width as needed */
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  /* Example style for inputs in table cells */
+  .form-control.input1 {
+    width: 50px; /* Adjust as needed */
+    text-align: center;
+  }
+.input1{
+    border: 1px solid #272626!important;
+
+}
+form{
+    margin-top: 2rem;
+}
+//for dialog *********
+:host ::ng-deep .p-ripple.p-button{
+    border-radius: 3rem!important;
+    height: 2rem !important;
+    background-color: #12a212;
+}
+.school{
+  margin-right: 5px;
+}
+
+// this for form
+
+.group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 0.2fr));
+    gap: 20px;
+  }
+  
+  .container{
+    margin-top: -2rem;
+  }
+  .form-control {
+    display: flex;
+    border:none;
+    flex-direction: column;
+    gap: 5px; /* Space between label and input */
+  }
+  
+.adding{
+    position: relative;
+    right: 87%;
+    top: -8rem;
+}
+.button{
+  background-color: #12a212;
+    color: white;
+    position: absolute;
+    top: 1rem;
+    right: 9rem;
+    border: 1px solid green;
+    border-radius: 3px;
+    padding: 3px 10px;
+}
+//disply _____________________________________________________________________
+.modal-container {
+    background-color: white;
+  }
+:host ::ng-deep .p-dropdown .p-dropdown-clear-icon {
+  color: #6b7280;
+  left: 3rem!important; /* Align to the left */
+  direction: rtl;
+}
+:host ::ng-deep{
+  .chipsOne{
+    position: absolute;
+    margin-top: -5.2rem;
+    left: 3%;
+    width: 14%;
+  }
+}
+@media (max-width: 900px) {
+    .mange{
+        position: absolute;
+        top: 8rem;
+        left: 11rem;
+    }
+}

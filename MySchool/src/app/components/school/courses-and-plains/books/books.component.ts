@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { PageEvent } from '@angular/material/paginator';
+import { PaginatorState } from 'primeng/paginator';
 interface City {
   name: string;
   code: string;
@@ -21,14 +21,11 @@ export class BooksComponent {
   }
   form: FormGroup;
   cities: City[] | undefined;
-
-  values = new FormControl<string[] | null>(null);
-  max = 2;
-
+  search:any;
+  books:number[]=[1,2,3,4,5,6,7,8,9,10];
+  
   selectedCity: City | undefined;
-
-  students = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,];
-  displayedStudents: number[] = []; // Students for the current page
+  paginatedBooks: number[] = []; // Students for the current page
 
   isSmallScreen = false;
 
@@ -43,8 +40,7 @@ export class BooksComponent {
   }
 
   ngOnInit(): void {
-    this.length = this.students.length; // Set the total number of items
-    this.updateDisplayedStudents(); // Initialize the displayed students
+    this.updatePaginatedData();
     this.cities = [
       { name: 'New Yorkaaaaaaaaaaa', code: 'NY' },
       { name: 'Rome', code: 'RM' },
@@ -53,19 +49,19 @@ export class BooksComponent {
       { name: 'Paris', code: 'PRS' }
     ];
   }
-  currentPage: number = 0; // Current page index
-  pageSize: number = 5; // Number of items per page
-  length: number = 0; // Total number of items
-  updateDisplayedStudents(): void {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.displayedStudents = this.students.slice(startIndex, endIndex);
-  }
-  // Handle paginator events
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateDisplayedStudents();
+ 
+  first: number = 0; // Current starting index
+  rows: number = 4; // Number of rows per page
+  updatePaginatedData(): void {
+    const start = this.first;
+    const end = this.first + this.rows;
+    this.paginatedBooks = this.books.slice(start, end);
   }
 
+  // Handle page change event from PrimeNG paginator
+  onPageChange(event: PaginatorState): void {
+    this.first = event.first || 0; // Default to 0 if undefined
+    this.rows = event.rows || 4; // Default to 4 rows
+    this.updatePaginatedData();
+  }
 }

@@ -16,24 +16,34 @@
       <p class="line"></p>
 
       <div id="News" class="tabcontent">
-        <mat-paginator [ngStyle]="{ position: 'relative', top: '-30px' }" [length]="length" [pageSize]="pageSize"
-          [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
-        </mat-paginator>
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="stages.length" [rowsPerPageOptions]="[4, 8, 16]" />
 
         <form [formGroup]="form" class="From">
-          <label for="stageName" class="termName">اسـم المرحـلة</label>
-          <input type="text" formControlName="StageName" class="term" placeholder="المرحـلة" />
-          
-          <label for="note" class="className">ملاحظة</label>
-          <input type="text" formControlName="Note" class="class" placeholder="ملاحظة" />
+          <div class="group group2">
+            <div class="form-control">
+              <mat-form-field appearance="outline" class="inputText">
+                <mat-label>اسم المرحلة</mat-label>
+                <input formControlName="StageName" class="term" type="text" matInput />
+              </mat-form-field>
+            </div>
+            <div class="form-control">
+              <mat-form-field appearance="outline" class="inputText">
+                <mat-label>ملاحظة</mat-label>
+                <input formControlName="Note" class="class" type="text" matInput />
+              </mat-form-field>
+            </div>
+
+          </div>
           <!-- I want when I click on the edit change this for "تعديل" -->
           <input type="submit" class="btn btn-primary add" [value]="isEditMode ? 'تعديل' : 'إضافة'"
             (click)="isEditMode ? updateStage() : addStage()" [disabled]="!form.valid" />
         </form>
+
         @if( form.get('StageName')?.invalid && form.get('StageName')?.touched){
         <span style="
             position: absolute;
-            top: 14.6rem;
+            top: 11.6rem;
             right: 4rem;
             text-align: right;
             width: 34%;
@@ -55,7 +65,7 @@
             </tr>
           </thead>
           <tbody>
-            @for ( item of displayedDivisions; track $index) {
+            @for ( item of paginatedStage; track $index) {
             <tr>
               <td>{{ $index + 1 + currentStagePage * maxStagesPerPage }}</td>
               <td>{{ item.stageName }}</td>

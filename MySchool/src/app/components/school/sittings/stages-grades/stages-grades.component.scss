@@ -18,12 +18,11 @@ h2 {
   border-bottom: 1px solid rgb(180 180 180);
 }
 
-input,
-select {
+input {
   border: 1px solid #ccc;
   border-radius: 4px;
   height: 33px;
-  width: 33%;
+  width:100%;
   background-color: white;
   box-sizing: border-box;
   transition: border-color 0.3s ease-in-out;
@@ -35,13 +34,6 @@ select {
 
 .class {
   margin-right: 8px;
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: #2fdf85;
-  box-shadow: 0 0 5px #2fdf85;
 }
 
 .tablink {
@@ -73,6 +65,7 @@ select:focus {
 .tabcontent {
   color: black;
   display: none;
+  margin-top: -1rem;
   padding: 80px 20px;
   height: 100%;
 }
@@ -85,7 +78,9 @@ select:focus {
 .From {
   margin-left: 21rem;
   position: relative;
-  left: 3rem;
+  width: 100%;
+  top: 1rem;
+  right: -1.8rem;
 }
 .termName {
   position: absolute;
@@ -95,10 +90,10 @@ select:focus {
 
 .add {
   position: relative;
-  top: 0rem;
+  top: -3rem;
   width: 14%;
   border-radius: 32px;
-  left: -11rem;
+  left: 0rem;
   border: none;
   color: white;
   background-color: #2fdf84;
@@ -114,6 +109,11 @@ select:focus {
     padding: 1px 0px;
     font-size: 11px;
   }
+  :host ::ng-deep{
+    .p-paginator {
+      display: none!important;
+    }
+  }
   .line {
     top: 1.4rem;
   }
@@ -125,7 +125,7 @@ select:focus {
   }
   .add {
     position: relative;
-    top: -1.5rem;
+    top: -6rem;
     width: 14%;
     left: -1rem;
     color: white;
@@ -254,15 +254,6 @@ select:focus {
 .action-button:hover {
   opacity: 0.8;
 }
-.division {
-  text-align: center;
-  border: 2px solid green;
-  border-radius: 11px;
-  padding: 11px;
-}
-.division:hover {
-  border: 2px solid rgb(8, 197, 8);
-}
 //nested dropdown list
 .nested-dropdown {
   display: block;
@@ -341,14 +332,15 @@ select:focus {
   opacity: 0.8;
 }
 
+.division:hover {
+  border: 2px solid #34d589;
+}
+
 .division {
   text-align: center;
   border: 2px solid rgb(8, 197, 8);
   border-radius: 11px;
-}
-
-.division:hover {
-  border: 2px solid #34d589;
+  padding: 8px 33px;
 }
 
 //nested dropdown list
@@ -418,14 +410,13 @@ select:focus {
 .dropdown:hover {
   border: 2px solid #34d589;
 }
-.mat-paginator {
-  font-family: 'Roboto', sans-serif; /* Apply the chosen font */
-  font-size: 14px; /* Adjust font size as needed */
-  color: #333; /* Change text color */
-}
-
-.mat-paginator .mat-button {
-  font-weight: 500; /* Set button font weight */
+:host ::ng-deep{
+  .p-paginator {
+    position: absolute!important;
+    top: 5rem!important;
+    left: 2px!important;
+    z-index: 11;
+  }
 }
 
 .mat-paginator .mat-select {
@@ -435,9 +426,143 @@ select:focus {
 .mat-paginator .mat-icon {
   font-size: 20px; /* Adjust icon size */
 }
-.form-control{
-  position: relative;
-    top: -4rem;
-    right: 1.3rem;
-    width: 48%;
+.Title{
+  position: absolute;
+  top: 13px;
+}
+.add{
+  background-color: #2fdf84;
+}
+:host ::ng-deep{
+.cPaginator{
+  position: absolute;
+  margin-top: 7rem;
+  left: 0%;
+}
+}
+//for dialog *********
+:host ::ng-deep .p-ripple.p-button{
+  border-radius: 3rem!important;
+  height: 2rem !important;
+  background-color: #12a212;
+}
+:host ::ng-deep .p-dialog-header-close{
+  background-color: white!important;
+}//***********************
+.school{
+margin-right: 5px;
+margin-top: 1rem;
+}
+
+// this for form
+
+.group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 0.2fr));
+  gap: 20px;
+}
+
+.container{
+  margin-top: -2rem;
+}
+.form-control {
+  display: flex;
+  border:none;
+  flex-direction: column;
+  gap: 5px; /* Space between label and input */
+}
+
+//-----------------------------------------------//--------------------
+.input-group {
+margin-bottom: 15px;
+position: relative;
+}
+.label1 {
+position: absolute;
+left: 94px;
+top: -37px;
+font-size: 11px;
+color: #141313;
+transition: 0.2s;
+pointer-events: none;
+}
+#clearIcon {
+position: absolute;
+left: 1.7rem;
+top: -25px;
+font-size: 12px !important;
+color: #777;
+transition: 0.2s;
+}
+#clearIcon1 {
+position: absolute;
+left: 11.7rem;
+top: 27px;
+font-size: 12px !important;
+color: #777;
+transition: 0.2s;
+}
+#clearIcon:hover,
+#clearIcon1:hover {
+cursor: pointer;
+}
+:host ::ng-deep .p-dropdown .p-dropdown-clear-icon {
+color: #6b7280;
+left: 3rem!important; /* Align to the left */
+direction: rtl;
+}
+
+:host
+::ng-deep
+.mdc-text-field--outlined.mdc-text-field--focused
+.mdc-notched-outline__leading {
+border-color: #2fdf85 !important;
+// box-shadow: 0 0 5px 0 #2fdf85!important;
+border-width: 2px 2px 2px 0 !important;
+transition: border-color 0.2s;
+}
+:host
+::ng-deep
+.mdc-text-field--outlined.mdc-text-field--focused
+.mdc-notched-outline__trailing {
+border-color: #2fdf85 !important;
+// box-shadow: 0 0 5px 0 #2fdf85!important;
+border-width: 2px 0 2px 2px !important;
+transition: border-color 0.2s;
+}
+:host
+::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
+.mdc-notched-outline__notch {
+border-color: #2fdf85 !important;
+// box-shadow: 2px 0 5px 0 #2fdf85!important;
+border-width: 2px 0 2px 0 !important;
+transition: border-color 0.2s;
+}
+
+/* Cancel icon styles */
+.cancel {
+left: -8px;
+padding-left: 19px;
+position: absolute;
+top: 16px;
+color: #6f6d6d;
+}
+.cancel:hover {
+color: rgb(70, 70, 70);
+cursor: pointer;
+}
+.dropdown13 {
+left: -8px;
+color: white;
+padding-left: 19px;
+position: absolute;
+top: 16px;
+}
+:host ::ng-deep{
+.chipsOne{
+  position: absolute;
+  margin-top: -5.2rem;
+  left: 3%;
+  width: 14%;
+}
 }

@@ -27,11 +27,6 @@
       <mat-error *ngIf="password.errors?.['minlength']">كلمة السر يجب أن تكون 3 حروف على الأقل</mat-error>
     </mat-form-field>
 
-    <!-- Error Message Display -->
-    <div *ngIf="registerError" class="error-message">
-      {{ registerError }}
-    </div>
-
     <!-- Register Button -->
     <button type="submit" class="btn btn-success mb-2 buttonSend" mat-raised-button color="primary">
       إنشاء حساب

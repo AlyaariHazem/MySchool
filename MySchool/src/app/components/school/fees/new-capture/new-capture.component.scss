@@ -9,6 +9,24 @@
   top: 1rem;
   left: 50%;
 }
+textarea{
+  border: 2px solid #d6d6d6!important;
+  border-radius: 7px!important;
+}
+textarea:hover ,textarea:focus{
+  border: 1px solid #2fdf85!important;
+  border-radius: 7px!important;
+  box-shadow:1px #04b204;
+}
+input:hover,
+input:focus,
+textarea:focus,
+textarea:hover,
+select:focus {
+  outline: none;
+  border-color: #2fdf85;
+  box-shadow: 0 0 5px #2fdf85;
+}
 .image{
     position: relative;
     top: 1px;

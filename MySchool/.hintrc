@@ -20,7 +20,8 @@
           "-moz-box-pack",
           "-webkit-overflow-scrolling",
           "min-height: auto",
-          "-webkit-text-size-adjust"
+          "-webkit-text-size-adjust",
+          "scrollbar-width"
         ]
       }
     ],
