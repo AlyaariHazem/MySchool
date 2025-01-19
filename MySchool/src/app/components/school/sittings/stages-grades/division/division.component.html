@@ -15,7 +15,7 @@
     </select>
     <label for="className" class="className">اسـم الشبعة</label>
     <input type="text" formControlName="divisionName" class="class" placeholder="إدخال اسم صـف جديد" />
-    <input type="submit" class="btn btn-primary add" [value]="isEditMode ? 'تحديث' : 'إضافة'"
+    <input type="submit" class="btn btn-primary add school-btn" [value]="isEditMode ? 'تحديث' : 'إضافة'"
       (click)="isEditMode ? updateDivision() : AddDivision()" [disabled]="!form.valid" />
   </form>
 

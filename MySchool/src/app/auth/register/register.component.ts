@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { AuthAPIService } from '../authAPI.service';  // Make sure this points to your service
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
 
 import { ShardModule } from '../../shared/shard.module';
+import { User } from '../../core/models/user.model';
+import { AuthAPIService } from '../authAPI.service';
 
 @Component({
   selector: 'app-register',
@@ -17,8 +18,8 @@ export class RegisterComponent {
 
   constructor(private authService: AuthAPIService, private router: Router) {}
 
-  register(formValue: { userName: string; email: string; password: string }) {
-    this.authService.register(formValue).subscribe({
+  register(user:User) {
+    this.authService.register(user).subscribe({
       next: () => {
         this.router.navigate(['/login']); // Navigate to login or any other page on success
       },

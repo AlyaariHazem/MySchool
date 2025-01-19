@@ -1,18 +1,17 @@
-<div id="id01" class="modal-container">
+<div id="id01" class="modal-container" [attr.dir]="dir" [ngClass]="{'English':dir==='ltr'}">
     <h2 class="school">الدرجات الشهرية</h2>
 
     <form [formGroup]="form">
         <div class="group group2">
             <div class="form-control">
-                <p-dropdown [options]="Books"  optionLabel="name" [editable]="true"
-                    [showClear]="SelectBook" (onChange)="selectBook()" placeholder="إختار الصف">
+                <p-dropdown [options]="Books" optionLabel="name" [editable]="true" [showClear]="SelectBook"
+                    (onChange)="selectBook()" placeholder="إختار الصف">
                 </p-dropdown>
             </div>
 
             <div class="form-control">
-                <p-dropdown [options]="classes"  [checkmark]="true" optionLabel="name"
-                    [editable]="true" [showClear]="SelectClass" (onChange)="selectClass()"
-                    placeholder="إختار الفصل">
+                <p-dropdown [options]="classes" [checkmark]="true" optionLabel="name" [editable]="true"
+                    [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الفصل">
                 </p-dropdown>
             </div>
 
@@ -23,15 +22,15 @@
             </div>
 
             <div class="form-control">
-                <p-dropdown [options]="classes" [checkmark]="true" optionLabel="name"
-                    [editable]="true" [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الشهر">
+                <p-dropdown [options]="classes" [checkmark]="true" optionLabel="name" [editable]="true"
+                    [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الشهر">
                 </p-dropdown>
             </div>
         </div>
-
-        <p-button class="adding" (onClick)="showDialog()" label="إضافة+"></p-button>
+        <button  class="adding school-btn" (onClick)="showDialog()">إضافة+</button>
         <div class="mange">
-            <span class="hidden" (click)="toggleHidden()"><i [class]="hidden?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
+            <span class="border" (click)="toggleHidden()"><i
+                    [class]="hidden?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
         </div>
 
         <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا...">
@@ -114,7 +113,7 @@
         </mat-card>
     </div>
     <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-          [totalRecords]="studentsData.length" [rowsPerPageOptions]="[4, 8, 16]" />
+        [totalRecords]="studentsData.length" [rowsPerPageOptions]="[4, 8, 16]" />
     <div class="table-container">
         <mat-card>
             <div class="responsive-table">

@@ -24,6 +24,7 @@ import { BillsComponent } from './accounts/bills/bills.component';
 import { AllotmentComponent } from './allotment-report/allotment/allotment.component';
 import { GradesMangeComponent } from './grades-mange/grades-mange-mange.component';
 import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.component';
+import { ReportComponent } from './report/report.component';
 
 const routes: Routes = [
   {
@@ -32,6 +33,7 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent, data: { breadcrumb: '' } },
       { path: 'sidebar', component: PageHeaderComponent, data: { breadcrumb: 'Sidebar' } },
+      { path: 'report', component: ReportComponent, data: { breadcrumb: 'تقارير' } },
       {
         path: 'students', data: { breadcrumb: 'الطلاب' }, children: [
           { path: 'all-students', component: StudentsComponent, data: { breadcrumb: 'جميع الطلاب' } },

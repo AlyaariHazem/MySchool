@@ -1,1 +1,15 @@
-{}
+{
+    // 1) Which HTML attributes should get PrimeFlex class completions
+    "primeflex.classAttributes": [
+      "class",
+      "className",
+      "styleClass",
+      "ngClass"
+    ],
+    // 2) Whether to enable or disable PrimeFlex IntelliSense
+    "primeflex.enabled": true,
+    // 3) Path to the CSS/SCSS file that defines color theming or custom PrimeFlex overrides
+    //    This is relative to your workspace root
+    "primeflex.sourceTheme": "./src/styles.css"
+  }
+  

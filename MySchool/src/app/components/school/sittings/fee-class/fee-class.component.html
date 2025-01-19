@@ -1,11 +1,7 @@
-<div class="Fee">
+<div class="Fee" [attr.dir]="languageService.dir">
     <h2 class="school">إعدادات الرسوم</h2>
-    <p-paginator dir="ltr"
-            (onPageChange)="onPageChange($event)" 
-            [first]="first"
-            [rows]="rows" 
-            [totalRecords]="FeeClass.length"
-            [rowsPerPageOptions]="[4, 8, 16]" />
+    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+        [totalRecords]="FeeClass.length" [rowsPerPageOptions]="[4, 8, 16]" />
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
         <!-- Tab 1: بند الرسوم -->
         <mat-tab label="بند الرسوم">
@@ -15,7 +11,7 @@
                     <div class="form-control">
                         <mat-form-field appearance="outline" class="inputText">
                             <mat-label>إدخل بند رسوم جديد</mat-label>
-                            <input class="inputError" type="text" name="feeName" [(ngModel)]="Addfee.feeName"
+                            <input class="inputError " type="text" name="feeName" [(ngModel)]="Addfee.feeName"
                                 #feeName="ngModel" matInput required />
                         </mat-form-field>
 
@@ -32,9 +28,10 @@
                         </mat-form-field>
                     </div>
                     <!-- Submit Button -->
-                    <button mat-raised-button color="primary" type="submit" [ngClass]="feeForm.invalid||editMode?'disabledAdd':'add'" [disabled]="feeForm.invalid"
+                    <button mat-raised-button color="primary" type="submit"
+                        [ngClass]="feeForm.invalid||editMode?'disabledAdd':'add'" class="school-btn"
                         (click)="onSubmit(feeForm)">
-                        {{ editMode ? 'تعديل' : 'إضافة+' }}
+                        {{ editMode ? 'تعديل' : 'إضافة +' }}
                     </button>
 
 
@@ -100,8 +97,8 @@
                     <div class="form-control1">
                         <mat-form-field appearance="outline">
                             <mat-label>إختار الصـف</mat-label>
-                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"[(ngModel)]="FeeClassDTO.classID" 
-                                name="classID" #classSelector="ngModel" required>
+                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"
+                                [(ngModel)]="FeeClassDTO.classID" name="classID" #classSelector="ngModel" required>
                                 <mat-option [value]="null">None</mat-option>
                                 @for (Class of classDTO; track $index) {
                                 <mat-option [value]="Class.classID">{{ Class.className }}</mat-option>
@@ -113,13 +110,13 @@
                     <div class="form-control1">
                         <mat-form-field class="button1" appearance="outline">
                             <mat-label>إختار بند الرسوم</mat-label>
-                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" name="feeID"
-                                [(ngModel)]="FeeClassDTO.feeID" required>
+                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"
+                                name="feeID" [(ngModel)]="FeeClassDTO.feeID" required>
                                 <mat-option [value]="null">None</mat-option>
                                 @for (fee of Fees; track $index) {
-                                    <mat-option [value]="fee.feeID">
-                                        {{ fee.feeName }}
-                                    </mat-option>
+                                <mat-option [value]="fee.feeID">
+                                    {{ fee.feeName }}
+                                </mat-option>
                                 }
                             </mat-select>
                         </mat-form-field>
@@ -137,8 +134,9 @@
                         </mat-form-field>
                     </div>
                     <!-- Submit Button -->
-                    <button mat-raised-button color="primary" type="submit" [ngClass]="classFeeForm.invalid||exist?'disabledAdd':'add'"
-                        [disabled]="classFeeForm.invalid||exist">
+                    <button mat-raised-button color="primary" type="submit" class="school-btn"
+                        [ngClass]="classFeeForm.invalid||exist?'disabledAdd':'add'"
+                        >
                         {{ editModeClass ? 'تعديل' : 'إضافة+' }}
                     </button>
 
@@ -180,8 +178,7 @@
                                                     <i class="bi bi-pencil-square IconEdit"></i> تعديل
                                                 </a>
                                                 <div role="separator" class="dropdown-divider"></div>
-                                                <a class="dropdown-item"
-                                                    (click)="deleteFeeClass(fee.classID)"><i
+                                                <a class="dropdown-item" (click)="deleteFeeClass(fee.feeClassID)"><i
                                                         class="bi bi-trash IconDelete"></i>حذف</a>
                                             </div>
                                         </div>

@@ -1,0 +1,434 @@
+
+.sidebarEn .header-left {
+    border-bottom: 1px solid #e7e7e7;
+    border-radius: 10px 10px 0 0;
+    background: #fff;
+    float: left;
+    height: 80px;
+    padding: 0 20px;
+    position: fixed;
+    text-align: center;
+    width: 267px;
+    z-index: 1
+}
+
+.sidebarEn .header-left a span {
+    font-size: 20px;
+    color: #000;
+    font-weight: 600
+}
+
+.sidebarEn {
+    top: 10px;
+    width: 270px;
+    z-index: 99;
+    background-color: #fff;
+    bottom: 0;
+    margin-top: 0;
+    position: fixed;
+    left: 10px;
+    -webkit-transition: all .4s ease;
+    -moz-transition: all .4s ease;
+    transition: all .4s ease;
+    border: 1px solid #d5dbe1;
+    border-radius: 10px;
+    margin-bottom: 10px
+}
+
+.sidebarEn-inner {
+    height: 100%
+}
+
+.sidebarEn-menu ul {
+    font-size: 14px;
+    list-style-type: none;
+    margin: 0;
+    padding: 10px;
+    border-top: 0;
+    position: relative;
+    top: 0
+}
+
+.sidebarEn-menu ul.sidebarEn-ul {
+    top: 80px
+}
+
+.sidebarEn-menu li a img {
+    margin-right: 10px
+}
+
+.sidebarEn-menu li a {
+    text-transform: uppercase;
+    color: #373d3f;
+    display: block;
+    font-size: 14px;
+    height: auto;
+    line-height: 40px;
+    min-height: 40px;
+    padding: 10px 20px;
+    border-radius: 0;
+    border-top: 1px solid #e7e7e7
+}
+
+.sidebarEn-menu li a:hover {
+    color: #2fdf84
+}
+
+.sidebarEn-menu li a>.badge {
+    margin-top: 10px;
+    color: #fff;
+    font-weight: 700
+}
+
+.sidebarEn-menu li a i {
+    font-size: 16px;
+    margin-left: 10px;
+    margin-right: 10px
+}
+
+.sidebarEn-menu li a i.back-icon {
+    margin-right: 0
+}
+
+.sidebarEn-menu li.active a {
+    color: #fff;
+    background: linear-gradient(180deg, #2FDF84 0%, #8944D7 100%);
+    border-radius: 10px
+}
+
+.sidebarEn-menu li.submenu a.active.subdrop {
+    color: #fff;
+    background: linear-gradient(180deg, #2FDF84 0%, #8944D7 100%);
+    border-radius: 10px
+}
+
+.sidebarEn-menu li.menu-title a {
+    color: #ff9b44;
+    display: inline-block;
+    padding: 0
+}
+
+.sidebarEn-menu li.menu-title a.add-user-icon {
+    background-color: #eee;
+    border-radius: 24px;
+    color: #bbb;
+    line-height: 24px;
+    min-height: 24px;
+    width: 24px;
+    text-align: center;
+    margin-top: 6px
+}
+
+.sidebarEn-menu li.menu-title a.add-user-icon:hover {
+    background-color: #2fdf84;
+    color: #fff
+}
+
+.sidebarEn-menu li.menu-title a.add-user-icon i {
+    font-size: 14px;
+    margin-right: 0;
+    margin-right: 0
+}
+
+.sidebarEn-menu li.menu-title a.btn {
+    color: #fff;
+    display: block;
+    float: none;
+    font-size: 15px;
+    line-height: inherit;
+    margin-bottom: 15px
+}
+
+.sidebarEn-menu li.menu-title a.btn:hover {
+    color: #fff
+}
+
+.sidebarEn-menu ul ul a.active {
+    color: #2fdf84;
+    text-decoration: underline
+}
+
+
+
+.mobile_btn {
+    display: none
+}
+
+#sidebarEn-menu ul ul a {
+    display: block;
+    padding: 0 20px 0 50px;
+    border-top: 0
+}
+
+#sidebarEn-menu ul ul ul a {
+    padding-left: 80px
+}
+
+#sidebarEn-menu ul ul ul ul a {
+    padding-left: 100px
+}
+
+#sidebarEn-menu ul ul {
+    background-color: #fff
+}
+
+.sidebarEn-menu>ul>li {
+    position: relative;
+    border-bottom: 0 solid #d5dbe1
+}
+
+.sidebarEn-menu ul ul {
+    border: 0 solid #d5dbe1;
+    padding: 0
+}
+
+.sidebarEn-menu .menu-arrow {
+    -webkit-transition: -webkit-transform .15s;
+    -o-transition: -o-transform .15s;
+    transition: transform .15s;
+    position: absolute;
+    left: 20px;
+    display: inline-block;
+    font-family: 'font awesome 5 free';
+    font-weight: 900;
+    text-rendering: auto;
+    line-height: 40px;
+    font-size: 12px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-transform: translate(0, 0);
+    -ms-transform: translate(0, 0);
+    -o-transform: translate(0, 0);
+    transform: translate(0, 0)
+}
+
+.sidebarEn-menu .menu-arrow:before {
+    content: "\f105"
+}
+
+.sidebarEn-menu li a.subdrop .menu-arrow {
+    -ms-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    transform: rotate(90deg)
+}
+
+.model-open .header,
+.model-open .sidebarEn {
+    z-index: 0
+}
+
+.sidebarEn-overlay {
+    display: none;
+    position: fixed;
+    z-index: 90;
+    height: 100%;
+    left: 0;
+    top: 70px;
+    width: 100%;
+    z-index: 1040;
+    background-color: rgba(0, 0, 0, .6)
+}
+
+.sidebarEn-overlay.opened {
+    display: block
+}
+
+.sidebarEn-menu.opened {
+    opacity: 1;
+    -webkit-transform: translateX(0px);
+    -moz-transform: translateX(0px);
+    -ms-transform: translateX(0px);
+    -o-transform: translateX(0px);
+    transform: translateX(0px);
+    margin-left: 0
+}
+
+.slide-nav .sidebarEn {
+    margin-left: 0
+}
+
+.chat-sidebarEn {
+    background-color: #fff;
+    border-left: 1px solid #eaeaea;
+    width: 300px
+}
+
+.chat-sidebarEn .chat-contents {
+    background-color: #fff
+}
+
+.chat-sidebarEn .chat-left .chat-content {
+    border: 0;
+    padding: 0;
+    border-radius: 0 !important;
+    background-color: transparent;
+    max-width: 100%
+}
+
+.chat-sidebarEn .chat-left .chat-body {
+    margin-left: 50px;
+    padding-right: 0
+}
+
+.chat-sidebarEn .chat-date {
+    background-color: #fff
+}
+
+.chat-sidebarEn .chats {
+    padding: 15px 15px 30px
+}
+
+.chat-sidebarEn .avatar {
+    width: 30px;
+    height: 30px;
+    line-height: 30px
+}
+
+.chat-sidebarEn .chat.chat-left {
+    margin-bottom: 20px
+}
+
+.chat-sidebarEn .chat.chat-left:last-child {
+    margin-bottom: 0
+}
+
+.chat-sidebarEn .chat-left .chat-time {
+    color: #888;
+    display: inline-block;
+    font-size: 11px
+}
+
+.chat-sidebarEn .chat-content>p {
+    font-size: 13px;
+    margin-bottom: 0
+}
+
+.chat-sidebarEn.opened {
+    margin-right: 0
+}
+
+@media only screen and (min-width:991px) {
+    .mini-sidebarEn .header-left .logo img {
+        height: auto;
+        max-height: 30px;
+        width: auto
+    }
+
+    .mini-sidebarEn .sidebarEn .header-left {
+        padding: 0 5px;
+        width: 85px
+    }
+
+    .mini-sidebarEn .sidebarEn .header-left span {
+        display: none
+    }
+
+    .mini-sidebarEn .sidebarEn {
+        width: 90px
+    }
+
+    .mini-sidebarEn.expand-menu .sidebarEn {
+        width: 270px;
+    }
+
+    .mini-sidebarEn.expand-menu .sidebarEn .header-left {
+        width: 270px;
+    }
+
+    .mini-sidebarEn.expand-menu .sidebarEn .header-left span {
+        display: inline-block
+    }
+
+    .mini-sidebarEn .menu-title {
+        visibility: hidden;
+        white-space: nowrap
+    }
+
+    .mini-sidebarEn.expand-menu .menu-title {
+        visibility: visible
+    }
+
+    .mini-sidebarEn .menu-title a {
+        visibility: hidden
+    }
+
+    .mini-sidebarEn.expand-menu .menu-title a {
+        visibility: visible
+    }
+
+    .mini-sidebarEn .sidebarEn .noti-dot:before {
+        display: none
+    }
+
+    .mini-sidebarEn .sidebarEn .noti-dot:after {
+        display: none
+    }
+
+    .mini-sidebarEn.expand-menu .sidebarEn .noti-dot:before {
+        display: block;
+    }
+
+    .mini-sidebarEn.expand-menu .sidebarEn .noti-dot:after {
+        display: block;
+    }
+
+    .modal-open.mini-sidebarEn .sidebarEn {
+        z-index: 1001
+    }
+
+    .mini-sidebarEn .sidebarEn .sidebarEn-menu ul>li>a span {
+        display: none;
+        transition: all .2s ease-in-out;
+        opacity: 0
+    }
+
+    .mini-sidebarEn .sidebarEn .sidebarEn-menu ul>li>a span.chat-avatar-sm {
+        display: inline-block;
+        opacity: 1
+    }
+
+    .mini-sidebarEn .sidebarEn .sidebarEn-menu ul>li>a span.status {
+        display: inline-block;
+        opacity: 1
+    }
+
+    .mini-sidebarEn.expand-menu .sidebarEn .sidebarEn-menu ul>li>a span {
+        display: inline;
+        opacity: 1
+    }
+
+    .mini-sidebarEn .sidebarEn .sidebarEn-menu>ul>li>a i {
+        font-size: 30px;
+        width: 30px
+    }
+
+    .mini-sidebarEn.expand-menu .sidebarEn .sidebarEn-menu>ul>li>a i {
+        font-size: 24px;
+        width: 20px
+    }
+
+    .mini-sidebarEn .page-wrapper {
+        margin-right: -11.4rem;
+        /* left: 110px; */
+    }
+    .mini-sidebarEn.expand-menu .page-wrapper {
+        margin-right: 0rem;
+        /* left: 110px; */
+    }
+    .mini-sidebarEn .header {
+        margin-right: -11.4rem;
+    }
+    .mini-sidebarEn.expand-menu .header {
+        margin-right: 0rem;
+        
+    }
+}
+@media only screen and (max-width:991.98px) {
+    .sidebarEn {
+        top: 0;
+        left: 0;
+        display: none;
+        border-radius: 0
+    }
+}

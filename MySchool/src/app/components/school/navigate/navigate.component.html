@@ -1,9 +1,9 @@
 <div class="main-wrapper">
 
-    <app-header [attr.dir]="dir"></app-header>
+    <app-header [attr.dir]="languageService.dir"></app-header>
 
-    <div class="page-wrapper" [attr.dir]="dir" >
-        <div class="content container-fluid" dir="rtl" >
+    <div [ngClass]="{'page-wrapperEn':languageService.dir==='ltr','page-wrapper':languageService.dir==='rtl'}" >
+        <div class="content container-fluid" dir="ltr"  >
             
             <app-page-header ></app-page-header>
             

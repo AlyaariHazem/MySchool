@@ -1,14 +1,23 @@
 .page-header {
-    border: 1px solid #d5dbe1;
-    padding: 6px;
-    border-radius: 9px;
-    margin-bottom: 16px;
+  border-radius: 9px;
+  margin-bottom: 16px;
 }
-.page-header li{
-    margin-top: 12px;
+.english {
+  .page-header {
+    margin-top: 1.4rem !important;
+  }
+}
+.page-header li {
+  margin-top: 12px;
 }
 @media (max-width: 900.98px) {
-    .page-header{
-        display: none;
-    }
+  .page-header {
+    display: none;
+  }
+}
+:host ::ng-deep {
+  .p-breadcrumb {
+    background-color: #eceff6 !important;
+    border: 1px solid #c0c0c0 !important;
+  }
 }

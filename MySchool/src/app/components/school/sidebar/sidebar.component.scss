@@ -1,27 +1,56 @@
+/* Hide elements if needed */
 .d-none {
   display: none;
 }
 
 .sidebar {
-  overflow-y: scroll;
-  // left: 10px!important;
+  overflow-y: hidden;
+  right: 10px;
+}
+
+.sidebarEn {
+  overflow-y: hidden;
+}
+
+.sidebarEr {
+  overflow-y: hidden;
+  left: 10px !important;
+  direction: ltr;
 }
 
 .sidebar-ul {
-  overflow: hidden;
-}
-/* Hide scrollbar for WebKit browsers */
-.sidebar::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+  direction: rtl;
+  overflow-y: scroll;
+  max-height: 100vh;
+
+  scrollbar-width: thin;
+  scrollbar-color: #adadad #f1f1f1;
 }
 
-/* Hide scrollbar for Firefox */
-.sidebar,.sidebarEn {
-  scrollbar-width: none;
-  right: 10px; 
+.sidebar-ul ul {
+  direction: ltr;
+  padding-left: 11px;
 }
 
+.sidebar-ul::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-ul::-webkit-scrollbar-track {
+  background: #f1f1f1; /* track color */
+  border-radius: 3px;
+}
+
+.sidebar-ul::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.sidebar-ul::-webkit-scrollbar-thumb:hover {
+  background: #555; /* darker on hover */
+}
+
+/* MENU ARROWS */
 .menu-arrow {
   transition: transform 0.3s ease-in-out;
 }
@@ -29,14 +58,72 @@
 .rotate-arrow {
   transform: rotate(-90deg);
 }
-.sidebar-menu .menu-arrow{
-  rotate:(180deg)
+
+.sidebar-menu .menu-arrow {
+  rotate: (180deg);
+  left: 20px;
 }
 
+.sidebar {
+  right: 20px;
+}
+.sidebarEn {
+  left: 20px;
+  .rotate-arrow {
+    transform: rotate(180deg);
+  }
+  .sidebar-menu .menu-arrow {
+    transform: rotate(180deg);
+  }
+  .sidebar-menu .menu-arrow {
+    right: 20px !important;
+  }
+  .sidebar-ul {
+    img {
+      -webkit-transition: -webkit-transform 0.15s;
+      -o-transition: -o-transform 0.15s;
+      transition: transform 0.15s;
+      position: relative;
+      right: 10.5rem !important;
+      display: inline-block;
+      font-family: "font awesome 5 free";
+      font-weight: 900;
+      text-rendering: auto;
+      line-height: 40px;
+      font-size: 12px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+      -o-transform: translate(0, 0);
+      transform: translate(0, 0);
+    }
+    span {
+      -webkit-transition: -webkit-transform 0.15s;
+      -o-transition: -o-transform 0.15s;
+      transition: transform 0.15s;
+      position: absolute;
+      left: 55px !important;
+      line-height: 40px;
+      display: inline-block;
+      text-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+      -o-transform: translate(0, 0);
+      transform: translate(0, 0);
+    }
+  }
+}
+
+/* SIDEBAR ACTIVE STATE */
 .sidebar.active {
-  right: 2px; /* Slide-in */
+  right: 2px;
   transition: transform 0.3s ease-in-out;
 }
+
+/* CLOSE (CANCEL) BUTTON */
 .cancel {
   position: absolute;
   top: 10px;
@@ -46,34 +133,35 @@
   font-size: 1.5rem;
 }
 
-//this is for mobile menu 
-@media only screen and (max-width:991.98px) {
+/* RESPONSIVE BREAKPOINTS */
+@media only screen and (max-width: 991.98px) {
   .sidebar.active {
     top: 0;
-    height:100%;
+    height: 100%;
     right: 0;
     display: block;
-    border-radius: 0
+    border-radius: 0;
   }
-  .cancel{
+  .cancel {
     position: absolute;
     z-index: 100000;
     right: 14rem;
-    border:2px solid red;
+    border: 2px solid red;
     border-radius: 4px;
-    padding:0 5px;
-    top:5px;
+    padding: 0 5px;
+    top: 5px;
   }
-  .cancel:hover{
-    color:red;
-    cursor:pointer;
+  .cancel:hover {
+    color: red;
+    cursor: pointer;
   }
 }
-@media only screen and (min-width:991.98px) {
-.cancel{
-  visibility: hidden;
-}
-.sidebar .header-left {
-  position: fixed!important;
-}
+
+@media only screen and (min-width: 991.98px) {
+  .cancel {
+    visibility: hidden;
+  }
+  .sidebar .header-left {
+    position: fixed !important;
+  }
 }

@@ -16,7 +16,7 @@
     </select>
     <label for="className" class="className">اسـم الصف</label>
     <input type="text" formControlName="className" class="class" placeholder="إدخال اسم صـف جديد" />
-    <input type="submit" class="btn btn-primary add" [value]="isEditMode ? 'تعديل' : 'إضافة'"
+    <input type="submit" class="btn btn-primary add school-btn" [value]="isEditMode ? 'تعديل' : 'إضافة'"
       (click)="isEditMode ? updateClass() : addClass()" [disabled]="!form.valid" />
   </form>
 

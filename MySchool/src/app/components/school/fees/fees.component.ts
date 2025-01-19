@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
 import { Subscription } from 'rxjs';
+import { LanguageService } from '../../../core/services/language.service';
 interface City {
   name: string;
   code: string;
@@ -40,6 +41,8 @@ export class FeesComponent {
   
   isSmallScreen = false;
   private mediaSub: Subscription | null = null;
+  
+  languageService=inject(LanguageService);
 
   constructor(
     private formBuilder: FormBuilder,
@@ -67,6 +70,7 @@ export class FeesComponent {
       { name: 'Istanbul', code: 'IST' },
       { name: 'Paris', code: 'PRS' }
   ];
+  this.languageService.currentLanguage();
   }
 
   ngOnDestroy(): void {

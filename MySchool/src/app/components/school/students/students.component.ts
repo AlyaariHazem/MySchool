@@ -1,26 +1,32 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { NewStudentComponent } from './new-student/new-student.component';
-import { ActivatedRoute } from '@angular/router';
+import { Component, inject, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { PaginatorState } from 'primeng/paginator';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
+import { ActivatedRoute } from '@angular/router';
 
+import { NewStudentComponent } from './new-student/new-student.component';
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { StudentService } from '../../../core/services/student.service';
-import { PaginatorState } from 'primeng/paginator';
-import { Store } from '@ngrx/store';
+import { TranslationService } from '../../../core/services/translation.service';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-students',
   templateUrl: './students.component.html',
   styleUrls: ['./students.component.scss'],
 })
-export class StudentsComponent implements OnInit {
+export class StudentsComponent implements OnInit,OnChanges {
   form: FormGroup;
+
+  translationService=inject(TranslationService);
+  studentService=inject(StudentService);
+  languageService=inject(LanguageService);
+  
   Students:StudentDetailsDTO[]=[]
   values = new FormControl<string[] | null>(null);
-  max = 2;
   paginatedStudents: StudentDetailsDTO[] = []; // Paginated data
+  max = 2;
 
   first: number = 0; // Current starting index
   rows: number = 4; // Number of rows per page
@@ -36,8 +42,7 @@ export class StudentsComponent implements OnInit {
     this.rows = event.rows || 4; // Default to 4 rows
     this.updatePaginatedData();
   }
-  studentService=inject(StudentService);
-
+  
   // Dropdown options
   studentOptions: string[] = ['طالب 1', 'طالب 2', 'طالب 3'];
   stageOptions: string[] = ['المرحلة الأولى', 'المرحلة الثانية', 'المرحلة الثالثة'];
@@ -74,6 +79,10 @@ export class StudentsComponent implements OnInit {
       gradeName: ['', Validators.required],
     });
   }
+  ngOnChanges(changes: SimpleChanges): void {
+    this.languageService.currentLanguage();
+    this.translationService.changeLanguage(this.languageService.langDir);
+  }
 
   id!:number;
   ngOnInit(): void {
@@ -83,7 +92,8 @@ export class StudentsComponent implements OnInit {
       this.openDialog();
     }
     this.getAllStudents();
-    this.currentLanguage();
+    this.languageService.currentLanguage();
+    this.translationService.changeLanguage(this.languageService.langDir);
   }
 getAllStudents():void{
   this.studentService.getAllStudents().subscribe((res)=>{
@@ -174,16 +184,6 @@ EditDialog(id: number): void {
     this.getAllStudents();
    })
   }
-  }
-  langDir!:string;
-  languageStore=inject(Store);
-  dir:string="ltr";
-  currentLanguage():void{
-    this.languageStore.select("language").subscribe((res)=>{
-      this.langDir=res;
-      console.log("the diraction is ",this.dir);
-      this.dir=(res=="en")?"ltr":"rtl";
-    });
   }
   
 }

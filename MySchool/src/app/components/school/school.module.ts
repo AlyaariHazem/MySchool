@@ -19,6 +19,8 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { EditorModule } from 'primeng/editor';
 import { PaginatorModule } from 'primeng/paginator';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+
 
 import { SchoolRoutingModule } from './school-routing.module';
 import { HeaderComponent } from './header/header.component';
@@ -66,6 +68,7 @@ import { CountDirective } from '../../directives/count.directive';
 import { GradesMangeComponent } from './grades-mange/grades-mange-mange.component';
 import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.component';
 import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
+import { ReportComponent } from './report/report.component';
 
 
 
@@ -97,6 +100,7 @@ const components = [
   NewYearComponent,
   FeesComponent,
   GuardianComponent,
+  ReportComponent,
   OptionDataComponent,
   HeadComponent,
   NewCaptureComponent,
@@ -128,6 +132,7 @@ const modules = [
   PaginatorModule,
   MatSelectModule,
   MatTabsModule,
+  BreadcrumbModule,  
   MatAutocompleteModule,
   AsyncPipe,
   MatCardModule,

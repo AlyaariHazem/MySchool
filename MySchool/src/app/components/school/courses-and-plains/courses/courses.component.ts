@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
+import { LanguageService } from '../../../../core/services/language.service';
 interface City {
   name: string;
   code: string;
@@ -14,7 +15,7 @@ interface City {
               './../../../../shared/styles/style-select.scss'
             ]
 })
-export class CoursesComponent {
+export class CoursesComponent implements OnInit {
 
   showDialog() {
     console.log('the Book is added successfully!');
@@ -29,6 +30,8 @@ export class CoursesComponent {
   SelectClass:boolean=false;
   selectedCity: City | undefined;
   selectedBook:City | undefined;
+
+languageService=inject(LanguageService);
 
   selectBook():void{
     this.SelectBook=true;
@@ -73,6 +76,7 @@ export class CoursesComponent {
       { name: 'Grade 4', code: 'G4' },
       { name: 'Grade 5', code: 'G5' },
     ];
+    this.languageService.currentLanguage();
   }
 
   currentPage: number = 0; // Current page index

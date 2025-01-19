@@ -27,9 +27,6 @@ a.mobile_btn-En {
   width: 60px;
   z-index: 1;
 }
-.mobile_btn-Ar{
-    display: none;
-}
 @media only screen and (min-width: 991px) {
   .toggle_btn {
     color: #999;
@@ -39,13 +36,22 @@ a.mobile_btn-En {
     color: #999;
     float: right;
   }
+  .English {
+    .header {
+      right: 10px !important;
+      left: 295px !important;
+    }
+  }
   .toggle_btn-En {
     color: #999;
-    float: left;
+    float: left !important;
   }
 
   @media only screen and (max-width: 991px) {
     .mobile_btn-En {
+      display: block;
+    }
+    .mobile_btn-Ar {
       display: block;
     }
     .mobile_btn {

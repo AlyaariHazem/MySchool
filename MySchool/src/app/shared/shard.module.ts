@@ -4,6 +4,7 @@ import { FormsModule,  ReactiveFormsModule } from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
+import { TranslateModule } from '@ngx-translate/core';
 // import { TranslateModule } from '@ngx-translate/core';
 
 // const components=[];
@@ -18,7 +19,8 @@ const modules=[
     MatDialogActions,
     MatDialogClose,
     ReactiveFormsModule,
-    CommonModule
+    CommonModule,
+    TranslateModule
 ]
 
 @NgModule({

@@ -1,18 +1,21 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { PaginatorState } from 'primeng/paginator';
 
 import { FeeService } from '../../../../core/services/fee.service';
 import { Fees, FeeClasses, Fee, FeeClass } from '../../../../core/models/Fee.model';
 import { ClassService } from '../../../../core/services/class.service';
 import { ClassDTO } from '../../../../core/models/class.model';
 import { FeeClassService } from '../../../../core/services/fee-class.service';
-import { PaginatorState } from 'primeng/paginator';
+import { LanguageService } from '../../../../core/services/language.service';
 
 @Component({
   selector: 'app-fee-class',
   templateUrl: './fee-class.component.html',
-  styleUrls: ['./fee-class.component.scss']
+  styleUrls: ['./fee-class.component.scss',
+    '../../../../shared/styles/button.scss'
+  ]
 })
 export class FeeClassComponent implements OnInit {
   // Model properties
@@ -39,6 +42,8 @@ export class FeeClassComponent implements OnInit {
   constructor(private feeService: FeeService, private toastr: ToastrService) {}
   paginatedClassFee: FeeClasses[] = []; // Paginated data
 
+  languageService=inject(LanguageService);
+
   first: number = 0; 
   rows: number = 4; 
   updatePaginatedData(): void {
@@ -59,6 +64,7 @@ export class FeeClassComponent implements OnInit {
     this.getClasses();
     this.updatePaginatedData();
     this.getAllClassFees();
+    this.languageService.currentLanguage();
   }
 
   // Fee Operations

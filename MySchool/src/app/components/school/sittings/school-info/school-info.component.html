@@ -1,4 +1,4 @@
-<div class="schoolInfo">
+<div class="schoolInfo" [attr.dir]="languageService.dir">
     <h2 class="schoolTitle">معلومات المدرسة</h2>
     <form [formGroup]="form"  (ngSubmit)="onSubmit()">
         <div class="contant">
@@ -6,7 +6,7 @@
                 <img class="photo" src="assets/img/user.jpg" alt="school Photo" />
             </label>
             <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
-            <button class="btn btn-success save" type="submit">حفظ التغيرات+</button>
+            <button class="btn btn-success save school-btn" type="submit">حفظ التغيرات+</button>
 
             <div class="group">
                 <div class="form-control">

@@ -86,11 +86,19 @@ border-width: 2px 0 2px 0 !important;
 transition: border-color 0.2s;
 }
 
+.group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
   .group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr; 
   }
+  /* ...other responsive rules for buttons, labels, etc. */
+}
+
   .group5 {
     margin-top: 1rem;
   }
@@ -165,7 +173,7 @@ transition: border-color 0.2s;
     padding: 8px 0;
     border: none;
     color: #987979;
-    background-color:#91ffc6;
+    background: color #91ffc6 !important;;
   }
   .add:active {
     background-color: #7fffbd;

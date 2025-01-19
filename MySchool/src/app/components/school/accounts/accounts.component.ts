@@ -1,9 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
+
+import { LanguageService } from '../../../core/services/language.service';
+
 interface City {
   name: string;
   code: string;
@@ -15,24 +18,25 @@ interface City {
   styleUrls: ['./accounts.component.scss',
     './../../../shared/styles/style-select.scss']
 })
-export class AccountsComponent {
+export class AccountsComponent implements OnInit {
   visible: boolean = false;
 
   showDialog() {
-      this.visible = true;
+    this.visible = true;
   }
   form: FormGroup;
   cities: City[] | undefined;
-  
+
   values = new FormControl<string[] | null>(null);
   max = 2;
 
   selectedCity: City | undefined;
 
+  languageService=inject(LanguageService);
 
-  students =[1,2,3,4,5,6,7,8,9,10,];
+  students = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,];
   displayedStudents: number[] = []; // Students for the current page
-  
+
   isSmallScreen = false;
   private mediaSub: Subscription | null = null;
 
@@ -61,7 +65,8 @@ export class AccountsComponent {
       { name: 'London', code: 'LDN' },
       { name: 'Istanbul', code: 'IST' },
       { name: 'Paris', code: 'PRS' }
-  ];
+    ];
+    this.languageService.currentLanguage();
   }
 
   ngOnDestroy(): void {
@@ -77,10 +82,10 @@ export class AccountsComponent {
     const endIndex = startIndex + this.pageSize;
     this.displayedStudents = this.students.slice(startIndex, endIndex);
   }
- // Handle paginator events
- onPageChange(event: PageEvent): void {
-  this.currentPage = event.pageIndex;
-  this.pageSize = event.pageSize;
-  this.updateDisplayedStudents();
-}
+  // Handle paginator events
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updateDisplayedStudents();
+  }
 }

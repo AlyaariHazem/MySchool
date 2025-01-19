@@ -18,13 +18,13 @@ form {
   right: 0rem;
   top: 4rem;
 }
-.Title{
+.Title {
   position: absolute;
-    top: 4px;
+  top: 4px;
 }
 .table-container {
-    margin-top: 3rem;
-  }
+  margin-top: 3rem;
+}
 mat-form-field {
   margin-right: 1rem;
   width: 30%;
@@ -44,7 +44,7 @@ mat-form-field {
   border-radius: 1.5%;
 }
 
-.showFee{
+.showFee {
   position: relative;
   left: -44%;
   top: -3rem;
@@ -57,31 +57,31 @@ mat-form-field {
   text-align: right;
 }
 
-.styled-table{
+.styled-table {
   position: relative;
   top: -20px;
 }
-.New{
+.New {
   position: absolute;
-    top: 23px;
-    right: 33%;
-    width: 10%;
-    border: none;
-    padding: 8px 0;
-    background-color: #585858;
-    color: white;
-    border-radius: 4px;
+  top: 23px;
+  right: 33%;
+  width: 10%;
+  border: none;
+  padding: 8px 0;
+  background-color: #585858;
+  color: white;
+  border-radius: 4px;
 }
 .add {
   position: absolute;
-    top: 1.4rem;
-    width: 11%;
-    border-radius: 4px;
-    right: 21%;
-    border:none;
-    padding: 8px 0;
-    color: white;
-    background-color: #2fdf84;
+  top: 1.4rem;
+  width: 11%;
+  border-radius: 4px;
+  right: 21%;
+  border: none;
+  padding: 8px 0;
+  color: white;
+  background-color: #2fdf84;
 }
 .add:active {
   background-color: #2fdf85;
@@ -103,7 +103,7 @@ mat-form-field {
   form {
     right: -1rem;
   }
-  .school{
+  .school {
     color: red;
   }
   .styled-table th,
@@ -217,27 +217,34 @@ li:hover {
   background-color: #f0f0f0;
 }
 //for dialog *********
-:host ::ng-deep .p-ripple.p-button{
-  border-radius: 3rem!important;
+:host ::ng-deep .p-ripple.p-button {
+  border-radius: 3rem !important;
   height: 2rem !important;
   background-color: #12a212;
 }
-:host ::ng-deep .p-dialog-header-close{
-  background-color: white!important;
-}//***********************
+:host ::ng-deep .p-dialog-header-close {
+  background-color: white !important;
+} //***********************
 
 // this for pagnator
-:host ::ng-deep{
-  .cPaginator{
+:host ::ng-deep {
+  .cPaginator {
     position: absolute;
     margin-top: -5rem;
     left: 27%;
   }
 }
-:host ::ng-deep{
-  .chipsOne{
+.chipsOne {
+  position: absolute;
+  margin-top: -0.2rem;
+  left: 5%;
+  width: 17%;
+}
+.English {
+  .chipsOne {
     position: absolute;
     margin-top: -0.2rem;
-    left: 3%;
+    right: 3%;
+    width: 22%;
   }
 }

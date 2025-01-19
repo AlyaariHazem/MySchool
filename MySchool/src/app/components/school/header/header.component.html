@@ -1,8 +1,11 @@
-<div class="header-outer" [attr.dir]="dir">
+<div class="header-outer" [ngClass]="{'English':dir==='ltr'}" [attr.dir]="dir">
     <div class="header">
-        <a style="cursor: pointer;" (click)="open()" [ngClass]="{'mobile_btn-Ar': dir === 'rtl','mobile_btn-En': dir === 'ltr'}" class="mobile_btn float-left"><i class="fas fa-bars"></i></a>
+        <a style="cursor: pointer;" (click)="open()"
+            [ngClass]="{'mobile_btn-Ar': dir === 'rtl','mobile_btn-En': dir === 'ltr'}" class="mobile_btn float-left"><i
+                class="fas fa-bars"></i></a>
         <app-sidebar [sidebar]=toggle></app-sidebar>
-        <a id="toggle_btn" [ngClass]="{'toggle_btn-Ar': dir === 'rtl','toggle_btn-En': dir === 'ltr'}" class="float-right" href="javascript:void(0);">
+        <a id="toggle_btn" [ngClass]="{'toggle_btn-Ar': dir === 'rtl','toggle_btn-En': dir === 'ltr'}"
+            class="float-right" href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-21.png" alt="">
         </a>
         <ul class="nav float-right">

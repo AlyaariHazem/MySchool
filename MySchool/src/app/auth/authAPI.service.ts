@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import { Observable, tap } from 'rxjs';
+
+import { User } from '../core/models/user.model';
 import { BackendAspService } from '../environments/ASP.NET/backend-asp.service';
 
 
@@ -12,8 +14,8 @@ export class AuthAPIService {
     
   constructor(public router: Router) { }
 
-  login(credentials: { username: string; password: string }): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/account/login`, credentials).pipe(
+  login(user:User): Observable<any> {
+    return this.API.http.post(`${this.API.baseUrl}/account/login`, user).pipe(
       tap((response: any) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
@@ -22,8 +24,8 @@ export class AuthAPIService {
     );
   }
 
-  register(credentials: { userName: string; email: string; password: string }): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/account/register`, credentials);
+  register(user:User): Observable<any> {
+    return this.API.http.post(`${this.API.baseUrl}/account/register`, user);
   }
   
   logout() {

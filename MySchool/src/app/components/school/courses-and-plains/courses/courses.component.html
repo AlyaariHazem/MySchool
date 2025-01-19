@@ -1,4 +1,4 @@
-<div id="id01" class="modal-container">
+<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
     <mat-paginator class="cPaginator" [ngStyle]="{ position: 'absolute'}" [length]="students.length"
         [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
     </mat-paginator>
