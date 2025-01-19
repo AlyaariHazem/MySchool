@@ -1,0 +1,21 @@
+services:
+  server:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: dotnet-container
+    ports:
+      - "5000:80"
+    # Add environment variables if needed
+    # environment:
+    #   - ASPNETCORE_ENVIRONMENT=Production
+
+  client:
+    build:
+      context: ./Myschool
+      dockerfile: Dockerfile
+    container_name: angular-container
+    ports:
+      - "4200:80"
+    depends_on:
+      - server

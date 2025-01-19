@@ -1,8 +1,8 @@
-<div id="id01" class="modal-container">
-  <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-  [totalRecords]="120" [rowsPerPageOptions]="[10, 20, 30]" />
+<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
+  <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="120"
+    [rowsPerPageOptions]="[10, 20, 30]" />
   <h2 class="school">سندات القبض</h2>
-  <form [formGroup]="form">
+  <form>
     <div class="group group2">
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
@@ -14,7 +14,7 @@
         <p-dropdown [options]="[
           { label: 'Cash', value: 'cash' },
           { label: 'الكريمي', value: 'visa' }
-        ]" [(ngModel)]="selectedCity" optionLabel="label" placeholder="الدفع بواسطة">
+        ]" optionLabel="label" placeholder="الدفع بواسطة">
         </p-dropdown>
       </div>
       <div class="form-control">
@@ -31,7 +31,7 @@
       </div>
     </div>
     <p-button class="showFee" (onClick)="showDialog()" label="+سند قبض جديد" />
-    <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
+    <p-chips class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
   </form>
 
 

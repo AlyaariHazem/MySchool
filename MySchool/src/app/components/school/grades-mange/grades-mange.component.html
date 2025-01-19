@@ -1,5 +1,5 @@
-<div id="id01" class="modal-container">
-  <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+<div id="id01" [attr.dir]="languageService.dir" class="modal-container">
+  <p-paginator [attr.dir]="languageService.dir" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
     [totalRecords]="books.length" [rowsPerPageOptions]="[4, 8, 16]" />
   <h2 class="school">بنود الدرجات</h2>
   <form [formGroup]="form">
@@ -26,11 +26,16 @@
       </div>
     </div>
     <p-button class="showFee" (onClick)="showDialog()" label="إضافة+" />
-    <p-chips class="chipsOne" [max]="search" placeholder="ابحث هنا..." />
+    <p-chips [ngClass]="{'chipsOne':languageService.dir==='rtl','chipsOneEn':languageService.dir==='ltr'}" [max]="search" placeholder="ابحث هنا..." />
   </form>
+  <button pButton label="تصدير PDF" class="p-button-success" (click)="captureAsPDF()">
+  </button>
+
+  <!-- ... rest of your table/modal code ... -->
 
   <!-- Responsive Table -->
-  <div class="table-container">
+  <div id="printableTable">
+    <!-- Your entire table markup, etc. -->
     <div class="table-container">
       <mat-card>
         <div class="responsive-table">
@@ -50,11 +55,14 @@
                 <td>{{ student }}</td>
                 <td>قران كريم</td>
                 <td>Quran</td>
-                <td><button class="active" (click)="toggleIsActive()">
-                    <i class="bi bi-record-circle" [ngStyle]="{'color': isActive ? 'red' : '#2fdf85'}"></i>
+                <td>
+                  <button class="active" (click)="toggleIsActive()">
+                    <i class="bi bi-record-circle" [ngStyle]="{'color': isActive ? 'red' : '#2fdf85'}">
+                    </i>
                     نشط
                     <span class="bi bi-caret-down-fill"></span>
-                  </button></td>
+                  </button>
+                </td>
                 <td>
                   <div class="col text-left">
                     <div class="mt-sm-0 mt-2">
@@ -71,12 +79,11 @@
                   </div>
                 </td>
               </tr>
-            }
+              }
             </tbody>
           </table>
         </div>
       </mat-card>
     </div>
-
   </div>
 </div>

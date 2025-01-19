@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { Store } from '@ngrx/store';
 import { PaginatorState } from 'primeng/paginator';
 
 interface City {
@@ -23,7 +24,8 @@ interface Student {
   styleUrls: [
     './grades-month.component.scss',
     './../../../../shared/styles/style-select.scss',
-    './../../../../shared/styles/style-table.scss'
+    './../../../../shared/styles/style-table.scss',
+    '../../../../shared/styles/button.scss'
   ]
 })
 export class GradesMonthComponent implements OnInit {
@@ -36,6 +38,16 @@ export class GradesMonthComponent implements OnInit {
   SelectBook = false;
   SelectClass = false;
 
+  langDir!: string;
+  languageStore = inject(Store);
+  dir: string = "ltr";
+  currentLanguage(): void {
+    this.languageStore.select("language").subscribe((res) => {
+      this.langDir = res;
+      console.log("the language is", this.langDir);
+      this.dir = (res == "en") ? "ltr" : "rtl";
+    });
+  }
   studentsData: Student[] = [
     {
       id: 1232,
@@ -163,7 +175,7 @@ export class GradesMonthComponent implements OnInit {
       BookID: [null, Validators.required],
       ClassID: [null, Validators.required]
     });
-
+    this.currentLanguage();
     // Example data for dropdowns
     this.Books = [
       { name: 'Math', code: 'MATH' },

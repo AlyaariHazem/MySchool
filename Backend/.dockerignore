@@ -1,0 +1,4 @@
+# Backend/.dockerignore
+bin
+obj
+.git

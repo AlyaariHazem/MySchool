@@ -11,7 +11,9 @@ import { PaginatorState } from 'primeng/paginator';
 @Component({
   selector: 'app-stages-grades',
   templateUrl: './stages-grades.component.html',
-  styleUrls: ['./stages-grades.component.scss']
+  styleUrls: ['./stages-grades.component.scss',
+    '../../../../shared/styles/button.scss'
+  ]
 })
 export class StagesGradesComponent implements AfterViewInit, OnInit {
   activeTab: string = 'News';

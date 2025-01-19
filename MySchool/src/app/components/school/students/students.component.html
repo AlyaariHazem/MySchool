@@ -1,13 +1,13 @@
-<div id="id01" class="modal-container">
+<div id="id01" [attr.dir]="languageService.dir" class="modal-container">
   <div class="modal-content">
-    <h2 class="school">عرض جميع الطلاب</h2>
+    <h2 class="school">{{ 'student.title' | translate }}</h2>
     <div class="container">
       <div class="tabcontent">
-        <div class="col-4">
+        <div [ngClass]="{'col-4':languageService.dir==='rtl','col-4En':languageService.dir==='ltr'}">
           <i class="pi col-2 pi-bars" (click)="showStudentCulomn()"></i>
           <i class="bi col-2 bi-grid" (click)="showStudentGrid()"></i>
         </div>
-        <form [formGroup]="form">
+        <form [formGroup]="form" [ngClass]="{'formEn':languageService.dir==='ltr','form':languageService.dir==='rlt'}">
           <!-- First Dropdown -->
           <mat-form-field appearance="outline">
             <mat-label>إختار طالب</mat-label>
@@ -54,14 +54,17 @@
         <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
           [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 8, 16]" />
 
-        <button mat-raised-button color="primary" class="add" (click)="openDialog()">
+        <button mat-raised-button color="primary" [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" (click)="openDialog()">
           إضافة طالب+
         </button>
 
-        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
+        <p-iconfield iconPosition="left" [ngClass]="{'chipsOne':languageService.dir==='rtl','chipsEn':languageService.dir==='ltr'}" >
+          <p-inputicon styleClass="pi pi-search"/>
+          <input type="text" style="width: 100%;" pInputText placeholder="Search" />
+        </p-iconfield>
         
         @if (showGrid) {
-        <div class="group group2" [attr.dir]="dir">
+        <div class="group group2">
           @for (student of paginatedStudents; track $index) {
           <div class="form-control">
             <p-card class="responsive-card">
@@ -92,22 +95,22 @@
         }
 
         @if (showCulomn) {
-        <div class="table-container" [attr.dir]="dir">
+        <div class="table-container" [attr.dir]="languageService.dir">
           <div class="table-container">
             <mat-card>
               <table class="styled-table">
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>رقم الطالب</th>
-                    <th class="student-name-column">اسم الطالب</th>
-                    <th>المرحلة</th>
-                    <th>الصف</th>
-                    <th>الشعبة</th>
-                    <th>العمر</th>
-                    <th>النوع</th>
-                    <th>تاريخ التسجيل</th>
-                    <th>العملية</th>
+                    <th>{{'student.studentID'| translate}}</th>
+                    <th class="student-name-column">{{'student.studentName'| translate}}</th>
+                    <th>{{'student.stageName'| translate}}</th>
+                    <th>{{'student.className'| translate}}</th>
+                    <th>{{'student.divisionName'| translate}}</th>
+                    <th>{{'student.studentAmount'| translate}}</th>
+                    <th>{{'student.gender'| translate}}</th>
+                    <th>{{'student.registerDate'| translate}}</th>
+                    <th>{{'student.action'| translate}}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -117,7 +120,7 @@
                     <td>{{ student.studentID}}</td>
                     <td class="student-name-column">{{student.fullName.firstName +" "+ student.fullName.middleName+" "+
                       student.fullName.lastName}}</td>
-                    <td>{{ student.stageName }}</td>
+                    <td>{{ student.stageName}}</td>
                     <td>{{ student.className}}</td>
                     <td>{{ student.divisionName }}</td>
                     <td>{{ student.age }}</td>

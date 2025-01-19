@@ -1,0 +1,116 @@
+{
+    "validation": {
+      "requiredMessage": "Please fill in the required fields"
+    },
+    "schoolName": "My School",
+    "settings": {
+      "title": "Settings",
+      "yearStudy": "Academic Years",
+      "schoolInfo": "School Information",
+      "stagesClasses": "Stages and Classes",
+      "feeClass": "Class Fees"
+    },
+    "student": {
+      "title": "All Students",
+      "studentID": "Student ID",
+      "studentName": "Student Name",
+      "stageName": "Stage",
+      "studentAmount": "Number of Students",
+      "className": "Class",
+      "divisionName": "Division",
+      "age": "Age",
+      "gender": "Gender",
+      "registerDate": "Registration Date",
+      "action": "Action"
+    },
+    "sidebar": {
+      "menu": "Menu",
+      "home": "Home",
+      
+      "teachers": "Teachers",
+      "teachers_sub": {
+        "all": "All Teachers",
+        "add": "Add Teacher",
+        "edit": "Edit Teacher",
+        "about": "About Teachers"
+      },
+  
+      "students": "Students",
+      "students_sub": {
+        "all": "All Students",
+        "add": "Add Student",
+        "edit": "Edit Student"
+      },
+  
+      "parents": "Parents",
+      "parents_sub": {
+        "all": "View Parents",
+        "editStudent": "Edit Student"
+      },
+  
+      "accounts": "Accounts",
+      "accounts_sub": {
+        "accounts": "Accounts",
+        "bills": "Bills"
+      },
+  
+      "grades": "Grades",
+      "grades_sub": {
+        "items": "Grade Items",
+        "monthly": "Monthly Grades"
+      },
+  
+      "calendar": "Calendar",
+      "tests": "Tests",
+      "holidays": "Holidays",
+      "events": "Events",
+  
+      "fees": "Fees",
+      "fees_sub": {
+        "feeSettings": "Fee Settings",
+        "receipt": "Receipt",
+        "expenses": "Expenses",
+        "taxes": "Taxes"
+      },
+  
+      "courses": "Courses and Plans",
+      "courses_sub": {
+        "books": "Books",
+        "curricula": "Curricula",
+        "plans": "Curriculum Plans"
+      },
+  
+      "payroll": "Payroll",
+      "payroll_sub": {
+        "salaries": "Employee Salaries",
+        "installments": "Installments"
+      },
+  
+      "blogs": "Blogs",
+      "blogs_sub": {
+        "blog": "Blog",
+        "view": "View Blogs",
+        "add": "Add Blog",
+        "edit": "Edit Blog"
+      },
+  
+      "management": "Management",
+      "employees_sub": {
+        "all": "All Employees",
+        "holidays": "Holidays",
+        "leaveRequests": "Leave Requests",
+        "attendance": "Attendance",
+        "departments": "Departments",
+        "tasks": "Tasks"
+      },
+      "activities": "Activities",
+      "users": "Users",
+      "reports": "Reports",
+      "reports_sub": {
+        "expensesReport": "Expenses Report",
+        "billReport": "Bill Report"
+      },
+      "employees": "Employees"
+    }
+  }
+  

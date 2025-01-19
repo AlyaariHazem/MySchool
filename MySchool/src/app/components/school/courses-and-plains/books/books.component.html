@@ -1,4 +1,4 @@
-<div id="id01" class="modal-container">
+<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
   <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
           [totalRecords]="books.length" [rowsPerPageOptions]="[4, 8, 16]" />
   <h2 class="school">الكتــب الدراسية</h2>

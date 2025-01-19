@@ -1,0 +1,105 @@
+{
+    "validation": {
+      "requiredMessage": "الرجاء ملء الحقول المطلوبة"
+    },
+    "schoolName": "مدرستي",
+    "settings": {
+      "title": "الإعدادات",
+      "yearStudy": "السنوات الدراسية",
+      "schoolInfo": "معلومات المدرسة",
+      "stagesClasses": "المراحل والصفوف",
+      "feeClass": "رسوم الصفوف"
+    },
+    "student": {
+      "title": "عرض جميع الطلاب",
+      "studentID": "رقم الطالب",
+      "studentName": "اسم الطالب",
+      "stageName": "المرحلة",
+      "studentAmount": "عدد الطلاب",
+      "className": "الفصل",
+      "divisionName": "الشعبة",
+      "age": "العمر",
+      "gender": "النوع",
+      "registerDate": "تاريخ التسجيل",
+      "action": "العملية"
+    },
+    "sidebar": {
+      "menu": "القائمة",
+      "home": "الصفحة الرئيسية",
+      "teachers": "المدرسين",
+      "teachers_sub": {
+        "all": "جميع المدرسين",
+        "add": "إضافة مدرس",
+        "edit": "تعديل مدرس",
+        "about": "عن المدرسين"
+      },
+      "students": "الطلاب",
+      "students_sub": {
+        "all": "كل الطلاب",
+        "add": "إضافة طالب",
+        "edit": "تعديل طالب"
+      },
+      "parents": "أولياء الأمور",
+      "parents_sub": {
+        "all": "عرض أولياء الأمور",
+        "editStudent": "تعديل طالب"
+      },
+      "accounts": "الحسابات",
+      "accounts_sub": {
+        "accounts": "الحسابات",
+        "bills": "الفواتير"
+      },
+      "grades": "درجات الطلاب",
+      "grades_sub": {
+        "items": "بنود الدرجات",
+        "monthly": "الدرجات الشهرية"
+      },
+      "calendar": "التقويم",
+      "tests": "الإختبارات",
+      "holidays": "العطل",
+      "events": "الأحداث",
+      "fees": "الرسوم",
+      "fees_sub": {
+        "feeSettings": "إعدادات الرسوم",
+        "receipt": "سند قبض",
+        "expenses": "النفقات",
+        "taxes": "الضرائب"
+      },
+      "courses": "المقررات و الخطط",
+      "courses_sub": {
+        "books": "الكتب",
+        "curricula": "المقررات",
+        "plans": "خطط المقررات"
+      },
+      "payroll": "كشف المرتبات",
+      "payroll_sub": {
+        "salaries": "مرتبات الموظفين",
+        "installments": "الأقساط"
+      },
+      "blogs": "المدونات",
+      "blogs_sub": {
+        "blog": "Blog",
+        "view": "عرض مدونات",
+        "add": "أضافة مدونة",
+        "edit": "تعديل مدونة"
+      },
+      "management": "إدارة",
+      "employees_sub": {
+        "all": "كل الموظفين",
+        "holidays": "العطل",
+        "leaveRequests": "طلبات الإجازة",
+        "attendance": "الحضور",
+        "departments": "Departments",
+        "tasks": "المهام"
+      },
+      "activities": "الأنشطة",
+      "users": "المستخدمين",
+      "reports": "التقارير",
+      "reports_sub": {
+        "expensesReport": "تقرير النفقات",
+        "billReport": "تقرير الفاتورة"
+      },
+      "employees": "الموظفين"
+    }
+  }
+  

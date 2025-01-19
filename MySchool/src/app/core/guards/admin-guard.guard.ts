@@ -1,7 +1,8 @@
 import { inject } from '@angular/core';
 import { CanMatchFn } from '@angular/router';
-import { AuthAPIService } from '../../auth/authAPI.service';
 import { ToastrService } from 'ngx-toastr';
+
+import { AuthAPIService } from '../../auth/authAPI.service';
 
 export const adminGuardGuard: CanMatchFn = (route, state) => {
   

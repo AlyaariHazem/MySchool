@@ -4,6 +4,7 @@ import { RegisterComponent } from '../register/register.component';
 import { ToastrService } from 'ngx-toastr';
 import { ShardModule } from '../../shared/shard.module';
 import { AuthAPIService } from '../authAPI.service';
+import { User } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-login',
@@ -17,8 +18,8 @@ export class LoginComponent {
   private toastr = inject(ToastrService);
   private dialog = inject(MatDialog);
 
-  login(credentials: { username: string; password: string }): void {
-    this.authService.login(credentials).subscribe({
+  login(user:User): void {
+    this.authService.login(user).subscribe({
       next: (response: any) => {
         if (response && response.token) {
           this.authService.router.navigateByUrl('school');

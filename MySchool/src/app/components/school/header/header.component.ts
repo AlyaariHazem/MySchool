@@ -25,7 +25,6 @@ export class HeaderComponent implements OnInit {
   currentLanguage():void{
     this.languageStore.select("language").subscribe((res)=>{
       this.langDir=res;
-      console.log("the language is",this.langDir);
       if(this.langDir=='en'){
         this.languageimage='Amarica.jpg';
       }else{

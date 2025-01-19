@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
+import { LanguageService } from '../../../../core/services/language.service';
 interface City {
   name: string;
   code: string;
@@ -14,7 +15,7 @@ interface City {
               './../../../../shared/styles/style-table.scss'
   ]
 })
-export class BooksComponent {
+export class BooksComponent implements OnInit {
 
   showDialog() {
     console.log('the Book is added successfully!');
@@ -28,6 +29,9 @@ export class BooksComponent {
   paginatedBooks: number[] = []; // Students for the current page
 
   isSmallScreen = false;
+
+ langDir!:string;
+ languageService=inject(LanguageService);
 
   constructor(
     private formBuilder: FormBuilder,
@@ -48,6 +52,7 @@ export class BooksComponent {
       { name: 'Istanbul', code: 'IST' },
       { name: 'Paris', code: 'PRS' }
     ];
+    this.languageService.currentLanguage();
   }
  
   first: number = 0; // Current starting index

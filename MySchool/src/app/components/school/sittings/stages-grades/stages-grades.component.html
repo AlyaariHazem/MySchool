@@ -36,15 +36,15 @@
 
           </div>
           <!-- I want when I click on the edit change this for "تعديل" -->
-          <input type="submit" class="btn btn-primary add" [value]="isEditMode ? 'تعديل' : 'إضافة'"
+          <input type="submit" class="btn btn-primary add school-btn"  [value]="isEditMode ? 'تعديل' : 'إضافة'"
             (click)="isEditMode ? updateStage() : addStage()" [disabled]="!form.valid" />
         </form>
 
         @if( form.get('StageName')?.invalid && form.get('StageName')?.touched){
         <span style="
             position: absolute;
-            top: 11.6rem;
-            right: 4rem;
+            top: 12.6rem;
+            right: 2rem;
             text-align: right;
             width: 34%;
             color: red;

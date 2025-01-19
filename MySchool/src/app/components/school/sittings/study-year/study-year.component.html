@@ -1,4 +1,4 @@
-<div id="id01" class="modal-container">
+<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
   <div class="modal-content">
     <h2 class="school">العام الدارسي</h2>
     <div class="container">
@@ -8,7 +8,10 @@
         <mat-paginator class="cPaginator" [ngStyle]="{ position: 'absolute'}" [length]="years.length"
           [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
         </mat-paginator>
-        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
+        <p-iconfield iconPosition="left" class="chipsOne" >
+          <p-inputicon styleClass="pi pi-search"/>
+          <input type="text" style="width: 100%;" pInputText placeholder="Search" />
+        </p-iconfield>
 
         <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '75%' }" [draggable]="false"
           [resizable]="false">

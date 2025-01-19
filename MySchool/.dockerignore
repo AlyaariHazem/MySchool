@@ -1,0 +1,5 @@
+# Ignore node_modules, Angular dist folder, coverage data, Git repo
+node_modules
+dist
+coverage
+.git

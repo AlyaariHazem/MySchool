@@ -18,6 +18,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 @import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Changa:wght@400;700&display=swap');
 
+@import 'primeflex/primeflex.scss';
+  @import 'primeflex/primeflex.css';
+  
 /* Primary font styles */
 body, h1, h2, h3,h4, span, td, a, button, th,li {
     font-family: 'Noto Kufi Arabic', sans-serif;

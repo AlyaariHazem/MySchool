@@ -1,9 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { PaginatorState } from 'primeng/paginator';
-import { Store } from '@ngrx/store'; 
 
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { StudentService } from '../../../core/services/student.service';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,23 +13,14 @@ import { StudentService } from '../../../core/services/student.service';
 export class DashboardComponent implements OnInit {
   constructor() {}
   
-  langDir!:string;
-  languageStore=inject(Store);
-  dir:string="ltr";
-  currentLanguage():void{
-    this.languageStore.select("language").subscribe((res)=>{
-      this.langDir=res;
-      console.log("the language is",this.langDir);
-      this.dir=(res=="en")?"ltr":"rtl";
-    });
-  }
-
+  languageService=inject(LanguageService);
+  
   students: StudentDetailsDTO[] = [];
   studentService = inject(StudentService);
 
   ngOnInit(): void {
     this.getAllStudent();
-    this.currentLanguage();
+    this.languageService.currentLanguage();
   }
 
   getAllStudent(): void {

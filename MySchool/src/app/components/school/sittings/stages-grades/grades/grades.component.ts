@@ -11,7 +11,9 @@ import { PageEvent } from '@angular/material/paginator';
 @Component({
   selector: 'app-grades',
   templateUrl: './grades.component.html',
-  styleUrls: ['./grades.component.scss']
+  styleUrls: ['./grades.component.scss',
+    '../../../../../shared/styles/button.scss'
+  ]
 })
 export class GradesComponent implements OnInit {
   stages: Array<Stage> = [];

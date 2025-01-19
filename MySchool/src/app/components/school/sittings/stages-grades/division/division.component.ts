@@ -11,7 +11,9 @@ import { ClassDTO } from '../../../../../core/models/class.model';
 @Component({
   selector: 'app-division',
   templateUrl: './division.component.html',
-  styleUrls: ['./division.component.scss']
+  styleUrls: ['./division.component.scss',
+    '../../../../../shared/styles/button.scss'
+  ]
 })
 export class DivisionComponent implements OnInit {
   divisions: Array<divisions> = [];
