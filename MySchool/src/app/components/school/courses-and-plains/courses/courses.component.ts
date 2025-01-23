@@ -26,19 +26,11 @@ export class CoursesComponent implements OnInit {
 
   values = new FormControl<string[] | null>(null);
   max = 2;
-  SelectBook:boolean=false;
-  SelectClass:boolean=false;
   selectedCity: City | undefined;
   selectedBook:City | undefined;
 
 languageService=inject(LanguageService);
 
-  selectBook():void{
-    this.SelectBook=true;
-  }
-  selectClass():void{
-    this.SelectClass=true;
-  }
   students = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,];
   displayedStudents: number[] = []; // Students for the current page
 

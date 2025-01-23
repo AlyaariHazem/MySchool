@@ -14,7 +14,8 @@ import { LanguageService } from '../../../../core/services/language.service';
   selector: 'app-fee-class',
   templateUrl: './fee-class.component.html',
   styleUrls: ['./fee-class.component.scss',
-    '../../../../shared/styles/button.scss'
+    '../../../../shared/styles/button.scss',
+    '../../../../shared/styles/style-select.scss'
   ]
 })
 export class FeeClassComponent implements OnInit {

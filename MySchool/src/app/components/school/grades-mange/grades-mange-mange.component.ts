@@ -22,7 +22,7 @@ export class GradesMangeComponent implements OnInit {
   form: FormGroup;
   cities: City[] | undefined;
   search: any;
-
+  
   books: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   paginatedBooks: number[] = [];
   isActive: boolean = false;

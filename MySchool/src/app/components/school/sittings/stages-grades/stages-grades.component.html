@@ -1,17 +1,17 @@
 <div id="id01" class="">
   <div class="modal-content" style="background-color: #ffffff !important">
     <div class="container" dir="rtl">
-      <h2 class="school" dir="rtl">تخصيص المدرسة</h2>
+      <h2 class="school" dir="rtl">{{'schoolTitle'|translate}}</h2>
       <button [ngClass]="{ tablink: true, active: activeTab === 'News' }" (click)="openPage('News', $event.target)"
         id="defaultOpen">
-        <span>المراحل</span>
+        <span>{{'stage'|translate}}</span>
       </button>
       <button [ngClass]="{ tablink: true, active: activeTab === 'Class' }" (click)="openPage('Class', $event.target)">
-        <span>الصفوف</span>
+        <span>{{'stages.classes'|translate}}</span>
       </button>
       <button [ngClass]="{ tablink: true, active: activeTab === 'Contact' }"
         (click)="openPage('Contact', $event.target)">
-        <span>الشعب</span>
+        <span>{{'stages.division'|translate}}</span>
       </button>
       <p class="line"></p>
 
@@ -23,20 +23,20 @@
           <div class="group group2">
             <div class="form-control">
               <mat-form-field appearance="outline" class="inputText">
-                <mat-label>اسم المرحلة</mat-label>
+                <mat-label>{{'tableHeaders.stageName'|translate}}</mat-label>
                 <input formControlName="StageName" class="term" type="text" matInput />
               </mat-form-field>
             </div>
             <div class="form-control">
               <mat-form-field appearance="outline" class="inputText">
-                <mat-label>ملاحظة</mat-label>
+                <mat-label>{{'tableHeaders.note'|translate}}</mat-label>
                 <input formControlName="Note" class="class" type="text" matInput />
               </mat-form-field>
             </div>
 
           </div>
           <!-- I want when I click on the edit change this for "تعديل" -->
-          <input type="submit" class="btn btn-primary add school-btn"  [value]="isEditMode ? 'تعديل' : 'إضافة'"
+          <input type="submit" class="btn btn-primary add school-btn" [value]="isEditMode ? 'تعديل' : 'إضافة'"
             (click)="isEditMode ? updateStage() : addStage()" [disabled]="!form.valid" />
         </form>
 
@@ -49,14 +49,14 @@
             width: 34%;
             color: red;
           " class="error">
-          اسم المرحلة مطلوب
+          {{'validation.stageNameRequired'|translate}}
         </span>
         }
         <table class="styled-table" style="overflow-y: hidden; width: 105%">
           <thead>
             <tr>
               <th>#</th>
-              <th>اسم المرحلة</th>
+              <th>{{'tableHeaders.stageName'|translate}}</th>
               <th>صفوف</th>
               <th>إجمالي الطلاب</th>
               <th>ملاحظة</th>

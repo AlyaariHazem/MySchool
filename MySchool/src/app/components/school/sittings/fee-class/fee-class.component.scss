@@ -31,6 +31,7 @@ form {
   .school{
     color:black;
     margin:4px 6px;
+    text-align: right;
     padding: 1rem;
   }
   mat-tab-group{
@@ -89,6 +90,7 @@ transition: border-color 0.2s;
 .group {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  width: 80%;
   gap: 20px;
 }
 
@@ -112,7 +114,8 @@ transition: border-color 0.2s;
   .form-control1 {
     display: flex;
     border: none;
-    width: 55%;
+    margin-top: 1rem;
+    width: 94%;
     flex-direction: column;
     gap: 5px; /* Space between label and input */
   }
@@ -147,10 +150,6 @@ transition: border-color 0.2s;
         position: relative;
         right: 0rem!important;
     }
-    .control3{
-        position: relative;
-        right: 0rem!important;
-    }
   }
   
 .add {
@@ -158,13 +157,13 @@ transition: border-color 0.2s;
     top: 2rem;
     width: 11%;
     border-radius: 32px;
-    left: 1rem;
+    right: 1rem;
     padding: 8px 0;
     border: none;
     color: white;
     background-color: #2fdf84;
   }
-.disabledAdd {
+.AddEn {
     position: absolute;
     top: 2rem;
     width: 11%;
@@ -181,11 +180,6 @@ transition: border-color 0.2s;
   .control2{
     position: relative;
     right: -10rem;
-  }
-  .control3{
-    position: relative;
-    left: 90%;
-    top: -0.3rem;
   }
   // table ---------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   .table-container {
@@ -209,9 +203,6 @@ transition: border-color 0.2s;
     }
     .button1{
         left:0%;
-    }
-    .control3{
-        left: 30%;
     }
     .styled-table th,
     .styled-table td {

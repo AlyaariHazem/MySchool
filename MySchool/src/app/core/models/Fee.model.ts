@@ -28,6 +28,7 @@ export class FeeClasses {
     mandatory: boolean = false;
   }
 export class FeeClass{
+    feeClassID!:number;
     classID!:number;
     feeID!:number;
     amount?:number;

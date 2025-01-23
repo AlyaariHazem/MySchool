@@ -1,12 +1,12 @@
 <div class="Fee" [attr.dir]="languageService.dir">
     <h2 class="school">إعدادات الرسوم</h2>
-    <p-paginator [attr.dir]="languageService.dir" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
         [totalRecords]="FeeClass.length" [rowsPerPageOptions]="[4, 8, 16]" />
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
         <!-- Tab 1: بند الرسوم -->
         <mat-tab label="بند الرسوم">
             <form #feeForm="ngForm">
-                <div class="group group1">
+                <div class="group">
                     <!-- Input for Fee Name -->
                     <div class="form-control">
                         <mat-form-field appearance="outline" class="inputText">
@@ -29,7 +29,7 @@
                     </div>
                     <!-- Submit Button -->
                     <button mat-raised-button color="primary" type="submit"
-                        [ngClass]="feeForm.invalid||editMode?'disabledAdd':'add'" class="school-btn"
+                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="school-btn"
                         [disabled]="feeForm.invalid" (click)="onSubmit(feeForm)">
                         {{ editMode ? 'تعديل' : 'إضافة+' }}
                     </button>
@@ -65,8 +65,9 @@
                                 <td>
                                     <div class="col text-left">
                                         <div class="mt-sm-0 mt-2">
-                                            <button class="btn btn-left" type="button" data-toggle="dropdown"
-                                                aria-haspopup="true" aria-expanded="false">
+                                            <button class="btn btn-left"
+                                                [ngClass]="{'btnEn': languageService.dir==='rtl'}" type="button"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
                                             <div class="dropdown-menu dropdown-menu-left">
@@ -92,38 +93,27 @@
         <!-- Tab 2: رسوم الصفوف -->
         <mat-tab label="رسوم الصفوف">
             <form #classFeeForm="ngForm" (ngSubmit)="onSubmitClassFee(classFeeForm)">
-                <div class="group group1">
+                <div class="group">
                     <!-- Class Selector -->
                     <div class="form-control1">
-                        <mat-form-field appearance="outline">
-                            <mat-label>إختار الصـف</mat-label>
-                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"
-                                [(ngModel)]="FeeClassDTO.classID" name="classID" #classSelector="ngModel" required>
-                                <mat-option [value]="null">None</mat-option>
-                                @for (Class of classDTO; track $index) {
-                                <mat-option [value]="Class.classID">{{ Class.className }}</mat-option>
-                                }
-                            </mat-select>
-                        </mat-form-field>
+                        <p-dropdown [options]="classDTO" [(ngModel)]="FeeClassDTO.classID" name="classID"
+                            optionLabel="className" optionValue="classID" placeholder="إختار الصـف" [showClear]="true"
+                            (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" required>
+                        </p-dropdown>
+
                     </div>
                     <!-- Fee Selector -->
                     <div class="form-control1">
-                        <mat-form-field class="button1" appearance="outline">
-                            <mat-label>إختار بند الرسوم</mat-label>
-                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"
-                                name="feeID" [(ngModel)]="FeeClassDTO.feeID" required>
-                                <mat-option [value]="null">None</mat-option>
-                                @for (fee of Fees; track $index) {
-                                <mat-option [value]="fee.feeID">
-                                    {{ fee.feeName }}
-                                </mat-option>
-                                }
-                            </mat-select>
-                        </mat-form-field>
+                        <p-dropdown [options]="Fees" [(ngModel)]="FeeClassDTO.feeID" name="feeID" optionLabel="feeName"
+                            optionValue="feeID" placeholder="إختار بند الرسوم" [showClear]="true"
+                            [ngClass]="{'en': languageService.dir==='ltr'}"
+                            (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" required>
+                        </p-dropdown>
                     </div>
+
                     <div *ngIf="exist" class="error">هذا الصف يحتوي على نفس البند</div>
                     <!-- Amount -->
-                    <div class="form-control control3">
+                    <div class="form-control">
                         <mat-form-field appearance="outline" class="inputText">
                             <mat-label>المبلغ</mat-label>
                             <input class="inputError" type="number" name="amount" [(ngModel)]="FeeClassDTO.amount"
@@ -135,8 +125,7 @@
                     </div>
                     <!-- Submit Button -->
                     <button mat-raised-button color="primary" type="submit" class="school-btn"
-                        [ngClass]="classFeeForm.invalid||exist?'disabledAdd':'add'"
-                        [disabled]="classFeeForm.invalid||exist">
+                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" [disabled]="classFeeForm.invalid||exist">
                         {{ editModeClass ? 'تعديل' : 'إضافة+' }}
                     </button>
 
@@ -178,7 +167,7 @@
                                                     <i class="bi bi-pencil-square IconEdit"></i> تعديل
                                                 </a>
                                                 <div role="separator" class="dropdown-divider"></div>
-                                                <a class="dropdown-item" (click)="deleteFeeClass(fee.classID)"><i
+                                                <a class="dropdown-item" (click)="deleteFeeClass(fee.feeClassID)"><i
                                                         class="bi bi-trash IconDelete"></i>حذف</a>
                                             </div>
                                         </div>

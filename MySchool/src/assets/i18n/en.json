@@ -1,116 +1,195 @@
 {
-    "validation": {
-      "requiredMessage": "Please fill in the required fields"
-    },
-    "schoolName": "My School",
-    "settings": {
-      "title": "Settings",
-      "yearStudy": "Academic Years",
-      "schoolInfo": "School Information",
-      "stagesClasses": "Stages and Classes",
-      "feeClass": "Class Fees"
-    },
-    "student": {
-      "title": "All Students",
-      "studentID": "Student ID",
-      "studentName": "Student Name",
-      "stageName": "Stage",
-      "studentAmount": "Number of Students",
-      "className": "Class",
-      "divisionName": "Division",
-      "age": "Age",
-      "gender": "Gender",
-      "registerDate": "Registration Date",
-      "action": "Action"
-    },
-    "sidebar": {
-      "menu": "Menu",
-      "home": "Home",
-      
-      "teachers": "Teachers",
-      "teachers_sub": {
-        "all": "All Teachers",
-        "add": "Add Teacher",
-        "edit": "Edit Teacher",
-        "about": "About Teachers"
-      },
-  
-      "students": "Students",
-      "students_sub": {
-        "all": "All Students",
-        "add": "Add Student",
-        "edit": "Edit Student"
-      },
-  
-      "parents": "Parents",
-      "parents_sub": {
-        "all": "View Parents",
-        "editStudent": "Edit Student"
-      },
-  
-      "accounts": "Accounts",
-      "accounts_sub": {
-        "accounts": "Accounts",
-        "bills": "Bills"
-      },
-  
-      "grades": "Grades",
-      "grades_sub": {
-        "items": "Grade Items",
-        "monthly": "Monthly Grades"
-      },
-  
-      "calendar": "Calendar",
-      "tests": "Tests",
-      "holidays": "Holidays",
-      "events": "Events",
-  
-      "fees": "Fees",
-      "fees_sub": {
-        "feeSettings": "Fee Settings",
-        "receipt": "Receipt",
-        "expenses": "Expenses",
-        "taxes": "Taxes"
-      },
-  
-      "courses": "Courses and Plans",
-      "courses_sub": {
-        "books": "Books",
-        "curricula": "Curricula",
-        "plans": "Curriculum Plans"
-      },
-  
-      "payroll": "Payroll",
-      "payroll_sub": {
-        "salaries": "Employee Salaries",
-        "installments": "Installments"
-      },
-  
-      "blogs": "Blogs",
-      "blogs_sub": {
-        "blog": "Blog",
-        "view": "View Blogs",
-        "add": "Add Blog",
-        "edit": "Edit Blog"
-      },
-  
-      "management": "Management",
-      "employees_sub": {
-        "all": "All Employees",
-        "holidays": "Holidays",
-        "leaveRequests": "Leave Requests",
-        "attendance": "Attendance",
-        "departments": "Departments",
-        "tasks": "Tasks"
-      },
-      "activities": "Activities",
-      "users": "Users",
-      "reports": "Reports",
-      "reports_sub": {
-        "expensesReport": "Expenses Report",
-        "billReport": "Bill Report"
-      },
-      "employees": "Employees"
+  "validation": {
+    "requiredMessage": "Please fill in the required fields",
+    "stageNameRequired": "Stage name is required"
+  },
+  "schoolInfo": "School Information",
+  "saveChanges": "Save Changes+",
+  "labels": {
+    "schoolName": "School Name",
+    "schoolNameEn": "Alternate School Name",
+    "schoolType": "School Type",
+    "schoolClass": "School Category",
+    "address": "Address",
+    "country": "Country",
+    "city": "City",
+    "zone": "Region",
+    "email": "Email",
+    "fax": "Fax",
+    "street": "street",
+    "schoolPhone": "Phone",
+    "mobile": "Mobile",
+    "website": "School Website",
+    "description": "School Description",
+    "schoolGoal": "School Goals",
+    "schoolVision": "School Vision",
+    "schoolMission": "School Mission"
+  },
+  "placeholders": {
+    "address": "Address",
+    "chooseType": "Choose Type",
+    "chooseCategory": "Choose Category"
+  },
+  "buttons": {
+    "save": "Save Changes+"
+  },
+  "stage": "Stage",
+  "stages": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "active": "Active",
+    "inactive": "Inactive",
+    "noStudents": "No students currently",
+    "classes": "Classes",
+    "division": "Division",
+    "totalStudents": "Total Students",
+    "note": "Note",
+    "status": "Status",
+    "actions": "Actions",
+    "rows": "Rows",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "of": "of"
     }
+  },
+  "schoolTitle": "School Setup",
+  "tableHeaders": {
+    "number": "#",
+    "stageName": "Stage Name",
+    "classes": "Classes",
+    "totalStudents": "Total Students",
+    "note": "Note",
+    "status": "Status",
+    "action": "Action"
+  },
+  "dropdown": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "chooseType": "Choose Type",
+    "chooseCategory": "Choose Category",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "form": {
+    "stageName": "Stage Name",
+    "note": "Note",
+    "submit": "Add",
+    "editSubmit": "Edit"
+  },
+  "schoolName": "My School",
+  "settings": {
+    "title": "Settings",
+    "yearStudy": "Academic Years",
+    "schoolInfo": "School Information",
+    "stagesClasses": "Stages and Classes",
+    "feeClass": "Class Fees"
+  },
+  "student": {
+    "title": "All Students",
+    "studentID": "Student ID",
+    "studentName": "Student Name",
+    "stageName": "Stage",
+    "studentAmount": "Number of Students",
+    "className": "Class",
+    "divisionName": "Division",
+    "age": "Age",
+    "gender": "Gender",
+    "registerDate": "Registration Date",
+    "action": "Action"
+  },
+  "sidebar": {
+    "menu": "Menu",
+    "home": "Home",
+    "teachers": "Teachers",
+    "teachers_sub": {
+      "all": "All Teachers",
+      "add": "Add Teacher",
+      "edit": "Edit Teacher",
+      "about": "About Teachers"
+    },
+    "students": "Students",
+    "students_sub": {
+      "all": "All Students",
+      "add": "Add Student",
+      "edit": "Edit Student"
+    },
+    "parents": "Parents",
+    "parents_sub": {
+      "all": "View Parents",
+      "editStudent": "Edit Student"
+    },
+    "accounts": "Accounts",
+    "accounts_sub": {
+      "accounts": "Accounts",
+      "bills": "Bills"
+    },
+    "grades": "Grades",
+    "grades_sub": {
+      "items": "Grade Items",
+      "monthly": "Monthly Grades"
+    },
+    "calendar": "Calendar",
+    "tests": "Tests",
+    "holidays": "Holidays",
+    "events": "Events",
+    "fees": "Fees",
+    "fees_sub": {
+      "feeSettings": "Fee Settings",
+      "receipt": "Receipt",
+      "expenses": "Expenses",
+      "taxes": "Taxes"
+    },
+    "courses": "Courses and Plans",
+    "courses_sub": {
+      "books": "Books",
+      "curricula": "Curricula",
+      "plans": "Curriculum Plans"
+    },
+    "payroll": "Payroll",
+    "payroll_sub": {
+      "salaries": "Employee Salaries",
+      "installments": "Installments"
+    },
+    "blogs": "Blogs",
+    "blogs_sub": {
+      "blog": "Blog",
+      "view": "View Blogs",
+      "add": "Add Blog",
+      "edit": "Edit Blog"
+    },
+    "management": "Management",
+    "employees_sub": {
+      "all": "All Employees",
+      "holidays": "Holidays",
+      "leaveRequests": "Leave Requests",
+      "attendance": "Attendance",
+      "departments": "Departments",
+      "tasks": "Tasks"
+    },
+    "activities": "Activities",
+    "users": "Users",
+    "reports": "Reports",
+    "reports_sub": {
+      "expensesReport": "Expenses Report",
+      "billReport": "Bill Report"
+    },
+    "employees": "Employees"
+  },
+  "dashboard": {
+    "studentsLabel": "Students",
+    "teachersLabel": "Teachers",
+    "parentsLabel": "Parents",
+    "totalMoney": "Total Money",
+    "classSchedule": "Class Schedule",
+    "tests": "Tests",
+    "newStudents": "New Students",
+    "excel": "Excel",
+    "pdf": "PDF",
+    "actions": "Action",
+    "messages": "Messages",
+    "seeAllMessages": "See all messages"
   }
-  
+}
