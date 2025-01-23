@@ -77,7 +77,8 @@
     "stageName": "اسم المرحلة",
     "note": "ملاحظة",
     "submit": "إضافة",
-    "editSubmit": "تعديل"
+    "editSubmit": "تعديل",
+    "requiredMessage": "الرجاء ملء الحقول المطلوبة"
   },
   "schoolName": "مدرستي",
   "settings": {
@@ -91,6 +92,7 @@
     "title": "عرض جميع الطلاب",
     "studentID": "رقم الطالب",
     "studentName": "اسم الطالب",
+    "stageName": "المرحلة",
     "studentAmount": "عدد الطلاب",
     "className": "الفصل",
     "divisionName": "الشعبة",

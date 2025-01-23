@@ -4,6 +4,7 @@ import { PaginatorState } from 'primeng/paginator';
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { StudentService } from '../../../core/services/student.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { TranslationService } from '../../../core/services/translation.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,6 +15,7 @@ export class DashboardComponent implements OnInit {
   constructor() {}
   
   languageService=inject(LanguageService);
+  translationService=inject(TranslationService);
   
   students: StudentDetailsDTO[] = [];
   studentService = inject(StudentService);
@@ -21,6 +23,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.getAllStudent();
     this.languageService.currentLanguage();
+    this.translationService.changeLanguage(this.languageService.langDir);
   }
 
   getAllStudent(): void {

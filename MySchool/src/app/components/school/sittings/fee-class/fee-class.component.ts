@@ -15,7 +15,8 @@ import { LanguageService } from '../../../../core/services/language.service';
   templateUrl: './fee-class.component.html',
   styleUrls: ['./fee-class.component.scss',
     '../../../../shared/styles/button.scss',
-    '../../../../shared/styles/style-select.scss'
+    '../../../../shared/styles/style-select.scss',
+    '../../../../shared/styles/button.scss'
   ]
 })
 export class FeeClassComponent implements OnInit {

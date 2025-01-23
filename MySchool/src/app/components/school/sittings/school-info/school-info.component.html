@@ -1,5 +1,6 @@
 <div class="schoolInfo" [attr.dir]="languageService.dir">
     <h2 class="schoolTitle">{{'schoolInfo'|translate}}</h2>
+    <h2 class="schoolTitle">معلومات المدرسة</h2>
     <form [formGroup]="form"  (ngSubmit)="onSubmit()">
         <div class="contant">
             <label for="fileInput">
@@ -7,6 +8,7 @@
             </label>
             <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
             <button class="btn btn-success school-btn" [ngClass]="{'saveEn': languageService.dir==='ltr','save': languageService.dir==='rtl'}" type="submit">{{'saveChanges'|translate}}</button>
+            <button class="btn btn-success save school-btn" type="submit">حفظ التغيرات+</button>
 
             <div class="group">
                 <div class="form-control">

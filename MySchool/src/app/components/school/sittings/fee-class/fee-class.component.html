@@ -11,7 +11,7 @@
                     <div class="form-control">
                         <mat-form-field appearance="outline" class="inputText">
                             <mat-label>إدخل بند رسوم جديد</mat-label>
-                            <input class="inputError" type="text" name="feeName" [(ngModel)]="Addfee.feeName"
+                            <input class="inputError " type="text" name="feeName" [(ngModel)]="Addfee.feeName"
                                 #feeName="ngModel" matInput required />
                         </mat-form-field>
 
@@ -32,6 +32,9 @@
                         [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="school-btn"
                         [disabled]="feeForm.invalid" (click)="onSubmit(feeForm)">
                         {{ editMode ? 'تعديل' : 'إضافة+' }}
+                        [ngClass]="feeForm.invalid||editMode?'disabledAdd':'add'" class="school-btn"
+                        (click)="onSubmit(feeForm)">
+                        {{ editMode ? 'تعديل' : 'إضافة +' }}
                     </button>
 
 
@@ -109,6 +112,31 @@
                             [ngClass]="{'en': languageService.dir==='ltr'}"
                             (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" required>
                         </p-dropdown>
+                        <mat-form-field appearance="outline">
+                            <mat-label>إختار الصـف</mat-label>
+                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"
+                                [(ngModel)]="FeeClassDTO.classID" name="classID" #classSelector="ngModel" required>
+                                <mat-option [value]="null">None</mat-option>
+                                @for (Class of classDTO; track $index) {
+                                <mat-option [value]="Class.classID">{{ Class.className }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <!-- Fee Selector -->
+                    <div class="form-control1">
+                        <mat-form-field class="button1" appearance="outline">
+                            <mat-label>إختار بند الرسوم</mat-label>
+                            <mat-select (selectionChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"
+                                name="feeID" [(ngModel)]="FeeClassDTO.feeID" required>
+                                <mat-option [value]="null">None</mat-option>
+                                @for (fee of Fees; track $index) {
+                                <mat-option [value]="fee.feeID">
+                                    {{ fee.feeName }}
+                                </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
                     </div>
 
                     <div *ngIf="exist" class="error">هذا الصف يحتوي على نفس البند</div>
@@ -126,6 +154,8 @@
                     <!-- Submit Button -->
                     <button mat-raised-button color="primary" type="submit" class="school-btn"
                         [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" [disabled]="classFeeForm.invalid||exist">
+                        [ngClass]="classFeeForm.invalid||exist?'disabledAdd':'add'"
+                        >
                         {{ editModeClass ? 'تعديل' : 'إضافة+' }}
                     </button>
 

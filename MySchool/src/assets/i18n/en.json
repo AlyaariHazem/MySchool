@@ -77,7 +77,8 @@
     "stageName": "Stage Name",
     "note": "Note",
     "submit": "Add",
-    "editSubmit": "Edit"
+    "editSubmit": "Edit",
+    "requiredMessage": "Please fill in the required fields"
   },
   "schoolName": "My School",
   "settings": {
