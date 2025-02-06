@@ -36,7 +36,7 @@
 
           </div>
           <!-- I want when I click on the edit change this for "تعديل" -->
-          <input type="submit" class="btn btn-primary add school-btn" [value]="isEditMode ? 'تعديل' : 'إضافة'"/>
+          <input type="submit" class="btn btn-primary add school-btn" [value]="isEditMode ? 'تعديل' : 'إضافة'"
             (click)="isEditMode ? updateStage() : addStage()" [disabled]="!form.valid" />
         </form>
 

@@ -34,6 +34,7 @@
         "label": "off",
         "select-name": "off"
       }
-    ]
+    ],
+    "typescript-config/strict": "off"
   }
 }

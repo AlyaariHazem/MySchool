@@ -19,7 +19,6 @@ const modules=[
     MatDialogActions,
     MatDialogClose,
     ReactiveFormsModule,
-    CommonModule,
     TranslateModule
 ]
 
