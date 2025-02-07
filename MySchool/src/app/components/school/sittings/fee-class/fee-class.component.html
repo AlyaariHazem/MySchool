@@ -125,8 +125,7 @@
                     </div>
                     <!-- Submit Button -->
                     <button mat-raised-button color="primary" type="submit" class="school-btn"
-                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" [disabled]="classFeeForm.invalid||exist"
-                        [ngClass]="classFeeForm.invalid||exist?'disabledAdd':'add'" >
+                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" [disabled]="classFeeForm.invalid||exist">
                         {{ editModeClass ? 'تعديل' : 'إضافة+' }}
                     </button>
 

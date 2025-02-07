@@ -27,6 +27,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatOptionModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { PaginatorModule } from 'primeng/paginator';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 const components = [
@@ -52,6 +53,7 @@ const modules = [
   ReactiveFormsModule,
   MatFormFieldModule,
   MatInputModule,
+  TranslateModule,
   MatDialogTitle,
   MatDatepickerModule,
   MatDialogContent,

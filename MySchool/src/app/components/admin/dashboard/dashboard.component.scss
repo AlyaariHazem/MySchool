@@ -4,3 +4,8 @@
 .imageGreade{
     cursor: pointer;
 }
+:host ::ng-deep {
+    #pn_id_2_list {
+       padding-left: 0px!important;
+    }
+}

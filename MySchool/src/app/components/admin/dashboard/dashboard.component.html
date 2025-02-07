@@ -1,10 +1,10 @@
-<div class="contant" style="margin-top: 0rem">
+<div class="contant" style="margin-top: 0rem" [attr.dir]="languageService.dir">
   <div class="row">
     <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
       <div class="dash-widget dash-widget5">
         <span class="float-right"><img src="assets/img/dash/dash-1.png" alt="" width="80" /></span>
         <div class="dash-widget-info text-right">
-          <span>الطلاب</span>
+          <span>{{'dashboard.studentsLabel'| translate}}</span>
           <h3>{{students.length}}</h3>
         </div>
       </div>
@@ -12,7 +12,7 @@
     <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
       <div class="dash-widget dash-widget5">
         <div class="dash-widget-info text-right d-inline-block">
-          <span>المدرسين</span>
+          <span>{{'dashboard.teachersLabel'| translate}}</span>
           <h3>12,000</h3>
         </div>
         <span class="float-right"><img src="assets/img/dash/dash-2.png" width="80" alt="" /></span>
@@ -22,7 +22,7 @@
       <div class="dash-widget dash-widget5">
         <span class="float-right"><img src="assets/img/dash/dash-3.png" alt="" width="80" /></span>
         <div class="dash-widget-info text-right">
-          <span>أولياء الامور</span>
+          <span>{{'dashboard.parentsLabel'| translate}}</span>
           <h3>20,000</h3>
         </div>
       </div>
@@ -30,7 +30,7 @@
     <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
       <div class="dash-widget dash-widget5">
         <div class="dash-widget-info d-inline-block text-left">
-          <span>إجمالي الفلوس</span>
+          <span>{{'dashboard.totalMoney'| translate}}</span>
           <h3>$20,000</h3>
         </div>
         <span class="float-right"><img src="assets/img/dash/dash-4.png" alt="" width="80" /></span>
@@ -39,12 +39,12 @@
   </div>
   <!-- <app-chart-for-student></app-chart-for-student> -->
   <div class="row">
-    <div class="col-lg-6 col-md-12 col-12 d-flex">
+    <div class="col-lg-6 d-flex">
       <div class="card flex-fill">
         <div class="card-header">
           <div class="row align-items-center">
             <div class="col-auto">
-              <div class="page-title">جدول الحصص</div>
+              <div class="page-title">{{'dashboard.totalMoney'| translate}}</div>
             </div>
             <div class="col text-left">
               <div class="mt-sm-0 mt-2">
@@ -52,7 +52,7 @@
                   aria-expanded="false">
                   <i class="fas fa-ellipsis-h"></i>
                 </button>
-                <div class="dropdown-menu dropdown-menu-right">
+                <div class="dropdown-menu dropdown-menu-right" [attr.dir]="languageService.dir">
                   <a class="dropdown-item" href="#">Action</a>
                   <div role="separator" class="dropdown-divider"></div>
                   <a class="dropdown-item" href="#">Another action</a>
@@ -73,7 +73,7 @@
         <div class="card-header">
           <div class="row align-items-center">
             <div class="col-auto">
-              <div class="page-title">الإختبارات</div>
+              <div class="page-title">{{'dashboard.tests'| translate}}</div>
             </div>
             <div class="col text-left">
               <div class="mt-sm-0 mt-2">
@@ -81,7 +81,7 @@
                   aria-expanded="false">
                   <i class="fas fa-ellipsis-h"></i>
                 </button>
-                <div class="dropdown-menu dropdown-menu-right">
+                <div class="dropdown-menu dropdown-menu-right" [attr.dir]="languageService.dir">
                   <a class="dropdown-item" href="#">Action</a>
                   <div role="separator" class="dropdown-divider"></div>
                   <a class="dropdown-item" href="#">Another action</a>
@@ -92,7 +92,7 @@
             </div>
           </div>
         </div>
-        <div class="card-body">
+        <div class="card-body" [attr.dir]="languageService.dir">
           <div class="row">
             <div class="col-md-12">
               <div class="table-responsive">
