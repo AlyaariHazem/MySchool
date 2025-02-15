@@ -72,9 +72,13 @@ export class FeeClassComponent implements OnInit {
   // Fee Operations
   getAllFees(): void {
     this.feeService.getAllFee().subscribe({
-      next: (res) => (this.Fees = res.data),
+      next: (res) =>{
+        (this.Fees = res),
+        console.log(res);
+      } ,
       error: (err) => this.toastr.error('Error fetching fees'),
     });
+    
   }
 
   onSubmit(feeForm: NgForm): void {
@@ -174,10 +178,10 @@ export class FeeClassComponent implements OnInit {
     this.feeClassService.DeleteFeeClass(feeClassID).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastr.success(res.data);
+          this.toastr.success(res);
           this.getAllClassFees();
         } else {
-          this.toastr.error(res.data);
+          this.toastr.error(res);
         }
       },
     });
@@ -186,7 +190,7 @@ export class FeeClassComponent implements OnInit {
   getAllClassFees(): void {
     this.feeClassService.getAllFeeClass().subscribe({
       next: (res) =>{
-        (this.FeeClass = res.data);
+        (this.FeeClass = res);
          this.updatePaginatedData();
       },
       error: (err) => this.toastr.error('Error fetching class fees'),

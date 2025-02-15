@@ -1,60 +1,85 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
-namespace Backend.Controllers.School;
-
-[Route("api/[controller]")]
-[ApiController]
-public class GuardianController : Controller
+namespace Backend.Controllers.School
 {
-    private readonly IGuardianRepository _guardianRepository;
-
-    public GuardianController(IGuardianRepository guardianRepository)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class GuardianController : Controller
     {
-        _guardianRepository= guardianRepository;
+        private readonly IGuardianRepository _guardianRepository;
+
+        public GuardianController(IGuardianRepository guardianRepository)
+        {
+            _guardianRepository = guardianRepository;
+        }
+
+        // GET: api/Guardian
+        [HttpGet]
+        public async Task<ActionResult<APIResponse>> GetAllGuardians()
+        {
+            var response = new APIResponse();
+            try
+            {
+                var guardians = await _guardianRepository.GetAllGuardiansAsync();
+
+                response.Result = guardians;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error: {ex.Message}");
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add("An error occurred while fetching data.");
+                // Optionally, add the actual exception message: response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+        // GET: api/Guardian/{id}
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<APIResponse>> GetGuardianByID(int id)
+        {
+            var response = new APIResponse();
+            try
+            {
+                if (id <= 0)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMasseges.Add("Invalid ID provided.");
+                    return BadRequest(response);
+                }
+
+                var guardian = await _guardianRepository.GetGuardianByIdAsync(id);
+                if (guardian == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("Guardian not found.");
+                    return NotFound(response);
+                }
+
+                response.Result = guardian;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error occurred: {ex.Message}");
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add("An error occurred while fetching data.");
+                // Optionally, add the actual exception message: response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
     }
-   [HttpGet]
-    public async Task<IActionResult> GetAllGuardians()
-    {
-        try
-        {
-            var guardians = await _guardianRepository.GetAllGuardiansAsync();
-            return Ok(new { success = true, data = guardians });
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Error: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "An error occurred." });
-        }
-    }
-
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetGuardianByID(int id)
-    {
-        try
-        {
-            if (id <= 0)
-                return BadRequest(new { success = false, message = "Invalid ID provided." });
-
-            var guardian = await _guardianRepository.GetGuardianByIdAsync(id);
-
-            if (guardian == null)
-                return NotFound(new { success = false, message = "Guardian not found." });
-
-            return Ok(new { success = true, data = guardian });
-        }
-        catch (Exception ex)
-        {
-            // Log the error
-            Debug.WriteLine($"Error occurred: {ex.Message}");
-            return StatusCode(500, new { success = false, message = "An error occurred while fetching data." });
-        }
-    }
-
 }

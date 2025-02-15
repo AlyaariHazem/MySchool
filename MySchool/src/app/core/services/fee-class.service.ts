@@ -14,8 +14,8 @@ export class FeeClassService {
   constructor(private fb: FormBuilder) {}
 
   getAllFeeClass(): Observable<any> {
-    return this.API.http.get(`${this.API.baseUrl}/FeeClass`).pipe(
-      map(res => res),
+    return this.API.http.get<any>(`${this.API.baseUrl}/FeeClass`).pipe(
+      map(response=> response.result),
       catchError(err => this.handleError(err, "Failed to fetch fee classes"))
     );
   }

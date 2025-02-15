@@ -34,7 +34,7 @@ export class DivisionComponent implements OnInit {
   constructor(private formBuilder: FormBuilder) {
     this.form = this.formBuilder.group({
       ClassID: ['', Validators.required],
-      divisionName: ['',Validators.required]
+      divisionName: ['', Validators.required]
     });
   }
 
@@ -55,7 +55,7 @@ export class DivisionComponent implements OnInit {
   getAllDivisions(): void {
     this.divisionService.GetAll().subscribe({
       next: (res) => {
-        this.divisions = res.divisionInfo;
+        this.divisions = res;
         this.length = this.divisions.length; // Set total item count
         this.updateDisplayedDivisions(); // Initialize displayed divisions
       },
@@ -71,7 +71,7 @@ export class DivisionComponent implements OnInit {
       error: (err) => this.toastr.error('Error feched', 'Error', err)
     });
   }
-  
+
   AddDivision(): void {
     if (this.form.valid) {
       const addClassData: Division = this.form.value;
@@ -104,20 +104,20 @@ export class DivisionComponent implements OnInit {
   updateDivision(): void {
     this.form.markAllAsTouched();
     if (this.form.valid && this.divisionToEditId !== null) {
-      const updateDivision:Division = this.form.value;
+      const updateDivision: Division = this.form.value;
       this.divisionService.UpdateDivision(this.divisionToEditId, updateDivision).subscribe({
-        next: (res) =>{
-          if(res.success){
+        next: (res) => {
+          if (res.success) {
             this.toastr.success("Division updated successfully");
             this.form.reset();
             this.getAllDivisions();
           }
         },
-        error: ()=> this.toastr.error("Failed to Update Division")
-    });
-    this.form.reset();
-    this.getAllDivisions();
-    this.isEditMode=false;
+        error: () => this.toastr.error("Failed to Update Division")
+      });
+      this.form.reset();
+      this.getAllDivisions();
+      this.isEditMode = false;
     }
   }
 

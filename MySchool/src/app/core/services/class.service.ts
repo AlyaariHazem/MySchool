@@ -11,8 +11,8 @@ export class ClassService {
   constructor() { }
 
   GetAll(): Observable<ClassDTO[]> {
-    return this.API.http.get<{ classInfo: ClassDTO[] }>(`${this.API.baseUrl}/Classes`).pipe(
-      map(response => response.classInfo)  // Adjust to access 'classInfo'
+    return this.API.http.get<{ result: ClassDTO[] }>(`${this.API.baseUrl}/Classes`).pipe(
+      map(response => response.result)
     );
   }
 

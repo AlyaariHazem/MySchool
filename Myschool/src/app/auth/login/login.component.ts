@@ -18,11 +18,15 @@ export class LoginComponent {
   private toastr = inject(ToastrService);
   private dialog = inject(MatDialog);
 
-  login(user:User): void {
+  login(user: User): void {
     this.authService.login(user).subscribe({
       next: (response: any) => {
         if (response && response.token) {
-          this.authService.router.navigateByUrl('school');
+          if (user.userName === 'Admin') {
+            this.authService.router.navigateByUrl('admin');
+          } else {
+            this.authService.router.navigateByUrl('school');
+          }
           this.toastr.success('Login successful');// this message appear but I can't navigate to school?
         }
       },

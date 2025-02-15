@@ -1,11 +1,10 @@
-using System.Collections.Generic;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using Backend.Repository;
 using Backend.Repository.School;
-using Backend.DTOS;
 using Backend.DTOS.School.Stages;
 using Backend.Models;
 using Microsoft.AspNetCore.JsonPatch;
+using Backend.DTOS;
 
 namespace Backend.Controllers.School
 {
@@ -13,72 +12,169 @@ namespace Backend.Controllers.School
     [ApiController]
     public class DivisionsController : ControllerBase
     {
-        private readonly IDivisionRepository divisionRepo;
-        private readonly IClassesRepository classRepo;
+        private readonly IDivisionRepository _divisionRepo;
+        private readonly IClassesRepository _classRepo;
 
         public DivisionsController(IDivisionRepository divisionRepo, IClassesRepository classRepo)
         {
-            this.divisionRepo = divisionRepo;
-            this.classRepo = classRepo;
+            _divisionRepo = divisionRepo;
+            _classRepo = classRepo;
         }
 
         // POST api/divisions
         [HttpPost]
-        public async Task<ActionResult<APIResponse>> AddDivision(AddDivisionDTO division)
+        public async Task<ActionResult<APIResponse>> AddDivision([FromBody] AddDivisionDTO division)
         {
-            if (division == null)
-                return BadRequest("Invalid division data.");
+            var response = new APIResponse();
 
-            await divisionRepo.Add(division);
+            try
+            {
+                if (division == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMasseges.Add("Invalid division data.");
+                    return BadRequest(response);
+                }
 
-            return Ok(new { success = true, message = "Division added successfully" });
+                await _divisionRepo.Add(division);
+
+                response.Result = "Division added successfully.";
+                response.statusCode = HttpStatusCode.Created;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
-
 
         // PUT api/divisions/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDivision(int id, DivisionDTO division)
+        public async Task<ActionResult<APIResponse>> UpdateDivision(int id, [FromBody] DivisionDTO division)
         {
-            division.DivisionID = id;
-            var divisions = await divisionRepo.GetByIdAsync(id);
-            if (divisions == null)
-                return BadRequest("Invalid division data.");
+            var response = new APIResponse();
 
-           await divisionRepo.Update(division);
-            return Ok(new { success = true, message = "Division updated successfully" });
+            try
+            {
+                var existingDivision = await _divisionRepo.GetByIdAsync(id);
+                if (existingDivision == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("Division not found.");
+                    return NotFound(response);
+                }
+
+                // Assign the ID to the incoming DTO to ensure it's set correctly
+                division.DivisionID = id;
+                await _divisionRepo.Update(division);
+
+                response.Result = "Division updated successfully.";
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
 
         // GET api/divisions
         [HttpGet]
-        public async Task<IActionResult> GetDivisions()
+        public async Task<ActionResult<APIResponse>> GetDivisions()
         {
-            var divisions = await divisionRepo.GetAll();
-            return Ok(new { DivisionInfo = divisions });
+            var response = new APIResponse();
+
+            try
+            {
+                var divisions = await _divisionRepo.GetAll();
+                response.Result = divisions;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
 
         // DELETE api/divisions/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDivision(int id)
+        public async Task<ActionResult<APIResponse>> DeleteDivision(int id)
         {
-            var division =await divisionRepo.GetByIdAsync(id);
-            if (division == null)
-                return NotFound(new { success = false, message = "Division not found." });
+            var response = new APIResponse();
 
-          await  divisionRepo.DeleteAsync(id);
-            return Ok(new { success=true,message="Division deleted successflly"});
+            try
+            {
+                var existingDivision = await _divisionRepo.GetByIdAsync(id);
+                if (existingDivision == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("Division not found.");
+                    return NotFound(response);
+                }
+
+                await _divisionRepo.DeleteAsync(id);
+                response.Result = "Division deleted successfully.";
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
-        //Patch api/divisions/{id}
+
+        // PATCH api/divisions/{id}
         [HttpPatch("{id}")]
-        public async Task<IActionResult> PatchDivision(int id, [FromBody] JsonPatchDocument<UpdateDivisionDTO> patchDoc)
+        public async Task<ActionResult<APIResponse>> PatchDivision(int id, [FromBody] JsonPatchDocument<UpdateDivisionDTO> patchDoc)
         {
-            if (patchDoc == null)
-                return BadRequest("Invalid patch document.");
+            var response = new APIResponse();
 
-            var division = await divisionRepo.UpdatePartial(id, patchDoc);
-            if (!division)
-            return NotFound(new { success = false, message = "Division not found or update failed." });
+            try
+            {
+                if (patchDoc == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMasseges.Add("Invalid patch document.");
+                    return BadRequest(response);
+                }
 
-            return Ok(new { success = true, message = "Division partially updated successfully." });
+                var success = await _divisionRepo.UpdatePartial(id, patchDoc);
+                if (!success)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("Division not found or update failed.");
+                    return NotFound(response);
+                }
+
+                response.Result = "Division partially updated successfully.";
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
     }
 }

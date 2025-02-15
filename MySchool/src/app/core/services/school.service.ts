@@ -10,15 +10,13 @@ import { BackendAspService } from '../../environments/ASP.NET/backend-asp.servic
 export class SchoolService {
   private ApI = inject(BackendAspService);
   private http = inject(HttpClient);
+  result:School[]=[];
 
   constructor() {}
 
   getAllSchools(): Observable<School[]> {
-    return this.http.get<School[]>(`${this.ApI.baseUrl}/School`).pipe(
-      res => {
-        console.log('this get school', res)
-        return res;
-      },
+    return this.http.get<{result:School[]}>(`${this.ApI.baseUrl}/School`).pipe(
+      map(response=> response.result),
       catchError((error) => {
         return throwError(() => new Error(error.message));
       })

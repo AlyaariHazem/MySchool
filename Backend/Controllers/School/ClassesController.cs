@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
 using Backend.DTOS;
 using Backend.DTOS.School.Stages;
 using Backend.Models;
@@ -8,6 +7,7 @@ using Backend.Repository.School;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace Backend.Controllers.School
 {
@@ -15,88 +15,208 @@ namespace Backend.Controllers.School
     [ApiController]
     public class ClassesController : ControllerBase
     {
-        protected readonly APIResponse _response;
-        private readonly IClassesRepository classRepo;
-        private readonly IStagesRepository stageRepo;
+        // Instead of storing only a reference, we'll create a new APIResponse each time.
+        // But you can also keep a single _response field if you prefer.
+        private readonly IClassesRepository _classRepo;
+        private readonly IStagesRepository _stageRepo;
 
         public ClassesController(IClassesRepository classRepo, IStagesRepository stageRepo)
         {
-            this.classRepo = classRepo;
-            this.stageRepo = stageRepo;
-            this._response = new();
+            _classRepo = classRepo;
+            _stageRepo = stageRepo;
         }
 
         // POST api/classes
         [HttpPost]
         public async Task<ActionResult<APIResponse>> AddClass([FromBody] AddClassDTO createDTO)
         {
-            if (!ModelState.IsValid)
-                return BadRequest("Invalid class data.");
-          await  classRepo.Add(createDTO);
+            var response = new APIResponse();
 
-            return Ok(new { success = true });
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.IsSuccess = false;
+                    response.ErrorMasseges.Add("Invalid class data.");
+                    return BadRequest(response);
+                }
+
+                await _classRepo.Add(createDTO);
+
+                response.Result = "Class added successfully";
+                response.statusCode = HttpStatusCode.Created;  // or OK, depending on your preference
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
 
         // PUT api/classes/{id}
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateClass(int id, [FromBody] AddClassDTO updateClass)
+        public async Task<ActionResult<APIResponse>> UpdateClass(int id, [FromBody] AddClassDTO updateClass)
         {
-            if (!ModelState.IsValid)
-                return BadRequest("Invalid class data.");
+            var response = new APIResponse();
 
-            var existingClass =await classRepo.GetByIdAsync(id);
-            if (existingClass == null)
-                return NotFound(new { success = false, message = "Class not found." });
-            updateClass.ClassID = id;
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.IsSuccess = false;
+                    response.ErrorMasseges.Add("Invalid class data.");
+                    return BadRequest(response);
+                }
 
-          await  classRepo.Update(updateClass);
+                var existingClass = await _classRepo.GetByIdAsync(id);
+                if (existingClass == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.IsSuccess = false;
+                    response.ErrorMasseges.Add("Class not found.");
+                    return NotFound(response);
+                }
 
-            return Ok(new { message = "Class updated successfully." ,updateClass});
+                updateClass.ClassID = id;
+                await _classRepo.Update(updateClass);
+
+                response.Result = "Class updated successfully.";
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
 
         // GET api/classes
-        // [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetClasses()
+        public async Task<ActionResult<APIResponse>> GetClasses()
         {
-            var classes = await classRepo.GetAllAsync();
-            return Ok(new { ClassInfo = classes });
+            var response = new APIResponse();
+
+            try
+            {
+                var classes = await _classRepo.GetAllAsync();
+
+                response.Result = classes;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
 
         // GET api/classes/{id}
         [HttpGet("{id:int}")]
-        public IActionResult GetClass(int id)
+        public async Task<ActionResult<APIResponse>> GetClass(int id)
         {
-            var classes =  classRepo.GetByIdAsync(id);
-            return Ok(new { ClassInfo = classes });
+            var response = new APIResponse();
+            try
+            {
+                var classEntity = await _classRepo.GetByIdAsync(id);
+                if (classEntity == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("Class not found.");
+                    return NotFound(response);
+                }
+
+                response.Result = classEntity;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
 
         // DELETE api/classes/{id}
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteClass(int id)
+        public async Task<ActionResult<APIResponse>> DeleteClass(int id)
         {
-            var classData = await classRepo.GetByIdAsync(id);
-            if (classData == null)
-                return NotFound(new { success = false, message = "Class not found." });
+            var response = new APIResponse();
+            try
+            {
+                var classData = await _classRepo.GetByIdAsync(id);
+                if (classData == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("Class not found.");
+                    return NotFound(response);
+                }
 
-          await  classRepo.DeleteAsync(id);
+                await _classRepo.DeleteAsync(id);
+                var classes = await _classRepo.GetAllAsync();
 
-            var classes = await classRepo.GetAllAsync();
-            return Ok(new { success = true, classes});
+                response.Result = new { success = true, classes };
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
 
-         // PATCH api/Classes/{id}
+        // PATCH api/Classes/{id}
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdatePartial(int id, [FromBody] JsonPatchDocument<UpdateClassDTO> patchDoc)
+        public async Task<ActionResult<APIResponse>> UpdatePartial(int id, [FromBody] JsonPatchDocument<UpdateClassDTO> patchDoc)
         {
-            if (patchDoc == null)
-                return BadRequest("Invalid patch document.");
+            var response = new APIResponse();
+            try
+            {
+                if (patchDoc == null)
+                {
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.IsSuccess = false;
+                    response.ErrorMasseges.Add("Invalid patch document.");
+                    return BadRequest(response);
+                }
 
-            var success = await classRepo.UpdatePartial(id, patchDoc);
-            if (!success)
-                return NotFound(new { success = false, message = "Class not found or update failed." });
+                var success = await _classRepo.UpdatePartial(id, patchDoc);
+                if (!success)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.IsSuccess = false;
+                    response.ErrorMasseges.Add("Class not found or update failed.");
+                    return NotFound(response);
+                }
 
-            return Ok(new { success = true, message = "Class partially updated successfully." });
+                response.Result = "Class partially updated successfully.";
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
     }
 }

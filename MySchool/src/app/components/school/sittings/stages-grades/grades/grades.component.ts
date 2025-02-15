@@ -62,7 +62,7 @@ export class GradesComponent implements OnInit {
     });
 
     this.stageService.getAllStages().subscribe({
-      next: (res) => this.stages = res.stagesInfo,
+      next: (res) => this.stages = res,
       error: (err) => this.toastr.error('Error fetching Stages ', err)
     });
   }

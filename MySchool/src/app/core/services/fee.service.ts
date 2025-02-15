@@ -12,8 +12,8 @@ export class FeeService {
   constructor() { }
 
   getAllFee():Observable<any>{
-    return this.ApI.http.get(`${this.ApI.baseUrl}/Fees`).pipe(
-      map(res=>res),
+    return this.ApI.http.get<any>(`${this.ApI.baseUrl}/Fees`).pipe(
+      map(response=> response.result),
       catchError(error=>{
         throw error;
       })

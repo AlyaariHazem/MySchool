@@ -49,7 +49,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   getStage(): void {
     this.stageService.getAllStages().subscribe({
       next: (data) =>{
-        this.stages = data.stagesInfo;
+        this.stages = data;
         this.length = this.stages.length; // Set total item count
         this.updateDisplayedDivisions(); // Initialize displayed divisions
       },

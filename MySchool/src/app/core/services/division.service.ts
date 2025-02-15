@@ -12,12 +12,12 @@ export class DivisionService {
   constructor() { }
 
   GetAll(): Observable<any> {
-    return this.API.http.get(`${this.API.baseUrl}/Divisions`).pipe(
-      map(response => response)
+    return this.API.http.get<any>(`${this.API.baseUrl}/Divisions`).pipe(
+      map(response=> response.result),
     );
   }
   Add(division: Division): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/Divisions`, division).pipe(
+    return this.API.http.post<any>(`${this.API.baseUrl}/Divisions`, division).pipe(
       map(response => response)
     );
   }

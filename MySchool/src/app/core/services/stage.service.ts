@@ -11,8 +11,8 @@ export class StageService {
 
   // I want this to display my stages 
   getAllStages(): Observable<any> {
-    return this.API.http.get(`${this.API.baseUrl}/stages`).pipe(
-      map(response => response), // Process or map the response here if needed
+    return this.API.http.get<any>(`${this.API.baseUrl}/stages`).pipe(
+      map(response => response.result), // Process or map the response here if needed
       catchError(error => {
         console.error("Error fetching stages:", error);
         throw error; // Optionally handle the error or rethrow
