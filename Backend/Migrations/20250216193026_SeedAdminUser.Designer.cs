@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250216193026_SeedAdminUser")]
+    partial class SeedAdminUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,17 +171,18 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "62cb14d6-ffe6-42ba-a0e7-62045a200dc7",
+                            Address = "Sana'a",
+                            ConcurrencyStamp = "827625a2-391e-4e76-be03-680fa619f39e",
                             Email = "admin@gmail.com",
-                            EmailConfirmed = true,
-                            Gender = "",
-                            HireDate = new DateTime(2025, 2, 16, 22, 50, 37, 411, DateTimeKind.Local).AddTicks(8545),
+                            EmailConfirmed = false,
+                            Gender = "Male",
+                            HireDate = new DateTime(2025, 2, 16, 22, 30, 24, 345, DateTimeKind.Local).AddTicks(3010),
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEBZPw6lVQHEPASQU1eWFbhSjrEH814XGB0YTWleOFSJqWHgZd+HsV/lfBEqOpGzd9A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEP5kxR11x0YSGyX6IA2PUaut972i6iWAmRolXmoZVhqnK2g0u+HkKK8VF7+nPNWkZA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "4f9d1606-83c3-4e1c-9376-653567142c73",
+                            SecurityStamp = "b65d9234-dfe7-4027-98c3-c3f2e2fe3fb9",
                             TwoFactorEnabled = false,
                             UserName = "Admin",
                             UserType = "Admin"

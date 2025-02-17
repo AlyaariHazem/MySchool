@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { LoginComponent } from './auth/login/login.component';
 import { adminGuardGuard } from './core/guards/admin-guard.guard';
+import { PageNotFoundComponent } from './shared/components/page-not-found/page-not-found.component';
 
 export const routes: Routes = [
     {
@@ -18,6 +19,7 @@ export const routes: Routes = [
         loadChildren: ()=> import('./components/admin/admin.module').then(m=> m.AdminModule),
         canMatch:[adminGuardGuard]
     },
-    { path: '**', redirectTo: '', pathMatch: 'full' }
+    {path:'not-found',component:PageNotFoundComponent},
+    { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
     
 ];

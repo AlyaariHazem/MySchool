@@ -1,11 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-navigate',
   templateUrl: './navigate.component.html',
-  host: { '[attr.component-id]': 'app-navigate' },
   styleUrl: './navigate.component.scss'
 })
-export class NavigateComponent {
-
+export class NavigateComponent implements OnInit {
+  languageService=inject(LanguageService);
+   ngOnInit() {
+    this.languageService.currentLanguage();
+  }
 }

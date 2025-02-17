@@ -1,73 +1,47 @@
-<mat-card class="add-school-card">
-  <p class="title">إضافة مدرسة جديدة</p>
+<mat-card class="school-table-card">
+  <p class="title">قائمة المدارس</p>
   <mat-card-content>
-    <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()" class="school-form">
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>اسم المدرسة</mat-label>
-        <input matInput formControlName="schoolName">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>الاسم بالإنجليزي</mat-label>
-        <input matInput formControlName="schoolNameEn">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>تاريخ الإنشاء</mat-label>
-        <input matInput formControlName="schoolCreaDate">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>الرؤية</mat-label>
-        <textarea matInput formControlName="schoolVision"></textarea>
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>مهمة المدرسة</mat-label>
-        <textarea matInput formControlName="schoolMission"></textarea>
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>الهدف</mat-label>
-        <textarea matInput formControlName="schoolGoal"></textarea>
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>الملاحظة</mat-label>
-        <textarea matInput formControlName="notes"></textarea>
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>الدولة</mat-label>
-        <input matInput formControlName="country">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>المدينة</mat-label>
-        <input matInput formControlName="city">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>رقم الهاتف</mat-label>
-        <input matInput formControlName="schoolPhone" type="tel">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>الشارع</mat-label>
-        <input matInput formControlName="street">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>نوع المدرسة</mat-label>
-        <mat-select formControlName="schoolType">
-          <mat-option value="male">ذكر</mat-option>
-          <mat-option value="female">أنثى</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>الإيميل</mat-label>
-        <input matInput formControlName="email" type="email">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>فاكس</mat-label>
-        <input matInput formControlName="fax" type="tel">
-      </mat-form-field>
-      <mat-form-field appearance="fill" class="form-field">
-        <mat-label>المنطقة/الحي</mat-label>
-        <input matInput formControlName="zone">
-      </mat-form-field>
-      <div class="form-field">
-        <button mat-raised-button color="primary" type="submit" [disabled]="!schoolForm.valid">إرسال</button>
-      </div>
-    </form>
+    <button mat-raised-button (click)="openAddSchoolForm()">إضافة مدرسة</button>
+    <div class="table-container" dir="rtl">
+      <table mat-table [dataSource]="schools" class="mat-elevation-z8 responsive-table">
+        <ng-container matColumnDef="schoolName">
+          <th mat-header-cell *matHeaderCellDef> اسم المدرسة </th>
+          <td mat-cell *matCellDef="let school"> {{ school.schoolName }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="schoolNameEn">
+          <th mat-header-cell *matHeaderCellDef> الاسم بالإنجليزي </th>
+          <td mat-cell *matCellDef="let school"> {{ school.schoolNameEn }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="schoolCreaDate">
+          <th mat-header-cell *matHeaderCellDef> تاريخ الإنشاء </th>
+          <td mat-cell *matCellDef="let school"> {{ school.schoolCreaDate }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="schoolType">
+          <th mat-header-cell *matHeaderCellDef> نوع المدرسة </th>
+          <td mat-cell *matCellDef="let school"> {{ school.schoolType === 'male' ? 'ذكر' : 'أنثى' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="city">
+          <th mat-header-cell *matHeaderCellDef> المدينة </th>
+          <td mat-cell *matCellDef="let school"> {{ school.city }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="schoolPhone">
+          <th mat-header-cell *matHeaderCellDef> رقم الهاتف </th>
+          <td mat-cell *matCellDef="let school"> {{ school.schoolPhone }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef> الإيميل </th>
+          <td mat-cell *matCellDef="let school"> {{ school.email }} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
   </mat-card-content>
 </mat-card>

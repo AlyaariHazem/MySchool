@@ -11,6 +11,8 @@ import { MessagesComponent } from './messages/messages.component';
 import { FileManagerComponent } from './file-manager/file-manager.component';
 import { SittingComponent } from './sitting/sitting.component';
 import { SchoolsComponent } from './schools/schools.component';
+// import { SchoolInfoComponent } from './school-info/school-info.component';
+import { PageNotFoundComponent } from '../../shared/components/page-not-found/page-not-found.component';
 
 const routes: Routes = [
   {
@@ -18,19 +20,23 @@ const routes: Routes = [
     component: NavigateComponent, data: { breadcrumb: 'الرئيسية  / ' },
     children: [
       { path: 'dashboard', component: DashboardComponent, data: { breadcrumb: '' } },
-      { path: 'sidebar', component: PageHeaderComponent , data: { breadcrumb: 'Sidebar' } },
-      { path: 'school', component: SchoolsComponent , data: { breadcrumb: 'المدارس' } },
-      { path: 'user', component: UsersComponent , data: { breadcrumb: 'المستخدمين' } },
-      { path: 'media', component: MediaPartalComponent , data: { breadcrumb: 'بوابة الإعلام' } },
-      { path: 'customer', component: CustomerComponent , data: { breadcrumb: 'الزبائن' } },
-      { path: 'message', component: MessagesComponent , data: { breadcrumb: 'الرسائل' } },
-      { path: 'file', component: FileManagerComponent , data: { breadcrumb: 'ملف المدير' } },
-      { path: 'sitting', component:SittingComponent  , data: { breadcrumb: 'الإعدادات' } },
-      
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+      { path: 'sidebar', component: PageHeaderComponent, data: { breadcrumb: 'Sidebar' } },
+      { path: 'school', component: SchoolsComponent, data: { breadcrumb: 'المدارس' } },
+      { path: 'user', component: UsersComponent, data: { breadcrumb: 'المستخدمين' } },
+      { path: 'media', component: MediaPartalComponent, data: { breadcrumb: 'بوابة الإعلام' } },
+      { path: 'customer', component: CustomerComponent, data: { breadcrumb: 'الزبائن' } },
+      { path: 'message', component: MessagesComponent, data: { breadcrumb: 'الرسائل' } },
+      { path: 'file', component: FileManagerComponent, data: { breadcrumb: 'ملف المدير' } },
+      { path: 'sitting', component: SittingComponent, data: { breadcrumb: 'الإعدادات' } },
+
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'not-found', component: PageNotFoundComponent },
+      { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
     ]
   },
-  { path: '', redirectTo: '/admin/dashboard', pathMatch: 'full' }
+  { path: '', redirectTo: '/admin/dashboard', pathMatch: 'full' },
+  { path: 'not-found', component: PageNotFoundComponent },
+  { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 ];
 @NgModule({
   imports: [RouterModule.forChild(routes)],

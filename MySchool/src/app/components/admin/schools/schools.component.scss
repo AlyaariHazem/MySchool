@@ -1,30 +1,78 @@
-.add-school-card {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
+/* Card and Title Styling */
+.school-table-card {
+  margin: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .title {
-  font-size: 21px;
-  /* font-weight: bold; Uncomment if needed */
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+  text-align: right;
+  color: #333;
 }
 
-.school-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+/* Table Container for Responsiveness */
+.table-container {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+.mat-raised-button {
+  align-self: flex-end;
+  padding: 12px 20px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #146c43!important;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.form-field {
+button:hover {
+  background-color: #158852;
+  color:white;
+}
+/* Table Styling */
+.responsive-table {
   width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* helps keep columns readable on small screens */
+  table-layout: auto;
 }
 
-@media (min-width: 768px) {
-  .form-field {
-    width: calc(33.33% - 20px);
-  }
+.responsive-table th,
+.responsive-table td {
+  padding: 12px 16px;
+  border: 1px solid #ddd; /* subtle border around cells */
+  text-align: center;     /* center or right, based on your preference */
+  white-space: nowrap;    /* prevent text from wrapping if you prefer */
 }
-.mat-card-content {
-  max-height: 70vh; /* Set the maximum height of the content */
-  overflow-y: auto; /* Add a vertical scroll */
+
+/* Header Styling (Green Header) */
+.responsive-table th {
+  background-color: #009879; /* Material Green 800 (adjust to your liking) */
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Alternate row shading */
+.responsive-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Hover effect on rows (optional) */
+.responsive-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .responsive-table th,
+  .responsive-table td {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    white-space: normal; /* allow wrapping on very small screens */
+  }
 }

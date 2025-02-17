@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-schools',
@@ -7,34 +6,17 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./schools.component.scss']
 })
 export class SchoolsComponent implements OnInit {
-  schoolForm: FormGroup;
-
-  constructor(private fb: FormBuilder) {
-    this.schoolForm = this.fb.group({
-      schoolName: ['', Validators.required],
-      schoolNameEn: ['', Validators.required],
-      schoolCreaDate: ['', Validators.required],
-      schoolVision: [''],
-      schoolMission: [''],
-      schoolGoal: ['', Validators.required],
-      notes: [''],
-      country: ['', Validators.required],
-      city: ['', Validators.required],
-      schoolPhone: ['', Validators.required],
-      street: ['', Validators.required],
-      schoolType: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      fax: [''],
-      zone: ['', Validators.required]
-    });
-  }
 
   ngOnInit(): void {}
 
-  onSubmit(): void {
-    if (this.schoolForm.valid) {
-      console.log(this.schoolForm.value);
-      // Handle form submission logic here
-    }
+  schools = [
+    { schoolName: 'مدرسة 1', schoolNameEn: 'School 1', schoolCreaDate: '2000-01-01', schoolType: 'male', city: 'مدينة 1', schoolPhone: '123456789', email: 'school1@example.com' },
+    { schoolName: 'مدرسة 2', schoolNameEn: 'School 2', schoolCreaDate: '2005-05-10', schoolType: 'female', city: 'مدينة 2', schoolPhone: '987654321', email: 'school2@example.com' }
+  ];
+  displayedColumns: string[] = ['schoolName', 'schoolNameEn', 'schoolCreaDate', 'schoolType', 'city', 'schoolPhone', 'email'];
+
+  openAddSchoolForm() {
+    // Logic to open the form for adding a new school
   }
+  
 }

@@ -1,67 +1,68 @@
-<div class="sidebar" [ngClass]="{'active': sidebar}" id="sidebar">
-  <div class="sidebar-inner">
-    <div id="sidebar-menu" class="sidebar-menu">
-      <div class="header-left">
-        <a  class="logo">
-          <img src="assets/img/logo1.png" width="40" height="40" alt="" />
-          <span class="text-uppercase">مدرستي</span>
-        </a>
-        @if (sidebar) {
-        <span (click)="cancel()" class="cancel">X</span>
-        }
+<div [ngClass]="{'active': sidebar,'sidebar':languageService.dir==='rtl','sidebarEn':languageService.dir==='ltr'}" id="sidebar">
+    <div class="sidebar-inner">
+      <div id="sidebar-menu" class="sidebar-menu">
+        <div class="header-left">
+          <a routerLink="/school/dashboard" class="logo">
+            <img src="assets/img/logo1.png" width="40" height="40" alt="">
+            <span class="text-uppercase">{{'schoolName'|translate}}</span>
+          </a>
+          <span (click)="cancel()" class="cancel" *ngIf="sidebar">X</span>
+        </div>
+        
+        <ul class="sidebar-ul">
+          <li class="menu-title">القائمة</li>
+          <li class="active">
+            <a routerLink="/admin/dashboard">
+              <img src="assets/img/sidebar/icon-1.png" alt="icon" />
+              <span>الصفحة الرئيسية</span></a
+            >
+          </li>
+          <li class="submenu">
+            <a routerLink="/admin/school">
+              <img src="assets/img/sidebar/icon-26.png" alt="icon" />
+              <span> المدارس</span>
+            </a>
+          </li>
+          <li class="submenu">
+            <a routerLink="/admin/user">
+              <img src="assets/img/sidebar/icon-3.png" alt="icon" />
+              <span> المستخدمين</span>
+            </a>
+          </li>
+  
+          <li class="submenu">
+            <a routerLink="/admin/media">
+              <img src="assets/img/sidebar/icon-28.png" alt="icon" />
+              <span> بوابة الإعلام</span>
+            </a>
+          </li>
+          <li class="submenu">
+            <a routerLink="/admin/customer">
+              <img src="assets/img/sidebar/icon-10.png" alt="icon" />
+              <span> الزبائن</span>
+            </a>
+          </li>
+          <li class="submenu">
+            <a routerLink="/admin/message">
+              <img src="assets/img/sidebar/icon-23.png" alt="icon" />
+              <span> الرسائل</span>
+            </a>
+          </li>
+          <li class="submenu">
+            <a routerLink="/admin/file">
+              <img src="assets/img/sidebar/icon-12.png" alt="icon" />
+              <span> ملف المدير</span>
+            </a>
+          </li>
+          <li class="submenu">
+            <a routerLink="/admin/sitting">
+              <img src="assets/img/sidebar/icon-14.png" alt="icon" />
+              <span> الإعدادات</span>
+            </a>
+          </li>
+        </ul>
+        
       </div>
-      <ul class="sidebar-ul">
-        <li class="menu-title">القائمة</li>
-        <li class="active">
-          <a routerLink="/admin/dashboard">
-            <img src="assets/img/sidebar/icon-1.png" alt="icon" />
-            <span>الصفحة الرئيسية</span></a
-          >
-        </li>
-        <li class="submenu">
-          <a routerLink="/admin/school">
-            <img src="assets/img/sidebar/icon-26.png" alt="icon" />
-            <span> المدارس</span>
-          </a>
-        </li>
-        <li class="submenu">
-          <a routerLink="/admin/user">
-            <img src="assets/img/sidebar/icon-3.png" alt="icon" />
-            <span> المستخدمين</span>
-          </a>
-        </li>
-
-        <li class="submenu">
-          <a routerLink="/admin/media">
-            <img src="assets/img/sidebar/icon-28.png" alt="icon" />
-            <span> بوابة الإعلام</span>
-          </a>
-        </li>
-        <li class="submenu">
-          <a routerLink="/admin/customer">
-            <img src="assets/img/sidebar/icon-10.png" alt="icon" />
-            <span> الزبائن</span>
-          </a>
-        </li>
-        <li class="submenu">
-          <a routerLink="/admin/message">
-            <img src="assets/img/sidebar/icon-23.png" alt="icon" />
-            <span> الرسائل</span>
-          </a>
-        </li>
-        <li class="submenu">
-          <a routerLink="/admin/file">
-            <img src="assets/img/sidebar/icon-12.png" alt="icon" />
-            <span> ملف المدير</span>
-          </a>
-        </li>
-        <li class="submenu">
-          <a routerLink="/admin/sitting">
-            <img src="assets/img/sidebar/icon-14.png" alt="icon" />
-            <span> الإعدادات</span>
-          </a>
-        </li>
-      </ul>
     </div>
   </div>
-</div>
+  

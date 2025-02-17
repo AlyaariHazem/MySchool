@@ -5,9 +5,10 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-// import { TranslateModule } from '@ngx-translate/core';
+import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
+import { RouterLink } from '@angular/router';
 
-// const components=[];
+const components=[PageNotFoundComponent];
 
 const modules=[
   FormsModule,
@@ -15,6 +16,7 @@ const modules=[
     MatFormFieldModule,
     MatInputModule,
     MatDialogTitle,
+    RouterLink,
     MatDialogContent,
     MatDialogActions,
     MatDialogClose,
@@ -23,11 +25,10 @@ const modules=[
 ]
 
 @NgModule({
-  // declarations:components,
+  declarations:components,
   imports: modules,
   exports:[
-    ...modules
-  //  ...components,...modules
+   ...components,...modules
   ]
 })
 export class ShardModule { }

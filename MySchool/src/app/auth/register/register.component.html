@@ -1,10 +1,12 @@
 <div class="register-form">
-  <form #registerForm="ngForm" dir="rtl" (ngSubmit)="register(registerForm.value)">
+  <button class="close-btn" (click)="closeModal()">×</button>
+  <form #registerForm="ngForm" dir="rtl" (ngSubmit)="register()">
+
     <!-- Username Input Field -->
     <mat-form-field appearance="outline" class="input-field">
       <mat-label>اسم المستخدم</mat-label>
-      <input matInput placeholder="أدخل اسم المستخدم" #username="ngModel" ngModel name="userName" required minlength="3"
-        maxlength="22" />
+      <input matInput placeholder="أدخل اسم المستخدم" [(ngModel)]="user.userName" name="userName" required minlength="3"
+        maxlength="22" #username="ngModel" />
       <mat-error *ngIf="username.errors?.['required']">اسم المستخدم مطلوب</mat-error>
       <mat-error *ngIf="username.errors?.['minlength']">اسم المستخدم يجب أن يكون 3 حروف على الأقل</mat-error>
     </mat-form-field>
@@ -12,8 +14,8 @@
     <!-- Email Input Field -->
     <mat-form-field appearance="outline" class="input-field">
       <mat-label>البريد الإلكتروني</mat-label>
-      <input matInput placeholder="أدخل البريد الإلكتروني" #email="ngModel" ngModel name="email" type="email" required
-        email />
+      <input matInput placeholder="أدخل البريد الإلكتروني" [(ngModel)]="user.email" name="email" type="email" required
+        email #email="ngModel" />
       <mat-error *ngIf="email.errors?.['required']">البريد الإلكتروني مطلوب</mat-error>
       <mat-error *ngIf="email.errors?.['email']">الرجاء إدخال بريد إلكتروني صالح</mat-error>
     </mat-form-field>
@@ -21,11 +23,17 @@
     <!-- Password Input Field -->
     <mat-form-field appearance="outline" class="input-field">
       <mat-label>كلمة السر</mat-label>
-      <input matInput placeholder="أدخل كلمة السر" #password="ngModel" ngModel name="password" type="password" required
-        minlength="3" />
+      <input matInput placeholder="أدخل كلمة السر" [(ngModel)]="user.password" name="password" type="password" required
+        minlength="3" #password="ngModel" />
       <mat-error *ngIf="password.errors?.['required']">كلمة السر مطلوبة</mat-error>
       <mat-error *ngIf="password.errors?.['minlength']">كلمة السر يجب أن تكون 3 حروف على الأقل</mat-error>
     </mat-form-field>
+
+    <!-- User Type Select Field -->
+    <p-dropdown [options]="userTypes" [(ngModel)]="selectedUserType" name="userType" optionLabel="label"
+      optionValue="value" placeholder="اختر نوع المستخدم" required [showClear]="true">
+    </p-dropdown>
+    <mat-error *ngIf="!selectedUserType">نوع المستخدم مطلوب</mat-error>
 
     <!-- Register Button -->
     <button type="submit" class="btn btn-success mb-2 buttonSend" mat-raised-button color="primary">

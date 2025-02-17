@@ -25,6 +25,7 @@ import { AllotmentComponent } from './allotment-report/allotment/allotment.compo
 import { GradesMangeComponent } from './grades-mange/grades-mange-mange.component';
 import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.component';
 import { ReportComponent } from './report/report.component';
+import { PageNotFoundComponent } from '../../shared/components/page-not-found/page-not-found.component';
 
 const routes: Routes = [
   {
@@ -41,7 +42,9 @@ const routes: Routes = [
           { path: 'add-student/:id', component: StudentsComponent, data: { breadcrumb: 'إضافة طالب' } },
           { path: 'edit-student', component: AllStudentsComponent, data: { breadcrumb: 'تعديل طالب' } },
           { path: 'chart-for-student', component: ChartForStudentComponent, data: { breadcrumb: ' طالب' } },
-          { path: '', redirectTo: 'all-students', pathMatch: 'full' }
+          { path: '', redirectTo: 'all-students', pathMatch: 'full' },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
         ]
       },
       {
@@ -50,14 +53,17 @@ const routes: Routes = [
           { path: 'schoolInfo', component: SchoolInfoComponent, data: { breadcrumb: 'معلومات المدرسة' } },
           { path: 'stages', component: StagesGradesComponent, data: { breadcrumb: 'المراحل والفصول' } },
           { path: 'feeClass', component: FeeClassComponent, data: { breadcrumb: 'رسوم الصـفوف' } },
-          { path: '', redirectTo: 'years', pathMatch: 'full' }
+          { path: '', redirectTo: 'years', pathMatch: 'full' },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
         ]
       },
       {
         path: 'teacher', data: { breadcrumb: 'الإستاذ' }, children: [
           { path: '', component: TeachersComponent, data: { breadcrumb: 'الإستاذ' } },
           { path: 'action', component: ActionComponent, data: { breadcrumb: 'حدث' } },
-          { path: '**', redirectTo: 'action', pathMatch: 'full' }
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 
         ]
       },
@@ -66,14 +72,16 @@ const routes: Routes = [
           { path: '', component: GradesMangeComponent, data: { breadcrumb: 'بنود الدرجات' } },
           { path: 'GradeMonth', component: GradesMonthComponent, data: { breadcrumb: 'الدرجات الشهرية' } },
           { path: 'GradeClass', component: ActionComponent, data: { breadcrumb: 'الدرجات الفصلية' } },
-          { path: '**', redirectTo: 'action', pathMatch: 'full' }
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 
         ]
       },
       {
         path: 'guardian', data: { breadcrumb: 'أولياء الأمور' }, children: [
           { path: '', component: AllParentsComponent, data: { breadcrumb: 'عرض أولياء الأمور' } },
-          { path: '**', redirectTo: '', pathMatch: 'full' }
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 
         ]
       },
@@ -81,26 +89,32 @@ const routes: Routes = [
         path: 'account', data: { breadcrumb: 'الحسابات' }, children: [
           { path: '', component: AccountsComponent, data: { breadcrumb: 'الحسابات' } },
           { path: 'bill', component: BillsComponent, data: { breadcrumb: 'الفواتير' } },
-          { path: '**', redirectTo: '', pathMatch: 'full' }
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 
         ]
       },
       {
-        path:'allotment',component:AllotmentComponent,data:{breadcrumb:'تخصيص'}
+        path: 'allotment', component: AllotmentComponent, data: { breadcrumb: 'تخصيص' }
       },
       {
         path: 'course', data: { breadcrumb: 'المقررات والخطط' }, children: [
           { path: '', component: BooksComponent, data: { breadcrumb: 'الكتب' } },
           { path: 'courses', component: CoursesComponent, data: { breadcrumb: 'المقررات' } },
           { path: 'plain', component: PlainsComponent, data: { breadcrumb: 'الخطط' } },
-          { path: '**', redirectTo: '', pathMatch: 'full' }
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
         ]
       },
       { path: 'CaptureBonds', component: FeesComponent, data: { breadcrumb: 'سند قبض' } },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'not-found', component: PageNotFoundComponent },
+      { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
     ]
   },
-  { path: '', redirectTo: '/school/dashboard', pathMatch: 'full' }
+  { path: '', redirectTo: '/school/dashboard', pathMatch: 'full' },
+  { path: 'not-found', component: PageNotFoundComponent },
+  { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 ];
 @NgModule({
   imports: [RouterModule.forChild(routes)],

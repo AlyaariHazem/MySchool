@@ -47,15 +47,16 @@ namespace WebAPIDotNet.Controllers
                         await userManager.AddToRoleAsync(user, UserFromRequest.UserType);
                     }
 
-                    return Ok("User created successfully");
+                    return Ok(new { message = "User created successfully." });
                 }
 
                 foreach (var item in result.Errors)
                 {
                     ModelState.AddModelError("Password", item.Description);
                 }
+                return BadRequest(new { message = "Registration failed.", errors = result.Errors });
             }
-            return BadRequest(ModelState);
+            return BadRequest(new { message = "Invalid request data." });
         }
 
         [HttpPost("Login")]//Post api/Account/login

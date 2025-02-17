@@ -1,1 +1,300 @@
-<p>users works!</p>
+<div class="contant" style="margin-top: 0rem" [attr.dir]="languageService.dir">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="row align-items-center">
+              <div class="col-sm-6">
+                <div class="page-title">New Students</div>
+              </div>
+              <div class="col-sm-6 text-sm-left">
+                <div class="mt-sm-0 mt-2">
+                  <button class="btn btn-outline-primary mr-2" (click)="openDialog()">
+                    <span class="ml-2" >Add User</span>
+                  </button>
+                  <button class="btn btn-light" type="button" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+                    <i class="fas fa-ellipsis-h"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#">Action</a>
+                    <div role="separator" class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Another action</a>
+                    <div role="separator" class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Something else here</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <div class="row">
+              <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+                <div class="table-responsive">
+                  <table class="table custom-table">
+                    <thead class="thead-light">
+                      <tr>
+                        <th>الاسم</th>
+                        <th>رقم الطالب</th>
+                        <th>اسم الأب</th>
+                        <th>رقم الهاتف</th>
+                        <th>العنوان</th>
+                        <th>تاريخ القبول</th>
+                        <th>المبلغ المدفوع</th>
+                        <th>صورة الشهادة</th>
+                        <th class="text-right">الحدث</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (student of students; track $index) {
+                      <tr>
+                        <td>
+                          <h2>
+                            <a href="#" class="avatar text-white"><img [src]="student.photoUrl" alt="" /></a><a
+                              href="#">{{
+                              student.fullName.firstName+" "+student.fullName.lastName
+                              }}<span></span></a>
+                          </h2>
+                        </td>
+                        <td>{{ student.studentPhone }}</td>
+                        <td>{{ student.guardians.guardianFullName }}</td>
+                        <td>{{ student.guardians.guardianPhone }}</td>
+                        <td>{{ student.placeBirth }}</td>
+                        <td>{{ student.hireDate|date:"dd-MM-yyyy" }}</td>
+                        <td>{{ student.fee }}</td>
+                        <td>
+                          <img class="imageGreade" src="assets/img/pdf.png" alt="" />
+                        </td>
+                        <td class="text-right">
+                          <button mat-raised-button class="btn btn-primary btn-sm mb-1">
+                            <i class="far fa-edit"></i>
+                          </button>
+                          <button type="submit" data-toggle="modal" data-target="#delete_employee"
+                            class="btn btn-danger btn-sm mb-1">
+                            <i class="far fa-trash-alt"></i>
+                          </button>
+                        </td>
+                      </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+            [totalRecords]="120" [rowsPerPageOptions]="[10, 20, 30]" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notification-box">
+      <div class="msg-sidebar notifications msg-noti">
+        <div class="topnav-dropdown-header">
+          <span>الرسائل</span>
+        </div>
+        <div class="drop-scroll msg-list-scroll">
+          <ul class="list-box">
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">R</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author">Richard Miles </span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item new-message">
+                  <div class="list-left">
+                    <span class="avatar">J</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author">Ruth C. Gault</span>
+                    <span class="message-time">1 Aug</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">T</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author"> Tarah Shropshire </span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">M</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author">Mike Litorus</span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">C</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author"> Catherine Manseau </span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">D</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author"> Domenic Houston </span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">B</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author"> Buster Wigton </span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">R</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author"> Rolland Webber </span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">C</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author"> Claire Mapes </span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">M</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author">Melita Faucher</span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">J</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author">Jeffery Lalor</span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">L</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author">Loren Gatlin</span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <div class="list-item">
+                  <div class="list-left">
+                    <span class="avatar">T</span>
+                  </div>
+                  <div class="list-body">
+                    <span class="message-author">Tarah Shropshire</span>
+                    <span class="message-time">12:28 AM</span>
+                    <div class="clearfix"></div>
+                    <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="topnav-dropdown-footer">
+          <a href="#">See all messages</a>
+        </div>
+      </div>
+    </div>
+  </div>

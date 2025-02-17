@@ -1,50 +1,61 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { MenuItem } from 'primeng/api';
 
-interface Breadcrumb {
-  label: string;
-  url: string;
-}
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
-  host: { '[attr.component-id]': 'app-page-header' },
-  styleUrl: './page-header.component.scss'
+  styleUrls: ['./page-header.component.scss']
 })
-export class PageHeaderComponent implements OnInit{
-  breadcrumbs: Breadcrumb[] = [];
+export class PageHeaderComponent implements OnInit {
+
+  // PrimeNG breadcrumb items
+  items: MenuItem[] = [];
+  home: MenuItem = { icon: 'pi pi-home', routerLink: ['/'] };
+
+  languageService = inject(LanguageService);
 
   constructor(private router: Router, private route: ActivatedRoute) {
+    // Listen to NavigationEnd events to update breadcrumbs dynamically
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      this.breadcrumbs = this.createBreadcrumbs(this.route.root);
+      this.items = this.buildBreadCrumb(this.route.root);
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.languageService.currentLanguage();
+  }
 
-  private createBreadcrumbs(route: ActivatedRoute, url: string = '', breadcrumbs: Breadcrumb[] = []): Breadcrumb[] {
+  buildBreadCrumb(route: ActivatedRoute, url: string = '', breadcrumbs: MenuItem[] = []): MenuItem[] {
+    // Get the child routes of the current route
     const children: ActivatedRoute[] = route.children;
 
+    // Return if there are no more child routes
     if (children.length === 0) {
       return breadcrumbs;
     }
 
+    // Iterate over each child route
     for (const child of children) {
+      // Get the route's URL segment
       const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
-      if (routeURL !== '') {
-        url = `${url}/${routeURL}`;
+      if (routeURL) {
+        url += `/${routeURL}`;
       }
 
+      // Check if the route has a 'breadcrumb' data property
       const label = child.snapshot.data['breadcrumb'];
       if (label) {
-        breadcrumbs.push({ label, url });
+        breadcrumbs.push({ label, routerLink: [url] });
       }
 
-      return this.createBreadcrumbs(child, url, breadcrumbs);
+      // Recurse on the child route
+      return this.buildBreadCrumb(child, url, breadcrumbs);
     }
 
     return breadcrumbs;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Backend.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -59,7 +60,7 @@ namespace Backend.Data
 
             modelBuilder.Entity<Accounts>()
                 .HasKey(a => a.AccountID);
-                
+
             modelBuilder.Entity<Fee>()
                 .HasKey(a => a.FeeID);
 
@@ -82,11 +83,11 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // many to many relationship for Teachers and Students
-           modelBuilder.Entity<TeacherStudent>()
-                .HasOne<Student>(S => S.Student)
-                .WithMany(TS => TS.TeacherStudents)
-                .HasForeignKey(S => S.StudentID)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TeacherStudent>()
+                 .HasOne<Student>(S => S.Student)
+                 .WithMany(TS => TS.TeacherStudents)
+                 .HasForeignKey(S => S.StudentID)
+                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<TeacherStudent>()
                 .HasOne<Teacher>(T => T.Teacher)
@@ -175,7 +176,7 @@ namespace Backend.Data
             .WithOne(T => T.Teacher)
             .HasForeignKey(S => S.TeacherID)
             .OnDelete(DeleteBehavior.Restrict);
-            
+
             modelBuilder.Entity<Student>()
             .HasOne(s => s.Guardian)
             .WithMany(g => g.Students)
@@ -215,7 +216,7 @@ namespace Backend.Data
             //     .WithOne(a => a.Guardian)
             //     .HasForeignKey(a => a.GuardianID)
             //     .OnDelete(DeleteBehavior.Cascade);
-            
+
             // One-to-many: Guardian ↔ Account
             // modelBuilder.Entity<Student>()
             //     .HasMany(S => S.Accounts)
@@ -295,26 +296,26 @@ namespace Backend.Data
                 .WithMany(a => a.AccountStudentGuardians)
                 .HasForeignKey(ASG => ASG.AccountID)
                 .OnDelete(DeleteBehavior.Restrict);
-                
+
             modelBuilder.Entity<Vouchers>()
                 .HasOne(v => v.AccountStudentGuardians)
                 .WithMany(ASG => ASG.Vouchers)
                 .HasForeignKey(v => v.AccountStudentGuardianID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-             modelBuilder.Entity<AccountStudentGuardian>()
-                .HasOne(ASG => ASG.Guardian)
-                .WithMany(a => a.AccountStudentGuardians)
-                .HasForeignKey(ASG => ASG.GuardianID)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AccountStudentGuardian>()
+               .HasOne(ASG => ASG.Guardian)
+               .WithMany(a => a.AccountStudentGuardians)
+               .HasForeignKey(ASG => ASG.GuardianID)
+               .OnDelete(DeleteBehavior.Restrict);
 
-             modelBuilder.Entity<AccountStudentGuardian>()
-                .HasOne(ASG => ASG.Student)
-                .WithMany(a => a.AccountStudentGuardians)
-                .HasForeignKey(ASG => ASG.StudentID)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AccountStudentGuardian>()
+               .HasOne(ASG => ASG.Student)
+               .WithMany(a => a.AccountStudentGuardians)
+               .HasForeignKey(ASG => ASG.StudentID)
+               .OnDelete(DeleteBehavior.Restrict);
 
-                 // FeeClass to StudentClassFees
+            // FeeClass to StudentClassFees
             modelBuilder.Entity<StudentClassFees>()
                 .HasOne(scf => scf.FeeClass)
                 .WithMany(fc => fc.StudentClassFees)
@@ -332,7 +333,7 @@ namespace Backend.Data
                 .HasOne(scf => scf.Student)
                 .WithMany(s => s.StudentClassFees)
                 .HasForeignKey(scf => scf.StudentID)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Vouchers>()
                 .Property(v => v.Receipt)
@@ -340,19 +341,45 @@ namespace Backend.Data
 
             modelBuilder.Entity<Accounts>()
                 .Property(v => v.OpenBalance)
-                .HasColumnType("decimal(18,2)"); 
-            
+                .HasColumnType("decimal(18,2)");
+
             modelBuilder.Entity<AccountStudentGuardian>()
                 .Property(v => v.Amount)
-                .HasColumnType("decimal(18,2)"); 
+                .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<TypeAccount>()
-                .HasData(new TypeAccount{TypeAccountID=1,TypeAccountName="Guardain"},
-                new TypeAccount{TypeAccountID=2,TypeAccountName="School"},
-                new TypeAccount{TypeAccountID=3,TypeAccountName="Branches"},
-                new TypeAccount{TypeAccountID=4,TypeAccountName="Funds"},
-                new TypeAccount{TypeAccountID=5,TypeAccountName="Employees"},
-                new TypeAccount{TypeAccountID=6,TypeAccountName="Banks"});
+                .HasData(new TypeAccount { TypeAccountID = 1, TypeAccountName = "Guardain" },
+                new TypeAccount { TypeAccountID = 2, TypeAccountName = "School" },
+                new TypeAccount { TypeAccountID = 3, TypeAccountName = "Branches" },
+                new TypeAccount { TypeAccountID = 4, TypeAccountName = "Funds" },
+                new TypeAccount { TypeAccountID = 5, TypeAccountName = "Employees" },
+                new TypeAccount { TypeAccountID = 6, TypeAccountName = "Banks" });
+            // Add seed data for the admin user
+
+            // Seed data for roles
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "1",
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
+                }
+            );
+            var passwordHasher = new PasswordHasher<ApplicationUser>();
+            var hashedPassword = passwordHasher.HashPassword(null, "Admin");
+
+            modelBuilder.Entity<ApplicationUser>().HasData(
+                new ApplicationUser
+                {
+                    Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
+                    UserName = "Admin",
+                    NormalizedUserName = "ADMIN",
+                    Email = "admin@gmail.com",
+                    NormalizedEmail = "ADMIN@GMAIL.COM",
+                    PasswordHash = hashedPassword, // Store the hashed password here
+                    EmailConfirmed = true,
+                    UserType = "Admin" // You can assign a specific role or user type if needed
+                });
         }
     }
 }

@@ -1,0 +1,7 @@
+@import 'primeflex/primeflex.scss';
+.btn-outline-primary{
+    @include styleclass('bg-green-500 hover:bg-green-400 border-round transition-colors transition-duration-150 p-2 border-none text-white');
+}
+.btn-outline-primary:hover{
+    background-color: rgb(11, 255, 174);
+}

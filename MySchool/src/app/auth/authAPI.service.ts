@@ -24,14 +24,17 @@ export class AuthAPIService {
     );
   }
 
-  register(user:User): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/account/register`, user);
+  register(user: User): Observable<any> {
+    return this.API.http.post(`${this.API.baseUrl}/account/register`, user, {
+      responseType: 'json' // ✅ Ensures response is treated as JSON
+    });
   }
+  
   
   logout() {
     localStorage.removeItem('token');
     // Navigate to the login page
-    this.API.router.navigate(['/login']);
-  //  localStorage.removeItem('token'); 
+    this.API.router.navigate(['/']);
+   localStorage.removeItem('token'); 
   }
 }

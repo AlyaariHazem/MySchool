@@ -1,15 +1,18 @@
-import { Component, Input } from '@angular/core';
+import { Component, OnInit, Input, inject } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { TranslationService } from '../../../core/services/translation.service';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss'],
+  styleUrls: ['./sidebar.component.scss',
+    '../../../../assets/css/sideBar.css'
+  ],
   animations: [
     trigger('submenuToggle', [
       state('closed', style({
         height: '0',
-        overflow: 'hidden',
         opacity: 0
       })),
       state('open', style({
@@ -22,21 +25,31 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     ])
   ]
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
+  translationService=inject(TranslationService);
   isSubmenuOpen: { [key: string]: boolean } = {
     sittings: false,
     teachersSubmenu: false,
     studentsSubmenu: false,
     guardianSubmenu: false,
+    accountSubmenu: false,
     accountsSubmenu: false,
     blogSubmenu: false,
+    courses: false,
+    GradeSubmenu: false,
     payrollSubmenu: false,
     mangmentSubmenu: false,
     employeesSubmenu: false,
     reportsSubmenu: false,
-    
-    // Add other submenus here
   };
+languageService=inject(LanguageService);
+
+  @Input() sidebar: boolean = false;
+
+  ngOnInit() {
+    this.languageService.currentLanguage();
+    this.translationService.changeLanguage(this.languageService.langDir);
+  }
 
   toggleSubmenu(submenu: string, parentSubmenu?: string) {
     if (parentSubmenu) {
@@ -56,8 +69,6 @@ export class SidebarComponent {
   getSubmenuState(submenu: string): string {
     return this.isSubmenuOpen[submenu] ? 'open' : 'closed';
   }
-
-  @Input() sidebar: boolean = false;
 
   cancel() {
     this.sidebar = false;
