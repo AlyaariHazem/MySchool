@@ -38,6 +38,11 @@ export class SchoolInfoComponent implements OnInit {
       notes: [''],
       country: [''],
       city: [''],
+      address: [''],
+      mobile: [''],
+      website: [''],
+      schoolCategory: [''],
+      description: [''],
       schoolPhone: [''],
       schoolMission: [''],
       street: [''],
@@ -87,15 +92,14 @@ export class SchoolInfoComponent implements OnInit {
 
 
   uploadPhoto(event: Event): void {
-    // Logic for uploading photos
     console.log('Photo uploaded!');
   }
 
   onSubmit(): void {
     if (this.form.valid) {
       console.log('added successfully', this.form);
-      this.schoolService.updateSchool(this.school[0].schoolID, this.form.value).subscribe(res => {
-        this.toaster.success("updated successfully");
+      this.schoolService.addSchool(this.form.value).subscribe(res => {
+        this.toaster.success("Added successfully");
       })
     } else {
       this.toaster.success("some thing is wrong");

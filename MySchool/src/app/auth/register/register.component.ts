@@ -1,4 +1,4 @@
-import { Component, Inject, ViewChild } from '@angular/core';
+import { Component, Inject, ViewChild, AfterViewInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -14,10 +14,11 @@ import { DropdownModule } from 'primeng/dropdown';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss', '../../shared/styles/style-select.scss']
 })
-export class RegisterComponent {
+export class RegisterComponent implements AfterViewInit {
   @ViewChild('registerForm') registerForm!: NgForm; // Get the form reference
 
   registerError: string | null = null;
+
   user: User = {
     userName: '',
     email: '',
@@ -25,7 +26,7 @@ export class RegisterComponent {
     userType: ''
   };
   userTypes = [
-    { label: 'مشرف', value: 'Admin' },
+    { label: 'مدير', value: 'Admin' },
     { label: 'معلم', value: 'Teacher' },
     { label: 'طالب', value: 'Student' },
     { label: 'ولي أمر', value: 'Guardian' },
@@ -38,20 +39,22 @@ export class RegisterComponent {
     private toastr: ToastrService,
     public dialogRef: MatDialogRef<RegisterComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) { 
-    this.resetForm(); // ✅ Initialize form
+  ) {
+    // Do not call resetForm() here because registerForm is not yet available.
+  }
+
+  ngAfterViewInit(): void {
+    // Now the registerForm is available.
+    this.resetForm();
   }
 
   register() {
-    this.user.userType = this.selectedUserType; // Assign userType from dropdown
-
-    console.log('Registering user:', this.user);
 
     if (this.user.userName && this.user.password && this.user.email && this.user.userType) {
       this.authService.register(this.user).subscribe({
         next: () => {
           this.toastr.success('تم إنشاء الحساب بنجاح.');
-          this.resetForm(); // ✅ Reset form on success
+          this.resetForm(); // Reset form on success
         },
         error: (error) => {
           this.registerError = error.error?.message || 'فشل في التسجيل';
@@ -65,9 +68,11 @@ export class RegisterComponent {
   }
 
   resetForm() {
-    this.registerForm.resetForm(); // ✅ Resets the form including validation errors
-    this.user = { userName: '', email: '', password: '', userType: '' }; // ✅ Reset model
-    this.selectedUserType = ''; // ✅ Reset dropdown
+    if (this.registerForm) {
+      this.registerForm.resetForm(); // Resets the form including validation errors
+    }
+    this.user = { userName: '', email: '', password: '', userType: '' }; // Reset model
+    this.selectedUserType = ''; // Reset dropdown
   }
 
   closeModal(): void {

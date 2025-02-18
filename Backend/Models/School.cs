@@ -22,6 +22,11 @@ public class School
     public string Street { get; set; }
     public string SchoolType { get; set; }
     public string? Email { get; set; }
+    public string? SchoolCategory { get; set; }
+    public string? Address { get; set; }
+    public string? Mobile { get; set; }
+    public string? Description { get; set; }
+    public string? Website { get; set; }
     public int? fax { get; set; }
     public string? zone { get; set; }
     public virtual ICollection<Year> Years { get; set; }

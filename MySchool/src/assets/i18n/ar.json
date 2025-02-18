@@ -9,6 +9,7 @@
   "labels": {
     "schoolName": "اسم المدرسة",
     "schoolNameEn": "اسم البديل للمدرسة",
+    "schoolCategory": "فئة المدرسة",
     "schoolType": "نوع المدرسة",
     "schoolClass": "فئة المدرسة",
     "address": "العنوان",

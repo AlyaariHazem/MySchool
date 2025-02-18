@@ -22,20 +22,20 @@
 
             <div class="group">
                 <div class="form-control">
-                    <label for="schoolType" class="label2">{{'labels.schoolNameEn'|translate}}</label>
+                    <label for="schoolType" class="label2">{{'labels.schoolType'|translate}}</label>
                     <p-dropdown formControlName="schoolType" [options]="Books" optionLabel="name" [ngClass]="{'en': languageService.dir==='ltr'}"
                      [editable]="true" [showClear]="true" placeholder="إختار النوع"></p-dropdown>
                 </div>
                 <div class="form-control">
-                    <label for="schoolClass" class="label2">{{'labels.schoolClass'|translate}}</label>
-                    <p-dropdown  [options]="classes"  optionLabel="name" [editable]="true" [showClear]="true" placeholder="إختار الفئة"></p-dropdown>
+                    <label for="schoolCategory" class="label2">{{'labels.schoolCategory'|translate}}</label>
+                    <p-dropdown  [options]="classes" formControlName="schoolCategory" optionLabel="name" [editable]="true" [showClear]="true" placeholder="إختار الفئة"></p-dropdown>
                 </div>
             </div>
 
             <div class="group">
                 <div class="form-control">
                     <label for="street" class="label2">{{'labels.address'|translate}}</label>
-                    <input  type="text" id="street" placeholder="العنوان" />
+                    <input  type="text" formControlName="address" id="street" placeholder="العنوان" />
                 </div>
             </div>
 
@@ -76,21 +76,21 @@
                 </div>
                 <div class="form-control">
                     <label for="mobile" class="label2">{{'labels.mobile'|translate}}</label>
-                    <input  pInputText />
+                    <input  pInputText formControlName="mobile"/>
                 </div>
             </div>
 
             <div class="group">
                 <div class="form-control">
                     <label for="website" class="label2">{{'labels.website'|translate}}</label>
-                    <input  pInputText />
+                    <input  pInputText formControlName="website"/>
                 </div>
             </div>
 
             <div class="group">
                 <div class="form-control">
                     <label for="description" class="label2">{{'labels.description'|translate}}</label>
-                    <textarea  id="description"></textarea>
+                    <textarea  id="description" formControlName="description"></textarea>
                 </div>
                 <div class="form-control">
                     <label for="schoolGoal" class="label2">{{'labels.schoolGoal'|translate}}</label>

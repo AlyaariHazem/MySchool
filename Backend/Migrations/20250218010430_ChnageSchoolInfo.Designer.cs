@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250218010430_ChnageSchoolInfo")]
+    partial class ChnageSchoolInfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,17 +171,17 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "3234dee8-c4e3-44a9-9738-dae488693024",
+                            ConcurrencyStamp = "11adceea-8e3d-409d-826c-3a98ae048a00",
                             Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 2, 18, 4, 15, 25, 569, DateTimeKind.Local).AddTicks(5460),
+                            HireDate = new DateTime(2025, 2, 18, 4, 4, 28, 405, DateTimeKind.Local).AddTicks(8144),
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEP1Nsl6vZguEHHerOwjlaC1ke31ErGzvrKXfBTAHbYpJ2GqDunv3QnkO/pHPROUacw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGrtMDEU/KrWj+HMStfwxOGiP0WVGK56f3CXjgzEBtEV31J7Hp8UswQyz5FDysondw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "4afa8e8f-10fb-4aca-8d83-702de6e4bff4",
+                            SecurityStamp = "fbb80392-1e95-4073-b056-8bd2c5bcaadf",
                             TwoFactorEnabled = false,
                             UserName = "Admin",
                             UserType = "Admin"
@@ -445,9 +448,6 @@ namespace Backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SchoolCategory")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SchoolGoal")

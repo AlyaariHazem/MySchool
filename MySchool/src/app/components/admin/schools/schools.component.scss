@@ -29,10 +29,13 @@
   cursor: pointer;
   transition: background-color 0.3s;
 }
+button{
+  background-color: #22c55e!important;
+  color: white !important;
+}
 
 button:hover {
   background-color: #158852;
-  color:white;
 }
 /* Table Styling */
 .responsive-table {

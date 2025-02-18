@@ -2,11 +2,16 @@ export class School {
     schoolID: number=1;
     schoolName!: string;
     schoolNameEn!: string;
-    hireDate: string='2024-01-01';
+    hireDate: string='2025-01-01';
     schoolVison!: string;
     schoolMission!: string | null;
     schoolGoal!: string;
     notes!: string;
+    website!: string;
+    mobile!: string;
+    schoolCategory!: string;
+    description!: string;
+    address!: string;
     country!: string;
     city!: string;
     schoolPhone!: number;

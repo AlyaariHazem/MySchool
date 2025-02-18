@@ -43,7 +43,7 @@ constructor(
   }
   openDialog(): void {
       const dialogConfig = new MatDialogConfig();
-      dialogConfig.width = '50%';
+      dialogConfig.width = '400px';
       dialogConfig.panelClass = 'custom-dialog-container';
   
       const dialogRef = this.dialog.open(RegisterComponent, dialogConfig);

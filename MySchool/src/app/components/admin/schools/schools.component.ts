@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+
+import { SchoolInfoComponent } from '../school-info/school-info.component';
 
 @Component({
   selector: 'app-schools',
@@ -6,17 +9,21 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./schools.component.scss']
 })
 export class SchoolsComponent implements OnInit {
-
-  ngOnInit(): void {}
+constructor(
+    public dialog: MatDialog) { }
+  ngOnInit(): void { }
 
   schools = [
     { schoolName: 'مدرسة 1', schoolNameEn: 'School 1', schoolCreaDate: '2000-01-01', schoolType: 'male', city: 'مدينة 1', schoolPhone: '123456789', email: 'school1@example.com' },
     { schoolName: 'مدرسة 2', schoolNameEn: 'School 2', schoolCreaDate: '2005-05-10', schoolType: 'female', city: 'مدينة 2', schoolPhone: '987654321', email: 'school2@example.com' }
   ];
   displayedColumns: string[] = ['schoolName', 'schoolNameEn', 'schoolCreaDate', 'schoolType', 'city', 'schoolPhone', 'email'];
-
+//how can I fix this to wrok fine?
   openAddSchoolForm() {
-    // Logic to open the form for adding a new school
+    this.dialog.open(SchoolInfoComponent, {
+      width: '80%',
+      height: '80%',
+    });
   }
-  
+
 }
