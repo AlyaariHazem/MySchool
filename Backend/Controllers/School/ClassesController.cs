@@ -169,7 +169,7 @@ namespace Backend.Controllers.School
                 await _classRepo.DeleteAsync(id);
                 var classes = await _classRepo.GetAllAsync();
 
-                response.Result = new { success = true, classes };
+                response.Result = "Class deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
             }

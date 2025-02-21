@@ -6,13 +6,19 @@
                 <img class="photo" src="assets/img/user.jpg" alt="school Photo" />
             </label>
             <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
-            <button class="btn btn-success school-btn" [ngClass]="{'saveEn': languageService.dir==='ltr','save': languageService.dir==='rtl'}" type="submit">{{'saveChanges'|translate}}</button>
-            <button class="btn btn-success save school-btn" type="submit">حفظ التغيرات+</button>
+
+            <!-- Single submit button -->
+            <button class="btn btn-success save school-btn" type="submit">
+                حفظ التغيرات+
+            </button>
+            <button type="button" class="btn btn-warning school-btn" (click)="resetForm()">Reset</button>
 
             <div class="group">
                 <div class="form-control">
-                    <label for="schoolName" class="label2">{{'labels.schoolName'|translate}}<span style="color:red;"> *</span></label>
-                    <input formControlName="schoolName"   pInputText />
+                    <label for="schoolName" class="label2">
+                        {{ 'labels.schoolName' | translate }}<span style="color:red;"> *</span>
+                    </label>
+                    <input formControlName="schoolName" placeholder="School Name" pInputText />
                 </div>
                 <div class="form-control">
                     <label for="schoolNameEn" class="label2">اسم البديل للمدرسة</label>
@@ -23,19 +29,21 @@
             <div class="group">
                 <div class="form-control">
                     <label for="schoolType" class="label2">{{'labels.schoolType'|translate}}</label>
-                    <p-dropdown formControlName="schoolType" [options]="Books" optionLabel="name" [ngClass]="{'en': languageService.dir==='ltr'}"
-                     [editable]="true" optionValue="code" [showClear]="true" placeholder="إختار النوع"></p-dropdown>
+                    <p-dropdown formControlName="schoolType" [options]="schoolType" optionLabel="name"
+                        [ngClass]="{'en': languageService.dir==='ltr'}" [editable]="true" optionValue="code"
+                        [showClear]="true" placeholder="إختار النوع"></p-dropdown>
                 </div>
                 <div class="form-control">
                     <label for="schoolCategory" class="label2">{{'labels.schoolCategory'|translate}}</label>
-                    <p-dropdown  [options]="classes" optionValue="code" formControlName="schoolCategory"  optionLabel="name" [editable]="true" [showClear]="true" placeholder="إختار الفئة"></p-dropdown>
+                    <p-dropdown [options]="schoolCategory" optionValue="code" formControlName="schoolCategory"
+                        optionLabel="name" [editable]="true" [showClear]="true" placeholder="إختار الفئة"></p-dropdown>
                 </div>
             </div>
 
             <div class="group">
                 <div class="form-control">
                     <label for="street" class="label2">{{'labels.address'|translate}}</label>
-                    <input  type="text" formControlName="address" id="street" placeholder="العنوان" />
+                    <input type="text" formControlName="address" id="street" placeholder="العنوان" />
                 </div>
             </div>
 
@@ -76,21 +84,21 @@
                 </div>
                 <div class="form-control">
                     <label for="mobile" class="label2">{{'labels.mobile'|translate}}</label>
-                    <input  pInputText formControlName="mobile"/>
+                    <input pInputText formControlName="mobile" />
                 </div>
             </div>
 
             <div class="group">
                 <div class="form-control">
                     <label for="website" class="label2">{{'labels.website'|translate}}</label>
-                    <input  pInputText formControlName="website"/>
+                    <input pInputText formControlName="website" />
                 </div>
             </div>
 
             <div class="group">
                 <div class="form-control">
                     <label for="description" class="label2">{{'labels.description'|translate}}</label>
-                    <textarea  id="description" formControlName="description"></textarea>
+                    <textarea id="description" formControlName="description"></textarea>
                 </div>
                 <div class="form-control">
                     <label for="schoolGoal" class="label2">{{'labels.schoolGoal'|translate}}</label>
@@ -108,17 +116,6 @@
                     <textarea formControlName="schoolMission" id="schoolMission"></textarea>
                 </div>
             </div>
-        </div>
-        <div class="buttons">
-            <button class="btn btn-success school-btn" type="submit">
-                {{ currentSchool ? ('saveChanges' | translate) : 'Add School' }}
-            </button>
-            <!-- Reset form button -->
-            <button type="button" class="btn btn-warning school-btn" (click)="resetForm()">Reset</button>
-            <!-- Delete button only if editing an existing school -->
-            <button *ngIf="currentSchool" type="button" class="btn btn-danger school-btn" (click)="deleteSchool()">
-                Delete School
-            </button>
         </div>
     </form>
 </div>

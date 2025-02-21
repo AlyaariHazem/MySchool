@@ -28,6 +28,10 @@ form {
   right: 3rem;
   border-radius: 2rem;
 }
+.school-btn {
+  position: absolute;
+  top: 60px;
+}
 .schoolInfo {
   background-color: white;
 }
@@ -83,9 +87,9 @@ input::placeholder,
 select::placeholder {
   color: #aaa;
 }
-textarea{
-  border: 2px solid #d6d6d6!important;
-  border-radius: 7px!important;
+textarea {
+  border: 2px solid #d6d6d6 !important;
+  border-radius: 7px !important;
 }
 textarea:hover,
 textarea:focus {

@@ -56,8 +56,8 @@ export class FeeComponent implements OnInit, OnChanges {
     this.isOptionSelected = true;
 
     this.feeClassService.GetAllByID(feeClassID).subscribe((res: any) => {
-      if (res.success) {
-        this.feeClasses = res.data;
+      if (res.isSuccess) {
+        this.feeClasses = res.result;
         this.feeClassesChanged.emit(this.feeClasses); // Notify parent
         this.updateFormGroup();
         this.changeDetectorRef.detectChanges();

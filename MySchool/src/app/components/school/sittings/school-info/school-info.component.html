@@ -1,18 +1,24 @@
 <div class="schoolInfo" [attr.dir]="languageService.dir">
-    <h2 class="schoolTitle">{{'schoolInfo'|translate}}</h2>
-    <form [formGroup]="form"  (ngSubmit)="onSubmit()">
+    <h2 class="schoolTitle">{{ 'schoolInfo' | translate }}</h2>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="contant">
             <label for="fileInput">
                 <img class="photo" src="assets/img/user.jpg" alt="school Photo" />
             </label>
             <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
-            <button class="btn btn-success school-btn" [ngClass]="{'saveEn': languageService.dir==='ltr','save': languageService.dir==='rtl'}" type="submit">{{'saveChanges'|translate}}</button>
-            <button class="btn btn-success save school-btn" type="submit">حفظ التغيرات+</button>
 
+            <!-- Submit button for updating -->
+            <button class="btn btn-success school-btn" type="submit">
+                {{ 'saveChanges' | translate }}
+            </button>
+
+            <!-- School Name Group -->
             <div class="group">
                 <div class="form-control">
-                    <label for="schoolName" class="label2">{{'labels.schoolName'|translate}}<span style="color:red;"> *</span></label>
-                    <input formControlName="schoolName"   pInputText />
+                    <label for="schoolName" class="label2">
+                        {{ 'labels.schoolName' | translate }}<span style="color:red;"> *</span>
+                    </label>
+                    <input formControlName="schoolName" placeholder="School Name" pInputText />
                 </div>
                 <div class="form-control">
                     <label for="schoolNameEn" class="label2">اسم البديل للمدرسة</label>
@@ -20,92 +26,103 @@
                 </div>
             </div>
 
+            <!-- School Type and Category Groups -->
             <div class="group">
                 <div class="form-control">
-                    <label for="schoolType" class="label2">{{'labels.schoolType'|translate}}</label>
-                    <p-dropdown formControlName="schoolType" [options]="Books" optionLabel="name" [ngClass]="{'en': languageService.dir==='ltr'}"
-                     [editable]="true" [showClear]="true" placeholder="إختار النوع"></p-dropdown>
+                    <label for="schoolType" class="label2">{{ 'labels.schoolType' | translate }}</label>
+                    <p-dropdown formControlName="schoolType" [options]="schoolType" optionLabel="name"
+                        optionValue="code" [ngClass]="{'en': languageService.dir==='ltr'}" [editable]="true"
+                        [showClear]="true" placeholder="إختار النوع">
+                    </p-dropdown>
                 </div>
                 <div class="form-control">
-                    <label for="schoolCategory" class="label2">{{'labels.schoolCategory'|translate}}</label>
-                    <p-dropdown  [options]="classes" formControlName="schoolCategory" optionLabel="name" [editable]="true" [showClear]="true" placeholder="إختار الفئة"></p-dropdown>
-                </div>
-            </div>
-
-            <div class="group">
-                <div class="form-control">
-                    <label for="street" class="label2">{{'labels.address'|translate}}</label>
-                    <input  type="text" formControlName="address" id="street" placeholder="العنوان" />
+                    <label for="schoolCategory" class="label2">{{ 'labels.schoolCategory' | translate }}</label>
+                    <p-dropdown formControlName="schoolCategory" [options]="schoolCategory" optionLabel="name"
+                        optionValue="code" [editable]="true" [showClear]="true" placeholder="إختار الفئة">
+                    </p-dropdown>
                 </div>
             </div>
 
+            <!-- Address Group -->
             <div class="group">
                 <div class="form-control">
-                    <label for="country" class="label2">{{'labels.country'|translate}}</label>
+                    <label for="street" class="label2">{{ 'labels.address' | translate }}</label>
+                    <input type="text" formControlName="address" id="street" placeholder="العنوان" />
+                </div>
+            </div>
+
+            <!-- Location Details -->
+            <div class="group">
+                <div class="form-control">
+                    <label for="country" class="label2">{{ 'labels.country' | translate }}</label>
                     <input formControlName="country" pInputText />
                 </div>
                 <div class="form-control">
-                    <label for="city" class="label2">{{'labels.city'|translate}}</label>
+                    <label for="city" class="label2">{{ 'labels.city' | translate }}</label>
                     <input formControlName="city" pInputText />
                 </div>
                 <div class="form-control">
-                    <label for="zone" class="label2">{{'labels.zone'|translate}}</label>
+                    <label for="zone" class="label2">{{ 'labels.zone' | translate }}</label>
                     <input formControlName="zone" pInputText />
                 </div>
                 <div class="form-control">
-                    <label for="street" class="label2">{{'labels.street'|translate}}</label>
+                    <label for="street" class="label2">{{ 'labels.street' | translate }}</label>
                     <input formControlName="street" pInputText />
                 </div>
             </div>
 
+            <!-- Contact Details -->
             <div class="group">
                 <div class="form-control">
-                    <label for="email" class="label2">{{'labels.email'|translate}}</label>
+                    <label for="email" class="label2">{{ 'labels.email' | translate }}</label>
                     <input formControlName="email" pInputText />
                 </div>
                 <div class="form-control">
-                    <label for="fax" class="label2">{{'labels.fax'|translate}}</label>
+                    <label for="fax" class="label2">{{ 'labels.fax' | translate }}</label>
                     <input formControlName="fax" pInputText />
                 </div>
             </div>
 
+            <!-- Phone Numbers -->
             <div class="group">
                 <div class="form-control">
-                    <label for="schoolPhone" class="label2">{{'labels.schoolPhone'|translate}}</label>
+                    <label for="schoolPhone" class="label2">{{ 'labels.schoolPhone' | translate }}</label>
                     <input formControlName="schoolPhone" pInputText />
                 </div>
                 <div class="form-control">
-                    <label for="mobile" class="label2">{{'labels.mobile'|translate}}</label>
-                    <input  pInputText formControlName="mobile"/>
+                    <label for="mobile" class="label2">{{ 'labels.mobile' | translate }}</label>
+                    <input formControlName="mobile" pInputText />
+                </div>
+            </div>
+
+            <!-- Website -->
+            <div class="group">
+                <div class="form-control">
+                    <label for="website" class="label2">{{ 'labels.website' | translate }}</label>
+                    <input formControlName="website" pInputText />
+                </div>
+            </div>
+
+            <!-- Additional Details -->
+            <div class="group">
+                <div class="form-control">
+                    <label for="description" class="label2">{{ 'labels.description' | translate }}</label>
+                    <textarea id="description" formControlName="description"></textarea>
+                </div>
+                <div class="form-control">
+                    <label for="schoolGoal" class="label2">{{ 'labels.schoolGoal' | translate }}</label>
+                    <textarea id="schoolGoal" formControlName="schoolGoal"></textarea>
                 </div>
             </div>
 
             <div class="group">
                 <div class="form-control">
-                    <label for="website" class="label2">{{'labels.website'|translate}}</label>
-                    <input  pInputText formControlName="website"/>
-                </div>
-            </div>
-
-            <div class="group">
-                <div class="form-control">
-                    <label for="description" class="label2">{{'labels.description'|translate}}</label>
-                    <textarea  id="description" formControlName="description"></textarea>
+                    <label for="schoolVison" class="label2">{{ 'labels.schoolVision' | translate }}</label>
+                    <textarea id="schoolVison" formControlName="schoolVison"></textarea>
                 </div>
                 <div class="form-control">
-                    <label for="schoolGoal" class="label2">{{'labels.schoolGoal'|translate}}</label>
-                    <textarea formControlName="schoolGoal" id="schoolGoal"></textarea>
-                </div>
-            </div>
-
-            <div class="group">
-                <div class="form-control">
-                    <label for="schoolVison" class="label2">{{'labels.schoolVision'|translate}}</label>
-                    <textarea formControlName="schoolVison" id="schoolVison"></textarea>
-                </div>
-                <div class="form-control">
-                    <label for="schoolMission" class="label2">{{'labels.schoolMission'|translate}}</label>
-                    <textarea formControlName="schoolMission" id="schoolMission"></textarea>
+                    <label for="schoolMission" class="label2">{{ 'labels.schoolMission' | translate }}</label>
+                    <textarea id="schoolMission" formControlName="schoolMission"></textarea>
                 </div>
             </div>
         </div>

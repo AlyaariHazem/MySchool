@@ -1,29 +1,27 @@
-﻿using System.Net;
+using System.Net;
 using System.Threading.Tasks;
-using Backend.DTOS;
-using Backend.DTOS.School.Stages;
+using Backend.DTOS.School.Years;
 using Backend.Models;
-using Backend.Repository;
-using Backend.Repository.School;
-using Microsoft.AspNetCore.JsonPatch;
+using Backend.Repository.School.Classes;
+using Backend.Repository.School.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.School
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StagesController : ControllerBase
+    public class YearController : ControllerBase
     {
-        private readonly IStagesRepository _stageRepo;
+        private readonly IYearRepository _yearRepo;
 
-        public StagesController(IStagesRepository stageRepo, IClassesRepository classRepo)
+        public YearController(IYearRepository yearRepo)
         {
-            _stageRepo = stageRepo;
+            _yearRepo = yearRepo;
         }
 
-        // POST api/stages
+        // POST api/year
         [HttpPost]
-        public async Task<ActionResult<APIResponse>> Add([FromBody] StagesDTO model)
+        public async Task<ActionResult<APIResponse>> Add([FromBody] YearDTO model)
         {
             var response = new APIResponse();
             try
@@ -32,14 +30,14 @@ namespace Backend.Controllers.School
                 {
                     response.IsSuccess = false;
                     response.statusCode = HttpStatusCode.BadRequest;
-                    response.ErrorMasseges.Add("Invalid stage data.");
+                    response.ErrorMasseges.Add("Invalid year data.");
                     return BadRequest(response);
                 }
-
-                await _stageRepo.AddStage(model);
-                response.Result = "Stage added successfully.";
+                
+                await _yearRepo.Add(model);
+                response.Result = "Year added successfully.";
                 response.statusCode = HttpStatusCode.Created;
-                return Ok(response); // or StatusCode((int)HttpStatusCode.Created, response);
+                return Ok(response);
             }
             catch (System.Exception ex)
             {
@@ -50,15 +48,15 @@ namespace Backend.Controllers.School
             }
         }
 
-        // GET api/stages
+        // GET api/year
         [HttpGet]
-        public async Task<ActionResult<APIResponse>> GetStages()
+        public async Task<ActionResult<APIResponse>> GetYears()
         {
             var response = new APIResponse();
             try
             {
-                var stages = await _stageRepo.GetAll();
-                response.Result = stages;
+                var years = await _yearRepo.GetAll();
+                response.Result = years;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
             }
@@ -71,9 +69,37 @@ namespace Backend.Controllers.School
             }
         }
 
-        // PUT api/stages/{id}
+        // GET api/year/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<APIResponse>> Get(int id)
+        {
+            var response = new APIResponse();
+            try
+            {
+                var year = await _yearRepo.GetByIdAsync(id);
+                if (year == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("Year not found.");
+                    return NotFound(response);
+                }
+                response.Result = year;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (System.Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+        // PUT api/year/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<APIResponse>> UpdateStage(int id, [FromBody] UpdateStageDTO model)
+        public async Task<ActionResult<APIResponse>> Update(int id, [FromBody] YearDTO model)
         {
             var response = new APIResponse();
             try
@@ -82,25 +108,21 @@ namespace Backend.Controllers.School
                 {
                     response.IsSuccess = false;
                     response.statusCode = HttpStatusCode.BadRequest;
-                    response.ErrorMasseges.Add("Invalid stage data.");
+                    response.ErrorMasseges.Add("Invalid year data.");
                     return BadRequest(response);
                 }
 
-                var existingStage = await _stageRepo.GetByIdAsync(id);
-                if (existingStage == null)
+                var existingYear = await _yearRepo.GetByIdAsync(id);
+                if (existingYear == null)
                 {
                     response.IsSuccess = false;
                     response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("Stage not found.");
+                    response.ErrorMasseges.Add("Year not found.");
                     return NotFound(response);
                 }
 
-                // Ensure the incoming model has the correct ID:
-                model.ID = existingStage.StageID;
-
-                await _stageRepo.Update(model);
-
-                response.Result = "Stage updated successfully.";
+                await _yearRepo.Update(model);
+                response.Result = "Year updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
             }
@@ -113,62 +135,24 @@ namespace Backend.Controllers.School
             }
         }
 
-        // DELETE api/stages/{id}
+        // DELETE api/year/{id}
         [HttpDelete("{id}")]
-        public async Task<ActionResult<APIResponse>> DeleteStage(int id)
+        public async Task<ActionResult<APIResponse>> Delete(int id)
         {
             var response = new APIResponse();
             try
             {
-                var stage = await _stageRepo.GetByIdAsync(id);
-                if (stage == null)
+                var year = await _yearRepo.GetByIdAsync(id);
+                if (year == null)
                 {
                     response.IsSuccess = false;
                     response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("Stage not found.");
+                    response.ErrorMasseges.Add("Year not found.");
                     return NotFound(response);
                 }
 
-                await _stageRepo.DeleteAsync(id);
-
-                response.Result = "Stage deleted successfully.";
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (System.Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
-
-        // PATCH api/stages/{id}
-        [HttpPatch("{id}")]
-        public async Task<ActionResult<APIResponse>> UpdatePartial(int id, [FromBody] JsonPatchDocument<StagesDTO> patchDoc)
-        {
-            var response = new APIResponse();
-            try
-            {
-                if (patchDoc == null)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.BadRequest;
-                    response.ErrorMasseges.Add("Invalid patch document.");
-                    return BadRequest(response);
-                }
-
-                var success = await _stageRepo.UpdatePartial(id, patchDoc);
-                if (!success)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("Stage not found or update failed.");
-                    return NotFound(response);
-                }
-
-                response.Result = "Stage partially updated successfully.";
+                await _yearRepo.DeleteAsync(id);
+                response.Result = "Year deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
             }

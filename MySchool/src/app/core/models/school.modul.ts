@@ -1,5 +1,5 @@
 export class School {
-    schoolID: number=1;
+    schoolID?: number=1;
     schoolName!: string;
     schoolNameEn!: string;
     hireDate: string='2025-01-01';

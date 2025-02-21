@@ -21,7 +21,18 @@ namespace Backend.Repository.School.Classes
             _mapper = mapper;
         }
 
-        public async Task<List<SchoolDTO>> GetByIdAsync()
+        public async Task<SchoolDTO> GetByIdAsync(int id)
+        {
+            var schools = await _db.Schools.FirstOrDefaultAsync(x => x.SchoolID == id);
+            if (schools == null)
+            {
+                throw new KeyNotFoundException($"School with ID {id} not found.");
+            }
+            var schoolDTO = _mapper.Map<SchoolDTO>(schools);
+            return schoolDTO;
+        }
+
+        public async Task<List<SchoolDTO>> GetAllAsync()
         {
             var schools = await _db.Schools.ToListAsync();
             var schoolDTO = _mapper.Map<List<SchoolDTO>>(schools);

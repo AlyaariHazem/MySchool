@@ -7,7 +7,9 @@ using Backend.Models;
 
 namespace Backend.Repository.School.Interfaces;
 
-public interface IYearRepository:IgenericRepository<Year>
+public interface IYearRepository : IgenericRepository<YearDTO>
 {
-    public void Add(YearDTO obj);
+    Task Add(YearDTO obj);
+    Task Update(YearDTO obj);
+    Task<List<YearDTO>> GetAll();
 }

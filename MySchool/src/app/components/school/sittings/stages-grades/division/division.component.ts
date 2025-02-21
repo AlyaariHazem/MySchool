@@ -67,7 +67,7 @@ export class DivisionComponent implements OnInit {
 
   getAllClass(): void {
     this.classService.GetAll().subscribe({
-      next: (res) => this.classes = res,
+      next: (res) => this.classes = res.result,
       error: (err) => this.toastr.error('Error feched', 'Error', err)
     });
   }
@@ -80,7 +80,7 @@ export class DivisionComponent implements OnInit {
           this.getAllDivisions();
           this.form.reset();
           this.isEditMode = false;
-          this.toastr.success('Stage Added successfully', res);
+          this.toastr.success('Stage Added successfully', res.result);
         },
         error: () => this.toastr.error('Something went wrong')
       });
@@ -92,8 +92,8 @@ export class DivisionComponent implements OnInit {
   DeleteDivision(id: number): void {
     this.divisionService.Delete(id).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.toastr.success(response.message, 'Division Deleted');
+        if (response.isSuccess) {
+          this.toastr.success(response.result, 'Division Deleted');
           this.getAllDivisions(); // Refresh the list after deletion
         }
       },
@@ -107,7 +107,7 @@ export class DivisionComponent implements OnInit {
       const updateDivision: Division = this.form.value;
       this.divisionService.UpdateDivision(this.divisionToEditId, updateDivision).subscribe({
         next: (res) => {
-          if (res.success) {
+          if (res.isSuccess) {
             this.toastr.success("Division updated successfully");
             this.form.reset();
             this.getAllDivisions();
@@ -128,8 +128,8 @@ export class DivisionComponent implements OnInit {
 
     this.divisionService.partialUpdate(division.divisionID, patchDoc).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.toastr.success(response.message);
+        if (response.isSuccess) {
+          this.toastr.success(response.result);
           this.getAllDivisions(); // Refresh the list to show updated data
         }
       },

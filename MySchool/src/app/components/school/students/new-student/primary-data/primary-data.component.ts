@@ -74,7 +74,7 @@ export class PrimaryDataComponent implements OnInit {
   getAllDivision(): void {
     this.Divisions.GetAll().subscribe({
       next: (res) => {
-        this.allDivisions = res.divisionInfo;
+        this.allDivisions = res;
 
         const initialClassId = this.formGroup.get('classID')?.value;
         if (initialClassId) {

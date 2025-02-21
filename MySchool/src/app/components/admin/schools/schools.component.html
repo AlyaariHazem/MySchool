@@ -4,7 +4,7 @@
     <!-- correct this to be correct? -->
     <button mat-raised-button (click)="openAddSchoolForm()">إضافة مدرسة</button>
     <div class="table-container" dir="rtl">
-      <table mat-table [dataSource]="schools" class="mat-elevation-z8 responsive-table">
+      <table mat-table [dataSource]="paginatedSchools" class="mat-elevation-z8 responsive-table">
         <ng-container matColumnDef="schoolName">
           <th mat-header-cell *matHeaderCellDef> اسم المدرسة </th>
           <td mat-cell *matCellDef="let school"> {{ school.schoolName }} </td>
@@ -17,12 +17,12 @@
 
         <ng-container matColumnDef="schoolCreaDate">
           <th mat-header-cell *matHeaderCellDef> تاريخ الإنشاء </th>
-          <td mat-cell *matCellDef="let school"> {{ school.schoolCreaDate }} </td>
+          <td mat-cell *matCellDef="let school"> {{ school.hireDate }} </td>
         </ng-container>
 
         <ng-container matColumnDef="schoolType">
           <th mat-header-cell *matHeaderCellDef> نوع المدرسة </th>
-          <td mat-cell *matCellDef="let school"> {{ school.schoolType === 'male' ? 'ذكر' : 'أنثى' }} </td>
+          <td mat-cell *matCellDef="let school"> {{ school.schoolType }} </td>
         </ng-container>
 
         <ng-container matColumnDef="city">
@@ -40,9 +40,29 @@
           <td mat-cell *matCellDef="let school"> {{ school.email }} </td>
         </ng-container>
 
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> العملية </th>
+          <td mat-cell *matCellDef="let school">
+            <button class="action" mat-icon-button [matMenuTriggerFor]="actionMenu">
+              <mat-icon style="color:black; font-weight:bold;">⁝</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button class="item" mat-menu-item (click)="openEditSchoolForm(school)">
+                <mat-icon>edit</mat-icon> تعديل
+              </button>
+              <button class="item" mat-menu-item (click)="deleteSchool(school)">
+                <mat-icon>delete</mat-icon> حذف
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
     </div>
   </mat-card-content>
+  <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+            [totalRecords]="schools.length" [rowsPerPageOptions]="[4, 10, 20]" />
 </mat-card>

@@ -25,7 +25,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var schools = await _schoolRepository.GetByIdAsync(); 
+                var schools = await _schoolRepository.GetAllAsync(); 
                 response.Result = schools;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -36,6 +36,25 @@ namespace Backend.Controllers.School
                 response.statusCode = HttpStatusCode.InternalServerError;
                 response.ErrorMasseges.Add(ex.Message); 
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<APIResponse>> GetSchoolById(int id)
+        {
+            var response = new APIResponse();
+            try
+            {
+                var school = await _schoolRepository.GetByIdAsync(id);
+                response.Result = school;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (System.Exception  ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.NotFound;
+                response.ErrorMasseges.Add(ex.Message);
+                return NotFound(response);
             }
         }
 

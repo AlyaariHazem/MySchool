@@ -27,6 +27,10 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { MatTableModule } from '@angular/material/table';
 
+import { MatIconModule } from '@angular/material/icon';
+
+import { MatMenuModule } from '@angular/material/menu';
+
 import { HeaderComponent } from './header/header.component';
 import { ActionComponent } from './action/action.component';
 import { SchoolsComponent } from './schools/schools.component';
@@ -65,6 +69,10 @@ const modules = [
   FormsModule,
   CommonModule,
   MatOptionModule,
+  AdminRoutingModule,
+  MatButtonModule,
+  MatIconModule,
+  MatMenuModule,
   ReactiveFormsModule,
   MatTableModule,
   MatFormFieldModule,

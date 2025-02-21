@@ -23,14 +23,14 @@
   padding: 12px 20px;
   font-size: 1rem;
   color: #fff;
-  background-color: #146c43!important;
+  background-color: #146c43 !important;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
-button{
-  background-color: #22c55e!important;
+button {
+  background-color: #22c55e !important;
   color: white !important;
 }
 
@@ -44,13 +44,24 @@ button:hover {
   min-width: 600px; /* helps keep columns readable on small screens */
   table-layout: auto;
 }
-
+.action {
+  background-color: #ffffff !important;
+  color: black;
+  border: 1px solid #dcdccb;
+  border-radius: 6px;
+}
+.item{
+  background-color: #ffffff !important;
+  color: black!important;
+  border: 1px solid #dcdccb;
+  border-radius: 6px;
+}
 .responsive-table th,
 .responsive-table td {
   padding: 12px 16px;
   border: 1px solid #ddd; /* subtle border around cells */
-  text-align: center;     /* center or right, based on your preference */
-  white-space: nowrap;    /* prevent text from wrapping if you prefer */
+  text-align: center; /* center or right, based on your preference */
+  white-space: nowrap; /* prevent text from wrapping if you prefer */
 }
 
 /* Header Styling (Green Header) */

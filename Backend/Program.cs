@@ -96,6 +96,7 @@ builder.Services.AddScoped<IGuardianRepository, GuardianRepository>();
 builder.Services.AddScoped<IStudentClassFeeRepository, StudentClassFeeRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IStudentClassFeesRepository, StudentClassFeesRepository>();
+builder.Services.AddScoped<IYearRepository, YearRepository>();
 
 
 // Configure Identity and JWT Authentication

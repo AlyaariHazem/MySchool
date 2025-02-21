@@ -121,8 +121,8 @@ export class FeeClassComponent implements OnInit {
   deleteFee(id: number): void {
     this.feeService.DeleteFee(id).subscribe({
       next: (res) => {
-        if (res.success) {
-          this.toastr.success(res.message, 'Fee Deleted');
+        if (res.isSuccess) {
+          this.toastr.success(res.result, 'Fee Deleted');
           this.getAllFees();
         }
       },
@@ -193,7 +193,7 @@ export class FeeClassComponent implements OnInit {
         (this.FeeClass = res);
          this.updatePaginatedData();
       },
-      error: (err) => this.toastr.error('Error fetching class fees'),
+      error: () => this.toastr.error('Error fetching class fees'),
     });
     
   }

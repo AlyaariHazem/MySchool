@@ -9,7 +9,8 @@ namespace Backend.Repository.School.Implements;
 public interface ISchoolRepository
 {
         Task AddAsync(SchoolDTO school);
-        Task<List<SchoolDTO>> GetByIdAsync();
+        Task<SchoolDTO> GetByIdAsync(int id);
+        Task<List<SchoolDTO>> GetAllAsync();
         Task UpdateAsync(SchoolDTO school);
         Task DeleteAsync(int schoolId);
 }

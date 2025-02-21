@@ -10,19 +10,27 @@ import { BackendAspService } from '../../environments/ASP.NET/backend-asp.servic
 export class SchoolService {
   private ApI = inject(BackendAspService);
   private http = inject(HttpClient);
-  result:School[]=[];
+  result: School[] = [];
 
-  constructor() {}
+  constructor() { }
 
   getAllSchools(): Observable<School[]> {
-    return this.http.get<{result:School[]}>(`${this.ApI.baseUrl}/School`).pipe(
-      map(response=> response.result),
+    return this.http.get<{ result: School[] }>(`${this.ApI.baseUrl}/School`).pipe(
+      map(response => response.result),
       catchError((error) => {
         return throwError(() => new Error(error.message));
       })
     )
-    }
-      
+  }
+  getSchoolByID(id:number): Observable<School> {
+    return this.http.get<{result: School}>(`${this.ApI.baseUrl}/School/${id}`).pipe(
+      map(response => response.result),
+      catchError((error) => {
+        return throwError(() => new Error(error.message));
+      })
+    )
+  }
+
   addSchool(school: School): Observable<School> {
     return this.http.post<School>(`${this.ApI.baseUrl}/School`, school).pipe(
       catchError((error) => {
@@ -33,7 +41,7 @@ export class SchoolService {
 
   updateSchool(id: number, school: School): Observable<any> {
     return this.http.put(`${this.ApI.baseUrl}/School/${id}`, school).pipe(
-      map(res=>res),
+      map(res => res),
       catchError((error) => {
         return throwError(() => new Error(error.message));
       })

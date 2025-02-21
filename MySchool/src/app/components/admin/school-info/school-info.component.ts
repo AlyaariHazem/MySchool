@@ -1,9 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, Inject, inject } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { SchoolService } from '../../../core/services/school.service';
 import { School } from '../../../core/models/school.modul';
 import { LanguageService } from '../../../core/services/language.service';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-school-info',
@@ -21,18 +22,19 @@ export class SchoolInfoComponent implements OnInit {
   languageService = inject(LanguageService);
 
   form: FormGroup;
-  Books: any[] = [];
-  classes: any[] = [];
-  school: School[] = []; // list of schools
-
-  // To store the currently selected school (if editing)
+  schoolType: any[] = [];
+  schoolCategory: any[] = [];
   currentSchool?: School;
+  isAddMode: boolean = true;
 
-  constructor(private fb: FormBuilder) {
-    // Setup validators as needed. Here we mark schoolName and email as required for example.
+  constructor(
+    private fb: FormBuilder,
+    private dialogRef: MatDialogRef<SchoolInfoComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
     this.form = this.fb.group({
       schoolID: [0],
-      schoolName: ['', Validators.required],
+      schoolName: [''],
       schoolNameEn: [''],
       schoolVison: [''],
       schoolType: [''],
@@ -49,33 +51,30 @@ export class SchoolInfoComponent implements OnInit {
       schoolPhone: [''],
       schoolMission: [''],
       street: [''],
-      email: ['', [Validators.required, Validators.email]],
+      email: [''],
       fax: [''],
       zone: [''],
     });
   }
 
   ngOnInit(): void {
-    // Load schools from the API
-    this.schoolService.getAllSchools().subscribe((res) => {
-      this.school = res;
-      console.log('the schools are', this.school);
-      if (res.length > 0) {
-        // If at least one school exists, we take the first one to edit.
-        this.currentSchool = res[0];
-        this.initializeForm(this.currentSchool);
-      }
-    });
+    // If dialog data indicates edit mode, prefill the form
+    if (this.data && this.data.isEditMode && this.data.schoolData) {
+      this.isAddMode = false;
+      this.currentSchool = this.data.schoolData;
+      this.initializeForm(this.data.schoolData);
+    } else {
+      this.isAddMode = true;
+      // For add mode, leave the form with default/empty values
+    }
 
-    // For School Type
-    this.Books = [
+    this.schoolType = [
       { name: 'بنين', code: 'MALE' },
       { name: 'بنات', code: 'FEMALE' },
       { name: 'مختلط', code: 'MIXED' },
     ];
 
-    // For School Category
-    this.classes = [
+    this.schoolCategory = [
       { name: 'تمهيدي', code: 'KINDERGARTEN' },
       { name: 'أساسي', code: 'PRIMARY' },
       { name: 'ثانوي', code: 'SECONDARY' },
@@ -88,106 +87,77 @@ export class SchoolInfoComponent implements OnInit {
 
   initializeForm(school: School): void {
     this.form.patchValue({
-      schoolID: school.schoolID,
-      schoolName: school.schoolName,
-      schoolNameEn: school.schoolNameEn,
-      schoolType: school.schoolType,
-      email: school.email,
-      country: school.country,
-      schoolPhone: school.schoolPhone,
-      city: school.city,
-      zone: school.zone,
-      street: school.street,
-      mobile: school.mobile,
-      website: school.website,
-      schoolCategory: school.schoolCategory,
-      description: school.description,
-      address: school.address,
-      fax: school.fax,
-      schoolVison: school.schoolVison,
-      schoolMission: school.schoolMission,
-      schoolGoal: school.schoolGoal,
-      notes: school.notes,
-      hireDate: school.hireDate,
+      schoolID: school.schoolID || 0,
+      schoolName: school.schoolName || '',
+      schoolNameEn: school.schoolNameEn || '',
+      schoolType: school.schoolType || '',
+      email: school.email || '',
+      country: school.country || '',
+      schoolPhone: school.schoolPhone?.toString() || '',
+      city: school.city || '',
+      zone: school.zone || '',
+      street: school.street || '',
+      mobile: school.mobile || '',
+      website: school.website || '',
+      schoolCategory: school.schoolCategory || '',
+      description: school.description || '',
+      address: school.address || '',
+      fax: school.fax || '',
+      schoolVison: school.schoolVison || '',
+      schoolMission: school.schoolMission || '',
+      schoolGoal: school.schoolGoal || '',
+      notes: school.notes || '',
+      hireDate: school.hireDate || '2025-01-01',
     });
+    console.log('Form after initialization:', this.form.value);
   }
 
-  // Called on form submission
   onSubmit(): void {
     if (this.form.valid) {
       const schoolData: School = this.form.value;
-      // Decide to add or update based on schoolID (or existence of currentSchool)
-      if (this.currentSchool && this.currentSchool.schoolID) {
-        // Update existing school
-        this.schoolService
-          .updateSchool(this.currentSchool.schoolID, schoolData)
-          .subscribe({
-            next: (res) => {
+      if (this.isAddMode) {
+        // When adding, remove the schoolID so the backend creates a new entry
+        schoolData.schoolID = undefined;
+        this.schoolService.addSchool(schoolData).subscribe({
+          next: () => {
+            this.toaster.success('Added successfully');
+            this.dialogRef.close();
+          },
+          error: (err) => {
+            console.error('Error adding school', err);
+            this.toaster.error('Please fill all required fields');
+          },
+        });
+      } else {
+        if (this.currentSchool?.schoolID) {
+          this.schoolService.updateSchool(this.currentSchool.schoolID, schoolData).subscribe({
+            next: () => {
               this.toaster.success('Updated successfully');
-              // Optionally update local data
-              this.currentSchool = res;
+              this.dialogRef.close();
             },
             error: (err) => {
               console.error('Error updating school', err);
               this.toaster.error('Update failed');
             },
           });
-      } else {
-        // Add new school
-        this.schoolService.addSchool(schoolData).subscribe({
-          next: (res) => {
-            this.toaster.success('Added successfully');
-            // Optionally push the new school to local list
-            this.school.push(res);
-            this.currentSchool = res;
-          },
-          error: (err) => {
-            console.error('Error adding school', err);
-            console.error('school data is', schoolData);
-            this.toaster.error('Add failed');
-          },
-        });
+        } else {
+          this.toaster.error('No school ID found for update');
+        }
       }
     } else {
       this.toaster.error('Please fill all required fields');
     }
   }
 
-  // Method to delete the current school
-  deleteSchool(): void {
-    if (this.currentSchool && this.currentSchool.schoolID) {
-      if (confirm('Are you sure you want to delete this school?')) {
-        this.schoolService.deleteSchool(this.currentSchool.schoolID).subscribe({
-          next: () => {
-            this.toaster.success('Deleted successfully');
-            // Remove the deleted school from the list and clear the form
-            this.school = this.school.filter(s => s.schoolID !== this.currentSchool?.schoolID);
-            this.currentSchool = undefined;
-            this.form.reset();
-          },
-          error: (err) => {
-            console.error('Error deleting school', err);
-            this.toaster.error('Delete failed');
-          },
-        });
-      }
-    } else {
-      this.toaster.error('No school selected to delete');
-    }
-  }
-
-  // Optional: reset form for adding a new school
   resetForm(): void {
     this.currentSchool = undefined;
     this.form.reset({
       schoolID: 0,
-      hireDate: '2024-01-01'
+      hireDate: '2024-01-01',
     });
   }
 
-  // For photo upload example
   uploadPhoto(event: Event): void {
-    // Add your file upload logic here
     console.log('Photo uploaded!', event);
   }
 }

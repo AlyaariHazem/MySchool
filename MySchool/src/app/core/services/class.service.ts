@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
 import { catchError, map, Observable } from 'rxjs';
-import { CLass, ClassDTO, updateClass } from '../models/class.model';
+import { CLass, updateClass } from '../models/class.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +10,8 @@ export class ClassService {
   private API = inject(BackendAspService);
   constructor() { }
 
-  GetAll(): Observable<ClassDTO[]> {
-    return this.API.http.get<{ result: ClassDTO[] }>(`${this.API.baseUrl}/Classes`).pipe(
+  GetAll(): Observable<any> {
+    return this.API.http.get<any>(`${this.API.baseUrl}/Classes`).pipe(
       map(response => response.result)
     );
   }

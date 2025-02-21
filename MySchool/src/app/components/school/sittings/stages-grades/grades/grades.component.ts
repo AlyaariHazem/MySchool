@@ -71,7 +71,7 @@ export class GradesComponent implements OnInit {
     if (this.form.valid) {
       const addClassData: CLass = this.form.value;
       this.classService.Add(addClassData).subscribe({
-        next: (res) => {
+        next: () => {
           this.getAllClasses();
           this.form.reset();
           this.isEditMode = false;
@@ -100,15 +100,14 @@ export class GradesComponent implements OnInit {
       const updateData: updateClass = this.form.value;
       this.classService.Update(this.classToEditId, updateData).subscribe({
         next: (response) => {
-          if (response.success) {
-            this.toastr.success(response.success, "Stage Updated Successfully");
+          if (response.isSuccess) {
+            this.toastr.success(response.result, "Class Updated Successfully");
             this.form.reset();
             this.getAllClasses();
           }
         },
-        error: () => this.toastr.error('Failed to update stage', 'Error')
+        error: () => this.toastr.error('Failed to update Class', 'Error')
       });
-      this.toastr.success('Stage updated successfully');
       this.form.reset();
       this.getAllClasses();
       this.isEditMode = false;
@@ -122,8 +121,8 @@ export class GradesComponent implements OnInit {
 
     this.classService.partialUpdate(Class.classID, patchDoc).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.toastr.success(response.message);
+        if (response.isSuccess) {
+          this.toastr.success(response.result);
           this.getAllClasses(); // Refresh the list to show updated data
         }
       },
@@ -137,8 +136,8 @@ export class GradesComponent implements OnInit {
   deleteClass(id: number): void {
     this.classService.Delete(id).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.toastr.success(response.message, 'Class Deleted');
+        if (response.isSuccess) {
+          this.toastr.success(response.result, 'Class Deleted');
           this.getAllClasses(); // Refresh the list after deletion
         }
       },
