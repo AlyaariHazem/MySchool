@@ -15,8 +15,13 @@
       <mat-label>كلمة السر</mat-label>
       <input matInput placeholder="كلمة السر" ngModel name="password" type="password" required minlength="3"
         maxlength="22" #pass="ngModel" />
-      <mat-error *ngIf="pass.errors?.['required']">كلمة السر مطلوبة</mat-error>
-      <mat-error *ngIf="pass.errors?.['minlength']">يجب أن تكون كلمة السر أكبر من 3</mat-error>
+
+      @if (pass.errors?.['required']) {
+      <mat-error>كلمة السر مطلوبة</mat-error>
+      }
+      @if (pass.errors?.['minlength']) {
+      <mat-error>يجب أن تكون كلمة السر أكبر من 3</mat-error>
+      }
     </mat-form-field>
 
     <!-- Login and Register Buttons -->

@@ -20,7 +20,7 @@ public class AccountRepository : IAccountRepository
 
     public async Task<Accounts> AddAccountAsync(Accounts account)
     {
-        _dbContext.Accounts.Add(account);
+        await _dbContext.Accounts.AddAsync(account);
         await _dbContext.SaveChangesAsync();
         return account;
     }

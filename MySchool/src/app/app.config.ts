@@ -7,7 +7,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 import { provideToastr } from 'ngx-toastr';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { TokenInterceptor } from './auth/interceptors/token.interceptor';
+import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { counterReducer } from './core/store/counter/counter.reducer';
 import { provideStore } from '@ngrx/store';
 import { languageReduser } from './core/store/language/language.reducer';
@@ -38,6 +38,6 @@ export const appConfig: ApplicationConfig = {
     }
     // {provide: HTTP_INTERCEPTORS, useClass: IntercepterService, multi: true}
     ,
-    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })
+    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })//can you explain for me why is use this?
 ]
 };
