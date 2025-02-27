@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RegisterComponent } from '../register/register.component';
+import { RegisterComponent } from '../../auth/register/register.component';
 import { ToastrService } from 'ngx-toastr';
 import { ShardModule } from '../../shared/shard.module';
-import { AuthAPIService } from '../authAPI.service';
+import { AuthAPIService } from '../../auth/authAPI.service';
 import { User } from '../../core/models/user.model';
 import { MatSelectModule } from '@angular/material/select';
 
