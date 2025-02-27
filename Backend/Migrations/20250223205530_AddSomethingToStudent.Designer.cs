@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250223205530_AddSomethingToStudent")]
+    partial class AddSomethingToStudent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,20 +171,20 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "683c84d0-24e6-48af-81dd-8892fd24a1d4",
-                            Email = "ALYAARIHAZEM@GMAIL.COM",
+                            ConcurrencyStamp = "17cfa2a0-1505-44f7-b6ff-1204c69bed6d",
+                            Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 2, 27, 3, 49, 30, 203, DateTimeKind.Local).AddTicks(5919),
+                            HireDate = new DateTime(2025, 2, 23, 23, 55, 28, 471, DateTimeKind.Local).AddTicks(6878),
                             LockoutEnabled = false,
-                            NormalizedEmail = "ALYAARIHAZEM@GMAIL.COM",
-                            NormalizedUserName = "MANAGER",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDzYYajqNuv+djJbS7f8NUKKgbhXCeQe0md5BvhouU0V2/fxituNusXPDCdG1moTzA==",
+                            NormalizedEmail = "ADMIN@GMAIL.COM",
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAIAAYagAAAAELq/4QSE/+sDl1eIVvZGWDhHQQ/WiNbNq37NjQ2pmJwQxfHUJHsx3a/BMqjHl0dauw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "40fd6df1-ef73-45ca-927c-65095b5a410e",
+                            SecurityStamp = "a497c0a8-2d9d-4efe-9693-014ee00d2891",
                             TwoFactorEnabled = false,
-                            UserName = "MANAGER",
-                            UserType = "MANAGER"
+                            UserName = "Admin",
+                            UserType = "Admin"
                         });
                 });
 
@@ -368,9 +371,6 @@ namespace Backend.Migrations
                     b.Property<int>("SchoolID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TenantID")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -379,10 +379,6 @@ namespace Backend.Migrations
 
                     b.HasIndex("SchoolID")
                         .IsUnique();
-
-                    b.HasIndex("TenantID")
-                        .IsUnique()
-                        .HasFilter("[TenantID] IS NOT NULL");
 
                     b.HasIndex("UserID")
                         .IsUnique();
@@ -859,26 +855,8 @@ namespace Backend.Migrations
                         new
                         {
                             Id = "1",
-                            Name = "MANAGER",
-                            NormalizedName = "MANAGER"
-                        },
-                        new
-                        {
-                            Id = "2",
-                            Name = "STUDENT",
-                            NormalizedName = "STUDENT"
-                        },
-                        new
-                        {
-                            Id = "3",
-                            Name = "TEACHER",
-                            NormalizedName = "TEACHER"
-                        },
-                        new
-                        {
-                            Id = "4",
-                            Name = "GUARDIAN",
-                            NormalizedName = "GUARDIAN"
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
                         });
                 });
 
@@ -1103,11 +1081,6 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.Tenant", "Tenant")
-                        .WithOne("Manager")
-                        .HasForeignKey("Backend.Models.Manager", "TenantID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Backend.Models.ApplicationUser", "ApplicationUser")
                         .WithOne("Manager")
                         .HasForeignKey("Backend.Models.Manager", "UserID")
@@ -1145,8 +1118,6 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("School");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Backend.Models.Salary", b =>
@@ -1564,12 +1535,6 @@ namespace Backend.Migrations
                     b.Navigation("TeacherStudents");
 
                     b.Navigation("TeacherSubjectStudents");
-                });
-
-            modelBuilder.Entity("Backend.Models.Tenant", b =>
-                {
-                    b.Navigation("Manager")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Backend.Models.TypeAccount", b =>

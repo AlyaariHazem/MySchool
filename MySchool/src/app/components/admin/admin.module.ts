@@ -26,6 +26,9 @@ import { ChipsModule } from 'primeng/chips';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { MatTableModule } from '@angular/material/table';
+import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 import { MatIconModule } from '@angular/material/icon';
 
@@ -46,6 +49,7 @@ import { PageHeaderComponent } from './page-header/page-header.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AdminRoutingModule } from './admin-routing.module';
 import { SchoolInfoComponent } from './school-info/school-info.component';
+import { AddManagerComponent } from './users/add-manager/add-manager.component';
 
 
 const components = [
@@ -63,6 +67,7 @@ const components = [
   SidebarComponent,
   NavigateComponent,
   ActionComponent,
+  AddManagerComponent
 ];
 
 const modules = [
@@ -96,7 +101,7 @@ const modules = [
   EditorModule,
   DropdownModule,
   MatTabsModule,
-  BreadcrumbModule,  
+  BreadcrumbModule,
   MatAutocompleteModule,
   AsyncPipe,
   RouterLinkActive,
@@ -105,18 +110,21 @@ const modules = [
   PanelModule,
   ChipsModule,
   InputMaskModule,
-  CardModule 
+  CardModule,
+  InputTextModule,
+  PasswordModule,
+  InputNumberModule,
 ];
 
 @NgModule({
   declarations: components,
   imports: [
-      ...modules,
-      AdminRoutingModule,
+    ...modules,
+    AdminRoutingModule,
   ],
   exports: [
-      ...components,
-      ...modules
+    ...components,
+    ...modules
   ]
 })
 export class AdminModule {

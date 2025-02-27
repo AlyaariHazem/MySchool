@@ -14,11 +14,13 @@ namespace Backend.Models
         [Required]
         public Name FullName { get; set; }
         public string UserID { get; set; }
-        public virtual ApplicationUser ApplicationUser { get; set; }
         [JsonIgnore]
         public School School { get; set; }
         [Required]
         public int SchoolID { get; set; }
+        public int? TenantID { get; set; }
+        public Tenant Tenant { get; set; }
+        public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual ICollection<Teacher> Teachers { get; set; }
 
     }

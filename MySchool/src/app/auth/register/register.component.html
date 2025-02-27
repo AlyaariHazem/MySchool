@@ -1,6 +1,6 @@
 <div class="register-form">
   <button class="close-btn" (click)="closeModal()">×</button>
-  <form #registerForm="ngForm" dir="rtl" (ngSubmit)="register()">
+  <form #registerForm="ngForm" dir="rtl" (ngSubmit)="register(registerForm)">
 
     <!-- Username Input Field -->
     <mat-form-field appearance="outline" class="input-field">

@@ -48,12 +48,13 @@ export class RegisterComponent implements AfterViewInit {
     this.resetForm();
   }
 
-  register() {
-
-    if (this.user.userName && this.user.password && this.user.email && this.user.userType) {
+  register(registerForm:NgForm) {
+    if (registerForm.valid) {
       this.authService.register(this.user).subscribe({
         next: () => {
           this.toastr.success('تم إنشاء الحساب بنجاح.');
+          console.log("the form register is ",registerForm.value);
+          console.log("the form user is ",this.user);
           this.resetForm(); // Reset form on success
         },
         error: (error) => {

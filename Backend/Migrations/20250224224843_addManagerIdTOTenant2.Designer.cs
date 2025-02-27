@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250224224843_addManagerIdTOTenant2")]
+    partial class addManagerIdTOTenant2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,20 +171,20 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "683c84d0-24e6-48af-81dd-8892fd24a1d4",
-                            Email = "ALYAARIHAZEM@GMAIL.COM",
+                            ConcurrencyStamp = "0010f0ca-e668-4476-b27a-bf7c7697ae3f",
+                            Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 2, 27, 3, 49, 30, 203, DateTimeKind.Local).AddTicks(5919),
+                            HireDate = new DateTime(2025, 2, 25, 1, 48, 42, 646, DateTimeKind.Local).AddTicks(288),
                             LockoutEnabled = false,
-                            NormalizedEmail = "ALYAARIHAZEM@GMAIL.COM",
-                            NormalizedUserName = "MANAGER",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDzYYajqNuv+djJbS7f8NUKKgbhXCeQe0md5BvhouU0V2/fxituNusXPDCdG1moTzA==",
+                            NormalizedEmail = "ADMIN@GMAIL.COM",
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAIAAYagAAAAELjblt8fvZmXkHxejXPokcOZZDoSmezV4kOQRSBvq0rtOhepxZdr153rv6Z40ZTPTA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "40fd6df1-ef73-45ca-927c-65095b5a410e",
+                            SecurityStamp = "81b7eab6-0bc7-47da-b3e8-a156f583304c",
                             TwoFactorEnabled = false,
-                            UserName = "MANAGER",
-                            UserType = "MANAGER"
+                            UserName = "Admin",
+                            UserType = "Admin"
                         });
                 });
 

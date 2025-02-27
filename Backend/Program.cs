@@ -28,7 +28,7 @@ builder.Services.AddEndpointsApiExplorer();
 // Configure services
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
+        builder.Configuration.GetConnectionString("SqlAdminConnection"),
         sqlOptions => sqlOptions.CommandTimeout(180) // Set timeout to 180 seconds (3 minutes)
     )
 );
@@ -81,6 +81,7 @@ AddEntityFrameworkStores<DatabaseContext>();
 builder.Services.AddScoped<StudentManagementService>();
 builder.Services.AddScoped<mangeFilesService>();
 builder.Services.AddScoped<StudentClassFeesRepository>();
+builder.Services.AddScoped<TenantProvisioningService>();
 
 // Register custom repositories
 builder.Services.AddScoped<IClassesRepository, ClassesRepository>();
@@ -97,6 +98,9 @@ builder.Services.AddScoped<IStudentClassFeeRepository, StudentClassFeeRepository
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IStudentClassFeesRepository, StudentClassFeesRepository>();
 builder.Services.AddScoped<IYearRepository, YearRepository>();
+builder.Services.AddScoped<IManagerRepository, ManagerRepository>();
+builder.Services.AddScoped<ITenantRepository, TenantRepository>();
+
 
 
 // Configure Identity and JWT Authentication
@@ -156,7 +160,7 @@ using (var scope = app.Services.CreateScope())
 
     foreach (var role in roles)
     {
-        if (!await roleManager.RoleExistsAsync(role))
+        
         {
             await roleManager.CreateAsync(new IdentityRole(role));
         }

@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 })
 export class BackendAspService {
 
-  public baseUrl = 'http://localhost:5180/api';
+  public baseUrl = 'https://localhost:7258/api';
 
   constructor(public http: HttpClient, public router: Router) { }
 }

@@ -9,6 +9,7 @@ using Backend.DTOS.School.Fees;
 using Backend.DTOS.School.Stages;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
+using Backend.DTOS.School.Tenant;
 using Backend.DTOS.School.Years;
 using Backend.Models;
 
@@ -55,6 +56,7 @@ public class MappingConfig : Profile
         .ForMember(dest => dest.ClassYear, opt => opt.MapFrom(src => src.Class.ClassYear));
         CreateMap<FeeClass, AddFeeClassDTO>().ReverseMap();
         CreateMap<Year, YearDTO>().ReverseMap();
+        CreateMap<Tenant, TenantDTO>().ReverseMap();
 
 
         

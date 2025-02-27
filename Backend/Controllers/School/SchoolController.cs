@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Backend.DTOS.School;
 using Backend.Models;
 using Backend.Repository.School.Implements;
+using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.School
@@ -13,10 +14,12 @@ namespace Backend.Controllers.School
     public class SchoolController : ControllerBase
     {
         private readonly ISchoolRepository _schoolRepository;
+        private readonly TenantProvisioningService _tenantProvisioningService;
 
-        public SchoolController(ISchoolRepository schoolRepository)
+        public SchoolController(ISchoolRepository schoolRepository, TenantProvisioningService tenantProvisioningService)
         {
             _schoolRepository = schoolRepository;
+            _tenantProvisioningService = tenantProvisioningService;
         }
 
         [HttpGet]
@@ -25,7 +28,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var schools = await _schoolRepository.GetAllAsync(); 
+                var schools = await _schoolRepository.GetAllAsync();
                 response.Result = schools;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -34,7 +37,7 @@ namespace Backend.Controllers.School
             {
                 response.IsSuccess = false;
                 response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message); 
+                response.ErrorMasseges.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }
@@ -49,7 +52,7 @@ namespace Backend.Controllers.School
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
             }
-            catch (System.Exception  ex)
+            catch (System.Exception ex)
             {
                 response.IsSuccess = false;
                 response.statusCode = HttpStatusCode.NotFound;
@@ -72,6 +75,19 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
+                // 1) Create a record in your *master* db for the "school" meta data
+                // (if you want to store basic info in master, you can do it here)
+
+                // 2) Use the provisioning service to create & migrate the new db
+                var tenant = await _tenantProvisioningService.CreateSchoolDatabaseAsync(schoolDTO.SchoolName, schoolDTO);
+
+                // 3) Return the newly created resource, incl. tenant ID or connection
+                response.Result = new
+                {
+                    TenantId = tenant.TenantId,
+                    SchoolName = tenant.SchoolName,
+                    ConnectionString = tenant.ConnectionString
+                };
                 await _schoolRepository.AddAsync(schoolDTO);
 
                 // Return the newly created resource
@@ -83,7 +99,7 @@ namespace Backend.Controllers.School
             {
                 response.IsSuccess = false;
                 response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message); 
+                response.ErrorMasseges.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }
@@ -103,7 +119,7 @@ namespace Backend.Controllers.School
                 }
 
                 await _schoolRepository.UpdateAsync(schoolDTO);
-                
+
                 // HTTP 204 is often used for a successful update with no content.
                 // But if you prefer returning data, you can return 200 + updated object.
                 response.Result = "School updated successfully.";
@@ -121,7 +137,7 @@ namespace Backend.Controllers.School
             {
                 response.IsSuccess = false;
                 response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message); 
+                response.ErrorMasseges.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }
@@ -148,7 +164,7 @@ namespace Backend.Controllers.School
             {
                 response.IsSuccess = false;
                 response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message); 
+                response.ErrorMasseges.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }

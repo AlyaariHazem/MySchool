@@ -16,7 +16,7 @@ public class YearRepository : IYearRepository
 {
     private readonly DatabaseContext _context;
     private readonly IMapper _mapper;
-    public YearRepository(DatabaseContext context,IMapper mapper)
+    public YearRepository(DatabaseContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
@@ -90,5 +90,5 @@ public class YearRepository : IYearRepository
         _context.Entry(existingYear).State = EntityState.Modified;
         await _context.SaveChangesAsync();
     }
-    
+
 }

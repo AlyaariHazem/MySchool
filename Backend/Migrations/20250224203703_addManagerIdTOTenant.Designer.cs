@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250224203703_addManagerIdTOTenant")]
+    partial class addManagerIdTOTenant
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,20 +171,20 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "683c84d0-24e6-48af-81dd-8892fd24a1d4",
-                            Email = "ALYAARIHAZEM@GMAIL.COM",
+                            ConcurrencyStamp = "bedf0368-927a-4b68-96f7-2dd27b4fa6a3",
+                            Email = "admin@gmail.com",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 2, 27, 3, 49, 30, 203, DateTimeKind.Local).AddTicks(5919),
+                            HireDate = new DateTime(2025, 2, 24, 23, 37, 2, 177, DateTimeKind.Local).AddTicks(5970),
                             LockoutEnabled = false,
-                            NormalizedEmail = "ALYAARIHAZEM@GMAIL.COM",
-                            NormalizedUserName = "MANAGER",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDzYYajqNuv+djJbS7f8NUKKgbhXCeQe0md5BvhouU0V2/fxituNusXPDCdG1moTzA==",
+                            NormalizedEmail = "ADMIN@GMAIL.COM",
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMe94oJi7E1DeSPGLVvUnlSxMRk6SLF16KE0zVs1FBoiLQzcOQE2BOFx6sFcsVvXUA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "40fd6df1-ef73-45ca-927c-65095b5a410e",
+                            SecurityStamp = "d98c7782-2ac9-40ef-adda-5f2330458967",
                             TwoFactorEnabled = false,
-                            UserName = "MANAGER",
-                            UserType = "MANAGER"
+                            UserName = "Admin",
+                            UserType = "Admin"
                         });
                 });
 
@@ -368,9 +371,6 @@ namespace Backend.Migrations
                     b.Property<int>("SchoolID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TenantID")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -379,10 +379,6 @@ namespace Backend.Migrations
 
                     b.HasIndex("SchoolID")
                         .IsUnique();
-
-                    b.HasIndex("TenantID")
-                        .IsUnique()
-                        .HasFilter("[TenantID] IS NOT NULL");
 
                     b.HasIndex("UserID")
                         .IsUnique();
@@ -710,11 +706,18 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ManagerId")
+                        .HasColumnType("int");
+
                     b.Property<string>("SchoolName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TenantId");
+
+                    b.HasIndex("ManagerId")
+                        .IsUnique()
+                        .HasFilter("[ManagerId] IS NOT NULL");
 
                     b.ToTable("Tenants");
                 });
@@ -1103,11 +1106,6 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.Tenant", "Tenant")
-                        .WithOne("Manager")
-                        .HasForeignKey("Backend.Models.Manager", "TenantID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Backend.Models.ApplicationUser", "ApplicationUser")
                         .WithOne("Manager")
                         .HasForeignKey("Backend.Models.Manager", "UserID")
@@ -1145,8 +1143,6 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("School");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Backend.Models.Salary", b =>
@@ -1392,6 +1388,16 @@ namespace Backend.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("Backend.Models.Tenant", b =>
+                {
+                    b.HasOne("Backend.Models.Manager", "Manager")
+                        .WithOne("Tenant")
+                        .HasForeignKey("Backend.Models.Tenant", "ManagerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Manager");
+                });
+
             modelBuilder.Entity("Backend.Models.Vouchers", b =>
                 {
                     b.HasOne("Backend.Models.AccountStudentGuardian", "AccountStudentGuardians")
@@ -1520,6 +1526,9 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.Manager", b =>
                 {
                     b.Navigation("Teachers");
+
+                    b.Navigation("Tenant")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Backend.Models.School", b =>
@@ -1564,12 +1573,6 @@ namespace Backend.Migrations
                     b.Navigation("TeacherStudents");
 
                     b.Navigation("TeacherSubjectStudents");
-                });
-
-            modelBuilder.Entity("Backend.Models.Tenant", b =>
-                {
-                    b.Navigation("Manager")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Backend.Models.TypeAccount", b =>

@@ -1,0 +1,64 @@
+<div id="DataStudent" class="container" dir="rtl">
+    <h2 class="title">إضافة مدير مدرسة</h2>
+
+    <form [formGroup]="managerForm" (ngSubmit)="onSubmit(managerForm)" class="p-fluid">
+        <div class="group group1">
+            <div class="form-control">
+                <label for="firstName">First Name:</label>
+                <input type="text" pInputText formControlName="firstName" />
+            </div>
+            <div class="form-control">
+                <label for="middleName">Middle Name:</label>
+                <input type="text" pInputText formControlName="middleName" />
+            </div>
+            <div class="form-control">
+                <label for="lastName">Last Name:</label>
+                <input type="text" pInputText formControlName="lastName" />
+            </div>
+        </div>
+        <div class="group group1">
+            <div class="form-control">
+                <label for="schoolID">School ID:</label>
+                <p-dropdown id="schoolID" formControlName="schoolID" [options]="schools" optionLabel="schoolName"
+                    optionValue="schoolID" placeholder="Select School" required>
+                </p-dropdown>
+
+            </div>
+            <div class="form-control">
+                <label for="username">Username:</label>
+                <input type="text" pInputText formControlName="userName" />
+            </div>
+        </div>
+        <div class="group group1">
+            <div class="form-control">
+                <label for="password">Password:</label>
+                <p-password id="password" formControlName="password" required [feedback]="true"></p-password>
+            </div>
+            <div class="form-control">
+                <label for="email">Email:</label>
+                <input type="email" pInputText formControlName="email" required />
+            </div>
+        </div>
+        <div class="group group1">
+            <div class="form-control">
+                <label for="userType">User Type:</label>
+                <input type="text" pInputText formControlName="userType" />
+            </div>
+            <div class="form-control">
+                <label for="tenantID">Tenant ID:</label>
+                <p-dropdown id="tenantID" formControlName="tenantID" [options]="tenants" optionLabel="schoolName"
+                    optionValue="tenantID" placeholder="Select Tenant" required>
+                </p-dropdown>
+
+            </div>
+            <div class="form-control">
+                <label for="phoneNumber">Phone Number:</label>
+                <p-inputNumber id="phoneNumber" formControlName="phoneNumber" required></p-inputNumber>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <input type="submit" class="school-btn" pButton [disabled]="managerForm.invalid" placeholder="إضافة +"/> 
+        </div>
+    </form>
+</div>

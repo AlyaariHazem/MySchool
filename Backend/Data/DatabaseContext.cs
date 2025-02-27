@@ -12,7 +12,7 @@ namespace Backend.Data
     public class DatabaseContext : IdentityDbContext<ApplicationUser>
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
-
+        public DbSet<Tenant> Tenants { get; set; }
         public DbSet<Attachments> Attachments { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<Class> Classes { get; set; }
@@ -38,6 +38,11 @@ namespace Backend.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Tenant>(entity =>
+            {
+                entity.HasKey(t => t.TenantId);
+            });
+
             base.OnModelCreating(modelBuilder); // Call the base method
 
             modelBuilder.Entity<TeacherStudent>().HasKey(TS => new { TS.StudentID, TS.TeacherID });
@@ -80,6 +85,12 @@ namespace Backend.Data
                 .HasOne<Manager>(m => m.Manager)
                 .WithOne(s => s.School)
                 .HasForeignKey<Manager>(m => m.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+           
+            modelBuilder.Entity<Tenant>()
+                .HasOne<Manager>(m => m.Manager)
+                .WithOne(s => s.Tenant)
+                .HasForeignKey<Manager>(m => m.TenantID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // many to many relationship for Teachers and Students
@@ -361,24 +372,49 @@ namespace Backend.Data
                 new IdentityRole
                 {
                     Id = "1",
-                    Name = "Admin",
-                    NormalizedName = "ADMIN"
+                    Name = "MANAGER",
+                    NormalizedName = "MANAGER"
+                }
+            );
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "2",
+                    Name = "STUDENT",
+                    NormalizedName = "STUDENT"
+                }
+            );
+            // Seed data for roles
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "3",
+                    Name = "TEACHER",
+                    NormalizedName = "TEACHER"
+                }
+            );
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "4",
+                    Name = "GUARDIAN",
+                    NormalizedName = "GUARDIAN"
                 }
             );
             var passwordHasher = new PasswordHasher<ApplicationUser>();
-            var hashedPassword = passwordHasher.HashPassword(null, "Admin");
+            var hashedPassword = passwordHasher.HashPassword(null, "MANAGER");
 
             modelBuilder.Entity<ApplicationUser>().HasData(
                 new ApplicationUser
                 {
                     Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
-                    UserName = "Admin",
-                    NormalizedUserName = "ADMIN",
-                    Email = "admin@gmail.com",
-                    NormalizedEmail = "ADMIN@GMAIL.COM",
+                    UserName = "MANAGER",
+                    NormalizedUserName = "MANAGER",
+                    Email = "ALYAARIHAZEM@GMAIL.COM",
+                    NormalizedEmail = "ALYAARIHAZEM@GMAIL.COM",
                     PasswordHash = hashedPassword, // Store the hashed password here
                     EmailConfirmed = true,
-                    UserType = "Admin" // You can assign a specific role or user type if needed
+                    UserType = "MANAGER" // You can assign a specific role or user type if needed
                 });
         }
     }

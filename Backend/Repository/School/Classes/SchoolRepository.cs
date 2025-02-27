@@ -7,6 +7,8 @@ using Backend.DTOS.School;
 using school = Backend.Models.School; // Alias for the model class
 using Backend.Repository.School.Implements;
 using Microsoft.EntityFrameworkCore;
+using Backend.DTOS.School.Years;
+using Backend.Repository.School.Interfaces;
 
 namespace Backend.Repository.School.Classes
 {
@@ -14,11 +16,13 @@ namespace Backend.Repository.School.Classes
     {
         private readonly DatabaseContext _db;
         private readonly IMapper _mapper;
+        private readonly IYearRepository _yearRepository;
 
-        public SchoolRepository(DatabaseContext db, IMapper mapper)
+        public SchoolRepository(DatabaseContext db, IYearRepository yearRepository, IMapper mapper)
         {
             _db = db;
             _mapper = mapper;
+            _yearRepository = yearRepository;
         }
 
         public async Task<SchoolDTO> GetByIdAsync(int id)
@@ -44,6 +48,15 @@ namespace Backend.Repository.School.Classes
             var newSchool = _mapper.Map<school>(school);
             await _db.Schools.AddAsync(newSchool);
             await _db.SaveChangesAsync();
+            var currentYear = new YearDTO
+            {
+                YearDateStart = DateTime.Now,
+                YearDateEnd = DateTime.Now.AddYears(1),
+                HireDate = DateTime.Now,
+                Active = true,
+                SchoolID = newSchool.SchoolID
+            };
+            await _yearRepository.Add(currentYear);
         }
 
         public async Task UpdateAsync(SchoolDTO schoolDTO)

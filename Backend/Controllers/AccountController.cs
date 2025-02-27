@@ -7,8 +7,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Backend.Models;
+using Backend.Data;
+using Microsoft.EntityFrameworkCore;
 
-namespace WebAPIDotNet.Controllers
+namespace Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -16,11 +18,13 @@ namespace WebAPIDotNet.Controllers
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IConfiguration config;
+        private readonly DatabaseContext _context;
 
-        public AccountController(UserManager<ApplicationUser> UserManager, IConfiguration config)
+        public AccountController(UserManager<ApplicationUser> UserManager, IConfiguration config, DatabaseContext context)
         {
             userManager = UserManager;
             this.config = config;
+            _context = context;
         }
 
         [HttpPost("Register")] // POST api/Account/Register
@@ -59,68 +63,62 @@ namespace WebAPIDotNet.Controllers
             return BadRequest(new { message = "Invalid request data." });
         }
 
-        [HttpPost("Login")]//Post api/Account/login
-        public async Task<IActionResult> Login(LoginDto userFRomRequest)
+        [HttpPost("Login")] // POST api/Account/Login
+        public async Task<IActionResult> Login(LoginDto userFromRequest)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                //check
-                ApplicationUser userFromDb =
-                    await userManager.FindByNameAsync(userFRomRequest.UserName);
-                if (userFromDb != null)
-                {
-                    bool found =
-                        await userManager.CheckPasswordAsync(userFromDb, userFRomRequest.Password);
-                    if (found == true)
-                    {
-                        //generate token<==
-
-                        List<Claim> UserClaims = new List<Claim>();
-
-                        //Token Genrated id change (JWT Predefind Claims )
-                        UserClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-                        UserClaims.Add(new Claim(ClaimTypes.NameIdentifier, userFromDb.Id));
-                        UserClaims.Add(new Claim(ClaimTypes.Name, userFromDb.UserName));
-
-                        var UserRoles = await userManager.GetRolesAsync(userFromDb);
-
-                        foreach (var roleNAme in UserRoles)
-                        {
-                            UserClaims.Add(new Claim(ClaimTypes.Role, roleNAme));
-                        }
-
-                        var SignInKey =
-                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                                config["JWT:SecritKey"]));
-
-                        SigningCredentials signingCred =
-                            new SigningCredentials
-                            (SignInKey, SecurityAlgorithms.HmacSha256);
-
-                        //design token
-                        JwtSecurityToken mytoken = new JwtSecurityToken(
-                            audience: config["JWT:AudienceIP"], //localhost for SPA(Angualr)
-                            issuer: config["JWT:IssuerIP"],
-                            expires: DateTime.Now.AddMonths(1),
-                            claims: UserClaims,
-                            signingCredentials: signingCred
-
-                            );
-                        //generate token response
-
-                        return Ok(new
-                        {
-                            //it can be DTO
-                            token = new JwtSecurityTokenHandler().WriteToken(mytoken),
-                            expiration = DateTime.Now.AddMonths(1)//mytoken.ValidTo
-                            
-                        });
-                    }
-                }
-                ModelState.AddModelError("Username", "Username OR Password  Invalid");
+                return BadRequest(ModelState);
             }
-            return BadRequest(ModelState);
 
+            // Check if the user exists in the database
+            ApplicationUser userFromDb = await userManager.FindByNameAsync(userFromRequest.UserName);
+            if (userFromDb == null)
+            {
+                return BadRequest(new { message = "Invalid username or password" });
+            }
+
+            // Check if the password is correct
+            bool isPasswordValid = await userManager.CheckPasswordAsync(userFromDb, userFromRequest.Password);
+            if (!isPasswordValid)
+            {
+                return BadRequest(new { message = "Invalid username or password" });
+            }
+
+            // Validate userType from `ApplicationUser`
+            if (!string.Equals(userFromDb.UserType, userFromRequest.userType, StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new { message = "Unauthorized: User type does not match." });
+            }
+
+            // Generate JWT token
+            List<Claim> userClaims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, userFromDb.Id),
+                new Claim(ClaimTypes.Name, userFromDb.UserName),
+                new Claim("UserType", userFromDb.UserType) // Adding userType as a claim
+            };
+
+            var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecritKey"]));
+            var signingCred = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
+
+            // Design token
+            JwtSecurityToken token = new JwtSecurityToken(
+                audience: config["JWT:AudienceIP"],
+                issuer: config["JWT:IssuerIP"],
+                expires: DateTime.Now.AddMonths(1),
+                claims: userClaims,
+                signingCredentials: signingCred
+            );
+
+            // Return the generated token
+            return Ok(new
+            {
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                expiration = token.ValidTo
+            });
         }
+
     }
 }
