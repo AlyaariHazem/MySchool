@@ -20,6 +20,8 @@ import { CardModule } from 'primeng/card';
 import { EditorModule } from 'primeng/editor';
 import { PaginatorModule } from 'primeng/paginator';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 
 import { SchoolRoutingModule } from './school-routing.module';
@@ -69,6 +71,7 @@ import { GradesMangeComponent } from './grades-mange/grades-mange-mange.componen
 import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.component';
 import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
 import { ReportComponent } from './report/report.component';
+import { CustomDatePipe } from '../../Pipes/customDate.pipe';
 
 
 
@@ -124,6 +127,7 @@ const modules = [
   ReactiveFormsModule,
   MatFormFieldModule,
   MatPaginatorModule,
+  CustomDatePipe,
   MatInputModule,
   MatOption,
   EditorModule,
@@ -149,7 +153,9 @@ const modules = [
   ChipsModule,
   InputMaskModule,
   CardModule,
-  CountDirective, 
+  CountDirective,
+  MatDatepickerModule,
+  MatNativeDateModule,
 ];
 
 @NgModule({

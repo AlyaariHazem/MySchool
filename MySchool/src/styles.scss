@@ -36,4 +36,7 @@ body, h1, h2, h3,h4, span, td, a, button, th,li {
   .mat-text-field--outlined .mdc-notched-outline_leading{
     border-color: red!important;
   }
-  
+  // Increase the z-index so the datepicker is above dialogs
+.cdk-overlay-container {
+  z-index: 3000 !important;
+}

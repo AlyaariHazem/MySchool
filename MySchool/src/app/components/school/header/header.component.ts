@@ -1,9 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
+
 import { AuthAPIService } from '../../../auth/authAPI.service';
 import { languageAction } from '../../../core/store/language/language.action';
-// Import the translate service (assuming you are using ngx-translate)
-import { TranslateService } from '@ngx-translate/core';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-header',
@@ -11,26 +12,31 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./header.component.scss'] // use plural "styleUrls" if you have more than one file
 })
 export class HeaderComponent implements OnInit {
-
+  currentUserName: string = '';
   toggle: boolean = false;
-  open() {
-    this.toggle = !this.toggle;
-  }
+
+  languageStore = inject(Store);
   private auth = inject(AuthAPIService);
-  
+  private toaster = inject(ToastrService);
+  private translate = inject(TranslateService);
+
+
+
   langDir!: string;
   langName!: string;
   languageimage!: string;
-  languageStore = inject(Store);
-  // Add the translateService injection:
-  private translate = inject(TranslateService);
+
 
   dir: string = "ltr";
+
+  open() {
+    this.toggle = !this.toggle;
+  }
 
   currentLanguage(): void {
     this.languageStore.select("language").subscribe((res) => {
       this.langDir = res;
-      if(this.langDir === 'en'){
+      if (this.langDir === 'en') {
         this.languageimage = 'Amarica.jpg';
       } else {
         this.languageimage = 'SudiAribia.jpg';
@@ -48,12 +54,17 @@ export class HeaderComponent implements OnInit {
     // Also update the translation service immediately. This helps if you want an instant change.
     this.translate.use(changeLang);
   }
-  
+
   ngOnInit(): void {
     this.currentLanguage();
+    this.currentUserName = localStorage.getItem('managerName') || '';
+    this.toaster.success('مرحبا بك : ' + this.currentUserName, '', {
+      positionClass: 'toast-center-center'
+    });
   }
-  
-  Logout(){
+
+
+  Logout() {
     // For example: console.log('logout');
     this.auth.logout();
   }

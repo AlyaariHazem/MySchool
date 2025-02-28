@@ -22,7 +22,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
     {
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     });
-    
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure services
@@ -160,7 +160,7 @@ using (var scope = app.Services.CreateScope())
 
     foreach (var role in roles)
     {
-        
+
         {
             await roleManager.CreateAsync(new IdentityRole(role));
         }

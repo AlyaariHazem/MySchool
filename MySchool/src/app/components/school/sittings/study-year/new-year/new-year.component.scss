@@ -1,151 +1,261 @@
-.NewYear{
-    background-color: white;
-    border-radius: 5px;
+.NewYear {
+  background-color: white;
+  border-radius: 5px;
 }
 //this button to close the dailog
 .close-btn {
-    position: absolute;
-    top: 3px;
-    right: 12px;
-    font-size: 30px;
-    font-weight: bold;
-    color: #443838;
-    border: 2px solid #e9d9d9;
-    border-radius: 49px;
-    cursor: pointer;
-  }
-  .close-btn:hover{
-    color:red;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  .school{
-    direction: rtl;
-    color:black;
-    font-style:bold;
-    margin:4px 6px;
-    padding: 1rem;
-  }
-  mat-tab-group{
-    background-color: white;
-    padding: 1rem;
-  }
- :host ::ng-deep mat-tab-header{
-    border-bottom: 1.8px solid #676767!important;
-  }
-  mat-form-field {
-    margin-right: 1rem;
-    margin-top: 1rem
-  }
+  position: absolute;
+  top: 3px;
+  right: 12px;
+  font-size: 30px;
+  font-weight: bold;
+  color: #443838;
+  border: 2px solid #e9d9d9;
+  border-radius: 49px;
+  cursor: pointer;
+}
+.close-btn:hover {
+  color: red;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.school {
+  direction: rtl;
+  color: black;
+  font-style: bold;
+  margin: 4px 6px;
+  padding: 1rem;
+}
+mat-tab-group {
+  background-color: white;
+  padding: 1rem;
+}
+:host ::ng-deep mat-tab-header {
+  border-bottom: 1.8px solid #676767 !important;
+}
+mat-form-field {
+  margin-right: 1rem;
+  margin-top: 1rem;
+}
 
- :host ::ng-deep .mdc-tab-indicator__content{
-    border-color: #2fdf84!important;
-  }
-  .inputText {
-    width: 92%;
-  }
-  .example-full-width {
-    width: 10%;
-  }
-  
+:host ::ng-deep .mdc-tab-indicator__content {
+  border-color: #2fdf84 !important;
+}
+.inputText {
+  width: 92%;
+}
+.example-full-width {
+  width: 10%;
+}
+
 :host
-::ng-deep
-.mdc-text-field--outlined.mdc-text-field--focused
-.mdc-notched-outline__leading {
-border-color: #2fdf85 !important;
-// box-shadow: 0 0 5px 0 #2fdf85!important;
-border-width: 2px 2px 2px 0 !important;
-transition: border-color 0.2s;
+  ::ng-deep
+  .mdc-text-field--outlined.mdc-text-field--focused
+  .mdc-notched-outline__leading {
+  border-color: #2fdf85 !important;
+  // box-shadow: 0 0 5px 0 #2fdf85!important;
+  border-width: 2px 2px 2px 0 !important;
+  transition: border-color 0.2s;
 }
 :host
-::ng-deep
-.mdc-text-field--outlined.mdc-text-field--focused
-.mdc-notched-outline__trailing {
-border-color: #2fdf85 !important;
-// box-shadow: 0 0 5px 0 #2fdf85!important;
-border-width: 2px 0 2px 2px !important;
-transition: border-color 0.2s;
+  ::ng-deep
+  .mdc-text-field--outlined.mdc-text-field--focused
+  .mdc-notched-outline__trailing {
+  border-color: #2fdf85 !important;
+  // box-shadow: 0 0 5px 0 #2fdf85!important;
+  border-width: 2px 0 2px 2px !important;
+  transition: border-color 0.2s;
 }
 :host
-::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
-.mdc-notched-outline__notch {
-border-color: #2fdf85 !important;
-// box-shadow: 2px 0 5px 0 #2fdf85!important;
-border-width: 2px 0 2px 0 !important;
-transition: border-color 0.2s;
+  ::ng-deep.mdc-text-field--outlined.mdc-text-field--focused
+  .mdc-notched-outline__notch {
+  border-color: #2fdf85 !important;
+  // box-shadow: 2px 0 5px 0 #2fdf85!important;
+  border-width: 2px 0 2px 0 !important;
+  transition: border-color 0.2s;
 }
+
+.group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+.group5 {
+  margin-top: 1rem;
+}
+.form-control {
+  display: flex;
+  border: none;
+  width: 100%;
+  flex-direction: column;
+  gap: 5px; /* Space between label and input */
+}
+.form-control-active {
+  display: flex;
+  border: none;
+  width: 40%;
+  flex-direction: column;
+  gap: 5px; /* Space between label and input */
+}
+.form-control2 {
+  display: flex;
+  border: none;
+  width: 55%;
+  flex-direction: column;
+  gap: 5px; /* Space between label and input */
+}
+
+label {
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
 
   .group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr;
   }
-  .group5 {
-    margin-top: 1rem;
-  }
-  .form-control {
-    display: flex;
-    border: none;
-    width: 100%;
-    flex-direction: column;
-    gap: 5px; /* Space between label and input */
-  }
-  .form-control-active {
-    display: flex;
-    border: none;
-    width: 40%;
-    flex-direction: column;
-    gap: 5px; /* Space between label and input */
-  }
-  .form-control2 {
-    display: flex;
-    border: none;
-    width: 55%;
-    flex-direction: column;
-    gap: 5px; /* Space between label and input */
-  }
-  
+
   label {
-    color: #333;
+    font-size: 0.9rem;
   }
 
-  @media (max-width: 768px) {
-    .container {
-      padding: 15px;
-    }
-  
-    .group {
-      grid-template-columns: 1fr;
-    }
-  
-    label {
-      font-size: 0.9rem;
-    }
-  
-    input,
-    select {
-      font-size: 0.9rem;
-    }
-  
-    button {
-      width: 100%;
-      text-align: center;
-    }
-    .control2{
-        position: relative;
-        right: 0rem!important;
-    }
-    .control3{
-        position: relative;
-        right: 0rem!important;
-    }
+  input,
+  select {
+    font-size: 0.9rem;
   }
 
-  .add:active {
-    background-color: #2fdf85;
+  .button {
+    background-color: #12a212;
+    color: white;
+    position: absolute;
+    top: 1rem;
+    right: 9rem;
+    border: 1px solid green;
+    border-radius: 3px;
+    padding: 3px 10px;
+  } 
+  .control2 {
+    position: relative;
+    right: 0rem !important;
   }
+  .control3 {
+    position: relative;
+    right: 0rem !important;
+  }
+}
 
-  
+.add:active {
+  background-color: #2fdf85;
+}
+.NewYear {
+  background-color: #f9f9f9; /* Light background for a cleaner look */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 800px;
+}
+
+/* General layout for the form */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Group container for sections */
+.group5 {
+  margin-top: 1.5rem;
+}
+
+/* Use flex layout for groups with responsive wrapping */
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Form controls styling */
+.form-control {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Spacing for inner containers */
+.techear {
+  margin-bottom: 1rem;
+}
+
+/* Angular Material field full width */
+mat-form-field.inputText {
+  width: 100%;
+}
+
+/* Input error styling (customize as needed) */
+input.inputError {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0.5rem;
+}
+
+/* Button styling */
+button.active {
+  background-color: #ffffff;
+  color: #3e3e3e;
+  margin-top: 1rem;
+  border: 1px solid #2fdf85;
+  padding: 1.1rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3sease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+button.active:hover {
+  background-color: #adffd2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .NewYear {
+    padding: 1rem;
+  }
+  .group {
+    flex-direction: column;
+  }
+  button.active {
+    width: 100%;
+    justify-content: center;
+  }
+}
+// Increase the z-index so the datepicker is above dialogs
+.cdk-overlay-container {
+  z-index: 3000 !important;
+}
+.cdk-overlay-container {
+  z-index: 2000 !important; // or higher than your dialog's z-index
+}
+.add {
+  position: absolute;
+  top: 1.4rem;
+  width: 11%;
+  border-radius: 4px;
+  right: 21%;
+  border: none;
+  padding: 8px 0;
+  color: white;
+  background-color: #2fdf84;
+}
+.add:active {
+  background-color: #2fdf85;
+}

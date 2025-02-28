@@ -1,0 +1,8 @@
+<p-dialog [modal]="true" [(visible)]="visible" [style]="{ width: '25rem', border: 'none', background: 'transparent' }"
+    [closable]="false" [draggable]="false" [resizable]="false">
+    <div class="spinner-overlay">
+        <p-progressSpinner strokeWidth="8" [style]="{ 'width': '80px', 'height': '80px' }"
+            ariaLabel="loading"></p-progressSpinner>
+        <div class="loading-text">Loading, please wait...</div>
+    </div>
+</p-dialog>

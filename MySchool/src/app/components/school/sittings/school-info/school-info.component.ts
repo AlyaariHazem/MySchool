@@ -25,6 +25,7 @@ export class SchoolInfoComponent implements OnInit {
   schoolType: any[] = [];
   schoolCategory: any[] = [];
   currentSchool?: School;
+ schoolId:string='';
 
   constructor(private fb: FormBuilder) {
     // Set up validators as needed
@@ -57,6 +58,8 @@ export class SchoolInfoComponent implements OnInit {
     // 1) Load the school from the backend
     // Here, we're hard-coding ID=1, but in a real scenario you might get it from the route param
     this.loadSchool(1);
+    localStorage.setItem('schoolId',"1");
+    this.schoolId!=localStorage.getItem('schoolId');
 
     // 2) Define options for dropdowns
     this.schoolType = [
@@ -95,9 +98,10 @@ export class SchoolInfoComponent implements OnInit {
   /**
    * Patch the form with the fetched school data.
    */
+  
   initializeForm(school: School): void {
     this.form.patchValue({
-      schoolID: school.schoolID,
+      schoolID: school.schoolID || 1,
       schoolName: school.schoolName || '',
       schoolNameEn: school.schoolNameEn || '',
       schoolType: school.schoolType || '',
@@ -142,7 +146,6 @@ export class SchoolInfoComponent implements OnInit {
         this.schoolService.updateSchool(this.currentSchool.schoolID, schoolData).subscribe({
           next: (res) => {
             this.toaster.success('Updated successfully');
-            this.currentSchool = res; // Optionally refresh local reference
           },
           error: (err) => {
             console.error('Error updating school', err);

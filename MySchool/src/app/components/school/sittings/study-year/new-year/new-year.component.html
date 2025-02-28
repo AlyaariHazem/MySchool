@@ -1,23 +1,55 @@
-<div class="NewYear">
+<form [formGroup]="formGroup" class="NewYear">
     <div id="guardian" class="group5">
-        <!-- Group 1: Guardian's Full Name and Relationship -->
+        <!-- Group 1: Dates -->
         <div class="group group1">
-            <div class="form-control">
-                <div class="techear">
-                    <mat-form-field appearance="outline" class="inputText">
-                        <mat-label>العام الدارسي</mat-label>
-                        <input class="inputError" type="text" matInput />
-                    </mat-form-field>
-                </div>
-            </div>
+            <!-- بداية العام -->
             <div class="form-control control2">
                 <mat-form-field appearance="outline" class="inputText">
-                    <mat-label>تاريخ الإنشاء</mat-label>
-                    <input class="inputError" type="date" matInput />
+                    <mat-label>بداية العام</mat-label>
+                    <!-- Use matInput and [matDatepicker], remove type="date" -->
+                    <input matInput [matDatepicker]="startPicker" formControlName="yearDateStart"
+                        (focus)="startPicker.open()" />
+                    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #startPicker></mat-datepicker>
+                </mat-form-field>
+            </div>
+
+            <!-- نهاية العام -->
+            <div class="form-control control2">
+                <mat-form-field appearance="outline" class="inputText">
+                    <mat-label>نهاية العام</mat-label>
+                    <input matInput [matDatepicker]="endPicker" formControlName="yearDateEnd"
+                        (focus)="endPicker.open()" />
+                    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #endPicker></mat-datepicker>
                 </mat-form-field>
             </div>
         </div>
+
+        <div class="group group1">
+            <!-- تاريخ الإنشاء -->
+            <div class="form-control control2">
+                <mat-form-field appearance="outline" class="inputText">
+                    <mat-label>تاريخ الإنشاء</mat-label>
+                    <input matInput [matDatepicker]="hirePicker" formControlName="hireDate"
+                        (focus)="hirePicker.open()" />
+                    <mat-datepicker-toggle matSuffix [for]="hirePicker"></mat-datepicker-toggle>
+                    <mat-datepicker #hirePicker></mat-datepicker>
+                </mat-form-field>
+            </div>
+
+            <div class="form-control control2">
+                <button class="active" (click)="toggleIsActive()">
+                    <i class="bi bi-record-circle" [ngStyle]="{'color': !isActive ? 'red' : '#2fdf85'}"></i>
+                    <ng-container *ngIf="isActive; then activeTrue; else activeFalse"></ng-container>
+                    <ng-template #activeTrue>نشط</ng-template>
+                    <ng-template #activeFalse>خامل</ng-template>
+                    <span class="bi bi-caret-down-fill"></span>
+                </button>
+            </div>
+        </div>
     </div>
+
     <div id="guardian" class="group5">
         <div class="group group1">
             <div class="form-control">
@@ -30,4 +62,10 @@
             </div>
         </div>
     </div>
-</div>
+
+    <div class="form-actions">
+        <button mat-raised-button class="button add" color="primary" type="button" (click)="yearAdd()">
+            إضافة
+        </button>
+    </div>
+</form>

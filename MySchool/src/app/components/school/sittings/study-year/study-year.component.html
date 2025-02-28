@@ -3,72 +3,72 @@
     <h2 class="school">العام الدارسي</h2>
     <div class="container">
       <div class="tabcontent">
-        <p-button class="showFee" (onClick)="showDialog()" label="+ سنة جديدة" />
+        <p-button class="showFee" (onClick)="showDialogAddYear()" label="+ سنة جديدة" />
 
-        <mat-paginator class="cPaginator" [ngStyle]="{ position: 'absolute'}" [length]="years.length"
-          [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
+        <mat-paginator class="cPaginator" [ngStyle]="{ position: 'absolute'}" 
+          [length]="years.length" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]" 
+          (page)="onPageChange($event)">
         </mat-paginator>
-        <p-iconfield iconPosition="left" class="chipsOne" >
-          <p-inputicon styleClass="pi pi-search"/>
+        
+        <p-iconfield iconPosition="left" class="chipsOne">
+          <p-inputicon styleClass="pi pi-search" />
           <input type="text" style="width: 100%;" pInputText placeholder="Search" />
         </p-iconfield>
 
-        <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '75%' }" [draggable]="false"
+        <!-- Dialog for adding a new year -->
+        <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '55%' }" [draggable]="false"
           [resizable]="false">
-          <h1 class="Title">إضافة سنة جديدة</h1>
-          <button class="button add">إضافة</button>
-          <button class="button New">جديد</button>
-          <app-new-year></app-new-year>
+          <!-- Listen to the "yearAdded" event -->
+          <app-new-year (yearAdded)="handleYearAdded($event)"></app-new-year>
         </p-dialog>
 
         <!-- Responsive Table -->
         <div class="table-container">
-          <div class="table-container">
-            <mat-card>
-              <table class="styled-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>العام الدراسي</th>
-                    <th>ملاحظة</th>
-                    <th>الترم الحالي</th>
-                    <th>تاريخ الإنشاء</th>
-                    <th>الحالة</th>
-                    <th>العملية</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (year of viewYear; track $index) {
-                  <tr>
-                    <td>{{ $index }}</td>
-                    <td>2024-01-01</td>
-                    <td>لا يوجد</td>
-                    <td></td>
-                    <td>2024-01-01</td>
-                    <td>10</td>
-                    <td>
-                      <div class="col text-left">
-                        <div class="mt-sm-0 mt-2">
-                          <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false">
-                            <i class="fas fa-ellipsis-h"></i>
-                          </button>
-                          <div class="dropdown-menu dropdown-menu-left">
-                            <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                            <div role="separator" class="dropdown-divider"></div>
-                            <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
-                          </div>
+          <mat-card>
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>تاريخ بدء الدراسة</th>
+                  <th>ملاحظة</th>
+                  <th>تاريخ إنتهاء الدراسة</th>
+                  <th>تاريخ الإنشاء</th>
+                  <th>الحالة</th>
+                  <th>العملية</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Assuming you're using Angular's *ngFor (adjust syntax as needed) -->
+                <tr *ngFor="let year of viewYear; let i = index">
+                  <td>{{ i }}</td>
+                  <td>{{ year.yearDateStart | customDate }}</td>
+                  <td>لا يوجد</td>
+                  <td>{{ year.yearDateEnd | customDate }}</td>
+                  <td>{{ year.hireDate | customDate }}</td>
+                  <td>{{ year.active }}</td>
+                  <td>
+                    <div class="col text-left">
+                      <div class="mt-sm-0 mt-2">
+                        <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                          aria-expanded="false">
+                          <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-left">
+                          <a class="dropdown-item">
+                            <i class="bi bi-pencil-square IconEdit"></i>تعديل
+                          </a>
+                          <div role="separator" class="dropdown-divider"></div>
+                          <a class="dropdown-item">
+                            <i class="bi bi-trash IconDelete"></i>حذف
+                          </a>
                         </div>
                       </div>
-                    </td>
-                  </tr>
-                  }
-                </tbody>
-              </table>
-
-            </mat-card>
-          </div>
-
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </mat-card>
         </div>
       </div>
     </div>

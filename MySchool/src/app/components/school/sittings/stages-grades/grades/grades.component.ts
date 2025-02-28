@@ -42,6 +42,7 @@ export class GradesComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllClasses();
+    this.getAllStages();
   }
 
   openOuterDropdown: any = null;
@@ -60,7 +61,9 @@ export class GradesComponent implements OnInit {
         this.toastr.error('Error fetching classes');
       }
     });
+  }
 
+  getAllStages(): void {
     this.stageService.getAllStages().subscribe({
       next: (res) => this.stages = res,
       error: (err) => this.toastr.error('Error fetching Stages ', err)
@@ -75,6 +78,7 @@ export class GradesComponent implements OnInit {
           this.getAllClasses();
           this.form.reset();
           this.isEditMode = false;
+          this.getAllStages();
           this.toastr.success('Stage Added successfully');
         },
         error: () => this.toastr.error('Something went wrong')
@@ -104,6 +108,7 @@ export class GradesComponent implements OnInit {
             this.toastr.success(response.result, "Class Updated Successfully");
             this.form.reset();
             this.getAllClasses();
+            this.getAllStages();
           }
         },
         error: () => this.toastr.error('Failed to update Class', 'Error')
@@ -139,6 +144,7 @@ export class GradesComponent implements OnInit {
         if (response.isSuccess) {
           this.toastr.success(response.result, 'Class Deleted');
           this.getAllClasses(); // Refresh the list after deletion
+          this.getAllStages();
         }
       },
       error: () => this.toastr.error('Failed to delete Class', 'Error')

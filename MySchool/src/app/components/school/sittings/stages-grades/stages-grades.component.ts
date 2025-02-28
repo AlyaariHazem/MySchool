@@ -2,11 +2,11 @@ import { AfterViewInit, Component, HostListener, inject, OnInit } from '@angular
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
+import { PaginatorState } from 'primeng/paginator';
 
 import { AddStage, Stage, updateStage } from '../../../../core/models/stages-grades.modul';
 import { StageService } from '../../../../core/services/stage.service';
 import { ClassService } from '../../../../core/services/class.service';
-import { PaginatorState } from 'primeng/paginator';
 
 @Component({
   selector: 'app-stages-grades',
@@ -30,7 +30,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   errorMessage: string = '';
 
   private classService = inject(ClassService);
-  
+
   constructor(
     private stageService: StageService,
     private formBuilder: FormBuilder,
@@ -48,7 +48,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
 
   getStage(): void {
     this.stageService.getAllStages().subscribe({
-      next: (data) =>{
+      next: (data) => {
         this.stages = data;
         this.length = this.stages.length; // Set total item count
         this.updateDisplayedDivisions(); // Initialize displayed divisions
@@ -92,64 +92,71 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
       const updateData: updateStage = this.form.value;
       this.stageService.Update(this.stageToEditId, updateData).subscribe({
         next: (response) => {
-          if (response.success) {
-           this.toastr.success(response.success,"Stage Updated Successfully");
-           this.form.reset();
-           this.getStage();  
+          if (response) {
+            this.toastr.success(response, "Stage Updated Successfully");
+            this.form.reset();
+            this.getStage();
           }
         },
         error: () => this.toastr.error('Failed to update stage', 'Error')
       });
       this.toastr.success('Stage updated successfully');
       this.form.reset();
-      this.getStage(); 
+      this.getStage();
       this.isEditMode = false;
     }
   }
-  
+
   changeState(stage: Stage, isActive: boolean): void {
     const patchDoc = [
       { op: "replace", path: "/active", value: isActive }
     ];
-  
+
     this.stageService.partialUpdate(stage.stageID, patchDoc).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.toastr.success(response.message);
+        if (response) {
+          this.toastr.success(response);
           this.getStage(); // Refresh the list to show updated data
         }
       },
       error: () => this.toastr.error('Failed to update stage', 'Error')
     });
-  
+
     this.isEditMode = false;
   }
-  
+
 
 
   // Method to delete a stage by ID
   deleteStage(id: number): void {
     this.stageService.DeleteStage(id).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.toastr.success(response.message, 'Stage Deleted');
+        if (response) {
+          this.toastr.success(response, 'Stage Deleted');
           this.getStage(); // Refresh the list after deletion
         }
       },
       error: () => this.toastr.error('Failed to delete stage', 'Error')
     });
   }
-
+  //these for Class
   deleteClass(ID: number): void {
     this.classService.Delete(ID).subscribe({
       next: (response) => {
-        if (response.success) {
+        if (response) {
         }
       },
       error: () => this.toastr.error('يجب أن يكون الصف فارغ', 'خطأ')
     });
   }
-
+  getAllClasses(): void {
+    this.classService.GetAll().subscribe({
+      next: (data) => {
+        this.combinedData$ = data;
+      },
+      error: () => this.errorMessage = 'Failed to load classes'
+    });
+  }
 
   ngAfterViewInit(): void {
     const defaultOpen = document.getElementById('defaultOpen');
@@ -301,7 +308,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   toggleStateDropdown(item: any): void {
     item.isDropdownOpen = !item.isDropdownOpen;
   }
-  
+
   first: number = 0; // Current starting index
   rows: number = 4; // Number of rows per page
   updatePaginatedData(): void {

@@ -20,6 +20,15 @@ export class AuthAPIService {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
         }
+        if (response.managerName) {
+          localStorage.setItem('managerName', response.managerName);
+        }
+        if (response.schoolName) {
+          localStorage.setItem('schoolName', response.schoolName);
+        }
+        if (response.schoolId) {
+          localStorage.setItem('schoolId', response.schoolId);
+        }
       })
     );
   }

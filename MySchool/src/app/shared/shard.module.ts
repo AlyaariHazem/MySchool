@@ -2,13 +2,17 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule,  ReactiveFormsModule } from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import {MatInputModule} from '@angular/material/input';
-import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
+import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { RouterLink } from '@angular/router';
+import { ProgressSpinnerComponent } from './components/progress-spinner/progress-spinner.component';
+import { DialogModule } from 'primeng/dialog';
+import { MatSelectModule } from '@angular/material/select';
 
-const components=[PageNotFoundComponent];
+const components=[PageNotFoundComponent,ProgressSpinnerComponent];
 
 const modules=[
   FormsModule,
@@ -21,7 +25,11 @@ const modules=[
     MatDialogActions,
     MatDialogClose,
     ReactiveFormsModule,
-    TranslateModule
+    TranslateModule,
+    DialogModule,
+    MatDialogModule,
+    MatSelectModule,
+    ProgressSpinnerModule
 ]
 
 @NgModule({

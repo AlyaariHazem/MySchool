@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { LoginComponent } from './auth/login/login.component';
+import { LoginComponent } from './auth/Login/login.component';
 import { adminGuardGuard } from './core/guards/admin-guard.guard';
 import { PageNotFoundComponent } from './shared/components/page-not-found/page-not-found.component';
 

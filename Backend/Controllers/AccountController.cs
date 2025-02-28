@@ -63,47 +63,50 @@ namespace Backend.Controllers
             return BadRequest(new { message = "Invalid request data." });
         }
 
-        [HttpPost("Login")] // POST api/Account/Login
+        [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto userFromRequest)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
-            // Check if the user exists in the database
+            // 1. Validate user credentials
             ApplicationUser userFromDb = await userManager.FindByNameAsync(userFromRequest.UserName);
             if (userFromDb == null)
-            {
                 return BadRequest(new { message = "Invalid username or password" });
-            }
 
-            // Check if the password is correct
             bool isPasswordValid = await userManager.CheckPasswordAsync(userFromDb, userFromRequest.Password);
             if (!isPasswordValid)
-            {
                 return BadRequest(new { message = "Invalid username or password" });
-            }
 
-            // Validate userType from `ApplicationUser`
             if (!string.Equals(userFromDb.UserType, userFromRequest.userType, StringComparison.OrdinalIgnoreCase))
-            {
                 return BadRequest(new { message = "Unauthorized: User type does not match." });
-            }
 
-            // Generate JWT token
+            var schoolData = await _context.Schools
+             .AsNoTracking()
+             .Include(s => s.Manager)
+             .Where(s => s.Manager.UserID == userFromDb.Id)
+             .Select(s => new
+             {
+                 SchoolName = s.SchoolName,
+                 ManagerName = s.Manager.FullName,
+                 SchoolId = s.SchoolID
+             })
+             .FirstOrDefaultAsync();
+
+            var UserName = schoolData?.ManagerName.FirstName + " " + schoolData?.ManagerName.LastName;
+
+            // 3. Create JWT token
             List<Claim> userClaims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, userFromDb.Id),
-                new Claim(ClaimTypes.Name, userFromDb.UserName),
-                new Claim("UserType", userFromDb.UserType) // Adding userType as a claim
+                new Claim(ClaimTypes.Name, userFromDb.UserName!),
+                new Claim("UserType", userFromDb.UserType)
             };
 
-            var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecritKey"]));
+            var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecritKey"]!));
             var signingCred = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
 
-            // Design token
             JwtSecurityToken token = new JwtSecurityToken(
                 audience: config["JWT:AudienceIP"],
                 issuer: config["JWT:IssuerIP"],
@@ -112,10 +115,15 @@ namespace Backend.Controllers
                 signingCredentials: signingCred
             );
 
-            // Return the generated token
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            // 4. Return user data + token (including email/phone if desired)
             return Ok(new
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
+                schoolName = schoolData?.SchoolName,
+                managerName = UserName,
+                schoolId = schoolData?.SchoolId,
+                token = tokenString,
                 expiration = token.ValidTo
             });
         }

@@ -67,7 +67,7 @@ export class DivisionComponent implements OnInit {
 
   getAllClass(): void {
     this.classService.GetAll().subscribe({
-      next: (res) => this.classes = res.result,
+      next: (res) => this.classes = res,
       error: (err) => this.toastr.error('Error feched', 'Error', err)
     });
   }
@@ -80,6 +80,8 @@ export class DivisionComponent implements OnInit {
           this.getAllDivisions();
           this.form.reset();
           this.isEditMode = false;
+          this.getAllDivisions();
+          this.getAllClass();
           this.toastr.success('Stage Added successfully', res.result);
         },
         error: () => this.toastr.error('Something went wrong')
@@ -111,6 +113,7 @@ export class DivisionComponent implements OnInit {
             this.toastr.success("Division updated successfully");
             this.form.reset();
             this.getAllDivisions();
+            this.getAllClass();
           }
         },
         error: () => this.toastr.error("Failed to Update Division")

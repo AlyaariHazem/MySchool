@@ -21,7 +21,8 @@ export class StageService {
   }
 
   AddStage(stage: AddStage): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/stages`, stage).pipe(
+    return this.API.http.post<any>(`${this.API.baseUrl}/stages`, stage).pipe(
+      map(response => response.result),
       catchError(error => {
         console.error("Error adding stage:", error);
         throw error; // Optionally rethrow or handle the error here
@@ -30,7 +31,8 @@ export class StageService {
   }
 
   DeleteStage(id: number): Observable<any> {
-    return this.API.http.delete(`${this.API.baseUrl}/stages/${id}`).pipe(
+    return this.API.http.delete<any>(`${this.API.baseUrl}/stages/${id}`).pipe(
+      map(response => response.result),
       catchError(error => {
         console.error("Error deleting stage:", error);
         throw error; // Optionally rethrow or handle the error here
@@ -39,8 +41,8 @@ export class StageService {
   }
 
   Update(id: number, update: updateStage): Observable<any> {
-    return this.API.http.put(`${this.API.baseUrl}/stages/${id}`, update).pipe(
-      map(response => response), // Optionally process the response if needed
+    return this.API.http.put<any>(`${this.API.baseUrl}/stages/${id}`, update).pipe(
+      map(response => response.result),
       catchError(error => {
         console.error("Error updating stage:", error);
         throw error;
@@ -49,8 +51,8 @@ export class StageService {
   }
   
   partialUpdate(id: number, patchDoc: any): Observable<any> {
-    return this.API.http.patch(`${this.API.baseUrl}/stages/${id}`, patchDoc).pipe(
-      map(response => response),
+    return this.API.http.patch<any>(`${this.API.baseUrl}/stages/${id}`, patchDoc).pipe(
+      map(response => response.result),
       catchError(error => {
         console.error("Error with partial update:", error);
         throw error;

@@ -6,6 +6,9 @@
     "MySchool": {
       "projectType": "application",
       "schematics": {
+        "@schematics/angular:service": {
+          "skipTests": true
+        },
         "@schematics/angular:component": {
           "style": "scss"
         }
@@ -53,9 +56,9 @@
             "production": {
               "budgets": [
                 {
-                   "type": "initial",
-                   "maximumWarning": "4mb",  
-                   "maximumError": "8mb"     
+                  "type": "initial",
+                  "maximumWarning": "4mb",
+                  "maximumError": "8mb"
                 },
                 {
                   "type": "anyComponentStyle",

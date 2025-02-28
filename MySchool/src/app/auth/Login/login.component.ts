@@ -1,17 +1,18 @@
 import { Component, inject } from '@angular/core';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RegisterComponent } from '../../auth/register/register.component';
 import { ToastrService } from 'ngx-toastr';
-import { ShardModule } from '../../shared/shard.module';
-import { AuthAPIService } from '../../auth/authAPI.service';
+import { MatDialog } from '@angular/material/dialog';
+
 import { User } from '../../core/models/user.model';
-import { MatSelectModule } from '@angular/material/select';
+import { AuthAPIService } from '../authAPI.service';
+import { ShardModule } from '../../shared/shard.module';
+import { RegisterComponent } from '../register/register.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  // Import MatSelectModule to provide a value accessor for mat-select.
-  imports: [ShardModule, MatDialogModule, MatSelectModule],
+  imports: [
+    ShardModule,
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
@@ -19,6 +20,19 @@ export class LoginComponent {
   private authService = inject(AuthAPIService);
   private toastr = inject(ToastrService);
   private dialog = inject(MatDialog);
+
+  // Track the loading state
+  isLoading = false;
+  visible: boolean = false;
+
+    showDialog() {
+        this.visible = true;
+    }
+
+    hideDialog() {
+        this.visible = false;
+        this.isLoading = false;
+    }
 
   // Define user types for the dropdown
   userTypes = [
@@ -34,6 +48,8 @@ export class LoginComponent {
       return;
     }
 
+    this.isLoading = true; // Start loading
+    this.showDialog();
     this.authService.login(user).subscribe({
       next: (response: any) => {
         if (response && response.token) {
@@ -42,10 +58,11 @@ export class LoginComponent {
           } else {
             this.authService.router.navigateByUrl('school');
           }
-          this.toastr.success('تم تسجيل الدخول بنجاح');
         }
       },
       error: () => {
+        this.isLoading = false; // Stop loading on error
+        this.hideDialog();
         this.toastr.error('فشل تسجيل الدخول');
       },
     });
