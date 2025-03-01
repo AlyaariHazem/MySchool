@@ -23,27 +23,27 @@
       <div class="group group2">
         <div class="form-control">
           <label for="amount" class="label2">المبلغ ر.ي<span style="color:red;"> *</span></label>
-          <input type="text" id="amount" formControlName="amount" />
+          <input type="text" id="amount" />
         </div>
         <div class="form-control">
           <label for="payBy" class="label2">الدفع بواسطة<span style="color:red;"> *</span></label>
           <p-dropdown [options]="[
           { label: 'Cash', value: 'cash' },
           { label: 'الكريمي', value: 'visa' }
-        ]" [(ngModel)]="selectedCity" optionLabel="label" formControlName="payBy" placeholder="الدفع بواسطة">
+        ]" [(ngModel)]="selectedCity" optionLabel="label" placeholder="الدفع بواسطة">
         </p-dropdown>
         </div>
       </div>
       <div class="group group2">
         <div class="form-control">
           <label for="amount" class="label2">البيان<span style="color:red;"> *</span></label>
-          <textarea type="text" id="amount" formControlName="amount" ></textarea>
+          <textarea type="text" id="amount" ></textarea>
         </div>
       </div>
       <div class="group group2">
         <div class="form-control">
           <label for="date" class="label2">تاريخ الإنشاء<span style="color:red;"> *</span></label>
-          <input type="date" id="date" formControlName="date" />
+          <input type="date" id="date" /> 
         </div>
         <div class="form-control">
           <label for="attachment" class="label2">مرفقات<span style="color:red;"> *</span></label>

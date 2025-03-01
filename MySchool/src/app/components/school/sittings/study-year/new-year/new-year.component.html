@@ -12,6 +12,7 @@
                     <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
                     <mat-datepicker #startPicker></mat-datepicker>
                 </mat-form-field>
+                @if(formGroup.get('yearDateStart')?.hasError('required')){}
             </div>
 
             <!-- نهاية العام -->

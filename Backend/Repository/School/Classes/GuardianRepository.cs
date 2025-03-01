@@ -23,66 +23,69 @@ public class GuardianRepository : IGuardianRepository
         _mapper = mapper;
     }
 
-    public async Task<Guardian> AddGuardianAsync(Guardian guardian)
+    public async Task<GuardianDTO> AddGuardianAsync(Guardian guardian)
     {
         _db.Guardians.Add(guardian);
         await _db.SaveChangesAsync();
-        return guardian;
+        var guardianMapped = _mapper.Map<GuardianDTO>(guardian);
+        return guardianMapped;
     }
 
-    public async Task<List<Guardian>> GetAllGuardiansAsync()
+    public async Task<List<GuardianDTO>> GetAllGuardiansAsync()
     {
-        var guardians=await _db.Guardians.ToListAsync();
-        return guardians;
+        var guardians = await _db.Guardians.ToListAsync();
+        var guardiansMapped = _mapper.Map<List<GuardianDTO>>(guardians);
+        return guardiansMapped;
     }
 
-    public async Task<Guardian> GetGuardianByIdAsync(int guardianId)
+    public async Task<GuardianDTO> GetGuardianByIdAsync(int guardianId)
     {
-        var guardianData=await _db.Guardians.FirstOrDefaultAsync(g=>g.GuardianID==guardianId);
+        var guardianData = await _db.Guardians.FirstOrDefaultAsync(g => g.GuardianID == guardianId);
         if (guardianData == null)
         {
-            return null;
+            throw new Exception("Guardian not found.");
         }
-        return guardianData;
+        var guardianMapped = _mapper.Map<GuardianDTO>(guardianData);
+        return guardianMapped;
     }
-     public async Task<GetGuardianDTO> GetGuardianByIdForUpdateAsync(int guardianId)
+    public async Task<GuardianDTO> GetGuardianByIdForUpdateAsync(int guardianId)
     {
-        var guardianData=await _db.Guardians
-        .Include(g=>g.ApplicationUser)
-        .FirstOrDefaultAsync(g=>g.GuardianID==guardianId);
+        var guardianData = await _db.Guardians
+        .Include(g => g.ApplicationUser)
+        .FirstOrDefaultAsync(g => g.GuardianID == guardianId);
         if (guardianData == null)
         {
-            return null;
+            throw new Exception("Guardian not found.");
         }
-        var guardian = new GetGuardianDTO
+        var guardian = new GuardianDTO
         {
             GuardianID = guardianData.GuardianID,
-            GuardianFullName = guardianData.FullName,
+            FullName = guardianData.FullName,
             Gender = guardianData.ApplicationUser.Gender,
             Type = guardianData.Type,
             UserID = guardianData.UserID,
-            GuardianAddress=guardianData.ApplicationUser.Address!,
-            GuardianDOB=guardianData.GuardianDOB,
-            GuardianEmail=guardianData.ApplicationUser.Email!,
-            GuardianPhone=guardianData.ApplicationUser.PhoneNumber
+            GuardianAddress = guardianData.ApplicationUser.Address!,
+            GuardianDOB = guardianData.GuardianDOB,
+            GuardianEmail = guardianData.ApplicationUser.Email!,
+            GuardianPhone = guardianData.ApplicationUser.PhoneNumber
         };
         return guardian;
     }
 
-     public async Task UpdateGuardianAsync(Guardian? guardian)
+    public async Task UpdateGuardianAsync(GuardianDTO? guardian)
     {
-        var guardianExist = await _db.Guardians.FirstOrDefaultAsync(g => g.GuardianID == guardian.GuardianID);
-        if(guardianExist!=null){
-            guardianExist.FullName = guardian.FullName;
+        var guardianExist = await _db.Guardians.FirstOrDefaultAsync(g => g.GuardianID == guardian!.GuardianID);
+        if (guardianExist != null)
+        {
+            guardianExist.FullName = guardian!.FullName;
             guardianExist.GuardianDOB = guardian.GuardianDOB;
             guardianExist.Type = guardian.Type;
-            guardianExist.ApplicationUser.Address = guardian.ApplicationUser.Address;
-            guardianExist.ApplicationUser.Email = guardian.ApplicationUser.Email;
-            guardianExist.ApplicationUser.PhoneNumber = guardian.ApplicationUser.PhoneNumber;
+            guardianExist.ApplicationUser.Address = guardian.GuardianAddress;
+            guardianExist.ApplicationUser.Email = guardian.GuardianEmail;
+            guardianExist.ApplicationUser.PhoneNumber = guardian.GuardianPhone;
             _db.Entry(guardian).State = EntityState.Modified;
-           await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
         }
-
 
     }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Backend.Data;
 using Backend.DTOS;
+using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
 using Backend.Models;
@@ -105,7 +106,7 @@ public class StudentManagementService
             return addedStudent;
         }
   public async Task<Student> AddStudentToExistingGuardianAsync(
-    Guardian existingGuardian,
+    GuardianDTO existingGuardian,
     ApplicationUser studentUser, string studentPassword, Student student,
     List<Attachments> attachments, List<StudentClassFeeDTO> studentClassFees,AccountStudentGuardian accountStudentGuardianPram)
     {

@@ -6,6 +6,7 @@ using AutoMapper;
 using Backend.DTOS;
 using Backend.DTOS.School;
 using Backend.DTOS.School.Fees;
+using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.Stages;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
@@ -57,6 +58,7 @@ public class MappingConfig : Profile
         CreateMap<FeeClass, AddFeeClassDTO>().ReverseMap();
         CreateMap<Year, YearDTO>().ReverseMap();
         CreateMap<Tenant, TenantDTO>().ReverseMap();
+        CreateMap<Guardian, GuardianDTO>().ReverseMap();
 
 
         

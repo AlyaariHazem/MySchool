@@ -25,7 +25,7 @@ export class YearService {
   }
 
   getAllYears(): Observable<Year[]> {
-    return this.API.http.get<{result:Year[]}>(`${this.API.baseUrl}/Year`).pipe(
+    return this.API.http.get<{ result: Year[] }>(`${this.API.baseUrl}/Year`).pipe(
       map(response => response.result),
       catchError(error => {
         console.error("Error fetching Year Details:", error);
@@ -42,13 +42,13 @@ export class YearService {
       })
     );
   }
-  deleteYear(id: number): void {
-    this.API.http.delete(`${this.API.baseUrl}/Year/${id}`).subscribe(res => {
-      console.log("deleted year is ", res);
+
+  deleteYear(id: number) {
+   return this.API.http.delete(`${this.API.baseUrl}/Year/${id}`).pipe(
       catchError(error => {
         console.error("Error deleting Year:", error);
         throw error; // Optionally handle the error or rethrow
-      });
-    });
+      })
+    );
   }
 }

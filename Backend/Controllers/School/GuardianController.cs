@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
+using Backend.DTOS.School.Guardians;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Mvc;
@@ -81,5 +82,47 @@ namespace Backend.Controllers.School
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<APIResponse>> UpdateGuardian(int id, [FromBody] GuardianDTO guardianDto)
+        {
+            var response = new APIResponse();
+            try
+            {
+                // Optional: Ensure ID in URL matches DTO
+                if (id != guardianDto.GuardianID)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMasseges.Add("Mismatched Guardian ID.");
+                    return BadRequest(response);
+                }
+
+                await _guardianRepository.UpdateGuardianAsync(guardianDto);
+
+                response.Result = "Guardian updated successfully.";
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.NotFound;
+                response.ErrorMasseges.Add(ex.Message);
+                return NotFound(response);
+            }
+            catch (Exception ex)
+            {
+                // Log exception if needed
+                Debug.WriteLine($"Error occurred: {ex.Message}");
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add("An error occurred while updating data.");
+                // Optionally include the actual exception message
+                // response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
     }
 }

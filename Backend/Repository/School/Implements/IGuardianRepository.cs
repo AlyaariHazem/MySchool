@@ -9,9 +9,9 @@ namespace Backend.Repository.School.Implements;
 
 public interface IGuardianRepository
 {
-    Task<Guardian> AddGuardianAsync(Guardian guardian);
-    Task<List<Guardian>> GetAllGuardiansAsync();
-    Task<Guardian> GetGuardianByIdAsync(int guardianId);
-    Task<GetGuardianDTO> GetGuardianByIdForUpdateAsync(int guardianId);
-    Task UpdateGuardianAsync(Guardian guardian);
+    Task<GuardianDTO> AddGuardianAsync(Guardian guardian);
+    Task<List<GuardianDTO>> GetAllGuardiansAsync();
+    Task<GuardianDTO> GetGuardianByIdAsync(int guardianId);
+    Task<GuardianDTO> GetGuardianByIdForUpdateAsync(int guardianId);
+    Task UpdateGuardianAsync(GuardianDTO guardian);
 }

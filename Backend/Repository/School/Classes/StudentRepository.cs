@@ -171,11 +171,11 @@ public async Task<Student?> GetStudentAsync(int id)
         {
             // Guardian Details
             ExistingGuardianId = guardian?.GuardianID,
-            GuardianEmail = guardianInfo.Result.GuardianEmail,
+            GuardianEmail = guardianInfo.Result.GuardianEmail!,
             GuardianPassword = string.Empty,
-            GuardianAddress =guardianInfo.Result.GuardianAddress,
+            GuardianAddress = guardianInfo.Result.GuardianAddress!,
             GuardianGender = guardianInfo.Result.Gender!,
-            GuardianFullName = guardianInfo.Result.GuardianFullName,
+            GuardianFullName = guardianInfo.Result.FullName,
             GuardianType = guardianInfo.Result.Type!,
             GuardianPhone = guardianInfo.Result.GuardianPhone!,
             GuardianDOB = guardianInfo.Result.GuardianDOB,

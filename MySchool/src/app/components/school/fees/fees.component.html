@@ -20,13 +20,17 @@
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
           <mat-label>من</mat-label>
-          <input class="inputError" type="date" matInput />
+          <input matInput [matDatepicker]="hirePickerFrom" (focus)="hirePickerFrom.open()" />
+          <mat-datepicker-toggle matSuffix [for]="hirePickerFrom"></mat-datepicker-toggle>
+          <mat-datepicker #hirePickerFrom></mat-datepicker>
         </mat-form-field>
       </div>
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
           <mat-label>إلى</mat-label>
-          <input class="inputError" type="date" matInput />
+          <input matInput [matDatepicker]="hirePickerTo" (focus)="hirePickerTo.open()" />
+          <mat-datepicker-toggle matSuffix [for]="hirePickerTo"></mat-datepicker-toggle>
+          <mat-datepicker #hirePickerTo></mat-datepicker>
         </mat-form-field>
       </div>
     </div>

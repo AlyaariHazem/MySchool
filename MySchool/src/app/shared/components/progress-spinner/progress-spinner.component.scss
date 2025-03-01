@@ -1,0 +1,15 @@
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+
+  .loading-text {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+  }
+}

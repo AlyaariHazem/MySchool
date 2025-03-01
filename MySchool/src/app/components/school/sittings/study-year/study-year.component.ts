@@ -4,6 +4,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { LanguageService } from '../../../../core/services/language.service';
 import { YearService } from '../../../../core/services/year.service';
 import { Year } from '../../../../core/models/year.model';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-study-year',
@@ -22,6 +23,7 @@ export class StudyYearComponent implements OnInit {
 
   yearService = inject(YearService);
   languageService = inject(LanguageService);
+  toaster=inject(ToastrService);
 
   currentPage: number = 0; // Current page index
   pageSize: number = 5; // Number of items per page
@@ -40,6 +42,13 @@ export class StudyYearComponent implements OnInit {
       this.years = res;
       this.viewYear = this.years;
       this.updateDisplayedStudents();
+    });
+  }
+
+  deleteYear(id:number) {
+    this.yearService.deleteYear(id).subscribe(res => {
+      this.getAllYears();
+      this.toaster.success('تم حذف العام الدراسي بنجاح');
     });
   }
 

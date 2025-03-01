@@ -1,4 +1,5 @@
 using Backend.DTOS;
+using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
 using Backend.Models;
@@ -39,7 +40,7 @@ namespace Backend.Controllers
 
         try
         {
-            Guardian existingGuardian = null!;
+            GuardianDTO existingGuardian = null!;
 
             // Step 1: Check if we are adding a student to an existing guardian.
             if (request.ExistingGuardianId.HasValue&&!request.ExistingGuardianId.Value.Equals(0))
