@@ -52,7 +52,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
       }),
       optionData: this.formBuilder.group({
         placeBirth: [''],
-        studentPhone: [77],
+        studentPhone: [776137120],
         studentAddress: [''],
       }),
       guardian: this.formBuilder.group({

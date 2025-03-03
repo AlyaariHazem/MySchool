@@ -125,6 +125,7 @@ export class SchoolInfoComponent implements OnInit {
           },
           error: (err) => {
             console.error('Error adding school', err);
+            console.log('Form is invalid:', this.form);
             this.toaster.error('Please fill all required fields');
           },
         });

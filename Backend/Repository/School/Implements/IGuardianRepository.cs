@@ -11,6 +11,7 @@ public interface IGuardianRepository
 {
     Task<GuardianDTO> AddGuardianAsync(Guardian guardian);
     Task<List<GuardianDTO>> GetAllGuardiansAsync();
+    Task<List<GuardiansInfo>> GetAllGuardiansInfoAsync();
     Task<GuardianDTO> GetGuardianByIdAsync(int guardianId);
     Task<GuardianDTO> GetGuardianByIdForUpdateAsync(int guardianId);
     Task UpdateGuardianAsync(GuardianDTO guardian);

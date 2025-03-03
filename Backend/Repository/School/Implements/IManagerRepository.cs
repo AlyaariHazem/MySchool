@@ -10,8 +10,8 @@ namespace Backend.Repository.School.Implements;
 public interface IManagerRepository
 {
     Task<List<GetManagerDTO>> GetManagers();
-    Task<ManagerDTO> GetManager(int id);
+    Task<GetManagerDTO> GetManager(int id);
     Task<string> AddManager(AddManagerDTO manager);
-    Task UpdateManager(ManagerDTO manager);
+    Task UpdateManager(GetManagerDTO manager);
     Task DeleteManager(int id);
 }

@@ -33,30 +33,60 @@ public class GuardianRepository : IGuardianRepository
 
     public async Task<List<GuardianDTO>> GetAllGuardiansAsync()
     {
-        var guardians = await _db.Guardians.ToListAsync();
-        var guardiansMapped = _mapper.Map<List<GuardianDTO>>(guardians);
-        return guardiansMapped;
+        var guardiansData = await _db.Guardians
+        .Include(g => g.ApplicationUser).ToListAsync();
+
+        if (guardiansData == null)
+            throw new Exception("Guardian not found.");
+
+        var mappedGuardians = guardiansData.Select(guardian => new GuardianDTO
+        {
+            GuardianID = guardian.GuardianID,
+            FullName = guardian.FullName,
+            Gender = guardian.ApplicationUser.Gender,
+            Type = guardian.Type,
+            UserID = guardian.UserID,
+            GuardianAddress = guardian.ApplicationUser.Address!,
+            GuardianDOB = guardian.GuardianDOB,
+            GuardianEmail = guardian.ApplicationUser.Email!,
+            GuardianPhone = guardian.ApplicationUser.PhoneNumber
+        }).ToList();
+
+        return mappedGuardians;
     }
 
     public async Task<GuardianDTO> GetGuardianByIdAsync(int guardianId)
     {
-        var guardianData = await _db.Guardians.FirstOrDefaultAsync(g => g.GuardianID == guardianId);
+        var guardianData = await _db.Guardians
+         .Include(g => g.ApplicationUser)
+         .FirstOrDefaultAsync(g => g.GuardianID == guardianId);
+
         if (guardianData == null)
-        {
             throw new Exception("Guardian not found.");
-        }
-        var guardianMapped = _mapper.Map<GuardianDTO>(guardianData);
-        return guardianMapped;
+
+        var guardian = new GuardianDTO
+        {
+            GuardianID = guardianData.GuardianID,
+            FullName = guardianData.FullName,
+            Gender = guardianData.ApplicationUser.Gender,
+            Type = guardianData.Type,
+            UserID = guardianData.UserID,
+            GuardianAddress = guardianData.ApplicationUser.Address!,
+            GuardianDOB = guardianData.GuardianDOB,
+            GuardianEmail = guardianData.ApplicationUser.Email!,
+            GuardianPhone = guardianData.ApplicationUser.PhoneNumber
+        };
+        return guardian;
     }
+
     public async Task<GuardianDTO> GetGuardianByIdForUpdateAsync(int guardianId)
     {
         var guardianData = await _db.Guardians
         .Include(g => g.ApplicationUser)
         .FirstOrDefaultAsync(g => g.GuardianID == guardianId);
         if (guardianData == null)
-        {
             throw new Exception("Guardian not found.");
-        }
+
         var guardian = new GuardianDTO
         {
             GuardianID = guardianData.GuardianID,
@@ -86,6 +116,39 @@ public class GuardianRepository : IGuardianRepository
             _db.Entry(guardian).State = EntityState.Modified;
             await _db.SaveChangesAsync();
         }
+    }
+    public async Task<List<GuardiansInfo>> GetAllGuardiansInfoAsync()
+    {
+        var guardiansData = await _db.Guardians
+        .Include(g => g.ApplicationUser)
+        .Include(g => g.AccountStudentGuardians)
+        .ThenInclude(ASG => ASG.Vouchers)
+        .ToListAsync();
 
+        if (guardiansData == null)
+            throw new Exception("Guardian not found.");
+
+        var mappedGuardians = guardiansData.Select(guardian =>
+        {
+            var requiredFee = guardian.AccountStudentGuardians?.Sum(ASG => ASG.Amount) ?? 0;
+            var piad = guardian.AccountStudentGuardians?.Sum(ASG => ASG.Vouchers?.Sum(V => V.Receipt) ?? 0) ?? 0;
+
+            return new GuardiansInfo
+            {
+                GuardianID = guardian.GuardianID,
+                FullName = guardian.FullName,
+                Gender = guardian.ApplicationUser?.Gender ?? "Unknown",
+                StudentCount = guardian.AccountStudentGuardians?.Count(g=>g.GuardianID==guardian.GuardianID) ?? 0,
+                RequiredFee = requiredFee,
+                Piad = piad,
+                Remaining = requiredFee - piad,
+                Address = guardian.ApplicationUser?.Address ?? "N/A",
+                DOB = guardian.GuardianDOB,
+                Phone = guardian.ApplicationUser?.PhoneNumber ?? "N/A",
+                AccountId = guardian.AccountStudentGuardians?.FirstOrDefault()?.Accounts?.AccountID ?? 1
+            };
+        }).ToList();
+
+        return mappedGuardians;
     }
 }

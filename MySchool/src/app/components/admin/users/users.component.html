@@ -48,7 +48,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (manager of ManagerInfo; track $index) {
+                    @for (manager of managerInfo; track $index) {
                     <tr>
                       <td>{{ $index+1 }}</td>
                       <td>
@@ -66,15 +66,26 @@
                       <td>
                         <img class="imageGreade" src="assets/img/pdf.png" alt="" />
                       </td>
-                      <td class="text-right">
-                        <button mat-raised-button class="btn btn-primary btn-sm mb-1">
-                          <i class="far fa-edit"></i>
-                        </button>
-                        <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                          class="btn btn-danger btn-sm mb-1">
-                          <i class="far fa-trash-alt"></i>
-                        </button>
+                      <td>
+                        <!-- this is for edit and delete  -->
+                        <div class="col text-left">
+                          <div class="mt-sm-0 mt-2">
+                            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                              aria-expanded="false">
+                              <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-left">
+                              <!-- when I click here chage in the form from "إضافة" to be like "تعديل"  -->
+                              <a class="dropdown-item"><i
+                                  class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                              <div role="separator" class="dropdown-divider"></div>
+                              <a class="dropdown-item" ><i
+                                  class="bi bi-trash IconDelete" (click)="deleteUser(manager.managerID)"></i>حذف</a>
+                            </div>
+                          </div>
+                        </div>
                       </td>
+                      
                     </tr>
                     }
                   </tbody>

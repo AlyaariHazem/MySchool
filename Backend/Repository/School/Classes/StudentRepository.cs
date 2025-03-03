@@ -158,9 +158,8 @@ public async Task<Student?> GetStudentAsync(int id)
             .FirstOrDefaultAsync(s => s.StudentID == studentId);
 
         if (student == null)
-        {
-            return null;
-        }
+        return null;
+        
         string PhotoUrl = "https://localhost:7258/uploads/StudentPhotos";
         string AttachmentUrl = "https://localhost:7258/uploads/Attachments";
          var guardianInfo =_guardianRepo.GetGuardianByIdForUpdateAsync(student!.GuardianID);

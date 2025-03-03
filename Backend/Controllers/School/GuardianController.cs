@@ -43,6 +43,29 @@ namespace Backend.Controllers.School
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }
+        
+        [HttpGet("GuardianInfo")]
+        public async Task<ActionResult<APIResponse>> GetAllGuardiansInfo()
+        {
+            var response = new APIResponse();
+            try
+            {
+                var guardiansInfo = await _guardianRepository.GetAllGuardiansInfoAsync();
+
+                response.Result = guardiansInfo;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error: {ex.Message}");
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add("An error occurred while fetching data.");
+                // Optionally, add the actual exception message: response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
 
         // GET: api/Guardian/{id}
         [HttpGet("{id:int}")]

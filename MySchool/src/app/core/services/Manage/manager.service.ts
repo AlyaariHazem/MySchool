@@ -32,7 +32,8 @@ export class ManagerService {
   }
   
   deleteManager(id: number): Observable<any> {
-    return this.API.http.delete(`${this.API.baseUrl}/Manager/${id}`).pipe(
+    return this.API.http.delete<any>(`${this.API.baseUrl}/Manager/${id}`).pipe(
+      map(response => response.result),
       catchError(error => {
         console.error("Error deleting manager:", error);
         throw error;
@@ -41,7 +42,8 @@ export class ManagerService {
   }
   
   addManager(manager: manager): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/Manager`, manager).pipe(
+    return this.API.http.post<any>(`${this.API.baseUrl}/Manager`, manager).pipe(
+      map(response => response.result),
       catchError(error => {
         console.error("Error adding manager:", error);
         throw error;

@@ -1,4 +1,5 @@
 export interface managerInfo{
+    managerID:number;
     fullName: {
         firstName: string;
         middleName: string;

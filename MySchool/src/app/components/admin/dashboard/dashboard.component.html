@@ -287,6 +287,7 @@
             <table class="table custom-table">
               <thead class="thead-light">
                 <tr>
+                  <span style="display:none;"></span>
                   <th>الاسم</th>
                   <th>الرقم التسلسلي</th>
                   <th>الصف</th>
@@ -297,6 +298,7 @@
                 </tr>
               </thead>
               <tbody>
+                @for (student of students; track $index) {
                 <tr>
                   <td>
                     <h2>
@@ -304,153 +306,30 @@
                         href="#">Parker <span></span></a>
                     </h2>
                   </td>
-                  <td>ST-0d001</td>
-                  <td>1</td>
-                  <td>A</td>
-                  <td>973-584-58700</td>
-                  <td>20/1/2021</td>
-                  <td class="text-right">
-                    <a href="#" class="btn btn-primary btn-sm mb-1">
-                      <i class="far fa-edit"></i>
-                    </a>
-                    <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                      class="btn btn-danger btn-sm mb-1">
-                      <i class="far fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
+                  <td>{{student.studentID}}</td>
+                  <td>{{student.className}}</td>
+                  <td>{{student.divisionName}}</td>
+                  <td>{{student.studentPhone}}</td>
+                  <td>{{student.age}}</td>
                   <td>
-                    <h2>
-                      <a href="#" class="avatar text-white"><img src="assets/img/profile/img-2.jpg" alt="" /></a><a
-                        href="#">Smith <span></span></a>
-                    </h2>
-                  </td>
-                  <td>ST-0d002</td>
-                  <td>2</td>
-                  <td>B</td>
-                  <td>973-584-58700</td>
-                  <td>20/1/2021</td>
-                  <td class="text-right">
-                    <a href="#" class="btn btn-primary btn-sm mb-1">
-                      <i class="far fa-edit"></i>
-                    </a>
-                    <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                      class="btn btn-danger btn-sm mb-1">
-                      <i class="far fa-trash-alt"></i>
-                    </button>
+                    <!-- this is for edit and delete  -->
+                    <div class="col text-left">
+                      <div class="mt-sm-0 mt-2">
+                        <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                          aria-expanded="false">
+                          <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-left">
+                          <!-- when I click here chage in the form from "إضافة" to be like "تعديل"  -->
+                          <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                          <div role="separator" class="dropdown-divider"></div>
+                          <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                        </div>
+                      </div>
+                    </div>
                   </td>
                 </tr>
-                <tr>
-                  <td>
-                    <h2>
-                      <a href="#" class="avatar text-white"><img src="assets/img/profile/img-3.jpg" alt="" /></a><a
-                        href="#">Hensley<span></span></a>
-                    </h2>
-                  </td>
-                  <td>ST-0d003</td>
-                  <td>1</td>
-                  <td>A</td>
-                  <td>973-584-58700</td>
-                  <td>20/1/2021</td>
-                  <td class="text-right">
-                    <a href="#" class="btn btn-primary btn-sm mb-1">
-                      <i class="far fa-edit"></i>
-                    </a>
-                    <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                      class="btn btn-danger btn-sm mb-1">
-                      <i class="far fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <h2>
-                      <a href="#" class="avatar text-white"><img src="assets/img/profile/img-4.jpg" alt="" /></a><a
-                        href="#">Friesen<span></span></a>
-                    </h2>
-                  </td>
-                  <td>ST-0d004</td>
-                  <td>1</td>
-                  <td>A</td>
-                  <td>973-584-58700</td>
-                  <td>20/1/2021</td>
-                  <td class="text-right">
-                    <a href="#" class="btn btn-primary btn-sm mb-1">
-                      <i class="far fa-edit"></i>
-                    </a>
-                    <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                      class="btn btn-danger btn-sm mb-1">
-                      <i class="far fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <h2>
-                      <a href="#" class="avatar text-white"><img src="assets/img/profile/img-5.jpg" alt="" /></a><a
-                        href="#">Jackson<span></span></a>
-                    </h2>
-                  </td>
-                  <td>ST-0d005</td>
-                  <td>1</td>
-                  <td>A</td>
-                  <td>973-584-58700</td>
-                  <td>20/1/2021</td>
-                  <td class="text-right">
-                    <a href="#" class="btn btn-primary btn-sm mb-1">
-                      <i class="far fa-edit"></i>
-                    </a>
-                    <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                      class="btn btn-danger btn-sm mb-1">
-                      <i class="far fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <h2>
-                      <a href="#" class="avatar text-white"><img src="assets/img/profile/img-6.jpg" alt="" /></a><a
-                        href="#">Mason<span></span></a>
-                    </h2>
-                  </td>
-                  <td>ST-0d006</td>
-                  <td>1</td>
-                  <td>A</td>
-                  <td>973-584-58700</td>
-                  <td>20/1/2021</td>
-                  <td class="text-right">
-                    <a href="#" class="btn btn-primary btn-sm mb-1">
-                      <i class="far fa-edit"></i>
-                    </a>
-                    <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                      class="btn btn-danger btn-sm mb-1">
-                      <i class="far fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <h2>
-                      <a href="#" class="avatar text-white"><img src="assets/img/profile/img-7.jpg" alt="" /></a><a
-                        href="#">Garrett <span></span></a>
-                    </h2>
-                  </td>
-                  <td>ST-0d007</td>
-                  <td>1</td>
-                  <td>A</td>
-                  <td>973-584-58700</td>
-                  <td>20/1/2021</td>
-                  <td class="text-right">
-                    <a href="#" class="btn btn-primary btn-sm mb-1">
-                      <i class="far fa-edit"></i>
-                    </a>
-                    <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                      class="btn btn-danger btn-sm mb-1">
-                      <i class="far fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
+                }
               </tbody>
             </table>
           </div>
@@ -530,14 +409,24 @@
                       <td>
                         <img class="imageGreade" src="assets/img/pdf.png" alt="" />
                       </td>
-                      <td class="text-right">
-                        <button mat-raised-button class="btn btn-primary btn-sm mb-1">
-                          <i class="far fa-edit"></i>
-                        </button>
-                        <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                          class="btn btn-danger btn-sm mb-1">
-                          <i class="far fa-trash-alt"></i>
-                        </button>
+                      <td>
+                        <!-- this is for edit and delete  -->
+                        <div class="col text-left">
+                          <div class="mt-sm-0 mt-2">
+                            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                              aria-expanded="false">
+                              <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-left">
+                              <!-- when I click here chage in the form from "إضافة" to be like "تعديل"  -->
+                              <a class="dropdown-item"><i
+                                  class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                              <div role="separator" class="dropdown-divider"></div>
+                              <a class="dropdown-item" ><i
+                                  class="bi bi-trash IconDelete"></i>حذف</a>
+                            </div>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                     }
@@ -550,7 +439,7 @@
       </div>
     </div>
   </div>
-  <div class="notification-box">
+  <!-- <div class="notification-box">
     <div class="msg-sidebar notifications msg-noti">
       <div class="topnav-dropdown-header">
         <span>الرسائل</span>
@@ -758,5 +647,5 @@
         <a href="#">See all messages</a>
       </div>
     </div>
-  </div>
+  </div> -->
 </div>

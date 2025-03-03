@@ -11,10 +11,10 @@ import { BackendAspService } from '../environments/ASP.NET/backend-asp.service';
 })
 export class AuthAPIService {
   private API = inject(BackendAspService);
-    
+
   constructor(public router: Router) { }
 
-  login(user:User): Observable<any> {
+  login(user: User): Observable<any> {
     return this.API.http.post(`${this.API.baseUrl}/account/login`, user).pipe(
       tap((response: any) => {
         if (response && response.token) {
@@ -22,6 +22,9 @@ export class AuthAPIService {
         }
         if (response.managerName) {
           localStorage.setItem('managerName', response.managerName);
+        }
+        if (response.managerName===" ") {
+          localStorage.setItem('managerName',"Admin");
         }
         if (response.schoolName) {
           localStorage.setItem('schoolName', response.schoolName);
@@ -38,12 +41,12 @@ export class AuthAPIService {
       responseType: 'json' // ✅ Ensures response is treated as JSON
     });
   }
-  
-  
+
+
   logout() {
     localStorage.removeItem('token');
     // Navigate to the login page
     this.API.router.navigate(['/']);
-   localStorage.removeItem('token'); 
+    localStorage.removeItem('token');
   }
 }

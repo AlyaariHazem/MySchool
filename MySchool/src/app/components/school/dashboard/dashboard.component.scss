@@ -1,11 +1,18 @@
-.contant{
-    margin-top: -23rem;
+.contant {
+  margin-top: -23rem;
 }
-.imageGreade{
-    cursor: pointer;
+.imageGreade {
+  cursor: pointer;
 }
 :host ::ng-deep {
-    #pn_id_2_list {
-       padding-left: 0px!important;
-    }
+  #pn_id_2_list {
+    padding-left: 0px !important;
+  }
+}
+td,
+th {
+  text-align: center!important;
+}
+span + th{ 
+    text-align: right!important;
 }

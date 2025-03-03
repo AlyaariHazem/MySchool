@@ -5,6 +5,7 @@ import { AuthAPIService } from '../../../auth/authAPI.service';
 import { languageAction } from '../../../core/store/language/language.action';
 // Import the translate service (assuming you are using ngx-translate)
 import { TranslateService } from '@ngx-translate/core';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-header',
@@ -25,6 +26,8 @@ export class HeaderComponent implements OnInit {
   languageStore = inject(Store);
   // Add the translateService injection:
   private translate = inject(TranslateService);
+  private toaster = inject(ToastrService);
+  currentUserName: string = '';
 
   dir: string = "ltr";
 
@@ -52,6 +55,10 @@ export class HeaderComponent implements OnInit {
   
   ngOnInit(): void {
     this.currentLanguage();
+    this.currentUserName = localStorage.getItem('managerName') || '';
+    this.toaster.success('مرحبا بك : ' + this.currentUserName, '', {
+      positionClass: 'toast-center-center'
+    });
   }
   
   Logout(){

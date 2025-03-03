@@ -1,34 +1,30 @@
 <div style="background-color: white;">
     <!-- <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." /> -->
-<h2 class="guardian">الكتــب الدراسية</h2>
-<div class="group group2">
-    @for (card of cards; track $index) {
-    <div class="form-control">
-        <p-card class="responsive-card">
-            <ng-template pTemplate="header">
-                @if (card%2 == 0) {
-                <img alt="Card" class="image" src="./../../../../../assets/img/Hazem.jpg"/>
-                }@else{
-                <img alt="Card" class="image" src="./../../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" />
-                }
-            </ng-template>
-            <div>
-                Hazem.{{card}}
-                الصف:الأول
-                <hr>
-                النوع:ذكر
-                المرحلة:الثانية
-                الرسوم المطلوبة:10000
-                <hr>
+    <h2 class="guardian" dir="rtl">أولياء الأمور</h2>
+    <div class="group group2">
+        @for (guardian of guardians; track $index) {
+        <div class="form-control">
+            <p-card class="responsive-card">
+                <ng-template pTemplate="header">
+                    <img alt="Card" class="image" src="./../../../../../assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" />
+                </ng-template>
+                <div class="card-content">
+                    الاسم: {{guardian.fullName}} <br>
+                    الصف:الأول
+                    <hr>
+                    النوع:ذكر <br>
+                    المرحلة:الثانية <br>
+                    الرسوم المطلوبة:10000 <br>
+                    <hr>
 
-            </div>
-            <ng-template pTemplate="footer">
-                <div class="flex gap-3 mt-1">
-                    <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
                 </div>
-            </ng-template>
-        </p-card>
+                <ng-template pTemplate="footer">
+                    <div class="flex gap-3 mt-1">
+                        <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
+                    </div>
+                </ng-template>
+            </p-card>
+        </div>
+        }
     </div>
-    }
-</div>
 </div>

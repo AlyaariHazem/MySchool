@@ -1,10 +1,10 @@
 <p-dialog [modal]="true" [(visible)]="visible" [style]="{ width: '300px', border: 'none', background: 'transparent' }"
     [closable]="false" [draggable]="false" [resizable]="false"
-    contentStyle="display: flex; justify-content: center; align-items: center;">
+    [contentStyle]="{ 'display': 'flex', 'justify-content': 'center', 'align-items': 'center' }">
 
     <div class="spinner-container">
-        <p-progressSpinner strokeWidth="6" [style]="{ 'width': '60px', 'height': '60px' }"
-            ariaLabel="Loading"></p-progressSpinner>
+        <p-progressSpinner strokeWidth="6" [style]="{ 'width': '60px', 'height': '60px' }" ariaLabel="Loading">
+        </p-progressSpinner>
         <p class="loading-text">Loading, please wait...</p>
     </div>
 

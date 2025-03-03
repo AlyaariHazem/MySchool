@@ -3,8 +3,6 @@ import { PaginatorState } from 'primeng/paginator';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
-import { StudentDetailsDTO } from '../../../core/models/students.model';
-import { StudentService } from '../../../core/services/student.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { TranslationService } from '../../../core/services/translation.service';
 import { AddManagerComponent } from './add-manager/add-manager.component';
@@ -22,26 +20,18 @@ export class UsersComponent {
     public dialog: MatDialog) {
 
   }
-  ManagerInfo:managerInfo[]=[];
-  ManagerService=inject(ManagerService);
+  managerInfo: managerInfo[] = [];
+  managerService = inject(ManagerService);
   languageService = inject(LanguageService);
   translationService = inject(TranslationService);
 
-  students: StudentDetailsDTO[] = [];
-  studentService = inject(StudentService);
-
   ngOnInit(): void {
-    this.getAllStudent();
     this.languageService.currentLanguage();
     this.getAllManagers();
     this.translationService.changeLanguage(this.languageService.langDir);
   }
-
-  getAllStudent(): void {
-    this.studentService.getAllStudents().subscribe(res => this.students = res);
-  }
-  getAllManagers(): void{
-    this.ManagerService.getAllManagers().subscribe(res=>this.ManagerInfo=res);
+  getAllManagers(): void {
+    this.managerService.getAllManagers().subscribe(res => this.managerInfo = res);
   }
 
   first: number = 0;
@@ -50,7 +40,7 @@ export class UsersComponent {
     this.first = event.first || 0; // Default to 0 if undefined
     this.rows = event.rows!;
   }
-  
+
   openDialog(): void {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.width = '95%';
@@ -63,5 +53,17 @@ export class UsersComponent {
         this.toastr.success('تم إضافة الطالب بنجاح');
       }
     });
+  }
+  deleteUser(userID: number) {
+    if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
+      this.managerService.deleteManager(userID).subscribe({
+        next: () => {
+          this.managerInfo = this.managerInfo.filter(s => s.managerID !== userID);
+        },
+        error: (err) => {
+          console.error('Error deleting student:', err);
+        }
+      });
+    }
   }
 }

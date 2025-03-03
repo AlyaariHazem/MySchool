@@ -17,13 +17,16 @@ namespace Backend.Repository.School.Classes
         private readonly DatabaseContext _context;
         private readonly IUserRepository _userRepository;
         private readonly ITenantRepository _tenantRepository;
+        private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
+
 
         public ManagerRepository(DatabaseContext context, IUserRepository userRepository,
-        ITenantRepository tenantRepository)
+        ITenantRepository tenantRepository, IPasswordHasher<ApplicationUser> passwordHasher)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _tenantRepository = tenantRepository;
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<string> AddManager(AddManagerDTO managerDTO)
@@ -78,18 +81,16 @@ namespace Backend.Repository.School.Classes
                     UserName = managerDTO.UserName,
                     Email = managerDTO.Email,
                     PhoneNumber = managerDTO.PhoneNumber,
-                    UserType = "MANAGER"
+                    UserType = managerDTO.UserType
                 };
-
+                user.PasswordHash = _passwordHasher.HashPassword(user, managerDTO.Password);
                 await tenantUserStore.AddAsync(user);
                 await tenantContext.SaveChangesAsync();
 
                 // Retrieve the created user
                 var createdUserTenant = await tenantContext.Set<ApplicationUser>().FirstOrDefaultAsync(u => u.Email == managerDTO.Email);
                 if (createdUserTenant == null)
-                {
                     throw new Exception("Failed to create user in tenant database.");
-                }
 
                 var NewTenant = new Tenant
                 {
@@ -122,38 +123,28 @@ namespace Backend.Repository.School.Classes
             return "Manager added successfully.";
         }
 
-        public async Task DeleteManager(int id)
-        {
-            var manager = await _context.Managers.FindAsync(id);
-            if (manager == null)
-            {
-                throw new Exception("Manager not found.");
-            }
 
-            _context.Managers.Remove(manager);
-            await _context.SaveChangesAsync();
-        }
 
-        public async Task<ManagerDTO> GetManager(int id)
+        public async Task<GetManagerDTO> GetManager(int id)
         {
             var manager = await _context.Managers
                 .Include(m => m.ApplicationUser)
+                .Include(m => m.School)
                 .FirstOrDefaultAsync(m => m.ManagerID == id);
 
             if (manager == null)
-            {
                 return null;
-            }
 
-            return new ManagerDTO
+            return new GetManagerDTO
             {
                 ManagerID = manager.ManagerID,
                 FullName = manager.FullName,
-                UserID = manager.UserID,
-                SchoolID = manager.SchoolID,
-                UserName = manager.ApplicationUser?.UserName,
+                HireDate = manager.ApplicationUser?.HireDate ?? DateTime.Now, // Get HireDate from ApplicationUser if available
+                SchoolName = manager.School?.SchoolName!, // Assuming there's a navigation property `School` in Manager
+                UserName = manager.ApplicationUser?.UserName!,
                 Email = manager.ApplicationUser?.Email,
-                UserType = "MANAGER"
+                UserType = "MANAGER",
+                PhoneNumber = manager.ApplicationUser?.PhoneNumber
             };
         }
 
@@ -169,8 +160,8 @@ namespace Backend.Repository.School.Classes
                 ManagerID = m.ManagerID,
                 FullName = m.FullName,
                 HireDate = m.ApplicationUser?.HireDate ?? DateTime.Now, // Get HireDate from ApplicationUser if available
-                SchoolName = m.School?.SchoolName, // Assuming there's a navigation property `School` in Manager
-                UserName = m.ApplicationUser?.UserName,
+                SchoolName = m.School?.SchoolName!, // Assuming there's a navigation property `School` in Manager
+                UserName = m.ApplicationUser?.UserName!,
                 Email = m.ApplicationUser?.Email,
                 UserType = "MANAGER",
                 PhoneNumber = m.ApplicationUser?.PhoneNumber
@@ -178,15 +169,16 @@ namespace Backend.Repository.School.Classes
         }
 
 
-        public async Task UpdateManager(ManagerDTO managerDTO)
+        public async Task UpdateManager(GetManagerDTO managerDTO)
         {
-            var manager = await _context.Managers.Include(m => m.ApplicationUser)
+            var manager = await _context.Managers
+                .Include(m => m.ApplicationUser)
+                .Include(m => m.School)
+                .Include(m => m.Tenant)
                 .FirstOrDefaultAsync(m => m.ManagerID == managerDTO.ManagerID);
 
             if (manager == null)
-            {
                 throw new Exception("Manager not found.");
-            }
 
             manager.FullName = managerDTO.FullName;
 
@@ -199,5 +191,26 @@ namespace Backend.Repository.School.Classes
             _context.Entry(manager).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteManager(int id)
+        {
+            var manager = await _context.Managers.FindAsync(id);
+            var user = await _context.Users.FindAsync(manager!.UserID);
+            if (manager is null)
+                throw new Exception("Manager not found.");
+
+            try
+            {
+                _context.Managers.Remove(manager);
+                _context.Users.Remove(user!);
+                await _context.SaveChangesAsync();
+            }
+
+            catch (Exception e)
+            {
+                throw new Exception("Failed to delete manager.", e);
+            }
+        }
     }
+
 }

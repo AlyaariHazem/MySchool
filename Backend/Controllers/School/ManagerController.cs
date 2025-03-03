@@ -96,7 +96,7 @@ public class ManagerController : ControllerBase
 
     // PUT: api/manager/{id} (Update a manager)
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<APIResponse>> UpdateManager(int id, [FromBody] ManagerDTO managerDTO)
+    public async Task<ActionResult<APIResponse>> UpdateManager(int id, [FromBody] GetManagerDTO managerDTO)
     {
         var response = new APIResponse();
         try

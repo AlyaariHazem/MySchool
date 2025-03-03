@@ -20,11 +20,11 @@
 
 .sidebar-ul {
   direction: rtl;
-  overflow-y: scroll;
-  max-height: 100vh;
+  overflow-y: none;
+  // max-height: 100vh;
 
-  scrollbar-width: thin;
-  scrollbar-color: #adadad #f1f1f1;
+  // scrollbar-width: thin;
+  // scrollbar-color: #adadad #f1f1f1;
 }
 
 .sidebar-ul ul {
@@ -65,7 +65,7 @@
 }
 
 .sidebar {
-  right: 20px;
+  right: 10px;
 }
 .sidebarEn {
   left: 20px;
