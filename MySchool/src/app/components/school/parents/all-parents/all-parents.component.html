@@ -10,13 +10,17 @@
                 </ng-template>
                 <div class="card-content">
                     الاسم: {{guardian.fullName}} <br>
-                    الصف:الأول
                     <hr>
-                    النوع:ذكر <br>
+                    عدد الطلاب:{{guardian.studentCount}} <br>
+                    النوع:{{guardian.gender}} <br>
                     المرحلة:الثانية <br>
-                    الرسوم المطلوبة:10000 <br>
+                    الرسوم المطلوبة:{{guardian.requiredFee}} <br>
+                    الرسوم المدفوعة:{{guardian.piad}} <br>
+                    الرسوم المتبقية:{{guardian.remaining}} <br>
+                    الهاتف:{{guardian.phone}} العنوان:{{guardian.address}} <br>
+                    العمر:{{guardian.dob | date: 'yyyy-MM-dd'}} AccountID:{{guardian.accountId}} <br>
                     <hr>
-
+  
                 </div>
                 <ng-template pTemplate="footer">
                     <div class="flex gap-3 mt-1">

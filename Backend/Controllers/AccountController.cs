@@ -93,7 +93,8 @@ namespace Backend.Controllers
              })
              .FirstOrDefaultAsync();
 
-            var UserName = schoolData?.ManagerName.FirstName + " " + schoolData?.ManagerName.LastName;
+            var managerName = schoolData?.ManagerName.FirstName + " " + schoolData?.ManagerName.LastName;
+            var userName = schoolData?.ManagerName.FirstName;
 
             // 3. Create JWT token
             List<Claim> userClaims = new List<Claim>
@@ -121,7 +122,8 @@ namespace Backend.Controllers
             return Ok(new
             {
                 schoolName = schoolData?.SchoolName,
-                managerName = UserName,
+                managerName = managerName,
+                userName = userName,
                 schoolId = schoolData?.SchoolId,
                 token = tokenString,
                 expiration = token.ValidTo

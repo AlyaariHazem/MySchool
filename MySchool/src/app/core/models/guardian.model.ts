@@ -9,3 +9,17 @@ export interface Guardians{
     guardianDOB:Date;
     userID:number;
 }
+
+export interface GuardianInfo{
+    guardianID: number;
+    fullName: string;
+    studentCount: number;
+    requiredFee: number;
+    piad:number;
+    remaining: number;
+    gender: string;
+    phone: number;
+    dob: Date;
+    address: string;
+    accountId: number;
+}

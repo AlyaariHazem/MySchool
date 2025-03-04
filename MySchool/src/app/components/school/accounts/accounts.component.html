@@ -1,9 +1,9 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
-  <mat-paginator class="cPaginator"  [length]="students.length" [pageSize]="pageSize"
+  <mat-paginator class="cPaginator" [length]="accounts.length" [pageSize]="pageSize"
     [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
   </mat-paginator>
-  <h2 class="school" >الحسابات</h2>
-  <form  [attr.dir]="languageService.dir">
+  <h2 class="school">الحسابات</h2>
+  <form [attr.dir]="languageService.dir">
     <div class="group group2">
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
@@ -12,12 +12,12 @@
         </mat-form-field>
       </div>
       <div class="form-control">
-        <p-dropdown [options]="cities"  [checkmark]="true" optionLabel="name"
-          [editable]="true" [showClear]="true" placeholder="نوع الحساب">
+        <p-dropdown [options]="accountType" [checkmark]="true" optionLabel="name" [editable]="true" [showClear]="true"
+          placeholder="نوع الحساب">
         </p-dropdown>
       </div>
       <div class="form-control">
-        <p-dropdown [options]="cities" [checkmark]="true" optionLabel="name" [editable]="true" [showClear]="true"
+        <p-dropdown [options]="accountType" [checkmark]="true" optionLabel="name" [editable]="true" [showClear]="true"
           placeholder="الحساب الأب">
         </p-dropdown>
       </div>
@@ -55,6 +55,7 @@
               <th>#</th>
               <th>الحساب</th>
               <th>النوع</th>
+              <th>حساب الأب</th>
               <th>الرصيد الإفتتاحي</th>
               <th>نوع الرصيد الإفتتاحي</th>
               <th>الحالة</th>
@@ -64,15 +65,17 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let student of displayedStudents">
-              <td>{{ student }}</td>
-              <td>حازم عبدالله اليعري</td>
-              <td>20000</td>
-              <td>لا يوجد</td>
-              <td></td>
-              <td>1</td>
-              <td>2025-1-1</td>
-              <td>3</td>
+            @for (student of displayedaccounts; track $index) {
+            <tr>
+              <td>{{ $index }}</td>
+              <td>{{student.guardianName}}</td>
+              <td>مدين</td>
+              <td>{{student.typeAccountID==1?'Guardian':student.typeAccountID}}</td>
+              <td>{{student.openBalance}}</td>
+              <td>{{student.typeOpenBalance}}</td>
+              <td>{{student.state}}</td>
+              <td>{{student.note}}</td>
+              <td>{{student.hireDate | date:'yyyy-mm-dd'}}</td>
               <td>
                 <div class="col text-left">
                   <div class="mt-sm-0 mt-2">
@@ -89,6 +92,7 @@
                 </div>
               </td>
             </tr>
+            }
           </tbody>
         </table>
 

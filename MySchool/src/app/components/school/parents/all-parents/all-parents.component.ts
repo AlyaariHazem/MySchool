@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 
 import { GuardianService } from '../../../../core/services/guardian.service';
-import { Guardians } from '../../../../core/models/guardian.model';
+import { GuardianInfo } from '../../../../core/models/guardian.model';
 
 @Component({
   selector: 'app-all-parents',
@@ -11,10 +11,11 @@ import { Guardians } from '../../../../core/models/guardian.model';
 export class AllParentsComponent implements OnInit {
 
   guardianSerivce = inject(GuardianService);
-  guardians:Guardians[]=[];
-
+  
+  guardians:GuardianInfo[]=[];
+  now:Date=new Date();
   ngOnInit(): void {
-    this.guardianSerivce.getAllGuardians().subscribe({
+    this.guardianSerivce.getGuardiansInfo().subscribe({
       next: (res) => {
         this.guardians = res;
         console.log('Guardians fetched successfully:', this.guardians);

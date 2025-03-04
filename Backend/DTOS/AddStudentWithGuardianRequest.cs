@@ -10,12 +10,12 @@ public class AddStudentWithGuardianRequest
     public int? ExistingGuardianId { get; set; }
     public int StudentID { get; set; }
      // Guardian details
-    public string GuardianEmail { get; set; }
+    public string GuardianEmail { get; set; }=string.Empty;
     public string GuardianPassword { get; set; } = string.Empty;
-    public string GuardianAddress { get; set; }
+    public string GuardianAddress { get; set; }=string.Empty;
     public string GuardianGender { get; set; } = "Guardian";
-    public string GuardianFullName { get; set; }
-    public string? GuardianType { get; set; }
+    public string GuardianFullName { get; set; }=string.Empty;
+    public string? GuardianType { get; set; }=string.Empty;
     public string GuardianPhone { get; set; } = string.Empty;
     public DateTime? GuardianDOB { get; set; }
 

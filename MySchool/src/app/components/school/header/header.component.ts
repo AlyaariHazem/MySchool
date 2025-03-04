@@ -13,6 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class HeaderComponent implements OnInit {
   currentUserName: string = '';
+  userName: string = '';
   toggle: boolean = false;
 
   languageStore = inject(Store);
@@ -57,6 +58,7 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentLanguage();
+    this.userName = localStorage.getItem('userName') || '';
     this.currentUserName = localStorage.getItem('managerName') || '';
     this.toaster.success('مرحبا بك : ' + this.currentUserName, '', {
       positionClass: 'toast-center-center'

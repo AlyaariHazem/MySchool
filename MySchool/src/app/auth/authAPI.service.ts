@@ -29,6 +29,9 @@ export class AuthAPIService {
         if (response.schoolName) {
           localStorage.setItem('schoolName', response.schoolName);
         }
+        if (response.userName) {
+          localStorage.setItem('userName', response.userName);
+        }
         if (response.schoolId) {
           localStorage.setItem('schoolId', response.schoolId);
         }

@@ -56,14 +56,14 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
         studentAddress: [''],
       }),
       guardian: this.formBuilder.group({
-        guardianFullName: ['', Validators.required],
+        guardianFullName: [''],
         guardianType: [''],
-        guardianEmail: ['', [Validators.required, Validators.email]],
+        guardianEmail: [''],
         guardianPassword: ['Guardian'],
-        guardianPhone: ['', Validators.required],
+        guardianPhone: [''],
         guardianGender: ['Male'],
-        guardianDOB: ['', Validators.required],
-        guardianAddress: ['', Validators.required]
+        guardianDOB: [''],
+        guardianAddress: ['']
       }),
       fees: this.formBuilder.group({
         discounts: this.formBuilder.array([], Validators.required)

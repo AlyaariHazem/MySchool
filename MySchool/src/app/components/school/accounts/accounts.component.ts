@@ -1,15 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 
 import { LanguageService } from '../../../core/services/language.service';
+import { AccountService } from '../../../core/services/account.service';
+import { ToastrService } from 'ngx-toastr';
+import { Account } from '../../../core/models/accounts.model';
 
-interface City {
+interface AccountType {
   name: string;
-  code: string;
+  code: number;
 }
 
 @Component({
@@ -21,21 +23,24 @@ interface City {
 export class AccountsComponent implements OnInit {
   visible: boolean = false;
 
+  accountService = inject(AccountService);
+
+  accounts: Account[] = [];
+
   showDialog() {
     this.visible = true;
   }
   form: FormGroup;
-  cities: City[] | undefined;
+  accountType: AccountType[] | undefined;
 
   values = new FormControl<string[] | null>(null);
   max = 2;
 
-  selectedCity: City | undefined;
+  selectedCity: AccountType | undefined;
 
-  languageService=inject(LanguageService);
+  languageService = inject(LanguageService);
 
-  students = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,];
-  displayedStudents: number[] = []; // Students for the current page
+  displayedaccounts: Account[] = []; // Students for the current page
 
   isSmallScreen = false;
   private mediaSub: Subscription | null = null;
@@ -43,7 +48,7 @@ export class AccountsComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
-    private mediaObserver: MediaObserver
+    private toastr: ToastrService
   ) {
     this.form = this.formBuilder.group({
       stage: ['', Validators.required],
@@ -52,22 +57,27 @@ export class AccountsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.length = this.students.length; // Set the total number of items
-    this.updateDisplayedStudents(); // Initialize the displayed students
-    this.mediaSub = this.mediaObserver.asObservable().subscribe((changes: MediaChange[]) => {
-      this.isSmallScreen = changes.some(
-        (change) => change.mqAlias === 'xs' || change.mqAlias === 'sm'
-      );
+    this.accountService.getAllAccounts().subscribe({
+      next: (res) => {
+        this.accounts = res;
+        this.length = this.accounts.length; // Update paginator length
+        this.updateDisplayedaccounts(); 
+        this.toastr.success('Accounts fetched successfully');
+        console.log('Accounts fetched successfully:', this.accounts);
+      },
+      error: (err) => console.error('Error fetching accounts:', err)
     });
-    this.cities = [
-      { name: 'New Yorkaaaaaaaaaaa', code: 'NY' },
-      { name: 'Rome', code: 'RM' },
-      { name: 'London', code: 'LDN' },
-      { name: 'Istanbul', code: 'IST' },
-      { name: 'Paris', code: 'PRS' }
+  
+    this.accountType = [
+      { name: 'Guardain', code: 1 },
+      { name: 'School', code: 2 },
+      { name: 'Branches', code: 3 },
+      { name: 'Funds', code: 4 },
+      { name: 'Employees', code: 5 },
+      { name: 'Banks', code: 6 }
     ];
-    this.languageService.currentLanguage();
   }
+  
 
   ngOnDestroy(): void {
     if (this.mediaSub) {
@@ -77,15 +87,15 @@ export class AccountsComponent implements OnInit {
   currentPage: number = 0; // Current page index
   pageSize: number = 5; // Number of items per page
   length: number = 0; // Total number of items
-  updateDisplayedStudents(): void {
+  updateDisplayedaccounts(): void {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.displayedStudents = this.students.slice(startIndex, endIndex);
+    this.displayedaccounts = this.accounts.slice(startIndex, endIndex);
   }
   // Handle paginator events
   onPageChange(event: PageEvent): void {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
-    this.updateDisplayedStudents();
+    this.updateDisplayedaccounts();
   }
 }

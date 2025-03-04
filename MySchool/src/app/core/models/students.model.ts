@@ -1,14 +1,14 @@
 export interface AddStudent{
     existingGuardianId?:number;
     studentID:number;
-    guardianEmail: string;
-    guardianPassword: string;
-    guardianAddress: string;
-    guardianGender: string;
-    guardianFullName: string;
-    guardianType: string;
-    guardianPhone: string;
-    guardianDOB: string; // Use `Date` type if you'll parse it into a Date object in your Angular code
+    guardianEmail?: string;
+    guardianPassword?: string;
+    guardianAddress?: string;
+    guardianGender?: string;
+    guardianFullName?: string;
+    guardianType?: string;
+    guardianPhone?: string;
+    guardianDOB?: string; // Use `Date` type if you'll parse it into a Date object in your Angular code
     studentEmail: string;
     studentPassword: string;
     studentAddress: string;
