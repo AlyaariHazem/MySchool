@@ -24,6 +24,7 @@ namespace Backend.Models
         [JsonIgnore]
         public Division Division { get; set; }
         public string UserID { get; set; }
+        public ICollection<MonthlyGrade> MonthlyGrades { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual ICollection<Attachments> Attachments { get; set; }
         public virtual ICollection<TeacherStudent> TeacherStudents { get; set; }

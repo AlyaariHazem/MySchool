@@ -1,4 +1,5 @@
 using Backend.DTOS;
+using Backend.DTOS.School.Accounts;
 using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
@@ -55,7 +56,7 @@ namespace Backend.Controllers
                 // If no existing guardian is provided, create a new guardian and guardian user
                 ApplicationUser guardianUser = null!;
                 Guardian guardian = null!;
-                Accounts account = null!;
+                AccountsDTO account = null!;
 
                 if (existingGuardian == null)
                 {
@@ -77,8 +78,9 @@ namespace Backend.Controllers
                         GuardianDOB = request.GuardianDOB
                     };
                     // Add Account
-                    account = new Accounts
+                    account = new AccountsDTO
                     {
+                        AccountName=request.GuardianFullName,
                         Note = "",
                         State = true,
                         TypeAccountID = 1

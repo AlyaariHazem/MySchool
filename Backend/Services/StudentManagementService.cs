@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Backend.Data;
 using Backend.DTOS;
+using Backend.DTOS.School.Accounts;
 using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
@@ -54,7 +55,7 @@ public class StudentManagementService
     public async Task<Student> AddStudentWithGuardianAsync(
         ApplicationUser guardianUser, string guardianPassword, Guardian guardian,
         ApplicationUser studentUser, string studentPassword, Student student,
-    Accounts account, AccountStudentGuardian accountStudentGuardian,  List<Attachments> attachments,List<StudentClassFeeDTO> studentClassFees)
+    AccountsDTO account, AccountStudentGuardian accountStudentGuardian,  List<Attachments> attachments,List<StudentClassFeeDTO> studentClassFees)
     {
         // Step 1: Add Guardian's User
         var createdGuardianUser = await _userRepository.CreateUserAsync(guardianUser, guardianPassword, "Guardian");
@@ -75,7 +76,7 @@ public class StudentManagementService
             var createdAccount = await _accountRepository.AddAccountAsync(account);
 
             // Step 5: Create AccountStudentGuardian Mapping
-            accountStudentGuardian.AccountID = createdAccount.AccountID;
+            accountStudentGuardian.AccountID = createdAccount.AccountID ?? default(int);
             accountStudentGuardian.GuardianID = addedGuardian.GuardianID;
             accountStudentGuardian.StudentID = addedStudent.StudentID;
             await _accountRepository.AddAccountStudentGuardianAsync(accountStudentGuardian);

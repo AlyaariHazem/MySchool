@@ -1,11 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { MatDialog } from '@angular/material/dialog';
 
 import { User } from '../../core/models/user.model';
 import { AuthAPIService } from '../authAPI.service';
 import { ShardModule } from '../../shared/shard.module';
-import { RegisterComponent } from '../register/register.component';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +17,6 @@ import { RegisterComponent } from '../register/register.component';
 export class LoginComponent {
   private authService = inject(AuthAPIService);
   private toastr = inject(ToastrService);
-  private dialog = inject(MatDialog);
 
   // Track the loading state
   isLoading = false;
@@ -69,8 +66,6 @@ export class LoginComponent {
   }
 
   openRegisterDialog(): void {
-    this.dialog.open(RegisterComponent, {
-      width: '400px',
-    });
+    this.toastr.info('فتح نافذة التسجيل');
   }
 }

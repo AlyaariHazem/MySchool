@@ -20,8 +20,8 @@
 
 .sidebar-ul {
   direction: rtl;
-  overflow-y: none;
-  // max-height: 100vh;
+  overflow-y: scroll;
+  max-height: 100vh;
 
   // scrollbar-width: thin;
   // scrollbar-color: #adadad #f1f1f1;

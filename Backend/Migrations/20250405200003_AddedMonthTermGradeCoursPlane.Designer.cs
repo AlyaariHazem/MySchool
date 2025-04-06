@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250405200003_AddedMonthTermGradeCoursPlane")]
+    partial class AddedMonthTermGradeCoursPlane
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,9 +63,6 @@ namespace Backend.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountID"));
-
-                    b.Property<string>("AccountName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("datetime2");
@@ -171,17 +171,17 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "bcd840b2-5a2f-40b7-b6da-10732055abd1",
+                            ConcurrencyStamp = "ea234470-4dc7-42f0-9003-e2177fab6129",
                             Email = "ALYAARIHAZEM@GMAIL.COM",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 4, 6, 2, 2, 3, 227, DateTimeKind.Local).AddTicks(9863),
+                            HireDate = new DateTime(2025, 4, 5, 23, 0, 1, 789, DateTimeKind.Local).AddTicks(3951),
                             LockoutEnabled = false,
                             NormalizedEmail = "ALYAARIHAZEM@GMAIL.COM",
                             NormalizedUserName = "MANAGER",
-                            PasswordHash = "AQAAAAIAAYagAAAAENad8ATpM2IotWlRXxWdDID8BrOKrQJVlEp0Zq8cRjdCEQTtrea1L0GDhG2vS2V7rA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAECKT88mV4k1rFR45rIvJG3IJsEUXyqemHHAkBsvqchvFy0L2H8BgizPqjnIl96+QOw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "5dbf107d-16ab-4cfb-a149-11af021e5bf3",
+                            SecurityStamp = "d9bbcb4d-2b81-422f-bc20-ab140ec3cf9f",
                             TwoFactorEnabled = false,
                             UserName = "MANAGER",
                             UserType = "MANAGER"

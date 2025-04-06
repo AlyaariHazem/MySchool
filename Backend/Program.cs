@@ -1,6 +1,7 @@
 using System.Text;
 using Backend;
 using Backend.Data;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository;
 using Backend.Repository.School;
@@ -84,6 +85,7 @@ builder.Services.AddScoped<StudentClassFeesRepository>();
 builder.Services.AddScoped<TenantProvisioningService>();
 
 // Register custom repositories
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IClassesRepository, ClassesRepository>();
 builder.Services.AddScoped<IStagesRepository, StagesRepository>();
 builder.Services.AddScoped<IDivisionRepository, DivisionRepository>();
@@ -100,6 +102,7 @@ builder.Services.AddScoped<IStudentClassFeesRepository, StudentClassFeesReposito
 builder.Services.AddScoped<IYearRepository, YearRepository>();
 builder.Services.AddScoped<IManagerRepository, ManagerRepository>();
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
+builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
 
 
 

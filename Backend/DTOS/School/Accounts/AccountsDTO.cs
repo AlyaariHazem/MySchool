@@ -9,6 +9,7 @@ public class AccountsDTO
 {
     public int? AccountID { get; set; }
     public string? GuardianName { get; set; }
+    public string? AccountName { get; set; }
     public bool State { get; set; } = true;
     public string? Note { get; set; }
     public decimal? OpenBalance { get; set; }

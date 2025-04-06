@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Backend.DTOS;
 using Backend.DTOS.School;
+using Backend.DTOS.School.Accounts;
 using Backend.DTOS.School.Fees;
 using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.Stages;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
+using Backend.DTOS.School.Subjects;
 using Backend.DTOS.School.Tenant;
 using Backend.DTOS.School.Years;
 using Backend.Models;
@@ -59,9 +61,9 @@ public class MappingConfig : Profile
         CreateMap<Year, YearDTO>().ReverseMap();
         CreateMap<Tenant, TenantDTO>().ReverseMap();
         CreateMap<Guardian, GuardianDTO>().ReverseMap();
+        CreateMap<Accounts, AccountsDTO>().ReverseMap();
+        CreateMap<Subject, SubjectsDTO>().ReverseMap();
 
-
-        
     }
 }
 

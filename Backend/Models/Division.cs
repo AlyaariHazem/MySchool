@@ -17,5 +17,6 @@ namespace Backend.Models
         [JsonIgnore]
         public Class Class { get; set; }
         public virtual ICollection<Student> Students { get; set; }
+        public virtual ICollection<CoursePlan> CoursePlans { get; set; }
     }
 }

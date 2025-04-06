@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit } from '@angular/core';
+import { Component, effect, HostListener, inject, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -38,6 +38,9 @@ export class GradesComponent implements OnInit {
       className: ['', Validators.required],
       stageID: ['', Validators.required]
     });
+    effect(()=>{
+      this.getAllStages();
+    })
   }
 
   ngOnInit(): void {
