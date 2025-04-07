@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Backend.DTOS.School.Manager;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +17,11 @@ namespace Backend.Controllers.School;
 [ApiController]
 public class ManagerController : ControllerBase
 {
-    private readonly IManagerRepository _managerRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ManagerController(IManagerRepository managerRepo)
+    public ManagerController(IUnitOfWork managerRepo)
     {
-        _managerRepo = managerRepo;
+        _unitOfWork = managerRepo;
     }
 
     // POST: api/manager (Add a new manager)
@@ -30,7 +31,7 @@ public class ManagerController : ControllerBase
         var response = new APIResponse();
         try
         {
-          var responseData=   await _managerRepo.AddManager(managerDTO);
+          var responseData=   await _unitOfWork.Managers.AddManager(managerDTO);
             response.Result = responseData;
             response.statusCode = HttpStatusCode.Created;
             return Ok(response);
@@ -51,7 +52,7 @@ public class ManagerController : ControllerBase
         var response = new APIResponse();
         try
         {
-            var manager = await _managerRepo.GetManager(id);
+            var manager = await _unitOfWork.Managers.GetManager(id);
             if (manager == null)
             {
                 response.IsSuccess = false;
@@ -80,7 +81,7 @@ public class ManagerController : ControllerBase
         var response = new APIResponse();
         try
         {
-            var managers = await _managerRepo.GetManagers();
+            var managers = await _unitOfWork.Managers.GetManagers();
             response.Result = managers;
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
@@ -109,7 +110,7 @@ public class ManagerController : ControllerBase
                 return BadRequest(response);
             }
 
-            await _managerRepo.UpdateManager(managerDTO);
+            await _unitOfWork.Managers.UpdateManager(managerDTO);
             response.Result = "Manager updated successfully.";
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
@@ -130,7 +131,7 @@ public class ManagerController : ControllerBase
         var response = new APIResponse();
         try
         {
-            await _managerRepo.DeleteManager(id);
+            await _unitOfWork.Managers.DeleteManager(id);
             response.Result = "Manager deleted successfully.";
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);

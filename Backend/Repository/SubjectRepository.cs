@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Backend.Data;            // or your DbContext namespace
 using Backend.DTOS.School.Subjects;
+using Backend.Interfaces;
 using Backend.Models;         // where your Subject entity lives
 using Backend.Repository.School.Implements;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository.School.Classes
 {
-    public class SubjectRepository : ISubjectRepository
+    public class SubjectRepository : ISubjectsRepository
     {
         private readonly DatabaseContext _context;
         private readonly IMapper _mapper;
@@ -19,19 +20,6 @@ namespace Backend.Repository.School.Classes
         {
             _context = context;
             _mapper = mapper;
-        }
-
-        // CREATE
-        public async Task AddSubjectAsync(SubjectsDTO subjectDto)
-        {
-            if (subjectDto == null)
-                throw new ArgumentNullException(nameof(subjectDto), "Subject DTO cannot be null.");
-
-            // Map DTO → Entity
-            var subjectEntity = _mapper.Map<Subject>(subjectDto);
-
-            await _context.Subjects.AddAsync(subjectEntity);
-            await _context.SaveChangesAsync();
         }
 
         // READ ALL
@@ -98,5 +86,18 @@ namespace Backend.Repository.School.Classes
             await _context.SaveChangesAsync();
         }
 
+      public async  Task<SubjectsDTO> AddSubjectAsync(SubjectsDTO subjectDto)
+        {
+             if (subjectDto == null)
+                throw new ArgumentNullException(nameof(subjectDto), "Subject DTO cannot be null.");
+
+            // Map DTO → Entity
+            var subjectEntity = _mapper.Map<Subject>(subjectDto);
+
+            await _context.Subjects.AddAsync(subjectEntity);
+            subjectDto.SubjectID = subjectEntity.SubjectID;
+            await _context.SaveChangesAsync();
+            return subjectDto;
+        }
     }
 }

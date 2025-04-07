@@ -5,6 +5,7 @@ using Backend.DTOS.School.Stages;
 using Backend.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Backend.DTOS;
+using Backend.Interfaces;
 
 namespace Backend.Controllers.School
 {
@@ -12,13 +13,11 @@ namespace Backend.Controllers.School
     [ApiController]
     public class DivisionsController : ControllerBase
     {
-        private readonly IDivisionRepository _divisionRepo;
-        private readonly IClassesRepository _classRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DivisionsController(IDivisionRepository divisionRepo, IClassesRepository classRepo)
+        public DivisionsController(IUnitOfWork unitOfWork)
         {
-            _divisionRepo = divisionRepo;
-            _classRepo = classRepo;
+            _unitOfWork = unitOfWork;
         }
 
         // POST api/divisions
@@ -37,7 +36,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                await _divisionRepo.Add(division);
+                await _unitOfWork.Divisions.Add(division);
 
                 response.Result = "Division added successfully.";
                 response.statusCode = HttpStatusCode.Created;
@@ -60,7 +59,7 @@ namespace Backend.Controllers.School
 
             try
             {
-                var existingDivision = await _divisionRepo.GetByIdAsync(id);
+                var existingDivision = await _unitOfWork.Divisions.GetByIdAsync(id);
                 if (existingDivision == null)
                 {
                     response.IsSuccess = false;
@@ -71,7 +70,7 @@ namespace Backend.Controllers.School
 
                 // Assign the ID to the incoming DTO to ensure it's set correctly
                 division.DivisionID = id;
-                await _divisionRepo.Update(division);
+                await _unitOfWork.Divisions.Update(division);
 
                 response.Result = "Division updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
@@ -94,7 +93,7 @@ namespace Backend.Controllers.School
 
             try
             {
-                var divisions = await _divisionRepo.GetAll();
+                var divisions = await _unitOfWork.Divisions.GetAll();
                 response.Result = divisions;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -116,7 +115,7 @@ namespace Backend.Controllers.School
 
             try
             {
-                var existingDivision = await _divisionRepo.GetByIdAsync(id);
+                var existingDivision = await _unitOfWork.Divisions.GetByIdAsync(id);
                 if (existingDivision == null)
                 {
                     response.IsSuccess = false;
@@ -125,7 +124,7 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
-                await _divisionRepo.DeleteAsync(id);
+                await _unitOfWork.Divisions.DeleteAsync(id);
                 response.Result = "Division deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -155,7 +154,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                var success = await _divisionRepo.UpdatePartial(id, patchDoc);
+                var success = await _unitOfWork.Divisions.UpdatePartial(id, patchDoc);
                 if (!success)
                 {
                     response.IsSuccess = false;

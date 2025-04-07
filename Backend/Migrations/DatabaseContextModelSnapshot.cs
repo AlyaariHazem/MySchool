@@ -171,17 +171,17 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "bcd840b2-5a2f-40b7-b6da-10732055abd1",
+                            ConcurrencyStamp = "3062d71a-0f68-41e2-bfcc-4fadaabe5bf4",
                             Email = "ALYAARIHAZEM@GMAIL.COM",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 4, 6, 2, 2, 3, 227, DateTimeKind.Local).AddTicks(9863),
+                            HireDate = new DateTime(2025, 4, 7, 21, 26, 27, 976, DateTimeKind.Local).AddTicks(6393),
                             LockoutEnabled = false,
                             NormalizedEmail = "ALYAARIHAZEM@GMAIL.COM",
                             NormalizedUserName = "MANAGER",
-                            PasswordHash = "AQAAAAIAAYagAAAAENad8ATpM2IotWlRXxWdDID8BrOKrQJVlEp0Zq8cRjdCEQTtrea1L0GDhG2vS2V7rA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEAuj+Ln0RWPjGXrtI7j8PHyLV3W4/+4/CTWCBnQFZotn56TJiechxcO8v1soJCTwpQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "5dbf107d-16ab-4cfb-a149-11af021e5bf3",
+                            SecurityStamp = "e34dd158-a54c-4ada-9c7b-f0e2fc01503c",
                             TwoFactorEnabled = false,
                             UserName = "MANAGER",
                             UserType = "MANAGER"
@@ -198,9 +198,6 @@ namespace Backend.Migrations
 
                     b.Property<string>("AttachmentURL")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("StudentID")
@@ -288,6 +285,31 @@ namespace Backend.Migrations
                     b.HasIndex("YearID");
 
                     b.ToTable("CoursePlans");
+                });
+
+            modelBuilder.Entity("Backend.Models.Curriculum", b =>
+                {
+                    b.Property<int>("SubjectID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClassID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CurriculumName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Not")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SubjectID", "ClassID");
+
+                    b.HasIndex("ClassID");
+
+                    b.ToTable("Curriculums");
                 });
 
             modelBuilder.Entity("Backend.Models.Division", b =>
@@ -381,6 +403,12 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GradeTypeID"));
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MaxGrade")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -393,27 +421,58 @@ namespace Backend.Migrations
                         new
                         {
                             GradeTypeID = 1,
+                            IsActive = true,
+                            MaxGrade = 20,
                             Name = "Assignments"
                         },
                         new
                         {
                             GradeTypeID = 2,
+                            IsActive = true,
+                            MaxGrade = 20,
                             Name = "Attendance"
                         },
                         new
                         {
                             GradeTypeID = 3,
+                            IsActive = true,
+                            MaxGrade = 10,
                             Name = "Participation"
                         },
                         new
                         {
                             GradeTypeID = 4,
+                            IsActive = true,
+                            MaxGrade = 10,
                             Name = "Oral"
                         },
                         new
                         {
                             GradeTypeID = 5,
+                            IsActive = true,
+                            MaxGrade = 40,
                             Name = "Exam"
+                        },
+                        new
+                        {
+                            GradeTypeID = 6,
+                            IsActive = false,
+                            MaxGrade = 20,
+                            Name = "work"
+                        },
+                        new
+                        {
+                            GradeTypeID = 7,
+                            IsActive = false,
+                            MaxGrade = 30,
+                            Name = "lab"
+                        },
+                        new
+                        {
+                            GradeTypeID = 8,
+                            IsActive = false,
+                            MaxGrade = 20,
+                            Name = "skills"
                         });
                 });
 
@@ -742,6 +801,9 @@ namespace Backend.Migrations
                     b.Property<int>("FeeClassID")
                         .HasColumnType("int");
 
+                    b.Property<bool?>("Mandatory")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NoteDiscount")
                         .HasColumnType("nvarchar(max)");
 
@@ -765,16 +827,11 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubjectID"));
 
-                    b.Property<int>("ClassID")
-                        .HasColumnType("int");
-
                     b.Property<string>("SubjectName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SubjectID");
-
-                    b.HasIndex("ClassID");
 
                     b.ToTable("Subjects");
                 });
@@ -977,7 +1034,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("AccountStudentGuardianID");
 
-                    b.ToTable("vouchers");
+                    b.ToTable("Vouchers");
                 });
 
             modelBuilder.Entity("Backend.Models.Year", b =>
@@ -1286,6 +1343,25 @@ namespace Backend.Migrations
                     b.Navigation("Year");
                 });
 
+            modelBuilder.Entity("Backend.Models.Curriculum", b =>
+                {
+                    b.HasOne("Backend.Models.Class", "Class")
+                        .WithMany("Curriculums")
+                        .HasForeignKey("ClassID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.Subject", "Subject")
+                        .WithMany("Curriculums")
+                        .HasForeignKey("SubjectID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Subject");
+                });
+
             modelBuilder.Entity("Backend.Models.Division", b =>
                 {
                     b.HasOne("Backend.Models.Class", "Class")
@@ -1360,7 +1436,6 @@ namespace Backend.Migrations
                                 .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("MiddleName")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
                             b1.HasKey("ManagerID");
@@ -1517,7 +1592,6 @@ namespace Backend.Migrations
                                 .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("MiddleName")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
                             b1.HasKey("StudentID");
@@ -1557,17 +1631,6 @@ namespace Backend.Migrations
                     b.Navigation("FeeClass");
 
                     b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("Backend.Models.Subject", b =>
-                {
-                    b.HasOne("Backend.Models.Class", "Class")
-                        .WithMany("Subjects")
-                        .HasForeignKey("ClassID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Class");
                 });
 
             modelBuilder.Entity("Backend.Models.SubjectStudent", b =>
@@ -1617,7 +1680,6 @@ namespace Backend.Migrations
                                 .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("MiddleName")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
                             b1.HasKey("TeacherID");
@@ -1791,13 +1853,13 @@ namespace Backend.Migrations
                 {
                     b.Navigation("CoursePlans");
 
+                    b.Navigation("Curriculums");
+
                     b.Navigation("Divisions");
 
                     b.Navigation("FeeClasses");
 
                     b.Navigation("MonthlyGrades");
-
-                    b.Navigation("Subjects");
                 });
 
             modelBuilder.Entity("Backend.Models.Division", b =>
@@ -1872,6 +1934,8 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.Subject", b =>
                 {
                     b.Navigation("CoursePlans");
+
+                    b.Navigation("Curriculums");
 
                     b.Navigation("MonthlyGrades");
 

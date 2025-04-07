@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Backend.DTOS.School.Guardians;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,11 @@ namespace Backend.Controllers.School
     [ApiController]
     public class GuardianController : Controller
     {
-        private readonly IGuardianRepository _guardianRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GuardianController(IGuardianRepository guardianRepository)
+        public GuardianController(IUnitOfWork unitOfWork)
         {
-            _guardianRepository = guardianRepository;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/Guardian
@@ -27,7 +28,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var guardians = await _guardianRepository.GetAllGuardiansAsync();
+                var guardians = await _unitOfWork.Guardians.GetAllGuardiansAsync();
 
                 response.Result = guardians;
                 response.statusCode = HttpStatusCode.OK;
@@ -50,7 +51,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var guardiansInfo = await _guardianRepository.GetAllGuardiansInfoAsync();
+                var guardiansInfo = await _unitOfWork.Guardians.GetAllGuardiansInfoAsync();
 
                 response.Result = guardiansInfo;
                 response.statusCode = HttpStatusCode.OK;
@@ -82,7 +83,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                var guardian = await _guardianRepository.GetGuardianByIdAsync(id);
+                var guardian = await _unitOfWork.Guardians.GetGuardianByIdAsync(id);
                 if (guardian == null)
                 {
                     response.IsSuccess = false;
@@ -121,7 +122,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                await _guardianRepository.UpdateGuardianAsync(guardianDto);
+                await _unitOfWork.Guardians.UpdateGuardianAsync(guardianDto);
 
                 response.Result = "Guardian updated successfully.";
                 response.statusCode = HttpStatusCode.OK;

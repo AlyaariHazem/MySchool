@@ -81,7 +81,7 @@
     } @if (activeTab === 'fees') {
     <div class="tabcontent">
       <!-- new-student.component.html -->
-      <app-fee [formGroup]="$any(formGroup.get('fees'))" [selectedClassID]="selectedClassID"
+      <app-fee [formGroup]="$any(formGroup.get('fees'))" [selectedClassID]="selectedClassID" [feeClasses]="feeClasses"
         (feeClassesChanged)="loadFeesForClass($event)" (requiredFeesChanged)="onRequiredFeesChanged($event)">
       </app-fee>
 

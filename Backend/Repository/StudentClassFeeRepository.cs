@@ -38,10 +38,25 @@ public class StudentClassFeeRepository : IStudentClassFeeRepository
         throw new NotImplementedException();
     }
 
-    public Task UpdateAsync(StudentClassFeeDTO studentClassFee)
+    public async Task UpdateAsync(StudentClassFeeDTO studentClassFee)
     {
-        throw new NotImplementedException();
+        if (studentClassFee == null)
+            throw new ArgumentNullException(nameof(studentClassFee));
+            
+        var existingStudentClassFee =await _db.StudentClassFees.FindAsync(studentClassFee.StudentClassFeesID);
+        if (existingStudentClassFee == null)
+            throw new KeyNotFoundException($"StudentClassFee with ID {studentClassFee.StudentClassFeesID} not found.");
+
+        existingStudentClassFee.StudentID = studentClassFee.StudentID;
+        existingStudentClassFee.FeeClassID = studentClassFee.FeeClassID;
+        existingStudentClassFee.AmountDiscount = studentClassFee.AmountDiscount;
+        existingStudentClassFee.NoteDiscount = studentClassFee.NoteDiscount;
+        existingStudentClassFee.Mandatory = studentClassFee.Mandatory;
+
+        _db.Entry(existingStudentClassFee).State = EntityState.Modified;
+       await _db.SaveChangesAsync();
     }
+
     public async Task<IEnumerable<StudentClassFees>> GetFeesByStudentIdAsync(int studentId)
 
         {

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Backend.DTOS.School.Years;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Classes;
 using Backend.Repository.School.Interfaces;
@@ -12,11 +13,11 @@ namespace Backend.Controllers.School
     [ApiController]
     public class YearController : ControllerBase
     {
-        private readonly IYearRepository _yearRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public YearController(IYearRepository yearRepo)
+        public YearController(IUnitOfWork unitOfWork)
         {
-            _yearRepo = yearRepo;
+            _unitOfWork = unitOfWork;
         }
 
         // POST api/year
@@ -34,7 +35,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
                 
-                await _yearRepo.Add(model);
+                await _unitOfWork.Years.Add(model);
                 response.Result = "Year added successfully.";
                 response.statusCode = HttpStatusCode.Created;
                 return Ok(response);
@@ -55,7 +56,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var years = await _yearRepo.GetAll();
+                var years = await _unitOfWork.Years.GetAll();
                 response.Result = years;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -76,7 +77,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var year = await _yearRepo.GetByIdAsync(id);
+                var year = await _unitOfWork.Years.GetByIdAsync(id);
                 if (year == null)
                 {
                     response.IsSuccess = false;
@@ -112,7 +113,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                var existingYear = await _yearRepo.GetByIdAsync(id);
+                var existingYear = await _unitOfWork.Years.GetByIdAsync(id);
                 if (existingYear == null)
                 {
                     response.IsSuccess = false;
@@ -121,7 +122,7 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
-                await _yearRepo.Update(model);
+                await _unitOfWork.Years.Update(model);
                 response.Result = "Year updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -142,7 +143,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var year = await _yearRepo.GetByIdAsync(id);
+                var year = await _unitOfWork.Years.GetByIdAsync(id);
                 if (year == null)
                 {
                     response.IsSuccess = false;
@@ -151,7 +152,7 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
-                await _yearRepo.DeleteAsync(id);
+                await _unitOfWork.Years.DeleteAsync(id);
                 response.Result = "Year deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);

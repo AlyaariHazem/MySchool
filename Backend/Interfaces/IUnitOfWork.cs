@@ -11,7 +11,7 @@ namespace Backend.Interfaces;
 
 public interface IUnitOfWork : IDisposable
 {
-    ISubjectRepository Subjects { get; }
+    ISubjectsRepository Subjects { get; }
     IStudentRepository Students { get; }
     IClassesRepository Classes { get; }
     IDivisionRepository Divisions { get; }
@@ -26,6 +26,11 @@ public interface IUnitOfWork : IDisposable
     IStudentClassFeeRepository StudentClassFees { get; }
     ITenantRepository Tenants { get; }
     IYearRepository Years { get; }
-    
+    IVoucherRepository Vouchers { get; }
+    IAttachmentRepository Attachments { get; }
+    ICurriculumRepository Curriculums { get; }
+    ICoursePlanRepository CoursePlans { get; }
+    ITeacherRepository Teachers { get; }
+
     Task<int> CompleteAsync();
 }

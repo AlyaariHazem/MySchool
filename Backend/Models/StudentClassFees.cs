@@ -15,4 +15,5 @@ public class StudentClassFees
     public Student Student { get; set; }
     public decimal? AmountDiscount { get; set; }
     public string? NoteDiscount { get; set; }
+    public bool? Mandatory { get; set; }=true;
 }

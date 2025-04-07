@@ -18,7 +18,10 @@ export class FeeComponent implements OnInit, OnChanges {
   @Output() feeClassesChanged = new EventEmitter<FeeClasses[]>(); // Output for notifying parent
   @Output() requiredFeesChanged = new EventEmitter<number>(); // Output for notifying parent about required fees
   @Input() selectedClassID!: number | string;
-
+  @Input('feeClasses') set feeClassesInput(value: FeeClasses[]) {
+    this.feeClasses = value;
+    this.updateFormGroup();
+  }
   myControl = new FormControl('');
   classes: ClassDTO[] = [];
   feeClasses: FeeClasses[] = [];

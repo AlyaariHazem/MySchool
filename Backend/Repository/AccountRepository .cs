@@ -29,7 +29,7 @@ public class AccountRepository : IAccountRepository
        
         await _dbContext.Accounts.AddAsync(accountEntity);
         await _dbContext.SaveChangesAsync();
-        return account;
+        return _mapper.Map<AccountsDTO>(accountEntity);
     }
 
     public async Task<AccountStudentGuardian> AddAccountStudentGuardianAsync(AccountStudentGuardian accountStudentGuardian)

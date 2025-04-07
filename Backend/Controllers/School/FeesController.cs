@@ -1,4 +1,5 @@
 using Backend.DTOS.School.Fees;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +11,11 @@ namespace Backend.Controllers
     [ApiController]
     public class FeesController : ControllerBase
     {
-        private readonly IFeesRepository _feesRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public FeesController(IFeesRepository feesRepo)
+        public FeesController(IUnitOfWork unitOfWork)
         {
-            _feesRepo = feesRepo;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/Fees
@@ -24,7 +25,7 @@ namespace Backend.Controllers
             var response = new APIResponse();
             try
             {
-                var fees = await _feesRepo.GetAllAsync();
+                var fees = await _unitOfWork.Fees.GetAllAsync();
                 
                 response.Result = fees;
                 response.statusCode = HttpStatusCode.OK;
@@ -46,7 +47,7 @@ namespace Backend.Controllers
             var response = new APIResponse();
             try
             {
-                var fee = await _feesRepo.GetByIdAsync(id);
+                var fee = await _unitOfWork.Fees.GetByIdAsync(id);
                 if (fee == null)
                 {
                     response.IsSuccess = false;
@@ -83,7 +84,7 @@ namespace Backend.Controllers
                     return BadRequest(response);
                 }
 
-                await _feesRepo.AddAsync(fee);
+                await _unitOfWork.Fees.AddAsync(fee);
 
                 response.Result = "Fee created successfully.";
                 response.statusCode = HttpStatusCode.Created;
@@ -118,7 +119,7 @@ namespace Backend.Controllers
                     return BadRequest(response);
                 }
 
-                var existingFee = await _feesRepo.GetByIdAsync(id);
+                var existingFee = await _unitOfWork.Fees.GetByIdAsync(id);
                 if (existingFee == null)
                 {
                     response.IsSuccess = false;
@@ -128,7 +129,7 @@ namespace Backend.Controllers
                 }
 
                 fee.FeeID = id;
-                await _feesRepo.UpdateAsync(fee);
+                await _unitOfWork.Fees.UpdateAsync(fee);
 
                 response.Result = "Fee updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
@@ -150,7 +151,7 @@ namespace Backend.Controllers
             var response = new APIResponse();
             try
             {
-                var existingFee = await _feesRepo.GetByIdAsync(id);
+                var existingFee = await _unitOfWork.Fees.GetByIdAsync(id);
                 if (existingFee == null)
                 {
                     response.IsSuccess = false;
@@ -159,7 +160,7 @@ namespace Backend.Controllers
                     return NotFound(response);
                 }
 
-                await _feesRepo.DeleteAsync(id);
+                await _unitOfWork.Fees.DeleteAsync(id);
 
                 response.Result = "Fee deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;

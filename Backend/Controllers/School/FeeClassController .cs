@@ -1,4 +1,5 @@
 using Backend.DTOS.School.Fees;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
@@ -11,11 +12,11 @@ namespace Backend.Controllers.School
     [ApiController]
     public class FeeClassController : ControllerBase
     {
-        private readonly IFeeClassRepository _feeClassRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public FeeClassController(IFeeClassRepository feeClassRepository)
+        public FeeClassController(IUnitOfWork unitOfWork)
         {
-            _feeClassRepository = feeClassRepository;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/FeeClass
@@ -25,7 +26,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var feeClasses = await _feeClassRepository.GetAllAsync();
+                var feeClasses = await _unitOfWork.FeeClasses.GetAllAsync();
                 response.Result = feeClasses;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -46,7 +47,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var feeClass = await _feeClassRepository.GetByIdAsync(feeClassID);
+                var feeClass = await _unitOfWork.FeeClasses.GetByIdAsync(feeClassID);
                 if (feeClass == null)
                 {
                     response.IsSuccess = false;
@@ -75,7 +76,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var feeClass = await _feeClassRepository.GetAllByClassIdAsync(classId);
+                var feeClass = await _unitOfWork.FeeClasses.GetAllByClassIdAsync(classId);
                 if (feeClass == null)
                 {
                     response.IsSuccess = false;
@@ -112,7 +113,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                await _feeClassRepository.AddAsync(feeClass);
+                await _unitOfWork.FeeClasses.AddAsync(feeClass);
 
                 response.Result = "FeeClass created successfully.";
                 response.statusCode = HttpStatusCode.Created;
@@ -134,7 +135,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var existingFeeClass = await _feeClassRepository.GetByIdAsync(feeClassID);
+                var existingFeeClass = await _unitOfWork.FeeClasses.GetByIdAsync(feeClassID);
                 if (existingFeeClass == null)
                 {
                     response.IsSuccess = false;
@@ -143,7 +144,7 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
-                await _feeClassRepository.UpdateAsync(feeClassID, updatedFeeClass);
+                await _unitOfWork.FeeClasses.UpdateAsync(feeClassID, updatedFeeClass);
 
                 response.Result = "FeeClass updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
@@ -165,7 +166,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var check = await _feeClassRepository.checkIfExist(FeeClassId);
+                var check = await _unitOfWork.FeeClasses.checkIfExist(FeeClassId);
                 if (!check)
                 {
                     response.IsSuccess = false;
@@ -174,7 +175,7 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
-                await _feeClassRepository.DeleteAsync(FeeClassId);
+                await _unitOfWork.FeeClasses.DeleteAsync(FeeClassId);
                 response.Result = "FeeClass deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);

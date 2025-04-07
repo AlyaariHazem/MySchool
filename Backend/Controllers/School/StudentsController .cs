@@ -3,6 +3,7 @@ using Backend.DTOS.School.Accounts;
 using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Classes;
 using Backend.Repository.School.Implements;
@@ -18,18 +19,13 @@ namespace Backend.Controllers
     {
         private readonly StudentManagementService _studentManagementService;
         private readonly mangeFilesService _mangeFilesService;
-        private readonly StudentClassFeesRepository _studentClassFeesRepository;
-        private readonly IGuardianRepository _guardianRepository;
-        private readonly IStudentRepository _studentRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public StudentsController(StudentManagementService studentManagementService,
-         StudentClassFeesRepository studentClassFeesRepository, IStudentRepository studentRepository,
-         IGuardianRepository guardianRepository, mangeFilesService mangeFilesService)
+        IUnitOfWork unitOfWork, mangeFilesService mangeFilesService)
         {
             _studentManagementService = studentManagementService;
-            _studentClassFeesRepository = studentClassFeesRepository;
-            _studentRepository = studentRepository;
-            _guardianRepository = guardianRepository;
+            _unitOfWork = unitOfWork;
             _mangeFilesService = mangeFilesService;
         }
 
@@ -46,7 +42,7 @@ namespace Backend.Controllers
                 // Step 1: Check if we are adding a student to an existing guardian.
                 if (request.ExistingGuardianId.HasValue && !request.ExistingGuardianId.Value.Equals(0))
                 {
-                    existingGuardian = await _guardianRepository.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
+                    existingGuardian = await _unitOfWork.Guardians.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
                     if (existingGuardian == null)
                     {
                         return NotFound(new { message = "Existing Guardian not found." });
@@ -80,7 +76,7 @@ namespace Backend.Controllers
                     // Add Account
                     account = new AccountsDTO
                     {
-                        AccountName=request.GuardianFullName,
+                        AccountName = request.GuardianFullName,
                         Note = "",
                         State = true,
                         TypeAccountID = 1
@@ -145,8 +141,7 @@ namespace Backend.Controllers
                         attachments.Add(new Attachments
                         {
                             StudentID = request.StudentID,
-                            AttachmentURL = $"{request.StudentID}_{fileUrl}",
-                            Note = ""
+                            AttachmentURL = $"{request.StudentID}_{fileUrl}"
                         });
                     }
                 }
@@ -161,7 +156,8 @@ namespace Backend.Controllers
                             StudentID = request.StudentID,
                             FeeClassID = discount.FeeClassID,
                             AmountDiscount = discount.AmountDiscount,
-                            NoteDiscount = discount.NoteDiscount
+                            NoteDiscount = discount.NoteDiscount,
+                            Mandatory = discount.Mandatory
                         });
                 }
 
@@ -222,7 +218,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllStudents()
         {
-            var students = await _studentRepository.GetAllStudentsAsync();
+            var students = await _unitOfWork.Students.GetAllStudentsAsync();
             if (students == null)
                 return NotFound(new { message = "Students not found." });
 
@@ -232,7 +228,7 @@ namespace Backend.Controllers
         [HttpGet("MaxValue")]
         public async Task<IActionResult> GetMaxValue()
         {
-            var students = await _studentRepository.MaxValue();
+            var students = await _unitOfWork.Students.MaxValue();
 
             return Ok(students);
         }
@@ -241,7 +237,7 @@ namespace Backend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteStudent([FromRoute] int id)
         {
-            var isDeleted = await _studentRepository.DeleteStudentAsync(id);
+            var isDeleted = await _unitOfWork.Students.DeleteStudentAsync(id);
 
             if (isDeleted)
             {
@@ -256,7 +252,7 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentDataAsRequest(int id)
         {
-            var requestData = await _studentRepository.GetUpdateStudentWithGuardianRequestData(id);
+            var requestData = await _unitOfWork.Students.GetUpdateStudentWithGuardianRequestData(id);
 
             if (requestData == null)
             {

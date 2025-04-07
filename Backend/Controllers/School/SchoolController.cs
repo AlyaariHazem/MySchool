@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Backend.DTOS.School;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Backend.Services;
@@ -13,12 +14,12 @@ namespace Backend.Controllers.School
     [ApiController]
     public class SchoolController : ControllerBase
     {
-        private readonly ISchoolRepository _schoolRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly TenantProvisioningService _tenantProvisioningService;
 
-        public SchoolController(ISchoolRepository schoolRepository, TenantProvisioningService tenantProvisioningService)
+        public SchoolController(IUnitOfWork unitOfWork, TenantProvisioningService tenantProvisioningService)
         {
-            _schoolRepository = schoolRepository;
+            _unitOfWork= unitOfWork;
             _tenantProvisioningService = tenantProvisioningService;
         }
 
@@ -28,7 +29,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var schools = await _schoolRepository.GetAllAsync();
+                var schools = await _unitOfWork.Schools.GetAllAsync();
                 response.Result = schools;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -47,7 +48,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var school = await _schoolRepository.GetByIdAsync(id);
+                var school = await _unitOfWork.Schools.GetByIdAsync(id);
                 response.Result = school;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -88,7 +89,7 @@ namespace Backend.Controllers.School
                     SchoolName = tenant.SchoolName,
                     ConnectionString = tenant.ConnectionString
                 };
-                await _schoolRepository.AddAsync(schoolDTO);
+                await _unitOfWork.Schools.AddAsync(schoolDTO);
 
                 // Return the newly created resource
                 response.Result = schoolDTO;
@@ -118,7 +119,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                await _schoolRepository.UpdateAsync(schoolDTO);
+                await _unitOfWork.Schools.UpdateAsync(schoolDTO);
 
                 // HTTP 204 is often used for a successful update with no content.
                 // But if you prefer returning data, you can return 200 + updated object.
@@ -148,7 +149,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                await _schoolRepository.DeleteAsync(id);
+                await _unitOfWork.Schools.DeleteAsync(id);
                 response.Result = "School deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);

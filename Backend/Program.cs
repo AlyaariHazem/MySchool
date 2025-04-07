@@ -85,24 +85,27 @@ builder.Services.AddScoped<StudentClassFeesRepository>();
 builder.Services.AddScoped<TenantProvisioningService>();
 
 // Register custom repositories
+// Register UnitOfWork and all required repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IClassesRepository, ClassesRepository>();
-builder.Services.AddScoped<IStagesRepository, StagesRepository>();
-builder.Services.AddScoped<IDivisionRepository, DivisionRepository>();
-builder.Services.AddScoped<IFeesRepository, FeesRepository>();
-builder.Services.AddScoped<IFeeClassRepository, FeeClassRepostory>();
+builder.Services.AddScoped<IGuardianRepository, GuardianRepository>();
+builder.Services.AddScoped<ISubjectsRepository, SubjectRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IGuardianRepository, GuardianRepository>();
+builder.Services.AddScoped<IClassesRepository, ClassesRepository>();
+builder.Services.AddScoped<IDivisionRepository, DivisionRepository>();
 builder.Services.AddScoped<IUserRepository, UsersRepository>();
-builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
-builder.Services.AddScoped<IGuardianRepository, GuardianRepository>();
-builder.Services.AddScoped<IStudentClassFeeRepository, StudentClassFeeRepository>();
+builder.Services.AddScoped<IStagesRepository, StagesRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-builder.Services.AddScoped<IStudentClassFeesRepository, StudentClassFeesRepository>();
-builder.Services.AddScoped<IYearRepository, YearRepository>();
+builder.Services.AddScoped<IFeeClassRepository, FeeClassRepostory>();
+builder.Services.AddScoped<IFeesRepository, FeesRepository>();
 builder.Services.AddScoped<IManagerRepository, ManagerRepository>();
+builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
+builder.Services.AddScoped<IStudentClassFeeRepository, StudentClassFeeRepository>();
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
-builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<IYearRepository, YearRepository>();
+builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
+builder.Services.AddScoped<IAttachmentRepository, AttachmentsRepository>();
+builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
+builder.Services.AddScoped<ICoursePlanRepository, CoursePlanRepository>();
 
 
 

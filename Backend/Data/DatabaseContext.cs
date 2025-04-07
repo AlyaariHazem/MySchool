@@ -27,9 +27,10 @@ namespace Backend.Data
         public DbSet<Stage> Stages { get; set; }
         public DbSet<Year> Years { get; set; }
         public DbSet<Fee> Fees { get; set; }
+        public DbSet<Curriculum> Curriculums { get; set; }
         public DbSet<Month> Months { get; set; }
         public DbSet<FeeClass> FeeClass { get; set; }
-        public DbSet<Vouchers> vouchers { get; set; }
+        public DbSet<Vouchers> Vouchers { get; set; }
         public DbSet<Guardian> Guardians { get; set; }
         public DbSet<Term> Terms { get; set; }
         public DbSet<MonthlyGrade> MonthlyGrades { get; set; }
@@ -52,6 +53,7 @@ namespace Backend.Data
 
             modelBuilder.Entity<TeacherStudent>().HasKey(TS => new { TS.StudentID, TS.TeacherID });
             modelBuilder.Entity<SubjectStudent>().HasKey(SS => new { SS.SubjectID, SS.StudentID });
+            modelBuilder.Entity<Curriculum>().HasKey(SS => new { SS.SubjectID, SS.ClassID });
 
             modelBuilder.Entity<Student>(entity =>
             {
@@ -164,6 +166,18 @@ namespace Backend.Data
                 .HasForeignKey(S => S.StudentID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // many to many relationship for Subjects and Students
+            modelBuilder.Entity<Curriculum>()
+                .HasOne(C => C.Subject)
+                .WithMany(S => S.Curriculums)
+                .HasForeignKey(C => C.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Curriculum>()
+                .HasOne(C => C.Class)
+                .WithMany(c => c.Curriculums)
+                .HasForeignKey(C => C.ClassID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // many to many relationship for Classes and Fees
             modelBuilder.Entity<FeeClass>()
                 .HasOne(fc => fc.Class)
@@ -176,12 +190,6 @@ namespace Backend.Data
                 .HasForeignKey(fc => fc.FeeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // one to many relationship for Class and Subject
-            modelBuilder.Entity<Class>()
-                .HasMany<Subject>(S => S.Subjects)
-                .WithOne(C => C.Class)
-                .HasForeignKey(S => S.ClassID)
-                .OnDelete(DeleteBehavior.Restrict);
 
             // one to many relationship for Class and Division
             modelBuilder.Entity<Class>()
@@ -438,11 +446,14 @@ namespace Backend.Data
                 new TypeAccount { TypeAccountID = 6, TypeAccountName = "Banks" });
 
             modelBuilder.Entity<GradeType>().HasData(
-                new GradeType { GradeTypeID = 1, Name = "Assignments" },
-                new GradeType { GradeTypeID = 2, Name = "Attendance" },
-                new GradeType { GradeTypeID = 3, Name = "Participation" },
-                new GradeType { GradeTypeID = 4, Name = "Oral" },
-                new GradeType { GradeTypeID = 5, Name = "Exam" }
+                new GradeType { GradeTypeID = 1, Name = "Assignments", MaxGrade = 20, IsActive = true },
+                new GradeType { GradeTypeID = 2, Name = "Attendance", MaxGrade = 20, IsActive = true },
+                new GradeType { GradeTypeID = 3, Name = "Participation", MaxGrade = 10, IsActive = true },
+                new GradeType { GradeTypeID = 4, Name = "Oral", MaxGrade = 10, IsActive = true },
+                new GradeType { GradeTypeID = 5, Name = "Exam", MaxGrade = 40, IsActive = true },
+                new GradeType { GradeTypeID = 6, Name = "work", MaxGrade = 20, IsActive = false },
+                new GradeType { GradeTypeID = 7, Name = "lab", MaxGrade = 30, IsActive = false },
+                new GradeType { GradeTypeID = 8, Name = "skills", MaxGrade = 20, IsActive = false }
             );
 
 

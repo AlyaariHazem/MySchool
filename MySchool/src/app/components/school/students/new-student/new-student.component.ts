@@ -121,6 +121,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
           this.toastr.error('Failed to upload files.');
         }
       });
+      console.log('Form is valid', formData);
       this.generateStudentID();
     } else {
       console.log('Form is not valid', this.formGroup.value);
@@ -134,77 +135,97 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
 
   isEditMode = false;
   ngOnInit(): void {
-    // If we have data passed in from the dialog:
-    if (this.data) {
-      if (this.data.mode === 'edit' && this.data.student) {
-        // We are in EDIT mode, patch the form with existing student data
-        const student = this.data.student;
-        console.log("the student that want to edit is", student);
-        // StudentID
-        this.formGroup.patchValue({
-          studentID: student.studentID,
-          // Fill primaryData
-          primaryData: {
-            studentFirstName: student.studentFirstName || '',
-            studentMiddleName: student.studentMiddleName || '',
-            studentLastName: student.studentLastName || '',
-            studentFirstNameEng: student.studentFirstNameEng || '',
-            studentMiddleNameEng: student.studentMiddleNameEng || '',
-            studentLastNameEng: student.studentLastNameEng || '',
-            studentGender: student.gender || 'Male',
-            studentDOB: student.studentDOB,
-            classID: student.classID,
-            divisionID: student.divisionID,
-            // ...any other fields you have
-          },
-          // Fill optional data
-          optionData: {
-            placeBirth: student.placeBirth || '',
-            studentPhone: student.studentPhone || '',
-            studentAddress: student.studentAddress || '',
-          },
-          // Guardian
-          guardian: {
-            guardianFullName: student.guardianFullName || '',
-            guardianGender: student.guardianGender || 'Male',
-            guardianDOB: student.guardianDOB,
-            guardianAddress: student.guardianAddress || '',
-            guardianEmail: student.guardianEmail || '',
-            guardianPhone: student.guardianPhone || '',
-            guardianType: student.guardianType || '',
-            // ...etc.
-          },
-          // If you also want to patch fees data
-          fees: this.formBuilder.group({
-            discounts: this.formBuilder.array([], Validators.required)
-          }),
-          documents: {
-            attachments: student.attachments
-          },
-          studentImageURL: student.photoUrl
-        });
-        this.patchFees(student.discounts);
-        this.isEditMode = true; // a local flag you can define
-        this.studentImageURL= student.studentImageURL;
-        this.refreshFees();
-      }
-      else {
-        // Default behavior for ADD mode
-        this.isEditMode = false;
-        this.generateStudentID();
-      }
+    // If dialog data indicates EDIT mode:
+    if (this.data && this.data.mode === 'edit' && this.data.student) {
+      this.isEditMode = true;
+      const student = this.data.student;
+      console.log("the student that want to edit is", student);
+  
+      // First, patch top-level fields:
+      this.formGroup.patchValue({
+        studentID: student.studentID,
+        existingGuardianId: student.existingGuardianId || null,
+        studentImageURL: student.studentImageURL || '',
+  
+        // Then, patch the nested "primaryData" group
+        primaryData: {
+          studentFirstName: student.studentFirstName || '',
+          studentMiddleName: student.studentMiddleName || '',
+          studentLastName: student.studentLastName || '',
+          studentFirstNameEng: student.studentFirstNameEng || '',
+          studentMiddleNameEng: student.studentMiddleNameEng || '',
+          studentLastNameEng: student.studentLastNameEng || '',
+          studentGender: student.studentGender || 'Male',
+          studentDOB: student.studentDOB,
+          studentPassword: student.studentPassword || 'Student',
+          classID: student.classID,
+          divisionID: student.divisionID,
+          amount: student.amount || 0
+        },
+  
+        // The "optionData" group
+        optionData: {
+          placeBirth: student.placeBirth || '',
+          studentPhone: student.studentPhone || '',
+          studentAddress: student.studentAddress || '',
+        },
+  
+        // The "guardian" group
+        guardian: {
+          guardianFullName: student.guardianFullName || '',
+          guardianGender: student.guardianGender || 'Male',
+          guardianDOB: student.guardianDOB,
+          guardianAddress: student.guardianAddress || '',
+          guardianEmail: student.guardianEmail || '',
+          guardianPhone: student.guardianPhone || '',
+          guardianType: student.guardianType || '',
+          guardianPassword: student.guardianPassword || 'Guardian'
+        },
+  
+        // The "documents" group
+        documents: {
+          attachments: student.attachments || [] // in your JSON, it's an array
+        },
+  
+        // fees => we will patch the array in patchFees(...)
+        fees: {
+          discounts: [] // start empty, patchFees will fill it
+        },
+      });
+  
+      // Now, patch the fees discounts array
+      this.patchFees(student.discounts);
+  
+      // If you want a local image preview in the component
+      this.studentImageURL = student.studentImageURL || '';
+  
+      // Refresh fee UI if needed
+      this.refreshFees();
+  
     } else {
-      // No data => default to ADD mode
+      // Otherwise, we are in ADD (create) mode
       this.isEditMode = false;
       this.generateStudentID();
     }
   }
 
-  private patchFees(discounts: FeeClasses[]): void {
-   
-    this.refreshFees();
-  }
-  
+  private patchFees(discounts: FeeClasses[] = []): void {
+    const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
+    discountsArray.clear(); // remove existing
+    discounts.forEach((fee) => {
+      discountsArray.push(
+        this.formBuilder.group({
+          feeClassID: [fee.feeClassID],
+          amountDiscount: [fee.amountDiscount],
+          noteDiscount: [fee.noteDiscount],
+          className: [fee.className],
+          feeName: [fee.feeName],
+          mandatory: [fee.mandatory],
+        })
+      );
+    });
+  }  
+  feeClasses: FeeClasses[] = [];
   loadFeesForClass(feeClasses: FeeClasses[]) {
     const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
     discountsArray.clear(); // Clear any existing discounts
@@ -222,6 +243,8 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
         })
       );
     });
+    
+    this.feeClasses=feeClasses;
   }
 
   private generateStudentID(): void {

@@ -17,48 +17,45 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly DatabaseContext _context;
     private readonly IMapper _mapper;
-    private readonly IGuardianRepository _guardianRepository;
     private readonly mangeFilesService _mangeFilesService;
-    private readonly ITenantRepository _tenantRepository;
-    private readonly IYearRepository _yearRepository;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public UnitOfWork(
         DatabaseContext context,
         IMapper mapper,
-        IGuardianRepository guardianRepository,
         mangeFilesService mangeFilesService,
-        ITenantRepository tenantRepository,
-        IYearRepository yearRepository,
         UserManager<ApplicationUser> userManager
     )
     {
         _context = context;
         _mapper = mapper;
-        _guardianRepository = guardianRepository;
         _mangeFilesService = mangeFilesService;
-        _tenantRepository = tenantRepository;
-        _yearRepository = yearRepository;
         _userManager = userManager;
 
+        // أنشئ الريبو بالترتيب الذي يعتمد عليه بعضهم بعضًا
+        Guardians = new GuardianRepository(_context, _mapper);
         Subjects = new SubjectRepository(_context, _mapper);
-        Students = new StudentRepository(_context, _guardianRepository, _mangeFilesService);
+        Students = new StudentRepository(_context, Guardians, _mangeFilesService);
         Classes = new ClassesRepository(_context, _mapper);
         Divisions = new DivisionRepository(_context, _mapper);
-        Guardians = new GuardianRepository(_context, _mapper);
         Users = new UsersRepository(_userManager);
         Stages = new StagesRepository(_context, _mapper);
         Accounts = new AccountRepository(_context, _mapper);
         FeeClasses = new FeeClassRepostory(_context, _mapper);
         Fees = new FeesRepository(_context, _mapper);
-        Managers = new ManagerRepository(_context, Users, _tenantRepository, _userManager.PasswordHasher);
-        Schools = new SchoolRepository(_context, _yearRepository, _mapper);
-        StudentClassFees = new StudentClassFeeRepository(_context, _mapper);
         Tenants = new TenantRepository(_context, _mapper);
+        Managers = new ManagerRepository(_context, Users, Tenants, _userManager.PasswordHasher);
         Years = new YearRepository(_context, _mapper);
+        Schools = new SchoolRepository(_context, Years, _mapper);
+        StudentClassFees = new StudentClassFeeRepository(_context, _mapper);
+        Vouchers = new VoucherRepository(_context, _mapper);
+        Attachments = new AttachmentsRepository(_context);
+        Curriculums = new CurriculumRepository(_context, _mapper);
+        CoursePlans = new CoursePlanRepository(_context, _mapper);
+        Teachers = new TeacherRepository(_context);
     }
 
-    public ISubjectRepository Subjects { get; private set; }
+    public ISubjectsRepository Subjects { get; private set; }
     public IStudentRepository Students { get; private set; }
     public IClassesRepository Classes { get; private set; }
     public IDivisionRepository Divisions { get; private set; }
@@ -73,6 +70,11 @@ public class UnitOfWork : IUnitOfWork
     public IStudentClassFeeRepository StudentClassFees { get; private set; }
     public ITenantRepository Tenants { get; private set; }
     public IYearRepository Years { get; private set; }
+    public IVoucherRepository Vouchers { get; private set; }
+    public IAttachmentRepository Attachments { get; private set; }
+    public ICurriculumRepository Curriculums { get; private set; }
+    public ICoursePlanRepository CoursePlans { get; private set; }
+    public ITeacherRepository Teachers { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

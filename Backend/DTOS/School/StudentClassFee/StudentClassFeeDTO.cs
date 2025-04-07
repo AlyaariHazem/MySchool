@@ -12,5 +12,6 @@ public class StudentClassFeeDTO
     public int FeeClassID  { get; set; }
     public decimal? AmountDiscount { get; set; }
     public string? NoteDiscount { get; set; }
+    public bool Mandatory { get; set; }=true;
     public List<string>?  Files { get; set; }
 }

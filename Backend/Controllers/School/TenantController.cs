@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Backend.DTOS.School.Tenant;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,11 @@ namespace Backend.Controllers.School
     [ApiController]
     public class TenantController : ControllerBase
     {
-        private readonly ITenantRepository _tenantRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TenantController(ITenantRepository tenantRepository)
+        public TenantController(IUnitOfWork unitOfWork)
         {
-            _tenantRepository = tenantRepository;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/tenants (Get all tenants)
@@ -27,7 +28,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var tenants = await _tenantRepository.GetAll();
+                var tenants = await _unitOfWork.Tenants.GetAll();
                 response.Result = tenants;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -48,7 +49,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var tenant = await _tenantRepository.GetByIdAsync(id);
+                var tenant = await _unitOfWork.Tenants.GetByIdAsync(id);
                 if (tenant == null)
                 {
                     response.IsSuccess = false;
@@ -85,7 +86,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                await _tenantRepository.AddAsync(tenantDto);
+                await _unitOfWork.Tenants.AddAsync(tenantDto);
                 response.Result = tenantDto;
                 response.statusCode = HttpStatusCode.Created;
                 return Ok(response);
@@ -114,7 +115,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                var existingTenant = await _tenantRepository.GetByIdAsync(id);
+                var existingTenant = await _unitOfWork.Tenants.GetByIdAsync(id);
                 if (existingTenant == null)
                 {
                     response.statusCode = HttpStatusCode.NotFound;
@@ -123,7 +124,7 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
-                await _tenantRepository.Update(tenantDto);
+                await _unitOfWork.Tenants.Update(tenantDto);
                 response.Result = "Tenant updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -144,7 +145,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var existingTenant = await _tenantRepository.GetByIdAsync(id);
+                var existingTenant = await _unitOfWork.Tenants.GetByIdAsync(id);
                 if (existingTenant == null)
                 {
                     response.statusCode = HttpStatusCode.NotFound;
@@ -153,7 +154,7 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
-                await _tenantRepository.DeleteAsync(id);
+                await _unitOfWork.Tenants.DeleteAsync(id);
                 response.Result = "Tenant deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);

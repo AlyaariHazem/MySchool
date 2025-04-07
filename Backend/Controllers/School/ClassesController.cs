@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Backend.DTOS;
 using Backend.DTOS.School.Stages;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository;
 using Backend.Repository.School;
@@ -17,13 +18,11 @@ namespace Backend.Controllers.School
     {
         // Instead of storing only a reference, we'll create a new APIResponse each time.
         // But you can also keep a single _response field if you prefer.
-        private readonly IClassesRepository _classRepo;
-        private readonly IStagesRepository _stageRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ClassesController(IClassesRepository classRepo, IStagesRepository stageRepo)
+        public ClassesController(IUnitOfWork unitOfWork)
         {
-            _classRepo = classRepo;
-            _stageRepo = stageRepo;
+            _unitOfWork = unitOfWork;
         }
 
         // POST api/classes
@@ -42,7 +41,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                await _classRepo.Add(createDTO);
+                await _unitOfWork.Classes.Add(createDTO);
 
                 response.Result = "Class added successfully";
                 response.statusCode = HttpStatusCode.Created;  // or OK, depending on your preference
@@ -73,7 +72,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                var existingClass = await _classRepo.GetByIdAsync(id);
+                var existingClass = await _unitOfWork.Classes.GetByIdAsync(id);
                 if (existingClass == null)
                 {
                     response.statusCode = HttpStatusCode.NotFound;
@@ -83,7 +82,7 @@ namespace Backend.Controllers.School
                 }
 
                 updateClass.ClassID = id;
-                await _classRepo.Update(updateClass);
+                await _unitOfWork.Classes.Update(updateClass);
 
                 response.Result = "Class updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
@@ -106,7 +105,7 @@ namespace Backend.Controllers.School
 
             try
             {
-                var classes = await _classRepo.GetAllAsync();
+                var classes = await _unitOfWork.Classes.GetAllAsync();
 
                 response.Result = classes;
                 response.statusCode = HttpStatusCode.OK;
@@ -128,7 +127,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var classEntity = await _classRepo.GetByIdAsync(id);
+                var classEntity = await _unitOfWork.Classes.GetByIdAsync(id);
                 if (classEntity == null)
                 {
                     response.IsSuccess = false;
@@ -157,7 +156,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var classData = await _classRepo.GetByIdAsync(id);
+                var classData = await _unitOfWork.Classes.GetByIdAsync(id);
                 if (classData == null)
                 {
                     response.IsSuccess = false;
@@ -166,8 +165,8 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
-                await _classRepo.DeleteAsync(id);
-                var classes = await _classRepo.GetAllAsync();
+                await _unitOfWork.Classes.DeleteAsync(id);
+                var classes = await _unitOfWork.Classes.GetAllAsync();
 
                 response.Result = "Class deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;
@@ -197,7 +196,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                var success = await _classRepo.UpdatePartial(id, patchDoc);
+                var success = await _unitOfWork.Classes.UpdatePartial(id, patchDoc);
                 if (!success)
                 {
                     response.statusCode = HttpStatusCode.NotFound;

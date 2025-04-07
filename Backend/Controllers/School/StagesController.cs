@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Backend.DTOS;
 using Backend.DTOS.School.Stages;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository;
 using Backend.Repository.School;
@@ -14,11 +15,11 @@ namespace Backend.Controllers.School
     [ApiController]
     public class StagesController : ControllerBase
     {
-        private readonly IStagesRepository _stageRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public StagesController(IStagesRepository stageRepo, IClassesRepository classRepo)
+        public StagesController(IUnitOfWork unitOfWork)
         {
-            _stageRepo = stageRepo;
+            _unitOfWork = unitOfWork;
         }
 
         // POST api/stages
@@ -36,7 +37,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                await _stageRepo.AddStage(model);
+                await _unitOfWork.Stages.AddStage(model);
                 response.Result = "Stage added successfully.";
                 response.statusCode = HttpStatusCode.Created;
                 return Ok(response); // or StatusCode((int)HttpStatusCode.Created, response);
@@ -57,7 +58,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var stages = await _stageRepo.GetAll();
+                var stages = await _unitOfWork.Stages.GetAll();
                 response.Result = stages;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -86,7 +87,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                var existingStage = await _stageRepo.GetByIdAsync(id);
+                var existingStage = await _unitOfWork.Stages.GetByIdAsync(id);
                 if (existingStage == null)
                 {
                     response.IsSuccess = false;
@@ -98,7 +99,7 @@ namespace Backend.Controllers.School
                 // Ensure the incoming model has the correct ID:
                 model.ID = existingStage.StageID;
 
-                await _stageRepo.Update(model);
+                await _unitOfWork.Stages.Update(model);
 
                 response.Result = "Stage updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
@@ -120,7 +121,7 @@ namespace Backend.Controllers.School
             var response = new APIResponse();
             try
             {
-                var stage = await _stageRepo.GetByIdAsync(id);
+                var stage = await _unitOfWork.Stages.GetByIdAsync(id);
                 if (stage == null)
                 {
                     response.IsSuccess = false;
@@ -129,7 +130,7 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
-                await _stageRepo.DeleteAsync(id);
+                await _unitOfWork.Stages.DeleteAsync(id);
 
                 response.Result = "Stage deleted successfully.";
                 response.statusCode = HttpStatusCode.OK;
@@ -159,7 +160,7 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                var success = await _stageRepo.UpdatePartial(id, patchDoc);
+                var success = await _unitOfWork.Stages.UpdatePartial(id, patchDoc);
                 if (!success)
                 {
                     response.IsSuccess = false;

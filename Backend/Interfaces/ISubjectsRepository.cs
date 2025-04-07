@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Backend.DTOS.School.Subjects;
+using Backend.Models;
 
-namespace Backend.Repository.School.Implements;
+namespace Backend.Interfaces;
 
-public interface ISubjectRepository
+public interface ISubjectsRepository
 {
-    Task AddSubjectAsync(SubjectsDTO subject);
+    Task<SubjectsDTO> AddSubjectAsync(SubjectsDTO subject);
     Task<List<SubjectsDTO>> GetSubjectsPaginatedAsync(int pageNumber, int pageSize);
     Task<int> GetTotalSubjectsCountAsync();
     Task<SubjectsDTO> GetSubjectByIdAsync(int id);

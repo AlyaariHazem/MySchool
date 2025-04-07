@@ -37,7 +37,7 @@ public class AddStudentWithGuardianRequest
      public string StudentPhone { get; set; } = string.Empty;
     public DateTime StudentDOB { get; set; }
     public DateTime HireDate { get; set; }= DateTime.Now;
-    public List<IFormFile>? Files { get; set; }// I want to use this in angular how can I handle it?
+    public List<IFormFile>? Files { get; set; }
 
     public decimal Amount { get; set; } = 0;
     public List<string>? Attachments { get; set; }
@@ -50,4 +50,5 @@ public class DisCount{
     public int FeeClassID  { get; set; }
     public decimal? AmountDiscount { get; set; }
     public string? NoteDiscount { get; set; }
+    public bool Mandatory { get; set; }=true;
 }

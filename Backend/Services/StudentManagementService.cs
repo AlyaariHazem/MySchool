@@ -9,6 +9,7 @@ using Backend.DTOS.School.Accounts;
 using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
@@ -19,37 +20,25 @@ namespace Backend.Services;
 
 public class StudentManagementService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IGuardianRepository _guardianRepository;
-    private readonly IStudentRepository _studentRepository;
     private readonly DatabaseContext _dbContext;
-    private readonly IAccountRepository _accountRepository;
-    private readonly IStudentClassFeeRepository _studentClassFeeRepository;
     private readonly mangeFilesService _mangeFilesService;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public StudentManagementService(
-        IUserRepository userRepository,
-        IGuardianRepository guardianRepository,
-        IStudentRepository studentRepository,
         DatabaseContext dbContext,
-        IAccountRepository accountRepository,
-        IStudentClassFeeRepository studentClassFeeRepository,
         IMapper mapper,
         mangeFilesService mangeFilesService,
+        IUnitOfWork unitOfWork,
         UserManager<ApplicationUser> userManager) // Inject UserManager
 
     {
-        _userRepository = userRepository;
-        _guardianRepository = guardianRepository;
-        _studentRepository = studentRepository;
         _dbContext = dbContext;
-        _accountRepository = accountRepository;
-        _studentClassFeeRepository = studentClassFeeRepository;
         _mapper = mapper;
-        _userManager = userManager;
         _mangeFilesService = mangeFilesService;
+        _unitOfWork = unitOfWork;
+        _userManager = userManager;
     }
 
     public async Task<Student> AddStudentWithGuardianAsync(
@@ -58,28 +47,28 @@ public class StudentManagementService
     AccountsDTO account, AccountStudentGuardian accountStudentGuardian,  List<Attachments> attachments,List<StudentClassFeeDTO> studentClassFees)
     {
         // Step 1: Add Guardian's User
-        var createdGuardianUser = await _userRepository.CreateUserAsync(guardianUser, guardianPassword, "Guardian");
+        var createdGuardianUser = await _unitOfWork.Users.CreateUserAsync(guardianUser, guardianPassword, "Guardian");
         guardian.UserID = createdGuardianUser.Id;
 
         // Step 2: Add Guardian
-        var addedGuardian = await _guardianRepository.AddGuardianAsync(guardian);
+        var addedGuardian = await _unitOfWork.Guardians.AddGuardianAsync(guardian);
 
         // Step 3: Add Student's User
-        var createdStudentUser = await _userRepository.CreateUserAsync(studentUser, studentPassword, "Student");
+        var createdStudentUser = await _unitOfWork.Users.CreateUserAsync(studentUser, studentPassword, "Student");
         student.UserID = createdStudentUser.Id;
         student.GuardianID = addedGuardian.GuardianID;
         
-         var addedStudent = await _studentRepository.AddStudentAsync(student);
+         var addedStudent = await _unitOfWork.Students.AddStudentAsync(student);
 
 
          // Step 4: Create Account
-            var createdAccount = await _accountRepository.AddAccountAsync(account);
+            var createdAccount = await _unitOfWork.Accounts.AddAccountAsync(account);
 
             // Step 5: Create AccountStudentGuardian Mapping
             accountStudentGuardian.AccountID = createdAccount.AccountID ?? default(int);
             accountStudentGuardian.GuardianID = addedGuardian.GuardianID;
             accountStudentGuardian.StudentID = addedStudent.StudentID;
-            await _accountRepository.AddAccountStudentGuardianAsync(accountStudentGuardian);
+            await _unitOfWork.Accounts.AddAccountStudentGuardianAsync(accountStudentGuardian);
             
              if (attachments != null && attachments.Any())
                 {
@@ -112,15 +101,15 @@ public class StudentManagementService
     List<Attachments> attachments, List<StudentClassFeeDTO> studentClassFees,AccountStudentGuardian accountStudentGuardianPram)
     {
         // 1. Create student user
-        var createdStudentUser = await _userRepository.CreateUserAsync(studentUser, studentPassword, "Student");
+        var createdStudentUser = await _unitOfWork.Users.CreateUserAsync(studentUser, studentPassword, "Student");
         student.UserID = createdStudentUser.Id;
         student.GuardianID = existingGuardian.GuardianID;
 
         // 2. Add Student
-        var addedStudent = await _studentRepository.AddStudentAsync(student);
+        var addedStudent = await _unitOfWork.Students.AddStudentAsync(student);
 
         // 3. Retrieve the existing account ID associated with the guardian
-        var existingAccountStudentGuardian = await _accountRepository.GetAccountStudentGuardianByGuardianIdAsync(existingGuardian.GuardianID);
+        var existingAccountStudentGuardian = await _unitOfWork.Accounts.GetAccountStudentGuardianByGuardianIdAsync(existingGuardian.GuardianID);
         if (existingAccountStudentGuardian == null)
         {
             throw new Exception("No account found for the existing guardian.");
@@ -135,7 +124,7 @@ public class StudentManagementService
             Amount=accountStudentGuardianPram.Amount
         };
 
-        await _accountRepository.AddAccountStudentGuardianAsync(accountStudentGuardian);
+        await _unitOfWork.Accounts.AddAccountStudentGuardianAsync(accountStudentGuardian);
 
         // 5. Handle attachments
          if (attachments != null && attachments.Any())
@@ -168,10 +157,10 @@ public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentI
         // **Update Student User**
         var studentUser = await _userManager.Users
             .FirstOrDefaultAsync(u => u.Student != null && u.Student.StudentID == studentId);
-        if (studentUser == null)
-        {
+        
+        if (studentUser is null)
             throw new Exception("Student user not found.");
-        }
+        
 
         studentUser.Email = request.StudentEmail ?? studentUser.Email;
         studentUser.PhoneNumber = request.StudentPhone ?? studentUser.PhoneNumber;
@@ -180,11 +169,10 @@ public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentI
         _dbContext.Entry(studentUser).State = EntityState.Modified;
 
         // **Update Student Entity**
-        var student = await _studentRepository.GetStudentAsync(studentId);
+        var student = await _unitOfWork.Students.GetStudentAsync(studentId);
         if (student == null)
-        {
             throw new Exception("Student not found.");
-        }
+        
 
         student.FullName.FirstName = request.StudentFirstName ?? student.FullName.FirstName;
         student.FullName.MiddleName = request.StudentMiddleName ?? student.FullName.MiddleName;
@@ -207,7 +195,7 @@ public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentI
         // **Update Guardian User and Entity**
         if (request.ExistingGuardianId.HasValue)
         {
-            var guardian = await _guardianRepository.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
+            var guardian = await _unitOfWork.Guardians.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
             if (guardian != null)
             {
                 guardian.FullName = request.GuardianFullName ?? guardian.FullName;
@@ -237,7 +225,6 @@ public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentI
             {
                 StudentID = student.StudentID,
                 AttachmentURL = filePath,
-                Note = ""
             }).ToList();
 
             await _dbContext.Attachments.AddRangeAsync(attachments);
@@ -246,13 +233,12 @@ public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentI
         // **Update Discounts**
         if (request.UpdateDiscounts != null && request.UpdateDiscounts.Any())
         {
-            var existingDiscounts = await _studentClassFeeRepository.GetFeesByStudentIdAsync(student.StudentID);
-            _dbContext.StudentClassFees.RemoveRange(existingDiscounts);
-
-            var newDiscounts = _mapper.Map<List<StudentClassFees>>(request.UpdateDiscounts);
-            newDiscounts.ForEach(discount => discount.StudentID = student.StudentID);
-
-            await _dbContext.StudentClassFees.AddRangeAsync(newDiscounts);
+            var existingDiscounts =request.UpdateDiscounts;
+            foreach (var discount in existingDiscounts)
+            {
+                await _unitOfWork.StudentClassFees.UpdateAsync(discount);
+                    
+            }
         }
 
         // **Save Changes and Commit Transaction**
@@ -260,7 +246,7 @@ public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentI
         await transaction.CommitAsync();
 
         // Return updated student details
-            var updatedStudent = await _studentRepository.GetStudentByIdAsync(studentId);
+            var updatedStudent = await _unitOfWork.Students.GetStudentByIdAsync(studentId);
             if (updatedStudent == null)
                 throw new Exception("Student data not found after update.");
             return updatedStudent;

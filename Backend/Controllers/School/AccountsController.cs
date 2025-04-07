@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Backend.DTOS.School.Accounts;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,11 @@ namespace Backend.Controllers.School;
 [Route("api/[controller]")]
 public class AccountsController : ControllerBase
 {
-    private readonly IAccountRepository _accountRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public AccountsController(IAccountRepository accountRepo)
+    public AccountsController(IUnitOfWork unitOfWork)
     {
-        _accountRepo = accountRepo;
+        _unitOfWork = unitOfWork;
     }
 
     // ✅ GET: api/accounts
@@ -27,7 +28,7 @@ public class AccountsController : ControllerBase
         var response = new APIResponse();
         try
         {
-            var accounts = await _accountRepo.GetAllAccounts();
+            var accounts = await _unitOfWork.Accounts.GetAllAccounts();
             response.Result = accounts;
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
@@ -48,7 +49,7 @@ public class AccountsController : ControllerBase
         var response = new APIResponse();
         try
         {
-            var account = await _accountRepo.GetAccountByIdAsync(id);
+            var account = await _unitOfWork.Accounts.GetAccountByIdAsync(id);
             if (account == null)
             {
                 response.IsSuccess = false;
@@ -77,7 +78,7 @@ public class AccountsController : ControllerBase
         var response = new APIResponse();
         try
         {
-            var createdAccount = await _accountRepo.AddAccountAsync(account);
+            var createdAccount = await _unitOfWork.Accounts.AddAccountAsync(account);
             response.Result = createdAccount;
             response.statusCode = HttpStatusCode.Created;
             return StatusCode((int)HttpStatusCode.InternalServerError, response);
@@ -106,7 +107,7 @@ public class AccountsController : ControllerBase
                 return BadRequest(response);
             }
 
-            var accountExists = await _accountRepo.GetAccountByIdAsync(id);
+            var accountExists = await _unitOfWork.Accounts.GetAccountByIdAsync(id);
             if (accountExists == null)
             {
                 response.IsSuccess = false;
@@ -115,7 +116,7 @@ public class AccountsController : ControllerBase
                 return NotFound(response);
             }
 
-            await _accountRepo.UpdateAccountAsync(account);
+            await _unitOfWork.Accounts.UpdateAccountAsync(account);
             response.Result = account;
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
@@ -136,7 +137,7 @@ public class AccountsController : ControllerBase
         var response = new APIResponse();
         try
         {
-            var account = await _accountRepo.GetAccountByIdAsync(id);
+            var account = await _unitOfWork.Accounts.GetAccountByIdAsync(id);
             if (account == null)
             {
                 response.IsSuccess = false;
@@ -145,7 +146,7 @@ public class AccountsController : ControllerBase
                 return NotFound(response);
             }
 
-            await _accountRepo.DeleteAccountAsync(id);
+            await _unitOfWork.Accounts.DeleteAccountAsync(id);
             response.Result = $"Account with ID {id} successfully deleted.";
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);

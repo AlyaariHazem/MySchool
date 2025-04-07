@@ -16,11 +16,11 @@ namespace Backend.Models
         [JsonIgnore]
         public Stage Stage { get; set; }
         [JsonIgnore]
-        public virtual ICollection<Subject> Subjects { get; set; }
-        [JsonIgnore]
         public virtual ICollection<FeeClass> FeeClasses { get; set; } = new List<FeeClass>();
         [JsonIgnore]
         public virtual ICollection<Division> Divisions { get; set; }
+        [JsonIgnore]
+        public ICollection<Curriculum> Curriculums { get; set; }
         [JsonIgnore]
         public ICollection<CoursePlan> CoursePlans { get; set; }
         [JsonIgnore]
