@@ -106,6 +106,12 @@ builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<IAttachmentRepository, AttachmentsRepository>();
 builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
 builder.Services.AddScoped<ICoursePlanRepository, CoursePlanRepository>();
+builder.Services.AddScoped<IGradeTypesRepository, GradeTypesRepository>();
+builder.Services.AddScoped<IMonthlyGradeRepository , MonthlyGradeRepository>();
+builder.Services.AddScoped<ITermlyGradeRepository, TermlyGradeRepository>();
+builder.Services.AddScoped<ITermRepository, TermRepository>();
+builder.Services.AddScoped<IMonthRepository, MonthRepository>();
+
 
 
 

@@ -6,7 +6,7 @@ namespace Backend.Repository.School.Implements;
 public interface ICoursePlanRepository
 {
     Task<CoursePlanDTO> AddAsync(CoursePlanDTO dto);
-    Task<List<CoursePlanDTO>> GetAllAsync();
+    Task<List<CoursePlanReturnDTO>> GetAllAsync();
     Task<CoursePlanDTO?> GetByIdAsync(int id);
     Task UpdateAsync(CoursePlanDTO dto);
     Task DeleteAsync(int id);

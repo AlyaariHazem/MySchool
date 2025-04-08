@@ -25,6 +25,8 @@ namespace Backend.Models
         public ICollection<CoursePlan> CoursePlans { get; set; }
         [JsonIgnore]
         public ICollection<MonthlyGrade> MonthlyGrades { get; set; }
+        [JsonIgnore]
+        public ICollection<TermlyGrade> TermlyGrades { get; set; }
 
     }
 }

@@ -12,6 +12,7 @@ public class Term
     public int YearID { get; set; }
     public Year Year { get; set; }
     public ICollection<MonthlyGrade> MonthlyGrades { get; set; }
+    public ICollection<TermlyGrade> TermlyGrades { get; set; }
     public ICollection<CoursePlan> CoursePlans { get; set; }
     public ICollection<Month> Months { get; set; } 
 

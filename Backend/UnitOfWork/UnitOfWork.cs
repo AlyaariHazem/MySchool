@@ -53,6 +53,9 @@ public class UnitOfWork : IUnitOfWork
         Curriculums = new CurriculumRepository(_context, _mapper);
         CoursePlans = new CoursePlanRepository(_context, _mapper);
         Teachers = new TeacherRepository(_context);
+        GradeTypes = new GradeTypesRepository(_context, _mapper);
+        Terms = new TermRepository(_context, _mapper);
+        Months = new MonthRepository(_context, _mapper);
     }
 
     public ISubjectsRepository Subjects { get; private set; }
@@ -75,6 +78,9 @@ public class UnitOfWork : IUnitOfWork
     public ICurriculumRepository Curriculums { get; private set; }
     public ICoursePlanRepository CoursePlans { get; private set; }
     public ITeacherRepository Teachers { get; private set; }
+    public IGradeTypesRepository GradeTypes { get; private set; }
+    public ITermRepository Terms { get; private set; }
+    public IMonthRepository Months { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

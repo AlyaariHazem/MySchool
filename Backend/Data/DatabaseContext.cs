@@ -39,6 +39,7 @@ namespace Backend.Data
         public DbSet<GradeType> GradeTypes { get; set; }
         public DbSet<StudentClassFees> StudentClassFees { get; set; }
         public DbSet<TeacherStudent> TeacherStudents { get; set; }
+        public DbSet<TermlyGrade> TermlyGrades { get; set; }
         public DbSet<AccountStudentGuardian> AccountStudentGuardians { get; set; }
         // public DbSet<User> Users { get; set; }
 
@@ -251,7 +252,28 @@ namespace Backend.Data
                 .WithMany(c => c.MonthlyGrades)
                 .HasForeignKey(mg => mg.ClassID)
                 .OnDelete(DeleteBehavior.Restrict);
-
+            
+            modelBuilder.Entity<TermlyGrade>()
+                .HasOne(mg => mg.Student)
+                .WithMany(s => s.TermlyGrades)
+                .HasForeignKey(mg => mg.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TermlyGrade>()
+                .HasOne(mg => mg.Class)
+                .WithMany(s => s.TermlyGrades)
+                .HasForeignKey(mg => mg.ClassID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TermlyGrade>()
+                .HasOne(mg => mg.Subject)
+                .WithMany(s => s.TermlyGrades)
+                .HasForeignKey(mg => mg.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TermlyGrade>()
+                .HasOne(mg => mg.Term)
+                .WithMany(s => s.TermlyGrades)
+                .HasForeignKey(mg => mg.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+                        
             // Etc. (Student, Subject, GradeType)
 
             modelBuilder.Entity<MonthlyGrade>()

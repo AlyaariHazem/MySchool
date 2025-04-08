@@ -27,16 +27,72 @@ public class YearRepository : IYearRepository
         if (yearDTO == null)
             throw new ArgumentNullException(nameof(yearDTO), "The model cannot be null.");
 
-        var newYear = new Year
-        {
-            YearDateStart = yearDTO.YearDateStart,
-            YearDateEnd = yearDTO.YearDateEnd,
-            HireDate = DateTime.Now,
-            Active = yearDTO.Active,
-            SchoolID = yearDTO.SchoolID
-        };
+        var newYear = _mapper.Map<Year>(yearDTO);
+
         await _context.Years.AddAsync(newYear);
         await _context.SaveChangesAsync();
+        yearDTO.YearID = newYear.YearID;
+        
+        var term = new Term
+        {
+            TermID = 0,
+            YearID = yearDTO.YearID ?? 1,
+            Name = "الأول"
+        };
+        var term2 = new Term
+        {
+            TermID = 0,
+            YearID = yearDTO.YearID ?? 1,
+            Name = "الثاني"
+        };
+        _context.Terms.Add(term);
+        _context.Terms.Add(term2);
+        await _context.SaveChangesAsync();
+        
+        var month2 = new Month
+        {
+            MonthID = 0,
+            TermID = term.TermID,
+            Name = "يوليو"
+        };
+        var month3 = new Month
+        {
+            MonthID = 0,
+            TermID = term.TermID,
+            Name = "أغسطس"
+        };
+        var month4 = new Month
+        {
+            MonthID = 0,
+            TermID = term.TermID,
+            Name = "سبتمبر"
+        };
+        var month5 = new Month
+        {
+            MonthID = 0,
+            TermID = term2.TermID,
+            Name = "أكتوبر"
+        };
+        var month6 = new Month
+        {
+            MonthID = 0,
+            TermID = term2.TermID,
+            Name = "نوفمبر"
+        };
+        var month7 = new Month
+        {
+            MonthID = 0,
+            TermID = term2.TermID,
+            Name = "ديسمبر"
+        };
+        _context.Months.Add(month2);
+        _context.Months.Add(month3);
+        _context.Months.Add(month4);
+        _context.Months.Add(month5);
+        _context.Months.Add(month6);
+        _context.Months.Add(month7);
+        await _context.SaveChangesAsync();
+
     }
 
     public async Task DeleteAsync(int id)

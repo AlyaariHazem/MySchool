@@ -7,7 +7,7 @@ namespace Backend.Models;
 
 public class MonthlyGrade
 {
-     public int MonthlyGradeID { get; set; }
+    public int MonthlyGradeID { get; set; }
 
     // Student/Subject
     public int StudentID { get; set; }

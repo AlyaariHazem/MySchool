@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250407233935_addTermlyGradeTable")]
+    partial class addTermlyGradeTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,17 +174,17 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "b75d3120-a2d4-49a2-8ce3-0e7197d434ff",
+                            ConcurrencyStamp = "31f53c41-bae7-4f1f-b99d-8a373628cdcf",
                             Email = "ALYAARIHAZEM@GMAIL.COM",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 4, 8, 3, 34, 35, 412, DateTimeKind.Local).AddTicks(2992),
+                            HireDate = new DateTime(2025, 4, 8, 2, 39, 33, 786, DateTimeKind.Local).AddTicks(8839),
                             LockoutEnabled = false,
                             NormalizedEmail = "ALYAARIHAZEM@GMAIL.COM",
                             NormalizedUserName = "MANAGER",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGFsw4BA5lxKxMpUyNeBj63CzTf2MkU86LX0fiV00a6gcXfbcjgdjIodNuHC7gYXzQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAECL14ACA434w+ArLk27q/zD1S6HnIed1jw84c+7+2lrHX8fwpOyWlzEUMW5Di1hTcQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "a5234117-f727-4950-80da-4d3fedac3f6d",
+                            SecurityStamp = "ef96804f-9dc6-4f2c-9d27-220137e2480f",
                             TwoFactorEnabled = false,
                             UserName = "MANAGER",
                             UserType = "MANAGER"
@@ -993,7 +996,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("TermID");
 
-                    b.ToTable("TermlyGrades");
+                    b.ToTable("TermlyGrade");
                 });
 
             modelBuilder.Entity("Backend.Models.TypeAccount", b =>

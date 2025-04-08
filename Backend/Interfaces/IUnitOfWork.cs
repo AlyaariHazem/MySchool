@@ -31,6 +31,8 @@ public interface IUnitOfWork : IDisposable
     ICurriculumRepository Curriculums { get; }
     ICoursePlanRepository CoursePlans { get; }
     ITeacherRepository Teachers { get; }
-
+    IGradeTypesRepository GradeTypes { get; }
+    ITermRepository Terms { get; }
+    IMonthRepository Months { get; }
     Task<int> CompleteAsync();
 }

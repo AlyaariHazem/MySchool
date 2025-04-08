@@ -9,12 +9,17 @@ using Backend.DTOS.School.Accounts;
 using Backend.DTOS.School.CoursePlan;
 using Backend.DTOS.School.Curriculms;
 using Backend.DTOS.School.Fees;
+using Backend.DTOS.School.GradeTypes;
 using Backend.DTOS.School.Guardians;
+using Backend.DTOS.School.MonthlyGrade;
+using Backend.DTOS.School.Months;
 using Backend.DTOS.School.Stages;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
 using Backend.DTOS.School.Subjects;
 using Backend.DTOS.School.Tenant;
+using Backend.DTOS.School.TermlyGrade;
+using Backend.DTOS.School.Terms;
 using Backend.DTOS.School.Vouchers;
 using Backend.DTOS.School.Years;
 using Backend.Models;
@@ -85,9 +90,12 @@ public class MappingConfig : Profile
                 .ForMember(dest => dest.Not, opt => opt.MapFrom(src => src.Not))
                 .ForMember(dest => dest.HireDate, opt => opt.MapFrom(src => src.HireDate));
 
-            // Course Plan Mapping for DTOs
-
-        
+            //  Mapping for DTOs    
+        CreateMap<GradeTypesDTO, GradeType>().ReverseMap();
+        CreateMap<MonthlyGradeDTO, MonthlyGrade>().ReverseMap();
+        CreateMap<TermlyGrade, TermlyGradeDTO>().ReverseMap();
+        CreateMap<Term, TermDTO>().ReverseMap();
+        CreateMap<MonthDTO, Month>().ReverseMap();
 
     }
 }
