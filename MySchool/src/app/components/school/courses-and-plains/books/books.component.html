@@ -1,30 +1,33 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
   <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-          [totalRecords]="books.length" [rowsPerPageOptions]="[4, 8, 16]" />
+    [totalRecords]="paginates?.totalCount" [rowsPerPageOptions]="[4, 10, 20]" />
+
   <h2 class="school">الكتــب الدراسية</h2>
   <form [formGroup]="form">
     <div class="group group2">
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
           <mat-label>اسم الكتاب</mat-label>
-          <input class="inputError" type="email" matInput />
+          <input class="inputError" formControlName="name" type="text" matInput />
         </mat-form-field>
       </div>
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
           <mat-label>الاسم البديل</mat-label>
-          <input class="inputError" type="email" matInput />
+          <input class="inputError" formControlName="nameReplacement" type="text" matInput />
         </mat-form-field>
       </div>
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
           <mat-label>الملاحظة</mat-label>
-          <input class="inputError" type="email" matInput />
+          <input class="inputError" formControlName="note" type="text" matInput />
         </mat-form-field>
       </div>
     </div>
-    <p-button class="showFee" (onClick)="showDialog()" label="إضافة+" />
-    <p-chips  class="chipsOne" [max]="search" placeholder="ابحث هنا..." />
+    <p-button class="showFee" (onClick)="subjectData ? updateSubject(form) : addSubject(form)"
+      [label]="editMode ? 'تعديل' : 'إضافة+'" />
+
+    <p-chips class="chipsOne" [max]="search" placeholder="ابحث هنا..." />
   </form>
 
   <!-- Responsive Table -->
@@ -43,12 +46,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let student of paginatedBooks">
-              <td>{{ student }}</td>
-              <td>قران كريم</td>
-              <td>Quran</td>
-              <td>لا يوجد</td>
-              <td>2025-1-1</td>
+            @for (subject of subjects; track $index) {
+            <tr>
+              <td>{{ subject.subjectID }}</td>
+              <td>{{subject.subjectName}} </td>
+              <td>{{subject.subjectName}}</td>
+              <td>{{subject.note}}</td>
+              <td>{{subject.hireDate|date:'yyyy-MM-dd'}}</td>
               <td>
                 <div class="col text-left">
                   <div class="mt-sm-0 mt-2">
@@ -57,14 +61,17 @@
                       <i class="fas fa-ellipsis-h"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-left">
-                      <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                      <a class="dropdown-item" (click)="editSubject(subject)"><i
+                          class="bi bi-pencil-square IconEdit"></i>تعديل</a>
                       <div role="separator" class="dropdown-divider"></div>
-                      <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                      <a class="dropdown-item"><i class="bi bi-trash IconDelete"
+                          (click)="deleteSubject(subject.subjectID!)"></i>حذف</a>
                     </div>
                   </div>
                 </div>
               </td>
             </tr>
+            }
           </tbody>
         </table>
 

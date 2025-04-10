@@ -3,6 +3,10 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { LanguageService } from '../../../../core/services/language.service';
+import { SubjectService } from '../../core/services/subject.service';
+import { ClassService } from '../../core/services/class.service';
+import { Subjects } from '../../core/models/subjects.model';
+import { Class } from '../../core/models/stages-grades.modul';
 interface City {
   name: string;
   code: string;
@@ -16,20 +20,19 @@ interface City {
             ]
 })
 export class CoursesComponent implements OnInit {
-
-  showDialog() {
-    console.log('the Book is added successfully!');
-  }
   form: FormGroup;
-  Books: City[] | undefined;
-  classes: City[] | undefined;
+
+  languageService=inject(LanguageService);
+  subjectService=inject(SubjectService);
+  ClassService=inject(ClassService);
+
+  subjects: Subjects[] =[];
+  classes: Class[] = [];
 
   values = new FormControl<string[] | null>(null);
   max = 2;
   selectedCity: City | undefined;
   selectedBook:City | undefined;
-
-languageService=inject(LanguageService);
 
   students = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,];
   displayedStudents: number[] = []; // Students for the current page
@@ -45,29 +48,21 @@ languageService=inject(LanguageService);
       ClassID: ['', Validators.required],
     });
   }
-
+  showDialog() {
+    console.log('the Book is added successfully!');
+  }
   ngOnInit(): void {
+    this.subjectService.getAllSubjects().subscribe(res => this.subjects = res);
+    this.ClassService.GetAll().subscribe(res => this.classes = res);
     this.length = this.students.length;
     this.updateDisplayedStudents(); 
     this.form = this.formBuilder.group({
-      BookID: [null, Validators.required],
-      ClassID: [null, Validators.required],
+      subjectID: [0, Validators.required],
+      curriculumName: [''],
+      classID: [0, Validators.required],
+      not: ['', Validators.required],
     });
     
-    this.Books = [
-      { name: 'Math', code: 'MATH' },
-      { name: 'Science', code: 'SCI' },
-      { name: 'History', code: 'HIST' },
-      { name: 'Geography', code: 'GEO' },
-      { name: 'English', code: 'ENG' },
-    ];
-    this.classes = [
-      { name: 'Grade 1', code: 'G1' },
-      { name: 'Grade 2', code: 'G2' },
-      { name: 'Grade 3', code: 'G3' },
-      { name: 'Grade 4', code: 'G4' },
-      { name: 'Grade 5', code: 'G5' },
-    ];
     this.languageService.currentLanguage();
   }
 

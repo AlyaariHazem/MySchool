@@ -6,12 +6,12 @@
     <form [formGroup]="form">
         <div class="group group2">
             <div class="form-control">
-                <p-dropdown [options]="Books" formControlName="BookID" optionLabel="name" [editable]="true"[ngClass]="{'en': languageService.dir==='ltr'}"
+                <p-dropdown [options]="subjects" formControlName="subjectID" optionLabel="subjectName" [editable]="true"[ngClass]="{'en': languageService.dir==='ltr'}"
                     [showClear]="true" placeholder="إختار الكتاب">
                 </p-dropdown>
             </div>
             <div class="form-control">
-                <p-dropdown [options]="classes" formControlName="ClassID" [checkmark]="true" optionLabel="name"[ngClass]="{'en': languageService.dir==='ltr'}"
+                <p-dropdown [options]="classes" formControlName="classID" [checkmark]="true" optionLabel="name"[ngClass]="{'en': languageService.dir==='ltr'}"
                     [editable]="true" [showClear]="true"  placeholder="إختار الصف">
                 </p-dropdown>
             </div>

@@ -9,7 +9,6 @@ import { Fee } from '../models/Fee.model';
 })
 export class FeeService {
   private ApI=inject(BackendAspService)
-  constructor() { }
 
   getAllFee():Observable<any>{
     return this.ApI.getRequest<Fee[]>("Fees");

@@ -10,6 +10,9 @@ namespace Backend.Models
     {
         public int SubjectID { get; set; }
         public string SubjectName { get; set; }
+        public string? SubjectReplacement { get; set; }
+        public string? Note { get; set; }
+        public DateTime HireDate { get; set; }= DateTime.Now;
         public virtual ICollection<SubjectStudent> SubjectStudents { get; set; }
         public virtual ICollection<TeacherSubjectStudent> TeacherSubjectStudents { get; set; }
         public ICollection<MonthlyGrade> MonthlyGrades { get; set; }

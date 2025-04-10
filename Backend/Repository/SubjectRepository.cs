@@ -64,17 +64,22 @@ namespace Backend.Repository.School.Classes
             if (subjectEntity == null)
                 throw new ArgumentNullException(nameof(Subject), $"Subject with ID {subjectDto.SubjectID} not found.");
 
-            // Update fields (manual or via AutoMapper)
-            // Example manual update:
-            // subjectEntity.SubjectName = subjectDto.SubjectName;
-
-            // Or if you want to use AutoMapper to map over existing entity:
-            // _mapper.Map(subjectDto, subjectEntity);
+            // Map DTO → Entity
+            subjectEntity.SubjectName= subjectDto.SubjectName!;
+            subjectEntity.SubjectReplacement = subjectDto.SubjectReplacement;
+            subjectEntity.Note = subjectDto.Note;
+            _context.Entry(subjectEntity).State = EntityState.Modified;
 
             // Save changes
             await _context.SaveChangesAsync();
         }
-
+        // READ ALL
+        public async Task<List<SubjectsNameDTO>> GetAllSubjectsAsync()
+        {
+            var subjects = await _context.Subjects.ToListAsync();
+            var subjectDtos = _mapper.Map<List<SubjectsNameDTO>>(subjects);
+            return subjectDtos;
+        }
         // DELETE
         public async Task DeleteSubjectAsync(int id)
         {

@@ -11,6 +11,7 @@ public interface ISubjectsRepository
 {
     Task<SubjectsDTO> AddSubjectAsync(SubjectsDTO subject);
     Task<List<SubjectsDTO>> GetSubjectsPaginatedAsync(int pageNumber, int pageSize);
+    Task<List<SubjectsNameDTO>> GetAllSubjectsAsync();
     Task<int> GetTotalSubjectsCountAsync();
     Task<SubjectsDTO> GetSubjectByIdAsync(int id);
     Task UpdateSubjectAsync(SubjectsDTO subject);

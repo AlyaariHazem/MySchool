@@ -22,7 +22,7 @@ namespace Backend.Controllers.School
 
         // GET: api/subject/paginated?pageNumber=1&pageSize=10
         [HttpGet("paginated")]
-        public async Task<ActionResult<APIResponse>> GetSubjectsPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<APIResponse>> GetSubjectsPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)//how can I call this?
         {
             var response = new APIResponse();
             try
@@ -74,6 +74,34 @@ namespace Backend.Controllers.School
                     response.IsSuccess = false;
                     response.statusCode = HttpStatusCode.NotFound;
                     response.ErrorMasseges.Add($"Subject with ID {id} not found.");
+                    return NotFound(response);
+                }
+
+                response.Result = subjectDto;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+        // GET: api/subject/AllSubjects
+        [HttpGet("AllSubjects")]
+        public async Task<ActionResult<APIResponse>> GetAllSubjects()
+        {
+            var response = new APIResponse();
+            try
+            {
+                var subjectDto = await _unitOfWork.Subjects.GetAllSubjectsAsync();
+                if (subjectDto == null || subjectDto.Count == 0)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("No subjects found.");
                     return NotFound(response);
                 }
 
