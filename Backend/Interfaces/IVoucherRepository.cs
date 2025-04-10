@@ -9,7 +9,7 @@ namespace Backend.Interfaces;
 
 public interface IVoucherRepository
 {
-    Task<List<VouchersDTO>> GetAllAsync();
+    Task<List<VouchersReturnDTO>> GetAllAsync();
     Task<VouchersDTO?> GetByIdAsync(int id);
     Task<VouchersDTO> AddAsync(VouchersDTO voucher);
     Task<bool> UpdateAsync(VouchersDTO voucher);

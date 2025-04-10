@@ -1,53 +1,34 @@
 import { Component, inject } from '@angular/core';
-import { MediaChange, MediaObserver } from '@angular/flex-layout';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
-import { Subscription } from 'rxjs';
+
 import { LanguageService } from '../../../core/services/language.service';
-interface City {
-  name: string;
-  code: string;
-}
+import { VoucherService } from '../core/services/voucher.service';
+import { Voucher } from '../core/models/voucher.model';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-fees',
   templateUrl: './fees.component.html',
   styleUrls: ['./fees.component.scss',
-              './../../../shared/styles/style-select.scss']
+    './../../../shared/styles/style-select.scss']
 })
 export class FeesComponent {
-  visible: boolean = false;
-
-  showDialog() {
-      this.visible = true;
-  }
   form: FormGroup;
-  cities: City[] | undefined;
-  
-  values = new FormControl<string[] | null>(null);
-  max = 2;
-  first: number = 0;
-  rows: number = 4;
-  onPageChange(event: PaginatorState) {
-    this.first = event.first || 0; // Default to 0 if undefined
-    this.rows = event.rows!;
-  }
-  selectedCity: City | undefined;
 
-
-  students =[1,2,3,4,5,6,7,8,9,10,];
-  displayedStudents: number[] = []; // Students for the current page
+  private voucherService = inject(VoucherService);
+  languageService = inject(LanguageService);
   
-  isSmallScreen = false;
-  private mediaSub: Subscription | null = null;
-  
-  languageService=inject(LanguageService);
+  visible: boolean = false;
+  vouchers: Voucher[] = [];
+  vouchersDisplay: Voucher[] = [];
+  selectedVoucher: Voucher | undefined;
 
   constructor(
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
-    private mediaObserver: MediaObserver
+    private toastr: ToastrService
   ) {
     this.form = this.formBuilder.group({
       stage: ['', Validators.required],
@@ -56,36 +37,67 @@ export class FeesComponent {
   }
 
   ngOnInit(): void {
-    this.length = this.students.length; // Set the total number of items
+    this.refreshVouchers();
+
     this.updateDisplayedStudents(); // Initialize the displayed students
-    this.mediaSub = this.mediaObserver.asObservable().subscribe((changes: MediaChange[]) => {
-      this.isSmallScreen = changes.some(
-        (change) => change.mqAlias === 'xs' || change.mqAlias === 'sm'
-      );
-    });
-    this.cities = [
-      { name: 'New Yorkaaaaaaaaaaa', code: 'NY' },
-      { name: 'Rome', code: 'RM' },
-      { name: 'London', code: 'LDN' },
-      { name: 'Istanbul', code: 'IST' },
-      { name: 'Paris', code: 'PRS' }
-  ];
-  this.languageService.currentLanguage();
+    this.languageService.currentLanguage();
   }
 
+  showDialog() {
+    this.visible = true;
+    this.selectedVoucher = undefined;
+  }
   ngOnDestroy(): void {
-    if (this.mediaSub) {
-      this.mediaSub.unsubscribe();
-    }
+  }
+  refreshVouchers() {
+    this.voucherService.getAll().subscribe((res) => {
+      this.vouchers = res;  // Update the list of vouchers in the parent component
+      this.updateDisplayedStudents();
+      this.toastr.success('Voucher updated successfully!');
+    });
   }
 
-  currentPage: number = 0; // Current page index
-  pageSize: number = 5; // Number of items per page
-  length: number = 0; // Total number of items
+  max = 2;
+  first: number = 0;
+  rows: number = 4;
   updateDisplayedStudents(): void {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.displayedStudents = this.students.slice(startIndex, endIndex);
+    const start = this.first;
+    const end = this.first + this.rows;
+    this.vouchersDisplay = this.vouchers.slice(start, end);
   }
 
+  onPageChange(event: PaginatorState) {
+    this.first = event.first || 0; // Default to 0 if undefined
+    this.rows = event.rows!;
+    this.updateDisplayedStudents();
+  }
+
+  // Handle the "Print" button
+  printVoucher() {
+    const voucherElement = document.getElementById('voucherContent');
+    if (!voucherElement) return;
+
+    const printContents = voucherElement.innerHTML;
+    const originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+  }
+  // Method to handle the "Edit" button click
+  onEdit(voucher: Voucher): void {
+    this.selectedVoucher = voucher; // Create a copy of the voucher for editing
+    this.visible = true; // Show the dialog
+  }
+
+  onDialogVisibilityChange(visible: boolean) {
+    this.visible = visible; // Update the visible state
+  }
+
+  Delete(id: number) {
+    this.voucherService.Delete(id).subscribe(res => {
+      this.toastr.success('Deleted successfully.', res);
+    }
+    )
+  }
 }

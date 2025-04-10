@@ -6,8 +6,8 @@ import { ToastrService } from 'ngx-toastr';
 import { LanguageService } from '../../../core/services/language.service';
 import { TranslationService } from '../../../core/services/translation.service';
 import { AddManagerComponent } from './add-manager/add-manager.component';
-import { managerInfo } from '../../../core/models/manage/managerInfo.model';
-import { ManagerService } from '../../../core/services/Manage/manager.service';
+import { managerInfo } from '../core/models/managerInfo.model';
+import { ManagerService } from '../../../core/services/manager.service';
 
 @Component({
   selector: 'app-users',

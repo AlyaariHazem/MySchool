@@ -2,11 +2,11 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 
-import { Division, divisions } from '../../../../../core/models/division.model';
-import { DivisionService } from '../../../../../core/services/division.service';
+import { Division, divisions } from '../../../core/models/division.model';
+import { DivisionService } from '../../../core/services/division.service';
 import { PageEvent } from '@angular/material/paginator';
-import { ClassService } from '../../../../../core/services/class.service';
-import { ClassDTO } from '../../../../../core/models/class.model';
+import { ClassService } from '../../../core/services/class.service';
+import { ClassDTO } from '../../../core/models/class.model';
 
 @Component({
   selector: 'app-division',

@@ -94,7 +94,7 @@
         </td>
         <td>{{ Class.studentCount }}</td>
         <td>
-          <div class="dropdown dropdown-toggle" data-toggle="dropdown">
+          <div class="dropdown dropdown-toggle" ngClass="{{ Class.state ? '' : 'active' }}" data-toggle="dropdown">
             @if (Class.state) {
             <span>نشط </span>
             } @else {

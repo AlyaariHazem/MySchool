@@ -48,7 +48,7 @@ public class UnitOfWork : IUnitOfWork
         Years = new YearRepository(_context, _mapper);
         Schools = new SchoolRepository(_context, Years, _mapper);
         StudentClassFees = new StudentClassFeeRepository(_context, _mapper);
-        Vouchers = new VoucherRepository(_context, _mapper);
+        Vouchers = new VoucherRepository(_context, _mapper, _mangeFilesService);
         Attachments = new AttachmentsRepository(_context);
         Curriculums = new CurriculumRepository(_context, _mapper);
         CoursePlans = new CoursePlanRepository(_context, _mapper);

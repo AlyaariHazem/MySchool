@@ -51,4 +51,14 @@ export class YearService {
       })
     );
   }
+
+  partialUpdate(id: number, patchDoc: any): Observable<any> {
+    return this.API.http.patch<any>(`${this.API.baseUrl}/year/${id}`, patchDoc).pipe(
+      map(response => response.result),
+      catchError(error => {
+        console.error("Error with partial update:", error);
+        throw error;
+      })
+    );
+  }
 }

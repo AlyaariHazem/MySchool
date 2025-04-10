@@ -89,27 +89,27 @@ namespace Backend.Repository
 
         public async Task<bool> UpdatePartial(int id, JsonPatchDocument<StagesDTO> partialStage)
         {
-            if (partialStage == null || id == 0)
-                return false;
+                if (partialStage == null || id == 0)
+                    return false;
 
-            // Retrieve the stage entity by its ID
-            var stage = await context.Stages.SingleOrDefaultAsync(s => s.StageID == id);
-            if (stage == null)
-                return false;
+                // Retrieve the stage entity by its ID
+                var stage = await context.Stages.SingleOrDefaultAsync(s => s.StageID == id);
+                if (stage == null)
+                    return false;
 
-            // Map the stage entity to the DTO (this will be modified)
-            var stageDTO = _mapper.Map<StagesDTO>(stage);
+                // Map the stage entity to the DTO (this will be modified)
+                var stageDTO = _mapper.Map<StagesDTO>(stage);
 
-            // Apply the patch to the DTO
-            partialStage.ApplyTo(stageDTO);
+                // Apply the patch to the DTO
+                partialStage.ApplyTo(stageDTO);
 
-            // Map the patched DTO back to the entity (stage)
-            _mapper.Map(stageDTO, stage);
+                // Map the patched DTO back to the entity (stage)
+                _mapper.Map(stageDTO, stage);
 
-            // Mark the entity as modified and save changes
-            context.Entry(stage).State = EntityState.Modified;
-            await context.SaveChangesAsync();
-            return true;
+                // Mark the entity as modified and save changes
+                context.Entry(stage).State = EntityState.Modified;
+                await context.SaveChangesAsync();
+                return true;
         }
 
     }

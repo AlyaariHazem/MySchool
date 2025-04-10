@@ -5,6 +5,7 @@ using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Classes;
 using Backend.Repository.School.Interfaces;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.School
@@ -154,6 +155,42 @@ namespace Backend.Controllers.School
 
                 await _unitOfWork.Years.DeleteAsync(id);
                 response.Result = "Year deleted successfully.";
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (System.Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+         // PATCH api/years/{id}
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<APIResponse>> UpdatePartial(int id, [FromBody] JsonPatchDocument<YearDTO> patchDoc)
+        {
+            var response = new APIResponse();
+            try
+            {
+                if (patchDoc == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMasseges.Add("Invalid patch document.");
+                    return BadRequest(response);
+                }
+
+                var success = await _unitOfWork.Years.UpdatePartial(id, patchDoc);
+                if (!success)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("Year not found or update failed.");
+                    return NotFound(response);
+                }
+
+                response.Result = "Year partially updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
             }

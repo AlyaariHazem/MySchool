@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 
-import { GuardianService } from '../../../../core/services/guardian.service';
-import { GuardianInfo } from '../../../../core/models/guardian.model';
+import { GuardianService } from '../../core/services/guardian.service';
+import { GuardianInfo } from '../../core/models/guardian.model';
 
 @Component({
   selector: 'app-all-parents',

@@ -3,11 +3,11 @@ import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { PaginatorState } from 'primeng/paginator';
 
-import { FeeService } from '../../../../core/services/fee.service';
-import { Fees, FeeClasses, Fee, FeeClass } from '../../../../core/models/Fee.model';
-import { ClassService } from '../../../../core/services/class.service';
-import { ClassDTO } from '../../../../core/models/class.model';
-import { FeeClassService } from '../../../../core/services/fee-class.service';
+import { FeeService } from '../../core/services/fee.service';
+import { Fees, FeeClasses, Fee, FeeClass } from '../../core/models/Fee.model';
+import { ClassService } from '../../core/services/class.service';
+import { ClassDTO } from '../../core/models/class.model';
+import { FeeClassService } from '../../core/services/fee-class.service';
 import { LanguageService } from '../../../../core/services/language.service';
 
 @Component({

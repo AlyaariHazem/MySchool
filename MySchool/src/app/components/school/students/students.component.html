@@ -52,7 +52,7 @@
         </form>
 
         <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-          [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 8, 16]" />
+          [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 10, 20]" />
 
         <button mat-raised-button color="primary" [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" (click)="openDialog()">
           إضافة طالب+

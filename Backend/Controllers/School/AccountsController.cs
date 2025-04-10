@@ -159,4 +159,24 @@ public class AccountsController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, response);
         }
     }
+    // ✅ GET: api/accounts/studentAndAccountNames
+    [HttpGet("studentAndAccountNames")]
+    public async Task<ActionResult<APIResponse>> GetStudentAndAccountNames()
+    {
+        var response = new APIResponse();
+        try
+        {
+            var studentAndAccountNames = await _unitOfWork.Accounts.GetStudentAndAccountNamesAllAsync();
+            response.Result = studentAndAccountNames;
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
 }

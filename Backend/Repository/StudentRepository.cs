@@ -264,7 +264,7 @@ public class StudentRepository : IStudentRepository
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            _mangeFilesService.RemoveStudentImage(student.StudentID);
+            _mangeFilesService.RemoveImage(student.StudentID);
             await _mangeFilesService.RemoveAttachmentsAsync(student.StudentID);
 
             return true; // Student and related entities successfully deleted

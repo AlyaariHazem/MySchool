@@ -5,7 +5,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 
 import { AddStudent } from '../../../../core/models/students.model';
-import { Discount, FeeClasses } from '../../../../core/models/Fee.model';
+import { Discount, FeeClasses } from '../../core/models/Fee.model';
 import { StudentService } from '../../../../core/services/student.service';
 import { ToastrService } from 'ngx-toastr';
 

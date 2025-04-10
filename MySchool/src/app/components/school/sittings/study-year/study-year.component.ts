@@ -23,7 +23,7 @@ export class StudyYearComponent implements OnInit {
 
   yearService = inject(YearService);
   languageService = inject(LanguageService);
-  toaster=inject(ToastrService);
+  toaster = inject(ToastrService);
 
   currentPage: number = 0; // Current page index
   pageSize: number = 5; // Number of items per page
@@ -45,7 +45,7 @@ export class StudyYearComponent implements OnInit {
     });
   }
 
-  deleteYear(id:number) {
+  deleteYear(id: number) {
     this.yearService.deleteYear(id).subscribe(res => {
       this.getAllYears();
       this.toaster.success('تم حذف العام الدراسي بنجاح');
@@ -56,6 +56,24 @@ export class StudyYearComponent implements OnInit {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     this.viewYear = this.years.slice(startIndex, endIndex);
+  }
+  isEditMode: boolean = false;
+  changeYear(year: Year, isActive: boolean): void {
+    const patchDoc = [
+      { op: "replace", path: "/active", value: isActive }
+    ];
+
+    this.yearService.partialUpdate(year.yearID, patchDoc).subscribe({
+      next: (response) => {
+        if (response) {
+          this.toaster.success(response);
+          this.getAllYears(); // Refresh the list to show updated data
+        }
+      },
+      error: () => this.toaster.error('Failed to update year', 'Error')
+    });
+
+    this.isEditMode = false;
   }
 
   // Handle paginator events

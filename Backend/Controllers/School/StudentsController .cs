@@ -286,7 +286,7 @@ namespace Backend.Controllers
 
             try
             {
-                var filePaths = await _mangeFilesService.UploadStudentImage(file, studentId);
+                var filePaths = await _mangeFilesService.UploadImage(file, studentId);
                 return Ok(new { success = true, filePaths });
             }
             catch (Exception ex)

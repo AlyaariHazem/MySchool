@@ -3,10 +3,10 @@ import { Component, EventEmitter, inject, Input, OnInit, Output, ChangeDetectorR
 import { FormControl, FormGroup, FormArray } from '@angular/forms';
 import { Observable } from 'rxjs';
 
-import { FeeClassService } from '../../../../../core/services/fee-class.service';
-import { FeeClasses } from '../../../../../core/models/Fee.model';
-import { ClassService } from '../../../../../core/services/class.service';
-import { ClassDTO } from '../../../../../core/models/class.model';
+import { FeeClassService } from '../../../core/services/fee-class.service';
+import { FeeClasses } from '../../../core/models/Fee.model';
+import { ClassService } from '../../../core/services/class.service';
+import { ClassDTO } from '../../../core/models/class.model';
 
 @Component({
   selector: 'app-fee',

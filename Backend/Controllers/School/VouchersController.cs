@@ -42,7 +42,7 @@ namespace Backend.Controllers.School
                     foreach (var fileUrl in vouchersDTO.Attachments)
                     {
                             attachments.StudentID = vouchersDTO.StudentID;
-                            attachments.AttachmentURL = $"voucher_{vouchersDTO.StudentID}_{fileUrl}";
+                            attachments.AttachmentURL = $"voucher_{vouchersDTO.VoucherID}_{fileUrl}";
                             attachments.VoucherID = voucher.VoucherID;
                         await _unitOfWork.Attachments.AddAsync(attachments);
                     }
@@ -50,7 +50,7 @@ namespace Backend.Controllers.School
 
                 await _unitOfWork.CompleteAsync();
 
-                response.Result = voucher;
+                response.Result = voucher.VoucherID!;
                 response.statusCode = HttpStatusCode.Created;
                 return Ok(response);
             }
@@ -136,7 +136,7 @@ namespace Backend.Controllers.School
                     response.ErrorMasseges.Add("Voucher not found.");
                     return NotFound(response);
                 }
-
+                dto.VoucherID = id;
                 await _unitOfWork.Vouchers.UpdateAsync(dto);
                 await _unitOfWork.CompleteAsync();
 
@@ -165,11 +165,19 @@ namespace Backend.Controllers.School
                 {
                     response.IsSuccess = false;
                     response.statusCode = HttpStatusCode.NotFound;
+                    response.Result = "Voucher not found.";
                     response.ErrorMasseges.Add("Voucher not found.");
-                    return NotFound(response);
+                    return NotFound(response);//here is the error?
                 }
 
-                await _unitOfWork.Vouchers.DeleteAsync(id);
+              var voucherDeleted=  await _unitOfWork.Vouchers.DeleteAsync(id);
+                if (!voucherDeleted)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                    response.ErrorMasseges.Add("Failed to delete voucher.");
+                    return StatusCode((int)HttpStatusCode.InternalServerError, response);
+                }
                 await _unitOfWork.CompleteAsync();
 
                 response.Result = "Voucher deleted successfully.";

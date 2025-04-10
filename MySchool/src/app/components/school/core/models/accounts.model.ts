@@ -10,3 +10,10 @@ export interface Account {
     hireDate: string;
     typeAccountID: number;
 }
+
+export interface StudentAccounts{
+    accountName: string;
+    studentName: string;
+    studentID: number;
+    accountStudentGuardianID:number;
+}

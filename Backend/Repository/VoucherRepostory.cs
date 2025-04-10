@@ -7,38 +7,53 @@ using Backend.Data;
 using Backend.DTOS.School.Vouchers;
 using Backend.Interfaces;
 using Backend.Models;
+using Backend.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository;
 
-public class VoucherRepository:IVoucherRepository
+public class VoucherRepository : IVoucherRepository
 {
     private readonly DatabaseContext _context;
     private readonly IMapper _mapper;
+    private readonly mangeFilesService _mangeFilesService;
 
-    public VoucherRepository(DatabaseContext context, IMapper mapper)
+    public VoucherRepository(DatabaseContext context, IMapper mapper, mangeFilesService mangeFilesService)
     {
         _context = context;
         _mapper = mapper;
+        _mangeFilesService = mangeFilesService;
     }
 
     // إرجاع جميع السندات
-    public async Task<List<VouchersDTO>> GetAllAsync()
+    public async Task<List<VouchersReturnDTO>> GetAllAsync()
     {
-        var vouchers= await _context.Vouchers
+        var vouchers = await _context.Vouchers
             .Include(v => v.AccountStudentGuardians)
+             .ThenInclude(v => v.Accounts)
             .Include(v => v.Attachments)
             .ToListAsync();
-         if (vouchers == null)
-            return new List<VouchersDTO>();
-        var vouchersDTO = _mapper.Map<List<VouchersDTO>>(vouchers);
+        if (vouchers == null)
+            return new List<VouchersReturnDTO>();
+
+        var vouchersDTO = vouchers.Select(v => new VouchersReturnDTO
+        {
+            VoucherID = v.VoucherID,
+            Receipt = v.Receipt,
+            Note = v.Note,
+            PayBy = v.PayBy,
+            HireDate = v.HireDate,
+            AccountName = v.AccountStudentGuardians.Accounts.AccountName,
+            AccountAttachments = v.Attachments.Count,
+            StudentID = v.AccountStudentGuardians.StudentID,
+        }).ToList();
         return vouchersDTO;
     }
 
     // إرجاع سند حسب المعرف
     public async Task<VouchersDTO?> GetByIdAsync(int id)
     {
-        var voucher= await _context.Vouchers
+        var voucher = await _context.Vouchers
             .Include(v => v.AccountStudentGuardians)
             .Include(v => v.Attachments)
             .FirstOrDefaultAsync(v => v.VoucherID == id);
@@ -54,7 +69,7 @@ public class VoucherRepository:IVoucherRepository
         var voucher = _mapper.Map<Vouchers>(voucherDTO);
         _context.Vouchers.Add(voucher);
         await _context.SaveChangesAsync();
-        voucherDTO.VoucherID= voucher.VoucherID;
+        voucherDTO.VoucherID = voucher.VoucherID;
         return voucherDTO;
     }
 
@@ -80,10 +95,18 @@ public class VoucherRepository:IVoucherRepository
     // حذف سند
     public async Task<bool> DeleteAsync(int id)
     {
-        var voucher = await _context.Vouchers.FindAsync(id);
+        var voucher = await _context.Vouchers
+        .Include(v => v.Attachments)
+        .FirstOrDefaultAsync(v => v.VoucherID == id);
+
         if (voucher == null)
             return false;
 
+        if (voucher.Attachments != null && voucher.Attachments.Count > 0)
+            _context.Attachments.RemoveRange(voucher.Attachments);
+        
+        await _mangeFilesService.RemoveAttachmentsAsync(voucher.AccountStudentGuardianID, voucher.VoucherID);
+        
         _context.Vouchers.Remove(voucher);
         await _context.SaveChangesAsync();
         return true;

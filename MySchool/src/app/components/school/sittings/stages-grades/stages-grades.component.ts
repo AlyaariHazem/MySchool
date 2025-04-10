@@ -4,9 +4,9 @@ import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 import { PaginatorState } from 'primeng/paginator';
 
-import { AddStage, Stage, updateStage } from '../../../../core/models/stages-grades.modul';
-import { StageService } from '../../../../core/services/stage.service';
-import { ClassService } from '../../../../core/services/class.service';
+import { AddStage, Stage, updateStage } from '../../core/models/stages-grades.modul';
+import { StageService } from '../../core/services/stage.service';
+import { ClassService } from '../../core/services/class.service';
 
 @Component({
   selector: 'app-stages-grades',

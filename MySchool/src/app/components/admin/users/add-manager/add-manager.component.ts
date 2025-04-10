@@ -1,10 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import { manager } from '../../../../core/models/manage/manager.model';
-import { ManagerService } from '../../../../core/services/Manage/manager.service';
-import { TenantService } from '../../../../core/services/Manage/tenant.service';
-import { Tenant } from '../../../../core/models/manage/tenant.model';
+import { manager } from '../../core/models/manager.model';
+import { ManagerService } from '../../../../core/services/manager.service';
+import { TenantService } from '../../../../core/services/tenant.service';
+import { Tenant } from '../../core/models/tenant.model';
 import { SchoolService } from '../../../../core/services/school.service';
 import { School } from '../../../../core/models/school.modul';
 

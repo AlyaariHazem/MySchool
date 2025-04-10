@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { catchError, map, Observable } from 'rxjs';
 
-import { BackendAspService } from '../../../environments/ASP.NET/backend-asp.service';
-import { manager } from '../../models/manage/manager.model';
+import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
+import { manager } from '../../components/admin/core/models/manager.model';
 
 @Injectable({
   providedIn: 'root'

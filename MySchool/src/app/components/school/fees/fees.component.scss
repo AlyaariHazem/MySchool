@@ -58,6 +58,14 @@
     border-radius: 3px;
     padding: 7px 16px;
 }
+:host ::ng-deep .p-dialog-header-icons {
+  z-index: 3 !important;
+  position: absolute !important;
+  left: 7px !important;
+}
+:host ::ng-deep .p-dialog-header {
+  padding-bottom: 3rem !important;
+}
 .typing{
     margin-right: 5rem;
     background-color:white;

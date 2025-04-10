@@ -1,10 +1,10 @@
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { ClassService } from '../../../../../core/services/class.service';
-import { DivisionService } from '../../../../../core/services/division.service';
-import { ClassDTO } from '../../../../../core/models/class.model';
-import { divisions } from '../../../../../core/models/division.model';
+import { ClassService } from '../../../core/services/class.service';
+import { DivisionService } from '../../../core/services/division.service';
+import { ClassDTO } from '../../../core/models/class.model';
+import { divisions } from '../../../core/models/division.model';
 
 @Component({
   selector: 'app-primary-data',

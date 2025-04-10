@@ -7,6 +7,7 @@ using Backend.Data;
 using Backend.DTOS.School.Years;
 using Backend.Models;
 using Backend.Repository.School.Interfaces;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -147,4 +148,28 @@ public class YearRepository : IYearRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<bool> UpdatePartial(int id, JsonPatchDocument<YearDTO> partialyear)
+    {
+     if (partialyear == null || id == 0)
+                return false;
+
+            // Retrieve the year entity by its ID
+            var year = await _context.Years.SingleOrDefaultAsync(s => s.YearID == id);
+            if (year == null)
+                return false;
+
+            // Map the year entity to the DTO (this will be modified)
+            var yearDTO = _mapper.Map<YearDTO>(year);
+
+            // Apply the patch to the DTO
+            partialyear.ApplyTo(yearDTO);
+
+            // Map the patched DTO back to the entity (year)
+            _mapper.Map(yearDTO, year);
+
+            // Mark the entity as modified and save changes
+            _context.Entry(year).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return true;   
+    }
 }

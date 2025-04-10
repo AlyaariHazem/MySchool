@@ -131,7 +131,7 @@
               <td>لا يوجد طلاب</td>
               <td>{{ item.note }}</td>
               <td>
-                <div class="dropdown dropdown-toggle" data-toggle="dropdown">
+                <div class="dropdown dropdown-toggle" ngClass="{{ item.active ? '' : 'active' }}" data-toggle="dropdown">
                   @if (item.active) {
                   <span>نشط </span>
                   } @else {

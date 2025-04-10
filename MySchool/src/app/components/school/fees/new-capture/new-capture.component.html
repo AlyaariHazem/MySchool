@@ -1,69 +1,83 @@
-<div class="container">
+<div class="container" id="voucherContent">
   <div class="button-container">
-    <button  pButton [icon]="changeView ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"
+    <button pButton [icon]="changeView ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"
       class="p-button-rounded p-button-text" (click)="toggleDiv()">
     </button>
+    <h1 class="Title">سند قبض جديد</h1>
+    <!-- Add button, disable after submission -->
+    <button class="button add" (click)="voucherData?updateVoucher():addVoucher(formGroup)">
+      {{voucherData?"تعديل":"إضافة"}}
+    </button>
+
+    <button class="button1 typing" (click)="printVoucher()">طباعة</button> <!-- Print button -->
+    <img class="image-header" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
   </div>
 
   <div class="content">
 
     <p-panel header="فلترة حسابات أولياء الأمور">
-      <div class="group group1">
-        <div class="form-control">
-          <p-floatLabel>
-            <p-dropdown [options]="cities" [(ngModel)]="selectedCity" [checkmark]="true" optionLabel="name"
-              [editable]="true" [showClear]="true" placeholder="حساب ولي الأمر"/>
-          </p-floatLabel>
+      <form [formGroup]="formGroup" class="form">
+        <div class="group group1">
+          <div class="form-control">
+            <p-floatLabel>
+              <p-dropdown [options]="accounts" [(ngModel)]="selectedAccount"
+                (ngModelChange)="setAccountStudentGuardianID($event)" formControlName="accountStudentGuardianID"
+                optionLabel="accountName" [checkmark]="true" [editable]="true" [showClear]="true"
+                placeholder="حساب ولي الأمر" />
+            </p-floatLabel>
+          </div>
+          <div class="form-control">
+            <p-dropdown [options]="accounts" [(ngModel)]="selectedAccount" formControlName="studentID"
+              optionLabel="studentName" (ngModelChange)="setStudentID($event)" [editable]="true" [showClear]="true" placeholder="الطالب" />
+          </div>
         </div>
-        <div class="form-control">
-          <p-dropdown [options]="cities" [(ngModel)]="selectedCity" [checkmark]="true" optionLabel="name"
-            [editable]="true" [showClear]="true" placeholder="الطالب" />
+        <div class="group group2">
+          <div class="form-control">
+            <label for="receipt" class="label2">المبلغ ر.ي<span style="color:red;"> *</span></label>
+            <input type="text" id="receipt" formControlName="receipt" />
+          </div>
+          <div class="form-control">
+            <label for="payBy" class="label2">الدفع بواسطة<span style="color:red;"> *</span></label>
+
+            <p-dropdown [options]="paymentMethods" [(ngModel)]="payBy" (ngModelChange)="setPayBy($event)" formControlName="payBy" optionLabel="label"
+              placeholder="الدفع بواسطة">
+            </p-dropdown>
+
+
+          </div>
         </div>
-      </div>
-      <div class="group group2">
-        <div class="form-control">
-          <label for="amount" class="label2">المبلغ ر.ي<span style="color:red;"> *</span></label>
-          <input type="text" id="amount" />
+        <div class="group group2">
+          <div class="form-control">
+            <label for="note" class="label2">البيان<span style="color:red;"> *</span></label>
+            <textarea formControlName="note" id="note"></textarea>
+          </div>
         </div>
-        <div class="form-control">
-          <label for="payBy" class="label2">الدفع بواسطة<span style="color:red;"> *</span></label>
-          <p-dropdown [options]="[
-          { label: 'Cash', value: 'cash' },
-          { label: 'الكريمي', value: 'visa' }
-        ]" [(ngModel)]="selectedCity" optionLabel="label" placeholder="الدفع بواسطة">
-        </p-dropdown>
+        <div class="group group2">
+          <div class="form-control">
+            <label for="date" class="label2">تاريخ الإنشاء<span style="color:red;"> *</span></label>
+            <input type="date" id="date" formControlName="hireDate" [value]="formGroup.get('hireDate')?.value | date:'yyyy-MM-dd'">
+          </div>
+          <div class="form-control">
+            <label for="attachment" class="label2">مرفقات<span style="color:red;"> *</span></label>
+            <label for="file" class="custom-button">إستعراض الملفات
+              <img src="assets/img/cloud-arrow-up.svg" alt="Upload Icon" class="upload-icon" />
+            </label>
+            <input type="file" accept="image/*" id="file" class="hidden-file-input"
+              (change)="updateAttachments($event)" />
+          </div>
         </div>
-      </div>
-      <div class="group group2">
-        <div class="form-control">
-          <label for="amount" class="label2">البيان<span style="color:red;"> *</span></label>
-          <textarea type="text" id="amount" ></textarea>
-        </div>
-      </div>
-      <div class="group group2">
-        <div class="form-control">
-          <label for="date" class="label2">تاريخ الإنشاء<span style="color:red;"> *</span></label>
-          <input type="date" id="date" /> 
-        </div>
-        <div class="form-control">
-          <label for="attachment" class="label2">مرفقات<span style="color:red;"> *</span></label>
-          <label for="file" class="custom-button">إستعراض الملفات
-            <img src="assets/img/cloud-arrow-up.svg" alt="Upload Icon" class="upload-icon" />
-          </label>
-          <input type="file" accept="image/*" id="file" class="hidden-file-input" />
-        </div>
-      </div>
+      </form>
     </p-panel>
 
     <p-panel header="فواتير ولي الأمر" *ngIf="showDiv2">
-      <button  pButton icon="pi pi-print" class="p-button-rounded p-button-text print"> طباعة </button>
-      @for (item of cities; track $index) {
+      <button pButton icon="pi pi-print" class="p-button-rounded p-button-text print"> طباعة </button>
+
       <div class="card flex justify-content-center">
         <p-card>
-          <h2>الاسم:{{item.name}}</h2>
           <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
+          <span style="position: absolute;">حازم اليعري</span>
           <div class="m-2">الصـف: <span>الخامس</span></div>
-          <div class="m-2" style="position: relative; top:-2rem;right:40%">الرسوم المطلوبة: <span>$1062</span></div>
+          <div class="m-2">الرسوم المطلوبة: <span>$1062</span></div>
           <span class="typeFee">رسوم طالب</span>
           <hr>
           <p>المدفوع: <span>12000</span></p>
@@ -73,7 +87,6 @@
           <button class="details">تفاصيل</button>
         </p-card>
       </div>
-    }
     </p-panel>
   </div>
 </div>

@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { GuardianService } from '../../../../../core/services/guardian.service';
-import { Guardians } from '../../../../../core/models/guardian.model';
+import { GuardianService } from '../../../core/services/guardian.service';
+import { Guardians } from '../../../core/models/guardian.model';
 
 @Component({
   selector: 'app-guardian',

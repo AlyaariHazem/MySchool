@@ -2,10 +2,10 @@ import { Component, effect, HostListener, inject, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import { Stage } from '../../../../../core/models/stages-grades.modul';
-import { ClassService } from '../../../../../core/services/class.service';
-import { CLass, ClassDTO, updateClass } from '../../../../../core/models/class.model';
-import { StageService } from '../../../../../core/services/stage.service';
+import { Stage } from '../../../core/models/stages-grades.modul';
+import { ClassService } from '../../../core/services/class.service';
+import { CLass, ClassDTO, updateClass } from '../../../core/models/class.model';
+import { StageService } from '../../../core/services/stage.service';
 import { PageEvent } from '@angular/material/paginator';
 
 @Component({

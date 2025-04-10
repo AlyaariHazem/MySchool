@@ -1,6 +1,6 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
-  <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="120"
-    [rowsPerPageOptions]="[10, 20, 30]" />
+  <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+    [totalRecords]="vouchers.length" [rowsPerPageOptions]="[4,10, 20]" />
   <h2 class="school">سندات القبض</h2>
   <form>
     <div class="group group2">
@@ -39,14 +39,14 @@
   </form>
 
 
-  <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '75%' }" [draggable]="false" [resizable]="false">
-    <h1 class="Title">سند قبض جديد</h1>
-    <button class="button add">إضافة</button>
-    <button class="button typing">طباعة</button>
-    <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
-    <div class="name">حازم عبدالله اليعري</div>
-    <app-new-capture></app-new-capture>
+  <p-dialog id="voucherContent" [(visible)]="visible" (visibleChange)="onDialogVisibilityChange($event)" [modal]="true"
+    [style]="{ width: '75%' }" [draggable]="false" [resizable]="false">
+    <app-new-capture [voucherData]="selectedVoucher" [visible]="visible"
+      (visibleChange)="onDialogVisibilityChange($event)">
+    </app-new-capture>
   </p-dialog>
+
+
 
   <!-- Responsive Table -->
   <div class="table-container">
@@ -66,14 +66,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let student of displayedStudents">
-              <td>{{ student }}</td>
-              <td>حازم عبدالله اليعري</td>
-              <td>20000</td>
-              <td>لا يوجد</td>
-              <td>Cash</td>
-              <td>2025-1-1</td>
-              <td>3</td>
+            @for (voucher of vouchersDisplay; track $index) {
+            <tr>
+              <td>{{ voucher.voucherID }}</td>
+              <td>{{voucher.accountName }}</td>
+              <td>{{voucher.receipt}}</td>
+              <td>{{voucher.note}}</td>
+              <td>{{voucher.payBy}}</td>
+              <td>{{voucher.hireDate| date:'yyyy-MM-dd'}}</td>
+              <td>{{voucher.accountAttachments}}</td>
+
               <td>
                 <div class="col text-left">
                   <div class="mt-sm-0 mt-2">
@@ -82,14 +84,19 @@
                       <i class="fas fa-ellipsis-h"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-left">
-                      <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                      <a class="dropdown-item" (click)="onEdit(voucher)">
+                        <i class="bi bi-pencil-square IconEdit"></i>تعديل
+                      </a>
+
                       <div role="separator" class="dropdown-divider"></div>
-                      <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                      <a class="dropdown-item"><i class="bi bi-trash IconDelete"
+                          (click)="Delete(voucher.voucherID)"></i>حذف</a>
                     </div>
                   </div>
                 </div>
               </td>
             </tr>
+            }
           </tbody>
         </table>
 

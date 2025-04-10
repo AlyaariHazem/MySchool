@@ -23,7 +23,9 @@ select {
   box-sizing: border-box;
   transition: border-color 0.3s ease-in-out;
 }
-
+.active {
+  border: 1px solid red !important;
+}
 .term {
   margin-right: -8px;
 }
@@ -112,7 +114,7 @@ select:focus {
   .line {
     top: 1.4rem;
   }
-  .tabcontent{
+  .tabcontent {
     padding: 38px 20px;
   }
   .add {
@@ -123,9 +125,9 @@ select:focus {
     color: white;
     background-color: #2fdf84;
   }
-.dropdown{
-  width: 105%;
-}
+  .dropdown {
+    width: 105%;
+  }
   .termName {
     right: 0rem;
   }
@@ -144,13 +146,13 @@ select:focus {
   button {
     margin-right: 8px;
   }
-  .From{
-    left:1rem;
+  .From {
+    left: 1rem;
   }
-  .tabcontent{
+  .tabcontent {
     padding: 38px 20px;
   }
-  .add{
+  .add {
     position: relative;
     top: -1.5rem;
     width: 4rem;
@@ -166,8 +168,6 @@ select:focus {
   button {
     margin-right: 19px;
   }
-
-  
 
   .add {
     position: relative;
@@ -280,5 +280,3 @@ select:focus {
 .dropdown:hover {
   border: 2px solid #34d589;
 }
-
-

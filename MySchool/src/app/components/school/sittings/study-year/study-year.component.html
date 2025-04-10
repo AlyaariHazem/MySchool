@@ -45,7 +45,20 @@
                   <td>لا يوجد</td>
                   <td>{{ year.yearDateEnd | customDate }}</td>
                   <td>{{ year.hireDate | customDate }}</td>
-                  <td>{{ year.active }}</td>
+                  <td>
+                    <div class="dropdown dropdown-toggle" ngClass="{{ year.active ? '' : 'active' }}" data-toggle="dropdown">
+                      @if (year.active) {
+                      <span>نشط </span>
+                      } @else {
+                      <span>خامل </span>
+    
+                      }
+                      <div class="dropdown-menu" style="margin-left: 2rem">
+                        <span class="dropdown-item" (click)="changeYear(year, true)">نشط</span>
+                        <span class="dropdown-item" (click)="changeYear(year, false)">خامل</span>
+                      </div>
+                    </div>
+                  </td>
                   <td>
                     <div class="col text-left">
                       <div class="mt-sm-0 mt-2">

@@ -25,8 +25,8 @@ public class AccountRepository : IAccountRepository
 
     public async Task<AccountsDTO> AddAccountAsync(AccountsDTO account)
     {
-       var accountEntity = _mapper.Map<Accounts>(account);
-       
+        var accountEntity = _mapper.Map<Accounts>(account);
+
         await _dbContext.Accounts.AddAsync(accountEntity);
         await _dbContext.SaveChangesAsync();
         return _mapper.Map<AccountsDTO>(accountEntity);
@@ -47,7 +47,7 @@ public class AccountRepository : IAccountRepository
     {
         var accounts = await _dbContext.Accounts
         .ToListAsync();
-       var accountDTOs = _mapper.Map<List<AccountsDTO>>(accounts);
+        var accountDTOs = _mapper.Map<List<AccountsDTO>>(accounts);
         return accountDTOs;
     }
 
@@ -80,9 +80,26 @@ public class AccountRepository : IAccountRepository
         var account = await GetAccountByIdAsync(id);
         if (account != null)
         {
-            var accounts=_mapper.Map<Accounts>(account);
+            var accounts = _mapper.Map<Accounts>(account);
             _dbContext.Accounts.Remove(accounts);
             await _dbContext.SaveChangesAsync();
         }
+    }
+
+    public async Task<List<StudentAndAccountNames>> GetStudentAndAccountNamesAllAsync()
+    {
+        var studentAndAccountNames = await _dbContext.AccountStudentGuardians
+            .Include(a => a.Accounts)
+            .Include(a => a.Student)
+            .Select(a => new StudentAndAccountNames
+            {
+                StudentName = a.Student.FullName.FirstName + " " + a.Student.FullName.MiddleName + " " + a.Student.FullName.LastName,
+                StudentID = a.Student.StudentID,
+                AccountStudentGuardianID = a.AccountStudentGuardianID,
+                AccountName = a.Accounts.AccountName
+            }).ToListAsync();
+        if (studentAndAccountNames == null)
+            throw new Exception("No data found");
+        return studentAndAccountNames;
     }
 }

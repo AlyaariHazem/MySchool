@@ -11,6 +11,9 @@ h2 {
   z-index: 1;
   border-bottom: 1px solid rgb(180 180 180);
 }
+.active {
+  border: 1px solid red !important;
+}
 
 input,
 select {
@@ -108,13 +111,13 @@ select:focus {
     padding: 1px 0px;
     font-size: 11px;
   }
-  .dropdown{
+  .dropdown {
     width: 105%;
   }
   .line {
     top: 1.4rem;
   }
-  .tabcontent{
+  .tabcontent {
     padding: 38px 20px;
   }
   .add {
@@ -144,13 +147,13 @@ select:focus {
   button {
     margin-right: 8px;
   }
-  .From{
-    left:1rem;
+  .From {
+    left: 1rem;
   }
-  .tabcontent{
+  .tabcontent {
     padding: 38px 20px;
   }
-  .add{
+  .add {
     position: relative;
     top: -1.5rem;
     width: 4rem;
@@ -166,8 +169,6 @@ select:focus {
   button {
     margin-right: 19px;
   }
-
-  
 
   .add {
     position: relative;
@@ -295,7 +296,7 @@ select:focus {
   border: 2px solid #34d589;
 }
 .mat-paginator {
-  font-family: 'Roboto', sans-serif; /* Apply the chosen font */
+  font-family: "Roboto", sans-serif; /* Apply the chosen font */
   font-size: 14px; /* Adjust font size as needed */
   color: #333; /* Change text color */
 }

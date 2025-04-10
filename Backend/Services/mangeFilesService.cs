@@ -7,12 +7,15 @@ namespace Backend.Services;
 
 public class mangeFilesService
 {
-      public async Task<List<string>> UploadAttachments(List<IFormFile> files, int studentId)
+      public async Task<List<string>> UploadAttachments(List<IFormFile> files, int studentId,int voucherId=0)
         {
             if (files == null || !files.Any())
                 return null!;
 
             var uploadsFolder = Path.Combine("wwwroot", "uploads", "Attachments");
+            if(voucherId!=0)
+             uploadsFolder = Path.Combine("wwwroot", "uploads", "Vouchers");
+             
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
@@ -26,6 +29,8 @@ public class mangeFilesService
                         throw new InvalidOperationException("Invalid file type.");
 
                     var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
+                    if(!voucherId.Equals(0))
+                        filePath = Path.Combine(uploadsFolder, $"voucher_{voucherId}_{Path.GetFileName(file.FileName)}");
                     try
                     {
                         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -43,12 +48,15 @@ public class mangeFilesService
             return filePaths;
         }
         
-        public async Task<List<string>> UploadStudentImage(IFormFile file, int studentId)
+        public async Task<List<string>> UploadImage(IFormFile file, int studentId,int voucherId=0)
         {
             if (file == null)
                 return null!;
 
             var uploadsFolder = Path.Combine("wwwroot", "uploads", "StudentPhotos");
+            if(voucherId!=0)
+             uploadsFolder = Path.Combine("wwwroot", "uploads", "Vouchers");
+
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
@@ -60,6 +68,9 @@ public class mangeFilesService
                     throw new InvalidOperationException("Invalid file type.");
 
                     var filePath = Path.Combine(uploadsFolder, $"{studentId}_{Path.GetFileName(file.FileName)}");
+                    if(!voucherId.Equals(0))
+                     filePath = Path.Combine(uploadsFolder, $"voucher_{voucherId}_{Path.GetFileName(file.FileName)}");
+
                     try
                     {
                         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -75,9 +86,11 @@ public class mangeFilesService
                 }
             return filePaths;
         }
-        public async Task<bool> RemoveAttachmentsAsync(int studentId)
+        public async Task<bool> RemoveAttachmentsAsync(int studentId,int voucherId=0)
         {
             var attachmentsFolder = Path.Combine("wwwroot", "uploads", "Attachments");
+            if(voucherId!=0)
+             attachmentsFolder = Path.Combine("wwwroot", "uploads", "Vouchers");
 
             if (!Directory.Exists(attachmentsFolder))
             {
@@ -85,6 +98,8 @@ public class mangeFilesService
                 return false;
             }
             string searchPattern = $"{studentId}_*";
+            if(!voucherId.Equals(0))
+             searchPattern = $"voucher_{voucherId}_*";
 
             try
             {
@@ -122,15 +137,16 @@ public class mangeFilesService
             }
         }
 
-        public bool RemoveStudentImage(int studentId)
+        public bool RemoveImage(int studentId,int voucherId=0)
         {
             // Define the uploads folder path
             var uploadsFolder = Path.Combine("wwwroot", "uploads", "StudentPhotos");
-            
+            if(voucherId!=0)
+             uploadsFolder = Path.Combine("wwwroot", "uploads", "Vouchers");
+
             // Check if the uploads folder exists
             if (!Directory.Exists(uploadsFolder))
             {
-                Console.WriteLine("Uploads folder does not exist.");
                 return false;
             }
             string searchPattern = $"{studentId}_*";
@@ -141,7 +157,6 @@ public class mangeFilesService
 
                 if (files.Length == 0)
                 {
-                    Console.WriteLine("No images found for the given student ID.");
                     return false;
                 }
 
@@ -153,12 +168,9 @@ public class mangeFilesService
                     try
                     {
                         File.Delete(file);
-                        Console.WriteLine($"Deleted file: {Path.GetFileName(file)}");
                     }
                     catch (Exception ex)
                     {
-                        // Log the exception and continue deleting other files
-                        Console.WriteLine($"Error deleting file {Path.GetFileName(file)}: {ex.Message}");
                         allDeleted = false;
                     }
                 }
@@ -167,8 +179,6 @@ public class mangeFilesService
             }
             catch (Exception ex)
             {
-                // Handle any unexpected exceptions
-                Console.WriteLine($"An error occurred while removing images: {ex.Message}");
                 return false;
             }
         }

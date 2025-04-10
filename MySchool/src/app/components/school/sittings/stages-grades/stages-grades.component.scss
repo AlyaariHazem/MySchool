@@ -401,13 +401,15 @@ input {
 .dropdown {
   border: 2px solid rgb(8, 197, 8);
   position: relative;
-  top: 8px;
-  padding: 6% 15%;
-  left: 5%;
-  right: 5%;
-  width: 107%;
+  top: 3px;
+  padding: 13% 13%;
+  right: -8%;
+  width: 116%;
   cursor: pointer;
   border-radius: 8px;
+}
+.active{
+  border: 1px solid red!important;
 }
 .dropdown:hover {
   border: 2px solid #34d589;

@@ -42,7 +42,7 @@
         <td>{{ div.studentCount }}</td>
         <td>{{ "لا يوجد ملاحظة" }}</td>
         <td>
-          <div class="dropdown dropdown-toggle" data-toggle="dropdown" (click)="toggleStateDropdown(div)">
+          <div class="dropdown dropdown-toggle" ngClass="{{ div.state ? '' : 'active' }}" data-toggle="dropdown" (click)="toggleStateDropdown(div)">
             <span class="">
               {{ div.state ? "نشط" : "خامل" }}
             </span>

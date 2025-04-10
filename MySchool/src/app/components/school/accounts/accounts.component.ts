@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 
 import { LanguageService } from '../../../core/services/language.service';
-import { AccountService } from '../../../core/services/account.service';
-import { ToastrService } from 'ngx-toastr';
+import { AccountService } from '../core/services/account.service';
 import { Account } from '../../../core/models/accounts.model';
 
 interface AccountType {
@@ -41,7 +41,7 @@ export class AccountsComponent implements OnInit {
   languageService = inject(LanguageService);
 
   displayedaccounts: Account[] = []; // Students for the current page
-
+  
   isSmallScreen = false;
   private mediaSub: Subscription | null = null;
 
@@ -57,17 +57,7 @@ export class AccountsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.accountService.getAllAccounts().subscribe({
-      next: (res) => {
-        this.accounts = res;
-        this.length = this.accounts.length; // Update paginator length
-        this.updateDisplayedaccounts(); 
-        this.toastr.success('Accounts fetched successfully');
-        console.log('Accounts fetched successfully:', this.accounts);
-      },
-      error: (err) => console.error('Error fetching accounts:', err)
-    });
-  
+    this.toastr.success("تم تحميل البيانات بنجاح");
     this.accountType = [
       { name: 'Guardain', code: 1 },
       { name: 'School', code: 2 },
@@ -77,7 +67,7 @@ export class AccountsComponent implements OnInit {
       { name: 'Banks', code: 6 }
     ];
   }
-  
+
 
   ngOnDestroy(): void {
     if (this.mediaSub) {
