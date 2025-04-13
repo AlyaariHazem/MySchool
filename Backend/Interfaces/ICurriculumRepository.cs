@@ -8,7 +8,7 @@ namespace Backend.Interfaces;
 
 public interface ICurriculumRepository
 {
-    Task<CurriculumReturnDTO> AddAsync(CurriculumDTO dto);
+    Task<Boolean> AddAsync(CurriculumDTO dto);
     Task<List<CurriculumReturnDTO>> GetAllAsync();
     Task<CurriculumReturnDTO?> GetByIdAsync(int subjectId, int classId);
     Task UpdateAsync(CurriculumDTO dto);

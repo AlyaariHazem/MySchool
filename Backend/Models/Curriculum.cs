@@ -12,6 +12,6 @@ public class Curriculum
     public Subject Subject { get; set; }
     public int ClassID { get; set; }
     public Class Class { get; set; }
-    public string? Not { get; set; }
+    public string? Note { get; set; }
     public DateTime HireDate { get; set; }= DateTime.Now;
 }

@@ -1,81 +1,93 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
-    <mat-paginator class="cPaginator" [ngStyle]="{ position: 'absolute'}" [length]="students.length"
-        [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
-    </mat-paginator>
+
     <h2 class="school">المقررات الدراسية</h2>
+
+    <!-- Reactive Form -->
     <form [formGroup]="form">
         <div class="group group2">
+            <!-- Subject Dropdown -->
             <div class="form-control">
-                <p-dropdown [options]="subjects" formControlName="subjectID" optionLabel="subjectName" [editable]="true"[ngClass]="{'en': languageService.dir==='ltr'}"
-                    [showClear]="true" placeholder="إختار الكتاب">
+                <p-dropdown [options]="subjects" formControlName="subjectID" optionLabel="subjectName"
+                    optionValue="subjectID" [showClear]="true" placeholder="إختار الكتاب">
                 </p-dropdown>
             </div>
+
+            <!-- Class Dropdown -->
             <div class="form-control">
-                <p-dropdown [options]="classes" formControlName="classID" [checkmark]="true" optionLabel="name"[ngClass]="{'en': languageService.dir==='ltr'}"
-                    [editable]="true" [showClear]="true"  placeholder="إختار الصف">
+                <p-dropdown [options]="classes" formControlName="classID" [checkmark]="true" optionLabel="className"
+                    optionValue="classID" [showClear]="true" placeholder="إختار الصف">
                 </p-dropdown>
             </div>
+
+            <!-- Note Input -->
             <div class="form-control">
                 <mat-form-field appearance="outline" class="inputText">
                     <mat-label>الملاحظة</mat-label>
-                    <input class="inputError" type="email" matInput />
+                    <input class="inputError" formControlName="note" type="text" matInput />
                 </mat-form-field>
             </div>
         </div>
-        <p-button class="showFee" (onClick)="showDialog()" label="إضافة+" />
-        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." />
+
+        <!-- Add Button -->
+        <p-button class="showFee" (onClick)="editMode ? updateCurriculum() : Add()"
+            [label]="editMode ? 'تعديل' : 'إضافة'"></p-button>
+
+        <!-- Example p-chips usage -->
+        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..."></p-chips>
     </form>
 
     <!-- Responsive Table -->
     <div class="table-container">
-        <div class="table-container">
-            <mat-card>
-                <table class="styled-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>المقرر</th>
-                            <th>الاسم البديل</th>
-                            <th>الكتاب</th>
-                            <th>الصف</th>
-                            <th>الملاحظة</th>
-                            <th>تاريخ الإنشاء</th>
-                            <th>العملية</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (student of displayedStudents; track $index) {
-                        <tr>
-                            <td>{{ student }}</td>
-                            <td>قران كريم-أول</td>
-                            <td>Quran</td>
-                            <td>قران كريم</td>
-                            <td>أول</td>
-                            <td>لا يوجد</td>
-                            <td>2025-1-1</td>
-                            <td>
-                                <div class="col text-left">
-                                    <div class="mt-sm-0 mt-2">
-                                        <button class="btn btn-left update" type="button" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-h"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-left">
-                                            <a class="dropdown-item"><i
-                                                    class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                                            <div role="separator" class="dropdown-divider"></div>
-                                            <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
-                                        </div>
+        <mat-card>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>المقرر</th>
+                        <th>الصف</th>
+                        <th>الكتاب</th>
+                        <th>الملاحظة</th>
+                        <th>تاريخ الإنشاء</th>
+                        <th>العملية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (curriculum of displayCurriculums; track $index;let i=$index) {
+                    <tr>
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ curriculum.curriculumName }}</td>
+                        <td>{{ curriculum.className }}</td>
+                        <td>{{ curriculum.subjectName }}</td>
+                        <td>{{ curriculum.note }}</td>
+                        <td>{{ curriculum.hireDate | date: 'yyyy-MM-dd' }}</td>
+                        <td>
+                            <div class="col text-left">
+                                <div class="mt-sm-0 mt-2">
+                                    <button class="btn btn-left update" type="button" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-left">
+                                        <a class="dropdown-item" (click)="editCurriculum(curriculum)">
+                                            <i class="bi bi-pencil-square IconEdit"></i>تعديل
+                                        </a>
+
+                                        <div role="separator" class="dropdown-divider"></div>
+                                        <a class="dropdown-item"
+                                            (click)="deleteCurriculm(curriculum.subjectID!, curriculum.classID!)"><i
+                                                class="bi bi-trash IconDelete"></i>حذف</a>
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
-                        }
-                    </tbody>
-                </table>
-
-            </mat-card>
-        </div>
-
+                            </div>
+                        </td>
+                    </tr>
+                    }@empty {
+                    <p>No Data available in a Table</p>
+                    }
+                </tbody>
+            </table>
+            <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+                [totalRecords]="curriculms.length" [rowsPerPageOptions]="[4, 10, 20]" />
+        </mat-card>
     </div>
 </div>

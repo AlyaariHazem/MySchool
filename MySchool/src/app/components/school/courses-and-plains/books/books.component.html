@@ -1,6 +1,4 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
-  <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-    [totalRecords]="paginates?.totalCount" [rowsPerPageOptions]="[4, 10, 20]" />
 
   <h2 class="school">الكتــب الدراسية</h2>
   <form [formGroup]="form">
@@ -50,7 +48,7 @@
             <tr>
               <td>{{ subject.subjectID }}</td>
               <td>{{subject.subjectName}} </td>
-              <td>{{subject.subjectName}}</td>
+              <td>{{subject.subjectReplacement}}</td>
               <td>{{subject.note}}</td>
               <td>{{subject.hireDate|date:'yyyy-MM-dd'}}</td>
               <td>
@@ -71,10 +69,13 @@
                 </div>
               </td>
             </tr>
+            }@empty {
+            <p>No Data available in a Table</p>
             }
           </tbody>
         </table>
-
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="paginates.totalCount" [rowsPerPageOptions]="[4, 10, 20]" />
       </mat-card>
     </div>
 

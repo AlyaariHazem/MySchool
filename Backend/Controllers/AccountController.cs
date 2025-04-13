@@ -93,6 +93,11 @@ namespace Backend.Controllers
              })
              .FirstOrDefaultAsync();
 
+            var yearID = await _context.Years
+            .Where(y => y.SchoolID == schoolData!.SchoolId)
+            .Select(y => y.YearID)
+            .ToListAsync();
+
             var managerName = schoolData?.ManagerName.FirstName + " " + schoolData?.ManagerName.LastName;
             var userName = schoolData?.ManagerName.FirstName;
 
@@ -125,6 +130,7 @@ namespace Backend.Controllers
                 managerName = managerName,
                 userName = userName,
                 schoolId = schoolData?.SchoolId,
+                yearId=yearID,
                 token = tokenString,
                 expiration = token.ValidTo
             });

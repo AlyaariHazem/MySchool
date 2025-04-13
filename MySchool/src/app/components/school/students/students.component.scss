@@ -13,22 +13,22 @@
   outline: 0;
   transform: scale(0.8); // Custom transform
 }
-p-paginator{
+p-paginator {
   position: absolute;
-  top: 0rem !important;
-  width: 65%;
-  right: 10rem;
+  bottom: -4rem !important;
+  width: 100%;
+  right: 0rem;
   z-index: 1;
 }
 :host ::ng-deep {
   #pn_id_3_list {
-     padding-left: 0px!important;
+    padding-left: 0px !important;
   }
 }
 
-.styled-table th:nth-child(3), 
+.styled-table th:nth-child(3),
 .styled-table td:nth-child(3) {
-    width: 400px; /* Adjust the width as needed */
+  width: 400px; /* Adjust the width as needed */
 }
 .student-name-column {
   width: 280px; /* Set your desired width */
@@ -44,34 +44,34 @@ p-paginator{
   left: 2rem;
   top: 4rem;
 }
- .col-4{
+.col-4 {
   position: absolute;
   left: -5rem;
   top: 3rem;
 }
- .col-4En{
+.col-4En {
   position: absolute;
   right: 2rem;
   top: 3rem;
-  .bi-grid{
+  .bi-grid {
     padding-left: 1rem;
   }
 }
-.col-4{
-  i:hover{
-    color:#2fdf84;
-    cursor:pointer;
+.col-4 {
+  i:hover {
+    color: #2fdf84;
+    cursor: pointer;
   }
 }
-.col-4En{
-  i:hover{
-    color:#2fdf84;
-    cursor:pointer;
+.col-4En {
+  i:hover {
+    color: #2fdf84;
+    cursor: pointer;
   }
 }
 .table-container {
-    margin-top: 3rem;
-  }
+  margin-top: 3rem;
+}
 mat-form-field {
   margin-right: 1rem;
   width: 30%;
@@ -170,7 +170,7 @@ mat-form-field {
   top: -0.5rem;
   right: 17%;
 }
-.group2{
+.group2 {
   margin-top: 3rem;
 }
 .add {
@@ -205,43 +205,43 @@ mat-form-field {
   .add {
     width: 10%;
   }
-  .styled-table th:nth-child(3), 
-.styled-table td:nth-child(3) {
+  .styled-table th:nth-child(3),
+  .styled-table td:nth-child(3) {
     width: 400px; /* Adjust the width as needed */
-}
+  }
 }
 @media (max-width: 900px) {
   form {
     right: -1rem;
   }
-  :host ::ng-deep{
-    .chipsOne{
+  :host ::ng-deep {
+    .chipsOne {
       display: none;
     }
   }
-  :host ::ng-deep{
-    .chipsEn{
+  :host ::ng-deep {
+    .chipsEn {
       display: none;
     }
   }
-  p-paginator{
+  p-paginator {
     display: none;
   }
-  .col-4{
+  .col-4 {
     position: absolute;
     left: 3rem;
     top: 2rem;
   }
-  .col-4En{
+  .col-4En {
     position: absolute;
     right: -3rem;
     top: 2rem;
   }
   .styled-table th,
-.styled-table td {
-  padding: 12px 1px;
-  border: 1px solid #dddddd;
-}
+  .styled-table td {
+    padding: 12px 1px;
+    border: 1px solid #dddddd;
+  }
 }
 
 @media (max-width: 600px) {
@@ -350,7 +350,7 @@ li:hover {
 
 :host ::ng-deep .p-dropdown .p-dropdown-clear-icon {
   color: #6b7280;
-  left: 3rem!important; /* Align to the left */
+  left: 3rem !important; /* Align to the left */
   direction: rtl;
 }
 :host
@@ -432,39 +432,39 @@ p-card img {
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1) !important;
 }
 :host ::ng-deep .custom-button:hover {
-  border: 1px solid rgb(248, 182, 170)!important;
+  border: 1px solid rgb(248, 182, 170) !important;
 }
 :host ::ng-deep .custom-button {
-  border: 1px solid rgb(177, 171, 171)!important;
-  border-radius: 3px!important;
+  border: 1px solid rgb(177, 171, 171) !important;
+  border-radius: 3px !important;
 }
 :host ::ng-deep .custom-button.guardain {
   margin-right: 1px;
   width: 100%;
 }
 :host ::ng-deep .p-button {
-  padding: 0.75rem 0.88rem!important;
+  padding: 0.75rem 0.88rem !important;
 }
-:host ::ng-deep{
-  .chipsOne{
+:host ::ng-deep {
+  .chipsOne {
     position: absolute;
     margin-top: 0rem;
     left: 3%;
     width: 14rem;
     z-index: 1;
-    .p-chips-multiple-container{
+    .p-chips-multiple-container {
       height: 38px;
     }
   }
 }
-:host ::ng-deep{
-  .chipsEn{
+:host ::ng-deep {
+  .chipsEn {
     position: absolute;
     margin-top: 0rem;
     right: 3%;
     width: 14rem;
     z-index: 1;
-    .p-chips-multiple-container{
+    .p-chips-multiple-container {
       height: 38px;
     }
   }

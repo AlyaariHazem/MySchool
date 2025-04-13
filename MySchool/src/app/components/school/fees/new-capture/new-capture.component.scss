@@ -40,12 +40,12 @@ select:focus {
 }
 .image {
   position: relative;
-  top: -2rem;
+  top: -1rem;
   width: 4.5rem;
   border-radius: 28px;
 }
 .details {
-  position: absolute;
+  position: relative;
   right: 46%;
   border: none;
   border-radius: 3px;
@@ -86,7 +86,7 @@ p-panel {
   color: #2d2e2d;
   position: absolute;
   left: 6%;
-  top: 6rem;
+  top: 7rem;
 }
 
 .group {

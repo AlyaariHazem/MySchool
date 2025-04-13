@@ -10,7 +10,7 @@ public class TermlyGrade
     public int TermlyGradeID { get; set; }
     public int StudentID { get; set; }
     public Student Student { get; set; }
-    public decimal Grade { get; set; }= 0;
+    public decimal? Grade { get; set; }
     public int TermID { get; set; }
     public Term Term { get; set; }
     public int ClassID { get; set; }

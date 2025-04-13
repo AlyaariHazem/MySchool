@@ -2,6 +2,7 @@ h2 {
   font-family: "Changa", sans-serif;
   font-style: italic;
 }
+
 form {
   display: flex;
   flex-direction: column;
@@ -31,7 +32,7 @@ form {
 .schoolInfo {
   background-color: white;
 }
-.school-btn{
+.school-btn {
   margin-top: -3rem;
   margin-left: -2rem;
 }
@@ -87,9 +88,9 @@ input::placeholder,
 select::placeholder {
   color: #aaa;
 }
-textarea{
-  border: 2px solid #d6d6d6!important;
-  border-radius: 7px!important;
+textarea {
+  border: 2px solid #d6d6d6 !important;
+  border-radius: 7px !important;
 }
 textarea:hover,
 textarea:focus {
@@ -150,16 +151,9 @@ button:hover {
   }
 }
 //this for p-chip
-:host {
-  ::ng-deep {
-    .inputChip {
-      width: 100% !important;
-      .p-chips {
-        width: 100% !important;
-        .p-inputtext {
-          width: 100% !important;
-        }
-      }
-    }
+:host ::ng-deep {
+  .p-dropdown-clear-icon {
+    left: auto !important;
+    right: 2.5rem !important;
   }
 }

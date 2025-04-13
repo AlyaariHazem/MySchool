@@ -1,6 +1,4 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
-  <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-    [totalRecords]="vouchers.length" [rowsPerPageOptions]="[4,10, 20]" />
   <h2 class="school">سندات القبض</h2>
   <form>
     <div class="group group2">
@@ -96,10 +94,13 @@
                 </div>
               </td>
             </tr>
+            }@empty {
+              <p>No Data available in a Table</p>
             }
           </tbody>
         </table>
-
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+        [totalRecords]="vouchers.length" [rowsPerPageOptions]="[4,10, 20]" />
       </mat-card>
     </div>
 

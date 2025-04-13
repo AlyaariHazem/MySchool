@@ -20,6 +20,14 @@ export class BackendAspService {
       })
     );
   }
+  getRequestByID<T>(name:string,id1: number,id2:number): Observable<T> {
+    return this.http.get<{ result: T }>(`${this.baseUrl}/${name}/${id1}/${id2}`).pipe(
+      map(response => response.result),
+      catchError(error => {
+        throw error;
+      })
+    );
+  }
 
   postRequest<T>(name: string, data: any): Observable<T> {
     return this.http.post<{ result: T }>(`${this.baseUrl}/${name}`, data).pipe(
@@ -36,7 +44,8 @@ export class BackendAspService {
   }
 
   deleteRequest<T>(name: string): Observable<T> {
-    return this.http.delete<T>(`${this.baseUrl}/${name}`).pipe(
+    return this.http.delete<{result:T}>(`${this.baseUrl}/${name}`).pipe(
+      map(res=>res.result),
       catchError(err => {
         console.error("Error when Delete:", err);
         throw err;
@@ -52,6 +61,16 @@ export class BackendAspService {
       })
     );
   }
+  putRequestWithToParms<T>(name: string,id1:number,id2:number, data: any): Observable<T> {
+    return this.http.put<{result:T}>(`${this.baseUrl}/${name}/${id1}/${id2}`, data).pipe(
+      map(res=>res.result),
+      catchError(error => {
+        console.error("Error with partial update:", error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   uploadFile(file: File, studentId: number, voucherID: number = 0): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);

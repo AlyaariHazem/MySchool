@@ -23,6 +23,9 @@ export class AuthAPIService {
         if (response.managerName) {
           localStorage.setItem('managerName', response.managerName);
         }
+        if (response.yearId) {
+          localStorage.setItem('yearId', response.yearId);
+        }
         if (response.managerName===" ") {
           localStorage.setItem('managerName',"Admin");
         }

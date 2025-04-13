@@ -51,18 +51,18 @@
           </mat-form-field>
         </form>
 
-        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-          [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 10, 20]" />
-
-        <button mat-raised-button color="primary" [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" (click)="openDialog()">
+        <button mat-raised-button color="primary"
+          [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" (click)="openDialog()">
           إضافة طالب+
         </button>
 
-        <p-iconfield iconPosition="left" [ngClass]="{'chipsOne':languageService.dir==='rtl','chipsEn':languageService.dir==='ltr'}" >
-          <p-inputicon styleClass="pi pi-search"/>
+        <!-- <p-iconfield iconPosition="left"
+          [ngClass]="{'chipsOne':languageService.dir==='rtl','chipsEn':languageService.dir==='ltr'}">
+          <p-inputicon styleClass="pi pi-search" />
           <input type="text" style="width: 100%;" pInputText placeholder="Search" />
-        </p-iconfield>
+        </p-iconfield> -->
         
+
         @if (showGrid) {
         <div class="group group2">
           @for (student of paginatedStudents; track $index) {
@@ -92,6 +92,8 @@
           </div>
           }
         </div>
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+                [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 10, 20]" />
         }
 
         @if (showCulomn) {
@@ -134,7 +136,8 @@
                             <i class="fas fa-ellipsis-h"></i>
                           </button>
                           <div class="dropdown-menu dropdown-menu-left">
-                            <a class="dropdown-item" (click)="EditDialog(student.studentID)"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                            <a class="dropdown-item" (click)="EditDialog(student.studentID)"><i
+                                class="bi bi-pencil-square IconEdit"></i>تعديل</a>
                             <div role="separator" class="dropdown-divider"></div>
                             <a class="dropdown-item" (click)="deleteStudent(student.studentID)">
                               <i class="bi bi-trash IconDelete"></i>حذف</a>
@@ -143,10 +146,13 @@
                       </div>
                     </td>
                   </tr>
+                  }@empty {
+                  <p animate-width>No Data available in a Table</p>
                   }
                 </tbody>
               </table>
-
+              <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+                [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 10, 20]" />
             </mat-card>
           </div>
 

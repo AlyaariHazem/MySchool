@@ -21,7 +21,7 @@ namespace Backend.Models
         public int? TenantID { get; set; }
         public Tenant Tenant { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
-        public virtual ICollection<Teacher> Teachers { get; set; }
+        // public virtual ICollection<Teacher> Teachers { get; set; }
 
     }
 }

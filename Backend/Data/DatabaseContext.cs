@@ -35,10 +35,11 @@ namespace Backend.Data
         public DbSet<Term> Terms { get; set; }
         public DbSet<MonthlyGrade> MonthlyGrades { get; set; }
         public DbSet<TypeAccount> TypeAccounts { get; set; }
-        public DbSet<SubjectStudent> SubjectStudents { get; set; }
+        // public DbSet<SubjectStudent> SubjectStudents { get; set; }
         public DbSet<GradeType> GradeTypes { get; set; }
+        public DbSet<YearTermMonth> YearTermMonths { get; set; }
         public DbSet<StudentClassFees> StudentClassFees { get; set; }
-        public DbSet<TeacherStudent> TeacherStudents { get; set; }
+        // public DbSet<TeacherStudent> TeacherStudents { get; set; }
         public DbSet<TermlyGrade> TermlyGrades { get; set; }
         public DbSet<AccountStudentGuardian> AccountStudentGuardians { get; set; }
         // public DbSet<User> Users { get; set; }
@@ -52,15 +53,31 @@ namespace Backend.Data
 
             base.OnModelCreating(modelBuilder); // Call the base method
 
-            modelBuilder.Entity<TeacherStudent>().HasKey(TS => new { TS.StudentID, TS.TeacherID });
-            modelBuilder.Entity<SubjectStudent>().HasKey(SS => new { SS.SubjectID, SS.StudentID });
+            // modelBuilder.Entity<TeacherStudent>().HasKey(TS => new { TS.StudentID, TS.TeacherID });
+            // modelBuilder.Entity<SubjectStudent>().HasKey(SS => new { SS.SubjectID, SS.StudentID });
             modelBuilder.Entity<Curriculum>().HasKey(SS => new { SS.SubjectID, SS.ClassID });
+            modelBuilder.Entity<CoursePlan>().HasKey(c => new { c.YearID, c.TeacherID, c.ClassID, c.DivisionID, c.SubjectID });
+            modelBuilder.Entity<MonthlyGrade>().HasKey(mg => new { mg.StudentID, mg.YearID, mg.SubjectID, mg.MonthID, mg.GradeTypeID, mg.ClassID });
+
+            modelBuilder.Entity<YearTermMonth>().HasKey(ytm => new { ytm.YearID, ytm.TermID, ytm.MonthID });
 
             modelBuilder.Entity<Student>(entity =>
             {
                 entity.HasKey(s => s.StudentID); // Primary key
                 entity.Property(s => s.StudentID)
                     .ValueGeneratedNever(); // Disables auto-increment
+            });
+            modelBuilder.Entity<Month>(entity =>
+            {
+                entity.HasKey(m => m.MonthID); // Primary key
+                entity.Property(m => m.MonthID)
+                    .ValueGeneratedNever();
+            });
+            modelBuilder.Entity<TermlyGrade>(entity =>
+            {
+                entity.HasKey(t => t.TermID); // Primary key
+                entity.Property(t => t.TermID)
+                    .ValueGeneratedNever();
             });
             modelBuilder.Entity<FeeClass>(entity =>
             {
@@ -86,14 +103,11 @@ namespace Backend.Data
             modelBuilder.Entity<Vouchers>()
                 .HasKey(v => v.VoucherID);
 
-            modelBuilder.Entity<TeacherSubjectStudent>()
-                .HasKey(tss => new { tss.TeacherID, tss.StudentID, tss.SubjectID });
+            // modelBuilder.Entity<TeacherSubjectStudent>()
+            //     .HasKey(tss => new { tss.TeacherID, tss.StudentID, tss.SubjectID });
 
             modelBuilder.Entity<Term>()
                 .HasKey(t => t.TermID);
-
-            modelBuilder.Entity<MonthlyGrade>()
-                .HasKey(mg => mg.MonthlyGradeID);
 
             modelBuilder.Entity<School>()
                 .HasOne<Manager>(m => m.Manager)
@@ -108,17 +122,17 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // many to many relationship for Teachers and Students
-            modelBuilder.Entity<TeacherStudent>()
-                 .HasOne<Student>(S => S.Student)
-                 .WithMany(TS => TS.TeacherStudents)
-                 .HasForeignKey(S => S.StudentID)
-                 .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<TeacherStudent>()
+            //      .HasOne<Student>(S => S.Student)
+            //      .WithMany(TS => TS.TeacherStudents)
+            //      .HasForeignKey(S => S.StudentID)
+            //      .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<TeacherStudent>()
-                .HasOne<Teacher>(T => T.Teacher)
-                .WithMany(TS => TS.TeacherStudents)
-                .HasForeignKey(T => T.TeacherID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<TeacherStudent>()
+            //     .HasOne<Teacher>(T => T.Teacher)
+            //     .WithMany(TS => TS.TeacherStudents)
+            //     .HasForeignKey(T => T.TeacherID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
 
             // one to many for School and Year
@@ -142,30 +156,24 @@ namespace Backend.Data
                 .HasForeignKey(c => c.StageID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Month>()
-                .HasOne(sm => sm.Term)
-                .WithMany(t => t.Months)
-                .HasForeignKey(sm => sm.TermID)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // one to many for Managers and Teachers
-            modelBuilder.Entity<Manager>()
-                .HasMany<Teacher>(T => T.Teachers)
-                .WithOne(M => M.Manager)
-                .HasForeignKey(T => T.ManagerID)
-                .OnDelete(DeleteBehavior.Restrict); // Restrict to prevent deletion of Teachers when Manager is deleted
+            // modelBuilder.Entity<Manager>()
+            //     .HasMany<Teacher>(T => T.Teachers)
+            //     .WithOne(M => M.Manager)
+            //     .HasForeignKey(T => T.ManagerID)
+            //     .OnDelete(DeleteBehavior.Restrict); // Restrict to prevent deletion of Teachers when Manager is deleted
 
             // many to many relationship for Subjects and Students
-            modelBuilder.Entity<SubjectStudent>()
-                .HasOne<Subject>(S => S.Subject)
-                .WithMany(SS => SS.SubjectStudents)
-                .HasForeignKey(S => S.SubjectID)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<SubjectStudent>()
-                .HasOne<Student>(S => S.Student)
-                .WithMany(SS => SS.SubjectStudents)
-                .HasForeignKey(S => S.StudentID)
-                .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<SubjectStudent>()
+            //     .HasOne<Subject>(S => S.Subject)
+            //     .WithMany(SS => SS.SubjectStudents)
+            //     .HasForeignKey(S => S.SubjectID)
+            //     .OnDelete(DeleteBehavior.Restrict);
+            // modelBuilder.Entity<SubjectStudent>()
+            //     .HasOne<Student>(S => S.Student)
+            //     .WithMany(SS => SS.SubjectStudents)
+            //     .HasForeignKey(S => S.StudentID)
+            //     .OnDelete(DeleteBehavior.Restrict);
 
             // many to many relationship for Subjects and Students
             modelBuilder.Entity<Curriculum>()
@@ -252,7 +260,7 @@ namespace Backend.Data
                 .WithMany(c => c.MonthlyGrades)
                 .HasForeignKey(mg => mg.ClassID)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             modelBuilder.Entity<TermlyGrade>()
                 .HasOne(mg => mg.Student)
                 .WithMany(s => s.TermlyGrades)
@@ -273,7 +281,7 @@ namespace Backend.Data
                 .WithMany(s => s.TermlyGrades)
                 .HasForeignKey(mg => mg.TermID)
                 .OnDelete(DeleteBehavior.Restrict);
-                        
+
             // Etc. (Student, Subject, GradeType)
 
             modelBuilder.Entity<MonthlyGrade>()
@@ -286,6 +294,18 @@ namespace Backend.Data
                 .HasOne(mg => mg.Subject)
                 .WithMany(sbj => sbj.MonthlyGrades)
                 .HasForeignKey(mg => mg.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MonthlyGrade>()
+                .HasOne(mg => mg.Year)
+                .WithMany(y => y.MonthlyGrades)
+                .HasForeignKey(mg => mg.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MonthlyGrade>()
+                .HasOne(mg => mg.Term)
+                .WithMany(y => y.MonthlyGrades)
+                .HasForeignKey(mg => mg.TermID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<MonthlyGrade>()
@@ -336,23 +356,23 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Ternary relationship between Teachers, Students, and Subjects
-            modelBuilder.Entity<TeacherSubjectStudent>()
-                .HasOne<Teacher>(tss => tss.Teacher)
-                .WithMany(t => t.TeacherSubjectStudents)
-                .HasForeignKey(tss => tss.TeacherID)
-                .OnDelete(DeleteBehavior.Cascade);
+            // modelBuilder.Entity<TeacherSubjectStudent>()
+            //     .HasOne<Teacher>(tss => tss.Teacher)
+            //     .WithMany(t => t.TeacherSubjectStudents)
+            //     .HasForeignKey(tss => tss.TeacherID)
+            //     .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<TeacherSubjectStudent>()
-                .HasOne<Student>(tss => tss.Student)
-                .WithMany(s => s.TeacherSubjectStudents)
-                .HasForeignKey(tss => tss.StudentID)
-                .OnDelete(DeleteBehavior.Cascade);
+            // modelBuilder.Entity<TeacherSubjectStudent>()
+            //     .HasOne<Student>(tss => tss.Student)
+            //     .WithMany(s => s.TeacherSubjectStudents)
+            //     .HasForeignKey(tss => tss.StudentID)
+            //     .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<TeacherSubjectStudent>()
-                .HasOne<Subject>(tss => tss.Subject)
-                .WithMany(sub => sub.TeacherSubjectStudents)
-                .HasForeignKey(tss => tss.SubjectID)
-                .OnDelete(DeleteBehavior.Cascade);
+            // modelBuilder.Entity<TeacherSubjectStudent>()
+            //     .HasOne<Subject>(tss => tss.Subject)
+            //     .WithMany(sub => sub.TeacherSubjectStudents)
+            //     .HasForeignKey(tss => tss.SubjectID)
+            //     .OnDelete(DeleteBehavior.Cascade);
 
             // Ternary relationship between Guardian, Students,Vouchers, and Accounts
             modelBuilder.Entity<AccountStudentGuardian>()
@@ -435,6 +455,25 @@ namespace Backend.Data
                 .WithMany(c => c.CoursePlans)
                 .HasForeignKey(p => p.DivisionID)
                 .OnDelete(DeleteBehavior.Restrict);
+            //YearTermMonth
+            modelBuilder.Entity<YearTermMonth>()
+                .HasOne(ytm => ytm.Year)
+                .WithMany(y => y.YearTermMonths)
+                .HasForeignKey(ytm => ytm.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<YearTermMonth>()
+                .HasOne(ytm => ytm.Month)
+                .WithMany(m => m.YearTermMonths)
+                .HasForeignKey(ytm => ytm.MonthID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<YearTermMonth>()
+                .HasOne(ytm => ytm.Term)
+                .WithMany(t => t.YearTermMonths)
+                .HasForeignKey(ytm => ytm.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             // Composite Unique Index
             modelBuilder.Entity<MonthlyGrade>()
@@ -478,7 +517,24 @@ namespace Backend.Data
                 new GradeType { GradeTypeID = 8, Name = "skills", MaxGrade = 20, IsActive = false }
             );
 
-
+            modelBuilder.Entity<Term>().HasData(
+                new Term { TermID = 1, Name = "الأول" },
+                new Term { TermID = 2, Name = "الثاني" }
+            );
+            modelBuilder.Entity<Month>().HasData(
+                new Month { MonthID = 1, Name = "يناير" },
+                new Month { MonthID = 2, Name = "فبراير" },
+                new Month { MonthID = 3, Name = "مارس" },
+                new Month { MonthID = 4, Name = "أبريل" },
+                new Month { MonthID = 5, Name = "مايو" },
+                new Month { MonthID = 6, Name = "يونيو" },
+                new Month { MonthID = 7, Name = "يوليو" },
+                new Month { MonthID = 8, Name = "أغسطس" },
+                new Month { MonthID = 9, Name = "سبتمبر" },
+                new Month { MonthID = 10, Name = "أكتوبر" },
+                new Month { MonthID = 11, Name = "نوفمبر" },
+                new Month { MonthID = 12, Name = "ديسمبر" }
+            );
             // Seed data for roles
             modelBuilder.Entity<IdentityRole>().HasData(
                 new IdentityRole

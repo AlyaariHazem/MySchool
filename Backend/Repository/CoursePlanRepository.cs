@@ -27,20 +27,29 @@ public class CoursePlanRepository : ICoursePlanRepository
         _context.CoursePlans.Add(entity);
         await _context.SaveChangesAsync(); // Save the CoursePlan and get the ID
 
-        dto.CoursePlanID = entity.CoursePlanID; // Set the CoursePlanID back to DTO
+        // dto.CoursePlanID = entity.CoursePlanID; // Set the CoursePlanID back to DTO
 
         // Step 2: Assign the subject to the students of the specified class
-        var studentsInClass = await _context.Students
-            .Where(s => s.DivisionID == dto.DivisionID)  // Get students in the class from DTO
-            .ToListAsync();
+        var students = await _context.Students
+        .Include(s => s.MonthlyGrades)
+        .Where(s => s.DivisionID == dto.DivisionID&& s.MonthlyGrades.Any(m => m.YearID == dto.YearID && m.ClassID == dto.ClassID))
+        .Select(s => new MonthlyGrade
+        {
+            StudentID = s.StudentID,
+            YearID = dto.YearID, // Assuming you want to set the YearID from the DTO
+            ClassID = dto.ClassID,
+            SubjectID = dto.SubjectID
+        })
+        .ToListAsync();
+
 
         // Step 3: Create the list of subjects for each student and save them to MonthlyGrades (or another related entity)
         var subjectAssignments = new List<MonthlyGrade>(); // Assuming MonthlyGrade holds the subject assignments for students
         var TermlyGradesData = new List<TermlyGrade>(); // Assuming MonthlyGrade holds the subject assignments for students
 
         // Fetch Months and GradeTypes
-        var months = await _context.Months
-            .Where(m => m.TermID == dto.TermID)
+        var months = await _context.YearTermMonths
+            .Where(m => m.YearID == dto.YearID && m.TermID == dto.TermID)
             .Select(m => m.MonthID)
             .ToListAsync();
 
@@ -49,7 +58,7 @@ public class CoursePlanRepository : ICoursePlanRepository
             .Select(g => g.GradeTypeID)
             .ToListAsync();
 
-        foreach (var student in studentsInClass)
+        foreach (var student in students)
         {
             // Step 4: For each student, loop through all months and grade types to create new grades
             foreach (var month in months)
@@ -59,11 +68,12 @@ public class CoursePlanRepository : ICoursePlanRepository
                     var newGrade = new MonthlyGrade
                     {
                         StudentID = student.StudentID,
+                        YearID = student.YearID,
                         SubjectID = dto.SubjectID,  // The subject associated with the course plan
                         ClassID = dto.ClassID,
                         MonthID = month,  // MonthID from the Months list
                         GradeTypeID = gradeType, // GradeTypeID from the GradeTypes list
-                        Grade = 0 // Default grade (0 or null, depending on your requirement)
+                        Grade = null // Default grade (null, depending on your requirement)
                     };
 
                     subjectAssignments.Add(newGrade);
@@ -75,7 +85,7 @@ public class CoursePlanRepository : ICoursePlanRepository
                     SubjectID = dto.SubjectID,  // The subject associated with the course plan
                     ClassID = dto.ClassID,
                     TermID = dto.TermID,
-                    Grade = 0, // Default grade (0 or null, depending on your requirement)
+                    Grade = null, // Default grade (0 or null, depending on your requirement)
                     Note = null // Default note (null or empty string, depending on your requirement)
                 };
                 TermlyGradesData.Add(newTermlyGrade);

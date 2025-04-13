@@ -6,6 +6,7 @@ using AutoMapper;
 using Backend.DTOS;
 using Backend.DTOS.School;
 using Backend.DTOS.School.Accounts;
+using Backend.DTOS.School.Classes;
 using Backend.DTOS.School.CoursePlan;
 using Backend.DTOS.School.Curriculms;
 using Backend.DTOS.School.Fees;
@@ -87,7 +88,7 @@ public class MappingConfig : Profile
                 .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.SubjectName))
                 .ForMember(dest => dest.CurriculumName, opt => opt.MapFrom(src => src.CurriculumName))
                 .ForMember(dest => dest.ClassName, opt => opt.MapFrom(src => src.Class.ClassName))
-                .ForMember(dest => dest.Not, opt => opt.MapFrom(src => src.Not))
+                .ForMember(dest => dest.Note, opt => opt.MapFrom(src => src.Note))
                 .ForMember(dest => dest.HireDate, opt => opt.MapFrom(src => src.HireDate));
 
             //  Mapping for DTOs    
@@ -96,6 +97,8 @@ public class MappingConfig : Profile
         CreateMap<TermlyGrade, TermlyGradeDTO>().ReverseMap();
         CreateMap<Term, TermDTO>().ReverseMap();
         CreateMap<MonthDTO, Month>().ReverseMap();
+        CreateMap<SubjectsNameDTO, Subject>().ReverseMap();
+        CreateMap<AllClassesDTO, Class>().ReverseMap();
 
     }
 }

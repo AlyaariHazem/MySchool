@@ -1531,7 +1531,7 @@ label {
 }
 
 .account-page {
-    background-image: url(../img/bg-account.jpeg);
+    /* background-image: url(../img/bg-account.jpeg); */
     width: 100%;
     min-height: 100vh;
     display: flex;
@@ -5552,7 +5552,7 @@ blockquote p {
 }
 
 .profile-bg {
-    background: url(../img/user-02.jpg);
+    /* background: url(../img/user-02.jpg); */
     background-size: cover;
     height: 141px;
     color: #fff;
@@ -7042,8 +7042,8 @@ blockquote p {
     -ms-transform: translateX(-50%) translateY(-50%);
     -o-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
-    background: url(../img/arrow.svg) no-repeat 0 0;
-    background-image: url(../img/arrow.svg) no-repeat 0 0
+    /* background: url(../img/arrow.svg) no-repeat 0 0;
+    background-image: url(../img/arrow.svg) no-repeat 0 0 */
 }
 
 .cd-timeline-navigation a.prev {

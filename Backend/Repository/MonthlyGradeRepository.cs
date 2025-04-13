@@ -33,7 +33,7 @@ namespace Backend.Repository
             _context.MonthlyGrades.Add(entity);
             await _context.SaveChangesAsync();
 
-            monthlyGradeDTO.MonthlyGradeID = entity.MonthlyGradeID; // Set the ID back to DTO after adding to DB
+            // monthlyGradeDTO.MonthlyGradeID = entity.MonthlyGradeID; // Set the ID back to DTO after adding to DB
             return monthlyGradeDTO;
         }
 
@@ -53,7 +53,7 @@ namespace Backend.Repository
         public async Task<List<MonthlyGradesReternDTO>> GetAllAsync(int term, int monthId, int classId)
         {
             var grades = await _context.MonthlyGrades
-                .Where(g => g.Month.TermID == term && g.MonthID == monthId && g.ClassID == classId)
+                .Where(g => g.TermID == term && g.MonthID == monthId && g.ClassID == classId)
                 .Include(g => g.Student)  // Ensure Student is included in the query
                 .Include(g => g.Subject)  // Include Subject if necessary
                 .Include(g => g.GradeType) // Include GradeType if necessary

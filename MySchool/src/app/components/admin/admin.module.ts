@@ -22,7 +22,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
-import { ChipsModule } from 'primeng/chips';
+// import { ChipsModule } from 'primeng/chips';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { MatTableModule } from '@angular/material/table';
@@ -108,7 +108,7 @@ const modules = [
   DialogModule,
   ButtonModule,
   PanelModule,
-  ChipsModule,
+  // ChipsModule,
   InputMaskModule,
   CardModule,
   InputTextModule,

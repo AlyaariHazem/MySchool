@@ -1,12 +1,11 @@
-import { Component, effect, HostListener, inject, OnInit } from '@angular/core';
+import { Component, HostListener, inject, Input, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { Stage } from '../../../core/models/stages-grades.modul';
 import { ClassService } from '../../../core/services/class.service';
 import { CLass, ClassDTO, updateClass } from '../../../core/models/class.model';
-import { StageService } from '../../../core/services/stage.service';
-import { PageEvent } from '@angular/material/paginator';
+import { PaginatorState } from 'primeng/paginator';
 
 @Component({
   selector: 'app-grades',
@@ -16,7 +15,8 @@ import { PageEvent } from '@angular/material/paginator';
   ]
 })
 export class GradesComponent implements OnInit {
-  stages: Array<Stage> = [];
+  @Input() stages: Stage[] = [];
+  paginatedGrade: Array<Stage> = [];
   classes: ClassDTO[] = [];
   DisplayClasses: ClassDTO[] = [];
   AddClass?: CLass;
@@ -30,7 +30,6 @@ export class GradesComponent implements OnInit {
 
   private toastr = inject(ToastrService);
   private classService = inject(ClassService);
-  private stageService = inject(StageService);
   errorMessage: string = "";
 
   constructor(private fb: FormBuilder) {
@@ -38,14 +37,10 @@ export class GradesComponent implements OnInit {
       className: ['', Validators.required],
       stageID: ['', Validators.required]
     });
-    effect(()=>{
-      this.getAllStages();
-    })
   }
 
   ngOnInit(): void {
     this.getAllClasses();
-    this.getAllStages();
   }
 
   openOuterDropdown: any = null;
@@ -66,13 +61,6 @@ export class GradesComponent implements OnInit {
     });
   }
 
-  getAllStages(): void {
-    this.stageService.getAllStages().subscribe({
-      next: (res) => this.stages = res,
-      error: (err) => this.toastr.error('Error fetching Stages ', err)
-    });
-  }
-
   addClass(): void {
     if (this.form.valid) {
       const addClassData: CLass = this.form.value;
@@ -81,7 +69,6 @@ export class GradesComponent implements OnInit {
           this.getAllClasses();
           this.form.reset();
           this.isEditMode = false;
-          this.getAllStages();
           this.toastr.success('Stage Added successfully');
         },
         error: () => this.toastr.error('Something went wrong')
@@ -111,7 +98,6 @@ export class GradesComponent implements OnInit {
             this.toastr.success(response.result, "Class Updated Successfully");
             this.form.reset();
             this.getAllClasses();
-            this.getAllStages();
           }
         },
         error: () => this.toastr.error('Failed to update Class', 'Error')
@@ -147,7 +133,6 @@ export class GradesComponent implements OnInit {
         if (response.isSuccess) {
           this.toastr.success(response.result, 'Class Deleted');
           this.getAllClasses(); // Refresh the list after deletion
-          this.getAllStages();
         }
       },
       error: () => this.toastr.error('Failed to delete Class', 'Error')
@@ -203,13 +188,19 @@ export class GradesComponent implements OnInit {
   }
 
   // Handle paginator events
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateDisplayedClass();
-  }
-  toggleStateDropdown(item: any): void {
-    item.isDropdownOpen = !item.isDropdownOpen;
-  }
+  first: number = 0; // Current starting index
+    rows: number = 4; // Number of rows per page
+    updatePaginatedData(): void {
+      const start = this.first;
+      const end = this.first + this.rows;
+      this.paginatedGrade = this.stages.slice(start, end);
+    }
+  
+    // Handle page change event from PrimeNG paginator
+    onPageChange(event: PaginatorState): void {
+      this.first = event.first || 0; // Default to 0 if undefined
+      this.rows = event.rows || 4; // Default to 4 rows
+      this.updatePaginatedData();
+    }
 
 }

@@ -9,6 +9,5 @@ public class TermDTO
 {
      public int TermID { get; set; }
     public string? Name { get; set; }
-    public int? YearID { get; set; }
 
 }

@@ -227,23 +227,12 @@ public class StudentRepository : IStudentRepository
         {
             // Load the student along with all related entities
             var student = await _context.Students
-                .Include(s => s.TeacherStudents)    // Many-to-many via TeacherStudents
-                .Include(s => s.SubjectStudents)    // Many-to-many via SubjectStudents
                 .Include(s => s.StudentClassFees)   // Possibly referencing Student
                 .Include(s => s.AccountStudentGuardians) // Possibly referencing Student
                 .FirstOrDefaultAsync(s => s.StudentID == id);
 
             if (student == null)
                 return false; // No student found with this ID
-
-            // Remove related TeacherStudents if any
-            if (student.TeacherStudents != null && student.TeacherStudents.Any())
-                _context.TeacherStudents.RemoveRange(student.TeacherStudents);
-
-
-            // Remove related SubjectStudents if any
-            if (student.SubjectStudents != null && student.SubjectStudents.Any())
-                _context.SubjectStudents.RemoveRange(student.SubjectStudents);
 
 
             // Remove related StudentClassFees if any

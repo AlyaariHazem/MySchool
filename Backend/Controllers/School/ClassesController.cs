@@ -119,6 +119,28 @@ namespace Backend.Controllers.School
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }
+        // GET api/classes
+        [HttpGet("GetAllNameClasses")]
+        public async Task<ActionResult<APIResponse>> GetAllNameClasses()
+        {
+            var response = new APIResponse();
+
+            try
+            {
+                var classes = await _unitOfWork.Classes.GetAllNamesAsync();
+
+                response.Result = classes;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
 
         // GET api/classes/{id}
         [HttpGet("{id:int}")]

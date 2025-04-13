@@ -4,6 +4,7 @@ using System.Linq;
 using AutoMapper;
 using Backend.Data;
 using Backend.DTOS;
+using Backend.DTOS.School.Classes;
 using Backend.DTOS.School.Stages;
 using Backend.Models;
 using Microsoft.AspNetCore.JsonPatch;
@@ -36,7 +37,12 @@ namespace Backend.Repository.School
                 Console.WriteLine($"Error adding class: {ex.Message}");
             }
         }
-
+        public async Task<List<AllClassesDTO>> GetAllNamesAsync()
+        {
+            var classList = await _db.Classes.ToListAsync();
+            var classDTOList = _mapper.Map<List<AllClassesDTO>>(classList);
+            return classDTOList;
+        }
         public async Task Update(AddClassDTO model)
         {
             var existingClass = await _db.Classes.FirstOrDefaultAsync(c => c.ClassID == model.ClassID);

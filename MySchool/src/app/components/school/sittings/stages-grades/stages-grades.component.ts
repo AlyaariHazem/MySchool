@@ -1,8 +1,8 @@
 import { AfterViewInit, Component, HostListener, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Observable } from 'rxjs';
 import { PaginatorState } from 'primeng/paginator';
+import { ClassDTO } from '../../core/models/class.model';
 
 import { AddStage, Stage, updateStage } from '../../core/models/stages-grades.modul';
 import { StageService } from '../../core/services/stage.service';
@@ -20,7 +20,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   form: FormGroup;
   isEditMode = false;  // Track if we're in edit mode
   stageToEditId: number | null = null;
-  combinedData$: Observable<any[]> | undefined;
+  classes: ClassDTO[] = [];
   outerDropdownState: { [key: string]: boolean } = {};
   innerDropdownState: { [key: string]: { [key: string]: boolean } } = {};
   currentPage: { [key: string]: number } = {};
@@ -44,6 +44,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.getStage();
+    this.getAllClasses();
   }
 
   getStage(): void {
@@ -62,6 +63,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
 
     if (this.form.valid) {
       const addStageData: AddStage = this.form.value;
+      addStageData.YearID = Number(localStorage.getItem('yearId')|| 1);
       this.stageService.AddStage(addStageData).subscribe({
         next: () => {
           this.getStage();
@@ -152,7 +154,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   getAllClasses(): void {
     this.classService.GetAll().subscribe({
       next: (data) => {
-        this.combinedData$ = data;
+        this.classes= data;
       },
       error: () => this.errorMessage = 'Failed to load classes'
     });

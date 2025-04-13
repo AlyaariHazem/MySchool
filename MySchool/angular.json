@@ -40,15 +40,16 @@
               "node_modules/primeicons/primeicons.css",
               "node_modules/quill/dist/quill.core.css",
               "node_modules/quill/dist/quill.snow.css",
-              "node_modules/primeng/resources/themes/lara-light-blue/theme.css",
-              "node_modules/primeng/resources/primeng.min.css",
               "node_modules/primeflex/primeflex.css",
+              "src/assets/css/style.css",
               "src/styles.scss"
             ],
             "scripts": [
               "./node_modules/jquery/dist/jquery.min.js",
               "./node_modules/@popperjs/core/dist/umd/popper.min.js",
               "./node_modules/bootstrap/dist/js/bootstrap.js",
+              "src/assets/js/jquery-3.6.0.min.js",
+              "src/assets/js/app.js",
               "src/assets/js/bootstrap.bundle.min.js"
             ]
           },

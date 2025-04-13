@@ -14,7 +14,7 @@ import { DialogModule } from 'primeng/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatOption } from '@angular/material/core';
 import { PanelModule } from 'primeng/panel';
-import { ChipsModule } from 'primeng/chips';
+import { TabsModule } from 'primeng/tabs';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { EditorModule } from 'primeng/editor';
@@ -22,6 +22,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { TextareaModule } from 'primeng/textarea';
 
 
 import { SchoolRoutingModule } from './school-routing.module';
@@ -72,6 +73,8 @@ import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.c
 import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
 import { ReportComponent } from './report/report.component';
 import { CustomDatePipe } from '../../Pipes/customDate.pipe';
+import { InputTextModule } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
 
 
 
@@ -127,7 +130,9 @@ const modules = [
   ReactiveFormsModule,
   MatFormFieldModule,
   MatPaginatorModule,
+  TabsModule,
   CustomDatePipe,
+  Select,
   MatInputModule,
   MatOption,
   EditorModule,
@@ -139,6 +144,8 @@ const modules = [
   BreadcrumbModule,  
   MatAutocompleteModule,
   AsyncPipe,
+  TextareaModule,
+  InputTextModule,
   MatCardModule,
   MatDialogTitle,
   MatDialogContent,
@@ -150,7 +157,6 @@ const modules = [
   DialogModule,
   ButtonModule,
   PanelModule,
-  ChipsModule,
   InputMaskModule,
   CardModule,
   CountDirective,

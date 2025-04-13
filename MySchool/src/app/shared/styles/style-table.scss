@@ -47,12 +47,11 @@
 
 /* 2) Base table styles */
 .styled-table {
-  width: 100%;
+  width: 99%;
   border-collapse: collapse;
-  /* Ensure table can expand to accommodate columns comfortably */
-  min-width: 900px; /* Example width, adjust to your needs */
-  background-color: #fff; 
-  /* Optionally: box-shadow, border, etc. */
+  min-width: 900px;
+  margin: 0 7px 0 7px;
+  background-color: #fff;
 }
 
 /* 3) Table header styles */

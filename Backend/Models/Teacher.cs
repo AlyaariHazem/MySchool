@@ -22,8 +22,8 @@ namespace Backend.Models
     [JsonIgnore]
     public Manager Manager { get; set; }
     public virtual ICollection<Salary> Salaries { get; set; }
-    public virtual ICollection<TeacherStudent> TeacherStudents { get; set; }
-    public virtual ICollection<TeacherSubjectStudent> TeacherSubjectStudents { get; set; }
+    // public virtual ICollection<TeacherStudent> TeacherStudents { get; set; }
+    // public virtual ICollection<TeacherSubjectStudent> TeacherSubjectStudents { get; set; }
     public ICollection<CoursePlan> CoursePlans { get; set; }
 
   }

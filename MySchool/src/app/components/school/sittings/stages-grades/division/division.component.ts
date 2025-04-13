@@ -1,12 +1,12 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 
 import { Division, divisions } from '../../../core/models/division.model';
 import { DivisionService } from '../../../core/services/division.service';
-import { PageEvent } from '@angular/material/paginator';
 import { ClassService } from '../../../core/services/class.service';
 import { ClassDTO } from '../../../core/models/class.model';
+import { PaginatorState } from 'primeng/paginator';
 
 @Component({
   selector: 'app-division',
@@ -17,7 +17,8 @@ import { ClassDTO } from '../../../core/models/class.model';
 })
 export class DivisionComponent implements OnInit {
   divisions: Array<divisions> = [];
-  classes: ClassDTO[] = [];
+  PaginatedDivisions: Array<divisions> = [];
+  @Input() classes: ClassDTO[] = [];
   displayedDivisions: Array<divisions> = [];
   form: FormGroup;
   isEditMode: boolean = false;
@@ -49,7 +50,6 @@ export class DivisionComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllDivisions();
-    this.getAllClass();
   }
 
   getAllDivisions(): void {
@@ -57,18 +57,11 @@ export class DivisionComponent implements OnInit {
       next: (res) => {
         this.divisions = res;
         this.length = this.divisions.length; // Set total item count
-        this.updateDisplayedDivisions(); // Initialize displayed divisions
+        this.updatePaginatedData(); // Update displayed data
       },
       error: (err) => {
         this.toastr.error('Error fetching divisions', err);
       }
-    });
-  }
-
-  getAllClass(): void {
-    this.classService.GetAll().subscribe({
-      next: (res) => this.classes = res,
-      error: (err) => this.toastr.error('Error feched', 'Error', err)
     });
   }
 
@@ -81,7 +74,6 @@ export class DivisionComponent implements OnInit {
           this.form.reset();
           this.isEditMode = false;
           this.getAllDivisions();
-          this.getAllClass();
           this.toastr.success('Stage Added successfully', res.result);
         },
         error: () => this.toastr.error('Something went wrong')
@@ -113,7 +105,6 @@ export class DivisionComponent implements OnInit {
             this.toastr.success("Division updated successfully");
             this.form.reset();
             this.getAllDivisions();
-            this.getAllClass();
           }
         },
         error: () => this.toastr.error("Failed to Update Division")
@@ -141,18 +132,20 @@ export class DivisionComponent implements OnInit {
   }
 
   // Update displayed data based on pagination
-  updateDisplayedDivisions(): void {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.displayedDivisions = this.divisions.slice(startIndex, endIndex);
+  first: number = 0; // Current starting index
+  rows: number = 4; // Number of rows per page
+  updatePaginatedData(): void {
+    const start = this.first;
+    const end = this.first + this.rows;
+    this.PaginatedDivisions = this.divisions.slice(start, end);
   }
 
   // Handle paginator events
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateDisplayedDivisions();
-  }
+  onPageChange(event: PaginatorState): void {
+      this.first = event.first || 0; // Default to 0 if undefined
+      this.rows = event.rows || 4; // Default to 4 rows
+      this.updatePaginatedData();
+    }
 
   toggleStateDropdown(item: any): void {
     item.isDropdownOpen = !item.isDropdownOpen;

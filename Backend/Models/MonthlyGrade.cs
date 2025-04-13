@@ -7,11 +7,15 @@ namespace Backend.Models;
 
 public class MonthlyGrade
 {
-    public int MonthlyGradeID { get; set; }
 
     // Student/Subject
     public int StudentID { get; set; }
     public Student Student { get; set; }
+    // Student/Subject
+    public int YearID { get; set; }
+    public Year Year { get; set; }
+    public int TermID { get; set; }
+    public Term Term { get; set; }
 
     public int SubjectID { get; set; }
     public Subject Subject { get; set; }
@@ -29,6 +33,6 @@ public class MonthlyGrade
     public GradeType GradeType { get; set; }
 
     // The actual grade
-    public decimal Grade { get; set; }
+    public decimal? Grade { get; set; }
 }
 

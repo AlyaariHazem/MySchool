@@ -13,8 +13,8 @@ namespace Backend.Models
         public string? SubjectReplacement { get; set; }
         public string? Note { get; set; }
         public DateTime HireDate { get; set; }= DateTime.Now;
-        public virtual ICollection<SubjectStudent> SubjectStudents { get; set; }
-        public virtual ICollection<TeacherSubjectStudent> TeacherSubjectStudents { get; set; }
+        // public virtual ICollection<SubjectStudent> SubjectStudents { get; set; }
+        // public virtual ICollection<TeacherSubjectStudent> TeacherSubjectStudents { get; set; }
         public ICollection<MonthlyGrade> MonthlyGrades { get; set; }
         public ICollection<Curriculum> Curriculums { get; set; }
         public ICollection<CoursePlan> CoursePlans { get; set; }

@@ -44,23 +44,20 @@ namespace Backend.Repository.School
         }
 
         // Add a new curriculum
-        public async Task<CurriculumReturnDTO> AddAsync(CurriculumDTO dto)
+        public async Task<Boolean> AddAsync(CurriculumDTO dto)
         {
-            var entity = _mapper.Map<Curriculum>(dto);
+            try{
+                var entity = _mapper.Map<Curriculum>(dto);
             _context.Curriculums.Add(entity);
             await _context.SaveChangesAsync();
-
-            // Create the CurriculumReturnDTO to return
-            var curriculumReturn = new CurriculumReturnDTO
+            return true;
+            }
+            catch (Exception ex)
             {
-                SubjectName = entity.Subject.SubjectName, // Ensure SubjectName exists in your model
-                CurriculumName = entity.CurriculumName,
-                ClassName = entity.Class.ClassName, // Ensure ClassName exists in your model
-                Not = entity.Not,
-                HireDate = entity.HireDate
-            };
+                Console.WriteLine($"Error adding curriculum: {ex.Message}");
+                return false;
+            }
 
-            return curriculumReturn;
         }
 
         // Update existing curriculum

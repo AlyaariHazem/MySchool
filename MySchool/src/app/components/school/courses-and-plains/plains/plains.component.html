@@ -1,0 +1,115 @@
+<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
+
+    <h2 class="school">خطط المقررات</h2>
+
+    <!-- Reactive Form -->
+    <form [formGroup]="form">
+        <div class="group group2">
+            <!-- الصف -->
+            <div class="form-control">
+                <!-- onChange logic is in .ts via valueChanges -->
+                <p-dropdown [options]="classes" formControlName="classID" optionLabel="className" optionValue="classID"
+                    [showClear]="true" placeholder="اختر الصف">
+                </p-dropdown>
+            </div>
+
+            <!-- المقرر (subjects filtered by class) -->
+            <div class="form-control">
+                <p-dropdown [options]="filteredSubjects" formControlName="subjectID" optionLabel="subjectName"
+                    optionValue="subjectID" [showClear]="true" placeholder="اختر المقرر">
+                </p-dropdown>
+            </div>
+
+            <!-- الشعبة -->
+            <div class="form-control">
+                <p-dropdown [options]="fiteredDivisions" formControlName="divisionID" optionLabel="divisionName"
+                    optionValue="divisionID" [showClear]="true" placeholder="إختر الشعبة">
+                </p-dropdown>
+            </div>
+        </div>
+
+        <div class="group group2">
+            <!-- المعلم -->
+            <div class="form-control">
+                <p-dropdown [options]="teachers" formControlName="teacherID" optionLabel="fullName"
+                    optionValue="teacherID" [showClear]="true" placeholder="إختر المعلم">
+                </p-dropdown>
+            </div>
+
+            <!-- الفصل الدراسي -->
+            <div class="form-control term">
+                <p-dropdown [options]="filteredTerms" formControlName="termID" optionLabel="name" optionValue="termID"
+                    [showClear]="true" placeholder="إختر الفصل الدراسي">
+                </p-dropdown>
+            </div>
+
+        </div>
+
+        <!-- زر الحفظ -->
+        <p-button class="showFee" (onClick)="editMode ? updateCurriculum() : Add()"
+            [label]="editMode ? 'تعديل' : 'إضافة'">
+        </p-button>
+
+        <!-- حقل البحث -->
+        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا...">
+        </p-chips>
+    </form>
+
+    <!-- Responsive Table -->
+    <div class="table-container">
+        <mat-card>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم المقرر</th>
+                        <th>الشعبة</th>
+                        <th>اسم المعلم</th>
+                        <th>الفصل الدراسي</th>
+                        <th>العام</th>
+                        <th>العملية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (curriculm of curriculmsPlans; track $index) {
+                    <!-- @for replaced with *ngFor here, typical Angular syntax -->
+                    <tr *ngFor="let curriculum of curriculmsPlans; let i = index">
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ curriculum.coursePlanName }}</td>
+                        <td>{{ curriculum.divisionName }}</td>
+                        <td>{{ curriculum.teacherName }}</td>
+                        <td>{{ curriculum.termName }}</td>
+                        <td>{{ curriculum.year | date: 'yyyy-MM-dd' }}</td>
+                        <td>
+                            <div class="col text-left">
+                                <div class="mt-sm-0 mt-2">
+                                    <button class="btn btn-left update" type="button" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-left">
+                                        <a class="dropdown-item">
+                                            <i class="bi bi-pencil-square IconEdit"></i>
+                                            تعديل
+                                        </a>
+                                        <div role="separator" class="dropdown-divider"></div>
+                                        <a class="dropdown-item">
+                                            <i class="bi bi-trash IconDelete"></i>
+                                            حذف
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    }@empty {
+                    <p>No Data available in a Table</p>
+                    }
+                </tbody>
+            </table>
+            <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+                [totalRecords]="curriculmsPlan.length" [rowsPerPageOptions]="[4, 10, 20]">
+            </p-paginator>
+        </mat-card>
+    </div>
+</div>

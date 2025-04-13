@@ -85,7 +85,14 @@ public class TenantProvisioningService
                 SchoolID = newSchool.SchoolID
             };
 
+            var Newtenant = new Tenant
+            {
+                SchoolName = schoolName,
+                ConnectionString = newDbConnString
+            };
+
             await newDbContext.Years.AddAsync(currecntYear);
+            await newDbContext.Tenants.AddAsync(Newtenant);
             await newDbContext.SaveChangesAsync();
 
         }

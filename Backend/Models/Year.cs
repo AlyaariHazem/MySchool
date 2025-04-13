@@ -16,10 +16,11 @@ namespace Backend.Models
         public int SchoolID { get; set; }
         [JsonIgnore]
         public School School { get; set; }
-        public ICollection<Term> Terms { get; set; }
+        public ICollection<YearTermMonth> YearTermMonths { get; set; }
 
         public virtual ICollection<Stage> Stages { get; set; }
         public ICollection<CoursePlan> CoursePlans { get; set; }
+        public ICollection<MonthlyGrade> MonthlyGrades { get; set; }
 
 
     }

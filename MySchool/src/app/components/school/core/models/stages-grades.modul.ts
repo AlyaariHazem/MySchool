@@ -1,17 +1,16 @@
+import { Class } from "./classes.model";
+
 export interface AddStage {
     StageName: string,
     Note: string,
+    YearID:number
 }
 
 
 //these are model for Asp.net 
 
 // stage.model.ts
-export interface Class {
-    ClassID: number;
-    className: string;
-    StudentCount: number;
-}
+
 
 export interface Student {
     StudentID: number;

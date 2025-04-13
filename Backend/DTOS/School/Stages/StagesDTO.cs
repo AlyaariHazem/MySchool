@@ -12,4 +12,5 @@ public class StagesDTO
     public string StageName { get; set; }
     public string? Note { get; set; } = "لا يوجد";
     public bool Active { get; set; } = true;
+    public int YearID { get; set; }=1;
 }

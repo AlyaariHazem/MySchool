@@ -15,18 +15,13 @@
 .p-dropdown-items{
   width:100%!important;
 }
-//for dialog *********
-:host ::ng-deep .p-ripple.p-button{
-    border-radius: 3rem!important;
-    height: 2rem !important;
-    background-color: #12a212;
-}
+
 :host ::ng-deep .p-dialog-header-close{
     background-color: white!important;
 }//***********************
 .school{
   margin-right: 5px;
-  margin-top: -3rem;
+  margin-top: 0rem;
 }
 
 // this for form

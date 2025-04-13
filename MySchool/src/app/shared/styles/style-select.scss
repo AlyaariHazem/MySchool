@@ -1,58 +1,59 @@
 :host {
-    ::ng-deep {
-      .p-dropdown {
-        position: relative !important;
-        border-radius: 8px !important;
-        width: 100% !important;
-        padding: 4px !important;
-  
-        &.p-focus {
-          border: 2px solid #2fdf85 !important;
-          box-shadow: 0 0 4px #1dc16c !important;
-        }
-  
-        &:hover {
-          border-color: #2fdf85 !important;
-          box-shadow: 0 0 8px #2fdf85 !important;
-        }
-  
-        .p-dropdown-clear-icon {
-          right: auto !important;
-          left: 2.5rem !important;
-        }
+  ::ng-deep {
+    .p-dropdown {
+      position: relative !important;
+      border-radius: 8px !important;
+      width: 100% !important;
+      padding: 8px !important;
+
+      &.p-focus {
+        border: 2px solid #2fdf85 !important;
+        box-shadow: 0 0 4px #1dc16c !important;
       }
-  
-      ul {
-        padding-left: 0rem !important;
+
+      &:hover {
+        border-color: #2fdf85 !important;
+        box-shadow: 0 0 8px #2fdf85 !important;
+      }
+
+      .p-select-clear-icon {
+        position: static !important;
+        margin-top: 0rem;
       }
     }
+
+    ul {
+      padding-left: 0rem !important;
+    }
   }
-  
+}
+
 :host {
-    ::ng-deep {
-      .en{
+  ::ng-deep {
+    .en {
       .p-dropdown {
         position: relative !important;
         border-radius: 8px !important;
         width: 100% !important;
-        padding: 4px !important;
-  
+        padding: 8px !important;
+
         &.p-focus {
           border: 2px solid #2fdf85 !important;
           box-shadow: 0 0 4px #1dc16c !important;
         }
-  
+
         &:hover {
           border-color: #2fdf85 !important;
           box-shadow: 0 0 8px #2fdf85 !important;
         }
-  
+
         .p-dropdown-clear-icon {
-          left: auto !important;
-          right: 2.5rem !important;
+          position: initial!important;
+          left: 2.5rem !important;
+          margin-top: 0rem;
         }
       }
-  
+
       ul {
         padding-left: 0rem !important;
       }

@@ -21,3 +21,6 @@
     border: 1px solid #c0c0c0 !important;
   }
 }
+:host ::ng-deep .p-breadcrumb-separator .p-icon:dir(rtl) {
+   transform: rotate(0deg)!important; 
+}

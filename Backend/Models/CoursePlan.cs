@@ -7,8 +7,6 @@ namespace Backend.Models;
 
 public class CoursePlan
 {
-     public int CoursePlanID { get; set; }
-
     // e.g. 2021-2022
     public int YearID { get; set; }
     public Year Year { get; set; }

@@ -171,17 +171,17 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "51bb76a6-a4d3-409e-a93d-57e76c56b0fd",
+                            ConcurrencyStamp = "e80c72af-78ab-43df-a1e3-81f5598b4d9c",
                             Email = "ALYAARIHAZEM@GMAIL.COM",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 4, 10, 19, 12, 35, 402, DateTimeKind.Local).AddTicks(6693),
+                            HireDate = new DateTime(2025, 4, 12, 23, 7, 18, 293, DateTimeKind.Local).AddTicks(7539),
                             LockoutEnabled = false,
                             NormalizedEmail = "ALYAARIHAZEM@GMAIL.COM",
                             NormalizedUserName = "MANAGER",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMRnnbi/jpnD5nu1ZdkE5PlQQgDpOJkRT2O7m0nG5lniNBJJefc8E6lleAMuXGeDVQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEDkPEvEcdvTt84yukm1NmriLfFXr/wu7R3V8viJ/FHZRdCL385oUgmMbZaOKEm9aDw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "2f0c8581-b780-4518-8d0d-fe275ef5a6c3",
+                            SecurityStamp = "f06faea1-4be6-4964-99ed-402719426ed7",
                             TwoFactorEnabled = false,
                             UserName = "MANAGER",
                             UserType = "MANAGER"
@@ -246,11 +246,11 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.CoursePlan", b =>
                 {
-                    b.Property<int>("CoursePlanID")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("YearID")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CoursePlanID"));
+                    b.Property<int>("TeacherID")
+                        .HasColumnType("int");
 
                     b.Property<int>("ClassID")
                         .HasColumnType("int");
@@ -261,16 +261,10 @@ namespace Backend.Migrations
                     b.Property<int>("SubjectID")
                         .HasColumnType("int");
 
-                    b.Property<int>("TeacherID")
-                        .HasColumnType("int");
-
                     b.Property<int>("TermID")
                         .HasColumnType("int");
 
-                    b.Property<int>("YearID")
-                        .HasColumnType("int");
-
-                    b.HasKey("CoursePlanID");
+                    b.HasKey("YearID", "TeacherID", "ClassID", "DivisionID", "SubjectID");
 
                     b.HasIndex("ClassID");
 
@@ -281,8 +275,6 @@ namespace Backend.Migrations
                     b.HasIndex("TeacherID");
 
                     b.HasIndex("TermID");
-
-                    b.HasIndex("YearID");
 
                     b.ToTable("CoursePlans");
                 });
@@ -302,7 +294,7 @@ namespace Backend.Migrations
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Not")
+                    b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SubjectID", "ClassID");
@@ -542,55 +534,106 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.Month", b =>
                 {
                     b.Property<int>("MonthID")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MonthID"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TermID")
-                        .HasColumnType("int");
-
                     b.HasKey("MonthID");
 
-                    b.HasIndex("TermID");
-
                     b.ToTable("Months");
+
+                    b.HasData(
+                        new
+                        {
+                            MonthID = 1,
+                            Name = "يناير"
+                        },
+                        new
+                        {
+                            MonthID = 2,
+                            Name = "فبراير"
+                        },
+                        new
+                        {
+                            MonthID = 3,
+                            Name = "مارس"
+                        },
+                        new
+                        {
+                            MonthID = 4,
+                            Name = "أبريل"
+                        },
+                        new
+                        {
+                            MonthID = 5,
+                            Name = "مايو"
+                        },
+                        new
+                        {
+                            MonthID = 6,
+                            Name = "يونيو"
+                        },
+                        new
+                        {
+                            MonthID = 7,
+                            Name = "يوليو"
+                        },
+                        new
+                        {
+                            MonthID = 8,
+                            Name = "أغسطس"
+                        },
+                        new
+                        {
+                            MonthID = 9,
+                            Name = "سبتمبر"
+                        },
+                        new
+                        {
+                            MonthID = 10,
+                            Name = "أكتوبر"
+                        },
+                        new
+                        {
+                            MonthID = 11,
+                            Name = "نوفمبر"
+                        },
+                        new
+                        {
+                            MonthID = 12,
+                            Name = "ديسمبر"
+                        });
                 });
 
             modelBuilder.Entity("Backend.Models.MonthlyGrade", b =>
                 {
-                    b.Property<int>("MonthlyGradeID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MonthlyGradeID"));
-
-                    b.Property<int>("ClassID")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Grade")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("GradeTypeID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MonthID")
-                        .HasColumnType("int");
-
                     b.Property<int>("StudentID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("YearID")
                         .HasColumnType("int");
 
                     b.Property<int>("SubjectID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TermID")
+                    b.Property<int>("MonthID")
                         .HasColumnType("int");
 
-                    b.HasKey("MonthlyGradeID");
+                    b.Property<int>("GradeTypeID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClassID")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Grade")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TermID")
+                        .HasColumnType("int");
+
+                    b.HasKey("StudentID", "YearID", "SubjectID", "MonthID", "GradeTypeID", "ClassID");
 
                     b.HasIndex("ClassID");
 
@@ -601,6 +644,8 @@ namespace Backend.Migrations
                     b.HasIndex("SubjectID");
 
                     b.HasIndex("TermID");
+
+                    b.HasIndex("YearID");
 
                     b.HasIndex("StudentID", "SubjectID", "MonthID", "GradeTypeID")
                         .IsUnique();
@@ -845,24 +890,6 @@ namespace Backend.Migrations
                     b.ToTable("Subjects");
                 });
 
-            modelBuilder.Entity("Backend.Models.SubjectStudent", b =>
-                {
-                    b.Property<int>("SubjectID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StudentID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Grade")
-                        .HasColumnType("int");
-
-                    b.HasKey("SubjectID", "StudentID");
-
-                    b.HasIndex("StudentID");
-
-                    b.ToTable("SubjectStudents");
-                });
-
             modelBuilder.Entity("Backend.Models.Teacher", b =>
                 {
                     b.Property<int>("TeacherID")
@@ -886,41 +913,6 @@ namespace Backend.Migrations
                         .IsUnique();
 
                     b.ToTable("Teachers");
-                });
-
-            modelBuilder.Entity("Backend.Models.TeacherStudent", b =>
-                {
-                    b.Property<int>("StudentID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TeacherID")
-                        .HasColumnType("int");
-
-                    b.HasKey("StudentID", "TeacherID");
-
-                    b.HasIndex("TeacherID");
-
-                    b.ToTable("TeacherStudents");
-                });
-
-            modelBuilder.Entity("Backend.Models.TeacherSubjectStudent", b =>
-                {
-                    b.Property<int>("TeacherID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StudentID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubjectID")
-                        .HasColumnType("int");
-
-                    b.HasKey("TeacherID", "StudentID", "SubjectID");
-
-                    b.HasIndex("StudentID");
-
-                    b.HasIndex("SubjectID");
-
-                    b.ToTable("TeacherSubjectStudent");
                 });
 
             modelBuilder.Entity("Backend.Models.Tenant", b =>
@@ -956,28 +948,32 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("YearID")
-                        .HasColumnType("int");
-
                     b.HasKey("TermID");
 
-                    b.HasIndex("YearID");
-
                     b.ToTable("Terms");
+
+                    b.HasData(
+                        new
+                        {
+                            TermID = 1,
+                            Name = "الأول"
+                        },
+                        new
+                        {
+                            TermID = 2,
+                            Name = "الثاني"
+                        });
                 });
 
             modelBuilder.Entity("Backend.Models.TermlyGrade", b =>
                 {
-                    b.Property<int>("TermlyGradeID")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("TermID")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TermlyGradeID"));
 
                     b.Property<int>("ClassID")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Grade")
+                    b.Property<decimal?>("Grade")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Note")
@@ -989,18 +985,16 @@ namespace Backend.Migrations
                     b.Property<int>("SubjectID")
                         .HasColumnType("int");
 
-                    b.Property<int>("TermID")
+                    b.Property<int>("TermlyGradeID")
                         .HasColumnType("int");
 
-                    b.HasKey("TermlyGradeID");
+                    b.HasKey("TermID");
 
                     b.HasIndex("ClassID");
 
                     b.HasIndex("StudentID");
 
                     b.HasIndex("SubjectID");
-
-                    b.HasIndex("TermID");
 
                     b.ToTable("TermlyGrades");
                 });
@@ -1113,6 +1107,26 @@ namespace Backend.Migrations
                     b.HasIndex("SchoolID");
 
                     b.ToTable("Years");
+                });
+
+            modelBuilder.Entity("Backend.Models.YearTermMonth", b =>
+                {
+                    b.Property<int>("YearID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TermID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MonthID")
+                        .HasColumnType("int");
+
+                    b.HasKey("YearID", "TermID", "MonthID");
+
+                    b.HasIndex("MonthID");
+
+                    b.HasIndex("TermID");
+
+                    b.ToTable("YearTermMonths");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -1504,17 +1518,6 @@ namespace Backend.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("Backend.Models.Month", b =>
-                {
-                    b.HasOne("Backend.Models.Term", "Term")
-                        .WithMany("Months")
-                        .HasForeignKey("TermID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Term");
-                });
-
             modelBuilder.Entity("Backend.Models.MonthlyGrade", b =>
                 {
                     b.HasOne("Backend.Models.Class", "Class")
@@ -1547,9 +1550,17 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.Term", null)
+                    b.HasOne("Backend.Models.Term", "Term")
                         .WithMany("MonthlyGrades")
-                        .HasForeignKey("TermID");
+                        .HasForeignKey("TermID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.Year", "Year")
+                        .WithMany("MonthlyGrades")
+                        .HasForeignKey("YearID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Class");
 
@@ -1560,6 +1571,10 @@ namespace Backend.Migrations
                     b.Navigation("Student");
 
                     b.Navigation("Subject");
+
+                    b.Navigation("Term");
+
+                    b.Navigation("Year");
                 });
 
             modelBuilder.Entity("Backend.Models.Salary", b =>
@@ -1681,31 +1696,12 @@ namespace Backend.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("Backend.Models.SubjectStudent", b =>
-                {
-                    b.HasOne("Backend.Models.Student", "Student")
-                        .WithMany("SubjectStudents")
-                        .HasForeignKey("StudentID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.Subject", "Subject")
-                        .WithMany("SubjectStudents")
-                        .HasForeignKey("SubjectID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-
-                    b.Navigation("Subject");
-                });
-
             modelBuilder.Entity("Backend.Models.Teacher", b =>
                 {
                     b.HasOne("Backend.Models.Manager", "Manager")
-                        .WithMany("Teachers")
+                        .WithMany()
                         .HasForeignKey("ManagerID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Backend.Models.ApplicationUser", "ApplicationUser")
@@ -1744,63 +1740,6 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Manager");
-                });
-
-            modelBuilder.Entity("Backend.Models.TeacherStudent", b =>
-                {
-                    b.HasOne("Backend.Models.Student", "Student")
-                        .WithMany("TeacherStudents")
-                        .HasForeignKey("StudentID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.Teacher", "Teacher")
-                        .WithMany("TeacherStudents")
-                        .HasForeignKey("TeacherID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-
-                    b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("Backend.Models.TeacherSubjectStudent", b =>
-                {
-                    b.HasOne("Backend.Models.Student", "Student")
-                        .WithMany("TeacherSubjectStudents")
-                        .HasForeignKey("StudentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.Subject", "Subject")
-                        .WithMany("TeacherSubjectStudents")
-                        .HasForeignKey("SubjectID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.Teacher", "Teacher")
-                        .WithMany("TeacherSubjectStudents")
-                        .HasForeignKey("TeacherID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-
-                    b.Navigation("Subject");
-
-                    b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("Backend.Models.Term", b =>
-                {
-                    b.HasOne("Backend.Models.Year", "Year")
-                        .WithMany("Terms")
-                        .HasForeignKey("YearID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Year");
                 });
 
             modelBuilder.Entity("Backend.Models.TermlyGrade", b =>
@@ -1858,6 +1797,33 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("School");
+                });
+
+            modelBuilder.Entity("Backend.Models.YearTermMonth", b =>
+                {
+                    b.HasOne("Backend.Models.Month", "Month")
+                        .WithMany("YearTermMonths")
+                        .HasForeignKey("MonthID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.Term", "Term")
+                        .WithMany("YearTermMonths")
+                        .HasForeignKey("TermID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.Year", "Year")
+                        .WithMany("YearTermMonths")
+                        .HasForeignKey("YearID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Month");
+
+                    b.Navigation("Term");
+
+                    b.Navigation("Year");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1976,14 +1942,11 @@ namespace Backend.Migrations
                     b.Navigation("Students");
                 });
 
-            modelBuilder.Entity("Backend.Models.Manager", b =>
-                {
-                    b.Navigation("Teachers");
-                });
-
             modelBuilder.Entity("Backend.Models.Month", b =>
                 {
                     b.Navigation("MonthlyGrades");
+
+                    b.Navigation("YearTermMonths");
                 });
 
             modelBuilder.Entity("Backend.Models.School", b =>
@@ -2009,12 +1972,6 @@ namespace Backend.Migrations
 
                     b.Navigation("StudentClassFees");
 
-                    b.Navigation("SubjectStudents");
-
-                    b.Navigation("TeacherStudents");
-
-                    b.Navigation("TeacherSubjectStudents");
-
                     b.Navigation("TermlyGrades");
                 });
 
@@ -2026,10 +1983,6 @@ namespace Backend.Migrations
 
                     b.Navigation("MonthlyGrades");
 
-                    b.Navigation("SubjectStudents");
-
-                    b.Navigation("TeacherSubjectStudents");
-
                     b.Navigation("TermlyGrades");
                 });
 
@@ -2038,10 +1991,6 @@ namespace Backend.Migrations
                     b.Navigation("CoursePlans");
 
                     b.Navigation("Salaries");
-
-                    b.Navigation("TeacherStudents");
-
-                    b.Navigation("TeacherSubjectStudents");
                 });
 
             modelBuilder.Entity("Backend.Models.Tenant", b =>
@@ -2056,9 +2005,9 @@ namespace Backend.Migrations
 
                     b.Navigation("MonthlyGrades");
 
-                    b.Navigation("Months");
-
                     b.Navigation("TermlyGrades");
+
+                    b.Navigation("YearTermMonths");
                 });
 
             modelBuilder.Entity("Backend.Models.TypeAccount", b =>
@@ -2075,9 +2024,11 @@ namespace Backend.Migrations
                 {
                     b.Navigation("CoursePlans");
 
+                    b.Navigation("MonthlyGrades");
+
                     b.Navigation("Stages");
 
-                    b.Navigation("Terms");
+                    b.Navigation("YearTermMonths");
                 });
 #pragma warning restore 612, 618
         }

@@ -15,6 +15,9 @@ import { provideEffects } from '@ngrx/effects';
 import { LanguageEffect } from './core/store/language/language.effect';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { AppTranslateModule } from './shared/modules/app-translate.module';
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeng/themes/aura';
+
 // import { IntercepterService } from './core/services/intercepter.service';
 
 export const appConfig: ApplicationConfig = {
@@ -22,6 +25,14 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     importProvidersFrom(AppTranslateModule.forRoot()),
     provideAnimationsAsync(),
+    providePrimeNG({ 
+        theme: {
+            preset: Aura,
+            options: {
+                darkModeSelector: false || 'none'
+            }
+        }
+    }),
     provideHttpClient(withInterceptorsFromDi()),
     provideHttpClient(withFetch()),
     provideAnimations(), // required animations providers

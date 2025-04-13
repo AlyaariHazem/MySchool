@@ -11,3 +11,8 @@ export interface Division{
     divisionName:string;
     classID:number;
   }
+
+  export interface DivisionName{
+    divisionID:number;
+    divisionName:string;
+  }

@@ -1,75 +1,66 @@
-<div id="Contact" class="tabcontent">
-  <mat-paginator [ngStyle]="{ position: 'relative', top: '-10px' }" [length]="length" [pageSize]="pageSize"
-    [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
-  </mat-paginator>
+<form [formGroup]="form" class="From">
+  <label for="Class" class="termName">اسم الصف </label><br />
+  <p-select [options]="classes" optionLabel="className" [showClear]="true" name="Class" optionValue="stageID"
+    formControlName="ClassID" id="term" class="term" />
 
-  <form [formGroup]="form" class="From">
-    <label for="Class" class="termName">اسم الصف </label><br />
-    <select name="Class" formControlName="ClassID" id="term" class="term" value="إختار الصف">
-      <option value="" disabled selected>إختار صــف</option>
+  <label for="className" class="className">اسـم الشبعة</label>
+  <input type="text" formControlName="divisionName" class="class" placeholder="إدخال اسم صـف جديد" />
+  <p-button class="showFee" [label]="isEditMode ? 'تحديث' : 'إضافة'"
+    (click)="isEditMode ? updateDivision() : AddDivision()" [disabled]="!form.valid" />
+</form>
 
-      @for (Class of classes; track $index) {
-
-      <option [value]="Class.classID">{{ Class.className }}</option>
-      }
-    </select>
-    <label for="className" class="className">اسـم الشبعة</label>
-    <input type="text" formControlName="divisionName" class="class" placeholder="إدخال اسم صـف جديد" />
-    <input type="submit" class="btn btn-primary add school-btn" [value]="isEditMode ? 'تحديث' : 'إضافة'"
-      (click)="isEditMode ? updateDivision() : AddDivision()" [disabled]="!form.valid" />
-  </form>
-
-  <table class="styled-table" style="overflow-y: hidden; width: 105%">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>رمز الشعبة</th>
-        <th>الصـف</th>
-        <th>إجمالي الطلاب</th>
-        <th>ملاحظة</th>
-        <th>الحالة</th>
-        <th>العملية</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (div of displayedDivisions; track $index;let i = $index) {
+<table class="styled-table" style="overflow-y: hidden; width: 100%">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>رمز الشعبة</th>
+      <th>الصـف</th>
+      <th>إجمالي الطلاب</th>
+      <th>ملاحظة</th>
+      <th>الحالة</th>
+      <th>العملية</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (div of PaginatedDivisions; track $index;let i = $index) {
 
 
-      <tr>
-        <td>{{ currentPage * pageSize + i + 1 }}</td>
-        <td>{{ div.divisionName }}</td>
-        <td>{{ div.classesName }}</td>
-        <td>{{ div.studentCount }}</td>
-        <td>{{ "لا يوجد ملاحظة" }}</td>
-        <td>
-          <div class="dropdown dropdown-toggle" ngClass="{{ div.state ? '' : 'active' }}" data-toggle="dropdown" (click)="toggleStateDropdown(div)">
-            <span class="">
-              {{ div.state ? "نشط" : "خامل" }}
-            </span>
-            <div class="dropdown-menu" style="margin-left: 2rem">
-              <span class="dropdown-item" (click)="changeState(div, true)">نشط</span>
-              <span class="dropdown-item" (click)="changeState(div, false)">خامل</span>
-            </div>
+    <tr>
+      <td>{{ currentPage * pageSize + i + 1 }}</td>
+      <td>{{ div.divisionName }}</td>
+      <td>{{ div.classesName }}</td>
+      <td>{{ div.studentCount }}</td>
+      <td>{{ "لا يوجد ملاحظة" }}</td>
+      <td>
+        <div class="dropdown dropdown-toggle" ngClass="{{ div.state ? '' : 'active' }}" data-toggle="dropdown"
+          (click)="toggleStateDropdown(div)">
+          <span class="">
+            {{ div.state ? "نشط" : "خامل" }}
+          </span>
+          <div class="dropdown-menu" style="margin-left: 2rem">
+            <span class="dropdown-item" (click)="changeState(div, true)">نشط</span>
+            <span class="dropdown-item" (click)="changeState(div, false)">خامل</span>
           </div>
-        </td>
-        <td>
-          <div class="col text-left">
-            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-              aria-expanded="false">
-              <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-left">
-              <a class="dropdown-item" (click)="editDivision(div)"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-              <div role="separator" class="dropdown-divider"></div>
-              <a class="dropdown-item" (click)="DeleteDivision(div.divisionID)"><i
-                  class="bi bi-trash IconDelete"></i>حذف</a>
-            </div>
+        </div>
+      </td>
+      <td>
+        <div class="col text-left">
+          <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-ellipsis-h"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-left">
+            <a class="dropdown-item" (click)="editDivision(div)"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+            <div role="separator" class="dropdown-divider"></div>
+            <a class="dropdown-item" (click)="DeleteDivision(div.divisionID)"><i
+                class="bi bi-trash IconDelete"></i>حذف</a>
           </div>
-        </td>
-      </tr>
-      }@empty {
-        <p>No Data available in a Table</p> 
-      }
-    </tbody>
-  </table>
-</div>
+        </div>
+      </td>
+    </tr>
+    }@empty {
+    <p>No Data available in a Table</p>
+    }
+  </tbody>
+</table>
+<p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="divisions.length"
+  [rowsPerPageOptions]="[4, 8, 16]" />

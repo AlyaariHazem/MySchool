@@ -34,64 +34,50 @@ public class YearRepository : IYearRepository
         await _context.SaveChangesAsync();
         yearDTO.YearID = newYear.YearID;
         
-        var term = new Term
-        {
-            TermID = 0,
-            YearID = yearDTO.YearID ?? 1,
-            Name = "الأول"
+        // Add the YearTermMonth entries
+        var YearTermMonths = new List<YearTermMonth>(){
+            new YearTermMonth(){
+                YearID = newYear.YearID,
+                TermID = 1,
+                MonthID = 5
+            },
+            new YearTermMonth(){
+                YearID = newYear.YearID,
+                TermID = 1,
+                MonthID = 6
+            },
+            new YearTermMonth(){
+                YearID = newYear.YearID,
+                TermID = 1,
+                MonthID = 7
+            },
+            new YearTermMonth(){
+                YearID = newYear.YearID,
+                TermID = 2,
+                MonthID = 8
+            },
+            new YearTermMonth(){
+                YearID = newYear.YearID,
+                TermID = 2,
+                MonthID = 9
+            },
+            new YearTermMonth(){
+                YearID = newYear.YearID,
+                TermID = 2,
+                MonthID = 10
+            },
+            new YearTermMonth(){
+                YearID = newYear.YearID,
+                TermID = 2,
+                MonthID = 11
+            },
+            new YearTermMonth(){
+                YearID = newYear.YearID,
+                TermID = 2,
+                MonthID = 12
+            }
         };
-        var term2 = new Term
-        {
-            TermID = 0,
-            YearID = yearDTO.YearID ?? 1,
-            Name = "الثاني"
-        };
-        _context.Terms.Add(term);
-        _context.Terms.Add(term2);
-        await _context.SaveChangesAsync();
-        
-        var month2 = new Month
-        {
-            MonthID = 0,
-            TermID = term.TermID,
-            Name = "يوليو"
-        };
-        var month3 = new Month
-        {
-            MonthID = 0,
-            TermID = term.TermID,
-            Name = "أغسطس"
-        };
-        var month4 = new Month
-        {
-            MonthID = 0,
-            TermID = term.TermID,
-            Name = "سبتمبر"
-        };
-        var month5 = new Month
-        {
-            MonthID = 0,
-            TermID = term2.TermID,
-            Name = "أكتوبر"
-        };
-        var month6 = new Month
-        {
-            MonthID = 0,
-            TermID = term2.TermID,
-            Name = "نوفمبر"
-        };
-        var month7 = new Month
-        {
-            MonthID = 0,
-            TermID = term2.TermID,
-            Name = "ديسمبر"
-        };
-        _context.Months.Add(month2);
-        _context.Months.Add(month3);
-        _context.Months.Add(month4);
-        _context.Months.Add(month5);
-        _context.Months.Add(month6);
-        _context.Months.Add(month7);
+        await _context.YearTermMonths.AddRangeAsync(YearTermMonths);
         await _context.SaveChangesAsync();
 
     }

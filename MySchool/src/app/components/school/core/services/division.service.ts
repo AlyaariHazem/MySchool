@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BackendAspService } from '../../../../environments/ASP.NET/backend-asp.service';
 import { catchError, map, Observable } from 'rxjs';
-import { Division } from '../models/division.model';
+import { Division, divisions } from '../models/division.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +11,8 @@ export class DivisionService {
 
   constructor() { }
 
-  GetAll(): Observable<any> {
-    return this.API.http.get<any>(`${this.API.baseUrl}/Divisions`).pipe(
-      map(response=> response.result),
-    );
+  GetAll(): Observable<divisions[]> {
+    return this.API.getRequest<divisions[]>('Divisions');
   }
   Add(division: Division): Observable<any> {
     return this.API.http.post<any>(`${this.API.baseUrl}/Divisions`, division).pipe(

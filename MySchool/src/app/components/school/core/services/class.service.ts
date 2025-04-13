@@ -15,6 +15,9 @@ export class ClassService {
   GetAll(): Observable<any> {
     return this.API.getRequest<any>("Classes");
   }
+  GetAllNames(): Observable<any> {
+    return this.API.getRequest<any>("Classes/GetAllNameClasses");
+  }
 
   // Add a new class
   Add(Class: CLass): Observable<any> {

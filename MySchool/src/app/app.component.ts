@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { AdminModule } from "./components/admin/admin.module";
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { PrimeNG } from 'primeng/config';
 
 @Component({
     selector: 'app-root',
@@ -18,7 +19,7 @@ export class AppComponent {
 
   @Input() userIsAdmin=true;
   lang$:Observable<string>
-  constructor(private router: Router,private store:Store<{language:string}>) {
+  constructor(private router: Router,private store:Store<{language:string}>,private primeng: PrimeNG) {
     this.lang$=this.store.select("language");
   }
 
@@ -29,5 +30,11 @@ export class AppComponent {
         this.showOutlet = !event.url.includes('/login');
       }
     });
+    this.primeng.zIndex = {
+      modal: 1100,    // dialog, sidebar
+      overlay: 1000,  // dropdown, overlaypanel
+      menu: 1000,     // overlay menus
+      tooltip: 1100   // tooltip
+  };
   }
 }

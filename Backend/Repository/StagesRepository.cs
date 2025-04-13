@@ -25,19 +25,18 @@ namespace Backend.Repository
             if (model == null)
                 throw new ArgumentNullException(nameof(model), "The model cannot be null.");
 
-            var year = await context.Years.FirstOrDefaultAsync(x => x.Active == true);//when I debugging it reach to here and stop it does not contounus to end
             // var AddStage=_mapper.Map<Stage>(model);
-            Stage newStage = new Stage
+            Stage newStage = new()
             {
                 StageName = model.StageName,
                 Note = model.Note ?? string.Empty,
                 Active = model.Active,
                 HireDate = DateTime.Now,
-                YearID = year!=null?year.YearID:1
+                YearID = model.YearID
             };
 
-           await context.Stages.AddAsync(newStage);
-           await context.SaveChangesAsync();
+            await context.Stages.AddAsync(newStage);
+            await context.SaveChangesAsync();
         }
 
 
@@ -51,7 +50,7 @@ namespace Backend.Repository
                 existingStage.Note = model.Note ?? string.Empty;
 
                 context.Entry(existingStage).State = EntityState.Modified; // Mark the entity as modified
-              await context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
         }
 
@@ -72,9 +71,9 @@ namespace Backend.Repository
         }
         public async Task SaveAsync()
         {
-           await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
-        
+
         public async Task<List<StageDTO>> GetAll()
         {
             var stageList = await context.Stages
@@ -82,34 +81,34 @@ namespace Backend.Repository
                 .ThenInclude(c => c.FeeClasses) // Include StudentClass for counting students
                 .ThenInclude(fc => fc.StudentClassFees)
                 .ToListAsync();
-                
+
             var ListstageDTO = _mapper.Map<List<StageDTO>>(stageList);
             return ListstageDTO;
         }
 
         public async Task<bool> UpdatePartial(int id, JsonPatchDocument<StagesDTO> partialStage)
         {
-                if (partialStage == null || id == 0)
-                    return false;
+            if (partialStage == null || id == 0)
+                return false;
 
-                // Retrieve the stage entity by its ID
-                var stage = await context.Stages.SingleOrDefaultAsync(s => s.StageID == id);
-                if (stage == null)
-                    return false;
+            // Retrieve the stage entity by its ID
+            var stage = await context.Stages.SingleOrDefaultAsync(s => s.StageID == id);
+            if (stage == null)
+                return false;
 
-                // Map the stage entity to the DTO (this will be modified)
-                var stageDTO = _mapper.Map<StagesDTO>(stage);
+            // Map the stage entity to the DTO (this will be modified)
+            var stageDTO = _mapper.Map<StagesDTO>(stage);
 
-                // Apply the patch to the DTO
-                partialStage.ApplyTo(stageDTO);
+            // Apply the patch to the DTO
+            partialStage.ApplyTo(stageDTO);
 
-                // Map the patched DTO back to the entity (stage)
-                _mapper.Map(stageDTO, stage);
+            // Map the patched DTO back to the entity (stage)
+            _mapper.Map(stageDTO, stage);
 
-                // Mark the entity as modified and save changes
-                context.Entry(stage).State = EntityState.Modified;
-                await context.SaveChangesAsync();
-                return true;
+            // Mark the entity as modified and save changes
+            context.Entry(stage).State = EntityState.Modified;
+            await context.SaveChangesAsync();
+            return true;
         }
 
     }

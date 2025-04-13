@@ -88,15 +88,14 @@
     }
   }
   .btn-custom {
-    background-color: white !important;
-    color: black !important;
+    background-color: #198754 !important; 
+    color: white !important;
     border: 1px solid #28a745 !important; /* same green as btn-success */
     transition: all 0.3s ease; /* smooth transition on hover */
   }
   
   .btn-custom:hover {
-    background-color: #198754 !important; /* green background on hover */
-    color: white !important;             /* white text on hover */
+    background-color: #21943c !important; /* green background on hover */
     border: 1px solid #28a745 !important; /* maintain the border */
   }
     

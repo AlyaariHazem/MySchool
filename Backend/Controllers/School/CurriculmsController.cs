@@ -36,7 +36,11 @@ namespace Backend.Controllers.School
                 var created = await _unitOfWork.Curriculums.AddAsync(dto);
                 await _unitOfWork.CompleteAsync();
 
-                response.Result = created;
+                if(created == false)
+                response.Result = "Curriculum already exists.";
+                else
+                response.Result = "Curriculum added successfully.";
+
                 response.statusCode = HttpStatusCode.Created;
                 return Ok(response);
             }
