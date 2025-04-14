@@ -26,21 +26,22 @@ namespace Backend.Repository
                 throw new ArgumentNullException(nameof(teacher), "Teacher DTO cannot be null.");
 
             // Create the User for Teacher
-            var guardianUser = new ApplicationUser
+            var teacherUser = new ApplicationUser
             {
-                UserName = "Teacher_" + Guid.NewGuid().ToString("N").Substring(0, 5),
+                UserName = teacher.UserName,
                 Email = teacher.Email,
                 Address = teacher.Address,
                 Gender = teacher.Gender,
                 PhoneNumber = teacher.PhoneNumber,
-                UserType = "Teacher" // Ensure the UserType field exists in the ApplicationUser model
+                UserType = "TEACHER" // Ensure the UserType field exists in the ApplicationUser model
             };
+            
 
             // Add User to database
-            _context.Users.Add(guardianUser);
+            _context.Users.Add(teacherUser);
             await _context.SaveChangesAsync(); // Use SaveChangesAsync() for async IO
 
-            teacher.UserID = guardianUser.Id;
+            teacher.UserID = teacherUser.Id;
 
             // Create Teacher entity
             var newTeacher = new Teacher

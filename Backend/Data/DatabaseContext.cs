@@ -540,6 +540,14 @@ namespace Backend.Data
                 new IdentityRole
                 {
                     Id = "1",
+                    Name = "ADMIN",
+                    NormalizedName = "ADMIN"
+                }
+            );
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "2",
                     Name = "MANAGER",
                     NormalizedName = "MANAGER"
                 }
@@ -547,7 +555,7 @@ namespace Backend.Data
             modelBuilder.Entity<IdentityRole>().HasData(
                 new IdentityRole
                 {
-                    Id = "2",
+                    Id = "3",
                     Name = "STUDENT",
                     NormalizedName = "STUDENT"
                 }
@@ -556,7 +564,7 @@ namespace Backend.Data
             modelBuilder.Entity<IdentityRole>().HasData(
                 new IdentityRole
                 {
-                    Id = "3",
+                    Id = "4",
                     Name = "TEACHER",
                     NormalizedName = "TEACHER"
                 }
@@ -564,26 +572,27 @@ namespace Backend.Data
             modelBuilder.Entity<IdentityRole>().HasData(
                 new IdentityRole
                 {
-                    Id = "4",
+                    Id = "5",
                     Name = "GUARDIAN",
                     NormalizedName = "GUARDIAN"
                 }
             );
             var passwordHasher = new PasswordHasher<ApplicationUser>();
-            var hashedPassword = passwordHasher.HashPassword(null, "MANAGER");
+            var hashedPassword = passwordHasher.HashPassword(null, "ADMIN");
 
             modelBuilder.Entity<ApplicationUser>().HasData(
                 new ApplicationUser
                 {
                     Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
-                    UserName = "MANAGER",
-                    NormalizedUserName = "MANAGER",
-                    Email = "ALYAARIHAZEM@GMAIL.COM",
-                    NormalizedEmail = "ALYAARIHAZEM@GMAIL.COM",
+                    UserName = "ADMIN",
+                    NormalizedUserName = "ADMIN",
+                    Email = "ADMIN@GMAIL.COM",
+                    NormalizedEmail = "ADMIN@GMAIL.COM",
                     PasswordHash = hashedPassword, // Store the hashed password here
                     EmailConfirmed = true,
-                    UserType = "MANAGER" // You can assign a specific role or user type if needed
+                    UserType = "ADMIN" // You can assign a specific role or user type if needed
                 });
+                
         }
     }
 }

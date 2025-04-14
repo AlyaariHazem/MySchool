@@ -26,8 +26,8 @@ public class TeacherController : ControllerBase
         var response = new APIResponse();
         try
         {
-            var tenants = await _unitOfWork.Teachers.AddTeacherAsync(teacher);
-            response.Result = tenants;
+            var teachers = await _unitOfWork.Teachers.AddTeacherAsync(teacher);
+            response.Result = teachers;
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
         }
@@ -45,8 +45,8 @@ public class TeacherController : ControllerBase
         var response = new APIResponse();
         try
         {
-            var tenants = await _unitOfWork.Teachers.GetAllTeachersAsync();
-            response.Result = tenants;
+            var teachers = await _unitOfWork.Teachers.GetAllTeachersAsync();
+            response.Result = teachers;
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
         }
