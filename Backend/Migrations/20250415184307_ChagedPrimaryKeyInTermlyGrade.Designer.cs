@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250415184307_ChagedPrimaryKeyInTermlyGrade")]
+    partial class ChagedPrimaryKeyInTermlyGrade
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,17 +174,17 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "4df2c51c-72f8-445e-a4bb-4d0615f57e2f",
+                            ConcurrencyStamp = "658000ad-682a-4611-9071-b5123adfcefc",
                             Email = "ADMIN@GMAIL.COM",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 4, 17, 1, 10, 57, 163, DateTimeKind.Local).AddTicks(7824),
+                            HireDate = new DateTime(2025, 4, 15, 21, 43, 5, 137, DateTimeKind.Local).AddTicks(5713),
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFYtYhGwNeuyTCNCu+V+D91AJ/9jbpLSDzRvRtppdk7jQCKkhq1tR/XbYxKVR+lW9g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBzf3iHsDiNTk8adjuEGxpJLnoGtJJgrZlUEQ7W1lwF4KFWsjzKVzITUaE1caEQzJw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "7a8ed15d-163c-46a2-af7a-8738d98dcf37",
+                            SecurityStamp = "12570dc5-4457-4b1a-ae73-f7f3fe9fd8eb",
                             TwoFactorEnabled = false,
                             UserName = "ADMIN",
                             UserType = "ADMIN"
@@ -237,14 +240,9 @@ namespace Backend.Migrations
                     b.Property<bool>("State")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("YearID")
-                        .HasColumnType("int");
-
                     b.HasKey("ClassID");
 
                     b.HasIndex("StageID");
-
-                    b.HasIndex("YearID");
 
                     b.ToTable("Classes");
                 });
@@ -403,8 +401,8 @@ namespace Backend.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<decimal?>("MaxGrade")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int?>("MaxGrade")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -419,56 +417,56 @@ namespace Backend.Migrations
                         {
                             GradeTypeID = 1,
                             IsActive = true,
-                            MaxGrade = 20m,
+                            MaxGrade = 20,
                             Name = "Assignments"
                         },
                         new
                         {
                             GradeTypeID = 2,
                             IsActive = true,
-                            MaxGrade = 20m,
+                            MaxGrade = 20,
                             Name = "Attendance"
                         },
                         new
                         {
                             GradeTypeID = 3,
                             IsActive = true,
-                            MaxGrade = 10m,
+                            MaxGrade = 10,
                             Name = "Participation"
                         },
                         new
                         {
                             GradeTypeID = 4,
                             IsActive = true,
-                            MaxGrade = 10m,
+                            MaxGrade = 10,
                             Name = "Oral"
                         },
                         new
                         {
                             GradeTypeID = 5,
                             IsActive = true,
-                            MaxGrade = 40m,
+                            MaxGrade = 40,
                             Name = "Exam"
                         },
                         new
                         {
                             GradeTypeID = 6,
                             IsActive = false,
-                            MaxGrade = 20m,
+                            MaxGrade = 20,
                             Name = "work"
                         },
                         new
                         {
                             GradeTypeID = 7,
                             IsActive = false,
-                            MaxGrade = 30m,
+                            MaxGrade = 30,
                             Name = "lab"
                         },
                         new
                         {
                             GradeTypeID = 8,
                             IsActive = false,
-                            MaxGrade = 20m,
+                            MaxGrade = 20,
                             Name = "skills"
                         });
                 });
@@ -973,10 +971,7 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.TermlyGrade", b =>
                 {
                     b.Property<int>("TermlyGradeID")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TermlyGradeID"));
 
                     b.Property<int>("ClassID")
                         .HasColumnType("int");
@@ -1373,14 +1368,7 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.Year", "Year")
-                        .WithMany("Classes")
-                        .HasForeignKey("YearID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Stage");
-
-                    b.Navigation("Year");
                 });
 
             modelBuilder.Entity("Backend.Models.CoursePlan", b =>
@@ -2059,8 +2047,6 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.Year", b =>
                 {
-                    b.Navigation("Classes");
-
                     b.Navigation("CoursePlans");
 
                     b.Navigation("MonthlyGrades");

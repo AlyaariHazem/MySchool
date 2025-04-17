@@ -11,7 +11,6 @@ public class ClassDTO
 {
   public int ClassID { get; set; }
   public string ClassName { get; set; } = string.Empty;
-  public string ClassYear { get; set; } = Convert.ToString(DateTime.Now);
   public int StageID { get; set; }
   public string StageName { get; set; }
   public bool State { get; set; }

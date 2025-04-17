@@ -27,10 +27,7 @@ namespace Backend.Models
         public ICollection<MonthlyGrade> MonthlyGrades { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual ICollection<Attachments> Attachments { get; set; }
-        // public virtual ICollection<TeacherStudent> TeacherStudents { get; set; }
-        // public virtual ICollection<SubjectStudent> SubjectStudents { get; set; }
         public ICollection<TermlyGrade> TermlyGrades { get; set; }
-        // public virtual ICollection<TeacherSubjectStudent> TeacherSubjectStudents { get; set; }
         public virtual ICollection<AccountStudentGuardian> AccountStudentGuardians { get; set; }
         public virtual ICollection<StudentClassFees> StudentClassFees { get; set; }
        

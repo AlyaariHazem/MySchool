@@ -9,6 +9,6 @@ public record GradeTypesDTO
 {
     public int? GradeTypeID { get; set; }
     public string Name { get; set; }
-    public int?MaxGrade { get; set; } = 0;
+    public decimal? MaxGrade { get; set; } = 0;
     public bool IsActive { get; set; } = true;
 }

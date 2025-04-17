@@ -40,7 +40,6 @@ export class PlainsComponent {
   fiteredDivisions: divisions[] = [];
   teachers: Teachers[] = [];
   terms: Terms[] = [];
-  filteredTerms: Terms[] = [];
 
   ClassSubjects: Curriculms[] = [];
 
@@ -100,7 +99,6 @@ export class PlainsComponent {
       // Filter ClassSubjects
       this.filteredSubjects = this.ClassSubjects.filter(c => c.classID === selectedClassID);
       this.fiteredDivisions= this.divisions.filter(d=>d.classID===selectedClassID);
-      this.filteredTerms = this.terms.filter(t=>t.yearID===Number(localStorage.getItem('yearID')||'1'));
       // Clear the selected subject if class changes
       this.form.patchValue({ subjectID: null });
     });

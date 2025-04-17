@@ -64,6 +64,7 @@ export class GradesComponent implements OnInit {
   addClass(): void {
     if (this.form.valid) {
       const addClassData: CLass = this.form.value;
+      addClassData.yearID=Number(localStorage.getItem("yearID"));
       this.classService.Add(addClassData).subscribe({
         next: () => {
           this.getAllClasses();

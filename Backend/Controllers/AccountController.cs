@@ -69,7 +69,6 @@ namespace Backend.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // 1. Validate user credentials
             ApplicationUser userFromDb = await userManager.FindByNameAsync(userFromRequest.UserName);
             if (userFromDb == null)
                 return BadRequest(new { message = "Invalid username or password" });
@@ -81,34 +80,45 @@ namespace Backend.Controllers
             if (!string.Equals(userFromDb.UserType, userFromRequest.userType, StringComparison.OrdinalIgnoreCase))
                 return BadRequest(new { message = "Unauthorized: User type does not match." });
 
-            var schoolData = await _context.Schools
-             .AsNoTracking()
-             .Include(s => s.Manager)
-             .Where(s => s.Manager.UserID == userFromDb.Id)
-             .Select(s => new
-             {
-                 SchoolName = s.SchoolName,
-                 ManagerName = s.Manager.FullName,
-                 SchoolId = s.SchoolID
-             })
-             .FirstOrDefaultAsync();
+            dynamic? schoolData = null;
+            List<int>? yearID = null;
+            string? managerName = null;
+            string? userName = null;
 
-            var yearID = await _context.Years
-            .Where(y => y.SchoolID == schoolData!.SchoolId)
-            .Select(y => y.YearID)
-            .ToListAsync();
-
-            var managerName = schoolData?.ManagerName.FirstName + " " + schoolData?.ManagerName.LastName;
-            var userName = schoolData?.ManagerName.FirstName;
-
-            // 3. Create JWT token
-            List<Claim> userClaims = new List<Claim>
+            if (userFromDb.UserType != "ADMIN")
             {
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, userFromDb.Id),
-                new Claim(ClaimTypes.Name, userFromDb.UserName!),
-                new Claim("UserType", userFromDb.UserType)
-            };
+                schoolData = await _context.Schools
+                .AsNoTracking()
+                .Include(s => s.Manager)
+                .Where(s => s.Manager.UserID == userFromDb.Id)
+                .Select(s => new
+                {
+                    SchoolName = s.SchoolName,
+                    ManagerName = s.Manager.FullName,
+                    SchoolId = s.SchoolID
+                })
+                .FirstOrDefaultAsync();
+
+                int? schoolId = schoolData?.SchoolId;
+
+                yearID = await _context.Years
+                   .Where(y => y.SchoolID == schoolId)
+                   .Select(y => y.YearID)
+                   .ToListAsync();
+
+
+                managerName = $"{schoolData?.ManagerName.FirstName} {schoolData?.ManagerName.LastName}";
+                userName = schoolData?.ManagerName.FirstName;
+            }
+
+            // 🟩 إنشاء JWT Token
+            List<Claim> userClaims = new List<Claim>
+    {
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim(ClaimTypes.NameIdentifier, userFromDb.Id),
+        new Claim(ClaimTypes.Name, userFromDb.UserName!),
+        new Claim("UserType", userFromDb.UserType)
+    };
 
             var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecritKey"]!));
             var signingCred = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
@@ -123,18 +133,26 @@ namespace Backend.Controllers
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-            // 4. Return user data + token (including email/phone if desired)
+            if (userFromDb.UserType == "ADMIN")
+            {
+                return Ok(new
+                {
+                    userName = userFromDb.UserName,
+                    token = tokenString,
+                    expiration = token.ValidTo
+                });
+            }
+
             return Ok(new
             {
                 schoolName = schoolData?.SchoolName,
                 managerName = managerName,
                 userName = userName,
                 schoolId = schoolData?.SchoolId,
-                yearId=yearID,
+                yearId = yearID,
                 token = tokenString,
                 expiration = token.ValidTo
             });
         }
-
     }
 }

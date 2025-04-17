@@ -4,30 +4,30 @@
     <form [formGroup]="form">
         <div class="group group2">
             <div class="form-control">
-                <p-dropdown [options]="Books" optionLabel="name" [editable]="true" [showClear]="SelectBook"
+                <p-dropdown [options]="AllClasses" formControlName="classID" optionLabel="className" [editable]="true" [showClear]="SelectBook"
                     (onChange)="selectBook()" placeholder="إختار الصف">
                 </p-dropdown>
             </div>
 
             <div class="form-control">
-                <p-dropdown [options]="classes" [checkmark]="true" optionLabel="name" [editable]="true"
+                <p-dropdown [options]="terms" [checkmark]="true" optionLabel="name" [editable]="true"
                     [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الفصل">
                 </p-dropdown>
             </div>
 
             <div class="form-control">
-                <p-dropdown [options]="Books" formControlName="BookID" optionLabel="name" [editable]="true"
+                <p-dropdown [options]="" formControlName="BookID" optionLabel="name" [editable]="true"
                     [showClear]="SelectBook" (onChange)="selectBook()" placeholder="إختار المقرر">
                 </p-dropdown>
             </div>
 
             <div class="form-control">
-                <p-dropdown [options]="classes" [checkmark]="true" optionLabel="name" [editable]="true"
+                <p-dropdown [options]="" [checkmark]="true" optionLabel="name" [editable]="true"
                     [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الشهر">
                 </p-dropdown>
             </div>
         </div>
-        <button  class="adding school-btn" (onClick)="showDialog()">إضافة+</button>
+        <button  class="adding school-btn"  (click)="saveAllGrades()">>حفظ التغيرات</button>
         <div class="mange">
             <span class="border" (click)="toggleHidden()"><i
                     [class]="hidden?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
@@ -66,15 +66,17 @@
                                     (click)="goNextStudent()"></i>
                             </td>
 
-                            <td>{{ CurrentStudent.id }}</td>
-                            <td>{{ CurrentStudent.name }}</td>
-                            <td>{{ CurrentStudent.book }}</td>
+                            <td>{{ CurrentStudent.studentID }}</td>
+                            <td>{{ CurrentStudent.studentName }}</td>
+                            <td>{{ CurrentStudent.subjectName }}</td>
 
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            @for (grade of CurrentStudent.grades; track $index) {
+                                <td><input class="form-control input1 no-spinner" 
+                                    type="number"
+                                    [(ngModel)]="grade.maxGrade"         
+                                    name="g{{CurrentStudent.studentID}}_{{grade.gradeTypeID}}"
+                                    [ngModelOptions]="{standalone:true}" ></td>
+                            }
                             <td>100</td>
                             <td>100</td>
 
@@ -113,7 +115,7 @@
         </mat-card>
     </div>
     <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-        [totalRecords]="studentsData.length" [rowsPerPageOptions]="[4, 8, 16]" />
+        [totalRecords]="monthlyGrades.length" [rowsPerPageOptions]="[4, 8, 16]" />
     <div class="table-container">
         <mat-card>
             <div class="responsive-table">
@@ -135,17 +137,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (student of paginatedStudents; track $index) {
+                        @for (student of monthlyGrades; track $index) {
                         <tr>
                             <td>{{ $index+1 }}</td>
-                            <td>221</td>
-                            <td class="student-name-column">حازم عبدالله اليعري</td>
-                            <td>قران</td>
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
-                            <td><input class="form-control input1 no-spinner" type="number"></td>
+                            <td>{{student.studentID}}</td>
+                            <td class="student-name-column">{{student.studentName}}</td>
+                            <td>{{student.subjectName}}</td>
+                            @for (grade of student.grades; track $index) {
+                                <td><input class="form-control input1 no-spinner" 
+                                    type="number"
+                                    [(ngModel)]="grade.maxGrade"         
+                                    name="g{{student.studentID}}_{{grade.gradeTypeID}}"
+                                    [ngModelOptions]="{standalone:true}" ></td>
+                            }
                             <td>100</td>
                             <td>100</td>
                             <td>

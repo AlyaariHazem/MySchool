@@ -251,99 +251,14 @@
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="card">
-        <div class="card-header">
-          <div class="row align-items-center">
-            <div class="col-sm-6">
-              <div class="page-title">كل الطلاب</div>
-            </div>
-            <div class="col-sm-6 text-sm-left">
-              <div class="mt-sm-0 mt-2">
-                <button class="btn btn-outline-primary mr-2">
-                  <img src="assets/img/excel.png" alt="" /><span class="ml-2">Excel</span>
-                </button>
-                <button class="btn btn-outline-danger mr-2">
-                  <img src="assets/img/pdf.png" alt="" height="18" /><span class="ml-2">PDF</span>
-                </button>
-                <button class="btn btn-light" type="button" data-toggle="dropdown" aria-haspopup="true"
-                  aria-expanded="false">
-                  <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <div role="separator" class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <div role="separator" class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table custom-table">
-              <thead class="thead-light">
-                <tr>
-                  <span style="display:none;"></span>
-                  <th>الاسم</th>
-                  <th>الرقم التسلسلي</th>
-                  <th>الصف</th>
-                  <th>الشعبة</th>
-                  <th>رقم الهاتف</th>
-                  <th>العمر</th>
-                  <th class="text-right">حدث</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (student of students; track $index) {
-                <tr>
-                  <td>
-                    <h2>
-                      <a href="#" class="avatar text-white"><img src="assets/img/profile/img-1.jpg" alt="" /></a><a
-                        href="#">Parker <span></span></a>
-                    </h2>
-                  </td>
-                  <td>{{student.studentID}}</td>
-                  <td>{{student.className}}</td>
-                  <td>{{student.divisionName}}</td>
-                  <td>{{student.studentPhone}}</td>
-                  <td>{{student.age}}</td>
-                  <td>
-                    <!-- this is for edit and delete  -->
-                    <div class="col text-left">
-                      <div class="mt-sm-0 mt-2">
-                        <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                          aria-expanded="false">
-                          <i class="fas fa-ellipsis-h"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-left">
-                          <!-- when I click here chage in the form from "إضافة" to be like "تعديل"  -->
-                          <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                          <div role="separator" class="dropdown-divider"></div>
-                          <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  
   <div class="row">
     <div class="col-12">
       <div class="card">
         <div class="card-header">
           <div class="row align-items-center">
             <div class="col-sm-6">
-              <div class="page-title">New Students</div>
+              <div class="page-title">كل الطلاب</div>
             </div>
             <div class="col-sm-6 text-sm-left">
               <div class="mt-sm-0 mt-2">

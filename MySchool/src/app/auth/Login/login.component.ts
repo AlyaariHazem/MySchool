@@ -33,6 +33,7 @@ export class LoginComponent {
 
   // Define user types for the dropdown
   userTypes = [
+    { label: 'Admin', value: 'ADMIN' },
     { label: 'طالب', value: 'STUDENT' },
     { label: 'معلم', value: 'TEACHER' },
     { label: 'ولي أمر', value: 'GUARDIAN' },
@@ -50,7 +51,7 @@ export class LoginComponent {
     this.authService.login(user).subscribe({
       next: (response: any) => {
         if (response && response.token) {
-          if (user.userType === 'MANAGER') {
+          if (user.userType === 'ADMIN') {
             this.authService.router.navigateByUrl('admin');
           } else {
             this.authService.router.navigateByUrl('school');

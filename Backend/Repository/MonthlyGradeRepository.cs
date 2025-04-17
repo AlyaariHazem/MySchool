@@ -50,30 +50,54 @@ namespace Backend.Repository
         }
 
         // Get all monthly grades based on filters: Term, Month, Class, GradeType
-        public async Task<List<MonthlyGradesReternDTO>> GetAllAsync(int term, int monthId, int classId)
+        public async Task<List<MonthlyGradesReternDTO>> GetAllAsync(int term, int monthId, int classId, int subjectId)
         {
-            var grades = await _context.MonthlyGrades
-                .Where(g => g.TermID == term && g.MonthID == monthId && g.ClassID == classId)
-                .Include(g => g.Student)  // Ensure Student is included in the query
-                .Include(g => g.Subject)  // Include Subject if necessary
-                .Include(g => g.GradeType) // Include GradeType if necessary
-                .ToListAsync();
+            List<MonthlyGrade> grades;
+            if (subjectId == 0)
+            {
+                grades = await _context.MonthlyGrades
+                    .Where(g => g.TermID == term && g.MonthID == monthId && g.ClassID == classId)
+                    .Include(g => g.Student)
+                    .ThenInclude(s => s.FullName)
+                    .Include(g => g.Subject)
+                    .Include(g => g.GradeType)
+                    .ToListAsync();
+            }
+            else
+            {
+                grades = await _context.MonthlyGrades
+                    .Where(g => g.TermID == term && g.MonthID == monthId && g.ClassID == classId && g.SubjectID == subjectId)
+                    .Include(g => g.Student)
+                    .ThenInclude(s => s.FullName)
+                    .Include(g => g.Subject)
+                    .Include(g => g.GradeType)
+                    .ToListAsync();
+            }
 
-            // Group the grades by student
             var studentGrades = grades
-                .GroupBy(g => g.StudentID) // Group by StudentID
-                .Select(studentGroup => new MonthlyGradesReternDTO
+                .GroupBy(g => g.StudentID)
+                .Select(studentGroup =>
                 {
-                    StudentID = studentGroup.Key,
-                    StudentName = studentGroup.FirstOrDefault()?.Student.FullName.FirstName + " " +
-                                  studentGroup.FirstOrDefault()?.Student.FullName.MiddleName + " " +
-                                  studentGroup.FirstOrDefault()?.Student.FullName.LastName,
-                    Grades = studentGroup.Select(g => new GradeTypeMonthDTO
+                    var first = studentGroup.FirstOrDefault();
+                    var fullName = first?.Student?.FullName;
+                    var studentName = fullName != null
+                        ? $"{fullName.FirstName} {fullName.MiddleName} {fullName.LastName}"
+                        : "Unknown";
+
+                    return new MonthlyGradesReternDTO
                     {
-                        Name = g.GradeType.Name,
-                        MaxGrade = g.GradeType.MaxGrade
-                    }).ToList()
-                }).ToList();
+                        StudentID = studentGroup.Key,
+                        StudentName = studentName,
+                        SubjectID = first?.SubjectID ?? 0,
+                        SubjectName = first?.Subject?.SubjectName ?? "Unknown",
+                        Grades = studentGroup.Select(g => new GradeTypeMonthDTO
+                        {
+                            GradeTypeID = g.GradeTypeID,
+                            MaxGrade = g.Grade
+                        }).ToList()
+                    };
+                })
+                .ToList();
 
             return studentGrades;
         }
@@ -99,5 +123,30 @@ namespace Backend.Repository
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> UpdateManyAsync(List<MonthlyGradeDTO> dtos)
+        {
+            if (dtos == null || dtos.Count == 0) return false;
+
+            foreach (var dto in dtos)
+            {
+                var grade = await _context.MonthlyGrades.FirstOrDefaultAsync(g =>
+                       g.StudentID == dto.StudentID
+                    && g.SubjectID == dto.SubjectID
+                    && g.MonthID == dto.MonthID
+                    && g.TermID == dto.TermID
+                    && g.ClassID == dto.ClassID
+                    && g.GradeTypeID == dto.GradeTypeID);
+
+                if (grade != null)              // موجود → عدّل
+                {
+                    grade.Grade = dto.Grade;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 }

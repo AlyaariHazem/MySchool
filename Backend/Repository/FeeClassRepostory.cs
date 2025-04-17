@@ -26,7 +26,16 @@ public class FeeClassRepostory:IFeeClassRepository
         {
             var ListFeeClass= await _db.FeeClass
                 .Include(fc => fc.Class) // Include related Class
-                .Include(fc => fc.Fee)  // Include related Fee
+                .Include(fc => fc.Fee).Select(fc=>new FeeClassDTO{
+                    FeeClassID=fc.FeeClassID,
+                    ClassID=fc.ClassID,
+                    FeeID=fc.FeeID,
+                    Amount=fc.Amount,
+                    Mandatory=fc.Mandatory,
+                    ClassYear=fc.Class.Year.YearDateStart.ToString("yyyy-MM-dd"),
+                    ClassName=fc.Class.ClassName,
+                    FeeName=fc.Fee.FeeName
+                })  // Include related Fee
                 .ToListAsync();
             var FeeClassDTO=_mapper.Map<List<FeeClassDTO>>(ListFeeClass);
             return FeeClassDTO;

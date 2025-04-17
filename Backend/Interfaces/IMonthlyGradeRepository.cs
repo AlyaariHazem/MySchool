@@ -9,7 +9,8 @@ namespace Backend.Interfaces;
 public interface IMonthlyGradeRepository
 {
     Task<MonthlyGradeDTO> AddAsync(MonthlyGradeDTO monthlyGrade);
-    Task<List<MonthlyGradesReternDTO>> GetAllAsync(int Trem, int monthId, int classId);
+    Task<List<MonthlyGradesReternDTO>> GetAllAsync(int Trem, int monthId, int classId, int subjectId);
     Task<bool> UpdateAsync(MonthlyGradeDTO monthlyGrade);
+    Task<bool> UpdateManyAsync(List<MonthlyGradeDTO> monthlyGrades);
     Task<bool> DeleteAsync(int id);
 }

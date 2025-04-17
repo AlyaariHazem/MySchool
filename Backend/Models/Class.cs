@@ -15,6 +15,9 @@ namespace Backend.Models
         public bool State { get; set; } = true;
         [JsonIgnore]
         public Stage Stage { get; set; }
+        public int? YearID { get; set; }
+        [JsonIgnore]
+        public Year Year { get; set; }
         [JsonIgnore]
         public virtual ICollection<FeeClass> FeeClasses { get; set; } = new List<FeeClass>();
         [JsonIgnore]

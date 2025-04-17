@@ -19,8 +19,10 @@ namespace Backend.Models
         public ICollection<YearTermMonth> YearTermMonths { get; set; }
 
         public virtual ICollection<Stage> Stages { get; set; }
+        public virtual ICollection<Class> Classes { get; set; }
         public ICollection<CoursePlan> CoursePlans { get; set; }
         public ICollection<MonthlyGrade> MonthlyGrades { get; set; }
+        public ICollection<TermlyGrade> TermlyGrades { get; set; }
 
 
     }

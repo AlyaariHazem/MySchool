@@ -1,21 +1,18 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { PaginatorState } from 'primeng/paginator';
+import { MonthlyGradesService } from '../../core/services/monthly-grades.service';
+import { MonthlyGrade, updateMonthlyGrades } from '../../core/models/MonthlyGrade.model';
+import { ClassService } from '../../core/services/class.service';
 
-interface City {
+interface Term {
   name: string;
-  code: string;
-}
-
-interface Student {
   id: number;
-  name: string;
-  age: number;
-  grade: string;
-  gender: string;
-  book: string; // e.g., a field for "المقرر"
+}
+interface Months{
+  name:string;
+  id:number;
 }
 
 @Component({
@@ -30,10 +27,13 @@ interface Student {
 })
 export class GradesMonthComponent implements OnInit {
   form!: FormGroup;
-  Books: City[] = [];
-  classes: City[] = [];
   values = new FormControl<string[] | null>(null);
   max = 2;
+  monthlyGradesService = inject(MonthlyGradesService);
+  classService = inject(ClassService);
+
+  monthlyGrades: MonthlyGrade[] = [];
+  displayedStudents: MonthlyGrade[] = [];
 
   SelectBook = false;
   SelectClass = false;
@@ -48,165 +48,79 @@ export class GradesMonthComponent implements OnInit {
       this.dir = (res == "en") ? "ltr" : "rtl";
     });
   }
-  studentsData: Student[] = [
-    {
-      id: 1232,
-      name: 'حازم عبدالله اليعري',
-      age: 12,
-      grade: 'A',
-      gender: 'male',
-      book: 'قران'
-    },
-    {
-      id: 221,
-      name: 'محمد علي',
-      age: 11,
-      grade: 'B',
-      gender: 'male',
-      book: 'رياضيات'
-    },
-    {
-      id: 4321,
-      name: 'سارة خالد',
-      age: 12,
-      grade: 'A',
-      gender: 'female',
-      book: 'تاريخ'
-    },
-    {
-      id: 221,
-      name: 'محمد علي',
-      age: 11,
-      grade: 'B',
-      gender: 'male',
-      book: 'رياضيات'
-    },
-    {
-      id: 4321,
-      name: 'سارة خالد',
-      age: 12,
-      grade: 'A',
-      gender: 'female',
-      book: 'تاريخ'
-    },
-    {
-      id: 221,
-      name: 'محمد علي',
-      age: 11,
-      grade: 'B',
-      gender: 'male',
-      book: 'رياضيات'
-    },
-    {
-      id: 4321,
-      name: 'سارة خالد',
-      age: 12,
-      grade: 'A',
-      gender: 'female',
-      book: 'تاريخ'
-    },
-    {
-      id: 221,
-      name: 'محمد علي',
-      age: 11,
-      grade: 'B',
-      gender: 'male',
-      book: 'رياضيات'
-    },
-    {
-      id: 4321,
-      name: 'سارة خالد',
-      age: 12,
-      grade: 'A',
-      gender: 'female',
-      book: 'تاريخ'
-    },
-    {
-      id: 221,
-      name: 'محمد علي',
-      age: 11,
-      grade: 'B',
-      gender: 'male',
-      book: 'رياضيات'
-    },
-    {
-      id: 4321,
-      name: 'سارة خالد',
-      age: 12,
-      grade: 'A',
-      gender: 'female',
-      book: 'تاريخ'
-    },
-    {
-      id: 221,
-      name: 'محمد علي',
-      age: 11,
-      grade: 'B',
-      gender: 'male',
-      book: 'رياضيات'
-    },
-    {
-      id: 4321,
-      name: 'سارة خالد',
-      age: 12,
-      grade: 'A',
-      gender: 'female',
-      book: 'تاريخ'
-    }
-  ];
-
   currentStudentIndex = 0;
-  CurrentStudent!: Student; // Will be assigned in ngOnInit()
+  CurrentStudent!: MonthlyGrade; // Will be assigned in ngOnInit()
 
-  students = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  displayedStudents: number[] = [];
   currentPage = 0;
   pageSize = 5;
   length = 0;
+  AllClasses:any;
+  selectedTerm = 0;
+  selectedMonth = 0;
+  selectedClass = 0;
+  selectedSubject = 0;
 
   constructor(
     private formBuilder: FormBuilder,
-    public dialog: MatDialog
+    
   ) { }
 
   ngOnInit(): void {
+    this.getAllClasses();
     // Initialize form
+    this.monthlyGradesService.getAllMonthlyGrades(1, 6, 1, 1).subscribe(res => {
+      this.monthlyGrades = res;
+      if (this.monthlyGrades.length > 0) {
+        this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
+      }
+      console.log("the monthly grades are", res);
+    });
     this.form = this.formBuilder.group({
       BookID: [null, Validators.required],
       ClassID: [null, Validators.required]
     });
     this.currentLanguage();
     // Example data for dropdowns
-    this.Books = [
-      { name: 'Math', code: 'MATH' },
-      { name: 'Science', code: 'SCI' },
-      { name: 'History', code: 'HIST' },
-      { name: 'Geography', code: 'GEO' },
-      { name: 'English', code: 'ENG' },
-    ];
-    this.classes = [
-      { name: 'Grade 1', code: 'G1' },
-      { name: 'Grade 2', code: 'G2' },
-      { name: 'Grade 3', code: 'G3' },
-      { name: 'Grade 4', code: 'G4' },
-      { name: 'Grade 5', code: 'G5' },
-    ];
-    if (this.studentsData.length > 0) {
-      this.CurrentStudent = this.studentsData[this.currentStudentIndex];
-    }
+
     this.updatePaginatedData();
   }
+  // Example data for dropdowns
+  terms: Term[] = [
+    { name: 'الأول', id: 1 },
+    { name: 'الثاني', id: 2 }
+  ];
+
+  months: Months[] = [
+    { name: 'يناير', id: 1 },
+    { name: 'فبراير', id: 2 },
+    { name: 'مارس', id: 3 },
+    { name: 'أبريل', id: 4 },
+    { name: 'مايو', id: 5 },
+    { name: 'يونيو', id: 6 },
+    { name: 'يوليو', id: 7 },
+    { name: 'أغسطس', id: 8 },
+    { name: 'سبتمبر', id: 9 },
+    { name: 'أكتوبر', id: 10 },
+    { name: 'نوفمبر', id: 11 },
+    { name: 'ديسمبر', id: 12 }
+  ];
+  getAllClasses(){
+    this.classService.GetAllNames().subscribe(res => {
+      this.AllClasses=res;
+    });
+  }
+  getAll(){}
   goNextStudent(): void {
-    if (this.currentStudentIndex < this.studentsData.length - 1) {
+    if (this.currentStudentIndex < this.monthlyGrades.length - 1) {
       this.currentStudentIndex++;
-      this.CurrentStudent = this.studentsData[this.currentStudentIndex];
+      this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
     }
   }
 
   goPreviousStudent(): void {
     if (this.currentStudentIndex > 0) {
       this.currentStudentIndex--;
-      this.CurrentStudent = this.studentsData[this.currentStudentIndex];
+      this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
     }
   }
 
@@ -219,14 +133,40 @@ export class GradesMonthComponent implements OnInit {
     this.SelectClass = true;
   }
 
-  showDialog(): void {
-    console.log('the Book is added successfully!');
+  saveAllGrades() {
+    if (!this.selectedTerm || !this.selectedMonth || !this.selectedClass || !this.selectedSubject) {
+      alert('Please select term, month, class, and subject first.');
+      return;
+    }
+  
+    const payload: updateMonthlyGrades[] = this.monthlyGrades.flatMap(stu =>
+      stu.grades.map(g => ({
+        studentID:  stu.studentID,
+        subjectID:  this.selectedSubject,
+        monthID:    this.selectedMonth,
+        classID:    this.selectedClass,
+        termID:     this.selectedTerm,
+        gradeTypeID:g.gradeTypeID,
+        grade:      +g.maxGrade            // convert to number
+      }))
+    );
+  
+    this.monthlyGradesService.updateMonthlyGrades(payload)
+        .subscribe({
+          next: _ => {
+            alert('Grades saved successfully');
+          },
+          error: err => {
+            console.error(err);
+            alert('Error occurred while saving');
+          }
+        });
   }
 
   updateDisplayedStudents(): void {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.displayedStudents = this.students.slice(startIndex, endIndex);
+    this.displayedStudents = this.monthlyGrades.slice(startIndex, endIndex);
   }
   trackByIndex(index: number, item: any): number {
     return index;
@@ -236,14 +176,14 @@ export class GradesMonthComponent implements OnInit {
   toggleHidden() {
     this.hidden = !this.hidden;
   }
-  paginatedStudents: Student[] = [];
+  paginatedStudents: MonthlyGrade[] = [];
 
   first: number = 0;
   rows: number = 4;
   updatePaginatedData(): void {
     const start = this.first;
     const end = this.first + this.rows;
-    this.paginatedStudents = this.studentsData.slice(start, end);
+    this.paginatedStudents = this.monthlyGrades.slice(start, end);
   }
 
   // Handle page change event from PrimeNG paginator

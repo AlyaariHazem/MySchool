@@ -53,7 +53,7 @@ public class YearRepository : IYearRepository
             },
             new YearTermMonth(){
                 YearID = newYear.YearID,
-                TermID = 2,
+                TermID = 1,
                 MonthID = 8
             },
             new YearTermMonth(){

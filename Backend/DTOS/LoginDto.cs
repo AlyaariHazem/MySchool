@@ -11,9 +11,3 @@ public class LoginDto
     public string Password { get; set; }
     public string userType { get; set; }
 }
-public class ManagerLoginDto
-{
-    public string UserName { get; set; }
-    public string Password { get; set; }
-    public int SchoolId { get; set; } = 1; // Or string SchoolName
-}

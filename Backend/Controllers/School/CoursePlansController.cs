@@ -61,7 +61,7 @@ public class CoursePlansController : ControllerBase
         var response = new APIResponse();
         var created = await _unitOfWork.CoursePlans.AddAsync(dto);
         await _unitOfWork.CompleteAsync();
-        response.Result = created;
+        response.Result = "CoursePlan created successfully";
         response.statusCode = HttpStatusCode.Created;
         return Ok(response);
     }

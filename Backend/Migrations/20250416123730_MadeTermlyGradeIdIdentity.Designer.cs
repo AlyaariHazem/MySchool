@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250416123730_MadeTermlyGradeIdIdentity")]
+    partial class MadeTermlyGradeIdIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,17 +174,17 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "4df2c51c-72f8-445e-a4bb-4d0615f57e2f",
+                            ConcurrencyStamp = "7b10ebc5-2488-44e7-9a2c-2e386e439363",
                             Email = "ADMIN@GMAIL.COM",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 4, 17, 1, 10, 57, 163, DateTimeKind.Local).AddTicks(7824),
+                            HireDate = new DateTime(2025, 4, 16, 15, 37, 28, 866, DateTimeKind.Local).AddTicks(1626),
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFYtYhGwNeuyTCNCu+V+D91AJ/9jbpLSDzRvRtppdk7jQCKkhq1tR/XbYxKVR+lW9g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMQ4XxyeR9JGxZh+6fHyny1h1mygzMKMMab7dyntsR9N+r+uYM7pePY9ggvNYLeggA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "7a8ed15d-163c-46a2-af7a-8738d98dcf37",
+                            SecurityStamp = "6851637c-f9c8-4c1b-8cb5-7faf8414ebcb",
                             TwoFactorEnabled = false,
                             UserName = "ADMIN",
                             UserType = "ADMIN"
@@ -403,8 +406,8 @@ namespace Backend.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<decimal?>("MaxGrade")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int?>("MaxGrade")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -419,56 +422,56 @@ namespace Backend.Migrations
                         {
                             GradeTypeID = 1,
                             IsActive = true,
-                            MaxGrade = 20m,
+                            MaxGrade = 20,
                             Name = "Assignments"
                         },
                         new
                         {
                             GradeTypeID = 2,
                             IsActive = true,
-                            MaxGrade = 20m,
+                            MaxGrade = 20,
                             Name = "Attendance"
                         },
                         new
                         {
                             GradeTypeID = 3,
                             IsActive = true,
-                            MaxGrade = 10m,
+                            MaxGrade = 10,
                             Name = "Participation"
                         },
                         new
                         {
                             GradeTypeID = 4,
                             IsActive = true,
-                            MaxGrade = 10m,
+                            MaxGrade = 10,
                             Name = "Oral"
                         },
                         new
                         {
                             GradeTypeID = 5,
                             IsActive = true,
-                            MaxGrade = 40m,
+                            MaxGrade = 40,
                             Name = "Exam"
                         },
                         new
                         {
                             GradeTypeID = 6,
                             IsActive = false,
-                            MaxGrade = 20m,
+                            MaxGrade = 20,
                             Name = "work"
                         },
                         new
                         {
                             GradeTypeID = 7,
                             IsActive = false,
-                            MaxGrade = 30m,
+                            MaxGrade = 30,
                             Name = "lab"
                         },
                         new
                         {
                             GradeTypeID = 8,
                             IsActive = false,
-                            MaxGrade = 20m,
+                            MaxGrade = 20,
                             Name = "skills"
                         });
                 });

@@ -75,9 +75,9 @@ namespace Backend.Data
             });
             modelBuilder.Entity<TermlyGrade>(entity =>
             {
-                entity.HasKey(t => t.TermID); // Primary key
-                entity.Property(t => t.TermID)
-                    .ValueGeneratedNever();
+                entity.HasKey(t => t.TermlyGradeID); // Primary key
+                entity.HasIndex(t => new { t.StudentID, t.TermID, t.SubjectID, t.ClassID })
+                      .IsUnique();
             });
             modelBuilder.Entity<FeeClass>(entity =>
             {
@@ -121,19 +121,6 @@ namespace Backend.Data
                 .HasForeignKey<Manager>(m => m.TenantID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // many to many relationship for Teachers and Students
-            // modelBuilder.Entity<TeacherStudent>()
-            //      .HasOne<Student>(S => S.Student)
-            //      .WithMany(TS => TS.TeacherStudents)
-            //      .HasForeignKey(S => S.StudentID)
-            //      .OnDelete(DeleteBehavior.Restrict);
-
-            // modelBuilder.Entity<TeacherStudent>()
-            //     .HasOne<Teacher>(T => T.Teacher)
-            //     .WithMany(TS => TS.TeacherStudents)
-            //     .HasForeignKey(T => T.TeacherID)
-            //     .OnDelete(DeleteBehavior.Restrict);
-
 
             // one to many for School and Year
             modelBuilder.Entity<School>()
@@ -155,25 +142,12 @@ namespace Backend.Data
                 .WithMany(p => p.Classes)
                 .HasForeignKey(c => c.StageID)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // one to many for Managers and Teachers
-            // modelBuilder.Entity<Manager>()
-            //     .HasMany<Teacher>(T => T.Teachers)
-            //     .WithOne(M => M.Manager)
-            //     .HasForeignKey(T => T.ManagerID)
-            //     .OnDelete(DeleteBehavior.Restrict); // Restrict to prevent deletion of Teachers when Manager is deleted
-
-            // many to many relationship for Subjects and Students
-            // modelBuilder.Entity<SubjectStudent>()
-            //     .HasOne<Subject>(S => S.Subject)
-            //     .WithMany(SS => SS.SubjectStudents)
-            //     .HasForeignKey(S => S.SubjectID)
-            //     .OnDelete(DeleteBehavior.Restrict);
-            // modelBuilder.Entity<SubjectStudent>()
-            //     .HasOne<Student>(S => S.Student)
-            //     .WithMany(SS => SS.SubjectStudents)
-            //     .HasForeignKey(S => S.StudentID)
-            //     .OnDelete(DeleteBehavior.Restrict);
+            // one to many for Year and Class
+            modelBuilder.Entity<Class>()
+                .HasOne(c => c.Year)
+                .WithMany(p => p.Classes)
+                .HasForeignKey(c => c.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // many to many relationship for Subjects and Students
             modelBuilder.Entity<Curriculum>()
@@ -281,6 +255,11 @@ namespace Backend.Data
                 .WithMany(s => s.TermlyGrades)
                 .HasForeignKey(mg => mg.TermID)
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TermlyGrade>()
+                .HasOne(mg => mg.Year)
+                .WithMany(s => s.TermlyGrades)
+                .HasForeignKey(mg => mg.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Etc. (Student, Subject, GradeType)
 
@@ -354,25 +333,6 @@ namespace Backend.Data
                 .WithOne(m => m.ApplicationUser)
                 .HasForeignKey<Manager>(m => m.UserID)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            // Ternary relationship between Teachers, Students, and Subjects
-            // modelBuilder.Entity<TeacherSubjectStudent>()
-            //     .HasOne<Teacher>(tss => tss.Teacher)
-            //     .WithMany(t => t.TeacherSubjectStudents)
-            //     .HasForeignKey(tss => tss.TeacherID)
-            //     .OnDelete(DeleteBehavior.Cascade);
-
-            // modelBuilder.Entity<TeacherSubjectStudent>()
-            //     .HasOne<Student>(tss => tss.Student)
-            //     .WithMany(s => s.TeacherSubjectStudents)
-            //     .HasForeignKey(tss => tss.StudentID)
-            //     .OnDelete(DeleteBehavior.Cascade);
-
-            // modelBuilder.Entity<TeacherSubjectStudent>()
-            //     .HasOne<Subject>(tss => tss.Subject)
-            //     .WithMany(sub => sub.TeacherSubjectStudents)
-            //     .HasForeignKey(tss => tss.SubjectID)
-            //     .OnDelete(DeleteBehavior.Cascade);
 
             // Ternary relationship between Guardian, Students,Vouchers, and Accounts
             modelBuilder.Entity<AccountStudentGuardian>()
@@ -592,7 +552,7 @@ namespace Backend.Data
                     EmailConfirmed = true,
                     UserType = "ADMIN" // You can assign a specific role or user type if needed
                 });
-                
+
         }
     }
 }

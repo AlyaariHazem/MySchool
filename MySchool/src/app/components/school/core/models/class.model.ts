@@ -16,6 +16,7 @@ export interface ClassDTO {
   export interface CLass{
     className:string;
     stageID:number;
+    yearID:number;
   }
     
   export interface updateClass{

@@ -40,14 +40,14 @@ namespace Backend.Controllers.School
             }
         }
 
-        // GET: api/MonthlyGrades/{term}/{monthId}/{classId}/{gradeTypeId}
-        [HttpGet("{term}/{monthId}/{classId}/{gradeTypeId}")]
-        public async Task<ActionResult<APIResponse>> GetAll(int term, int monthId, int classId)
+        // GET: api/MonthlyGrades/{term}/{monthId}/{classId}/{subjectId}
+        [HttpGet("{term}/{monthId}/{classId}/{subjectId}")]
+        public async Task<ActionResult<APIResponse>> GetAll(int term, int monthId, int classId, int subjectId)
         {
             var response = new APIResponse();
             try
             {
-                var grades = await _monthlyGradeRepository.GetAllAsync(term, monthId, classId);
+                var grades = await _monthlyGradeRepository.GetAllAsync(term, monthId, classId, subjectId);
                 response.Result = grades;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
@@ -108,6 +108,26 @@ namespace Backend.Controllers.School
                 response.statusCode = HttpStatusCode.NotFound;
                 response.ErrorMasseges.Add("Monthly grade not found.");
                 return NotFound(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+        // PUT: api/MonthlyGrades/UpdateMany
+        [HttpPut("UpdateMany")]
+        public async Task<ActionResult<APIResponse>> UpdateMany([FromBody] List<MonthlyGradeDTO> dtos)
+        {
+            var response = new APIResponse();
+            try
+            {
+                await _monthlyGradeRepository.UpdateManyAsync(dtos);
+                response.Result = "Monthly grades updated successfully.";
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
             }
             catch (Exception ex)
             {
