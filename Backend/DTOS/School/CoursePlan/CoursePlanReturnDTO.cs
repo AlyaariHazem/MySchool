@@ -12,6 +12,4 @@ public class CoursePlanReturnDTO
     public string? TeacherName { get; set; }
     public string? TermName { get; set; }
     public string? Year { get; set; }
-
-
 }

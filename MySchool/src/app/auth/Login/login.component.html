@@ -1,10 +1,11 @@
-<div class="form">
-  <!-- Enhanced Loading Spinner -->
-  <div *ngIf="isLoading" class="card flex justify-center">
-   <app-progress-spinner [visible]="visible"></app-progress-spinner>
-  </div>
+<!-- Enhanced Loading Spinner -->
+<div *ngIf="isLoading" class="card flex justify-center">
+  <app-progress-spinner [visible]="visible"></app-progress-spinner>
+ </div>
 
-  <!-- Your Login Form -->
+
+ <!-- Your Login Form -->
+<div class="form">
   <form class="form-inline" action="" dir="rtl" #loginForm="ngForm" (ngSubmit)="login(loginForm.value)">
     <h2 style="margin-right:3rem;">تسجيل الدخول لنظام مدرستي</h2>
 

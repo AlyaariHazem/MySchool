@@ -9,59 +9,24 @@
         </div>
         <form [formGroup]="form" [ngClass]="{'formEn':languageService.dir==='ltr','form':languageService.dir==='rlt'}">
           <!-- First Dropdown -->
-          <mat-form-field appearance="outline">
-            <mat-label>إختار طالب</mat-label>
-            <mat-select [value]="selectedStudent" (selectionChange)="onSelectionChange('student', $event.value)">
-              <mat-option [value]="null">None</mat-option>
-              <mat-option *ngFor="let option of studentOptions" [value]="option">
-                {{ option }}
-              </mat-option>
-            </mat-select>
-            <span mat-icon-button class="cancel" *ngIf="isStudentSelected" (click)="clearSelection('student')">
-              ✖
-            </span>
-          </mat-form-field>
+          <div class="group3">
+            <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
+              [showClear]="true" placeholder="إختار طالب" />
 
-          <!-- Second Dropdown -->
-          <mat-form-field appearance="outline">
-            <mat-label>إختار المرحلة</mat-label>
-            <mat-select [value]="selectedStage" (selectionChange)="onSelectionChange('stage', $event.value)">
-              <mat-option [value]="null">None</mat-option>
-              <mat-option *ngFor="let option of stageOptions" [value]="option">
-                {{ option }}
-              </mat-option>
-            </mat-select>
-            <span mat-icon-button class="cancel" *ngIf="isStageSelected" (click)="clearSelection('stage')">
-              ✖
-            </span>
-          </mat-form-field>
+            <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
+              [showClear]="true" placeholder="إختار المرحلة" />
 
-          <!-- Third Dropdown -->
-          <mat-form-field appearance="outline">
-            <mat-label>إختار الصـف</mat-label>
-            <mat-select [value]="selectedClass" (selectionChange)="onSelectionChange('class', $event.value)">
-              <mat-option [value]="null">None</mat-option>
-              <mat-option *ngFor="let option of classOptions" [value]="option">
-                {{ option }}
-              </mat-option>
-            </mat-select>
-            <span mat-icon-button class="cancel" *ngIf="isClassSelected" (click)="clearSelection('class')">
-              ✖
-            </span>
-          </mat-form-field>
+            <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
+              [showClear]="true" placeholder="إختار الصف" />
+          </div>
+
+
         </form>
 
         <button mat-raised-button color="primary"
           [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" (click)="openDialog()">
           إضافة طالب+
         </button>
-
-        <!-- <p-iconfield iconPosition="left"
-          [ngClass]="{'chipsOne':languageService.dir==='rtl','chipsEn':languageService.dir==='ltr'}">
-          <p-inputicon styleClass="pi pi-search" />
-          <input type="text" style="width: 100%;" pInputText placeholder="Search" />
-        </p-iconfield> -->
-        
 
         @if (showGrid) {
         <div class="group group2">
@@ -93,7 +58,7 @@
           }
         </div>
         <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-                [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 10, 20]" />
+          [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 10, 20]" />
         }
 
         @if (showCulomn) {
@@ -151,12 +116,12 @@
                   }
                 </tbody>
               </table>
-              <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-                [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 10, 20]" />
+
             </mat-card>
           </div>
-
         </div>
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 10, 20]" />
         }
       </div>
     </div>

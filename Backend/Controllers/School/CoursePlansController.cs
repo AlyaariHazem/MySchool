@@ -17,7 +17,18 @@ public class CoursePlansController : ControllerBase
         _unitOfWork = unitOfWork;
     }
 
-    [HttpGet]
+    [HttpPost]
+    public async Task<ActionResult<APIResponse>> Create([FromBody] CoursePlanDTO dto)
+    {
+        var response = new APIResponse();
+        var created = await _unitOfWork.CoursePlans.AddAsync(dto);
+        await _unitOfWork.CompleteAsync();
+        response.Result = "CoursePlan created successfully";
+        response.statusCode = HttpStatusCode.Created;
+        return Ok(response);
+    }
+
+     [HttpGet]
     public async Task<ActionResult<APIResponse>> GetAll()
     {
         var response = new APIResponse();
@@ -36,6 +47,16 @@ public class CoursePlansController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, response);
         }
     }
+    
+    [HttpGet("subjects")]
+    public async Task<ActionResult<APIResponse>> GetAllSubjects()
+    {
+        var response = new APIResponse();
+        var result = await _unitOfWork.CoursePlans.GetAllSubjectsAsync();
+        response.Result = result;
+        response.statusCode = HttpStatusCode.OK;
+        return Ok(response);
+    }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<APIResponse>> Get(int id)
@@ -52,17 +73,6 @@ public class CoursePlansController : ControllerBase
 
         response.Result = item;
         response.statusCode = HttpStatusCode.OK;
-        return Ok(response);
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<APIResponse>> Create([FromBody] CoursePlanDTO dto)
-    {
-        var response = new APIResponse();
-        var created = await _unitOfWork.CoursePlans.AddAsync(dto);
-        await _unitOfWork.CompleteAsync();
-        response.Result = "CoursePlan created successfully";
-        response.statusCode = HttpStatusCode.Created;
         return Ok(response);
     }
 

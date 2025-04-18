@@ -1,33 +1,39 @@
+<!-- Enhanced Loading Spinner -->
+<div *ngIf="isLoading" class="card flex justify-center">
+    <app-progress-spinner [visible]="visible"></app-progress-spinner>
+</div>
+
+
 <div id="id01" class="modal-container" [attr.dir]="dir" [ngClass]="{'English':dir==='ltr'}">
     <h2 class="school">الدرجات الشهرية</h2>
 
     <form [formGroup]="form">
         <div class="group group2">
             <div class="form-control">
-                <p-dropdown [options]="AllClasses" formControlName="classID" optionLabel="className" [editable]="true" [showClear]="SelectBook"
-                    (onChange)="selectBook()" placeholder="إختار الصف">
-                </p-dropdown>
+                <p-select [options]="AllClasses" [(ngModel)]="selectedClass" optionValue="classID" [checkmark]="true"
+                    optionLabel="className" [editable]="true" [showClear]="true" (onChange)="selectClass($event.value)"
+                    placeholder="إختار الصف" />
             </div>
 
             <div class="form-control">
-                <p-dropdown [options]="terms" [checkmark]="true" optionLabel="name" [editable]="true"
-                    [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الفصل">
-                </p-dropdown>
+                <p-select [options]="terms" [(ngModel)]="selectedTerm" optionValue="id" [checkmark]="true"
+                    optionLabel="name" [editable]="true" [showClear]="true" (onChange)="onTermChange($event.value)"
+                    placeholder="إختار الفصل" />
             </div>
 
             <div class="form-control">
-                <p-dropdown [options]="" formControlName="BookID" optionLabel="name" [editable]="true"
-                    [showClear]="SelectBook" (onChange)="selectBook()" placeholder="إختار المقرر">
-                </p-dropdown>
+                <p-select [options]="curriculmsPlan" optionValue="subjectID" [(ngModel)]="selectedSubject"
+                    optionLabel="subjectName" [editable]="true" [showClear]="true" (onChange)="selectBook($event.value)"
+                    placeholder="إختار المقرر" />
             </div>
 
             <div class="form-control">
-                <p-dropdown [options]="" [checkmark]="true" optionLabel="name" [editable]="true"
-                    [showClear]="SelectClass" (onChange)="selectClass()" placeholder="إختار الشهر">
-                </p-dropdown>
+                <p-select [options]="filteredMonths" [(ngModel)]="selectedMonth" optionValue="id" [checkmark]="true"
+                    optionLabel="name" [editable]="true" [showClear]="true" (onChange)="selectMonth($event.value)"
+                    placeholder="إختار الشهر" />
             </div>
         </div>
-        <button  class="adding school-btn"  (click)="saveAllGrades()">>حفظ التغيرات</button>
+        <button class="adding school-btn" (click)="saveAllGrades()">حفظ التغيرات</button>
         <div class="mange">
             <span class="border" (click)="toggleHidden()"><i
                     [class]="hidden?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
@@ -71,22 +77,17 @@
                             <td>{{ CurrentStudent.subjectName }}</td>
 
                             @for (grade of CurrentStudent.grades; track $index) {
-                                <td><input class="form-control input1 no-spinner" 
-                                    type="number"
-                                    [(ngModel)]="grade.maxGrade"         
+                            <td><input class="form-control input1 no-spinner" type="number" [(ngModel)]="grade.maxGrade"
                                     name="g{{CurrentStudent.studentID}}_{{grade.gradeTypeID}}"
-                                    [ngModelOptions]="{standalone:true}" ></td>
+                                    [ngModelOptions]="{standalone:true}" min="0" [max]="gradeLimits[grade.gradeTypeID]"
+                                    (ngModelChange)="clampGrade(grade)" (input)="enforceLimit($event, grade)"></td>
                             }
                             <td>100</td>
                             <td>100</td>
-
-                            <!-- "Previous student" button/column -->
                             <td>
                                 <i class="pi pi-angle-double-left" style="font-size:24px;color:#207133;cursor:pointer;"
                                     (click)="goPreviousStudent()"></i>
                             </td>
-
-                            <!-- Operation Buttons -->
                             <td>
                                 <div class="col text-left">
                                     <div class="mt-sm-0 mt-2">
@@ -144,11 +145,10 @@
                             <td class="student-name-column">{{student.studentName}}</td>
                             <td>{{student.subjectName}}</td>
                             @for (grade of student.grades; track $index) {
-                                <td><input class="form-control input1 no-spinner" 
-                                    type="number"
-                                    [(ngModel)]="grade.maxGrade"         
+                            <td><input class="form-control input1 no-spinner" type="number" [(ngModel)]="grade.maxGrade"
                                     name="g{{student.studentID}}_{{grade.gradeTypeID}}"
-                                    [ngModelOptions]="{standalone:true}" ></td>
+                                    [ngModelOptions]="{standalone:true}" min="0" [max]="gradeLimits[grade.gradeTypeID]"
+                                    (ngModelChange)="clampGrade(grade)" (input)="enforceLimit($event, grade)"></td>
                             }
                             <td>100</td>
                             <td>100</td>

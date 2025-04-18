@@ -121,21 +121,17 @@ public class CoursePlanRepository : ICoursePlanRepository
             .Include(p => p.Division)
             .Include(p => p.Term)
             .Include(p => p.Year)
-            .ToListAsync();
-        var coursePlans = new List<CoursePlanReturnDTO>();
-        foreach (var item in list)
-        {
-            var coursePlan = new CoursePlanReturnDTO
+            .Select(item => new CoursePlanReturnDTO
             {
                 CoursePlanName = $"{item.Subject.SubjectName}-{item.Class.ClassName}",
                 TeacherName = $"{item.Teacher.FullName.FirstName} {item.Teacher.FullName.MiddleName} {item.Teacher.FullName.LastName}",
                 DivisionName = $"{item.Division.DivisionName}",
                 TermName = $"{item.Term.Name}",
-                Year = $"{item.Year.YearDateStart.Year}-{item.Year.YearDateEnd?.Year}",
-            };
-            coursePlans.Add(coursePlan);
-        }
-        return coursePlans;
+                Year = $"{item.Year.YearDateStart.Year}-{item.Year.YearDateEnd!.Value.Year}",
+            })
+            .ToListAsync();
+        
+        return list;
     }
 
     public async Task<CoursePlanDTO?> GetByIdAsync(int id)
@@ -163,5 +159,18 @@ public class CoursePlanRepository : ICoursePlanRepository
 
         _context.CoursePlans.Remove(entity);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<SubjectCoursePlanDTO>> GetAllSubjectsAsync()
+    {
+        var subjects = await _context.CoursePlans
+            .Include(s => s.Subject)
+            .Select(s => new SubjectCoursePlanDTO
+            {
+                SubjectID = s.SubjectID,
+                SubjectName = s.Subject.SubjectName,
+            })
+            .ToListAsync();
+        return subjects;
     }
 }

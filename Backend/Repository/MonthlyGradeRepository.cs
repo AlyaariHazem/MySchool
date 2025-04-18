@@ -52,50 +52,32 @@ namespace Backend.Repository
         // Get all monthly grades based on filters: Term, Month, Class, GradeType
         public async Task<List<MonthlyGradesReternDTO>> GetAllAsync(int term, int monthId, int classId, int subjectId)
         {
-            List<MonthlyGrade> grades;
-            if (subjectId == 0)
-            {
-                grades = await _context.MonthlyGrades
-                    .Where(g => g.TermID == term && g.MonthID == monthId && g.ClassID == classId)
-                    .Include(g => g.Student)
+            var query = _context.MonthlyGrades
+                .Where(g => g.TermID == term && g.MonthID == monthId && g.ClassID == classId);
+
+            if (subjectId != 0)
+                query = query.Where(g => g.SubjectID == subjectId);
+
+            var grades = await query
+                .Include(g => g.Student)
                     .ThenInclude(s => s.FullName)
-                    .Include(g => g.Subject)
-                    .Include(g => g.GradeType)
-                    .ToListAsync();
-            }
-            else
-            {
-                grades = await _context.MonthlyGrades
-                    .Where(g => g.TermID == term && g.MonthID == monthId && g.ClassID == classId && g.SubjectID == subjectId)
-                    .Include(g => g.Student)
-                    .ThenInclude(s => s.FullName)
-                    .Include(g => g.Subject)
-                    .Include(g => g.GradeType)
-                    .ToListAsync();
-            }
+                .Include(g => g.Subject)
+                .Include(g => g.GradeType)
+                .ToListAsync();
 
             var studentGrades = grades
-                .GroupBy(g => g.StudentID)
-                .Select(studentGroup =>
+                .GroupBy(g => new { g.StudentID, g.Student.FullName, g.SubjectID, g.Subject.SubjectName })
+                .Select(group => new MonthlyGradesReternDTO
                 {
-                    var first = studentGroup.FirstOrDefault();
-                    var fullName = first?.Student?.FullName;
-                    var studentName = fullName != null
-                        ? $"{fullName.FirstName} {fullName.MiddleName} {fullName.LastName}"
-                        : "Unknown";
-
-                    return new MonthlyGradesReternDTO
+                    StudentID = group.Key.StudentID,
+                    StudentName = $"{group.Key.FullName.FirstName} {group.Key.FullName.MiddleName} {group.Key.FullName.LastName}",
+                    SubjectID = group.Key.SubjectID,
+                    SubjectName = group.Key.SubjectName,
+                    Grades = group.Select(g => new GradeTypeMonthDTO
                     {
-                        StudentID = studentGroup.Key,
-                        StudentName = studentName,
-                        SubjectID = first?.SubjectID ?? 0,
-                        SubjectName = first?.Subject?.SubjectName ?? "Unknown",
-                        Grades = studentGroup.Select(g => new GradeTypeMonthDTO
-                        {
-                            GradeTypeID = g.GradeTypeID,
-                            MaxGrade = g.Grade
-                        }).ToList()
-                    };
+                        GradeTypeID = g.GradeTypeID,
+                        MaxGrade = g.Grade
+                    }).ToList()
                 })
                 .ToList();
 

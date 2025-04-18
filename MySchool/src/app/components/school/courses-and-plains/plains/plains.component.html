@@ -71,9 +71,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (curriculm of curriculmsPlans; track $index) {
-                    <!-- @for replaced with *ngFor here, typical Angular syntax -->
-                    <tr *ngFor="let curriculum of curriculmsPlans; let i = index">
+                    @for (curriculum of curriculmsPlans; track $index; let i=$index) {
+                    <tr>
                         <td>{{ i + 1 }}</td>
                         <td>{{ curriculum.coursePlanName }}</td>
                         <td>{{ curriculum.divisionName }}</td>

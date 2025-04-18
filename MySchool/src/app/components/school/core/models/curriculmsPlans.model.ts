@@ -14,3 +14,7 @@ export interface CurriculmsPlans {
     termName: string;
     year: string;
 }
+export interface CurriculmsPlanSubject {
+    subjectID: number;
+    subjectName: string;
+}

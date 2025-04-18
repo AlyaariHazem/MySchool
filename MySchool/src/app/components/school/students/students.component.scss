@@ -72,9 +72,9 @@ p-paginator {
 .table-container {
   margin-top: 3rem;
 }
-mat-form-field {
-  margin-right: 1rem;
-  width: 30%;
+p-select {
+  width: 22% !important;
+  margin-right: 1rem !important;
 }
 .inputText {
   width: 24%;
@@ -115,7 +115,11 @@ mat-form-field {
 .class {
   margin-right: 8px;
 }
-
+.group3 {
+  position: absolute;
+  right: -9rem;
+  top: 1rem;
+}
 .grade {
   margin-right: 0px;
 }
@@ -173,6 +177,9 @@ mat-form-field {
 .group2 {
   margin-top: 3rem;
 }
+.group3 {
+  margin-top: 3rem;
+}
 .add {
   position: absolute;
   top: 1rem;
@@ -219,6 +226,9 @@ mat-form-field {
       display: none;
     }
   }
+  .group3 {
+    right: -3rem;
+  }
   :host ::ng-deep {
     .chipsEn {
       display: none;
@@ -254,6 +264,7 @@ mat-form-field {
   // .tablink {
   //     color: rgb(35, 22, 213);
   // }
+  
 }
 
 //this is for talbes
