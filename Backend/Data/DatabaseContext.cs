@@ -57,7 +57,7 @@ namespace Backend.Data
             // modelBuilder.Entity<SubjectStudent>().HasKey(SS => new { SS.SubjectID, SS.StudentID });
             modelBuilder.Entity<Curriculum>().HasKey(SS => new { SS.SubjectID, SS.ClassID });
             modelBuilder.Entity<CoursePlan>().HasKey(c => new { c.YearID, c.TeacherID, c.ClassID, c.DivisionID, c.SubjectID });
-            modelBuilder.Entity<MonthlyGrade>().HasKey(mg => new { mg.StudentID, mg.YearID, mg.SubjectID, mg.MonthID, mg.GradeTypeID, mg.ClassID });
+            modelBuilder.Entity<MonthlyGrade>().HasKey(mg => new { mg.StudentID, mg.YearID, mg.SubjectID, mg.MonthID, mg.GradeTypeID, mg.ClassID, mg.TermID });
 
             modelBuilder.Entity<YearTermMonth>().HasKey(ytm => new { ytm.YearID, ytm.TermID, ytm.MonthID });
 
