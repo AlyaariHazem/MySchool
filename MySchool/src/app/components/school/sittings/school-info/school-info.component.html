@@ -1,9 +1,11 @@
+
+<app-progress-spinner [visible]="isLoading"></app-progress-spinner>
 <div class="schoolInfo" [attr.dir]="languageService.dir">
     <h2 class="schoolTitle">{{ 'schoolInfo' | translate }}</h2>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="contant">
             <label for="fileInput">
-                <img class="photo" src="assets/img/user.jpg" alt="school Photo" />
+                <img class="photo" [src]="SchoolImageURL?SchoolImageURL:'assets/img/user.jpg'" alt="school Photo" />
             </label>
             <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
 

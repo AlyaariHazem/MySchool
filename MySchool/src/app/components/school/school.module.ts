@@ -34,8 +34,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllParentsComponent } from './parents/all-parents/all-parents.component';
 import { EditParentsComponent } from './parents/edit-parents/edit-parents.component';
 import { AboutStudentComponent } from './students/about-student/about-student.component';
-import { AddStudentComponent } from './students/add-student/add-student.component';
-import { EditStudentComponent } from './students/edit-student/edit-student.component';
 import { TeachersComponent } from './teachers/teachers.component';
 import { NavigateComponent } from './navigate/navigate.component';
 import { RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -75,6 +73,9 @@ import { ReportComponent } from './report/report.component';
 import { CustomDatePipe } from '../../Pipes/customDate.pipe';
 import { InputTextModule } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
+import { NumberToArabicTextPipe } from '../../Pipes/number-to-arabic-text.pipe';
+import { AccountReportComponent } from './report/account-report/account-report.component';
+import { EmployeeComponent } from './teachers/employee/employee.component';
 
 
 
@@ -86,9 +87,7 @@ const components = [
   EditParentsComponent,
   SidebarComponent,
   AboutStudentComponent,
-  AddStudentComponent,
   ChartForStudentComponent,
-  EditStudentComponent,
   TeachersComponent,
   StudentMonthResultComponent,
   NavigateComponent,
@@ -96,6 +95,7 @@ const components = [
   StagesGradesComponent,
   SchoolInfoComponent,
   StudentsComponent,
+  EmployeeComponent,
   GradesComponent,
   ActionComponent,
   DivisionComponent,
@@ -121,7 +121,8 @@ const components = [
   GradesMonthComponent,
   AddAccountComponent,
   GradesMangeComponent,
-  AllotmentComponent
+  AllotmentComponent,
+  AccountReportComponent
 
 ];
 
@@ -162,7 +163,8 @@ const modules = [
   CountDirective,
   MatDatepickerModule,
   MatNativeDateModule,
-  DatePipe
+  DatePipe,
+  NumberToArabicTextPipe,
 ];
 
 @NgModule({

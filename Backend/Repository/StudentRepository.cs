@@ -30,6 +30,64 @@ public class StudentRepository : IStudentRepository
     {
         _context.Students.Add(student);
         await _context.SaveChangesAsync();
+
+        // Add student to manthly and termly grades
+        student = await _context.Students
+        .Include(s => s.Division)
+            .ThenInclude(d => d.Class)
+        .FirstOrDefaultAsync(s => s.StudentID == student.StudentID) ?? student;
+
+        var plans = await _context.CoursePlans
+            .Where(p => p.DivisionID == student.DivisionID &&
+                        p.YearID == student.Division.Class.YearID &&
+                        p.ClassID == student.Division.ClassID)
+            .ToListAsync();
+
+        // 3) بيانات مشتركة
+        var months = await _context.YearTermMonths
+            .Where(m => m.YearID == student.Division.Class.YearID)
+            .Select(m => new { m.MonthID, m.TermID })
+            .ToListAsync();
+
+        var gradeTypes = await _context.GradeTypes
+            .Where(g => g.IsActive)
+            .Select(g => g.GradeTypeID)
+            .ToListAsync();
+
+        var monthly = new List<MonthlyGrade>();
+        var termly = new List<TermlyGrade>();
+
+        foreach (var plan in plans)
+        {
+            // Termly
+            termly.Add(new TermlyGrade
+            {
+                StudentID = student.StudentID,
+                YearID = plan.YearID,
+                TermID = plan.TermID,
+                ClassID = plan.ClassID,
+                SubjectID = plan.SubjectID
+            });
+
+            // Monthly
+            foreach (var m in months.Where(m => m.TermID == plan.TermID))
+                foreach (var gt in gradeTypes)
+                    monthly.Add(new MonthlyGrade
+                    {
+                        StudentID = student.StudentID,
+                        YearID = plan.YearID,
+                        TermID = plan.TermID,
+                        ClassID = plan.ClassID,
+                        SubjectID = plan.SubjectID,
+                        MonthID = m.MonthID,
+                        GradeTypeID = gt
+                    });
+        }
+
+        if (monthly.Count > 0) _context.MonthlyGrades.AddRange(monthly);
+        if (termly.Count > 0) _context.TermlyGrades.AddRange(termly);
+        await _context.SaveChangesAsync();
+
         return student;
     }
 
@@ -225,43 +283,47 @@ public class StudentRepository : IStudentRepository
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
-            // Load the student along with all related entities
+            // Load student along with ALL referencing entities
             var student = await _context.Students
-                .Include(s => s.StudentClassFees)   // Possibly referencing Student
-                .Include(s => s.AccountStudentGuardians) // Possibly referencing Student
+                .Include(s => s.StudentClassFees)
+                .Include(s => s.AccountStudentGuardians)
+                .Include(s => s.TermlyGrades) // <-- Add this to fix your issue
+                .Include(s => s.MonthlyGrades) // Highly recommended, similar potential FK
                 .FirstOrDefaultAsync(s => s.StudentID == id);
 
             if (student == null)
-                return false; // No student found with this ID
+                return false;
 
-
-            // Remove related StudentClassFees if any
-            if (student.StudentClassFees != null && student.StudentClassFees.Any())
+            // Explicitly delete referencing rows first
+            if (student.StudentClassFees.Any())
                 _context.StudentClassFees.RemoveRange(student.StudentClassFees);
 
-
-            // Remove related AccountStudentGuardians if any
-            if (student.AccountStudentGuardians != null && student.AccountStudentGuardians.Any())
+            if (student.AccountStudentGuardians.Any())
                 _context.AccountStudentGuardians.RemoveRange(student.AccountStudentGuardians);
 
+            if (student.TermlyGrades.Any())
+                _context.TermlyGrades.RemoveRange(student.TermlyGrades);
 
-            // Now that all dependent entities have been removed,
-            // we can safely remove the student.
+            if (student.MonthlyGrades.Any())
+                _context.MonthlyGrades.RemoveRange(student.MonthlyGrades);
+
+            // Finally delete the student itself
             _context.Students.Remove(student);
 
-            // Save changes
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            _mangeFilesService.RemoveImage(student.StudentID);
-            await _mangeFilesService.RemoveAttachmentsAsync(student.StudentID);
+            _mangeFilesService.RemoveFile("StudentPhotos", student.StudentID);
+            await _mangeFilesService.RemoveAttachmentsAsync("Attachments", student.StudentID);
 
-            return true; // Student and related entities successfully deleted
+            return true;
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            // Log the exception as needed
+            // Helpful: Log inner exceptions clearly for troubleshooting
+            var baseException = ex.GetBaseException();
+            Console.WriteLine($"Deletion failed: {baseException.Message}");
             throw;
         }
     }

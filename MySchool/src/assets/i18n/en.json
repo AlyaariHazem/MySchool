@@ -162,6 +162,11 @@
       "add": "Add Blog",
       "edit": "Edit Blog"
     },
+    "report":{
+      "reports": "Reports",
+      "account": "Financial Reports",
+      "gradesMonth": "Monthly Grades Report" 
+    },
     "management": "Management",
     "employees_sub": {
       "all": "All Employees",

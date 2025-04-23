@@ -13,6 +13,8 @@ namespace Backend.Models
         public int ManagerID { get; set; }
         [Required]
         public Name FullName { get; set; }
+        public DateTime? DOB { get; set; } = DateTime.Now;
+        public string? ImageURL { get; set; }
         public string UserID { get; set; }
         [JsonIgnore]
         public School School { get; set; }

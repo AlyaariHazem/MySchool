@@ -28,6 +28,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   paginatedStage: Stage[] = [];
   update!: updateStage;
   errorMessage: string = '';
+  isLoading: boolean = true;
 
   private classService = inject(ClassService);
 
@@ -51,10 +52,14 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
     this.stageService.getAllStages().subscribe({
       next: (data) => {
         this.stages = data;
+        this.isLoading=false;
         this.length = this.stages.length; // Set total item count
         this.updateDisplayedDivisions(); // Initialize displayed divisions
       },
-      error: () => this.errorMessage = 'Failed to load stages'
+      error: () =>{
+        this.errorMessage = 'Failed to load stages';
+        this.isLoading=false;
+      } 
     });
   }
 
@@ -155,6 +160,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
     this.classService.GetAll().subscribe({
       next: (data) => {
         this.classes= data;
+        this.isLoading=false;
       },
       error: () => this.errorMessage = 'Failed to load classes'
     });

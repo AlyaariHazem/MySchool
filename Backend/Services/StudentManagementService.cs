@@ -220,7 +220,7 @@ public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentI
         // **Handle Attachments**
         if (request.Files != null && request.Files.Any())
         {
-            var filePaths = await this._mangeFilesService.UploadAttachments(request.Files, student.StudentID);
+            var filePaths = await this._mangeFilesService.UploadAttachments(request.Files,"Attachments", student.StudentID);
             var attachments = filePaths.Select(filePath => new Attachments
             {
                 StudentID = student.StudentID,

@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { SchoolService } from '../../../../core/services/school.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { School } from '../../../../core/models/school.modul';
+import { FileService } from '../../../../core/services/file.service';
 
 @Component({
   selector: 'app-school-info',
@@ -25,7 +26,9 @@ export class SchoolInfoComponent implements OnInit {
   schoolType: any[] = [];
   schoolCategory: any[] = [];
   currentSchool?: School;
- schoolId:string='';
+  schoolId!: number;
+  fileManage = inject(FileService);
+  isLoading: boolean = true;
 
   constructor(private fb: FormBuilder) {
     // Set up validators as needed
@@ -39,6 +42,7 @@ export class SchoolInfoComponent implements OnInit {
       schoolGoal: [''],
       notes: [''],
       country: [''],
+      imageURL: [''],
       city: [''],
       address: [''],
       mobile: [''],
@@ -57,9 +61,8 @@ export class SchoolInfoComponent implements OnInit {
   ngOnInit(): void {
     // 1) Load the school from the backend
     // Here, we're hard-coding ID=1, but in a real scenario you might get it from the route param
-    this.loadSchool(1);
-    localStorage.setItem('schoolId',"1");
-    this.schoolId!=localStorage.getItem('schoolId');
+    this.schoolId = Number(localStorage.getItem('schoolId'));
+    this.loadSchool(Number(this.schoolId));
 
     // 2) Define options for dropdowns
     this.schoolType = [
@@ -79,26 +82,21 @@ export class SchoolInfoComponent implements OnInit {
     this.languageService.currentLanguage();
   }
 
-  /**
-   * Load a school by ID, then initialize the form with that data.
-   */
   loadSchool(schoolId: number): void {
     this.schoolService.getSchoolByID(schoolId).subscribe({
       next: (res: School) => {
         this.currentSchool = res;
+        this.isLoading = false;
         this.initializeForm(res); // Populate the form once data is received
       },
       error: (err) => {
         console.error('Error fetching school:', err);
+        this.isLoading = false;
         this.toaster.error('Failed to load school data');
       },
     });
   }
 
-  /**
-   * Patch the form with the fetched school data.
-   */
-  
   initializeForm(school: School): void {
     this.form.patchValue({
       schoolID: school.schoolID || 1,
@@ -122,23 +120,45 @@ export class SchoolInfoComponent implements OnInit {
       notes: school.notes || '',
       hireDate: school.hireDate || '2025-01-01',
     });
+    this.SchoolImageURL= school.imageURL || '';
+    localStorage.setItem('SchoolImageURL', this.SchoolImageURL);
     console.log('Form after initialization:', this.form.value);
   }
 
-  /**
-   * Handle file upload event (optional).
-   */
+  SchoolImage!: File;
+  SchoolImageURL: string = '';
   uploadPhoto(event: Event): void {
-    console.log('Photo uploaded!', event);
+    const input = event.target as HTMLInputElement;
+
+    if (input.files?.[0]) {
+      this.SchoolImage = input.files[0];
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.SchoolImageURL = e.target.result;
+
+        // Patch form only after image load
+        this.form.patchValue({
+          imageURL: this.SchoolImageURL,
+        });
+      };
+
+      reader.readAsDataURL(this.SchoolImage);
+    } else {
+      console.error('No file selected');
+    }
   }
 
-  /**
-   * Submit form to update the existing school data.
-   */
-  
   onSubmit(): void {
     if (this.form.valid) {
       const schoolData: School = this.form.value;
+      if(this.SchoolImage!=undefined)
+       {
+        schoolData.imageURL = this.SchoolImage.name;
+        localStorage.setItem('SchoolImageURL', this.SchoolImageURL);
+       }else{
+        schoolData.imageURL=localStorage.getItem('SchoolImageURL')!;
+       }
 
       // Check if we have a current school and a valid ID
       if (this.currentSchool && this.currentSchool.schoolID) {
@@ -152,6 +172,8 @@ export class SchoolInfoComponent implements OnInit {
             this.toaster.error('Update failed');
           },
         });
+        this.fileManage.DeleteFile('School', Number(this.schoolId)).subscribe();
+        this.fileManage.uploadFile(this.SchoolImage, 'School', Number(this.schoolId)).subscribe();
       } else {
         this.toaster.error('No school selected for update');
       }

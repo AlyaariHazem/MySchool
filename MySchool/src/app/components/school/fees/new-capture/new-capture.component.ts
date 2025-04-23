@@ -11,11 +11,9 @@ import { StudentAccounts } from '../../core/models/accounts.model';
 import { VoucherService } from '../../core/services/voucher.service';
 import { Voucher, VoucherAdd } from '../../core/models/voucher.model';
 import { FileService } from '../../../../core/services/file.service';
+import { VouchersGuardian } from '../../core/models/vouchers-guardian.model';
+import { PayBy } from '../../core/models/payBy.model';
 
-interface PayBy {
-  label: string;
-  value: string;
-}
 
 @Component({
   selector: 'app-new-capture',
@@ -23,11 +21,11 @@ interface PayBy {
   styleUrls: ['./new-capture.component.scss', './../../../../shared/styles/style-select.scss'],
   providers: [DatePipe] // Add this line
 })
-export class NewCaptureComponent implements OnInit, OnChanges,OnDestroy {
+export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   @Input() voucherData: Voucher | undefined;
   @Input() visible: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>(); // Emit visibility change
-   
+
   formGroup: FormGroup;
 
   private accountService = inject(AccountService);
@@ -40,6 +38,7 @@ export class NewCaptureComponent implements OnInit, OnChanges,OnDestroy {
   selectedAccount!: StudentAccounts;
   payBy!: PayBy;
   voucherID: number | undefined;
+  vouchersGuardian: VouchersGuardian[] = [];
 
   showDiv2 = false;
   changeView: boolean = true;
@@ -100,7 +99,7 @@ export class NewCaptureComponent implements OnInit, OnChanges,OnDestroy {
   }
 
   uploadFiles(voucherID: number) {
-    this.fileService.uploadFile(this.files, this.studentID, voucherID).subscribe(res => {
+    this.fileService.uploadFiles(this.files,"Vouchers", voucherID).subscribe(res => {
 
       console.log('File upload response:', res);
     });
@@ -116,16 +115,18 @@ export class NewCaptureComponent implements OnInit, OnChanges,OnDestroy {
     }
     this.cdr.detectChanges();  // Trigger change detection
   }
-
+  filteredVouchers: VouchersGuardian[] = [];
   setStudentID(value: any): void {
     if (value) {
       this.studentID = value.studentID;
       console.log('Selected Student ID:', this.studentID);
     }
     this.cdr.detectChanges();  // Trigger change detection
+    this.filteredVouchers = this.vouchersGuardian.filter(v => v.guardianID == this.studentID);
   }
 
   setAccountStudentGuardianID(value: any): void {
+    this.filteredVouchers = this.vouchersGuardian.filter(v => v.guardianID == value.accountStudentGuardianID);
     if (value) {
       this.accountStudentGuardianID = value.accountStudentGuardianID;
       console.log('Selected Account Student Guardian ID:', this.accountStudentGuardianID);
@@ -134,29 +135,55 @@ export class NewCaptureComponent implements OnInit, OnChanges,OnDestroy {
   }
 
   printVoucher() {
-    const voucherElement = document.getElementById('voucherContent');
-    if (!voucherElement) return;
-
-    const printContents = voucherElement.innerHTML;
-    const originalContents = document.body.innerHTML;
-
-    document.body.innerHTML = printContents;
-    window.print();
-    document.body.innerHTML = originalContents;
+    const page = document.getElementById('reportVoucher');
+    if (!page) { return; }
+  
+    /* ️نسخ كل ملفات الأنماط الموجودة */
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+                       .map(el => el.outerHTML)
+                       .join('');
+  
+    const base = `<base href="${document.baseURI}">`;
+  
+    const popup = window.open('', '', 'width=1000px,height=auto');
+    if (!popup) { return; }
+  
+    popup.document.write(`
+      <html><head>
+      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+      <title>prinat any thing you want</title>
+        ${base}
+        ${links}
+        <style>
+        
+          @media print {
+            body{margin:0;direction:rtl;font-family:"Cairo","Tahoma",sans-serif}
+            .report,*{letter-spacing:0!important}   /* إبقاء العربية متصلة */
+          }
+        </style>
+      </head><body dir="rtl">
+        ${page.outerHTML}
+      </body></html>
+    `);
+  
+    popup.document.close();
+    popup.onload = () => popup.print();
+  
   }
 
   toggleDiv() {
     this.showDiv2 = !this.showDiv2;
     this.changeView = !this.changeView;
   }
-getAccounts(){
-  this.accountService.getAccountAndStudentNames().subscribe(res => {
-    this.accounts = res;
-  });
-}
+  getAccounts() {
+    this.accountService.getAccountAndStudentNames().subscribe(res => {
+      this.accounts = res;
+    });
+  }
   ngOnInit() {
     this.getAccounts();
     this.ngOnChanges();
+    this.getAllVouchersGuardian();
   }
 
   ngOnChanges() {
@@ -171,14 +198,14 @@ getAccounts(){
       });
     }
 
-    if(this.voucherData==undefined)
+    if (this.voucherData == undefined)
       this.formGroup.reset();
   }
 
   ngOnDestroy() {
     this.voucherData = undefined;
-    this.voucherData=undefined;
-    
+    this.voucherData = undefined;
+
   }
   updateAttachments(event: any): void {
     const input = event.target as HTMLInputElement;
@@ -215,8 +242,48 @@ getAccounts(){
       this.visibleChange.emit(false);  // Close dialog by emitting false
     });
   }
-
+  getAllVouchersGuardian(): void {
+    this.voucherService.getAllVouchersGuardian().subscribe(res => {
+      this.vouchersGuardian = res;
+    }
+    );
+  }
   trackByIndex(index: number): number {
     return index;
+  }
+  print(): void {
+    const page = document.getElementById('report');
+    if (!page) { return; }
+  
+    /* ️نسخ كل ملفات الأنماط الموجودة */
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+                       .map(el => el.outerHTML)
+                       .join('');
+  
+    const base = `<base href="${document.baseURI}">`;
+  
+    const popup = window.open('', '', 'width=1000px,height=auto');
+    if (!popup) { return; }
+  
+    popup.document.write(`
+      <html><head>
+      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+      <title>prinat any thing you want</title>
+        ${base}
+        ${links}
+        <style>
+        
+          @media print {
+            body{margin:0;direction:rtl;font-family:"Cairo","Tahoma",sans-serif}
+            .report,*{letter-spacing:0!important}   /* إبقاء العربية متصلة */
+          }
+        </style>
+      </head><body dir="rtl">
+        ${page.outerHTML}
+      </body></html>
+    `);
+  
+    popup.document.close();
+    popup.onload = () => popup.print();
   }
 }

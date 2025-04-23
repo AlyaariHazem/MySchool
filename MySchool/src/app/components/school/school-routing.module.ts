@@ -4,7 +4,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PageHeaderComponent } from './page-header/page-header.component';
 import { NavigateComponent } from './navigate/navigate.component';
-import { AddStudentComponent } from './students/add-student/add-student.component';
 import { AllStudentsComponent } from './students/all-students/all-students.component';
 import { TeachersComponent } from './teachers/teachers.component';
 import { StudyYearComponent } from './sittings/study-year/study-year.component';
@@ -24,8 +23,9 @@ import { BillsComponent } from './accounts/bills/bills.component';
 import { AllotmentComponent } from './allotment-report/allotment/allotment.component';
 import { GradesMangeComponent } from './grades-mange/grades-mange-mange.component';
 import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.component';
-import { ReportComponent } from './report/report.component';
 import { PageNotFoundComponent } from '../../shared/components/page-not-found/page-not-found.component';
+import { AccountReportComponent } from './report/account-report/account-report.component';
+import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
 
 const routes: Routes = [
   {
@@ -34,11 +34,18 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent, data: { breadcrumb: '' } },
       { path: 'sidebar', component: PageHeaderComponent, data: { breadcrumb: 'Sidebar' } },
-      { path: 'report', component: ReportComponent, data: { breadcrumb: 'تقارير' } },
+      {
+        path: 'reports', data: { breadcrumb: 'تقارير' }, children: [
+          {path:'',redirectTo:'account',pathMatch:'full'},
+          { path: 'account', component: AccountReportComponent, data: { breadcrumb: 'حسابات' } },
+          { path: 'allotment', component: AllotmentComponent, data: { breadcrumb: 'تخصيص التقارير' } },
+          { path: 'grades-month', component: StudentMonthResultComponent, data: { breadcrumb: 'تقارير شهرية' } },
+        ]
+      },
       {
         path: 'students', data: { breadcrumb: 'الطلاب' }, children: [
           { path: 'all-students', component: StudentsComponent, data: { breadcrumb: 'جميع الطلاب' } },
-          { path: 'about-students', component: AddStudentComponent, data: { breadcrumb: 'عن الطلاب' } },
+          { path: 'about-students', component: StudentsComponent, data: { breadcrumb: 'عن الطلاب' } },
           { path: 'add-student/:id', component: StudentsComponent, data: { breadcrumb: 'إضافة طالب' } },
           { path: 'edit-student', component: AllStudentsComponent, data: { breadcrumb: 'تعديل طالب' } },
           { path: 'chart-for-student', component: ChartForStudentComponent, data: { breadcrumb: ' طالب' } },

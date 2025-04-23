@@ -32,6 +32,7 @@ namespace Backend.Repository
                 Email = teacher.Email,
                 Address = teacher.Address,
                 Gender = teacher.Gender,
+                HireDate = DateTime.Now,
                 PhoneNumber = teacher.PhoneNumber,
                 UserType = "TEACHER" // Ensure the UserType field exists in the ApplicationUser model
             };
@@ -52,6 +53,8 @@ namespace Backend.Repository
                     MiddleName = teacher.MiddleName,
                     LastName = teacher.LastName
                 },
+                DOB = teacher.DOB,
+                ImageURL = teacher.ImageURL,
                 UserID = teacher.UserID,
                 ManagerID = teacher.ManagerID
             };
@@ -82,6 +85,8 @@ namespace Backend.Repository
                 LastName = t.FullName.LastName,
                 PhoneNumber = t.ApplicationUser.PhoneNumber??"776137120",
                 UserID = t.UserID,
+                DOB = t.DOB,
+                ImageURL = "https://localhost:7258/uploads/Teacher/"+t.ImageURL,
                 Gender = t.ApplicationUser.Gender??"Male",
                 Address = t.ApplicationUser.Address??"Yemen",
                 Email = t.ApplicationUser.Email??"User@gmail.com",

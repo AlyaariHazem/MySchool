@@ -1,80 +1,101 @@
-.Title{
-    position: absolute;
-    top: 13px;
+.Title {
+  position: absolute;
+  top: 13px;
 }
-.add{
-    background-color: #12a212;
+.add {
+  background-color: #12a212;
 }
-:host ::ng-deep{
-  .cPaginator{
+:host ::ng-deep {
+  .cPaginator {
     position: absolute;
     margin-top: 7rem;
     left: 0%;
   }
 }
 
-:host ::ng-deep .p-dialog-header-close{
-    background-color: white!important;
-}//***********************
-.school{
+:host ::ng-deep .p-dialog-header-close {
+  background-color: white !important;
+} //***********************
+.school {
   margin-right: 5px;
 }
 
 // this for form
 
 .group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 0.2fr));
-    gap: 20px;
-  }
-  
-  .container{
-    margin-top: -2rem;
-  }
-  .form-control {
-    display: flex;
-    border:none;
-    flex-direction: column;
-    gap: 5px; /* Space between label and input */
-  }
-  
-.showFee{
-    position: relative;
-    right: 87%;
-    top: -8rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 0.2fr));
+  gap: 20px;
 }
-.button{
+
+.container {
+  margin-top: -2rem;
+}
+.form-control {
+  display: flex;
+  border: none;
+  flex-direction: column;
+  gap: 5px; /* Space between label and input */
+}
+
+.showFee {
+  position: relative;
+  right: 87%;
+  top: -8rem;
+}
+.button {
   background-color: #12a212;
-    color: white;
-    position: absolute;
-    top: 1rem;
-    right: 9rem;
-    border: 1px solid green;
-    border-radius: 3px;
-    padding: 7px 16px;
+  color: white;
+  position: absolute;
+  top: 1rem;
+  right: 9rem;
+  border: 1px solid green;
+  border-radius: 3px;
+  padding: 7px 16px;
 }
-.typing{
-    margin-right: 5rem;
-    background-color:white;
-    color:black;
+.typing {
+  margin-right: 5rem;
+  background-color: white;
+  color: black;
 }
-.image,.name{
-    position: absolute;
-    top: 1px;
-    width: 4.5rem;
-    border-radius: 28px;
-    left: 8%;
+.image,
+.name {
+  position: absolute;
+  top: 1px;
+  width: 4.5rem;
+  border-radius: 28px;
+  left: 8%;
 }
-.name{
-    width: auto;
-    top: 4rem;
-    left: 6%;
+.name {
+  width: auto;
+  top: 4rem;
+  left: 6%;
+}
+.isActive {
+  color: #2fdf85 !important;
+}
+.bi-caret-down-fill {
+  color: #6b7280;
+}
+.active {
+  border: 1px solid #aca6a6;
+  width: 9rem;
+  border-radius: 18px;
+  height: 2.5rem;
+  color: black;
+  margin-top: 0.5rem;
+  background-color: white;
+}
+.dain {
+  background-color: #c2d50b36;
+  border-radius: 5rem;
+  color: #ff7373;
 }
 //disply _____________________________________________________________________
 .modal-container {
-    background-color: white;
-  }
-  //this is for talbes
+  background-color: white;
+}
+//this is for talbes
 /* Resetting some default styles */
 
 .styled-table thead tr {
@@ -168,7 +189,7 @@ li:hover {
 
 :host ::ng-deep .p-dropdown .p-dropdown-clear-icon {
   color: #6b7280;
-  left: 3rem!important; /* Align to the left */
+  left: 3rem !important; /* Align to the left */
 }
 
 :host
@@ -217,8 +238,8 @@ li:hover {
   position: absolute;
   top: 16px;
 }
-:host ::ng-deep{
-  .chipsOne{
+:host ::ng-deep {
+  .chipsOne {
     position: absolute;
     margin-top: -5.2rem;
     left: 3%;

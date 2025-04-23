@@ -111,6 +111,7 @@ builder.Services.AddScoped<IMonthlyGradeRepository , MonthlyGradeRepository>();
 builder.Services.AddScoped<ITermlyGradeRepository, TermlyGradeRepository>();
 builder.Services.AddScoped<ITermRepository, TermRepository>();
 builder.Services.AddScoped<IMonthRepository, MonthRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 
 

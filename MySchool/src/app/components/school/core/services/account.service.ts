@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { BackendAspService } from '../../../../environments/ASP.NET/backend-asp.service';
+import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { Account, StudentAccounts } from '../models/accounts.model';
 
 @Injectable({

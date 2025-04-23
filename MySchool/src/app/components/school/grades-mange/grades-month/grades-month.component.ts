@@ -178,17 +178,18 @@ export class GradesMonthComponent implements OnInit {
     this.getAllMonthlyGrades(this.selectedTerm, this.selectedMonth, classId, this.selectedSubject);
     this.filterMonthsByTerm();
   }
-
+  
+  yearID:number = Number(localStorage.getItem('yearID') || '1');
   saveAllGrades() {
-    if (!this.selectedTerm || !this.selectedMonth || !this.selectedClass || !this.selectedSubject) {
+    if (!this.selectedTerm || !this.selectedMonth || !this.selectedClass) {
       alert('Please select term, month, class, and subject first.');
       return;
     }
-
     const payload: updateMonthlyGrades[] = this.monthlyGrades.flatMap(stu =>
       stu.grades.map(g => ({
         studentID: stu.studentID,
-        subjectID: this.selectedSubject,
+        subjectID: stu.subjectID,
+        yearID: this.yearID,
         monthID: this.selectedMonth,
         classID: this.selectedClass,
         termID: this.selectedTerm,
@@ -196,7 +197,7 @@ export class GradesMonthComponent implements OnInit {
         grade: +g.maxGrade            // convert to number
       }))
     );
-
+    console.log('the data are',payload);
     this.monthlyGradesService.updateMonthlyGrades(payload)
       .subscribe({
         next: _ => {
@@ -283,6 +284,14 @@ export class GradesMonthComponent implements OnInit {
     input.value  = String(val);   // يُجبر الـ input على إظهار الرقم المقصوص
   }
   
+calcTotal(grades: { maxGrade: any }[]): number {
+  return grades.reduce((sum, g) => sum + (+g.maxGrade || 0), 0);
+}
+
+calcPercent(grades: { maxGrade: any }[]): string {
+  const total = this.calcTotal(grades);
+  return total.toString();
+}
   
 
 }

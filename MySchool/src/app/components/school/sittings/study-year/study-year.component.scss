@@ -22,9 +22,6 @@ form {
   position: absolute;
   top: 4px;
 }
-.table-container {
-  margin-top: 3rem;
-}
 mat-form-field {
   margin-right: 1rem;
   width: 30%;
@@ -46,8 +43,8 @@ mat-form-field {
 
 .showFee {
   position: relative;
-  left: -44%;
-  top: -3rem;
+  right: 84%;
+  top: -2rem;
 }
 .container {
   border-radius: 23px;
@@ -96,6 +93,7 @@ mat-form-field {
   .styled-table th,
   .styled-table td {
     padding: auto 10% !important;
+    text-align: center;
     border: 1px solid #dddddd;
   }
 }

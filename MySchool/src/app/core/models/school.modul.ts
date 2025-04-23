@@ -13,6 +13,7 @@ export class School {
     description!: string;
     address!: string;
     country!: string;
+    imageURL!: string;
     city!: string;
     schoolPhone!: number;
     street!: string;

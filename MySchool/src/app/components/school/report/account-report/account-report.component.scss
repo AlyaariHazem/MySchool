@@ -1,0 +1,90 @@
+/* إعدادات عامّة */
+:host {
+  direction: rtl;
+  font-size: 13px;
+}
+#page{
+    background-color: white;
+}
+/* تغليف القسم القابل للطباعة */
+.page {
+  border: 1px solid #e5e7eb;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* الشعار */
+.logo {
+  width: 80px;
+  height: 80px;
+}
+
+/* جدول مصغّر لإجماليات أعلى الصفحة */
+.mini-table {
+  margin-top: 1rem;
+  width: 230px;
+  margin-inline: auto;
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding-block: 4px;
+    border-bottom: 1px solid #f1f3f5;
+
+    &.highlight {
+      font-weight: 700;
+      border-color: transparent;
+    }
+
+    .label {
+      color: #777;
+    }
+  }
+}
+
+/* جدول الرسوم */
+table.fees {
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+
+  th,
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f3f5;
+    white-space: nowrap;
+  }
+  thead th {
+    background: #fafafa;
+    font-weight: 600;
+  }
+  tbody tr.alt {
+    background: #fcfcfc;
+  }
+  tbody tr.total {
+    background: #fff8e1;
+  }
+}
+
+/* إخفاء جميع العناصر غير التقرير أثناء الطباعة */
+@media print {
+  /* اجعل كل شيء مخفيًا أولًا */
+  body * {
+    visibility: hidden;
+  }
+
+  /* العناصر المسموح بطباعتها فقط */
+  app-account-statement,
+  .report,
+  .report * {
+    visibility: visible !important;
+    word-spacing:   normal !important;
+
+  }
+  /* الخط الأساسي للطباعة */
+  .report {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    width: 100%;
+  }
+}

@@ -2,6 +2,8 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "typeRoots": ["node_modules/@types", "src/typings"],
+    "allowSyntheticDefaultImports": true,
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,

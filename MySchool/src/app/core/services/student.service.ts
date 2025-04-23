@@ -3,7 +3,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 
 import { UpdateStudent } from '../models/update-student.model';
 import { AddStudent, StudentDetailsDTO } from '../models/students.model';
-import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
+import { BackendAspService } from '../../ASP.NET/backend-asp.service';
 
 @Injectable({
     providedIn: 'root'
@@ -67,12 +67,13 @@ export class StudentService {
         );
     }
     // Upload multiple Attachments
-    uploadAttachments(files: File[], studentId: number): Observable<any> {
+    uploadFiles(files: File[], studentId: number): Observable<any> {
         const formData = new FormData();
         files.forEach(file => formData.append('files', file));
+        formData.append('folderName', 'Attachments');
         formData.append('studentId', studentId.toString());
 
-        return this.API.http.post(`${this.API.baseUrl}/Students/uploadAttachments`, formData).pipe(
+        return this.API.http.post(`${this.API.baseUrl}/Students/uploadFiles`, formData).pipe(
             catchError(error => {
                 console.error("Error uploading Attachments:", error);
                 return throwError(() => error);

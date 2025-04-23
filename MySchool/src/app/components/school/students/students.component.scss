@@ -46,17 +46,10 @@ p-paginator {
 }
 .col-4 {
   position: absolute;
-  left: -5rem;
-  top: 3rem;
+  left: 0rem;
+  top: 1rem;
 }
-.col-4En {
-  position: absolute;
-  right: 2rem;
-  top: 3rem;
-  .bi-grid {
-    padding-left: 1rem;
-  }
-}
+
 .col-4 {
   i:hover {
     color: #2fdf84;
@@ -74,6 +67,7 @@ p-paginator {
 }
 p-select {
   width: 22% !important;
+  height: 3rem!important;
   margin-right: 1rem !important;
 }
 .inputText {
@@ -117,7 +111,7 @@ p-select {
 }
 .group3 {
   position: absolute;
-  right: -9rem;
+  right: 0rem;
   top: 1rem;
 }
 .grade {
@@ -227,7 +221,7 @@ p-select {
     }
   }
   .group3 {
-    right: -3rem;
+    right: 0rem;
   }
   :host ::ng-deep {
     .chipsEn {
@@ -237,16 +231,7 @@ p-select {
   p-paginator {
     display: none;
   }
-  .col-4 {
-    position: absolute;
-    left: 3rem;
-    top: 2rem;
-  }
-  .col-4En {
-    position: absolute;
-    right: -3rem;
-    top: 2rem;
-  }
+  
   .styled-table th,
   .styled-table td {
     padding: 12px 1px;

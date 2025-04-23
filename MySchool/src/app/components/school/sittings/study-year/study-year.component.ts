@@ -1,10 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { PageEvent } from '@angular/material/paginator';
+import { ToastrService } from 'ngx-toastr';
+import { PaginatorState } from 'primeng/paginator';
+
 import { LanguageService } from '../../../../core/services/language.service';
 import { YearService } from '../../../../core/services/year.service';
 import { Year } from '../../../../core/models/year.model';
-import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-study-year',
@@ -30,7 +31,6 @@ export class StudyYearComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllYears();
-    this.updateDisplayedStudents();
   }
 
   showDialogAddYear() {
@@ -41,7 +41,7 @@ export class StudyYearComponent implements OnInit {
     this.yearService.getAllYears().subscribe(res => {
       this.years = res;
       this.viewYear = this.years;
-      this.updateDisplayedStudents();
+      this.updatePaginatedData();
     });
   }
 
@@ -52,11 +52,7 @@ export class StudyYearComponent implements OnInit {
     });
   }
 
-  updateDisplayedStudents(): void {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.viewYear = this.years.slice(startIndex, endIndex);
-  }
+ 
   isEditMode: boolean = false;
   changeYear(year: Year, isActive: boolean): void {
     const patchDoc = [
@@ -76,11 +72,20 @@ export class StudyYearComponent implements OnInit {
     this.isEditMode = false;
   }
 
+  // Paginator properties
+  first: number = 0;
+  rows: number = 4;
+  paginatedYears: Year[] = [];
+  updatePaginatedData(): void {
+    const start = this.first;
+    const end = this.first + this.rows;
+    this.paginatedYears = this.years.slice(start, end);
+  }
   // Handle paginator events
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateDisplayedStudents();
+  onPageChange(event: PaginatorState): void {
+    this.first = event.first || 0;
+    this.rows = event.rows || 4;
+    this.updatePaginatedData();
   }
 
   // This method will be called when a new year is added

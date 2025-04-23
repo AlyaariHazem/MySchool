@@ -1,3 +1,4 @@
+<app-progress-spinner [visible]="isLoading"></app-progress-spinner>
 <div id="id01" [attr.dir]="languageService.dir" class="modal-container">
   <div class="modal-content">
     <h2 class="school">{{ 'student.title' | translate }}</h2>
@@ -19,8 +20,6 @@
             <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
               [showClear]="true" placeholder="إختار الصف" />
           </div>
-
-
         </form>
 
         <button mat-raised-button color="primary"

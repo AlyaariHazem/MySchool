@@ -30,6 +30,7 @@ export class FeeClassComponent implements OnInit {
   selectedFee: Fees | null = null;
   classDTO: ClassDTO[] = [];
 
+  isLoading: boolean = true; // Loading state for the component
   editMode = false; // Flag for fee editing
   editingFeeId: number | null = null;
 
@@ -74,9 +75,12 @@ export class FeeClassComponent implements OnInit {
     this.feeService.getAllFee().subscribe({
       next: (res) =>{
         (this.Fees = res),
-        console.log(res);
+        this.isLoading=false;
       } ,
-      error: (err) => this.toastr.error('Error fetching fees'),
+      error: (err) => {
+        this.toastr.error('Error fetching fees');
+        this.isLoading=false;
+      }
     });
     
   }

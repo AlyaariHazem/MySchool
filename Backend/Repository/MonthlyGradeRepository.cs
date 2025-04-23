@@ -84,51 +84,33 @@ namespace Backend.Repository
             return studentGrades;
         }
 
-        // Update an existing monthly grade
-        public async Task<bool> UpdateAsync(MonthlyGradeDTO monthlyGradeDTO)
+
+        public async Task<bool> UpdateManyAsync(IEnumerable<MonthlyGradeDTO> dtos)
         {
-            if (monthlyGradeDTO == null)
-                throw new ArgumentNullException(nameof(monthlyGradeDTO), "MonthlyGradeDTO cannot be null.");
-
-            var grade = await _context.MonthlyGrades.FindAsync(monthlyGradeDTO.MonthlyGradeID);
-            if (grade == null)
-                throw new KeyNotFoundException("Monthly grade not found.");
-
-            grade.Grade = monthlyGradeDTO.Grade;
-            grade.StudentID = monthlyGradeDTO.StudentID;
-            grade.SubjectID = monthlyGradeDTO.SubjectID;
-            grade.MonthID = monthlyGradeDTO.MonthID;
-            grade.ClassID = monthlyGradeDTO.ClassID;
-            grade.GradeTypeID = monthlyGradeDTO.GradeTypeID;
-
-            _context.MonthlyGrades.Update(grade);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> UpdateManyAsync(List<MonthlyGradeDTO> dtos)
-        {
-            if (dtos == null || dtos.Count == 0) return false;
-
             foreach (var dto in dtos)
             {
-                var grade = await _context.MonthlyGrades.FirstOrDefaultAsync(g =>
-                       g.StudentID == dto.StudentID
-                    && g.SubjectID == dto.SubjectID
-                    && g.MonthID == dto.MonthID
-                    && g.TermID == dto.TermID
-                    && g.ClassID == dto.ClassID
-                    && g.GradeTypeID == dto.GradeTypeID);
+                var grade = await _context.MonthlyGrades
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(g =>
+                        g.StudentID == dto.StudentID &&
+                        g.YearID == dto.YearID &&
+                        g.SubjectID == dto.SubjectID &&
+                        g.MonthID == dto.MonthID &&
+                        g.TermID == dto.TermID &&
+                        g.ClassID == dto.ClassID &&
+                        g.GradeTypeID == dto.GradeTypeID);
 
-                if (grade != null)              // موجود → عدّل
+                if (grade != null && dto.Grade != 0 && grade.Grade != dto.Grade)
                 {
                     grade.Grade = dto.Grade;
+                    _context.Entry(grade).State = EntityState.Modified;
                 }
             }
 
-            await _context.SaveChangesAsync();
-            return true;
+            var rows = await _context.SaveChangesAsync();
+            return rows > 0;
         }
+
 
     }
 }

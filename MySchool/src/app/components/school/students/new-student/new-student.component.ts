@@ -112,7 +112,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
       this.studentService.uploadStudentImage(this.StudentImage, this.studentID).subscribe(() => {
         console.log('Image is uploaded successfully!');
       });
-      this.studentService.uploadAttachments(this.files, this.studentID).subscribe({
+      this.studentService.uploadFiles(this.files, this.studentID).subscribe({
         next: () => {
           this.toastr.success('Files uploaded successfully!');
         },

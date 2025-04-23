@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { School } from '../models/school.modul';
-import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
+import { BackendAspService } from '../../ASP.NET/backend-asp.service';
 
 @Injectable({
   providedIn: 'root',

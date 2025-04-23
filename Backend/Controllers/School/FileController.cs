@@ -1,52 +1,115 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Backend.Interfaces;
+using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
-namespace Backend.Controllers.School;
-
-[Route("api/[controller]")]
-[ApiController]
-public class FileController : ControllerBase
+namespace Backend.Controllers.School
 {
-    private readonly mangeFilesService _mangeFilesService;
-
-    public FileController(mangeFilesService mangeFilesService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class FileController : ControllerBase
     {
-        _mangeFilesService = mangeFilesService;
-    }
+        private readonly mangeFilesService _mangeFilesService;
 
-    [HttpPost("uploadImage")]
-    public async Task<IActionResult> UploadImage([FromForm] IFormFile file, [FromForm] int studentId, int voucherId = 0)
-    {
-        if (file == null)
-            return BadRequest("No files uploaded.");
+        public FileController(mangeFilesService mangeFilesService)
+        {
+            _mangeFilesService = mangeFilesService;
+        }
 
-        try
+        [HttpPost("uploadImage")]
+        public async Task<ActionResult<APIResponse>> UploadImage([FromForm] IFormFile file, [FromForm] string folderName, [FromForm] int itemId)
         {
-            var filePaths = await _mangeFilesService.UploadImage(file, studentId, voucherId);
-            return Ok(new { success = true, filePaths });
+            var response = new APIResponse();
+            try
+            {
+                if (file == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMasseges.Add("No file uploaded.");
+                    return BadRequest(response);
+                }
+
+                var filePaths = await _mangeFilesService.UploadImage(file, folderName, itemId);
+
+                response.Result = filePaths;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
-        catch (Exception ex)
+
+        [HttpPost("uploadFiles")]
+        public async Task<ActionResult<APIResponse>> UploadAttachments([FromForm] List<IFormFile> files, [FromForm] string folderName = "Attachments", [FromForm] int voucherId = 0)
         {
-            return StatusCode(500, new { error = ex.Message });
+            var response = new APIResponse();
+            try
+            {
+                if (files == null || !files.Any())
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMasseges.Add("No files uploaded.");
+                    return BadRequest(response);
+                }
+
+                var filePaths = await _mangeFilesService.UploadAttachments(files, folderName, voucherId);
+
+                response.Result = filePaths;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
-    }
-    [HttpPost("uploadAttachments")]
-    public async Task<IActionResult> UploadAttachments([FromForm] List<IFormFile> files, [FromForm] int studentId,[FromForm] int voucherId = 0)
-    {
-        if (files == null || !files.Any())
-            return BadRequest("No files uploaded.");
-        try
+
+        [HttpDelete("deleteFile")]
+        public ActionResult<APIResponse> DeleteFile([FromQuery] string folderName, [FromQuery] int itemId)
         {
-            var filePaths = await _mangeFilesService.UploadAttachments(files, studentId, voucherId);
-            return Ok(new { success = true, filePaths });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
+            var response = new APIResponse();
+            try
+            {
+                if (string.IsNullOrEmpty(folderName) || itemId == 0)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMasseges.Add("Invalid parameters.");
+                    return BadRequest(response);
+                }
+
+                var filePath = _mangeFilesService.RemoveFile(folderName, itemId);
+
+                if (filePath == null)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.ErrorMasseges.Add("File not found.");
+                    return NotFound(response);
+                }
+
+                response.Result = filePath;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
         }
     }
 }

@@ -29,7 +29,7 @@
 }
 [dir="rtl"] .styled-table th,
 [dir="rtl"] .styled-table td {
-    text-align: right; /* Adjust alignment for Arabic */
+    text-align: center; /* Adjust alignment for Arabic */
 }
 
 :host ::ng-deep .p-dialog-header-close{
@@ -37,7 +37,7 @@
 }//***********************
 .school{
   margin-right: 5px;
-  margin-top: -3rem;
+  margin-top: 0rem;
 }
 
 // this for form

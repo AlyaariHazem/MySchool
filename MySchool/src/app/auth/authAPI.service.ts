@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 import { User } from '../core/models/user.model';
-import { BackendAspService } from '../environments/ASP.NET/backend-asp.service';
+import { BackendAspService } from '../ASP.NET/backend-asp.service';
 
 
 @Injectable({

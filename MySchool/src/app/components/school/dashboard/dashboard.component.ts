@@ -19,6 +19,7 @@ export class DashboardComponent implements OnInit {
   
   students: StudentDetailsDTO[] = [];
   studentService = inject(StudentService);
+  isLoading: boolean = true; // Loading state for the component
 
   ngOnInit(): void {
     this.getAllStudent();
@@ -27,7 +28,10 @@ export class DashboardComponent implements OnInit {
   }
 
   getAllStudent(): void {
-    this.studentService.getAllStudents().subscribe(res => this.students = res);
+    this.studentService.getAllStudents().subscribe(res => {
+      this.students = res;
+      this.isLoading=false;
+    });
   }
 
   first: number = 0;

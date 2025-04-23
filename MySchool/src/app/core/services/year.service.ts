@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BackendAspService } from '../../environments/ASP.NET/backend-asp.service';
+import { BackendAspService } from '../../ASP.NET/backend-asp.service';
 import { catchError, map, Observable } from 'rxjs';
 import { Year } from '../models/year.model';
 

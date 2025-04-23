@@ -13,7 +13,7 @@
     <img class="image-header" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
   </div>
 
-  <div class="content">
+  <div class="content" id="reportVoucher">
 
     <p-panel header="فلترة حسابات أولياء الأمور">
       <form [formGroup]="formGroup" class="form">
@@ -28,7 +28,8 @@
           </div>
           <div class="form-control">
             <p-dropdown [options]="accounts" [(ngModel)]="selectedAccount" formControlName="studentID"
-              optionLabel="studentName" (ngModelChange)="setStudentID($event)" [editable]="true" [showClear]="true" placeholder="الطالب" />
+              optionLabel="studentName" (ngModelChange)="setStudentID($event)" [editable]="true" [showClear]="true"
+              placeholder="الطالب" />
           </div>
         </div>
         <div class="group group2">
@@ -39,8 +40,8 @@
           <div class="form-control">
             <label for="payBy" class="label2">الدفع بواسطة<span style="color:red;"> *</span></label>
 
-            <p-dropdown [options]="paymentMethods" [(ngModel)]="payBy" (ngModelChange)="setPayBy($event)" formControlName="payBy" optionLabel="label"
-              placeholder="الدفع بواسطة">
+            <p-dropdown [options]="paymentMethods" [(ngModel)]="payBy" (ngModelChange)="setPayBy($event)"
+              formControlName="payBy" optionLabel="label" placeholder="الدفع بواسطة">
             </p-dropdown>
 
 
@@ -55,7 +56,8 @@
         <div class="group group2">
           <div class="form-control">
             <label for="date" class="label2">تاريخ الإنشاء<span style="color:red;"> *</span></label>
-            <input type="date" id="date" formControlName="hireDate" [value]="formGroup.get('hireDate')?.value | date:'yyyy-MM-dd'">
+            <input type="date" id="date" formControlName="hireDate"
+              [value]="formGroup.get('hireDate')?.value | date:'yyyy-MM-dd'">
           </div>
           <div class="form-control">
             <label for="attachment" class="label2">مرفقات<span style="color:red;"> *</span></label>
@@ -70,22 +72,38 @@
     </p-panel>
 
     <p-panel header="فواتير ولي الأمر" *ngIf="showDiv2">
-      <button pButton icon="pi pi-print" class="p-button-rounded p-button-text print"> طباعة </button>
+      <button pButton icon="pi pi-print" class="p-button-rounded p-button-text print" (click)="print()"> طباعة </button>
 
       <div class="card flex justify-content-center">
-        <p-card>
+        @for (voucher of filteredVouchers; track $index) {
+        <p-card id="report">
           <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
-          <span style="position: absolute;">حازم اليعري</span>
-          <div class="m-2">الصـف: <span>الخامس</span></div>
-          <div class="m-2">الرسوم المطلوبة: <span>$1062</span></div>
+          <span style="position: absolute;">{{voucher.studentName}}</span>
+          <div class="m-2">الصـف: <span>{{voucher.className}}</span></div>
+          <div class="m-2">الرسوم المطلوبة: <span>{{voucher.requiredFee}}</span></div>
           <span class="typeFee">رسوم طالب</span>
           <hr>
-          <p>المدفوع: <span>12000</span></p>
+          <p>المدفوع: <span>{{voucher.receiptionFee}}</span></p>
           <hr>
-          <p>مدين عليكم: <span>48000</span></p>
-          <p style="text-align: center; font-weight: bold;">خمسة و ثمانون الفاً ريال يمني لا غير</p>
+          <p>مدين عليكم: <span>{{ +voucher.requiredFee! - +voucher.receiptionFee! }}</span></p>
+          <p style="text-align: center; font-weight: bold;">{{ (+voucher.requiredFee! - +voucher.receiptionFee!) | numberToArabicText}}</p>
           <button class="details">تفاصيل</button>
         </p-card>
+        }@empty {
+          <p-card>
+            <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
+            <span style="position: absolute;">الاسم</span>
+            <div class="m-2">الصـف: <span>....</span></div>
+            <div class="m-2">الرسوم المطلوبة: <span>....</span></div>
+            <span class="typeFee">رسوم طالب</span>
+            <hr>
+            <p>المدفوع: <span>....</span></p>
+            <hr>
+            <p>مدين عليكم: <span>....</span></p>
+            <p style="text-align: center; font-weight: bold;">المبلغ كتابتاً</p>
+            <button class="details">تفاصيل</button>
+          </p-card>
+        }
       </div>
     </p-panel>
   </div>

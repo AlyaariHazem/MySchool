@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, map, Observable, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BackendAspService {
 
-  public baseUrl = 'https://localhost:7258/api';
+  public baseUrl = environment.baseUrl;
 
   constructor(public http: HttpClient, public router: Router) { }
 
@@ -71,11 +72,11 @@ export class BackendAspService {
     );
   }
 
-  uploadFile(file: File, studentId: number, voucherID: number = 0): Observable<any> {
+  uploadFile(file: File, folderName: string, itemId: number): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('voucherID', voucherID.toString());
-    formData.append('studentId', studentId.toString());
+    formData.append('itemId', itemId.toString());
+    formData.append('folderName', folderName.toString());
 
     return this.http.post(`${this.baseUrl}/File/uploadImage`, formData).pipe(
       catchError(error => {
@@ -87,10 +88,10 @@ export class BackendAspService {
   uploadFiles(files: File[], studentId: number, voucherID: number = 0): Observable<any> {
     const formData = new FormData();
     files.forEach(file => formData.append('files', file));
-    formData.append('studentId', studentId.toString());
     formData.append('voucherID', voucherID.toString());
+    formData.append('studentId', studentId.toString());
 
-    return this.http.post(`${this.baseUrl}/File/uploadAttachments`, formData).pipe(
+    return this.http.post(`${this.baseUrl}/File/uploadFiles`, formData).pipe(
       catchError(error => {
         console.error("Error uploading Files:", error);
         return throwError(() => error);

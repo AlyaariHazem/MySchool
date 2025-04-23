@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 
 import { LanguageService } from '../../../core/services/language.service';
 import { AccountService } from '../core/services/account.service';
-import { Account } from '../../../core/models/accounts.model';
+import { Account } from '../core/models/accounts.model';
 
 interface AccountType {
   name: string;
@@ -26,6 +26,7 @@ export class AccountsComponent implements OnInit {
   accountService = inject(AccountService);
 
   accounts: Account[] = [];
+  EditAccount: Account | undefined;
 
   showDialog() {
     this.visible = true;
@@ -41,14 +42,14 @@ export class AccountsComponent implements OnInit {
   languageService = inject(LanguageService);
 
   displayedaccounts: Account[] = []; // Students for the current page
-  
+
   isSmallScreen = false;
   private mediaSub: Subscription | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
-    private toastr: ToastrService
+    private toastr: ToastrService,
   ) {
     this.form = this.formBuilder.group({
       stage: ['', Validators.required],
@@ -57,7 +58,8 @@ export class AccountsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.toastr.success("تم تحميل البيانات بنجاح");
+    this.toastr.success('Account updated successfully!');
+    this.getAllAccounts();
     this.accountType = [
       { name: 'Guardain', code: 1 },
       { name: 'School', code: 2 },
@@ -68,7 +70,12 @@ export class AccountsComponent implements OnInit {
     ];
   }
 
-
+  getAllAccounts(): void {
+    this.accountService.getAllAccounts().subscribe(res => {
+      this.accounts = res;
+      this.updateDisplayedaccounts();
+    });
+  }
   ngOnDestroy(): void {
     if (this.mediaSub) {
       this.mediaSub.unsubscribe();
@@ -87,5 +94,12 @@ export class AccountsComponent implements OnInit {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
     this.updateDisplayedaccounts();
+  }
+  changeState(student: Account) {
+    student.state = !student.state;
+  }
+  editAccount(account: Account) {
+    this.EditAccount = account;
+    this.visible = true;
   }
 }

@@ -8,6 +8,7 @@
        padding-left: 0px!important;
     }
   }
-:host ::ng-deep h2 {
-    font-family: "Changa", sans-serif;
+:host ::ng-deep h2, mat-option {
+  font-family: 'Noto Kufi Arabic', sans-serif;
   }
+  

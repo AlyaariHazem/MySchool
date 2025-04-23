@@ -104,11 +104,30 @@ public class VoucherRepository : IVoucherRepository
 
         if (voucher.Attachments != null && voucher.Attachments.Count > 0)
             _context.Attachments.RemoveRange(voucher.Attachments);
-        
-        await _mangeFilesService.RemoveAttachmentsAsync(voucher.AccountStudentGuardianID, voucher.VoucherID);
-        
+
+        await _mangeFilesService.RemoveAttachmentsAsync("Attachments", voucher.VoucherID);
+
         _context.Vouchers.Remove(voucher);
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<List<VouchersGuardianDTO>> GetAllVouchersGuardian()
+    {
+        return await _context.Students
+    .Include(s => s.AccountStudentGuardians)
+        .ThenInclude(a => a.Vouchers)
+    .Include(s => s.Division)
+        .ThenInclude(d => d.Class)
+    .Include(s => s.Attachments)
+    .Select(vg => new VouchersGuardianDTO()
+    {
+        StudentName = vg.FullName.FirstName + " " + vg.FullName.MiddleName + " " + vg.FullName.LastName,
+        GuardianID = vg.GuardianID,
+        ClassName = vg.Division.Class.ClassName,
+        RequiredFee = vg.AccountStudentGuardians.Select(a => a.Amount).ToList(),
+        receiptionFee = vg.AccountStudentGuardians.SelectMany(a => a.Vouchers).Select(v => v.Receipt).ToList(),
+        ImageURL = vg.Attachments.Select(a => a.AttachmentURL).ToList(),
+    }).ToListAsync();
     }
 }

@@ -35,4 +35,3 @@ public class MonthlyGrade
     // The actual grade
     public decimal? Grade { get; set; }
 }
-

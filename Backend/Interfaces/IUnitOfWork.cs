@@ -34,5 +34,6 @@ public interface IUnitOfWork : IDisposable
     IGradeTypesRepository GradeTypes { get; }
     ITermRepository Terms { get; }
     IMonthRepository Months { get; }
+    IEmployeeRepository Employees { get; }
     Task<int> CompleteAsync();
 }

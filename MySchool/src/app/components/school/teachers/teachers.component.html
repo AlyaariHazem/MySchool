@@ -1,6 +1,126 @@
-<div class="techear">
-    <mat-form-field appearance="outline" class="inputText">
-        <mat-label>اسم الطالب</mat-label>
-        <input class="inputError" type="email" matInput />
-    </mat-form-field>
+<app-progress-spinner [visible]="isLoading"></app-progress-spinner>
+<div id="id01" [attr.dir]="languageService.dir" class="modal-container">
+  <div class="modal-content">
+    <h2 class="school">جميع الموظفين</h2>
+    <div class="container">
+      <div class="tabcontent">
+        <div [ngClass]="{'col-4':languageService.dir==='rtl','col-4En':languageService.dir==='ltr'}">
+          <i class="pi col-2 pi-bars" (click)="showteacherCulomn()"></i>
+          <i class="bi col-2 bi-grid" (click)="showteacherGrid()"></i>
+        </div>
+        <form [formGroup]="form" [ngClass]="{'formEn':languageService.dir==='ltr','form':languageService.dir==='rlt'}">
+          <!-- First Dropdown -->
+          <div class="group3">
+            <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
+              [showClear]="true" placeholder="إختار طالب" />
+
+            <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
+              [showClear]="true" placeholder="إختار المرحلة" />
+
+            <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
+              [showClear]="true" placeholder="إختار الصف" />
+          </div>
+        </form>
+
+        <button mat-raised-button color="primary"
+          [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" (click)="openDialog()">
+          إضافة موظف+
+        </button>
+
+        @if (showGrid) {
+        <div class="group group2">
+          @for (teacher of paginated; track $index) {
+          <div class="form-control">
+            <p-card class="responsive-card">
+              <ng-template pTemplate="header">
+                <img alt="Card" [src]="teacher.imageURL" />
+              </ng-template>
+              <div>
+                الاسم:{{teacher.firstName +" "+ teacher.middleName+" "+ teacher.lastName}}
+                <hr>
+                asdf:32302930
+                النوع:{{teacher.gender=="Male"?"ذكر":"إنثى"}}
+                <hr>
+
+              </div>
+              <ng-template pTemplate="footer">
+                <div class="flex gap-3 mt-1">
+                  <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
+                  <p-button label="ولي أمر" class="w-full" styleClass="custom-button guardain" />
+
+                </div>
+              </ng-template>
+            </p-card>
+          </div>
+          }
+        </div>
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="Employees.length" [rowsPerPageOptions]="[4, 10, 20]" />
+        }
+
+        @if (showCulomn) {
+        <div class="table-container" [attr.dir]="languageService.dir">
+          <div class="table-container">
+            <mat-card>
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>اسم المستخدم</th>
+                    <th >الوضيفة</th>
+                    <th>رقم المستخدم</th>
+                    <th>العمر</th>
+                    <th>النوع</th>
+                    <th>تاريخ الإنشاء</th>
+                    <th>العنوان</th>
+                    <th>رقم الهاتف</th>
+                    <th>العملية</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (teacher of paginated; track $index) {
+                  <tr>
+                    <td>{{ $index+1 }}</td>
+                    <td class="student-name-column">{{teacher.firstName +" "+ teacher.middleName+" "+
+                      teacher.lastName}}</td>
+                    <td>{{ teacher.jopName}}</td>
+                    <td>{{ teacher.employeeID}}</td>
+                    <td>{{ teacher.age}}</td>
+                    <td>{{ teacher.gender=="Male"?"ذكر":"انثى" }}</td>
+                    <td>{{ teacher.hireDate| date:"MM-yyyy" }}</td>
+                    <td>{{ teacher.address }}</td>
+                    <td>{{ teacher.mobile }}</td>
+                    <td>
+                      <div class="col text-left">
+                        <div class="mt-sm-0 mt-2">
+                          <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <i class="fas fa-ellipsis-h"></i>
+                          </button>
+                          <div class="dropdown-menu dropdown-menu-left">
+                            <a class="dropdown-item" (click)="EditDialog(teacher)"><i
+                                class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                            <div role="separator" class="dropdown-divider"></div>
+                            <a class="dropdown-item" (click)="deleteTeacher(teacher)">
+                              <i class="bi bi-trash IconDelete"></i>حذف</a>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  }@empty {
+                  <p animate-width>No Data available in a Table</p>
+                  }
+                </tbody>
+              </table>
+
+            </mat-card>
+          </div>
+        </div>
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="Employees.length" [rowsPerPageOptions]="[4, 10, 20]" />
+        }
+      </div>
+    </div>
+  </div>
 </div>

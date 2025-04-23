@@ -123,7 +123,7 @@ namespace Backend.Controllers
                     DivisionID = request.DivisionID,
                     PlaceBirth = request.PlaceBirth,
                     StudentDOB = request.StudentDOB,
-                    ImageURL = request.StudentImageURL
+                    ImageURL = $"StudentPhotos_{request.StudentImageURL}",
                 };
 
 
@@ -141,7 +141,7 @@ namespace Backend.Controllers
                         attachments.Add(new Attachments
                         {
                             StudentID = request.StudentID,
-                            AttachmentURL = $"{request.StudentID}_{fileUrl}"
+                            AttachmentURL = $"Attachments_{request.StudentID}_{fileUrl}"
                         });
                     }
                 }
@@ -262,7 +262,7 @@ namespace Backend.Controllers
             return Ok(requestData);
         }
 
-        [HttpPost("uploadAttachments")]
+        [HttpPost("uploadFiles")]
         public async Task<IActionResult> UploadAttachments([FromForm] List<IFormFile> files, [FromForm] int studentId)
         {
             if (files == null || !files.Any())
@@ -270,7 +270,7 @@ namespace Backend.Controllers
 
             try
             {
-                var filePaths = await _mangeFilesService.UploadAttachments(files, studentId);
+                var filePaths = await _mangeFilesService.UploadAttachments(files,"Attachments", studentId);
                 return Ok(new { success = true, filePaths });
             }
             catch (Exception ex)
@@ -286,7 +286,7 @@ namespace Backend.Controllers
 
             try
             {
-                var filePaths = await _mangeFilesService.UploadImage(file, studentId);
+                var filePaths = await _mangeFilesService.UploadImage(file,"StudentPhotos", studentId);
                 return Ok(new { success = true, filePaths });
             }
             catch (Exception ex)

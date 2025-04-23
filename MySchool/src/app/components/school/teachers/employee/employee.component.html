@@ -1,0 +1,77 @@
+<div class="employee-form-container ">
+    <h2>بيانات الموظف</h2>
+    <div class="form-actions">
+        <button class="btn-save" (click)="onSubmit()">حفظ الموظف</button>
+    </div>
+    <p-tabs value="0">
+        <p-tablist>
+            <p-tab value="0">معلومات الموظف</p-tab>
+            <p-tab value="1">معلومات إختيارية</p-tab>
+        </p-tablist>
+        <p-tabpanels [formGroup]="form">
+            <p-tabpanel value="0">
+
+                <div class=" employee-form ">
+                    <div class="grid p-fluid">
+                        <div class="form-row flex col-12 md:col-6 ">
+                            <label>الاسم الأول</label>
+                            <input formControlName="firstName" type="text" placeholder="أدخل الأسم">
+                        </div>
+
+                        <div class="form-row col-12 md:col-6 justify-content-center  ">
+                            <label>اسم الأخير</label>
+                            <input formControlName="lastName" type="text" placeholder="الاسم الأخير">
+                        </div>
+                    </div>
+                    <div class="grid p-fluid">
+                        <div class="form-row col-6 md:col-4 justify-content-center  ">
+                            <label>الجنس *</label>
+                            <p-select [options]="genders" formControlName="gender" optionValue="value"
+                                [checkmark]="true" optionLabel="name" [editable]="true" [showClear]="true"
+                                placeholder="إختار النوع" />
+                        </div>
+
+                        <div class="form-row col-6 md:col-4 justify-content-center  ">
+                            <label>الوظيفة *</label>
+                            <p-select [options]="employeeTypes" formControlName="employeeType" optionValue="value"
+                                [checkmark]="true" optionLabel="name" [editable]="true" [showClear]="true"
+                                placeholder="نوع الموظف" />
+                        </div>
+
+                        <div class="form-row col-6 md:col-4 justify-content-center  ">
+                            <label>تاريخ الميلاد *</label>
+                            <input formControlName="birthDate" type="date" [value]="date">
+                        </div>
+                    </div>
+                </div>
+
+            </p-tabpanel>
+            <p-tabpanel value="1">
+                <div class="grid p-fluid">
+                    <div class="col-12 md:col-6">
+                        <label for="birthPlace" class="block mb-2">مكان الميلاد</label>
+                        <input id="birthPlace" formControlName="birthPlace" pInputText type="text"
+                            placeholder="مكان الميلاد" />
+                    </div>
+
+                    <div class="col-12 md:col-6">
+                        <label for="address" class="block mb-2">العنوان *</label>
+                        <input formControlName="address" id="address" pInputText type="text" placeholder="العنوان" />
+                    </div>
+
+                    <div class="col-12 md:col-6">
+                        <label for="phone" class="block mb-2">رقم الهاتف</label>
+                        <input formControlName="phone" id="phone" pInputText type="text" placeholder="رقم الهاتف" />
+                    </div>
+
+                    <div class="col-12 md:col-6">
+                        <label for="email" class="block mb-2">البريد الإلكتروني</label>
+                        <input formControlName="email" id="email" pInputText type="email"
+                            placeholder="البريد الإلكتروني" />
+                    </div>
+                </div>
+            </p-tabpanel>
+        </p-tabpanels>
+    </p-tabs>
+
+</div>

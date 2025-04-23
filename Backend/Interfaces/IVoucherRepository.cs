@@ -11,6 +11,7 @@ public interface IVoucherRepository
 {
     Task<List<VouchersReturnDTO>> GetAllAsync();
     Task<VouchersDTO?> GetByIdAsync(int id);
+    Task<List<VouchersGuardianDTO>> GetAllVouchersGuardian();
     Task<VouchersDTO> AddAsync(VouchersDTO voucher);
     Task<bool> UpdateAsync(VouchersDTO voucher);
     Task<bool> DeleteAsync(int id);

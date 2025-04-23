@@ -56,6 +56,7 @@ public class UnitOfWork : IUnitOfWork
         GradeTypes = new GradeTypesRepository(_context, _mapper);
         Terms = new TermRepository(_context, _mapper);
         Months = new MonthRepository(_context, _mapper);
+        Employees = new EmployeeRepository(_context);
     }
 
     public ISubjectsRepository Subjects { get; private set; }
@@ -81,6 +82,7 @@ public class UnitOfWork : IUnitOfWork
     public IGradeTypesRepository GradeTypes { get; private set; }
     public ITermRepository Terms { get; private set; }
     public IMonthRepository Months { get; private set; }
+    public IEmployeeRepository Employees { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

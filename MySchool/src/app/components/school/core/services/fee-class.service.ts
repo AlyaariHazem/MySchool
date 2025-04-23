@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
-import { BackendAspService } from '../../../../environments/ASP.NET/backend-asp.service';
+import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { FeeClass, FeeClasses } from '../models/Fee.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
 

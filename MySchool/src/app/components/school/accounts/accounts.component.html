@@ -35,14 +35,14 @@
       </div>
     </div>
     <p-button class="showFee" (onClick)="showDialog()" label="+حساب جديد" />
-    <!-- <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." /> -->
   </form>
 
   <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '75%' }" [draggable]="false" [resizable]="false">
     <h1 class="Title">حساب جديد</h1>
-    <button class="button add">إضافة</button>
     <button class="button typing">طباعة</button>
-    <app-add-account></app-add-account>
+    @if(visible) {
+    <app-add-account [account]="EditAccount"></app-add-account>
+    }
   </p-dialog>
 
   <!-- Responsive Table -->
@@ -68,12 +68,21 @@
             @for (student of displayedaccounts; track $index) {
             <tr>
               <td>{{ $index }}</td>
-              <td>{{student.guardianName}}</td>
-              <td>مدين</td>
+              <td>{{student.accountName}}</td>
+              <td>
+                <p class="dain">مدين</p>
+              </td>
               <td>{{student.typeAccountID==1?'Guardian':student.typeAccountID}}</td>
               <td>{{student.openBalance}}</td>
               <td>{{student.typeOpenBalance}}</td>
-              <td>{{student.state}}</td>
+              <td>
+                <button class="active" (click)="changeState(student)">
+                  <i class="bi bi-record-circle" [ngStyle]="{'color': student.state ? '#2fdf85':'red'}">
+                  </i>
+                  {{ student.state ? 'نشط' : 'غير نشط' }}
+                  <span class="bi bi-caret-down-fill"></span>
+                </button>
+              </td>
               <td>{{student.note}}</td>
               <td>{{student.hireDate | date:'yyyy-mm-dd'}}</td>
               <td>
@@ -84,7 +93,8 @@
                       <i class="fas fa-ellipsis-h"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-left">
-                      <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                      <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"
+                          (click)="editAccount(student)"></i>تعديل</a>
                       <div role="separator" class="dropdown-divider"></div>
                       <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
                     </div>

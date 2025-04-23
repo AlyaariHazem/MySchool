@@ -27,6 +27,7 @@ public class School
     public string? Mobile { get; set; }
     public string? Description { get; set; }
     public string? Website { get; set; }
+    public string? ImageURL { get; set; }
     public int? fax { get; set; }
     public string? zone { get; set; }
     public virtual ICollection<Year> Years { get; set; }

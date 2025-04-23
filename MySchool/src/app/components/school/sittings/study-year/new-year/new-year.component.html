@@ -6,7 +6,6 @@
             <div class="form-control control2">
                 <mat-form-field appearance="outline" class="inputText">
                     <mat-label>بداية العام</mat-label>
-                    <!-- Use matInput and [matDatepicker], remove type="date" -->
                     <input matInput [matDatepicker]="startPicker" formControlName="yearDateStart"
                         (focus)="startPicker.open()" />
                     <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>

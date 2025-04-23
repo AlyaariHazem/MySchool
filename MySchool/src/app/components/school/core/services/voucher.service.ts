@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { BackendAspService } from '../../../../environments/ASP.NET/backend-asp.service';
+import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { Voucher, VoucherAdd } from '../models/voucher.model';
+import { VouchersGuardian } from '../models/vouchers-guardian.model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,10 @@ export class VoucherService {
   getAll(): Observable<Voucher[]> {
     return this.API.getRequest<Voucher[]>("Vouchers");
   }
+  getAllVouchersGuardian(): Observable<VouchersGuardian[]> {
+    return this.API.getRequest<VouchersGuardian[]>("Vouchers/vouchersGuardian");
+  }
+
   Add(voucher: VoucherAdd): Observable<string> {
     return this.API.postRequest<string>("Vouchers", voucher);
   }

@@ -192,5 +192,25 @@ namespace Backend.Controllers.School
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }
+        // GET api/vouchers/guardian
+        [HttpGet("vouchersGuardian")]
+        public async Task<ActionResult<APIResponse>> GetVouchersGuardian()
+        {
+            var response = new APIResponse();
+            try
+            {
+                var vouchers = await _unitOfWork.Vouchers.GetAllVouchersGuardian();
+                response.Result = vouchers;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (System.Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
     }
 }

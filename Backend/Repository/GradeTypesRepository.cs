@@ -56,7 +56,8 @@ namespace Backend.Repository
             {
                 GradeTypeID = g.GradeTypeID,
                 Name = g.Name,
-                MaxGrade = g.MaxGrade
+                MaxGrade = g.MaxGrade,
+                IsActive=g.IsActive
             }).ToList();
         }
 

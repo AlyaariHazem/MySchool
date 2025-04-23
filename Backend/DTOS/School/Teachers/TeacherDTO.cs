@@ -15,6 +15,8 @@ public class TeacherDTO
     public string? UserID { get; set; }
     public string? UserName { get; set; }
     public string? Gender { get; set; }="Male";
+    public DateTime? DOB { get; set; }
+    public string? ImageURL { get; set; }
     public string? Address { get; set; }
     public string Email { get; set; }
     public int ManagerID { get; set; }

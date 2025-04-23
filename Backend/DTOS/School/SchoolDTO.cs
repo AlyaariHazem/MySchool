@@ -24,6 +24,7 @@ public class SchoolDTO
     public string? Website { get; set; }
     public string? Street { get; set; }
     public string SchoolType { get; set; }
+    public string? ImageURL { get; set; }
     public string? SchoolCategory { get; set; }
     public string? Email { get; set; }
     public int? fax { get; set; }

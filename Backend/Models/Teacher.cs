@@ -15,6 +15,8 @@ namespace Backend.Models
     public int TeacherID { get; set; }
     [Required]
     public Name FullName { get; set; }
+    public DateTime? DOB { get; set; }=DateTime.Now;
+    public string? ImageURL { get; set; }
     public string UserID { get; set; }
     public virtual ApplicationUser ApplicationUser { get; set; }
     [Required]

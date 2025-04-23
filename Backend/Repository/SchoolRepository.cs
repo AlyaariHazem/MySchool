@@ -33,6 +33,7 @@ namespace Backend.Repository.School.Classes
                 throw new KeyNotFoundException($"School with ID {id} not found.");
             }
             var schoolDTO = _mapper.Map<SchoolDTO>(schools);
+            schoolDTO.ImageURL = $"https://localhost:7258/uploads/School/School_" + id + "_" + schoolDTO.ImageURL;
             return schoolDTO;
         }
 

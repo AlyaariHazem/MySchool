@@ -1,6 +1,4 @@
 <div id="id01" [attr.dir]="languageService.dir" class="modal-container">
-  <p-paginator [attr.dir]="languageService.dir" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-    [totalRecords]="books.length" [rowsPerPageOptions]="[4, 8, 16]" />
   <h2 class="school">بنود الدرجات</h2>
   <form [formGroup]="form">
     <div class="group group2">
@@ -17,7 +15,7 @@
         </mat-form-field>
       </div>
       <div class="form-control">
-        <button class="active" (click)="toggleIsActive()">
+        <button class="active">
           <i class="bi bi-record-circle" [ngStyle]="{'color': isActive ? 'red' : '#2fdf85'}"></i>
           نشط
           <span class="bi bi-caret-down-fill"></span>
@@ -26,10 +24,9 @@
       </div>
     </div>
     <p-button class="showFee" (onClick)="showDialog()" label="إضافة+" />
-    <p-chips [ngClass]="{'chipsOne':languageService.dir==='rtl','chipsOneEn':languageService.dir==='ltr'}" [max]="search" placeholder="ابحث هنا..." />
+    <p-chips [ngClass]="{'chipsOne':languageService.dir==='rtl','chipsOneEn':languageService.dir==='ltr'}"
+      [max]="search" placeholder="ابحث هنا..." />
   </form>
-  <button pButton label="تصدير PDF" class="p-button-success" (click)="captureAsPDF()">
-  </button>
 
   <!-- ... rest of your table/modal code ... -->
 
@@ -50,16 +47,16 @@
               </tr>
             </thead>
             <tbody>
-              @for (student of paginatedBooks; track $index) {
+              @for (gradeType of paginatedGradeTypes; track $index) {
               <tr>
-                <td>{{ student }}</td>
-                <td>قران كريم</td>
-                <td>Quran</td>
+                <td>{{ gradeType.gradeTypeID }}</td>
+                <td>{{gradeType.name}}</td>
+                <td>{{gradeType.maxGrade}}</td>
                 <td>
-                  <button class="active" (click)="toggleIsActive()">
-                    <i class="bi bi-record-circle" [ngStyle]="{'color': isActive ? 'red' : '#2fdf85'}">
+                  <button class="active" (click)="toggleIsActive(gradeType)">
+                    <i class="bi bi-record-circle" [ngStyle]="{'color': gradeType.isActive ? '#2fdf85':'red'}">
                     </i>
-                    نشط
+                    {{ gradeType.isActive ? 'نشط' : 'غير نشط' }}
                     <span class="bi bi-caret-down-fill"></span>
                   </button>
                 </td>
@@ -84,6 +81,8 @@
           </table>
         </div>
       </mat-card>
+      <p-paginator [attr.dir]="languageService.dir" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+        [totalRecords]="books.length" [rowsPerPageOptions]="[4, 8, 16]" />
     </div>
   </div>
 </div>

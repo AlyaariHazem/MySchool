@@ -27,7 +27,7 @@ export class StudentsComponent implements OnInit,OnChanges {
   values = new FormControl<string[] | null>(null);
   paginatedStudents: StudentDetailsDTO[] = []; // Paginated data
   max = 2;
-
+  isLoading: boolean = true; // Loading state for the component
   first: number = 0; // Current starting index
   rows: number = 4; // Number of rows per page
   updatePaginatedData(): void {
@@ -84,6 +84,7 @@ export class StudentsComponent implements OnInit,OnChanges {
 getAllStudents():void{
   this.studentService.getAllStudents().subscribe((res)=>{
     this.Students=res;
+    this.isLoading = false;
     this.updatePaginatedData(); // Initial slicing
   })
 }

@@ -1,6 +1,7 @@
 export interface Account {
     accountID: number;
     guardianName: string;
+    accountName: string;
     state: boolean;
     Balance: number;
     Status: string;

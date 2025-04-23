@@ -14,7 +14,7 @@ export class PageHeaderComponent implements OnInit {
 
   // PrimeNG breadcrumb items
   items: MenuItem[] = [];
-  home: MenuItem = { icon: 'pi pi-home', routerLink: ['/'] };
+  home: MenuItem = { icon: 'pi pi-home', routerLink: ['/school/dashboard'] };
 
   languageService = inject(LanguageService);
 

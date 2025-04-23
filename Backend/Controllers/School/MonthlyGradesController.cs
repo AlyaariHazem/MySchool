@@ -61,35 +61,6 @@ namespace Backend.Controllers.School
             }
         }
 
-        // PUT: api/MonthlyGrades/{id}
-        [HttpPut("{id}")]
-        public async Task<ActionResult<APIResponse>> Update(int id, [FromBody] MonthlyGradeDTO dto)
-        {
-            var response = new APIResponse();
-            try
-            {
-                dto.MonthlyGradeID = id;
-                var isUpdated = await _monthlyGradeRepository.UpdateAsync(dto);
-                if (isUpdated)
-                {
-                    response.Result = "Monthly grade updated successfully.";
-                    response.statusCode = HttpStatusCode.OK;
-                    return Ok(response);
-                }
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.NotFound;
-                response.ErrorMasseges.Add("Monthly grade not found.");
-                return NotFound(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
-
         // DELETE: api/MonthlyGrades/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult<APIResponse>> Delete(int id)

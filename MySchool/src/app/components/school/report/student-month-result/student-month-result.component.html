@@ -1,1 +1,80 @@
-<p>student-month-result works!</p>
+<div dir="rtl" id="report" style="font-family:Tajawal, sans-serif; line-height:1.7">
+    <!-- رأس الصفحة الكامل -->
+    <header class="page-header">
+        <!-- يسار -->
+        <div class="header-col text-end">
+            <ng-container *ngFor="let line of report.govHeader">
+                <p [class.fw-bold]="line === report.govHeader[3]">{{ line }}</p>
+            </ng-container>
+        </div>
+
+
+        <!-- وسط (شعار) -->
+        <div class="header-col text-center">
+            <img [src]="SchoolLogo" alt="logo" class="logo" />
+        </div>
+
+        <!-- يمين -->
+        <div class="header-col text-start">
+            <p class="fw-bold">{{ report.school }}</p>
+            <p>{{ report.year }}</p>
+            <p>الفصل الدراسي: {{ report.term }}</p>
+            <p>الشهر: {{ report.month }}</p>
+        </div>
+    </header>
+
+    <!-- عنوان أسفل الهيدر مباشرة -->
+    <h4 class="report-title text-center mb-3 fw-bold">نتيجة الطالب الشهرية</h4>
+
+    <!-- بطاقة التقرير -->
+    <section class="report-card shadow-sm">
+
+        <!-- معلومات الطالب -->
+        <div class="student-meta mb-3">
+            <span><b>رقم الطالب:</b> {{ report.studentId }}</span>
+            <span><b>الطالب:</b> {{ report.studentName }}</span>
+            <span><b>الصف:</b> {{ report.grade }}</span>
+            <span><b>الشعبة:</b> {{ report.section }}</span>
+        </div>
+
+        <!-- الجدول -->
+        <table class="table table-bordered text-center">
+            <thead>
+                <tr class="bg-light">
+                    <ng-container *ngFor="let subj of report.subjects">
+                        <th>{{ subj.name }}</th>
+                    </ng-container>
+                    <th>النسبة</th>
+                    <th>المجموع</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <!-- الخلايا الديناميكية -->
+                    <ng-container *ngFor="let subj of report.subjects">
+                        <td>{{ subj.score }}</td>
+                    </ng-container>
+                    <!-- خلية النسبة -->
+                    <td>
+                        <span class="badge bg-success-subtle text-success fw-bold">{{ percentage }}</span>
+                    </td>
+                    <!-- خلية المجموع -->
+                    <td>{{ total }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- تذييل -->
+        <div class="footer text-center mt-3 fw-bold">
+            <span>المعلم:</span>
+            <span>الختم:</span>
+            <span>التوقيع:</span>
+        </div>
+    </section>
+
+    <!-- زر طباعة اختياري -->
+    <div class="text-center mt-4 d-print-none">
+        <button class="btn btn-outline-primary add px-5" (click)="print()">طباعة</button>
+    </div>
+
+</div>

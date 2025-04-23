@@ -547,6 +547,7 @@ namespace Backend.Data
                     UserName = "ADMIN",
                     NormalizedUserName = "ADMIN",
                     Email = "ADMIN@GMAIL.COM",
+                    HireDate = DateTime.Now,
                     NormalizedEmail = "ADMIN@GMAIL.COM",
                     PasswordHash = hashedPassword, // Store the hashed password here
                     EmailConfirmed = true,

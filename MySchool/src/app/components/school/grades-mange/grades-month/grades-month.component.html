@@ -82,8 +82,9 @@
                                     [ngModelOptions]="{standalone:true}" min="0" [max]="gradeLimits[grade.gradeTypeID]"
                                     (ngModelChange)="clampGrade(grade)" (input)="enforceLimit($event, grade)"></td>
                             }
-                            <td>100</td>
-                            <td>100</td>
+                            <td>{{ calcTotal(CurrentStudent.grades) }}</td>
+                            <td>{{ calcPercent(CurrentStudent.grades) }}%</td>
+
                             <td>
                                 <i class="pi pi-angle-double-left" style="font-size:24px;color:#207133;cursor:pointer;"
                                     (click)="goPreviousStudent()"></i>
@@ -150,8 +151,8 @@
                                     [ngModelOptions]="{standalone:true}" min="0" [max]="gradeLimits[grade.gradeTypeID]"
                                     (ngModelChange)="clampGrade(grade)" (input)="enforceLimit($event, grade)"></td>
                             }
-                            <td>100</td>
-                            <td>100</td>
+                            <td>{{ calcTotal(student.grades) }}</td>
+                            <td>{{ calcPercent(student.grades) }}%</td>
                             <td>
                                 <div class="col text-left">
                                     <div class="mt-sm-0 mt-2">

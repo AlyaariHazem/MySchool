@@ -5,15 +5,6 @@
       <div class="tabcontent">
         <p-button class="showFee" (onClick)="showDialogAddYear()" label="+ سنة جديدة" />
 
-        <mat-paginator class="cPaginator" [ngStyle]="{ position: 'absolute'}" [length]="years.length"
-          [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
-        </mat-paginator>
-
-        <p-iconfield iconPosition="left" class="chipsOne">
-          <p-inputicon styleClass="pi pi-search" />
-          <input type="text" style="width: 100%;" pInputText placeholder="Search" />
-        </p-iconfield>
-
         <!-- Dialog for adding a new year -->
         <p-dialog header="إضافة سنة" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }"
           [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
@@ -82,6 +73,8 @@
               </tbody>
             </table>
           </mat-card>
+          <p-paginator  (onPageChange)="onPageChange($event)" [first]="first"
+            [rows]="rows" [totalRecords]="years.length" [rowsPerPageOptions]="[4, 8, 16]" />
         </div>
       </div>
     </div>

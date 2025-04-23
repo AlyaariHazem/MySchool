@@ -1,51 +1,57 @@
-<div class="schoolInfo">
-    <div class="contant">
-        <div class="group">
-            <div class="form-control">
-                <label for="amount" class="label2">اسم الحساب<span style="color:red;"> *</span></label>
-                <input pInputText name="values" class="inputChip" type="text" pSize="large" placeholder="Large" />
+<form [formGroup]="form" class="account-form">
+    <div class="schoolInfo">
+        <div class="contant">
+            <div class="group">
+                <div class="form-control">
+                    <label class="label2 ">اسم الحساب<span style="color:red;"> *</span></label>
+                    <input pInputText class="inputChip" type="text" pSize="large" placeholder="اسم الحساب"
+                        formControlName="accountName" />
+                </div>
+                <div class="form-control">
+                    <label class="label2">الحساب الأب</label>
+                    <p-dropdown [options]="" optionLabel="name" [editable]="true" [showClear]="true"
+                        formControlName="parentAccount" placeholder="إختار النوع">
+                    </p-dropdown>
+                </div>
             </div>
-            <div class="form-control">
-                <label for="placeOfBirth" class="label2">الحساب الأب</label>
-                <p-dropdown [options]="Books" optionLabel="name" [editable]="true" [showClear]="SelectBook"
-                    (onChange)="selectBook()" placeholder="إختار النوع">
-                </p-dropdown>
-            </div>
-        </div>
 
-        <div class="group">
-            <div class="form-control">
-                <label for="amount" class="label2"> نوع الحساب</label>
-                <input name="values" type="checkbox" />
+            <div class="group">
+                <div class="form-control">
+                    <label class="label2">نوع الحساب</label>
+                    <input type="checkbox" formControlName="typeOpenBalance" binary="true"/>
+                </div>
+                <div class="form-control">
+                    <label class="label2">نوع الحساب</label>
+                    <p-dropdown [options]="paymentMethods" optionLabel="label" [editable]="true" [showClear]="true"
+                       optionvalue="value" formControlName="accountType" placeholder="إختار النوع">
+                    </p-dropdown>
+                </div>
             </div>
-            <div class="form-control">
-                <label for="placeOfBirth" class="label2"> نوع الحساب  </label>
-                <p-dropdown [options]="Books" optionLabel="name" [editable]="true" [showClear]="SelectBook"
-                    (onChange)="selectBook()" placeholder="إختار النوع">
-                </p-dropdown>
-            </div>
-        </div>
-        <div class="group">
-            <div class="form-control">
-                <label for="amount" class="label2"> الرصيد الإفتتاحي</label>
-                <input pInputText name="values" class="inputChip" type="number" pSize="large" placeholder="Large" />
-            </div>
-            <div class="form-control">
-                <label for="placeOfBirth" class="label2"> نوع الرصيد الإفتتاحي </label>
-                <p-dropdown [options]="Books" optionLabel="name" [editable]="true" [showClear]="SelectBook"
-                    (onChange)="selectBook()" placeholder="إختار النوع">
-                </p-dropdown>
-            </div>
-        </div>
 
-        <div class="group">
-            <div class="form-control">
-                <label for="address" class="label2">البيان</label>
-                <textarea pTextarea name="value" pSize="small" placeholder="" rows="3"></textarea>
+            <div class="group">
+                <div class="form-control">
+                    <label class="label2">الرصيد الإفتتاحي</label>
+                    <input pInputText type="number" pSize="large" formControlName="openingBalance" />
+                </div>
+                <div class="form-control">
+                    <label class="label2">نوع الرصيد الإفتتاحي</label>
+                    <p-dropdown [options]="" optionLabel="name" [editable]="true" [showClear]="true"
+                        formControlName="openingBalanceType" placeholder="إختار النوع">
+                    </p-dropdown>
+                </div>
             </div>
-            <div class="form-control">
-                <label for="address" class="label2">تاريخ الإنشاء</label>
-                <input type="date" id="address" placeholder="التاريخ" />
+
+            <div class="group">
+                <div class="form-control">
+                    <label class="label2">البيان</label>
+                    <textarea pTextarea pSize="small" rows="3" formControlName="description"></textarea>
+                </div>
+                <div class="form-control">
+                    <label class="label2">تاريخ الإنشاء</label>
+                    <input type="date" formControlName="createdDate" />
+                </div>
             </div>
         </div>
-</div>
+    </div>
+    <button class="save" pButton type="button" label="حفظ" (click)="save()"></button>
+</form>

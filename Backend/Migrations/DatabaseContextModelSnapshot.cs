@@ -171,17 +171,17 @@ namespace Backend.Migrations
                         {
                             Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "4df2c51c-72f8-445e-a4bb-4d0615f57e2f",
+                            ConcurrencyStamp = "8c318b89-bbf2-4a4c-ad1a-0df165a35bd7",
                             Email = "ADMIN@GMAIL.COM",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2025, 4, 17, 1, 10, 57, 163, DateTimeKind.Local).AddTicks(7824),
+                            HireDate = new DateTime(2025, 4, 23, 2, 11, 41, 799, DateTimeKind.Local).AddTicks(1825),
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFYtYhGwNeuyTCNCu+V+D91AJ/9jbpLSDzRvRtppdk7jQCKkhq1tR/XbYxKVR+lW9g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBiaPI29rX8WaR3BbClF4RY2Ys7vE4rHejGjPrCNYFEs0ajpqRbznKj2it1YxR98+A==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "7a8ed15d-163c-46a2-af7a-8738d98dcf37",
+                            SecurityStamp = "31577761-af89-4cb1-a36c-c5bb84d58ac0",
                             TwoFactorEnabled = false,
                             UserName = "ADMIN",
                             UserType = "ADMIN"
@@ -511,6 +511,12 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ManagerID"));
 
+                    b.Property<DateTime?>("DOB")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageURL")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("SchoolID")
                         .HasColumnType("int");
 
@@ -632,13 +638,13 @@ namespace Backend.Migrations
                     b.Property<int>("ClassID")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("Grade")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("TermID")
                         .HasColumnType("int");
 
-                    b.HasKey("StudentID", "YearID", "SubjectID", "MonthID", "GradeTypeID", "ClassID");
+                    b.Property<decimal?>("Grade")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("StudentID", "YearID", "SubjectID", "MonthID", "GradeTypeID", "ClassID", "TermID");
 
                     b.HasIndex("ClassID");
 
@@ -715,6 +721,9 @@ namespace Backend.Migrations
 
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageURL")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Mobile")
                         .HasColumnType("nvarchar(max)");
@@ -902,6 +911,12 @@ namespace Backend.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeacherID"));
+
+                    b.Property<DateTime?>("DOB")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageURL")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ManagerID")
                         .HasColumnType("int");

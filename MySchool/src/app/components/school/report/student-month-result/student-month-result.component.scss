@@ -1,0 +1,109 @@
+#report {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-top: 2rem;
+}
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap");
+.add {
+  position: absolute;
+  top: 11rem;
+  left: 2rem;
+}
+:host {
+  display: block;
+  direction: rtl;
+  font-family: "Cairo", sans-serif;
+  padding: 1rem;
+  background: #f5f8ff; // نفس الخلفية الرمادية الخفيفة
+}
+
+// رأس الصفحة
+.page-header {
+  display: grid;
+  grid-template-columns: 1fr 120px 1fr;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+
+  .header-col p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  .logo {
+    max-height: 70px;
+    object-fit: contain;
+    margin-top: 2rem;
+  }
+}
+
+// عنوان تحت الهيدر
+.report-title {
+  margin-top: 0.5rem;
+}
+
+// البطاقة
+.report-card {
+  background: #fff;
+  border-radius: 6px;
+  padding: 1.25rem;
+  max-width: 1000px;
+  margin-inline: auto;
+}
+
+.student-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: space-between;
+  font-size: 0.95rem;
+}
+
+table th,
+table td {
+  vertical-align: middle;
+}
+
+.badge.bg-success-subtle {
+  background: #d2f4d1;
+  border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+}
+.text-start {
+  margin: 1rem;
+}
+.text-end {
+  margin: 1rem;
+}
+// التذييل
+.footer {
+  display: flex;
+  justify-content: space-around;
+  > span {
+    min-width: 90px;
+  }
+}
+
+// الطباعة (إخفاء الأزرار والمساحات غير المرغوبة)
+@media print {
+  :host {
+    background: #fff;
+    padding: 0;
+  }
+  .d-print-none {
+    display: none !important;
+  }
+  .report-card {
+    box-shadow: none;
+    margin: 0;
+  }
+  .page-header,
+  .report-title {
+    margin-inline: 0.5cm;
+  }
+}
+@media (max-width: 900px) {
+  .add {
+    top: 8rem;
+  }
+}

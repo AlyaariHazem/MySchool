@@ -37,7 +37,8 @@ namespace Backend.Repository.School.Classes
                 UserName = managerDTO.UserName,
                 Email = managerDTO.Email,
                 PhoneNumber = managerDTO.PhoneNumber,
-                UserType = "MANAGER"
+                UserType = "MANAGER",
+                HireDate = DateTime.Now,
             };
 
             var createdUser = await _userRepository.CreateUserAsync(user, managerDTO.Password, "MANAGER");

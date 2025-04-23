@@ -17,6 +17,9 @@
   -webkit-appearance: none; /* Chrome, Safari, Edge, Opera */
   appearance: none; /* General */
 }
+p-select{
+  height: 3rem;
+}
 
 // Remove the margin/padding that might appear due to spinner removal
 .no-spinner::-webkit-inner-spin-button,

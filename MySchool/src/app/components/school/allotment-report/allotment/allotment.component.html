@@ -1,10 +1,21 @@
-<div class="allotment">
-    <p-dropdown [options]="reportOptions" optionLabel="label" [(ngModel)]="selectedReportType"
-        placeholder="Select a report" (onChange)="onReportSelect()"></p-dropdown>
+<div id="id01" class="container">
+    <h2 class="title">تخصيص التقارير</h2>
+    <div class="select">
+        <p-select [options]="reportOptions" optionLabel="label" optionValue="value" [ngModel]="selectedReportType"
+            (ngModelChange)="onReportSelect($event)" placeholder="Select a report" />
 
-    <ng-template  #reportContainer></ng-template>
+    </div>
 
-    <form [formGroup]="formGroup">
-        <p-editor formControlName="text" [style]="{ height: '320px' }"></p-editor>
-    </form>
+    <div class="flex flex-wrap gap-3 save">
+        <button class="w-3" pButton type="button" label="حفظ التغيرات" icon="pi pi-save" (click)="exportPDF()">
+        </button>
+    </div>
+
+    <ng-template #reportContainer></ng-template>
+
+    <div #editorPreview dir="rtl">
+        <form [formGroup]="formGroup">
+            <p-editor formControlName="text" [style]="{ height: '320px' }"></p-editor>
+        </form>
+    </div>
 </div>
