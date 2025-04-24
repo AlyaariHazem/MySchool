@@ -10,9 +10,8 @@
             <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
 
             <!-- Submit button for updating -->
-            <button class="btn btn-success school-btn" type="submit">
-                {{ 'saveChanges' | translate }}
-            </button>
+          
+            <p-button class="btn" variant="outlined" severity="success" label="{{ 'saveChanges' | translate }}" type="submit"/>
 
             <!-- School Name Group -->
             <div class="group">

@@ -23,7 +23,7 @@
 
       </div>
     </div>
-    <p-button class="showFee" (onClick)="showDialog()" label="إضافة+" />
+    <p-button variant="outlined" severity="success" class="showFee" (onClick)="showDialog()" label="إضافة+" />
     <p-chips [ngClass]="{'chipsOne':languageService.dir==='rtl','chipsOneEn':languageService.dir==='ltr'}"
       [max]="search" placeholder="ابحث هنا..." />
   </form>

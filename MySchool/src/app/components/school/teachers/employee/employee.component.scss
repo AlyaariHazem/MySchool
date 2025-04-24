@@ -26,8 +26,6 @@
     }
 
     .btn-save {
-      background: #28a745;
-      color: white;
       padding: 8px 12px;
       border: none;
     }
@@ -58,8 +56,8 @@
     }
   }
 }
-p-selec{
-  height:3rem!important;
+p-select, input{
+  height: 3rem!important;
 }
 .scroll-wrapper {
     max-height: 90vh;

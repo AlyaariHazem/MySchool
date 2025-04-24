@@ -22,7 +22,7 @@
         </mat-form-field>
       </div>
     </div>
-    <p-button class="showFee" (onClick)="subjectData ? updateSubject(form) : addSubject(form)"
+    <p-button variant="outlined" severity="success" class="showFee" (onClick)="subjectData ? updateSubject(form) : addSubject(form)"
       [label]="editMode ? 'تعديل' : 'إضافة+'" />
 
     <p-chips class="chipsOne" [max]="search" placeholder="ابحث هنا..." />

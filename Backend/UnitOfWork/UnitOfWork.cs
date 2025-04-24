@@ -56,7 +56,7 @@ public class UnitOfWork : IUnitOfWork
         GradeTypes = new GradeTypesRepository(_context, _mapper);
         Terms = new TermRepository(_context, _mapper);
         Months = new MonthRepository(_context, _mapper);
-        Employees = new EmployeeRepository(_context);
+        Employees = new EmployeeRepository(_context, Users);
     }
 
     public ISubjectsRepository Subjects { get; private set; }

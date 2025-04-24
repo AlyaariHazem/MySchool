@@ -26,7 +26,7 @@
 
             </div>
             <!-- I want when I click on the edit change this for "تعديل" -->
-            <p-button class="showFee" [label]="isEditMode ? 'تعديل' : 'إضافة'"
+            <p-button variant="outlined" severity="success" class="showFee" [label]="isEditMode ? 'تعديل' : 'إضافة'"
               (click)="isEditMode ? updateStage() : addStage()" [disabled]="!form.valid" />
             </form>
             

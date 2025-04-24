@@ -1,8 +1,6 @@
 <app-progress-spinner [visible]="isLoading"></app-progress-spinner>
 <div class="Fee" [attr.dir]="languageService.dir">
     <h2 class="school">إعدادات الرسوم</h2>
-    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-        [totalRecords]="FeeClass.length" [rowsPerPageOptions]="[4, 8, 16]" />
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
         <!-- Tab 1: بند الرسوم -->
         <mat-tab label="بند الرسوم">
@@ -29,11 +27,10 @@
                         </mat-form-field>
                     </div>
                     <!-- Submit Button -->
-                    <button mat-raised-button color="primary" type="submit"
-                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="school-btn"
-                        [disabled]="feeForm.invalid" (click)="onSubmit(feeForm)">
-                        {{ editMode ? 'تعديل' : 'إضافة+' }}
-                    </button>
+                   
+                    <p-button variant="outlined" severity="success" type="submit"
+                    [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="btn"
+                    [disabled]="feeForm.invalid" (click)="onSubmit(feeForm)" label="{{ editMode ? 'تعديل' : 'إضافة+' }}" />
 
 
                 </div>
@@ -125,10 +122,9 @@
                         </mat-form-field>
                     </div>
                     <!-- Submit Button -->
-                    <button mat-raised-button color="primary" type="submit" class="school-btn"
-                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" [disabled]="classFeeForm.invalid||exist">
-                        {{ editModeClass ? 'تعديل' : 'إضافة+' }}
-                    </button>
+                    <p-button variant="outlined" severity="success" type="button"
+                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="btn" [disabled]="classFeeForm.invalid||exist"
+                         label="{{ editModeClass ? 'تعديل' : 'إضافة+' }}" />
 
                 </div>
             </form>
@@ -184,4 +180,6 @@
             </div>
         </mat-tab>
     </mat-tab-group>
+    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+    [totalRecords]="FeeClass.length" [rowsPerPageOptions]="[4, 8, 16]" />
 </div>

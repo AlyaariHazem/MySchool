@@ -25,11 +25,6 @@ p-paginator {
     padding-left: 0px !important;
   }
 }
-
-.styled-table th:nth-child(3),
-.styled-table td:nth-child(3) {
-  width: 400px; /* Adjust the width as needed */
-}
 .student-name-column {
   width: 280px; /* Set your desired width */
 }
@@ -184,8 +179,6 @@ p-select {
   left: 1rem;
   padding: 8px 0;
   border: none;
-  color: white;
-  background-color: #2fdf84;
 }
 .addEn {
   position: absolute;
@@ -195,11 +188,6 @@ p-select {
   right: 1rem;
   padding: 8px 0;
   border: none;
-  color: white;
-  background-color: #2fdf84;
-}
-.add:active {
-  background-color: #2fdf85;
 }
 .modal-container {
   background-color: white;
@@ -208,10 +196,7 @@ p-select {
   .add {
     width: 10%;
   }
-  .styled-table th:nth-child(3),
-  .styled-table td:nth-child(3) {
-    width: 400px; /* Adjust the width as needed */
-  }
+ 
 }
 @media (max-width: 900px) {
   form {
@@ -240,7 +225,10 @@ p-select {
     border: 1px solid #dddddd;
   }
 }
-
+/* 2) Base table styles */
+.styled-table {
+  width: 97%!important;
+}
 @media (max-width: 600px) {
   form {
     right: -1rem;

@@ -3,7 +3,7 @@
     <h2 class="school">العام الدارسي</h2>
     <div class="container">
       <div class="tabcontent">
-        <p-button class="showFee" (onClick)="showDialogAddYear()" label="+ سنة جديدة" />
+        <p-button class="showFee" variant="outlined" severity="success" (onClick)="showDialogAddYear()" label="+ سنة جديدة" />
 
         <!-- Dialog for adding a new year -->
         <p-dialog header="إضافة سنة" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }"

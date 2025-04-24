@@ -5,7 +5,7 @@
 
   <label for="className" class="className">اسـم الصف</label>
   <input pInputText type="text" formControlName="className" class="class" placeholder="إدخال اسم صـف جديد" />
-  <p-button class="showFee" [label]="isEditMode ? 'تعديل' : 'إضافة'" (click)="isEditMode ? updateClass() : addClass()"
+  <p-button variant="outlined" severity="success" class="showFee" [label]="isEditMode ? 'تعديل' : 'إضافة'" (click)="isEditMode ? updateClass() : addClass()"
     [disabled]="!form.valid" />
 </form>
 

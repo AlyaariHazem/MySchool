@@ -22,10 +22,8 @@
           </div>
         </form>
 
-        <button mat-raised-button color="primary"
-          [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" (click)="openDialog()">
-          إضافة طالب+
-        </button>
+        <p-button label="تصدير" variant="outlined" severity="success" (click)="openDialog()"
+          [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" label="إضافة طالب+"/>
 
         @if (showGrid) {
         <div class="group group2">

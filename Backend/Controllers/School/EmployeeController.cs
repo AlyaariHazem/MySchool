@@ -64,4 +64,55 @@ public class EmployeeController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, response);
         }
     }
+    [HttpPut("{id}")]
+    public async Task<ActionResult<APIResponse>> UpdateEmployee(int id, [FromBody] EmployeeDTO employee)
+    {
+        var response = new APIResponse();
+        try
+        {
+            if (employee == null)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.BadRequest;
+                response.ErrorMasseges.Add("Employee data is null");
+                return BadRequest(response);
+            }
+            var result = await _unitOfWork.Employees.UpdateEmployeeAsync(id, employee);
+            response.Result = result;
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+    //  api/employees/42?jobType=Teacher
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<APIResponse>> DeleteEmployee(int id, [FromQuery] string jobType)
+    {
+        var response = new APIResponse();
+
+        try
+        {
+            await _unitOfWork.Employees.DeleteEmployeeAsync(id, jobType);
+
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.NotFound;
+            response.ErrorMasseges.Add("Employee not found");
+            return NotFound(response);
+            // 204, no body
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
 }

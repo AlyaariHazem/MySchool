@@ -13,7 +13,7 @@ export class TeacherService {
     return this.API.getRequest<Teachers[]>("Teacher").pipe(
       map((response: Teachers[]) => {
         return response.map((teacher: Teachers) => {
-          teacher.fullName = `${teacher.firstName} ${teacher.middleName} ${teacher.lastName}`;
+          teacher.fullName = `${teacher.firstName} ${teacher.middleName===null?'':teacher.middleName} ${teacher.lastName}`;
           return teacher;
         });
       })

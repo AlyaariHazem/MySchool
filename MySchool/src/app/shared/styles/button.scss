@@ -1,5 +1,5 @@
 @import 'primeflex/primeflex.scss';
 
 .school-btn {
-  @include styleclass('bg-green-500 hover:bg-green-400 border-round transition-colors transition-duration-150 p-2 border-none text-white');
+  @include styleclass('border-round transition-colors transition-duration-150 p-2 border-none');
 }

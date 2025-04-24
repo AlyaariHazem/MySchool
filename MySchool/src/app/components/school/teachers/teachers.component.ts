@@ -14,7 +14,7 @@ import { Employee } from '../core/models/employee.model';
 @Component({
   selector: 'app-teachers',
   templateUrl: './teachers.component.html',
-  styleUrls: ['./teachers.component.scss']
+  styleUrls: ['./teachers.component.scss','./../../../shared/styles/style-table.scss'],
 })
 export class TeachersComponent {
   form: FormGroup;
@@ -29,6 +29,7 @@ export class TeachersComponent {
   isLoading: boolean = true; // Loading state for the component
   first: number = 0; // Current starting index
   rows: number = 4; // Number of rows per page
+  DateNow: Date = new Date();
   updatePaginatedData(): void {
     const start = this.first;
     const end = this.first + this.rows;
@@ -76,23 +77,17 @@ export class TeachersComponent {
       //this for add teacher 
       this.openDialog();
     }
-    this.getAllTeachers();
+    this.getAllEmployees();
     this.languageService.currentLanguage();
     this.translationService.changeLanguage(this.languageService.langDir);
   }
-  getAllTeachers(): void {
+  getAllEmployees(): void {
     this.employeeService.getAllEmployees().subscribe((res) => {
       this.Employees = res;
       this.isLoading = false;
       this.updatePaginatedData(); // Initial slicing
     })
   }
-  getTeacherByID(id: number): void {
-    //  this.employeeService.getTeacherById(id).subscribe({
-    //    next:(res)=>res,
-    //  });
-  }
-
 
   openDialog(): void {
     const dialogConfig = new MatDialogConfig();
@@ -103,6 +98,7 @@ export class TeachersComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        this.paginated.push(result);
         this.toastr.success('تم إضافة الطالب بنجاح');
       }
     });
@@ -122,23 +118,18 @@ export class TeachersComponent {
 
     const dialogRef = this.dialog.open(EmployeeComponent, dialogConfig);
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result:Employee) => {
       if (result) {
+        this.paginated = this.paginated.map(emp => emp.employeeID === result.employeeID ? result : emp);
         this.toastr.success('تم تعديل الطالب بنجاح');
-        this.getAllTeachers(); // Refresh table or handle updates
       }
     });
   }
-
-  deleteTeacher(employee: Employee): void {
-    const confirmDelete = confirm('هل أنت متأكد من حذف هذا الطالب؟');
-    if (confirmDelete) {
-      // Filter out the teacher with the given ID
-      //   this.employeeService.deleteTeacher(teacherId).subscribe(()=>{
-      //    this.toastr.warning('تم حذف الطالب بنجاح');
-      //    this.getAllTeachers();
-      //   })
-    }
+  deleteEmployee(id:number,jobType:string): void {
+    this.employeeService.deleteEmployee(id,jobType).subscribe(res => {
+      this.paginated = this.paginated.filter(employee => employee.employeeID !==id);
+      console.log('Employee deleted successfully', res);
+      this.toastr.success('تم حذف الموظف بنجاح');
+    });
   }
-
 }

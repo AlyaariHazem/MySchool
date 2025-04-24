@@ -9,7 +9,6 @@
   max-height: 100%;
   pointer-events: auto;
   overflow-y: hidden; // Corrected to disable vertical scrolling
-  background-color: red;
   outline: 0;
   transform: scale(0.8); // Custom transform
 }
@@ -40,12 +39,13 @@ mat-form-field {
 .modal-content {
   border-radius: 1.5%;
 }
-
+//I want use this in the edge?
 .showFee {
   position: relative;
-  right: 84%;
+  right: 41%;
   top: -2rem;
 }
+
 .container {
   border-radius: 23px;
 }
@@ -69,27 +69,11 @@ mat-form-field {
   color: white;
   border-radius: 4px;
 }
-.add {
-  position: absolute;
-  top: 1.4rem;
-  width: 11%;
-  border-radius: 4px;
-  right: 21%;
-  border: none;
-  padding: 8px 0;
-  color: white;
-  background-color: #2fdf84;
-}
-.add:active {
-  background-color: #2fdf85;
-}
 .modal-container {
   background-color: white;
 }
 @media (max-width: 1600px) {
-  .add {
-    width: 10%;
-  }
+  
   .styled-table th,
   .styled-table td {
     padding: auto 10% !important;

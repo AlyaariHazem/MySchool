@@ -76,6 +76,7 @@ import { Select } from 'primeng/select';
 import { NumberToArabicTextPipe } from '../../Pipes/number-to-arabic-text.pipe';
 import { AccountReportComponent } from './report/account-report/account-report.component';
 import { EmployeeComponent } from './teachers/employee/employee.component';
+import { AgePipe } from '../../Pipes/age.pipe';
 
 
 
@@ -165,6 +166,7 @@ const modules = [
   MatNativeDateModule,
   DatePipe,
   NumberToArabicTextPipe,
+  AgePipe
 ];
 
 @NgModule({

@@ -12,12 +12,6 @@
     left: 0%;
   }
 }
-//for dialog *********
-:host ::ng-deep .p-ripple.p-button{
-    border-radius: 3rem!important;
-    height: 2rem !important;
-    z-index: 11;
-}
 :host ::ng-deep .p-dialog-header-close{
     background-color: white!important;
 }//***********************

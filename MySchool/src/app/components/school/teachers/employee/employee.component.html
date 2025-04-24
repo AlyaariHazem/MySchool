@@ -1,7 +1,8 @@
 <div class="employee-form-container ">
     <h2>بيانات الموظف</h2>
     <div class="form-actions">
-        <button class="btn-save" (click)="onSubmit()">حفظ الموظف</button>
+        <!-- <button class="btn-save" (click)="mode=='add'?AddEmployee():UpdateEmployee()"></button> -->
+        <p-button class="btn-save" variant="outlined" severity="success" (click)="mode=='add'?AddEmployee():UpdateEmployee()" label="{{mode=='add'?'حفظ الموظف':'تعديل الموظف'}}" />
     </div>
     <p-tabs value="0">
         <p-tablist>
@@ -33,14 +34,14 @@
 
                         <div class="form-row col-6 md:col-4 justify-content-center  ">
                             <label>الوظيفة *</label>
-                            <p-select [options]="employeeTypes" formControlName="employeeType" optionValue="value"
+                            <p-select [options]="employeeTypes" formControlName="jopName" optionValue="value"
                                 [checkmark]="true" optionLabel="name" [editable]="true" [showClear]="true"
                                 placeholder="نوع الموظف" />
                         </div>
 
                         <div class="form-row col-6 md:col-4 justify-content-center  ">
                             <label>تاريخ الميلاد *</label>
-                            <input formControlName="birthDate" type="date" [value]="date">
+                            <input formControlName="dob" type="date">
                         </div>
                     </div>
                 </div>
@@ -60,8 +61,8 @@
                     </div>
 
                     <div class="col-12 md:col-6">
-                        <label for="phone" class="block mb-2">رقم الهاتف</label>
-                        <input formControlName="phone" id="phone" pInputText type="text" placeholder="رقم الهاتف" />
+                        <label for="mobile" class="block mb-2">رقم الهاتف</label>
+                        <input formControlName="mobile" id="mobile" pInputText type="text" placeholder="رقم الهاتف" />
                     </div>
 
                     <div class="col-12 md:col-6">

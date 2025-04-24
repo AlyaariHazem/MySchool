@@ -22,10 +22,8 @@
           </div>
         </form>
 
-        <button mat-raised-button color="primary"
-          [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" (click)="openDialog()">
-          إضافة موظف+
-        </button>
+        <p-button label="تصدير" variant="outlined" severity="success" (click)="openDialog()"
+          [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" label="إضافة موظف+"/>
 
         @if (showGrid) {
         <div class="group group2">
@@ -62,58 +60,58 @@
         <div class="table-container" [attr.dir]="languageService.dir">
           <div class="table-container">
             <mat-card>
-              <table class="styled-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>اسم المستخدم</th>
-                    <th >الوضيفة</th>
-                    <th>رقم المستخدم</th>
-                    <th>العمر</th>
-                    <th>النوع</th>
-                    <th>تاريخ الإنشاء</th>
-                    <th>العنوان</th>
-                    <th>رقم الهاتف</th>
-                    <th>العملية</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (teacher of paginated; track $index) {
-                  <tr>
-                    <td>{{ $index+1 }}</td>
-                    <td class="student-name-column">{{teacher.firstName +" "+ teacher.middleName+" "+
-                      teacher.lastName}}</td>
-                    <td>{{ teacher.jopName}}</td>
-                    <td>{{ teacher.employeeID}}</td>
-                    <td>{{ teacher.age}}</td>
-                    <td>{{ teacher.gender=="Male"?"ذكر":"انثى" }}</td>
-                    <td>{{ teacher.hireDate| date:"MM-yyyy" }}</td>
-                    <td>{{ teacher.address }}</td>
-                    <td>{{ teacher.mobile }}</td>
-                    <td>
-                      <div class="col text-left">
-                        <div class="mt-sm-0 mt-2">
-                          <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false">
-                            <i class="fas fa-ellipsis-h"></i>
-                          </button>
-                          <div class="dropdown-menu dropdown-menu-left">
-                            <a class="dropdown-item" (click)="EditDialog(teacher)"><i
-                                class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                            <div role="separator" class="dropdown-divider"></div>
-                            <a class="dropdown-item" (click)="deleteTeacher(teacher)">
-                              <i class="bi bi-trash IconDelete"></i>حذف</a>
+              <div class="responsive-table">
+                <table class="styled-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>اسم المستخدم</th>
+                      <th>الوضيفة</th>
+                      <th>رقم المستخدم</th>
+                      <th>العمر</th>
+                      <th>النوع</th>
+                      <th>تاريخ الإنشاء</th>
+                      <th>العنوان</th>
+                      <th>رقم الهاتف</th>
+                      <th>العملية</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (employee of paginated; track $index) {
+                    <tr>
+                      <td>{{ $index+1 }}</td>
+                      <td class="student-name-column">{{employee.firstName +" "+employee.lastName}}</td>
+                      <td>{{ employee.jopName}}</td>
+                      <td>{{ employee.employeeID}}</td>
+                      <td>{{ employee.dob | age }}</td>
+                      <td>{{ employee.gender=="Male"?"ذكر":"انثى" }}</td>
+                      <td>{{ employee.hireDate| date:"MM-yyyy" }}</td>
+                      <td>{{ employee.address }}</td>
+                      <td>{{ employee.mobile }}</td>
+                      <td>
+                        <div class="col text-left">
+                          <div class="mt-sm-0 mt-2">
+                            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                              aria-expanded="false">
+                              <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-left">
+                              <a class="dropdown-item" (click)="EditDialog(employee)"><i
+                                  class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                              <div role="separator" class="dropdown-divider"></div>
+                              <a class="dropdown-item" (click)="deleteEmployee(employee.employeeID!,employee.jopName)">
+                                <i class="bi bi-trash IconDelete"></i>حذف</a>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                  }@empty {
-                  <p animate-width>No Data available in a Table</p>
-                  }
-                </tbody>
-              </table>
-
+                      </td>
+                    </tr>
+                    }@empty {
+                    <p animate-width>No Data available in a Table</p>
+                    }
+                  </tbody>
+                </table>
+              </div>
             </mat-card>
           </div>
         </div>
