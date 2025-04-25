@@ -122,17 +122,18 @@ export class FeeClassComponent implements OnInit {
     }
   }
 
-  deleteFee(id: number): void {
-    this.feeService.DeleteFee(id).subscribe({
-      next: (res) => {
-        if (res.isSuccess) {
-          this.toastr.success(res.result, 'Fee Deleted');
-          this.getAllFees();
-        }
-      },
-      error: () => this.toastr.error('Failed to delete Fee', 'Error'),
-    });
-  }
+  // fee.component.ts
+deleteFee(id: number): void {
+  this.feeService.DeleteFee(id).subscribe({
+    next: res => {
+      if (res.isSuccess) {
+        this.getAllFees();
+      }
+    },
+    error: () => {}
+  });
+}
+
 
   resetForm(): void {
     this.Addfee = new Fee();
@@ -181,11 +182,11 @@ export class FeeClassComponent implements OnInit {
   deleteFeeClass(feeClassID: number): void {
     this.feeClassService.DeleteFeeClass(feeClassID).subscribe({
       next: (res) => {
-        if (res.success) {
-          this.toastr.success(res);
+        if (res.isSuccess) {
+          this.toastr.success(res.result);
           this.getAllClassFees();
         } else {
-          this.toastr.error(res);
+          this.toastr.error(res.errorMasseges[0]);
         }
       },
     });

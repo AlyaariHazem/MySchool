@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Backend.Common;
 using Backend.DTOS.School.Fees;
 using Backend.Models;
 
@@ -9,10 +10,10 @@ namespace Backend.Repository.School.Interfaces;
 
 public interface IFeesRepository
 {
-    Task<List<GetFeeDTO>> GetAllAsync();
-    Task<GetFeeDTO> GetByIdAsync(int id);
-    Task AddAsync(FeeDTO fee);
-    Task UpdateAsync(FeeDTO fee);
-    Task DeleteAsync(int id);
+    Task<Result<List<GetFeeDTO>>> GetAllAsync();
+    Task<Result<GetFeeDTO>> GetByIdAsync(int id);
+    Task<Result<bool>> AddAsync(FeeDTO fee);
+    Task<Result<bool>> UpdateAsync(FeeDTO fee);
+    Task<Result<bool>> DeleteAsync(int id);
 
 }

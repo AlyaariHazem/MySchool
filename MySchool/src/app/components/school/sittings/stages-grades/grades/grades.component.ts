@@ -16,13 +16,14 @@ import { PaginatorState } from 'primeng/paginator';
 })
 export class GradesComponent implements OnInit {
   @Input() stages: Stage[] = [];
-  paginatedGrade: Array<Stage> = [];
+  paginatedGrade: ClassDTO[] = [];
   classes: ClassDTO[] = [];
   DisplayClasses: ClassDTO[] = [];
   AddClass?: CLass;
   form: FormGroup;
   isEditMode = false;
   classToEditId: number | null = null;
+  YearID!: number;
 
   currentPage: number = 0; // Current page index
   pageSize: number = 5; // Number of items per page
@@ -41,6 +42,7 @@ export class GradesComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllClasses();
+    this.YearID=Number(localStorage.getItem("yearId"));
   }
 
   openOuterDropdown: any = null;
@@ -52,7 +54,7 @@ export class GradesComponent implements OnInit {
       next: (res) => {
         this.classes = res;
         this.length = this.classes.length; // Set total item count
-        this.updateDisplayedClass(); // Initialize displayed divisions
+        this.updatePaginatedData();
       },
       error: (err) => {
         console.error('Error fetching classes:', err);
@@ -64,7 +66,7 @@ export class GradesComponent implements OnInit {
   addClass(): void {
     if (this.form.valid) {
       const addClassData: CLass = this.form.value;
-      addClassData.yearID=Number(localStorage.getItem("yearID"));
+      addClassData.yearID=this.YearID;
       this.classService.Add(addClassData).subscribe({
         next: () => {
           this.getAllClasses();
@@ -182,19 +184,13 @@ export class GradesComponent implements OnInit {
     }
   }
 
-  updateDisplayedClass(): void {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.DisplayClasses = this.classes.slice(startIndex, endIndex);
-  }
-
   // Handle paginator events
   first: number = 0; // Current starting index
     rows: number = 4; // Number of rows per page
     updatePaginatedData(): void {
       const start = this.first;
       const end = this.first + this.rows;
-      this.paginatedGrade = this.stages.slice(start, end);
+      this.paginatedGrade = this.classes.slice(start, end);
     }
   
     // Handle page change event from PrimeNG paginator

@@ -1,192 +1,108 @@
+using System.Net;
 using Backend.DTOS.School.Fees;
 using Backend.Interfaces;
 using Backend.Models;
-using Backend.Repository.School.Implements;
-using Backend.Repository.School.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
-namespace Backend.Controllers.School
+namespace Backend.Controllers.School;
+
+[Route("api/[controller]")]
+[ApiController]
+public class FeeClassController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class FeeClassController : ControllerBase
+    private readonly IUnitOfWork _unitOfWork;
+
+    public FeeClassController(IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        _unitOfWork = unitOfWork;
+    }
 
-        public FeeClassController(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
+    /*----------------------------------------------------
+     *                    GET  /api/FeeClass
+     *---------------------------------------------------*/
+    [HttpGet]
+    public async Task<IActionResult> GetAllFeeClasses()
+    {
+        var result = await _unitOfWork.FeeClasses.GetAllAsync();
 
-        // GET: api/FeeClass
-        [HttpGet]
-        public async Task<ActionResult<APIResponse>> GetAllFeeClasses()
-        {
-            var response = new APIResponse();
-            try
-            {
-                var feeClasses = await _unitOfWork.FeeClasses.GetAllAsync();
-                response.Result = feeClasses;
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return result.Ok
+            ? Ok(APIResponse.Success(result.Value!))
+            : StatusCode((int)HttpStatusCode.InternalServerError,
+                         APIResponse.Fail(result.Error!));
+    }
 
-        // GET: api/FeeClass/Fee/{feeClassID:int}
-        [HttpGet("Fee/{feeClassID:int}")]
-        public async Task<ActionResult<APIResponse>> GetFeeClassById(int feeClassID)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var feeClass = await _unitOfWork.FeeClasses.GetByIdAsync(feeClassID);
-                if (feeClass == null)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("FeeClass not found");
-                    return NotFound(response);
-                }
+    /*----------------------------------------------------
+     *       GET  /api/FeeClass/Fee/{feeClassID}
+     *---------------------------------------------------*/
+    [HttpGet("Fee/{feeClassID:int}")]
+    public async Task<IActionResult> GetFeeClassById(int feeClassID)
+    {
+        var result = await _unitOfWork.FeeClasses.GetByIdAsync(feeClassID);
 
-                response.Result = feeClass;
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return result.Ok
+            ? Ok(APIResponse.Success(result.Value!))
+            : NotFound(APIResponse.Fail(result.Error!));
+    }
 
-        // GET: api/FeeClass/Class/{classId:int}
-        [HttpGet("Class/{classId:int}")]
-        public async Task<ActionResult<APIResponse>> GetAllFeeClassById(int classId)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var feeClass = await _unitOfWork.FeeClasses.GetAllByClassIdAsync(classId);
-                if (feeClass == null)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("FeeClass not found");
-                    return NotFound(response);
-                }
+    /*----------------------------------------------------
+     *     GET  /api/FeeClass/Class/{classId}
+     *---------------------------------------------------*/
+    [HttpGet("Class/{classId:int}")]
+    public async Task<IActionResult> GetAllFeeClassByClassId(int classId)
+    {
+        var result = await _unitOfWork.FeeClasses.GetAllByClassIdAsync(classId);
 
-                response.Result = feeClass;
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return result.Ok
+            ? Ok(APIResponse.Success(result.Value!))
+            : NotFound(APIResponse.Fail(result.Error!));
+    }
 
-        // POST: api/FeeClass
-        [HttpPost]
-        public async Task<ActionResult<APIResponse>> AddFeeClass([FromBody] AddFeeClassDTO feeClass)
-        {
-            var response = new APIResponse();
-            try
-            {
-                if (feeClass == null)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.BadRequest;
-                    response.ErrorMasseges.Add("Invalid FeeClass data");
-                    return BadRequest(response);
-                }
+    /*----------------------------------------------------
+     *                POST  /api/FeeClass
+     *---------------------------------------------------*/
+    [HttpPost]
+    public async Task<IActionResult> AddFeeClass([FromBody] AddFeeClassDTO dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(APIResponse.Fail("Invalid FeeClass data."));
 
-                await _unitOfWork.FeeClasses.AddAsync(feeClass);
+        var result = await _unitOfWork.FeeClasses.AddAsync(dto);
 
-                response.Result = "FeeClass created successfully.";
-                response.statusCode = HttpStatusCode.Created;
-                return Ok(response); 
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return result.Ok
+            ? StatusCode((int)HttpStatusCode.Created,
+                         APIResponse.Success("FeeClass created successfully.",
+                                             HttpStatusCode.Created))
+            : StatusCode((int)HttpStatusCode.InternalServerError,
+                         APIResponse.Fail(result.Error!));
+    }
 
-        // PUT: api/FeeClass/{feeClassID}
-        [HttpPut("{feeClassID:int}")]
-        public async Task<ActionResult<APIResponse>> UpdateFeeClass(int feeClassID, [FromBody] AddFeeClassDTO updatedFeeClass)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var existingFeeClass = await _unitOfWork.FeeClasses.GetByIdAsync(feeClassID);
-                if (existingFeeClass == null)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("FeeClass not found");
-                    return NotFound(response);
-                }
+    /*----------------------------------------------------
+     *        PUT  /api/FeeClass/{feeClassID}
+     *---------------------------------------------------*/
+    [HttpPut("{feeClassID:int}")]
+    public async Task<IActionResult> UpdateFeeClass(int feeClassID,
+                                                    [FromBody] AddFeeClassDTO dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(APIResponse.Fail("Invalid FeeClass data."));
 
-                await _unitOfWork.FeeClasses.UpdateAsync(feeClassID, updatedFeeClass);
+        var result = await _unitOfWork.FeeClasses.UpdateAsync(feeClassID, dto);
 
-                response.Result = "FeeClass updated successfully.";
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return result.Ok
+            ? Ok(APIResponse.Success("FeeClass updated successfully."))
+            : NotFound(APIResponse.Fail(result.Error!));
+    }
 
-        // DELETE: api/FeeClass/{FeeClassId}
-        [HttpDelete("{FeeClassId:int}")]
-        public async Task<ActionResult<APIResponse>> DeleteFeeClass(int FeeClassId)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var check = await _unitOfWork.FeeClasses.checkIfExist(FeeClassId);
-                if (!check)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("FeeClass not found");
-                    return NotFound(response);
-                }
+    /*----------------------------------------------------
+     *       DELETE  /api/FeeClass/{feeClassID}
+     *---------------------------------------------------*/
+    [HttpDelete("{feeClassID:int}")]
+    public async Task<IActionResult> DeleteFeeClass(int feeClassID)
+    {
+        var result = await _unitOfWork.FeeClasses.DeleteAsync(feeClassID);
 
-                await _unitOfWork.FeeClasses.DeleteAsync(FeeClassId);
-                response.Result = "FeeClass deleted successfully.";
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return result.Ok
+            ? Ok(APIResponse.Success("FeeClass deleted successfully."))
+            : NotFound(APIResponse.Fail(result.Error!));
     }
 }

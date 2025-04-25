@@ -42,7 +42,8 @@ mat-form-field {
 //I want use this in the edge?
 .showFee {
   position: relative;
-  right: 41%;
+  justify-content: flex-end;
+  display: flex;
   top: -2rem;
 }
 
@@ -73,7 +74,6 @@ mat-form-field {
   background-color: white;
 }
 @media (max-width: 1600px) {
-  
   .styled-table th,
   .styled-table td {
     padding: auto 10% !important;

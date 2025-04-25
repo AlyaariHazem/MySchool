@@ -122,7 +122,7 @@
                         </mat-form-field>
                     </div>
                     <!-- Submit Button -->
-                    <p-button variant="outlined" severity="success" type="button"
+                    <p-button variant="outlined" severity="success" type="button" (click)="onSubmitClassFee(classFeeForm)"
                         [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="btn" [disabled]="classFeeForm.invalid||exist"
                          label="{{ editModeClass ? 'تعديل' : 'إضافة+' }}" />
 

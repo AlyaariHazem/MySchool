@@ -28,7 +28,8 @@ namespace FirstProjectWithMVC.Repository.School
             Division newDivision = new Division
             {
                 DivisionName = obj.DivisionName,
-                ClassID = obj.ClassID
+                ClassID = obj.ClassID,
+                State = true,
             };
 
             try

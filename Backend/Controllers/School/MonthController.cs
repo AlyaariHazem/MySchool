@@ -1,156 +1,76 @@
-using System;
 using System.Net;
-using System.Threading.Tasks;
 using Backend.DTOS.School.Months;
 using Backend.Interfaces;
 using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers.School
+namespace Backend.Controllers.School;
+
+[Route("api/[controller]")]
+[ApiController]
+public class MonthController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class MonthController : ControllerBase
+    private readonly IUnitOfWork _unitOfWork;
+
+    public MonthController(IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        _unitOfWork = unitOfWork;
+    }
 
-        public MonthController(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] MonthDTO dto)
+    {
+        var result = await _unitOfWork.Months.AddMonthAsync(dto);
 
-        // POST: api/Month
-        [HttpPost]
-        public async Task<ActionResult<APIResponse>> Create([FromBody] MonthDTO dto)
-        {
-            var response = new APIResponse();
-            try
-            {
-                await _unitOfWork.Months.AddMonthAsync(dto);
-                response.Result = dto;
-                response.statusCode = HttpStatusCode.Created;
-                return StatusCode((int)HttpStatusCode.Created, response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        if (!result.Ok)
+            return BadRequest(APIResponse.Fail(result.Error!));
 
-        // GET: api/Month
-        [HttpGet]
-        public async Task<ActionResult<APIResponse>> GetAll()
-        {
-            var response = new APIResponse();
-            try
-            {
-                var months = await _unitOfWork.Months.GetAllMonthsAsync();
-                response.Result = months;
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return CreatedAtAction(nameof(GetById),
+                               new { id = dto.MonthID },
+                               APIResponse.Success(dto, HttpStatusCode.Created));
+    }
 
-        // GET: api/Month/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<APIResponse>> GetById(int id)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var month = await _unitOfWork.Months.GetMonthByIdAsync(id);
-                response.Result = month;
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (ArgumentNullException)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.NotFound;
-                response.ErrorMasseges.Add($"Month with ID {id} not found.");
-                return NotFound(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _unitOfWork.Months.GetAllMonthsAsync();
 
-        // PUT: api/Month/{id}
-        [HttpPut("{id}")]
-        public async Task<ActionResult<APIResponse>> Update(int id, [FromBody] MonthDTO dto)
-        {
-            var response = new APIResponse();
-            try
-            {
-                if (id != dto.MonthID)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.BadRequest;
-                    response.ErrorMasseges.Add("Month ID mismatch.");
-                    return BadRequest(response);
-                }
+        if (!result.Ok)
+            return NotFound(APIResponse.Fail(result.Error!));
 
-                await _unitOfWork.Months.UpdateMonthAsync(dto);
-                response.Result = "Month updated successfully.";
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (ArgumentNullException)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.NotFound;
-                response.ErrorMasseges.Add($"Month with ID {id} not found.");
-                return NotFound(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return Ok(APIResponse.Success(result.Value!));
+    }
 
-        // DELETE: api/Month/{id}
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<APIResponse>> Delete(int id)
-        {
-            var response = new APIResponse();
-            try
-            {
-                await _unitOfWork.Months.DeleteMonthAsync(id);
-                response.Result = "Month deleted successfully.";
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (ArgumentNullException)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.NotFound;
-                response.ErrorMasseges.Add($"Month with ID {id} not found.");
-                return NotFound(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var result = await _unitOfWork.Months.GetMonthByIdAsync(id);
+
+        return result.Ok
+            ? Ok(APIResponse.Success(result.Value!))
+            : NotFound(APIResponse.Fail(result.Error!));
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] MonthDTO dto)
+    {
+        if (id != dto.MonthID)
+            return BadRequest(APIResponse.Fail("Month ID mismatch."));
+
+        var result = await _unitOfWork.Months.UpdateMonthAsync(dto);
+
+        return result.Ok
+            ? Ok(APIResponse.Success("Month updated successfully."))
+            : NotFound(APIResponse.Fail(result.Error!));
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var result = await _unitOfWork.Months.DeleteMonthAsync(id);
+
+        return result.Ok
+            ? Ok(APIResponse.Success("Month deleted successfully."))
+            : NotFound(APIResponse.Fail(result.Error!));
     }
 }

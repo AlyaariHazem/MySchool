@@ -62,7 +62,7 @@ public class GuardianRepository : IGuardianRepository
          .FirstOrDefaultAsync(g => g.GuardianID == guardianId);
 
         if (guardianData == null)
-            throw new Exception("Guardian not found.");
+            return null!;
 
         var guardian = new GuardianDTO
         {

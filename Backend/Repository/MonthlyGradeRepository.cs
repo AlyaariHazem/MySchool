@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.GradeTypes;
 using Backend.DTOS.School.MonthlyGrade;
@@ -10,107 +7,132 @@ using Backend.Interfaces;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Repository
+public class MonthlyGradeRepository : IMonthlyGradeRepository
 {
-    public class MonthlyGradeRepository : IMonthlyGradeRepository
+    private readonly DatabaseContext _context;
+    private readonly IMapper         _mapper;
+
+    public MonthlyGradeRepository(DatabaseContext context, IMapper mapper)
     {
-        private readonly DatabaseContext _context;
-        private readonly IMapper _mapper;
+        _context = context;
+        _mapper  = mapper;
+    }
 
-        public MonthlyGradeRepository(DatabaseContext context, IMapper mapper)
+    /* ----------  CREATE  ---------- */
+    public async Task<Result<MonthlyGradeDTO>> AddAsync(MonthlyGradeDTO dto)
+    {
+        if (dto == null)
+            return Result<MonthlyGradeDTO>.Fail("MonthlyGrade payload is null.");
+
+        var entity = _mapper.Map<MonthlyGrade>(dto);
+        await _context.MonthlyGrades.AddAsync(entity);
+
+        try
         {
-            _context = context;
-            _mapper = mapper;
-        }
-
-        // Add a new monthly grade
-        public async Task<MonthlyGradeDTO> AddAsync(MonthlyGradeDTO monthlyGradeDTO)
-        {
-            if (monthlyGradeDTO == null)
-                throw new ArgumentNullException(nameof(monthlyGradeDTO), "MonthlyGradeDTO cannot be null.");
-
-            var entity = _mapper.Map<MonthlyGrade>(monthlyGradeDTO);
-            _context.MonthlyGrades.Add(entity);
             await _context.SaveChangesAsync();
-
-            // monthlyGradeDTO.MonthlyGradeID = entity.MonthlyGradeID; // Set the ID back to DTO after adding to DB
-            return monthlyGradeDTO;
+            return Result<MonthlyGradeDTO>.Success(dto);
         }
-
-        // Delete a monthly grade by ID
-        public async Task<bool> DeleteAsync(int id)
+        catch (DbUpdateException ex)
         {
-            var grade = await _context.MonthlyGrades.FindAsync(id);
-            if (grade == null)
-                return false;
-
-            _context.MonthlyGrades.Remove(grade);
-            await _context.SaveChangesAsync();
-            return true;
+            return Result<MonthlyGradeDTO>.Fail($"DB error: {ex.Message}");
         }
+    }
 
-        // Get all monthly grades based on filters: Term, Month, Class, GradeType
-        public async Task<List<MonthlyGradesReternDTO>> GetAllAsync(int term, int monthId, int classId, int subjectId)
-        {
-            var query = _context.MonthlyGrades
-                .Where(g => g.TermID == term && g.MonthID == monthId && g.ClassID == classId);
+    /* ----------  READ  ---------- */
+    public async Task<Result<List<MonthlyGradesReternDTO>>> GetAllAsync(
+        int term, int monthId, int classId, int subjectId)
+    {
+        var query = _context.MonthlyGrades
+                            .Where(g => g.TermID  == term   &&
+                                        g.MonthID == monthId &&
+                                        g.ClassID == classId);
 
-            if (subjectId != 0)
-                query = query.Where(g => g.SubjectID == subjectId);
+        if (subjectId != 0)
+            query = query.Where(g => g.SubjectID == subjectId);
 
-            var grades = await query
-                .Include(g => g.Student)
-                    .ThenInclude(s => s.FullName)
-                .Include(g => g.Subject)
-                .Include(g => g.GradeType)
-                .ToListAsync();
+        var grades = await query
+            .Include(g => g.Student).ThenInclude(s => s.FullName)
+            .Include(g => g.Subject)
+            .Include(g => g.GradeType)
+            .ToListAsync();
 
-            var studentGrades = grades
-                .GroupBy(g => new { g.StudentID, g.Student.FullName, g.SubjectID, g.Subject.SubjectName })
-                .Select(group => new MonthlyGradesReternDTO
-                {
-                    StudentID = group.Key.StudentID,
-                    StudentName = $"{group.Key.FullName.FirstName} {group.Key.FullName.MiddleName} {group.Key.FullName.LastName}",
-                    SubjectID = group.Key.SubjectID,
-                    SubjectName = group.Key.SubjectName,
-                    Grades = group.Select(g => new GradeTypeMonthDTO
-                    {
-                        GradeTypeID = g.GradeTypeID,
-                        MaxGrade = g.Grade
-                    }).ToList()
-                })
-                .ToList();
+        if (grades.Count == 0)
+            return Result<List<MonthlyGradesReternDTO>>.Fail("No grades found.");
 
-            return studentGrades;
-        }
-
-
-        public async Task<bool> UpdateManyAsync(IEnumerable<MonthlyGradeDTO> dtos)
-        {
-            foreach (var dto in dtos)
+        var grouped = grades
+            .GroupBy(g => new { g.StudentID, g.Student.FullName,
+                                g.SubjectID, g.Subject.SubjectName })
+            .Select(grp => new MonthlyGradesReternDTO
             {
-                var grade = await _context.MonthlyGrades
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(g =>
-                        g.StudentID == dto.StudentID &&
-                        g.YearID == dto.YearID &&
-                        g.SubjectID == dto.SubjectID &&
-                        g.MonthID == dto.MonthID &&
-                        g.TermID == dto.TermID &&
-                        g.ClassID == dto.ClassID &&
-                        g.GradeTypeID == dto.GradeTypeID);
+                StudentID   = grp.Key.StudentID,
+                StudentName = $"{grp.Key.FullName.FirstName} {grp.Key.FullName.MiddleName} {grp.Key.FullName.LastName}",
+                SubjectID   = grp.Key.SubjectID,
+                SubjectName = grp.Key.SubjectName,
+                Grades      = grp.Select(g => new GradeTypeMonthDTO
+                               {
+                                   GradeTypeID = g.GradeTypeID,
+                                   MaxGrade    = g.Grade
+                               }).ToList()
+            })
+            .ToList();
 
-                if (grade != null && dto.Grade != 0 && grade.Grade != dto.Grade)
-                {
-                    grade.Grade = dto.Grade;
-                    _context.Entry(grade).State = EntityState.Modified;
-                }
+        return Result<List<MonthlyGradesReternDTO>>.Success(grouped);
+    }
+
+    /* ----------  UPDATE MANY  ---------- */
+    public async Task<Result<bool>> UpdateManyAsync(IEnumerable<MonthlyGradeDTO> dtos)
+    {
+        var changed = false;
+
+        foreach (var dto in dtos)
+        {
+            var grade = await _context.MonthlyGrades.FirstOrDefaultAsync(g =>
+                g.StudentID   == dto.StudentID &&
+                g.YearID      == dto.YearID    &&
+                g.SubjectID   == dto.SubjectID &&
+                g.MonthID     == dto.MonthID   &&
+                g.TermID      == dto.TermID    &&
+                g.ClassID     == dto.ClassID   &&
+                g.GradeTypeID == dto.GradeTypeID);
+
+            if (grade != null && dto.Grade != 0 && grade.Grade != dto.Grade)
+            {
+                grade.Grade = dto.Grade;
+                changed     = true;
             }
-
-            var rows = await _context.SaveChangesAsync();
-            return rows > 0;
         }
 
+        if (!changed)
+            return Result<bool>.Fail("Nothing to update.");
 
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result<bool>.Fail($"DB error: {ex.Message}");
+        }
+    }
+
+    /* ----------  DELETE  ---------- */
+    public async Task<Result<bool>> DeleteAsync(int id)
+    {
+        var grade = await _context.MonthlyGrades.FindAsync(id);
+        if (grade is null)
+            return Result<bool>.Fail($"Monthly grade {id} not found.");
+
+        _context.MonthlyGrades.Remove(grade);
+
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result<bool>.Fail($"DB error: {ex.Message}");
+        }
     }
 }

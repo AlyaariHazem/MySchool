@@ -27,8 +27,8 @@ export class AccountService {
     return this.API.putRequest<Account>(`Accounts/${id}`, account);
   }
 
-  DeleteAccount(id: number): Observable<Account> {
-    return this.API.deleteRequest<Account>(`Accounts/${id}`);
+  DeleteAccount(id: number): Observable<any> {
+    return this.API.deleteRequest(`Accounts/${id}`);
   }
   
 }

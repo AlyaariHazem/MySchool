@@ -29,6 +29,6 @@ export class TeacherService {
     return this.API.putRequest<any>(`Teacher/${id}`, updatedTeacher);
   }
   deleteTeacher(id: number): Observable<any> {
-    return this.API.deleteRequest<any>(`Teacher/${id}`);
+    return this.API.deleteRequest(`Teacher/${id}`);
   }
 }

@@ -81,8 +81,8 @@ namespace Backend.Controllers
                 return BadRequest(new { message = "Unauthorized: User type does not match." });
 
             dynamic? schoolData = null;
-            List<int>? yearID = null;
             string? managerName = null;
+            int yearID = 1;
             string? userName = null;
 
             if (userFromDb.UserType != "ADMIN")
@@ -90,22 +90,19 @@ namespace Backend.Controllers
                 schoolData = await _context.Schools
                 .AsNoTracking()
                 .Include(s => s.Manager)
+                .Include(s => s.Years)
                 .Where(s => s.Manager.UserID == userFromDb.Id)
                 .Select(s => new
                 {
                     SchoolName = s.SchoolName,
                     ManagerName = s.Manager.FullName,
-                    SchoolId = s.SchoolID
+                    SchoolId = s.SchoolID,
+                    yearID = s.Years.FirstOrDefault(y => y.Active)!.YearID
                 })
                 .FirstOrDefaultAsync();
 
                 int? schoolId = schoolData?.SchoolId;
-
-                yearID = await _context.Years
-                   .Where(y => y.SchoolID == schoolId)
-                   .Select(y => y.YearID)
-                   .ToListAsync();
-
+                yearID = schoolData?.yearID;
 
                 managerName = $"{schoolData?.ManagerName.FirstName} {schoolData?.ManagerName.LastName}";
                 userName = schoolData?.ManagerName.FirstName;

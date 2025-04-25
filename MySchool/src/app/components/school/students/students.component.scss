@@ -48,6 +48,7 @@ p-paginator {
   position: absolute;
   left: 0rem;
   top: 1rem;
+  display: flex;
 }
 
 .col-4 {
@@ -173,11 +174,12 @@ p-select {
 }
 .group3 {
   margin-top: 3rem;
+  display: flex;
 }
 .add {
   position: absolute;
   top: 1rem;
-  width: 11%;
+  width: 12%;
   border-radius: 32px;
   left: 1rem;
   padding: 8px 0;
@@ -186,7 +188,7 @@ p-select {
 .addEn {
   position: absolute;
   top: 1rem;
-  width: 11%;
+  width: 12%;
   border-radius: 32px;
   right: 1rem;
   padding: 8px 0;
@@ -197,7 +199,7 @@ p-select {
 }
 @media (max-width: 1600px) {
   .add {
-    width: 10%;
+    width: 19%;
   }
   .styled-table th:nth-child(3),
   .styled-table td:nth-child(3) {

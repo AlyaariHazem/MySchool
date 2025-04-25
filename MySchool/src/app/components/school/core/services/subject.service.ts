@@ -20,8 +20,8 @@ export class SubjectService {
   addSubject(newSubject: Subjects): Observable<Subjects> {
     return this.API.postRequest<Subjects>("Subject", newSubject);
   }
-  deleteSubject(id: number): Observable<void> {
-    return this.API.deleteRequest<void>(`Subject/${id}`);//call it here?
+  deleteSubject(id: number): Observable<any> {
+    return this.API.deleteRequest(`Subject/${id}`);
   }
   updateSubject(id: number, subject: Subjects): Observable<Subjects> {
     return this.API.putRequest<Subjects>(`Subject/${id}`, subject);

@@ -3,7 +3,7 @@
   <!-- <app-head></app-head> -->
   <div class="student-header rtl-direction">
     <div class="student-photo-section">
-      <h2 class="school">إضافة طالب جديد</h2>
+      <h2 class="school">{{isEditMode ? 'تعديل بيانات الطالب' : 'إضافة طالب جديد'}}</h2>
       <div class="student-photo">
         <label for="fileInput">
           <img [src]="studentImageURL ? studentImageURL : 'assets/img/user.jpg'" alt="Student Photo" />
@@ -30,7 +30,7 @@
       </div>
 
       <div class="buttons">
-        <button class="btn btn-success" type="submit" [disabled]="!formGroup.valid" (click)="onSubmit()">إضافة</button>
+        <button class="btn btn-success" type="submit" [disabled]="!formGroup.valid" (click)="isEditMode?onUpdate():onSubmit()">{{isEditMode? 'تعديل' : 'إضافة'}}</button>
         <button class="btn btn-info">جديد</button>
         <button class="btn btn-warning">الشهادة</button>
       </div>

@@ -19,7 +19,7 @@ export class FeeService {
  }
 
  DeleteFee(id:number):Observable<any>{
-  return this.ApI.deleteRequest<Fee>(`Fees/${id}`);
+  return this.ApI.deleteRequest(`Fees/${id}`);
  }
 
  Update(id:number,fee:Fee):Observable<any>{

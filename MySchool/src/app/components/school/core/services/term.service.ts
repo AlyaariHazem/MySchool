@@ -19,7 +19,7 @@ export class TermService {
     return this.API.postRequest<any>("Term", newTerm);
   }
   
-  deleteTerm(id: number): Observable<string> {
-    return this.API.deleteRequest<string>(`Term/${id}`);
+  deleteTerm(id: number): Observable<any> {
+    return this.API.deleteRequest(`Term/${id}`);
   }
 }

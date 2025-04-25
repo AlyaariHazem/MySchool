@@ -65,7 +65,7 @@ namespace Backend.Repository.School.Classes
 
             var connectionString = await _tenantRepository.GetByIdAsync(managerDTO.TenantID ?? 1);
             if (connectionString == null)
-                throw new Exception("Tenant not found.");
+                return null!;
 
             var builder = new DbContextOptionsBuilder<DatabaseContext>();
             builder.UseSqlServer(connectionString.ConnectionString);

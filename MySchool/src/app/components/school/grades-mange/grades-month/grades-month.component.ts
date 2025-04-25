@@ -205,7 +205,7 @@ export class GradesMonthComponent implements OnInit {
         },
         error: err => {
           console.error(err);
-          alert('Error occurred while saving');
+          this.toastr.error('Error occurred while saving');
         }
       });
   }
@@ -244,7 +244,7 @@ export class GradesMonthComponent implements OnInit {
   gradeLimits: { [typeId: number]: number } = {
     1: 20, // واجبات
     2: 20, // مواظبة
-    3: 20, // مشارك
+    3: 10, // مشارك
     4: 10, // شفهي
     5: 40  // تحرير
   };

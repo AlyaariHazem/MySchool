@@ -24,7 +24,7 @@ export class VoucherService {
     return this.API.postRequest<string>("Vouchers", voucher);
   }
   Delete(id: number): Observable<any> {
-    return this.API.deleteRequest<any>(`Vouchers/${id}`);
+    return this.API.deleteRequest(`Vouchers/${id}`);
   }
   Update(id: number | undefined, voucher: any): Observable<any> {
     return this.API.putRequest<any>(`Vouchers/${id}`, voucher);

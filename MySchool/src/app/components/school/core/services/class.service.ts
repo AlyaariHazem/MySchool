@@ -26,7 +26,7 @@ export class ClassService {
 
   // Delete a class by ID
   Delete(id: number): Observable<any> {
-    return this.API.deleteRequest<any>(`Classes/${id}`);
+    return this.API.deleteRequest(`Classes/${id}`);
   }
 
   // Update a class by ID

@@ -1,8 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+
 import { environment } from '../../environments/environment';
+import { response } from '../core/models/response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +14,7 @@ export class BackendAspService {
 
   public baseUrl = environment.baseUrl;
 
-  constructor(public http: HttpClient, public router: Router) { }
+  constructor(public http: HttpClient, public router: Router, private toastr: ToastrService) { }
 
   getRequest<T>(name: string): Observable<T> {
     return this.http.get<{ result: T }>(`${this.baseUrl}/${name}`).pipe(
@@ -21,7 +24,7 @@ export class BackendAspService {
       })
     );
   }
-  getRequestByID<T>(name:string,id1: number,id2:number): Observable<T> {
+  getRequestByID<T>(name: string, id1: number, id2: number): Observable<T> {
     return this.http.get<{ result: T }>(`${this.baseUrl}/${name}/${id1}/${id2}`).pipe(
       map(response => response.result),
       catchError(error => {
@@ -44,9 +47,15 @@ export class BackendAspService {
     return this.http.put<T>(`${this.baseUrl}/${name}`, data);
   }
 
-  deleteRequest<T>(name: string): Observable<T> {
-    return this.http.delete<{result:T}>(`${this.baseUrl}/${name}`).pipe(
-      map(res=>res.result),
+  deleteRequest(name: string): Observable<any> {
+    return this.http.delete<response>(`${this.baseUrl}/${name}`).pipe(
+      tap(res => {
+        if (res.isSuccess) {
+          this.toastr.success(res.result);
+        } else {
+          this.toastr.error(res.errorMasseges[0]);
+        }
+      }),
       catchError(err => {
         console.error("Error when Delete:", err);
         throw err;
@@ -62,9 +71,9 @@ export class BackendAspService {
       })
     );
   }
-  putRequestWithToParms<T>(name: string,id1:number,id2:number, data: any): Observable<T> {
-    return this.http.put<{result:T}>(`${this.baseUrl}/${name}/${id1}/${id2}`, data).pipe(
-      map(res=>res.result),
+  putRequestWithToParms<T>(name: string, id1: number, id2: number, data: any): Observable<T> {
+    return this.http.put<{ result: T }>(`${this.baseUrl}/${name}/${id1}/${id2}`, data).pipe(
+      map(res => res.result),
       catchError(error => {
         console.error("Error with partial update:", error);
         return throwError(() => error);

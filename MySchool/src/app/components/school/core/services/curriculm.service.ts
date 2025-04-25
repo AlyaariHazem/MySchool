@@ -21,7 +21,7 @@ export class CurriculmService {
   updateCurriculm(subID: number,classID: number, updatedCurriculm: any): Observable<string> {
     return this.API.putRequestWithToParms<string>(`Curriculms`,subID,classID, updatedCurriculm);
   }
-  deleteCurriculm(id1: number,id2:number): Observable<string> {
-    return this.API.deleteRequest<string>(`Curriculms/${id1}/${id2}`);
+  deleteCurriculm(id1: number,id2:number): Observable<any> {
+    return this.API.deleteRequest(`Curriculms/${id1}/${id2}`);
   }
 }

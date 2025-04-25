@@ -1,3 +1,7 @@
+import { Discount } from "./discount.model";
+import { Guardian } from "./guardian.model";
+import { NameAlisDTO, NameDTO } from "./name.model";
+
 export interface AddStudent{
     existingGuardianId?:number;
     studentID:number;
@@ -8,7 +12,7 @@ export interface AddStudent{
     guardianFullName?: string;
     guardianType?: string;
     guardianPhone?: string;
-    guardianDOB?: string; // Use `Date` type if you'll parse it into a Date object in your Angular code
+    guardianDOB?: string;
     studentEmail: string;
     studentPassword: string;
     studentAddress: string;
@@ -22,7 +26,7 @@ export interface AddStudent{
     divisionID: number;
     placeBirth: string;
     studentPhone: string;
-    studentDOB: string; // Use `Date` if parsing
+    studentDOB: string;
     amount: number;
     classID: number;
     files: File[];
@@ -30,12 +34,6 @@ export interface AddStudent{
     discounts: Discount[]; // Array of Discount objects
   }
   
-  export interface Discount{
-    classID: number,
-    feeID: number,
-    amountDiscount:number,
-    noteDiscount: string
-  }
 
   export interface StudentDetailsDTO {
     studentID: number;
@@ -55,19 +53,52 @@ export interface AddStudent{
     studentAddress?: string;
     userID?: string;
     applicationUser: ApplicationUserDTO;
-    guardians: GuardianDTO;
-  }
-
-  export interface NameDTO {
-    firstName: string;
-    middleName: string;
-    lastName: string;
+    guardians: Guardian;
   }
   
-  export interface NameAlisDTO {
-    firstNameEng: string;
-    middleNameEng: string;
-    lastNameEng: string;
+  export interface StudentPayload {
+    studentID: number;
+    studentEmail: string;
+    studentPhone: string;
+    studentAddress: string;
+    studentPassword: string;
+    studentFirstName: string;
+    studentMiddleName: string;
+    studentLastName: string;
+    studentFirstNameEng: string;
+    studentMiddleNameEng: string;
+    studentLastNameEng: string;
+    divisionID: number;
+    placeBirth: string;
+    studentDOB: string; // or Date if parsed
+    studentImageURL: string;
+    studentGender: string;
+    hireDate: string; // or Date if parsed
+  
+    guardianID: number;
+    existingGuardianId: number;
+    guardianEmail: string;
+    guardianPhone: string;
+    guardianAddress: string;
+    guardianFullName: string;
+    guardianGender: string;
+    guardianDOB: string; // or Date
+    guardianType: string;
+  
+    attachments: string[]; // URLs or filenames
+    files: string[]; // base64 or filenames
+  
+    updateDiscounts: UpdateDiscount[];
+  }
+  
+  export interface UpdateDiscount {
+    studentClassFeesID: number;
+    studentID: number;
+    feeClassID: number;
+    amountDiscount: number;
+    noteDiscount: string;
+    mandatory: boolean;
+    files: string[]; // attached to each discount
   }
   
   export interface ApplicationUserDTO {
@@ -77,11 +108,4 @@ export interface AddStudent{
     gender: string;
   }
   
-  export interface GuardianDTO {
-    guardianFullName: string;
-    guardianType: string;
-    guardianEmail: string;
-    guardianPhone: string;
-    guardianDOB?: Date;
-    guardianAddress: string;
-  }
+  

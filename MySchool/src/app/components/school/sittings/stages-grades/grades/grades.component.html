@@ -22,7 +22,7 @@
     </tr>
   </thead>
   <tbody>
-    @for (Class of DisplayClasses; track $index) {
+    @for (Class of paginatedGrade; track $index) {
     <tr>
       <td>{{ $index + 1 }}</td>
       <td>{{ Class.className }}</td>

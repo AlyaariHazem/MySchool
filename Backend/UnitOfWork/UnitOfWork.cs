@@ -41,7 +41,7 @@ public class UnitOfWork : IUnitOfWork
         Users = new UsersRepository(_userManager);
         Stages = new StagesRepository(_context, _mapper);
         Accounts = new AccountRepository(_context, _mapper);
-        FeeClasses = new FeeClassRepostory(_context, _mapper);
+        FeeClasses = new FeeClassRepository(_context, _mapper);
         Fees = new FeesRepository(_context, _mapper);
         Tenants = new TenantRepository(_context, _mapper);
         Managers = new ManagerRepository(_context, Users, Tenants, _userManager.PasswordHasher);

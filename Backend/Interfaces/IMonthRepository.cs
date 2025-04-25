@@ -1,16 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Backend.DTOS.School.Months;
+using Backend.Common;
 
 namespace Backend.Interfaces;
 
 public interface IMonthRepository
 {
-    Task AddMonthAsync(MonthDTO month);
-    Task<List<MonthDTO>> GetAllMonthsAsync();
-    Task<MonthDTO> GetMonthByIdAsync(int id);
-    Task UpdateMonthAsync(MonthDTO month);
-    Task DeleteMonthAsync(int id);
+    Task<Result<bool>> AddMonthAsync(MonthDTO month);
+    Task<Result<List<MonthDTO>>> GetAllMonthsAsync();
+    Task<Result<MonthDTO>> GetMonthByIdAsync(int id);
+    Task<Result<bool>> UpdateMonthAsync(MonthDTO month);
+    Task<Result<bool>> DeleteMonthAsync(int id);
 }

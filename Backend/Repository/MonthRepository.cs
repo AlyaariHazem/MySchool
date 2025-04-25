@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.Months;
 using Backend.Interfaces;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Backend.Repository;
 
@@ -16,60 +12,89 @@ public class MonthRepository : IMonthRepository
 {
     private readonly DatabaseContext _context;
     private readonly IMapper _mapper;
+
     public MonthRepository(DatabaseContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public async Task AddMonthAsync(MonthDTO month)
+    public async Task<Result<bool>> AddMonthAsync(MonthDTO dto)
     {
-        if (month == null)
-            throw new ArgumentNullException(nameof(month), $"Month is not found.");
+        if (dto is null)
+            return Result<bool>.Fail("Month payload is null.");
 
-        var monthEntity = _mapper.Map<Month>(month);
-        await _context.Months.AddAsync(monthEntity);
-        await _context.SaveChangesAsync();
+        bool exists = await _context.Months.AnyAsync(m => m.Name == dto.Name);
+        if (exists)
+            return Result<bool>.Fail($"Month '{dto.Name}' already exists.");
+
+        await _context.Months.AddAsync(_mapper.Map<Month>(dto));
+
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result<bool>.Fail($"DB error: {ex.Message}");
+        }
     }
 
-    public async Task DeleteMonthAsync(int id)
+    public async Task<Result<List<MonthDTO>>> GetAllMonthsAsync()
     {
-        var month = await _context.Months.FirstOrDefaultAsync(m => m.MonthID == id);
-        if (month == null)
-            throw new ArgumentNullException(nameof(month), $"Month with ID {id} not found.");
+        var list = await _context.Months
+                                 .Select(m => _mapper.Map<MonthDTO>(m))
+                                 .ToListAsync();
 
-        _context.Months.Remove(month);
-        await _context.SaveChangesAsync();
+        return list.Count == 0
+            ? Result<List<MonthDTO>>.Fail("No months found.")
+            : Result<List<MonthDTO>>.Success(list);
     }
 
-    public async Task<List<MonthDTO>> GetAllMonthsAsync()
+    public async Task<Result<MonthDTO>> GetMonthByIdAsync(int id)
     {
-        var months = await _context.Months.ToListAsync();
-        if (months == null)
-            return new List<MonthDTO>();
+        var month = await _context.Months.FindAsync(id);
 
-        var monthDtos = _mapper.Map<List<MonthDTO>>(months);
-        return monthDtos;
+        return month is null
+            ? Result<MonthDTO>.Fail($"Month {id} not found.")
+            : Result<MonthDTO>.Success(_mapper.Map<MonthDTO>(month));
     }
 
-    public async Task<MonthDTO> GetMonthByIdAsync(int id)
+    public async Task<Result<bool>> UpdateMonthAsync(MonthDTO dto)
     {
-        var month = await _context.Months.FirstOrDefaultAsync(m => m.MonthID == id);
-        if (month == null)
-            throw new ArgumentNullException(nameof(month), $"Month with ID {id} not found.");
+        var entity = await _context.Months.FindAsync(dto.MonthID);
+        if (entity is null)
+            return Result<bool>.Fail($"Month {dto.MonthID} not found.");
 
-        var monthDto = _mapper.Map<MonthDTO>(month);
-        return monthDto;
+        _mapper.Map(dto, entity);              // update in-place
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result<bool>.Fail($"DB error: {ex.Message}");
+        }
     }
 
-    public async Task UpdateMonthAsync(MonthDTO month)
+    public async Task<Result<bool>> DeleteMonthAsync(int id)
     {
-        var monthEntity = await _context.Months.FirstOrDefaultAsync(m => m.MonthID == month.MonthID);
-        if (monthEntity == null)
-            throw new ArgumentNullException(nameof(month), $"Month with ID {month.MonthID} not found.");
-            
-        var MonthEntity = _mapper.Map<Month>(month);
-        _context.Months.Update(MonthEntity);
-        await _context.SaveChangesAsync();
+        var entity = await _context.Months.FindAsync(id);
+        if (entity is null)
+            return Result<bool>.Fail($"Month {id} not found.");
+
+        _context.Months.Remove(entity);
+
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result<bool>.Fail($"DB error: {ex.Message}");
+        }
     }
 }

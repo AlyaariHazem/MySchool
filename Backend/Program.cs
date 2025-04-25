@@ -95,7 +95,7 @@ builder.Services.AddScoped<IDivisionRepository, DivisionRepository>();
 builder.Services.AddScoped<IUserRepository, UsersRepository>();
 builder.Services.AddScoped<IStagesRepository, StagesRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-builder.Services.AddScoped<IFeeClassRepository, FeeClassRepostory>();
+builder.Services.AddScoped<IFeeClassRepository, FeeClassRepository>();
 builder.Services.AddScoped<IFeesRepository, FeesRepository>();
 builder.Services.AddScoped<IManagerRepository, ManagerRepository>();
 builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();

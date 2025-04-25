@@ -1,178 +1,82 @@
+using System.Net;
 using Backend.DTOS.School.Fees;
 using Backend.Interfaces;
 using Backend.Models;
-using Backend.Repository.School.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
-namespace Backend.Controllers
+namespace Backend.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class FeesController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class FeesController : ControllerBase
+    private readonly IUnitOfWork _unitOfWork;
+
+    public FeesController(IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        _unitOfWork = unitOfWork;
+    }
 
-        public FeesController(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
+    [HttpGet]
+    public async Task<IActionResult> GetAllFees()
+    {
+        var result = await _unitOfWork.Fees.GetAllAsync();
 
-        // GET: api/Fees
-        [HttpGet]
-        public async Task<ActionResult<APIResponse>> GetAllFees()
-        {
-            var response = new APIResponse();
-            try
-            {
-                var fees = await _unitOfWork.Fees.GetAllAsync();
-                
-                response.Result = fees;
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        if (!result.Ok)
+            return StatusCode((int)HttpStatusCode.InternalServerError,
+                              APIResponse.Fail(result.Error!));
 
-        // GET: api/Fees/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<APIResponse>> GetFeeById(int id)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var fee = await _unitOfWork.Fees.GetByIdAsync(id);
-                if (fee == null)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("Fee not found.");
-                    return NotFound(response);
-                }
+        return Ok(APIResponse.Success(result.Value!));
+    }
 
-                response.Result = fee;
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetFeeById(int id)
+    {
+        var result = await _unitOfWork.Fees.GetByIdAsync(id);
 
-        // POST: api/Fees
-        [HttpPost]
-        public async Task<ActionResult<APIResponse>> CreateFee([FromBody] FeeDTO fee)
-        {
-            var response = new APIResponse();
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.BadRequest;
-                    response.ErrorMasseges.Add("Invalid fee data.");
-                    return BadRequest(response);
-                }
+        return result.Ok
+            ? Ok(APIResponse.Success(result.Value!))
+            : NotFound(APIResponse.Fail(result.Error!));
+    }
 
-                await _unitOfWork.Fees.AddAsync(fee);
+    [HttpPost]
+    public async Task<IActionResult> CreateFee([FromBody] FeeDTO dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(APIResponse.Fail("Invalid fee data."));
 
-                response.Result = "Fee created successfully.";
-                response.statusCode = HttpStatusCode.Created;
+        var result = await _unitOfWork.Fees.AddAsync(dto);
 
-                // You can either return Ok(...) or CreatedAtAction(...) 
-                // but if you want correct REST semantics, use StatusCode/Created like:
-                // return StatusCode((int)HttpStatusCode.Created, response);
-                // For consistency with your other controllers, we can do:
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return result.Ok
+            ? StatusCode((int)HttpStatusCode.Created,
+                         APIResponse.Success("Fee created successfully.", HttpStatusCode.Created))
+            : StatusCode((int)HttpStatusCode.InternalServerError,
+                         APIResponse.Fail(result.Error!));
+    }
 
-        // PUT: api/Fees/{id}
-        [HttpPut("{id}")]
-        public async Task<ActionResult<APIResponse>> UpdateFee(int id, [FromBody] FeeDTO fee)
-        {
-            var response = new APIResponse();
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.BadRequest;
-                    response.ErrorMasseges.Add("Invalid fee data.");
-                    return BadRequest(response);
-                }
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateFee(int id, [FromBody] FeeDTO dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(APIResponse.Fail("Invalid fee data."));
 
-                var existingFee = await _unitOfWork.Fees.GetByIdAsync(id);
-                if (existingFee == null)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("Fee not found.");
-                    return NotFound(response);
-                }
+        if (id != dto.FeeID)
+            return BadRequest(APIResponse.Fail("Fee ID mismatch."));
 
-                fee.FeeID = id;
-                await _unitOfWork.Fees.UpdateAsync(fee);
+        var result = await _unitOfWork.Fees.UpdateAsync(dto);
 
-                response.Result = "Fee updated successfully.";
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return result.Ok
+            ? Ok(APIResponse.Success("Fee updated successfully."))
+            : NotFound(APIResponse.Fail(result.Error!));
+    }
 
-        // DELETE: api/Fees/{id}
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<APIResponse>> DeleteFee(int id)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var existingFee = await _unitOfWork.Fees.GetByIdAsync(id);
-                if (existingFee == null)
-                {
-                    response.IsSuccess = false;
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("Fee not found.");
-                    return NotFound(response);
-                }
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteFee(int id)
+    {
+        var result = await _unitOfWork.Fees.DeleteAsync(id);
 
-                await _unitOfWork.Fees.DeleteAsync(id);
-
-                response.Result = "Fee deleted successfully.";
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        return result.Ok
+            ? Ok(APIResponse.Success("Fee deleted successfully."))
+            : NotFound(APIResponse.Fail(result.Error!));
     }
 }

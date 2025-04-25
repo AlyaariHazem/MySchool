@@ -1,115 +1,152 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.Fees;
 using Backend.Models;
 using Backend.Repository.School.Implements;
+using Backend.Repository.School.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository.School.Classes;
 
-public class FeeClassRepostory:IFeeClassRepository
+public class FeeClassRepository : IFeeClassRepository
 {
-      private readonly DatabaseContext _db;
+    private readonly DatabaseContext _db;
     private readonly IMapper _mapper;
 
-        public FeeClassRepostory(DatabaseContext db,IMapper mapper)
-        {
-            _db = db;
-            _mapper = mapper;
-        }
+    public FeeClassRepository(DatabaseContext db, IMapper mapper)
+    {
+        _db = db;
+        _mapper = mapper;
+    }
 
-        public async Task<List<FeeClassDTO>> GetAllAsync()
-        {
-            var ListFeeClass= await _db.FeeClass
-                .Include(fc => fc.Class) // Include related Class
-                .Include(fc => fc.Fee).Select(fc=>new FeeClassDTO{
-                    FeeClassID=fc.FeeClassID,
-                    ClassID=fc.ClassID,
-                    FeeID=fc.FeeID,
-                    Amount=fc.Amount,
-                    Mandatory=fc.Mandatory,
-                    ClassYear=fc.Class.Year.YearDateStart.ToString("yyyy-MM-dd"),
-                    ClassName=fc.Class.ClassName,
-                    FeeName=fc.Fee.FeeName
-                })  // Include related Fee
-                .ToListAsync();
-            var FeeClassDTO=_mapper.Map<List<FeeClassDTO>>(ListFeeClass);
-            return FeeClassDTO;
-                
-        }
+    /*-----------------------------------------*/
+    /*               READ METHODS              */
+    /*-----------------------------------------*/
 
-        public async Task<FeeClassDTO> GetByIdAsync(int feeClassID)
+    public async Task<Result<List<FeeClassDTO>>> GetAllAsync()
+    {
+        try
         {
-            var FeeClass= await _db.FeeClass
-                .Include(fc => fc.Class) // Include related Class
-                .Include(fc => fc.Fee)  // Include related Fee
-                .FirstOrDefaultAsync(fc => fc.FeeClassID == feeClassID);
-            var FeeClassDTO=_mapper.Map<FeeClassDTO>(FeeClass);
-            if (FeeClassDTO == null)
-            {
-                return null!;
-            }
-            return FeeClassDTO;
-        }
+            var list = await _db.FeeClass
+                                .Include(fc => fc.Class)
+                                .Include(fc => fc.Fee)
+                                .Select(fc => new FeeClassDTO
+                                {
+                                    FeeClassID = fc.FeeClassID,
+                                    ClassID    = fc.ClassID,
+                                    FeeID      = fc.FeeID,
+                                    Amount     = fc.Amount,
+                                    Mandatory  = fc.Mandatory,
+                                    ClassYear  = fc.Class.Year.YearDateStart.ToString("yyyy-MM-dd"),
+                                    ClassName  = fc.Class.ClassName,
+                                    FeeName    = fc.Fee.FeeName
+                                })
+                                .ToListAsync();
 
-        public async Task<List<FeeClassDTO>> GetAllByClassIdAsync(int classId)
+            return Result<List<FeeClassDTO>>.Success(list);
+        }
+        catch (Exception ex)
         {
-            var FeeClass= await _db.FeeClass
-                .Include(fc => fc.Class)
-                .Include(fc => fc.Fee)
-                .Where(fc => fc.ClassID == classId)
-                .ToListAsync();
-            var FeeClassDTO=_mapper.Map<List<FeeClassDTO>>(FeeClass);
-            if (FeeClassDTO == null)
-            {
-                return null!;
-            }
-            return FeeClassDTO;
+            return Result<List<FeeClassDTO>>.Fail($"Error fetching fee-classes: {ex.Message}");
         }
-        
-        public async Task<bool> checkIfExist(int feeClassID){
-            var FeeClass= await _db.FeeClass.FirstOrDefaultAsync(fc => fc.FeeClassID==feeClassID);
-            if(FeeClass == null)
-            return false;
-        return true;
-        }
+    }
 
-        public async Task AddAsync(AddFeeClassDTO feeClass)
+    public async Task<Result<FeeClassDTO>> GetByIdAsync(int feeClassID)
+    {
+        try
         {
-            var NewFeeClass=_mapper.Map<FeeClass>(feeClass);
-            await _db.FeeClass.AddAsync(NewFeeClass);
+            var entity = await _db.FeeClass
+                                  .Include(fc => fc.Class)
+                                  .Include(fc => fc.Fee)
+                                  .FirstOrDefaultAsync(fc => fc.FeeClassID == feeClassID);
+
+            if (entity is null)
+                return Result<FeeClassDTO>.Fail("Fee-class not found.");
+
+            var dto = _mapper.Map<FeeClassDTO>(entity);
+            return Result<FeeClassDTO>.Success(dto);
+        }
+        catch (Exception ex)
+        {
+            return Result<FeeClassDTO>.Fail($"Error retrieving fee-class: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<List<FeeClassDTO>>> GetAllByClassIdAsync(int classId)
+    {
+        try
+        {
+            var list = await _db.FeeClass
+                                .Include(fc => fc.Class)
+                                .Include(fc => fc.Fee)
+                                .Where(fc => fc.ClassID == classId)
+                                .Select(fc => _mapper.Map<FeeClassDTO>(fc))
+                                .ToListAsync();
+
+            return Result<List<FeeClassDTO>>.Success(list);
+        }
+        catch (Exception ex)
+        {
+            return Result<List<FeeClassDTO>>.Fail($"Error fetching fee-classes: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> AddAsync(AddFeeClassDTO feeClass)
+    {
+        try
+        {
+            var entity = _mapper.Map<FeeClass>(feeClass);
+            await _db.FeeClass.AddAsync(entity);
             await _db.SaveChangesAsync();
+            return Result<bool>.Success(true);
         }
-
-        public async Task UpdateAsync(int feeClassID,AddFeeClassDTO feeClass)
+        catch (Exception ex)
         {
-            var existingFeeClass = await _db.FeeClass
-                .FirstOrDefaultAsync(fc => fc.FeeClassID==feeClassID);
-
-            if (existingFeeClass != null)
-            {
-                existingFeeClass.FeeID = feeClass.FeeID;
-                existingFeeClass.ClassID = feeClass.ClassID;
-                existingFeeClass.Amount = feeClass.Amount;
-                existingFeeClass.Mandatory = feeClass.Mandatory;
-                _db.Entry(existingFeeClass).State = EntityState.Modified;
-                await _db.SaveChangesAsync();
-            }
+            return Result<bool>.Fail($"Error adding fee-class: {ex.Message}");
         }
+    }
 
-        public async Task DeleteAsync(int feeClassID)
+    public async Task<Result<bool>> UpdateAsync(int feeClassID, AddFeeClassDTO feeClass)
+    {
+        try
         {
-            var feeClass = await _db.FeeClass
-                .FirstOrDefaultAsync(fc => fc.FeeClassID == feeClassID);
+            var existing = await _db.FeeClass.FirstOrDefaultAsync(fc => fc.FeeClassID == feeClassID);
+            if (existing is null)
+                return Result<bool>.Fail("Fee-class not found.");
 
-            if (feeClass != null)
-            {
-                _db.FeeClass.Remove(feeClass);
-                await _db.SaveChangesAsync();
-            }
+            existing.FeeID     = feeClass.FeeID;
+            existing.ClassID   = feeClass.ClassID;
+            existing.Amount    = feeClass.Amount;
+            existing.Mandatory = feeClass.Mandatory;
+
+            _db.Entry(existing).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+
+            return Result<bool>.Success(true);
         }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail($"Error updating fee-class: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> DeleteAsync(int feeClassID)
+    {
+        try
+        {
+            var entity = await _db.FeeClass.FirstOrDefaultAsync(fc => fc.FeeClassID == feeClassID);
+            if (entity is null)
+                return Result<bool>.Fail("Fee-class not found.");
+
+            _db.FeeClass.Remove(entity);
+            await _db.SaveChangesAsync();
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Fail($"Error deleting fee-class: {ex.Message}");
+        }
+    }
 }

@@ -1,112 +1,60 @@
-using System;
 using System.Net;
-using System.Threading.Tasks;
 using Backend.DTOS.School.MonthlyGrade;
 using Backend.Interfaces;
 using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers.School
+[Route("api/[controller]")]
+[ApiController]
+public class MonthlyGradesController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class MonthlyGradesController : ControllerBase
+    private readonly IMonthlyGradeRepository _repo;
+
+    public MonthlyGradesController(IMonthlyGradeRepository repo)
     {
-        private readonly IMonthlyGradeRepository _monthlyGradeRepository;
-
-        public MonthlyGradesController(IMonthlyGradeRepository monthlyGradeRepository)
-        {
-            _monthlyGradeRepository = monthlyGradeRepository;
-        }
-
-        // POST: api/MonthlyGrades
-        [HttpPost]
-        public async Task<ActionResult<APIResponse>> Create([FromBody] MonthlyGradeDTO dto)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var createdGrade = await _monthlyGradeRepository.AddAsync(dto);
-                response.Result = createdGrade;
-                response.statusCode = HttpStatusCode.Created;
-                return StatusCode((int)HttpStatusCode.Created, response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
-
-        // GET: api/MonthlyGrades/{term}/{monthId}/{classId}/{subjectId}
-        [HttpGet("{term}/{monthId}/{classId}/{subjectId}")]
-        public async Task<ActionResult<APIResponse>> GetAll(int term, int monthId, int classId, int subjectId)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var grades = await _monthlyGradeRepository.GetAllAsync(term, monthId, classId, subjectId);
-                response.Result = grades;
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
-
-        // DELETE: api/MonthlyGrades/{id}
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<APIResponse>> Delete(int id)
-        {
-            var response = new APIResponse();
-            try
-            {
-                var isDeleted = await _monthlyGradeRepository.DeleteAsync(id);
-                if (isDeleted)
-                {
-                    response.Result = "Monthly grade deleted successfully.";
-                    response.statusCode = HttpStatusCode.OK;
-                    return Ok(response);
-                }
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.NotFound;
-                response.ErrorMasseges.Add("Monthly grade not found.");
-                return NotFound(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
-        // PUT: api/MonthlyGrades/UpdateMany
-        [HttpPut("UpdateMany")]
-        public async Task<ActionResult<APIResponse>> UpdateMany([FromBody] List<MonthlyGradeDTO> dtos)
-        {
-            var response = new APIResponse();
-            try
-            {
-                await _monthlyGradeRepository.UpdateManyAsync(dtos);
-                response.Result = "Monthly grades updated successfully.";
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMasseges.Add(ex.Message);
-                return StatusCode((int)HttpStatusCode.InternalServerError, response);
-            }
-        }
+        _repo = repo;
     }
+
+    /* ----------  POST  ---------- */
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] MonthlyGradeDTO dto)
+    {
+        var result = await _repo.AddAsync(dto);
+
+        return result.Ok
+            ? CreatedAtAction(nameof(GetAll),          // no single-item GET, so point to list
+                              new
+                              {
+                                  term = dto.TermID,
+                                  monthId = dto.MonthID,
+                                  classId = dto.ClassID,
+                                  subjectId = dto.SubjectID
+                              },
+                              APIResponse.Success(result.Value!, HttpStatusCode.Created))
+            : BadRequest(APIResponse.Fail(result.Error!));
+    }
+
+    /* ----------  GET LIST  ---------- */
+    [HttpGet("{term:int}/{monthId:int}/{classId:int}/{subjectId:int}")]
+    public async Task<IActionResult> GetAll(int term, int monthId, int classId, int subjectId)
+    {
+        var result = await _repo.GetAllAsync(term, monthId, classId, subjectId);
+
+        return result.Ok
+            ? Ok(APIResponse.Success(result.Value!))
+            : NotFound(APIResponse.Fail(result.Error!));
+    }
+
+    /* ----------  PUT MANY  ---------- */
+   [HttpPut("UpdateMany")]
+    public async Task<IActionResult> UpdateMany([FromBody] List<MonthlyGradeDTO> dtos)
+    {
+        var result = await _repo.UpdateManyAsync(dtos);
+
+        return result.Ok
+            ? Ok(APIResponse.Success("Monthly grades updated successfully."))
+            : BadRequest(APIResponse.Fail(result.Error!));
+    }
+
+   
 }

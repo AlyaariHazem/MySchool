@@ -4,7 +4,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 
-import { AddStudent } from '../../../../core/models/students.model';
+import { AddStudent, StudentPayload } from '../../../../core/models/students.model';
 import { Discount, FeeClasses } from '../../core/models/Fee.model';
 import { StudentService } from '../../../../core/services/student.service';
 import { ToastrService } from 'ngx-toastr';
@@ -208,7 +208,19 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
       this.generateStudentID();
     }
   }
-
+  onUpdate():void{
+    const formData: StudentPayload = {
+      studentID: this.formGroup.get('studentID')?.value,
+      existingGuardianId: this.formGroup.get('existingGuardianId')?.value,
+      ...this.formGroup.get('primaryData')?.value,
+      ...this.formGroup.get('guardian')?.value,
+      ...this.formGroup.get('optionData')?.value,
+      ...this.formGroup.get('fees')?.value,
+      attachments: this.formGroup.get('documents.attachments')?.value || [],
+      studentImageURL: this.studentImageURL2
+    };
+    console.log('updated',formData);
+  }
   private patchFees(discounts: FeeClasses[] = []): void {
     const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
     discountsArray.clear(); // remove existing
