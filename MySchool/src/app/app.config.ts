@@ -17,6 +17,7 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { AppTranslateModule } from './shared/modules/app-translate.module';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
+import { IntercepterService } from './core/interceptors/intercepter.service';
 
 // import { IntercepterService } from './core/services/intercepter.service';
 
@@ -46,8 +47,8 @@ export const appConfig: ApplicationConfig = {
         provide: HTTP_INTERCEPTORS,
         useClass: TokenInterceptor,
         multi: true,
-    }
-    // {provide: HTTP_INTERCEPTORS, useClass: IntercepterService, multi: true}
+    },
+    {provide: HTTP_INTERCEPTORS, useClass: IntercepterService, multi: true}
     ,
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })//can you explain for me why is use this?
 ]

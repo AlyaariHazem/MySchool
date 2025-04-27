@@ -42,6 +42,7 @@ export class GradesComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllClasses();
+    this.form.reset();
     this.YearID=Number(localStorage.getItem("yearId"));
   }
 

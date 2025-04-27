@@ -1,7 +1,7 @@
 <form [formGroup]="form" class="From">
   <label for="stage" class="termName">اسـم المرحـلة</label><br />
   <p-select [options]="stages" optionLabel="stageName" [showClear]="true" name="stage" optionValue="stageID"
-     formControlName="stageID" id="term" class="term" />
+     formControlName="stageID" id="term" class="term" placeholder="إختار مرحلة" />
 
   <label for="className" class="className">اسـم الصف</label>
   <input pInputText type="text" formControlName="className" class="class" placeholder="إدخال اسم صـف جديد" />

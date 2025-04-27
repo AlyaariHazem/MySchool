@@ -149,28 +149,21 @@ transition: border-color 0.2s;
   
 .add {
     position: absolute;
-    top: 2rem;
+    top: 1rem;
     width: 11%;
     border-radius: 32px;
     right: 1rem;
     padding: 8px 0;
     border: none;
-    color: white;
-    background-color: #2fdf84;
   }
 .AddEn {
     position: absolute;
-    top: 2rem;
+    top: 1rem;
     width: 11%;
     border-radius: 32px;
     left: 1rem;
     padding: 8px 0;
     border: none;
-    color: #987979;
-    background: color #91ffc6 !important;;
-  }
-  .add:active {
-    background-color: #7fffbd;
   }
   .control2{
     position: relative;

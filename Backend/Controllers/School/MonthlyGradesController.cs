@@ -36,17 +36,29 @@ public class MonthlyGradesController : ControllerBase
 
     /* ----------  GET LIST  ---------- */
     [HttpGet("{term:int}/{monthId:int}/{classId:int}/{subjectId:int}")]
-    public async Task<IActionResult> GetAll(int term, int monthId, int classId, int subjectId)
+    public async Task<IActionResult> GetAll(int term, int monthId, int classId, int subjectId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var result = await _repo.GetAllAsync(term, monthId, classId, subjectId);
+        var result = await _repo.GetAllAsync(term, monthId, classId, subjectId, pageNumber, pageSize);
+
+        // استخدم الفلاتر لحساب العدد الصحيح
+        var totalCount = await _repo.GetTotalMonthlyGradesCountAsync(term, monthId, classId, subjectId);
+
+        var paginatedResult = new
+        {
+            data = result.Value,
+            pageNumber,
+            pageSize,
+            totalCount,
+            totalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+        };
 
         return result.Ok
-            ? Ok(APIResponse.Success(result.Value!))
+            ? Ok(APIResponse.Success(paginatedResult))
             : NotFound(APIResponse.Fail(result.Error!));
     }
 
     /* ----------  PUT MANY  ---------- */
-   [HttpPut("UpdateMany")]
+    [HttpPut("UpdateMany")]
     public async Task<IActionResult> UpdateMany([FromBody] List<MonthlyGradeDTO> dtos)
     {
         var result = await _repo.UpdateManyAsync(dtos);
@@ -56,5 +68,5 @@ public class MonthlyGradesController : ControllerBase
             : BadRequest(APIResponse.Fail(result.Error!));
     }
 
-   
+
 }

@@ -123,7 +123,7 @@ namespace Backend.Controllers
                     DivisionID = request.DivisionID,
                     PlaceBirth = request.PlaceBirth,
                     StudentDOB = request.StudentDOB,
-                    ImageURL = $"StudentPhotos_{request.StudentImageURL}",
+                    ImageURL = $"StudentPhotos_{request.StudentID}_{request.StudentImageURL}",
                 };
 
 

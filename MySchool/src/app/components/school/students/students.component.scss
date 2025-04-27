@@ -68,7 +68,7 @@ p-paginator {
 }
 p-select {
   width: 22% !important;
-  height: 3rem!important;
+  height: 3rem !important;
   margin-right: 1rem !important;
 }
 .inputText {
@@ -226,7 +226,7 @@ p-select {
   p-paginator {
     display: none;
   }
-  
+
   .styled-table th,
   .styled-table td {
     padding: 12px 1px;
@@ -244,7 +244,6 @@ p-select {
   // .tablink {
   //     color: rgb(35, 22, 213);
   // }
-  
 }
 
 //this is for talbes
@@ -411,6 +410,8 @@ p-card img {
   height: auto;
   position: relative;
   left: 0rem;
+  display: flex;
+  justify-self: center;
   border-radius: 64px;
 }
 .modal-content {

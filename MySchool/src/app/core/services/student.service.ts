@@ -1,8 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
-import { UpdateStudent } from '../models/update-student.model';
-import { AddStudent, StudentDetailsDTO } from '../models/students.model';
+import { AddStudent, StudentDetailsDTO, StudentPayload } from '../models/students.model';
 import { BackendAspService } from '../../ASP.NET/backend-asp.service';
 
 @Injectable({
@@ -46,8 +45,9 @@ export class StudentService {
     }
     
     // Update an existing student
-    updateStudent(student: UpdateStudent): Observable<any> {
-        return this.API.http.put(`${this.API.baseUrl}/Students/${student.studentID}`, student).pipe(
+    updateStudent(student: StudentPayload): Observable<any> {
+        return this.API.http.put<{message:string}>(`${this.API.baseUrl}/Students/updateStudentWithGuardian/${student.studentID}`, student).pipe(
+            map(s=>s.message),
             catchError(error => {
                 console.error("Error updating student:", error);
                 return throwError(() => error);

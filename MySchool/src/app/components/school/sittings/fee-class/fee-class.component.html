@@ -8,29 +8,26 @@
                 <div class="group">
                     <!-- Input for Fee Name -->
                     <div class="form-control">
-                        <mat-form-field appearance="outline" class="inputText">
-                            <mat-label>إدخل بند رسوم جديد</mat-label>
-                            <input class="inputError " type="text" name="feeName" [(ngModel)]="Addfee.feeName"
-                                #feeName="ngModel" matInput required />
-                        </mat-form-field>
 
-                        @if (feeName.invalid && feeName.touched) {
-                        <p class="error"> اسم بند الرسوم مطلوب</p>
-                        }
+                        <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
+                            <input class="inputError w-full h-3rem" type="text" name="feeName" pInputText id="fee"
+                                [(ngModel)]="Addfee.feeName" autocomplete="off" />
+                            <label for="fee">إدخل بند رسوم</label>
+                        </p-floatlabel>
                     </div>
                     <!-- Input for Notes -->
                     <div class="form-control control2">
-                        <mat-form-field appearance="outline" class="inputText">
-                            <mat-label>ملاحظة</mat-label>
-                            <input class="inputError" type="text" name="note" [(ngModel)]="Addfee.note"
-                                #feeNote="ngModel" matInput />
-                        </mat-form-field>
+                        <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
+                            <input class="inputError w-full h-3rem" name="feeName" pInputText id="fee" type="text"
+                                name="note" [(ngModel)]="Addfee.note" autocomplete="off" />
+                            <label for="fee">ملاحظة</label>
+                        </p-floatlabel>
                     </div>
                     <!-- Submit Button -->
-                   
+
                     <p-button variant="outlined" severity="success" type="submit"
-                    [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="btn"
-                    [disabled]="feeForm.invalid" (click)="onSubmit(feeForm)" label="{{ editMode ? 'تعديل' : 'إضافة+' }}" />
+                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="btn" [disabled]="feeForm.invalid"
+                        (click)="onSubmit(feeForm)" label="{{ editMode ? 'تعديل' : 'إضافة+' }}" />
 
 
                 </div>
@@ -94,37 +91,46 @@
                 <div class="group">
                     <!-- Class Selector -->
                     <div class="form-control1">
-                        <p-dropdown [options]="classDTO" [(ngModel)]="FeeClassDTO.classID" name="classID"
-                            optionLabel="className" optionValue="classID" placeholder="إختار الصـف" [showClear]="true"
-                            (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" required>
-                        </p-dropdown>
+                        <p-floatlabel class="w-full md:w-56" variant="on">
+                            <p-select class="h-3rem" formControlName="selectedClass" inputId="Class"
+                                [options]="classDTO" optionLabel="className"
+                                (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"
+                                optionValue="classID" [checkmark]="true" [editable]="true" [showClear]="true"
+                                required />
+                            <label for="Class">إختار الصف</label>
+                        </p-floatlabel>
 
                     </div>
                     <!-- Fee Selector -->
                     <div class="form-control1">
-                        <p-dropdown [options]="Fees" [(ngModel)]="FeeClassDTO.feeID" name="feeID" optionLabel="feeName"
-                            optionValue="feeID" placeholder="إختار بند الرسوم" [showClear]="true"
-                            [ngClass]="{'en': languageService.dir==='ltr'}"
-                            (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" required>
-                        </p-dropdown>
+                        <p-floatlabel class="w-full md:w-56" variant="on">
+                            <p-select class="h-3rem" [options]="Fees" [(ngModel)]="FeeClassDTO.feeID" name="feeID"
+                                optionLabel="feeName" optionValue="feeID" [showClear]="true"
+                                [ngClass]="{'en': languageService.dir==='ltr'}"
+                                (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" [checkmark]="true"
+                                [editable]="true" [showClear]="true" required />
+                            <label for="Class">إختار بند الرسوم</label>
+                        </p-floatlabel>
                     </div>
-                  
+
                     <div *ngIf="exist" class="error">هذا الصف يحتوي على نفس البند</div>
                     <!-- Amount -->
                     <div class="form-control">
-                        <mat-form-field appearance="outline" class="inputText">
-                            <mat-label>المبلغ</mat-label>
-                            <input class="inputError" type="number" name="amount" [(ngModel)]="FeeClassDTO.amount"
-                                #amount="ngModel" matInput required />
+                        <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
+                            <input class="inputText w-full h-3rem" name="feeName" pInputText id="amount" type="number"
+                                name="note" #amount="ngModel" [(ngModel)]="FeeClassDTO.amount" autocomplete="off" />
+                            <label for="amount">المبلغ</label>
                             @if (amount.invalid && amount.touched) {
                             <div class="error">يجب إدخال مبلغ</div>
                             }
-                        </mat-form-field>
+                        </p-floatlabel>
+
                     </div>
                     <!-- Submit Button -->
-                    <p-button variant="outlined" severity="success" type="button" (click)="onSubmitClassFee(classFeeForm)"
-                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="btn" [disabled]="classFeeForm.invalid||exist"
-                         label="{{ editModeClass ? 'تعديل' : 'إضافة+' }}" />
+                    <p-button variant="outlined" severity="success" type="button"
+                        (click)="onSubmitClassFee(classFeeForm)" [ngClass]="languageService.dir==='rtl'?'AddEn':'add'"
+                        class="btn" [disabled]="classFeeForm.invalid||exist"
+                        label="{{ editModeClass ? 'تعديل' : 'إضافة+' }}" />
 
                 </div>
             </form>
@@ -181,5 +187,5 @@
         </mat-tab>
     </mat-tab-group>
     <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-    [totalRecords]="FeeClass.length" [rowsPerPageOptions]="[4, 8, 16]" />
+        [totalRecords]="FeeClass.length" [rowsPerPageOptions]="[4, 8, 16]" />
 </div>

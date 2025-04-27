@@ -37,7 +37,7 @@ public class AddStudentWithGuardianRequest
      public string StudentPhone { get; set; } = string.Empty;
     public DateTime StudentDOB { get; set; }
     public DateTime HireDate { get; set; }= DateTime.Now;
-    public List<IFormFile>? Files { get; set; }
+    // public List<IFormFile>? Files { get; set; }
 
     public decimal Amount { get; set; } = 0;
     public List<string>? Attachments { get; set; }

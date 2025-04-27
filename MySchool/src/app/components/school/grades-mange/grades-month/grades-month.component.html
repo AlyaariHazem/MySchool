@@ -10,36 +10,50 @@
     <form [formGroup]="form">
         <div class="group group2">
             <div class="form-control">
-                <p-select [options]="AllClasses" [(ngModel)]="selectedClass" optionValue="classID" [checkmark]="true"
-                    optionLabel="className" [editable]="true" [showClear]="true" (onChange)="selectClass($event.value)"
-                    placeholder="إختار الصف" />
+                <p-floatlabel class="w-full md:w-56" variant="on">
+                    <p-select formControlName="selectedClass" inputId="Class" [options]="AllClasses"
+                        optionLabel="className"  (onChange)="selectClass($event.value)" optionValue="classID"
+                        [checkmark]="true" [editable]="true" [showClear]="true" />
+                    <label for="Class">إختار الصف</label>
+                </p-floatlabel>
+
             </div>
 
             <div class="form-control">
-                <p-select [options]="terms" [(ngModel)]="selectedTerm" optionValue="id" [checkmark]="true"
-                    optionLabel="name" [editable]="true" [showClear]="true" (onChange)="onTermChange($event.value)"
-                    placeholder="إختار الفصل" />
+                <p-floatlabel class="w-full md:w-56" variant="on">
+                    <p-select [options]="terms" formControlName="selectedTerm" optionValue="id" [checkmark]="true"
+                        optionLabel="name" [editable]="true" [showClear]="true"
+                        (onChange)="selectTerm(form.get('selectedTerm')?.value)" inputId="name" />
+                    <label for="name">إختار الترم</label>
+                </p-floatlabel>
             </div>
 
             <div class="form-control">
-                <p-select [options]="curriculmsPlan" optionValue="subjectID" [(ngModel)]="selectedSubject"
-                    optionLabel="subjectName" [editable]="true" [showClear]="true" (onChange)="selectBook($event.value)"
-                    placeholder="إختار المقرر" />
+                <p-floatlabel class="w-full md:w-56" variant="on">
+                    <p-select [options]="curriculmsPlan" optionValue="subjectID" formControlName="selectedSubject"
+                    optionLabel="subjectName" [editable]="true" [showClear]="true"
+                    (onChange)="selectSubject(form.get('selectedSubject')?.value)" inputId="subject" />
+                    <label for="subject">إختار المادة</label>
+                </p-floatlabel>
             </div>
 
             <div class="form-control">
-                <p-select [options]="filteredMonths" [(ngModel)]="selectedMonth" optionValue="id" [checkmark]="true"
-                    optionLabel="name" [editable]="true" [showClear]="true" (onChange)="selectMonth($event.value)"
-                    placeholder="إختار الشهر" />
+                <p-floatlabel class="w-full md:w-56" variant="on">
+                    <p-select [options]="filteredMonths" formControlName="selectedMonth" optionValue="id" [checkmark]="true"
+                    optionLabel="name" [editable]="true" [showClear]="true"
+                    (onChange)="selectMonth(form.get('selectedMonth')?.value)" inputId="month" />
+                    <label for="month">إختار الشهر</label>
+                </p-floatlabel>
             </div>
         </div>
-        <p-button class="adding school-btn" variant="outlined" severity="success" (click)="saveAllGrades()" label="حفظ التغيرات"/>
+        <p-button class="adding school-btn" variant="outlined" severity="success" (click)="saveAllGrades()"
+            label="حفظ التغيرات" />
         <div class="mange">
             <span class="border" (click)="toggleHidden()"><i
                     [class]="hidden?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
         </div>
 
-        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا...">
+        <p-chips class="chipsOne" [max]="max" placeholder="ابحث هنا...">
         </p-chips>
     </form>
 
@@ -116,8 +130,10 @@
             </div>
         </mat-card>
     </div>
-    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-        [totalRecords]="monthlyGrades.length" [rowsPerPageOptions]="[4, 8, 16]" />
+    @if (paginates) {
+    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="5"
+        [totalRecords]="paginates.totalCount" [rowsPerPageOptions]="[5, 10, 15]" />
+    }
     <div class="table-container">
         <mat-card>
             <div class="responsive-table">

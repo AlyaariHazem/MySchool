@@ -10,8 +10,6 @@ namespace Backend.Repository.School.Implements;
 public interface IAccountRepository
 {
     Task<AccountsDTO> AddAccountAsync(AccountsDTO account);
-    Task<AccountStudentGuardian> AddAccountStudentGuardianAsync(AccountStudentGuardian accountStudentGuardian);
-    Task<AccountStudentGuardian> GetAccountStudentGuardianByGuardianIdAsync(int guardianId);
     Task<List<AccountsDTO>> GetAllAccounts();
     Task<List<StudentAndAccountNames>> GetStudentAndAccountNamesAllAsync();
     Task<AccountsDTO> GetAccountByIdAsync(int id);

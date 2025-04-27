@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Store } from '@ngrx/store';
 import { PaginatorState } from 'primeng/paginator';
@@ -9,6 +9,7 @@ import { MonthlyGrade, updateMonthlyGrades } from '../../core/models/MonthlyGrad
 import { ClassService } from '../../core/services/class.service';
 import { CurriculmsPlanService } from '../../core/services/curriculms-plan.service';
 import { CurriculmsPlanSubject } from '../../core/models/curriculmsPlans.model';
+import { Paginates } from '../../core/models/Pagination.model';
 
 interface Term {
   name: string;
@@ -77,36 +78,19 @@ export class GradesMonthComponent implements OnInit {
     this.getAllClasses();
     this.getAllCurriculm();
     // Initialize form
-
     this.getAllMonthlyGrades(1, 6, 1, 0);
     this.form = this.formBuilder.group({
-      BookID: [null, Validators.required],
-      ClassID: [null, Validators.required]
+      selectedClass: [this.selectedClass],
+      selectedTerm: [this.selectedTerm],
+      selectedSubject: [this.selectedSubject],
+      selectedMonth: [this.selectedMonth],
     });
     this.currentLanguage();
     // Example data for dropdowns
 
     this.updatePaginatedData();
   }
-  getAllMonthlyGrades(TermID: number, MonthID: number, ClassID: number, SubjectID: number): void {
-    this.isLoading = true;
-    this.visible = true;
-    this.monthlyGradesService.getAllMonthlyGrades(
-      TermID,
-      MonthID,
-      ClassID,
-      SubjectID
-    ).subscribe(res => {
-      this.monthlyGrades = res;
-      this.isLoading = false;
-      this.visible = false;
-      if (this.monthlyGrades.length > 0) {
-        this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
-      }
-      console.log("the monthly grades are", res);
-      this.updatePaginatedData(); // للتحديث عند كل تحميل
-    });
-  }
+
   // Example data for dropdowns
   terms: Term[] = [
     { name: 'الأول', id: 1 },
@@ -154,50 +138,71 @@ export class GradesMonthComponent implements OnInit {
     this.filteredMonths = this.months.filter(m => m.termId === this.selectedTerm); // إفراغ الاختيار القديم
   }
 
-  // Event Handlers
-  selectBook(subjectId: number): void {
-    this.selectedSubject = subjectId;
-    this.getAllMonthlyGrades(this.selectedTerm, this.selectedMonth, this.selectedClass, subjectId);
+  selectClass(_: any): void {
+    
+    this.getAllMonthlyGrades(
+      this.form.get('selectedTerm')?.value,
+      this.form.get('selectedMonth')?.value,
+      this.form.get('selectedClass')?.value,
+      this.form.get('selectedSubject')?.value
+    );
+    this.updatePaginatedData();
     this.filterMonthsByTerm();
   }
 
-  onTermChange(termId: number): void {
-    this.selectedTerm = +termId;        // تأكد أنها رقم
-    this.getAllMonthlyGrades(this.selectedTerm, this.selectedMonth, this.selectedClass, this.selectedSubject);
+  selectTerm(_: any): void {
+    this.filterMonthsByTerm();
+    this.getAllMonthlyGrades(
+      this.form.get('selectedTerm')?.value,
+      this.form.get('selectedMonth')?.value,
+      this.form.get('selectedClass')?.value,
+      this.form.get('selectedSubject')?.value
+    );
+    this.updatePaginatedData();
+  }
+
+  selectSubject(_: any): void {
+    this.getAllMonthlyGrades(
+      this.form.get('selectedTerm')?.value,
+      this.form.get('selectedMonth')?.value,
+      this.form.get('selectedClass')?.value,
+      this.form.get('selectedSubject')?.value
+    );
+    this.updatePaginatedData();
     this.filterMonthsByTerm();
   }
 
-  selectMonth(monthId: number): void {
-    this.selectedMonth = monthId;
-    this.getAllMonthlyGrades(this.selectedTerm, monthId, this.selectedClass, this.selectedSubject);
+  selectMonth(_: any): void {
+    this.getAllMonthlyGrades(
+      this.form.get('selectedTerm')?.value,
+      this.form.get('selectedMonth')?.value,
+      this.form.get('selectedClass')?.value,
+      this.form.get('selectedSubject')?.value
+    );
+    this.updatePaginatedData();
     this.filterMonthsByTerm();
   }
 
-  selectClass(classId: number): void {
-    this.selectedClass = classId;
-    this.getAllMonthlyGrades(this.selectedTerm, this.selectedMonth, classId, this.selectedSubject);
-    this.filterMonthsByTerm();
-  }
-  
-  yearID:number = Number(localStorage.getItem('yearID') || '1');
+  yearID: number = Number(localStorage.getItem('yearID') || '1');
   saveAllGrades() {
     if (!this.selectedTerm || !this.selectedMonth || !this.selectedClass) {
       alert('Please select term, month, class, and subject first.');
       return;
     }
-    const payload: updateMonthlyGrades[] = this.monthlyGrades.flatMap(stu =>
+    const payload: updateMonthlyGrades[] = this.displayedStudents.flatMap(stu =>
       stu.grades.map(g => ({
         studentID: stu.studentID,
         subjectID: stu.subjectID,
         yearID: this.yearID,
-        monthID: this.selectedMonth,
-        classID: this.selectedClass,
-        termID: this.selectedTerm,
+        monthID: this.form.get('selectedMonth')?.value,
+        classID: this.form.get('selectedClass')?.value,
+        termID: this.form.get('selectedTerm')?.value,
         gradeTypeID: g.gradeTypeID,
-        grade: +g.maxGrade            // convert to number
+        grade: +g.maxGrade
       }))
-    );
-    console.log('the data are',payload);
+    );    
+
+    console.log('the data are', payload);
     this.monthlyGradesService.updateMonthlyGrades(payload)
       .subscribe({
         next: _ => {
@@ -210,34 +215,40 @@ export class GradesMonthComponent implements OnInit {
       });
   }
 
-  updateDisplayedStudents(): void {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.displayedStudents = this.monthlyGrades.slice(startIndex, endIndex);
-  }
-  trackByIndex(index: number, item: any): number {
-    return index;
-  }
-
   hidden: boolean = false;
   toggleHidden() {
     this.hidden = !this.hidden;
   }
-
-  paginatedStudents: MonthlyGrade[] = [];
-
   first: number = 0;
-  rows: number = 4;
-  updatePaginatedData(): void {
-    const start = this.first;
-    const end = this.first + this.rows;
-    this.paginatedStudents = this.monthlyGrades.slice(start, end);
+  rows: number = 5;
+
+  paginates!: Paginates;
+  getAllMonthlyGrades(TermId: number, MonthId: number, ClassId: number, SubjectId: number): void {
+    this.monthlyGradesService.getAllMonthlyGrades(TermId, MonthId, ClassId, SubjectId, this.first / this.rows + 1, this.rows).subscribe((res) => {
+      this.paginates = res; // تأكد أن res يحتوي totalCount
+      this.monthlyGrades = res.data;
+      this.displayedStudents = res.data;
+      console.log('monthly Grades are',this.monthlyGrades);
+      this.isLoading = false;
+      this.visible = false;
+      if (this.monthlyGrades.length > 0) {
+        this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
+      }
+    });
   }
 
-  // Handle page change event from PrimeNG paginator
+  updatePaginatedData(): void {
+    this.monthlyGradesService.getAllMonthlyGrades(this.form.get('selectedTerm')?.value, this.form.get('selectedMonth')?.value, this.form.get('selectedClass')?.value, this.form.get('selectedSubject')?.value, this.first / this.rows + 1, this.rows).subscribe((res) => {
+      this.paginates = res;
+      this.monthlyGrades = res.data;
+      this.displayedStudents = res.data;
+    });
+  }
+
+  // Handle page change event from PrimeNG paginator 
   onPageChange(event: PaginatorState): void {
-    this.first = event.first || 0; // Default to 0 if undefined
-    this.rows = event.rows || 4; // Default to 4 rows
+    this.first = event.first || 0; // Update first index based on page
+    this.rows = event.rows || 5; // Update rows per page
     this.updatePaginatedData();
   }
   // ثابت يحتوى الحدود حسب gradeTypeID
@@ -253,13 +264,13 @@ export class GradesMonthComponent implements OnInit {
   clampGrade(g: { gradeTypeID: number, maxGrade: any }): void {
     const limit = this.gradeLimits[g.gradeTypeID] ?? 100;  // إذا لم يتم تحديد حد، استخدم 100
     let value = Number(g.maxGrade);
-  
+
     // إذا كانت القيمة غير رقم، رجّعها صفر
     if (isNaN(value)) {
       g.maxGrade = 0;
       return;
     }
-  
+
     // إذا كانت أكبر من الحد، قصّها تلقائيًا
     if (value > limit) {
       g.maxGrade = limit;
@@ -270,28 +281,28 @@ export class GradesMonthComponent implements OnInit {
   enforceLimit(evt: Event, g: { gradeTypeID: number; maxGrade: any }): void {
     const input = evt.target as HTMLInputElement;
     const limit = this.gradeLimits[g.gradeTypeID] ?? 100;
-  
+
     // احصل على الرقم الحالى (قد يكون فارغاً)
     let val = Number(input.value);
     if (isNaN(val)) { val = 0; }
-  
-    // قصّ إلى الحدّ
-    if (val > limit)   val = limit;
-    if (val < 0)       val = 0;
-  
-    // حدِّث نموذج البيانات وواجهة المستخدم فوراً
-    g.maxGrade   = val;
-    input.value  = String(val);   // يُجبر الـ input على إظهار الرقم المقصوص
-  }
-  
-calcTotal(grades: { maxGrade: any }[]): number {
-  return grades.reduce((sum, g) => sum + (+g.maxGrade || 0), 0);
-}
 
-calcPercent(grades: { maxGrade: any }[]): string {
-  const total = this.calcTotal(grades);
-  return total.toString();
-}
-  
+    // قصّ إلى الحدّ
+    if (val > limit) val = limit;
+    if (val < 0) val = 0;
+
+    // حدِّث نموذج البيانات وواجهة المستخدم فوراً
+    g.maxGrade = val;
+    input.value = String(val);   // يُجبر الـ input على إظهار الرقم المقصوص
+  }
+
+  calcTotal(grades: { maxGrade: any }[]): number {
+    return grades.reduce((sum, g) => sum + (+g.maxGrade || 0), 0);
+  }
+
+  calcPercent(grades: { maxGrade: any }[]): string {
+    const total = this.calcTotal(grades);
+    return total.toString();
+  }
+
 
 }

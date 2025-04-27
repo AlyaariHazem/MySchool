@@ -32,18 +32,7 @@ public class AccountRepository : IAccountRepository
         return _mapper.Map<AccountsDTO>(accountEntity);
     }
 
-    public async Task<AccountStudentGuardian> AddAccountStudentGuardianAsync(AccountStudentGuardian accountStudentGuardian)
-    {
-        await _dbContext.AccountStudentGuardians.AddAsync(accountStudentGuardian);
-        await _dbContext.SaveChangesAsync();
-        return accountStudentGuardian;
-    }
-
-    public async Task<AccountStudentGuardian> GetAccountStudentGuardianByGuardianIdAsync(int guardianId) =>
-         await _dbContext.AccountStudentGuardians.FirstOrDefaultAsync(a => a.GuardianID == guardianId);
-
-
-    public async Task<List<AccountsDTO>> GetAllAccounts()
+        public async Task<List<AccountsDTO>> GetAllAccounts()
     {
         var accounts = await _dbContext.Accounts
         .ToListAsync();
@@ -55,7 +44,7 @@ public class AccountRepository : IAccountRepository
     {
         var updatedAccount = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.AccountID == account.AccountID);
 
-        updatedAccount.AccountName = account.AccountName;
+        updatedAccount!.AccountName = account.AccountName;
         updatedAccount.TypeOpenBalance = account.TypeOpenBalance;
         updatedAccount.HireDate = account.HireDate;
         updatedAccount.OpenBalance = account.OpenBalance;

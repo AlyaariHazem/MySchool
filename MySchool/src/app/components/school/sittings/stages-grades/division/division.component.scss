@@ -90,11 +90,6 @@ select:focus {
 .From {
   position: relative;
 }
-.termName {
-  position: absolute;
-  top: -0.5rem;
-  right: 3rem;
-}
 
 .add {
   position: relative;
@@ -141,10 +136,6 @@ select:focus {
     left: -1rem;
     color: white;
     background-color: #2fdf84;
-  }
-
-  .termName {
-    right: 0rem;
   }
   .From {
     margin-left: 0rem;

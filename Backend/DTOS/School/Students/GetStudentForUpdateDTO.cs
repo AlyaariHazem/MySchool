@@ -51,6 +51,7 @@ public class GetStudentForUpdateDTO
     }
 
 public class DisCountUpdate{
+    public int? StudentClassFeeID { get; set; }
     public int FeeClassID  { get; set; }
     public decimal? AmountDiscount { get; set; }
     public string? NoteDiscount { get; set; }

@@ -15,7 +15,7 @@ public class StudentClassFeeRepository : IStudentClassFeeRepository
 {
     private readonly DatabaseContext _db;
     private readonly IMapper _mapper;
-    public StudentClassFeeRepository(DatabaseContext db,IMapper mapper)
+    public StudentClassFeeRepository(DatabaseContext db, IMapper mapper)
     {
         _db = db;
         _mapper = mapper;
@@ -42,30 +42,35 @@ public class StudentClassFeeRepository : IStudentClassFeeRepository
     {
         if (studentClassFee == null)
             throw new ArgumentNullException(nameof(studentClassFee));
-            
-        var existingStudentClassFee =await _db.StudentClassFees.FindAsync(studentClassFee.StudentClassFeesID);
+
+        var existingStudentClassFee = await _db.StudentClassFees.FirstOrDefaultAsync(fee => fee.StudentID == studentClassFee.StudentID && fee.FeeClassID == studentClassFee.FeeClassID);
         if (existingStudentClassFee == null)
-            throw new KeyNotFoundException($"StudentClassFee with ID {studentClassFee.StudentClassFeesID} not found.");
+            await AddAsync(studentClassFee);
 
-        existingStudentClassFee.StudentID = studentClassFee.StudentID;
-        existingStudentClassFee.FeeClassID = studentClassFee.FeeClassID;
-        existingStudentClassFee.AmountDiscount = studentClassFee.AmountDiscount;
-        existingStudentClassFee.NoteDiscount = studentClassFee.NoteDiscount;
-        existingStudentClassFee.Mandatory = studentClassFee.Mandatory;
+        else
+        {
+            existingStudentClassFee.StudentID = studentClassFee.StudentID;
+            existingStudentClassFee.FeeClassID = studentClassFee.FeeClassID;
+            existingStudentClassFee.AmountDiscount = studentClassFee.AmountDiscount;
+            existingStudentClassFee.NoteDiscount = studentClassFee.NoteDiscount;
+            existingStudentClassFee.Mandatory = studentClassFee.Mandatory;
 
-        _db.Entry(existingStudentClassFee).State = EntityState.Modified;
-       await _db.SaveChangesAsync();
+            _db.Entry(existingStudentClassFee).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+        }
+
+
     }
 
     public async Task<IEnumerable<StudentClassFees>> GetFeesByStudentIdAsync(int studentId)
 
-        {
+    {
 
-            return await _db.StudentClassFees
+        return await _db.StudentClassFees
 
-                .Where(fee => fee.StudentID == studentId)
+            .Where(fee => fee.StudentID == studentId)
 
-                .ToListAsync();
+            .ToListAsync();
 
-        }
+    }
 }

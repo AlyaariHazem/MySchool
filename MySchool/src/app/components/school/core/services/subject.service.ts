@@ -13,6 +13,7 @@ export class SubjectService {
 
   getPaginatedSubjects(pageNumber: number, pageSize: number): Observable<Paginates> {
     return this.API.getRequest<Paginates>(`Subject/paginated?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+
   }
   getAllSubjects(): Observable<Subjects[]> {
     return this.API.getRequest<Subjects[]>("Subject/AllSubjects");

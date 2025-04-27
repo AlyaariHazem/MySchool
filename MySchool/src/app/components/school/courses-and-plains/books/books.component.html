@@ -4,32 +4,32 @@
   <form [formGroup]="form" class="h-5rem">
     <div class="group group2">
       <div class="form-control">
-        <mat-form-field appearance="outline" class="inputText">
-          <mat-label>اسم الكتاب</mat-label>
-          <input class="inputError" formControlName="name" type="text" matInput />
-        </mat-form-field>
+        <label class="label2 ">اسم الكتاب<span
+            [style]="(form.get('name')?.invalid && form.get('name'))?'color:red;':'color:rgb(56, 216, 86);'">
+            *</span></label>
+        <input pInputText class="h-3rem" type="text" placeholder="ادخل اسم الكتاب"
+          formControlName="name" />
       </div>
       <div class="form-control">
-        <mat-form-field appearance="outline" class="inputText">
-          <mat-label>الاسم البديل</mat-label>
-          <input class="inputError" formControlName="nameReplacement" type="text" matInput />
-        </mat-form-field>
+        <label class="label2 ">الاسم البديل</label>
+        <input pInputText class="h-3rem" type="text" placeholder="ادخل اسم البديل"
+          formControlName="nameReplacement" />
       </div>
+
       <div class="form-control">
-        <mat-form-field appearance="outline" class="inputText">
-          <mat-label>الملاحظة</mat-label>
-          <input class="inputError" formControlName="note" type="text" matInput />
-        </mat-form-field>
+        <label class="label2 ">الملاحظة</label>
+        <input pInputText class="h-3rem" type="text"  placeholder="ادخل ملاحظة"
+          formControlName="note" />
       </div>
     </div>
-    <p-button variant="outlined" severity="success" class="showFee" (onClick)="subjectData ? updateSubject(form) : addSubject(form)"
-      [label]="editMode ? 'تعديل' : 'إضافة+'" />
+    <p-button variant="outlined" severity="success" class="showFee"
+      (onClick)="subjectData ? updateSubject(form) : addSubject(form)" [label]="editMode ? 'تعديل' : 'إضافة+'" />
 
     <p-chips class="chipsOne" [max]="search" placeholder="ابحث هنا..." />
   </form>
 
   <!-- Responsive Table -->
-  <div class="table-container">
+  <div class="table-container mt-3">
     <div class="table-container">
       <mat-card>
         <table class="styled-table">

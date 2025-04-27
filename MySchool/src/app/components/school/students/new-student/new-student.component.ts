@@ -3,11 +3,11 @@ import { Component, AfterViewInit, OnInit, Inject, ChangeDetectorRef, SimpleChan
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
-import { AddStudent, StudentPayload } from '../../../../core/models/students.model';
+import { AddStudent, StudentPayload, UpdateDiscount } from '../../../../core/models/students.model';
 import { Discount, FeeClasses } from '../../core/models/Fee.model';
 import { StudentService } from '../../../../core/services/student.service';
-import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-new-student',
@@ -69,7 +69,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
         discounts: this.formBuilder.array([], Validators.required)
       }),
       documents: this.formBuilder.group({
-        attachments: [[],Validators.required], // Array of strings for URLs
+        attachments: [[], Validators.required], // Array of strings for URLs
       }),
       studentImageURL: [''],
     });
@@ -140,13 +140,13 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
       this.isEditMode = true;
       const student = this.data.student;
       console.log("the student that want to edit is", student);
-  
+
       // First, patch top-level fields:
       this.formGroup.patchValue({
         studentID: student.studentID,
         existingGuardianId: student.existingGuardianId || null,
         studentImageURL: student.studentImageURL || '',
-  
+
         // Then, patch the nested "primaryData" group
         primaryData: {
           studentFirstName: student.studentFirstName || '',
@@ -162,14 +162,14 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
           divisionID: student.divisionID,
           amount: student.amount || 0
         },
-  
+
         // The "optionData" group
         optionData: {
           placeBirth: student.placeBirth || '',
           studentPhone: student.studentPhone || '',
           studentAddress: student.studentAddress || '',
         },
-  
+
         // The "guardian" group
         guardian: {
           guardianFullName: student.guardianFullName || '',
@@ -181,45 +181,67 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
           guardianType: student.guardianType || '',
           guardianPassword: student.guardianPassword || 'Guardian'
         },
-  
+
         // The "documents" group
         documents: {
-          attachments: student.attachments || [] // in your JSON, it's an array
+          attachments: [""]
         },
-  
-        // fees => we will patch the array in patchFees(...)
-        fees: {
-          discounts: [] // start empty, patchFees will fill it
-        },
+
       });
-  
+
       // Now, patch the fees discounts array
       this.patchFees(student.discounts);
-  
+
       // If you want a local image preview in the component
       this.studentImageURL = student.studentImageURL || '';
-  
+
       // Refresh fee UI if needed
       this.refreshFees();
-  
+
     } else {
       // Otherwise, we are in ADD (create) mode
       this.isEditMode = false;
       this.generateStudentID();
     }
   }
-  onUpdate():void{
+  onUpdate(): void {
+    const updateDiscounts: UpdateDiscount[] =
+      (this.formGroup.get('fees.discounts') as FormArray).value.map((d: any) => ({
+        studentClassFeeID: d.studentClassFeeID ?? 0,      // or omit if new
+        studentID: this.formGroup.get('studentID')?.value,
+        feeClassID: d.feeClassID,
+        amountDiscount: d.amountDiscount ?? 0,
+        noteDiscount: d.noteDiscount ?? '',
+        mandatory: d.mandatory ?? false
+      }));
+
     const formData: StudentPayload = {
-      studentID: this.formGroup.get('studentID')?.value,
-      existingGuardianId: this.formGroup.get('existingGuardianId')?.value,
       ...this.formGroup.get('primaryData')?.value,
       ...this.formGroup.get('guardian')?.value,
-      ...this.formGroup.get('optionData')?.value,
-      ...this.formGroup.get('fees')?.value,
-      attachments: this.formGroup.get('documents.attachments')?.value || [],
-      studentImageURL: this.studentImageURL2
+      studentID: this.formGroup.get('studentID')?.value,
+      existingGuardianId: this.formGroup.get('existingGuardianId')?.value,
+      attachments: this.formGroup.get('documents.attachments')?.value ?? [],
+      studentImageURL: this.studentImageURL2 ? this.StudentImage.name : '',
+      updateDiscounts: updateDiscounts
     };
-    console.log('updated',formData);
+    console.log('updated', formData);
+    this.studentService.updateStudent(formData).subscribe(res => {
+      this.toastr.success(res);
+      this.dialogRef.close();
+      this.studentService.uploadStudentImage(this.StudentImage, formData.studentID).subscribe(() => {
+        console.log('Image is uploaded successfully!');
+      });
+      this.studentService.uploadFiles(this.files, this.studentID).subscribe({
+        next: () => {
+          this.toastr.success('Files uploaded successfully!');
+        },
+        error: (error) => {
+          console.error('File upload failed:', error);
+          this.toastr.error('Failed to upload files.');
+        }
+      });
+    });
+
   }
   private patchFees(discounts: FeeClasses[] = []): void {
     const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
@@ -236,7 +258,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
         })
       );
     });
-  }  
+  }
   feeClasses: FeeClasses[] = [];
   loadFeesForClass(feeClasses: FeeClasses[]) {
     const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
@@ -255,8 +277,8 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
         })
       );
     });
-    
-    this.feeClasses=feeClasses;
+
+    this.feeClasses = feeClasses;
   }
 
   private generateStudentID(): void {

@@ -23,6 +23,7 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { TextareaModule } from 'primeng/textarea';
+import { FloatLabel } from "primeng/floatlabel"
 
 
 import { SchoolRoutingModule } from './school-routing.module';
@@ -164,6 +165,7 @@ const modules = [
   CountDirective,
   MatDatepickerModule,
   MatNativeDateModule,
+  FloatLabel,
   DatePipe,
   NumberToArabicTextPipe,
   AgePipe

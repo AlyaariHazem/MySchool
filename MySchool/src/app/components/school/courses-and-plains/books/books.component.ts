@@ -102,13 +102,14 @@ export class BooksComponent implements OnInit {
       console.log('subjectID is missing!');
       return; // Return early if subjectID is not set
     }
-
+    
     this.subjectService.updateSubject(subjectID, this.subjectData).subscribe(() => {
       // Update the subject in the list after successful update
       this.subjects = this.subjects.map(subj =>
         subj.subjectID === subjectID ? { ...subj, ...this.subjectData } : subj
       );
       this.updatePaginatedData(); // Refresh the paginated data
+      this.form.reset();
     });
 
     this.form.reset();

@@ -112,7 +112,7 @@ public class StudentRepository : IStudentRepository
             FullName = new NameDTO
             {
                 FirstName = student.FullName.FirstName,
-                MiddleName = student.FullName.MiddleName,
+                MiddleName = student.FullName.MiddleName!,
                 LastName = student.FullName.LastName
             },
             PhotoUrl = student.ImageURL != null
@@ -268,6 +268,7 @@ public class StudentRepository : IStudentRepository
             }).ToList() ?? new List<AttachmentDTO>(),
             Discounts = student.StudentClassFees?.Select(f => new DisCountUpdate
             {
+                StudentClassFeeID = f.StudentClassFeesID,
                 FeeClassID = f.FeeClassID,
                 AmountDiscount = f.AmountDiscount ?? 0,
                 NoteDiscount = f.NoteDiscount ?? string.Empty,

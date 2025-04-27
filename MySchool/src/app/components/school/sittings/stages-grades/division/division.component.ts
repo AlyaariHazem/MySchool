@@ -50,6 +50,7 @@ export class DivisionComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllDivisions();
+    this.form.reset();
   }
 
   getAllDivisions(): void {

@@ -17,7 +17,7 @@
   -webkit-appearance: none; /* Chrome, Safari, Edge, Opera */
   appearance: none; /* General */
 }
-p-select{
+p-select {
   height: 3rem;
 }
 
@@ -30,8 +30,8 @@ p-select{
 
 .mange {
   position: absolute;
-  top: 12rem;
-  left: 11rem;
+  top: 13rem;
+  left: 14%;
 }
 .border:hover {
   cursor: pointer;
@@ -69,9 +69,9 @@ form {
 .school {
   margin-right: 5px;
 }
-.school-btn{
+.school-btn {
   position: relative;
-  top: -6rem !important;;
+  top: -6rem !important;
 }
 // this for form
 
@@ -101,7 +101,7 @@ form {
   .adding {
     position: relative;
     left: 87%;
-  top: -7rem;
+    top: -7rem;
   }
 }
 .button {
@@ -131,7 +131,7 @@ form {
     width: 14%;
   }
 }
-.English{
+.English {
   .chipsOne {
     position: absolute;
     margin-top: -5.2rem;
@@ -139,10 +139,9 @@ form {
     width: 14%;
   }
 }
-@media (max-width: 900px) {
+@media (width < 900px) {
   .mange {
     position: absolute;
     top: 8rem;
-    left: 11rem;
   }
 }

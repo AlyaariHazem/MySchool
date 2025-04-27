@@ -6,6 +6,7 @@ using AutoMapper;
 using Backend.DTOS;
 using Backend.DTOS.School;
 using Backend.DTOS.School.Accounts;
+using Backend.DTOS.School.AccountStudentGuardian;
 using Backend.DTOS.School.Classes;
 using Backend.DTOS.School.CoursePlan;
 using Backend.DTOS.School.Curriculms;
@@ -99,6 +100,7 @@ public class MappingConfig : Profile
         CreateMap<MonthDTO, Month>().ReverseMap();
         CreateMap<SubjectsNameDTO, Subject>().ReverseMap();
         CreateMap<AllClassesDTO, Class>().ReverseMap();
+        CreateMap<AccountStudentGuardian, AccountStudentGuardianDTO>();
 
     }
 }

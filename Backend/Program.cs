@@ -1,3 +1,4 @@
+// ✅ Program.cs
 using System.Text;
 using Backend;
 using Backend.Data;
@@ -14,50 +15,38 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models; // Required for Swagger configuration
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-    });
+{
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+});
 
 builder.Services.AddEndpointsApiExplorer();
 
-// Configure services
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("SqlAdminConnection"),
-        sqlOptions => sqlOptions.CommandTimeout(180) // Set timeout to 180 seconds (3 minutes)
+        sqlOptions => sqlOptions.CommandTimeout(180)
     )
 );
-//this is for mapping
+
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
-#region Swagger Settings
 builder.Services.AddSwaggerGen(swagger =>
 {
-    // Generate the Default UI of Swagger Documentation
-    swagger.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Version = "v1",
-        Title = "ASP.NET 8 Web API",
-        Description = "Myschool Project"
-    });
-
-    // Enable authorization using Swagger (JWT)
-    swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    swagger.SwaggerDoc("v1", new OpenApiInfo { Version = "v1", Title = "ASP.NET 8 Web API", Description = "Myschool Project" });
+    swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\"",
+        Description = "Enter 'Bearer' followed by your token."
     });
-
     swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -73,19 +62,70 @@ builder.Services.AddSwaggerGen(swagger =>
         }
     });
 });
-#endregion
 
-//---------------------------------------------------------------
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 4;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+.AddEntityFrameworkStores<DatabaseContext>()
+.AddDefaultTokenProviders();
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>().
-AddEntityFrameworkStores<DatabaseContext>();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+});
+
+var jwtKey = Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"] ?? throw new InvalidOperationException("JWT:SecretKey missing"));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["JWT:IssuerIP"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["JWT:AudienceIP"],
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(jwtKey)
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync("{\"error\": \"Unauthorized\"}");
+            }
+        };
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 builder.Services.AddScoped<StudentManagementService>();
 builder.Services.AddScoped<mangeFilesService>();
 builder.Services.AddScoped<StudentClassFeesRepository>();
 builder.Services.AddScoped<TenantProvisioningService>();
 
-// Register custom repositories
-// Register UnitOfWork and all required repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IGuardianRepository, GuardianRepository>();
 builder.Services.AddScoped<ISubjectsRepository, SubjectRepository>();
@@ -107,95 +147,40 @@ builder.Services.AddScoped<IAttachmentRepository, AttachmentsRepository>();
 builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
 builder.Services.AddScoped<ICoursePlanRepository, CoursePlanRepository>();
 builder.Services.AddScoped<IGradeTypesRepository, GradeTypesRepository>();
-builder.Services.AddScoped<IMonthlyGradeRepository , MonthlyGradeRepository>();
+builder.Services.AddScoped<IMonthlyGradeRepository, MonthlyGradeRepository>();
 builder.Services.AddScoped<ITermlyGradeRepository, TermlyGradeRepository>();
 builder.Services.AddScoped<ITermRepository, TermRepository>();
 builder.Services.AddScoped<IMonthRepository, MonthRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IAccountStudentGuardianRepository, AccountStudentGuardianRepository>();
 
-
-
-
-// Configure Identity and JWT Authentication
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;//unauth
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JWT:IssuerIP"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:AudienceIP"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecritKey"]))
-    };
-});
-
-//---------------------------------------------------------------
-
-// Configure CORS policy
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("MyPolicy", builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
-
-// Configure Identity with custom password requirements
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Password.RequireDigit = false;              // not Requires a digit
-    options.Password.RequiredLength = 4;               // Minimum length
-    options.Password.RequireNonAlphanumeric = false;    // Not Requires a special character
-
-    // Customize error messages
-    options.Password.RequireDigit = false;
-    options.Password.RequiredUniqueChars = 1;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-});
 
 var app = builder.Build();
-// Seed roles
+
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var roles = new[] { "GUARDIAN", "STUDENT", "TEACHER", "MANAGER" };
-
     foreach (var role in roles)
     {
-
-        {
+        if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole(role));
-        }
     }
 }
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "ASP.NET 8 Web API V1");
-        c.RoutePrefix = "swagger"; // Access Swagger UI at https://localhost:7258/swagger
+        c.RoutePrefix = "swagger";
     });
 }
 
 app.UseStaticFiles();
-
 app.UseCors("MyPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

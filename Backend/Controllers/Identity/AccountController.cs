@@ -117,7 +117,7 @@ namespace Backend.Controllers
         new Claim("UserType", userFromDb.UserType)
     };
 
-            var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecritKey"]!));
+            var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecretKey"]!));
             var signingCred = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
 
             JwtSecurityToken token = new JwtSecurityToken(

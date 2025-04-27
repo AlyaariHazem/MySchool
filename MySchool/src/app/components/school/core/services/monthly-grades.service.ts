@@ -8,23 +8,21 @@ import { updateMonthlyGrades } from '../models/MonthlyGrade.model';
 })
 export class MonthlyGradesService {
 
-  API=inject(BackendAspService);
-  getAllMonthlyGrades(term:number,monthId:number,classId:number,subjectId:number){
-    return this.API.http.get(`${this.API.baseUrl}/MonthlyGrades/${term}/${monthId}/${classId}/${subjectId}`).pipe(
-      map((res:any)=>{
+  API = inject(BackendAspService);
+  getAllMonthlyGrades(term: number, monthId: number, classId: number, subjectId: number, pageNumber: number, pageSize: number) {
+    return this.API.http.get(`${this.API.baseUrl}/MonthlyGrades/${term}/${monthId}/${classId}/${subjectId}?pageNumber=${pageNumber}&pageSize=${pageSize}`).pipe(
+      map((res: any) => res.result)
+    );
+  }
+
+
+  updateMonthlyGrades(monthlyGrades: updateMonthlyGrades[]) {
+    return this.API.http.put(`${this.API.baseUrl}/MonthlyGrades/UpdateMany`, monthlyGrades).pipe(
+      map((res: any) => {
         return res.result;
       }
       )
     );
   }
 
-  updateMonthlyGrades(monthlyGrades: updateMonthlyGrades[]){
-    return this.API.http.put(`${this.API.baseUrl}/MonthlyGrades/UpdateMany`, monthlyGrades).pipe(
-      map((res:any)=>{
-        return res.result;
-      }
-      )
-    );
-  }
-  
 }
