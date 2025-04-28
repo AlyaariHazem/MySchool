@@ -36,5 +36,6 @@ public interface IUnitOfWork : IDisposable
     IMonthRepository Months { get; }
     IEmployeeRepository Employees { get; }
     IAccountStudentGuardianRepository AccountStudentGuardians { get; }
+    IReportRepository Reports { get; }
     Task<int> CompleteAsync();
 }

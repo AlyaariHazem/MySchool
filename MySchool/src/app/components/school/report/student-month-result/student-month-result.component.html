@@ -1,80 +1,78 @@
-<div dir="rtl" id="report" style="font-family:Tajawal, sans-serif; line-height:1.7">
-    <!-- رأس الصفحة الكامل -->
+@for (subj of monthlyResults; track $index; let i = $index) {
+<div dir="rtl" class="report" [id]="'report-' + i" style="font-family:Tajawal, sans-serif; line-height:1.7">
+
     <header class="page-header">
-        <!-- يسار -->
         <div class="header-col text-end">
-            <ng-container *ngFor="let line of report.govHeader">
-                <p [class.fw-bold]="line === report.govHeader[3]">{{ line }}</p>
-            </ng-container>
+            <p>الجمهورية اليمنية</p>
+            <p>وزارة التربية والتعليم</p>
+            <p>مكتب التربية أمانة العاصمة</p>
         </div>
-
-
-        <!-- وسط (شعار) -->
         <div class="header-col text-center">
             <img [src]="SchoolLogo" alt="logo" class="logo" />
         </div>
 
-        <!-- يمين -->
         <div class="header-col text-start">
-            <p class="fw-bold">{{ report.school }}</p>
-            <p>{{ report.year }}</p>
-            <p>الفصل الدراسي: {{ report.term }}</p>
-            <p>الشهر: {{ report.month }}</p>
+            <p class="fw-bold">{{ subj.schoolName }}</p>
+            <p>{{ subj.year }}</p>
+            <p>الفصل الدراسي: {{ subj.term }}</p>
+            <p>الشهر: {{ subj.month }}</p>
         </div>
     </header>
 
-    <!-- عنوان أسفل الهيدر مباشرة -->
     <h4 class="report-title text-center mb-3 fw-bold">نتيجة الطالب الشهرية</h4>
 
-    <!-- بطاقة التقرير -->
+
     <section class="report-card shadow-sm">
 
-        <!-- معلومات الطالب -->
         <div class="student-meta mb-3">
-            <span><b>رقم الطالب:</b> {{ report.studentId }}</span>
-            <span><b>الطالب:</b> {{ report.studentName }}</span>
-            <span><b>الصف:</b> {{ report.grade }}</span>
-            <span><b>الشعبة:</b> {{ report.section }}</span>
+            <span><b>رقم الطالب:</b> {{ subj.studentID }}</span>
+            <span><b>الطالب:</b> {{ subj.studentName }}</span>
+            <span><b>الصف:</b> {{ subj.class }}</span>
+            <span><b>الشعبة:</b> {{ subj.division }}</span>
         </div>
 
-        <!-- الجدول -->
         <table class="table table-bordered text-center">
             <thead>
                 <tr class="bg-light">
-                    <ng-container *ngFor="let subj of report.subjects">
-                        <th>{{ subj.name }}</th>
-                    </ng-container>
+
+                    @for (item of subj.gradeSubjects; track $index) {
+
+                    <th>{{ item.subjectName }}</th>
+                    }
+
                     <th>النسبة</th>
                     <th>المجموع</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <!-- الخلايا الديناميكية -->
-                    <ng-container *ngFor="let subj of report.subjects">
-                        <td>{{ subj.score }}</td>
-                    </ng-container>
-                    <!-- خلية النسبة -->
+
+                    @for (item of subj.gradeSubjects; track $index) {
+
+                    <th>{{ item.grade }}</th>
+                    }
                     <td>
-                        <span class="badge bg-success-subtle text-success fw-bold">{{ percentage }}</span>
+                        <span class="badge fw-bold"
+                            [ngClass]="{'bg-success-subtle text-success': subj.grade !== undefined && subj.grade >= 60, 'bg-danger': subj.grade !== undefined && subj.grade < 60}">{{
+                            (subj.grade !== undefined && subj.gradeSubjects ? subj.grade/subj.gradeSubjects.length : 0 )
+                            | number:'2.2' }}</span>
                     </td>
-                    <!-- خلية المجموع -->
-                    <td>{{ total }}</td>
+
+                    <td>{{ subj.grade }}</td>
                 </tr>
             </tbody>
         </table>
 
-        <!-- تذييل -->
         <div class="footer text-center mt-3 fw-bold">
-            <span>المعلم:</span>
+            <span>المعلم:{{subj.teacher}}</span>
             <span>الختم:</span>
             <span>التوقيع:</span>
         </div>
     </section>
 
-    <!-- زر طباعة اختياري -->
     <div class="text-center mt-4 d-print-none">
-        <button class="btn btn-outline-primary add px-5" (click)="print()">طباعة</button>
+        <button class="btn btn-outline-primary add px-5" (click)="printReport(subj)">طباعة</button>
     </div>
 
 </div>
+}

@@ -15,7 +15,7 @@ export class AuthAPIService {
   constructor(public router: Router) { }
 
   login(user: User): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/account/login`, user).pipe(
+    return this.API.http.post(`${this.API.baseUrl}/auth/login`, user).pipe(
       tap((response: any) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
@@ -43,7 +43,7 @@ export class AuthAPIService {
   }
 
   register(user: User): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/account/register`, user, {
+    return this.API.http.post(`${this.API.baseUrl}/auth/register`, user, {
       responseType: 'json' // ✅ Ensures response is treated as JSON
     });
   }

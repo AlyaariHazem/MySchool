@@ -1,4 +1,4 @@
-#report {
+.report {
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -6,9 +6,9 @@
 }
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap");
 .add {
-  position: absolute;
-  top: 11rem;
-  left: 2rem;
+  position: relative;
+  top: -4rem;
+  left: 0rem;
 }
 :host {
   display: block;
@@ -23,6 +23,7 @@
   display: grid;
   grid-template-columns: 1fr 120px 1fr;
   gap: 1rem;
+  width:100%;
   align-items: flex-start;
   margin-bottom: 0.5rem;
 

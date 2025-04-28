@@ -24,6 +24,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { TextareaModule } from 'primeng/textarea';
 import { FloatLabel } from "primeng/floatlabel"
+import { TableModule }       from 'primeng/table';
 
 
 import { SchoolRoutingModule } from './school-routing.module';
@@ -78,6 +79,7 @@ import { NumberToArabicTextPipe } from '../../Pipes/number-to-arabic-text.pipe';
 import { AccountReportComponent } from './report/account-report/account-report.component';
 import { EmployeeComponent } from './teachers/employee/employee.component';
 import { AgePipe } from '../../Pipes/age.pipe';
+import { MonthlyResultComponent } from './report/monthly-result/monthly-result.component';
 
 
 
@@ -124,6 +126,7 @@ const components = [
   AddAccountComponent,
   GradesMangeComponent,
   AllotmentComponent,
+  MonthlyResultComponent,
   AccountReportComponent
 
 ];
@@ -134,6 +137,7 @@ const modules = [
   MatFormFieldModule,
   MatPaginatorModule,
   TabsModule,
+  TableModule,
   CustomDatePipe,
   Select,
   MatInputModule,

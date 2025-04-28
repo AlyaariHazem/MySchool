@@ -26,6 +26,7 @@ import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.c
 import { PageNotFoundComponent } from '../../shared/components/page-not-found/page-not-found.component';
 import { AccountReportComponent } from './report/account-report/account-report.component';
 import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
+import { MonthlyResultComponent } from './report/monthly-result/monthly-result.component';
 
 const routes: Routes = [
   {
@@ -40,6 +41,7 @@ const routes: Routes = [
           { path: 'account', component: AccountReportComponent, data: { breadcrumb: 'حسابات' } },
           { path: 'allotment', component: AllotmentComponent, data: { breadcrumb: 'تخصيص التقارير' } },
           { path: 'grades-month', component: StudentMonthResultComponent, data: { breadcrumb: 'تقارير شهرية' } },
+          { path: 'month-result', component: MonthlyResultComponent, data: { breadcrumb: 'الدرجات شهرية' } },
         ]
       },
       {

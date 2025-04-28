@@ -67,12 +67,14 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
                 g.StudentID,
                 g.Student.FullName,
                 g.SubjectID,
-                g.Subject.SubjectName
+                g.Subject.SubjectName,
+                g.Student.ImageURL
             })
             .Select(grp => new MonthlyGradesReternDTO
             {
                 StudentID = grp.Key.StudentID,
                 StudentName = $"{grp.Key.FullName.FirstName} {grp.Key.FullName.MiddleName} {grp.Key.FullName.LastName}",
+                StudentURL =  $"https://localhost:7258/uploads/StudentPhotos/{grp.Key.ImageURL}",
                 SubjectID = grp.Key.SubjectID,
                 SubjectName = grp.Key.SubjectName,
                 Grades = grp.Select(g => new GradeTypeMonthDTO

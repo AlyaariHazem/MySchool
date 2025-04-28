@@ -1,6 +1,7 @@
 export interface MonthlyGrade{
     studentID:number;
     studentName:string;
+    studentURL:string;
     subjectID:number;
     subjectName:string;
     grades:Grades[];

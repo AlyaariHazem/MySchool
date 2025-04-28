@@ -5,7 +5,7 @@
       <div class="header-left">
         <a routerLink="/school/dashboard" class="logo">
           <img [src]="SchoolLogo" width="40" height="40" alt="">
-          <span class="text-uppercase">{{'schoolName'|translate}}</span>
+          <span class="text-uppercase">{{schoolName}}</span>
         </a>
         <span (click)="cancel()" class="cancel" *ngIf="sidebar">X</span>
       </div>
@@ -15,7 +15,7 @@
         <li [attr.dir]="languageService.dir">{{ 'sidebar.menu' | translate }}</li>
 
         <li class="active" [attr.dir]="languageService.dir">
-          <a routerLink="/school/dashboard">
+          <a routerLink="/school/dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-1.png" alt="icon">
             <span>{{ 'sidebar.home' | translate }}</span>
           </a>
@@ -29,22 +29,22 @@
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('sittings')" [attr.dir]="languageService.dir">
             <li>
-              <a routerLink="/school/sitting/years" routerLinkActive="active">
+              <a routerLink="/school/sitting/years" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'settings.yearStudy' | translate }}</span>
               </a>
             </li>
             <li>
-              <a routerLink="/school/sitting/schoolInfo" routerLinkActive="active">
+              <a routerLink="/school/sitting/schoolInfo" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'settings.schoolInfo' | translate }}</span>
               </a>
             </li>
             <li>
-              <a routerLink="/school/sitting/stages" routerLinkActive="active">
+              <a routerLink="/school/sitting/stages" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'settings.stagesClasses' | translate }}</span>
               </a>
             </li>
             <li>
-              <a routerLink="/school/sitting/feeClass" routerLinkActive="active">
+              <a routerLink="/school/sitting/feeClass" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'settings.feeClass' | translate }}</span>
               </a>
             </li>
@@ -62,11 +62,11 @@
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('teachersSubmenu')"
             [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/teacher"><span>{{ 'sidebar.teachers_sub.all' | translate }}</span></a></li>
-            <li><a routerLink="/school/teacher/action"><span>{{ 'sidebar.teachers_sub.add' | translate }}</span></a>
+            <li><a routerLink="/school/teacher" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.all' | translate }}</span></a></li>
+            <li><a routerLink="/school/teacher/action" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.add' | translate }}</span></a>
             </li>
-            <li><a routerLink="/school/parants"><span>{{ 'sidebar.teachers_sub.edit' | translate }}</span></a></li>
-            <li><a routerLink="/school/about-teachers"><span>{{ 'sidebar.teachers_sub.about' | translate }}</span></a>
+            <li><a routerLink="/school/parants" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.edit' | translate }}</span></a></li>
+            <li><a routerLink="/school/about-teachers" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.about' | translate }}</span></a>
             </li>
           </ul>
         </li>
@@ -80,13 +80,13 @@
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('studentsSubmenu')"
             [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/students/all-students"><span>{{ 'sidebar.students_sub.all' | translate
+            <li><a routerLink="/school/students/all-students" (click)="cancel()"><span>{{ 'sidebar.students_sub.all' | translate
                   }}</span></a></li>
-            <li><a routerLink="/school/students/add-student/1"><span>{{ 'sidebar.students_sub.add' | translate
+            <li><a routerLink="/school/students/add-student/1" (click)="cancel()"><span>{{ 'sidebar.students_sub.add' | translate
                   }}</span></a></li>
-            <li><a routerLink="/school/students/edit-student"><span>{{ 'sidebar.students_sub.edit' | translate
+            <li><a routerLink="/school/students/edit-student" (click)="cancel()"><span>{{ 'sidebar.students_sub.edit' | translate
                   }}</span></a></li>
-            <li><a routerLink="/school/students/about-students"><span>عن الطلاب</span></a></li>
+            <li><a routerLink="/school/students/about-students" (click)="cancel()"><span>عن الطلاب</span></a></li>
           </ul>
         </li>
 
@@ -99,8 +99,8 @@
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('guardianSubmenu')"
             [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/guardian/"><span>{{ 'sidebar.parents_sub.all' | translate }}</span></a></li>
-            <li><a routerLink="/edit-student"><span>{{ 'sidebar.parents_sub.editStudent' | translate }}</span></a></li>
+            <li><a routerLink="/school/guardian/" (click)="cancel()"><span>{{ 'sidebar.parents_sub.all' | translate }}</span></a></li>
+            <li><a routerLink="/edit-student" (click)="cancel()"><span>{{ 'sidebar.parents_sub.editStudent' | translate }}</span></a></li>
           </ul>
         </li>
 
@@ -113,8 +113,8 @@
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('accountSubmenu')"
             [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/account/"><span>{{ 'sidebar.accounts_sub.accounts' | translate }}</span></a></li>
-            <li><a routerLink="/school/account/bill"><span>{{ 'sidebar.accounts_sub.bills' | translate }}</span></a>
+            <li><a routerLink="/school/account/" (click)="cancel()"><span>{{ 'sidebar.accounts_sub.accounts' | translate }}</span></a></li>
+            <li><a routerLink="/school/account/bill" (click)="cancel()"><span>{{ 'sidebar.accounts_sub.bills' | translate }}</span></a>
             </li>
           </ul>
         </li>
@@ -127,8 +127,8 @@
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['GradeSubmenu']}"></span>
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('GradeSubmenu')" [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/grade/"><span>{{ 'sidebar.grades_sub.items' | translate }}</span></a></li>
-            <li><a routerLink="/school/grade/GradeMonth"><span>{{ 'sidebar.grades_sub.monthly' | translate }}</span></a>
+            <li><a routerLink="/school/grade/" (click)="cancel()"><span>{{ 'sidebar.grades_sub.items' | translate }}</span></a></li>
+            <li><a routerLink="/school/grade/GradeMonth" (click)="cancel()"><span>{{ 'sidebar.grades_sub.monthly' | translate }}</span></a>
             </li>
           </ul>
         </li>
@@ -142,16 +142,17 @@
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('reportsSubmenu')"
             [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/reports"><span>{{ 'sidebar.report.reports' | translate }}</span></a></li>
-            <li><a routerLink="/school/reports/account"><span>{{ 'sidebar.report.account' | translate }}</span></a></li>
-            <li><a routerLink="/school/reports/grades-month"><span>{{ 'sidebar.report.gradesMonth' | translate
+            <li><a routerLink="/school/reports" (click)="cancel()"><span>{{ 'sidebar.report.reports' | translate }}</span></a></li>
+            <li><a routerLink="/school/reports/account" (click)="cancel()"><span>{{ 'sidebar.report.account' | translate }}</span></a></li>
+            <li><a routerLink="/school/reports/month-result" (click)="cancel()"><span>الدرجات الشهرية</span></a></li>
+            <li><a routerLink="/school/reports/grades-month" (click)="cancel()"><span>{{ 'sidebar.report.gradesMonth' | translate
                   }}</span></a></li>
           </ul>
 
         </li>
         <!-- التقويم -->
         <li [attr.dir]="languageService.dir">
-          <a routerLink="/school/allotment">
+          <a routerLink="/school/allotment" (click)="cancel()">
             <img src="assets/img/sidebar/icon-6.png" alt="icon">
             <span>{{ 'sidebar.calendar' | translate }}</span>
           </a>
@@ -159,7 +160,7 @@
 
         <!-- الإختبارات -->
         <li [attr.dir]="languageService.dir">
-          <a routerLink="dashboard">
+          <a routerLink="dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-7.png" alt="icon">
             <span>{{ 'sidebar.tests' | translate }}</span>
           </a>
@@ -167,7 +168,7 @@
 
         <!-- العطل -->
         <li [attr.dir]="languageService.dir">
-          <a routerLink="dashboard">
+          <a routerLink="dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-8.png" alt="icon">
             <span>{{ 'sidebar.holidays' | translate }}</span>
           </a>
@@ -175,7 +176,7 @@
 
         <!-- الأحداث -->
         <li [attr.dir]="languageService.dir">
-          <a routerLink="dashboard">
+          <a routerLink="dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-9.png" alt="icon">
             <span>{{ 'sidebar.events' | translate }}</span>
           </a>
@@ -190,11 +191,11 @@
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('accountsSubmenu')"
             [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/CaptureBonds"><span>{{ 'sidebar.fees_sub.feeSettings' | translate }}</span></a>
+            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.feeSettings' | translate }}</span></a>
             </li>
-            <li><a routerLink="/school/CaptureBonds"><span>{{ 'sidebar.fees_sub.receipt' | translate }}</span></a></li>
-            <li><a routerLink="/school/CaptureBonds"><span>{{ 'sidebar.fees_sub.expenses' | translate }}</span></a></li>
-            <li><a routerLink="/school/CaptureBonds"><span>{{ 'sidebar.fees_sub.taxes' | translate }}</span></a></li>
+            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.receipt' | translate }}</span></a></li>
+            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.expenses' | translate }}</span></a></li>
+            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.taxes' | translate }}</span></a></li>
           </ul>
         </li>
 
@@ -206,10 +207,10 @@
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['courses']}"></span>
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('courses')" [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/course/"><span>{{ 'sidebar.courses_sub.books' | translate }}</span></a></li>
-            <li><a routerLink="/school/course/courses"><span>{{ 'sidebar.courses_sub.curricula' | translate
+            <li><a routerLink="/school/course/" (click)="cancel()"><span>{{ 'sidebar.courses_sub.books' | translate }}</span></a></li>
+            <li><a routerLink="/school/course/courses" (click)="cancel()"><span>{{ 'sidebar.courses_sub.curricula' | translate
                   }}</span></a></li>
-            <li><a routerLink="/school/course/plain"><span>{{ 'sidebar.courses_sub.plans' | translate }}</span></a></li>
+            <li><a routerLink="/school/course/plain" (click)="cancel()"><span>{{ 'sidebar.courses_sub.plans' | translate }}</span></a></li>
           </ul>
         </li>
 
@@ -222,8 +223,8 @@
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('payrollSubmenu')"
             [attr.dir]="languageService.dir">
-            <li><a href="inbox.html"><span>{{ 'sidebar.payroll_sub.salaries' | translate }}</span></a></li>
-            <li><a href="inbox.html"><span>{{ 'sidebar.payroll_sub.installments' | translate }}</span></a></li>
+            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.payroll_sub.salaries' | translate }}</span></a></li>
+            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.payroll_sub.installments' | translate }}</span></a></li>
           </ul>
         </li>
 
@@ -235,10 +236,10 @@
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['blogSubmenu']}"></span>
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('blogSubmenu')" [attr.dir]="languageService.dir">
-            <li><a href="inbox.html"><span>{{ 'sidebar.blogs_sub.blog' | translate }}</span></a></li>
-            <li><a href="inbox.html"><span>{{ 'sidebar.blogs_sub.view' | translate }}</span></a></li>
-            <li><a href="inbox.html"><span>{{ 'sidebar.blogs_sub.add' | translate }}</span></a></li>
-            <li><a href="inbox.html"><span>{{ 'sidebar.blogs_sub.edit' | translate }}</span></a></li>
+            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.blogs_sub.blog' | translate }}</span></a></li>
+            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.blogs_sub.view' | translate }}</span></a></li>
+            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.blogs_sub.add' | translate }}</span></a></li>
+            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.blogs_sub.edit' | translate }}</span></a></li>
           </ul>
         </li>
 
@@ -262,28 +263,28 @@
               </a>
               <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('employeesSubmenu')"
                 [attr.dir]="languageService.dir">
-                <li><a href="inbox.html"><span>{{ 'sidebar.employees_sub.all' | translate }}</span></a></li>
-                <li><a href="inbox.html"><span>{{ 'sidebar.employees_sub.holidays' | translate }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.all' | translate }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.holidays' | translate }}</span></a></li>
                 <li>
-                  <a href="inbox.html">
+                  <a href="inbox.html" (click)="cancel()">
                     <span>{{ 'sidebar.employees_sub.leaveRequests' | translate }}</span>
                     <span class="badge badge-pill bg-primary float-right">1</span>
                   </a>
                 </li>
-                <li><a href="inbox.html"><span>{{ 'sidebar.employees_sub.attendance' | translate }}</span></a></li>
-                <li><a href="inbox.html"><span>{{ 'sidebar.employees_sub.departments' | translate }}</span></a></li>
-                <li><a href="inbox.html"><span>{{ 'sidebar.employees_sub.tasks' | translate }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.attendance' | translate }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.departments' | translate }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.tasks' | translate }}</span></a></li>
               </ul>
             </li>
 
             <!-- الأنشطة -->
             <li>
-              <a href="#"><span>{{ 'sidebar.activities' | translate }}</span></a>
+              <a href="#" (click)="cancel()"><span>{{ 'sidebar.activities' | translate }}</span></a>
             </li>
 
             <!-- المستخدمين -->
             <li>
-              <a href="inbox.html"><span>{{ 'sidebar.users' | translate }}</span></a>
+              <a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.users' | translate }}</span></a>
             </li>
 
             <!-- التقارير (nested submenu) -->
@@ -296,8 +297,8 @@
               </a>
               <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('reportsSubmenu')"
                 [attr.dir]="languageService.dir">
-                <li><a href="inbox.html"><span>{{ 'sidebar.reports_sub.expensesReport' | translate }}</span></a></li>
-                <li><a href="inbox.html"><span>{{ 'sidebar.reports_sub.billReport' | translate }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.reports_sub.expensesReport' | translate }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.reports_sub.billReport' | translate }}</span></a></li>
               </ul>
             </li>
 

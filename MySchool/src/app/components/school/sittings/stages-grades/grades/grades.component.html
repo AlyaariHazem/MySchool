@@ -1,10 +1,10 @@
 <form [formGroup]="form" class="From">
   <label for="stage" class="termName">اسـم المرحـلة</label><br />
   <p-select [options]="stages" optionLabel="stageName" [showClear]="true" name="stage" optionValue="stageID"
-     formControlName="stageID" id="term" class="term" placeholder="إختار مرحلة" />
+     formControlName="stageID" id="term" class="term h-3rem" placeholder="إختار مرحلة" />
 
   <label for="className" class="className">اسـم الصف</label>
-  <input pInputText type="text" formControlName="className" class="class" placeholder="إدخال اسم صـف جديد" />
+  <input pInputText type="text" formControlName="className" class="class h-3rem" placeholder="إدخال اسم صـف جديد" />
   <p-button variant="outlined" severity="success" class="showFee" [label]="isEditMode ? 'تعديل' : 'إضافة'" (click)="isEditMode ? updateClass() : addClass()"
     [disabled]="!form.valid" />
 </form>

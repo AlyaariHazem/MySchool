@@ -14,8 +14,7 @@ public class MonthlyGradesController : ControllerBase
     {
         _repo = repo;
     }
-
-    /* ----------  POST  ---------- */
+    //api/MonthlyGrades
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] MonthlyGradeDTO dto)
     {
@@ -34,7 +33,7 @@ public class MonthlyGradesController : ControllerBase
             : BadRequest(APIResponse.Fail(result.Error!));
     }
 
-    /* ----------  GET LIST  ---------- */
+    //api/MonthlyGrades/1/2/3/4?pageNumber=1&pageSize=10
     [HttpGet("{term:int}/{monthId:int}/{classId:int}/{subjectId:int}")]
     public async Task<IActionResult> GetAll(int term, int monthId, int classId, int subjectId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {

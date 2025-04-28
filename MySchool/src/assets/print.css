@@ -1,0 +1,9 @@
+body       { direction:rtl; font-family:"Tajawal",Arial,sans-serif }
+table      { border-collapse:collapse; width:100% }
+th,td      { border:1px solid #dcdcdc; padding:4px 6px; text-align:center; font-size:11px }
+.subject-header{ background:#f5f5f5; font-weight:600 }
+.odd-row   { background:#fafafa }
+td,th{
+    border: 1px solid #dcdcdc;
+    border-width: none !important;
+   }

@@ -10,6 +10,7 @@ public class MonthlyGradesReternDTO
 {
     public int StudentID { get; set; }
     public string StudentName { get; set; }
+    public string? StudentURL {get; set;}
     public int SubjectID { get; set; }
     public string SubjectName { get; set; }
     public List<GradeTypeMonthDTO> Grades { get; set; }

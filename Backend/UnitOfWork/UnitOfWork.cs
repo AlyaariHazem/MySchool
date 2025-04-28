@@ -58,6 +58,7 @@ public class UnitOfWork : IUnitOfWork
         Months = new MonthRepository(_context, _mapper);
         Employees = new EmployeeRepository(_context, Users);
         AccountStudentGuardians = new AccountStudentGuardianRepository(_context, _mapper);
+        Reports = new ReportRepository(_context);
     }
 
     public ISubjectsRepository Subjects { get; private set; }
@@ -85,6 +86,7 @@ public class UnitOfWork : IUnitOfWork
     public IMonthRepository Months { get; private set; }
     public IEmployeeRepository Employees { get; private set; }
     public IAccountStudentGuardianRepository AccountStudentGuardians { get; private set; }
+    public IReportRepository Reports { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

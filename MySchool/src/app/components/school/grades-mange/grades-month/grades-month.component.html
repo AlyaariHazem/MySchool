@@ -87,7 +87,7 @@
                             </td>
 
                             <td>{{ CurrentStudent.studentID }}</td>
-                            <td>{{ CurrentStudent.studentName }}</td>
+                            <td><img class="w-3rem h-3rem image" src="{{CurrentStudent.studentURL}}" alt="">{{ CurrentStudent.studentName }}</td>
                             <td>{{ CurrentStudent.subjectName }}</td>
 
                             @for (grade of CurrentStudent.grades; track $index) {
@@ -159,7 +159,7 @@
                         <tr>
                             <td>{{ $index+1 }}</td>
                             <td>{{student.studentID}}</td>
-                            <td class="student-name-column">{{student.studentName}}</td>
+                            <td class="student-name-column text-right"><img class="w-3rem h-3rem image" src="{{student.studentURL}}" alt=""> {{student.studentName}}</td>
                             <td>{{student.subjectName}}</td>
                             @for (grade of student.grades; track $index) {
                             <td><input class="form-control input1 no-spinner" type="number" [(ngModel)]="grade.maxGrade"
@@ -189,6 +189,8 @@
                                 </div>
                             </td>
                         </tr>
+                        }@empty {
+                            <div class="empty">لا يوجد طلاب في هذا الفصل</div>
                         }
                     </tbody>
                 </table>

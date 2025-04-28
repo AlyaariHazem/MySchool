@@ -1,0 +1,56 @@
+.grades-table {
+    direction: rtl;
+    font-family: 'Tajawal', sans-serif;
+  
+    .toolbar button,
+    .toolbar .p-dropdown {
+      min-width: 6rem;
+    }
+  
+    .subject-header {
+      text-align: center;
+    }
+  
+    .odd-row {
+      background-color: #fafafa;
+    }
+  
+    ::ng-deep .p-table td,
+    ::ng-deep .p-table th {
+      border: 1px solid #dcdcdc;
+      padding: 4px 6px;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+   td,th{
+    border: 1px solid #dcdcdc;
+    border-width: none !important;
+   }
+  
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: inherit;
+      z-index: 1;
+    }
+    .sticky-col-right {
+      position: sticky;
+      right: 0;
+      background: inherit;
+      z-index: 1;
+    }
+  
+    ::ng-deep .p-datatable-scrollable-header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+  }
+  
+  ::-webkit-scrollbar {
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c0c0c0;
+    border-radius: 4px;
+  }

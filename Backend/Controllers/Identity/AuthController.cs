@@ -14,13 +14,13 @@ namespace Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IConfiguration config;
         private readonly DatabaseContext _context;
 
-        public AccountController(UserManager<ApplicationUser> UserManager, IConfiguration config, DatabaseContext context)
+        public AuthController(UserManager<ApplicationUser> UserManager, IConfiguration config, DatabaseContext context)
         {
             userManager = UserManager;
             this.config = config;

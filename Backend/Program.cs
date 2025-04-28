@@ -153,6 +153,7 @@ builder.Services.AddScoped<ITermRepository, TermRepository>();
 builder.Services.AddScoped<IMonthRepository, MonthRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IAccountStudentGuardianRepository, AccountStudentGuardianRepository>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
 
 var app = builder.Build();

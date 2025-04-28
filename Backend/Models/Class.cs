@@ -18,6 +18,10 @@ namespace Backend.Models
         public int? YearID { get; set; }
         [JsonIgnore]
         public Year Year { get; set; }
+        public int? TeacherID { get; set; }
+
+        [JsonIgnore]
+        public Teacher Teacher { get; set; }//and if I add this I must to add it in the teacher class
         [JsonIgnore]
         public virtual ICollection<FeeClass> FeeClasses { get; set; } = new List<FeeClass>();
         [JsonIgnore]

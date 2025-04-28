@@ -43,8 +43,8 @@ export class GradesMonthComponent implements OnInit {
   filteredMonths: Month[] = [];
 
   // Track the loading state
-  isLoading = false;
-  visible: boolean = false;
+  isLoading = true;
+  visible: boolean =true
 
   langDir!: string;
   languageStore = inject(Store);
@@ -124,7 +124,7 @@ export class GradesMonthComponent implements OnInit {
     if (this.currentStudentIndex < this.monthlyGrades.length - 1) {
       this.currentStudentIndex++;
       this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
-    }
+    } 
   }
 
   goPreviousStudent(): void {
@@ -135,7 +135,7 @@ export class GradesMonthComponent implements OnInit {
   }
 
   private filterMonthsByTerm(): void {
-    this.filteredMonths = this.months.filter(m => m.termId === this.selectedTerm); // إفراغ الاختيار القديم
+    this.filteredMonths = this.months.filter(m => m.termId ===  this.form.get('selectedTerm')?.value);
   }
 
   selectClass(_: any): void {
@@ -159,6 +159,7 @@ export class GradesMonthComponent implements OnInit {
       this.form.get('selectedSubject')?.value
     );
     this.updatePaginatedData();
+    this.filterMonthsByTerm();
   }
 
   selectSubject(_: any): void {
@@ -233,15 +234,21 @@ export class GradesMonthComponent implements OnInit {
       this.visible = false;
       if (this.monthlyGrades.length > 0) {
         this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
+      }else{
+        this.CurrentStudent =null!;
       }
     });
   }
 
   updatePaginatedData(): void {
+    this.visible = true;
+    this.isLoading = true;
     this.monthlyGradesService.getAllMonthlyGrades(this.form.get('selectedTerm')?.value, this.form.get('selectedMonth')?.value, this.form.get('selectedClass')?.value, this.form.get('selectedSubject')?.value, this.first / this.rows + 1, this.rows).subscribe((res) => {
       this.paginates = res;
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
+      this.isLoading = false;
+      this.visible = false;
     });
   }
 
@@ -262,10 +269,9 @@ export class GradesMonthComponent implements OnInit {
 
   // تُستدعى عند كل تغيّر فى حقل الدرجة
   clampGrade(g: { gradeTypeID: number, maxGrade: any }): void {
-    const limit = this.gradeLimits[g.gradeTypeID] ?? 100;  // إذا لم يتم تحديد حد، استخدم 100
+    const limit = this.gradeLimits[g.gradeTypeID] ?? 100;
     let value = Number(g.maxGrade);
 
-    // إذا كانت القيمة غير رقم، رجّعها صفر
     if (isNaN(value)) {
       g.maxGrade = 0;
       return;
@@ -277,6 +283,7 @@ export class GradesMonthComponent implements OnInit {
     } else if (value < 0) {
       g.maxGrade = 0;
     }
+    // this.monthlyGrades[this.currentStudentIndex].grades[this.currentStudentIndex].maxGrade = g.maxGrade;
   }
   enforceLimit(evt: Event, g: { gradeTypeID: number; maxGrade: any }): void {
     const input = evt.target as HTMLInputElement;

@@ -51,6 +51,7 @@ languageService=inject(LanguageService);
     this.translationService.changeLanguage(this.languageService.langDir);
   }
   SchoolLogo=localStorage.getItem('SchoolImageURL');
+  schoolName=localStorage.getItem('schoolName');
   toggleSubmenu(submenu: string, parentSubmenu?: string) {
     if (parentSubmenu) {
       this.closeOtherSubmenus(parentSubmenu, submenu);

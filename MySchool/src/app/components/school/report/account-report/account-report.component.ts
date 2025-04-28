@@ -12,7 +12,8 @@ export class AccountReportComponent {
   @ViewChild('printArea', { static: true })
   printArea!: ElementRef<HTMLDivElement>;
 
-  /* مثال بيانات – استبدلها بـ API */
+  logo=localStorage.getItem('SchoolImageURL');
+  schoolName=localStorage.getItem('schoolName');
   header = {
     accountNo: '123456789',
     guardian: 'ولي الأمر: أحمد محمد',

@@ -181,6 +181,13 @@ namespace Backend.Data
                 .HasForeignKey(D => D.ClassID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // one to many relationship for Class and Teacher
+            modelBuilder.Entity<Teacher>()
+                .HasMany<Class>(c => c.Classes)
+                .WithOne(t => t.Teacher)
+                .HasForeignKey(c => c.TeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // one to many relationship for Division and Student
             modelBuilder.Entity<Division>()
                 .HasMany<Student>(S => S.Students)

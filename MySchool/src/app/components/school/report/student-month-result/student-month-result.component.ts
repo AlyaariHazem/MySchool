@@ -1,10 +1,8 @@
 // student-month-result.component.ts
-import { Component, OnInit } from '@angular/core';
-interface SubjectGrade {
-  name: string;
-  max: number;
-  score: number;
-}
+import { Component, inject, OnInit } from '@angular/core';
+import { MonthlyResultService } from '../../core/services/monthly-resultt.service';
+import { MonthlyResult } from '../../core/models/monthly-result.model';
+
 
 @Component({
   selector: 'app-student-month-result',
@@ -13,13 +11,20 @@ interface SubjectGrade {
 })
 export class StudentMonthResultComponent implements OnInit {
   private title = 'Student Month Result';
+  monthlyResults!: MonthlyResult[];
+  monthlyResult = inject(MonthlyResultService);
+  constructor() {
+    this.monthlyResult.getMonthlyGradesReport().subscribe((res) => {
+      this.monthlyResults = res;
+    });
+  }
 
   getTitle(): string {
     return this.title;
   }
 
   getContent(): string {
-  return `
+    return `
   <div dir="rtl" style="font-family:Tajawal, sans-serif; line-height:1.7">
     <!-- top line -->
     <div style="display:flex; justify-content:space-between; margin-bottom:16px">
@@ -73,80 +78,46 @@ export class StudentMonthResultComponent implements OnInit {
     </table>
   </div>
   `;
-}
-SchoolLogo=localStorage.getItem('SchoolImageURL');
-ngOnInit(): void {
-}
-report = {
-  school: 'Hossam Schools',
-  year: '2021‑2022',
-  term: 'First',
-  month: 'أكتوبر',
+  }
 
-  govHeader: [
-    'الجمهورية اليمنية',
-    'وزارة التربية والتعليم',
-    'مكتب التربية أمانة العاصمة'
-  ],
+  SchoolLogo = localStorage.getItem('SchoolImageURL');
+  ngOnInit(): void {
+  }
 
-  studentId: '1001483',
-  studentName: 'عبدالعليم علي حسن العزي',
-  grade: 'أول',
-  section: 'ب',
+  printReport(subj: MonthlyResult): void {
+    const page = document.getElementById(`report-${subj.studentID}`);
+    if (!page) return;
+    this.title = `${subj.studentName}_${subj.year}_${subj.month}_${subj.class}`;
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+      .map(el => el.outerHTML)
+      .join('');
+    const base = `<base href="${document.baseURI}">`;
 
-  subjects: <SubjectGrade[]>[
-    { name: 'القرآن الكريم', max: 100, score: 100 },
-    { name: 'القرآن الكريم', max: 100, score: 100 },
-    { name: 'القرآن الكريم', max: 100, score: 100 },
-    { name: 'علوم',          max: 100, score: 94  }
-  ]
-};
+    const popup = window.open('', '', 'width=1000px,height=auto');
+    if (!popup) return;
 
-/** مجموع الدرجات */
-get total(): number {
-  return this.report.subjects.reduce((s, x) => s + x.score, 0);
-}
-
-/** النسبة المئوية */
-get percentage(): number {
-  const full = this.report.subjects.reduce((s, x) => s + x.max, 0);
-  return +(this.total / full * 100).toFixed(0);
-}
-
-print(): void {
-  const page = document.getElementById('report');
-  if (!page) { return; }
-
-  /* ️نسخ كل ملفات الأنماط الموجودة */
-  const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-                     .map(el => el.outerHTML)
-                     .join('');
-
-  const base = `<base href="${document.baseURI}">`;
-
-  const popup = window.open('', '', 'width=1000px,height=auto');
-  if (!popup) { return; }
-
-  popup.document.write(`
-    <html><head>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    <title>${this.title}</title>
-      ${base}
-      ${links}
-      <style>
-      
-        @media print {
-          body{margin:0;direction:rtl;font-family:"Cairo","Tahoma",sans-serif}
-          .report,*{letter-spacing:0!important}   /* إبقاء العربية متصلة */
-        }
-      </style>
-    </head><body dir="rtl">
-      ${page.outerHTML}
-    </body></html>
+    popup.document.write(`
+    <html>
+      <head>
+        <title>${this.title}</title>
+        ${base}
+        ${links}
+        <style>
+          @media print {
+            body { margin: 0; direction: rtl; font-family: "Tajawal", "Arial", sans-serif; }
+            .report, * { letter-spacing: 0 !important; }
+          }
+        </style>
+      </head>
+      <body>
+        ${page.outerHTML}
+      </body>
+    </html>
   `);
 
-  popup.document.close();
-  popup.onload = () => popup.print();
-}
+    popup.document.close();
+    popup.onload = () => popup.print();
+  }
+
 
 }
