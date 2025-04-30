@@ -1,6 +1,6 @@
 <form [formGroup]="form" class="From">
   <label for="stage" class="termName">اسـم المرحـلة</label><br />
-  <p-select [options]="stages" optionLabel="stageName" [showClear]="true" name="stage" optionValue="stageID"
+  <p-select [options]="stages" optionLabel="stageName" [showClear]="true" [editable]="true" name="stage" optionValue="stageID"
      formControlName="stageID" id="term" class="term h-3rem" placeholder="إختار مرحلة" />
 
   <label for="className" class="className">اسـم الصف</label>

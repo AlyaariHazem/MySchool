@@ -7,6 +7,7 @@ import { FeeClassService } from '../../../core/services/fee-class.service';
 import { FeeClasses } from '../../../core/models/Fee.model';
 import { ClassService } from '../../../core/services/class.service';
 import { ClassDTO } from '../../../core/models/class.model';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-fee',
@@ -31,6 +32,7 @@ export class FeeComponent implements OnInit, OnChanges {
   feeClassService = inject(FeeClassService);
   changeDetectorRef = inject(ChangeDetectorRef);
   classService = inject(ClassService);
+  toastr=inject(ToastrService);
 
   ngOnInit() {
     this.GetAllClasses();
@@ -51,7 +53,19 @@ export class FeeComponent implements OnInit, OnChanges {
   }
 
   GetAllClasses(): void {
-    this.classService.GetAll().subscribe((res) => (this.classes = res));
+    this.classService.GetAll().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load classes');
+          this.classes = [];
+        } else {
+          this.classes = res.result;
+        }
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
   }
 
   onOptionSelected(event: any) {

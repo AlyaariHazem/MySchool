@@ -59,6 +59,8 @@ public class UnitOfWork : IUnitOfWork
         Employees = new EmployeeRepository(_context, Users);
         AccountStudentGuardians = new AccountStudentGuardianRepository(_context, _mapper);
         Reports = new ReportRepository(_context);
+        MonthlyGrades = new MonthlyGradeRepository(_context, _mapper);
+        TermlyGrades = new TermlyGradeRepository(_context, _mapper);
     }
 
     public ISubjectsRepository Subjects { get; private set; }
@@ -87,6 +89,8 @@ public class UnitOfWork : IUnitOfWork
     public IEmployeeRepository Employees { get; private set; }
     public IAccountStudentGuardianRepository AccountStudentGuardians { get; private set; }
     public IReportRepository Reports { get; private set; }
+    public IMonthlyGradeRepository MonthlyGrades { get; private set; }
+    public ITermlyGradeRepository TermlyGrades { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { Voucher, VoucherAdd } from '../models/voucher.model';
 import { VouchersGuardian } from '../models/vouchers-guardian.model';
+import { ApiResponse } from '../../../../core/models/response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,22 +13,23 @@ export class VoucherService {
 
   private API = inject(BackendAspService);
 
-  constructor() { }
-  getAll(): Observable<Voucher[]> {
-    return this.API.getRequest<Voucher[]>("Vouchers");
-  }
-  getAllVouchersGuardian(): Observable<VouchersGuardian[]> {
-    return this.API.getRequest<VouchersGuardian[]>("Vouchers/vouchersGuardian");
+  getAll(): Observable<ApiResponse<Voucher[]>> {
+    return this.API.getRequest<Voucher[]>('Vouchers');
   }
 
-  Add(voucher: VoucherAdd): Observable<string> {
-    return this.API.postRequest<string>("Vouchers", voucher);
+  getAllVouchersGuardian(): Observable<ApiResponse<VouchersGuardian[]>> {
+    return this.API.getRequest<VouchersGuardian[]>('Vouchers/vouchersGuardian');
   }
-  Delete(id: number): Observable<any> {
-    return this.API.deleteRequest(`Vouchers/${id}`);
+
+  Add(voucher: VoucherAdd): Observable<ApiResponse<string>> {
+    return this.API.postRequest<string>('Vouchers', voucher);
   }
-  Update(id: number | undefined, voucher: any): Observable<any> {
+
+  Delete(id: number): Observable<ApiResponse<any>> {
+    return this.API.deleteRequest<any>(`Vouchers/${id}`);
+  }
+
+  Update(id: number | undefined, voucher: VoucherAdd): Observable<ApiResponse<any>> {
     return this.API.putRequest<any>(`Vouchers/${id}`, voucher);
   }
-
 }

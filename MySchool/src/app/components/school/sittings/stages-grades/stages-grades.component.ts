@@ -52,14 +52,14 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
     this.stageService.getAllStages().subscribe({
       next: (data) => {
         this.stages = data;
-        this.isLoading=false;
+        this.isLoading = false;
         this.length = this.stages.length; // Set total item count
         this.updateDisplayedDivisions(); // Initialize displayed divisions
       },
-      error: () =>{
+      error: () => {
         this.errorMessage = 'Failed to load stages';
-        this.isLoading=false;
-      } 
+        this.isLoading = false;
+      }
     });
   }
 
@@ -68,7 +68,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
 
     if (this.form.valid) {
       const addStageData: AddStage = this.form.value;
-      addStageData.YearID = Number(localStorage.getItem('yearId')|| 1);
+      addStageData.YearID = Number(localStorage.getItem('yearId') || 1);
       this.stageService.AddStage(addStageData).subscribe({
         next: () => {
           this.getStage();
@@ -149,20 +149,35 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   //these for Class
   deleteClass(ID: number): void {
     this.classService.Delete(ID).subscribe({
-      next: (response) => {
-        if (response) {
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'الصف غير فارغ');
+          return;
         }
+
+        this.toastr.success('Class deleted');
+        this.getAllClasses();
       },
       error: () => this.toastr.error('يجب أن يكون الصف فارغ', 'خطأ')
     });
   }
+  
   getAllClasses(): void {
     this.classService.GetAll().subscribe({
-      next: (data) => {
-        this.classes= data;
-        this.isLoading=false;
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'فشل تحميل الصفوف');
+          this.classes = [];
+          return;
+        }
+
+        this.classes = res.result;
+        this.isLoading = false;
       },
-      error: () => this.errorMessage = 'Failed to load classes'
+      error: () => {
+        this.toastr.error('Failed to load classes');
+        this.classes = [];
+      }
     });
   }
 

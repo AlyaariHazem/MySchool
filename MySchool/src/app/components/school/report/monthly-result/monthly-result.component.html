@@ -1,6 +1,5 @@
 <div class="card grades-table">
 
-    <!-- أدوات الجدول -->
     <div class="toolbar flex justify-content-between align-items-center mb-3 gap-2">
         <button pButton icon="pi pi-print" label="طباعة" (click)="print()"></button>
         <button pButton icon="pi pi-download" label="CSV"></button>
@@ -13,7 +12,6 @@
         <p-table #table [value]="monthlyReports" [scrollable]="true" scrollHeight="400px" [paginator]="true" [rows]="10"
             dataKey="studentID" styleClass="p-datatable-striped">
 
-            <!-- الصف الأول من الرؤوس -->
             <ng-template pTemplate="header">
                 <tr>
                     <th colspan="2" class="sticky-col w-12rem text-center">#</th>
@@ -24,7 +22,6 @@
                     <th colspan="3" class="sticky-col-right w-6rem">درجات الفصل الدراسي</th>
                 </tr>
 
-                <!-- الصف الثاني من الرؤوس -->
                 <tr>
                     <th>م</th>
                     <th>اسم الطالب</th>
@@ -37,7 +34,6 @@
                 </tr>
             </ng-template>
 
-            <!-- الجسم -->
             <ng-template pTemplate="body" let-row let-i="rowIndex">
                 <tr [ngClass]="{ 'odd-row': i % 2 === 1 }">
                     <td class="sticky-col">{{ row.studentID }}</td>

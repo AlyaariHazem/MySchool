@@ -10,7 +10,7 @@ export class IntercepterService implements HttpInterceptor {
    handleError=inject(HandleErrorService);
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>>{
     return next.handle(req).pipe(
-      catchError(this.handleError.logErrorResponse)
+      catchError(error => this.handleError.logErrorResponse(error))
     );
   }
   constructor() { }

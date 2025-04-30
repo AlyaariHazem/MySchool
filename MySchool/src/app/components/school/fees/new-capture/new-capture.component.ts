@@ -140,8 +140,9 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   
     /* ️نسخ كل ملفات الأنماط الموجودة */
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-                       .map(el => el.outerHTML)
-                       .join('');
+      .filter((el: Element) => el.getAttribute('href') !== 'assets/print.css')
+      .map(el => el.outerHTML)
+      .join('');
   
     const base = `<base href="${document.baseURI}">`;
   
@@ -176,8 +177,21 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
     this.changeView = !this.changeView;
   }
   getAccounts() {
-    this.accountService.getAccountAndStudentNames().subscribe(res => {
-      this.accounts = res;
+    this.accountService.getAccountAndStudentNames().subscribe({
+      next: res=>{
+        if(!res.isSuccess){
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load accounts.');
+          this.accounts = [];
+          return;
+        }
+        this.accounts = res.result;
+        
+      },
+      error: err => {
+        this.toastr.error('Server error occurred while fetching accounts.');
+        console.error(err);
+        this.accounts = [];
+      }
     });
   }
   ngOnInit() {
@@ -243,10 +257,21 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
   getAllVouchersGuardian(): void {
-    this.voucherService.getAllVouchersGuardian().subscribe(res => {
-      this.vouchersGuardian = res;
-    }
-    );
+    this.voucherService.getAllVouchersGuardian().subscribe({
+      next: res => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load vouchers.');
+          this.vouchersGuardian = [];
+          return;
+        }
+        this.vouchersGuardian = res.result;
+      },
+      error: err => {
+        this.toastr.error('Server error occurred while fetching vouchers.');
+        console.error(err);
+        this.vouchersGuardian = [];
+      }
+    });
   }
   trackByIndex(index: number): number {
     return index;
@@ -257,8 +282,9 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   
     /* ️نسخ كل ملفات الأنماط الموجودة */
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-                       .map(el => el.outerHTML)
-                       .join('');
+      .filter((el: Element) => el.getAttribute('href') !== 'assets/print.css')
+      .map(el => el.outerHTML)
+      .join('');
   
     const base = `<base href="${document.baseURI}">`;
   

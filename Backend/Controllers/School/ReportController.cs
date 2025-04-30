@@ -17,16 +17,13 @@ public class ReportController : ControllerBase
     {
         _unitOfWork = unitOfWork;
     }
-    [HttpGet]
-    public async Task<IActionResult> GetAllReports()
+    [HttpGet("{yearId:int}/{termId:int}/{monthId:int}/{classId:int}/{divisionId:int}/{studentId:int}")]
+    public async Task<IActionResult> MonthlyReports(int yearId, int termId, int monthId, int classId, int divisionId, int studentId = 0)
     {
-        var result = await _unitOfWork.Reports.GetAllReportsAsync();
-        if (result.Ok)
-        {
-            return result.Ok
-           ? Ok(APIResponse.Success(result.Value!))
-           : NotFound(APIResponse.Fail(result.Error!));
-        }
-        return NotFound(result.Error);
+        var result = await _unitOfWork.Reports.MonthlyReportsAsync(yearId, termId, monthId, classId, divisionId, studentId);
+        return result.Ok
+       ? Ok(APIResponse.Success(result.Value!))
+       : NotFound(APIResponse.Fail(result.Error!));
+
     }
 }

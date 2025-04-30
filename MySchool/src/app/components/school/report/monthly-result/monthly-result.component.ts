@@ -14,7 +14,7 @@ export class MonthlyResultComponent implements OnInit {
 
   subjectNames: string[] = [];
   gradeTypes: string[] = [];
-  print(){
+  print() {
     window.print();
   }
   months = [
@@ -26,12 +26,12 @@ export class MonthlyResultComponent implements OnInit {
   selectedMonth = 'October';
 
   ngOnInit() {
-    this.loadMockData();                // بيانات وهميّة
-    this.prepareHeaders();              // اشتق الرؤوس
-    this.filterByMonth();               // أول تصفية
+    this.loadMockData();
+    this.prepareHeaders();
+    this.filterByMonth();
   }
 
-  /* درجات تجريبية مقتبسة من لقطة الشاشة */
+  
   private loadMockData() {
     this.allReports = [
       {
@@ -43,23 +43,23 @@ export class MonthlyResultComponent implements OnInit {
         gradeSubjects: [
           {
             subjectID: 1, subjectName: 'قرآن كريم',
-            grades: { q1: 20, q2: 19, q3: 10, qTotal: 99 }
+            grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 }
           },
           {
             subjectID: 2, subjectName: 'تربية إسلامية',
-            grades: { i1: 20, i2: 20, i3: 10, iTotal: 100 }
+            grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 }
           },
           {
             subjectID: 3, subjectName: 'رياضيات',
-            grades: { m1: 20, m2: 19, m3: 10, mTotal: 74 }
+            grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 }
           },
           {
             subjectID: 4, subjectName: 'علوم',
-            grades: { s1: 19, s2: 13, s3: 7, sTotal: 84 }
+            grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 }
           },
           {
             subjectID: 5, subjectName: 'لغة عربية',
-            grades: { a1: 10, a2: 6, a3: 8, aTotal: 69 }
+            grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 }
           }
         ]
       },
@@ -70,23 +70,21 @@ export class MonthlyResultComponent implements OnInit {
         percentage: 100,
         gradeTotal: 500,
         gradeSubjects: [
-          { subjectID: 1, subjectName: 'قرآن كريم', grades: { q1: 20, q2: 20, q3: 40, qTotal: 100 } },
-          { subjectID: 2, subjectName: 'تربية إسلامية', grades: { i1: 20, i2: 20, i3: 40, iTotal: 100 } },
-          { subjectID: 3, subjectName: 'رياضيات', grades: { m1: 20, m2: 20, m3: 60, mTotal: 100 } },
-          { subjectID: 4, subjectName: 'علوم', grades: { s1: 20, s2: 20, s3: 60, sTotal: 100 } },
-          { subjectID: 5, subjectName: 'لغة عربية', grades: { a1: 20, a2: 20, a3: 60, aTotal: 100 } }
+          { subjectID: 1, subjectName: 'قرآن كريم', grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 } },
+          { subjectID: 2, subjectName: 'تربية إسلامية', grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 } },
+          { subjectID: 3, subjectName: 'رياضيات', grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 } },
+          { subjectID: 4, subjectName: 'علوم', grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 } },
+          { subjectID: 5, subjectName: 'لغة عربية', grades: { '20 واج': 20, 'موا 20': 19, 'مشا 10': 10, 'شفه 10': 7, 'تحر 40': 34, 'المجموع 100': 99 } }
         ]
       }
     ];
   }
 
-  /* استخرج أسماء المواد وأنواع الدرجات */
   private prepareHeaders() {
     this.subjectNames = [...new Set(
       this.allReports.flatMap(r => r.gradeSubjects.map(s => s.subjectName))
     )];
 
-    /* أنواع الدرجات من أوّل مادة (على فرض أنها موحّدة للجميع) */
     const firstGrades = this.allReports[0]?.gradeSubjects[0]?.grades ?? {};
     this.gradeTypes = Object.keys(firstGrades);
   }
@@ -108,13 +106,13 @@ export interface MonthlyResult {
   studentID: number;
   studentName: string;
   month: string;
-  percentage: number;              // النسبة العامة
-  gradeTotal: number;              // مجموع الشهر
+  percentage: number;
+  gradeTotal: number;
   gradeSubjects: GradeSubject[];
 }
 
 export interface GradeSubject {
   subjectID: number;
   subjectName: string;
-  grades: { [gradeType: string]: number };   // مفتاح النوع ← الدرجة
+  grades: { [gradeType: string]: number };
 }

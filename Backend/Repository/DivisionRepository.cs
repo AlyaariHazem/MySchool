@@ -34,15 +34,18 @@ namespace FirstProjectWithMVC.Repository.School
 
             try
             {
-               await _db.Divisions.AddAsync(newDivision);
+                await _db.Divisions.AddAsync(newDivision);
                 await _db.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                // Log the exception (you can use any logging library here)
                 Console.WriteLine($"Error adding class: {ex.Message}");
-                throw; // Re-throw or handle as needed
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                throw;
             }
         }
 
@@ -69,7 +72,7 @@ namespace FirstProjectWithMVC.Repository.School
                     ClassesName = d.Class.ClassName,  // Access the class name
                     StudentCount = d.Students != null ? d.Students.Count() : 0,
                     State = d.State,
-                }).ToListAsync(); 
+                }).ToListAsync();
 
             return divisions;
         }
@@ -90,15 +93,15 @@ namespace FirstProjectWithMVC.Repository.School
                 existingDivision.DivisionName = model.DivisionName;
                 existingDivision.ClassID = model.ClassID;
 
-              await  _db.SaveChangesAsync();
-              return true;
+                await _db.SaveChangesAsync();
+                return true;
             }
             return false;
         }
 
         public async Task<bool> UpdatePartial(int id, JsonPatchDocument<UpdateDivisionDTO> partialDivision)
         {
-               if (partialDivision == null || id == 0)
+            if (partialDivision == null || id == 0)
                 return false;
 
             // Retrieve the Class entity by its ID
@@ -120,7 +123,7 @@ namespace FirstProjectWithMVC.Repository.School
             await _db.SaveChangesAsync();
             return true;
         }
-    
 
-        }
+
     }
+}

@@ -34,14 +34,14 @@ export class DivisionComponent implements OnInit {
 
   constructor(private formBuilder: FormBuilder) {
     this.form = this.formBuilder.group({
-      ClassID: ['', Validators.required],
+      classID: ['', Validators.required],
       divisionName: ['', Validators.required]
     });
   }
 
   editDivision(division: divisions): void {
     this.form.patchValue({
-      ClassID: division.classID,
+      classID: division.classID,
       divisionName: division.divisionName
     });
     this.isEditMode = true;
@@ -51,17 +51,36 @@ export class DivisionComponent implements OnInit {
   ngOnInit(): void {
     this.getAllDivisions();
     this.form.reset();
+    this.classService.GetAll().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'فشل تحميل الصفوف');
+          this.classes = [];
+          return;
+        }
+        this.classes = res.result;
+      },
+      error: () => {
+        this.toastr.error('Failed to load classes');
+        this.classes = [];
+      }
+    });
   }
 
   getAllDivisions(): void {
     this.divisionService.GetAll().subscribe({
       next: (res) => {
-        this.divisions = res;
-        this.length = this.divisions.length; // Set total item count
-        this.updatePaginatedData(); // Update displayed data
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load divisions');
+          this.divisions = [];
+          return;
+        }
+        this.divisions = res.result;
+        this.updatePaginatedData();
       },
-      error: (err) => {
-        this.toastr.error('Error fetching divisions', err);
+      error: () => {
+        this.toastr.error('Server error while loading divisions');
+        this.divisions = [];
       }
     });
   }
@@ -69,15 +88,16 @@ export class DivisionComponent implements OnInit {
   AddDivision(): void {
     if (this.form.valid) {
       const addClassData: Division = this.form.value;
+      console.log('the date are ',addClassData);
       this.divisionService.Add(addClassData).subscribe({
         next: (res) => {
-          this.getAllDivisions();
-          this.form.reset();
-          this.isEditMode = false;
-          this.getAllDivisions();
-          this.toastr.success('Stage Added successfully', res.result);
+          if (res.isSuccess) {
+            this.toastr.success(res.result);
+            this.form.reset();
+            this.getAllDivisions();
+          }
         },
-        error: () => this.toastr.error('Something went wrong')
+        error: () => this.toastr.error('Failed to add Division')
       });
     } else {
       this.isEditMode = false;

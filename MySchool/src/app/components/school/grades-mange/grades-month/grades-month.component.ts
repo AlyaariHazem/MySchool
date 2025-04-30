@@ -10,16 +10,13 @@ import { ClassService } from '../../core/services/class.service';
 import { CurriculmsPlanService } from '../../core/services/curriculms-plan.service';
 import { CurriculmsPlanSubject } from '../../core/models/curriculmsPlans.model';
 import { Paginates } from '../../core/models/Pagination.model';
+import { Month } from '../../core/models/month.model';
 
 interface Term {
   name: string;
   id: number;
 }
-interface Month {
-  id: number;       // رقم الشهر
-  name: string;     // الاسم
-  termId: number;   // إلى أيّ فصل ينتمي
-}
+
 
 @Component({
   selector: 'app-grades-month',
@@ -44,7 +41,7 @@ export class GradesMonthComponent implements OnInit {
 
   // Track the loading state
   isLoading = true;
-  visible: boolean =true
+  visible: boolean = true
 
   langDir!: string;
   languageStore = inject(Store);
@@ -109,22 +106,42 @@ export class GradesMonthComponent implements OnInit {
   ];
 
   getAllClasses() {
-    this.classService.GetAllNames().subscribe(res => {
-      this.AllClasses = res;
+    this.classService.GetAllNames().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load classes.');
+          return;
+        }
+        this.AllClasses = res.result;
+      },
+      error: (err) => {
+        this.toastr.error('Server error occurred');
+        console.error(err);
+      }
     });
   }
+
   curriculmsPlan: CurriculmsPlanSubject[] = [];
   getAllCurriculm() {
-    this.curriculmsPlanService.getAllCurriculmPlanSubjects().subscribe(res => {
-      this.curriculmsPlan = [...res, { subjectName: "All", subjectID: 0 }];
-      this.updatePaginatedData();
+    this.curriculmsPlanService.getAllCurriculmPlanSubjects().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculums.');
+          return;
+        }
+        this.curriculmsPlan = res.result;
+      },
+      error: (err) => {
+        this.toastr.error('Server error occurred');
+        console.error(err);
+      }
     });
   }
   goNextStudent(): void {
     if (this.currentStudentIndex < this.monthlyGrades.length - 1) {
       this.currentStudentIndex++;
       this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
-    } 
+    }
   }
 
   goPreviousStudent(): void {
@@ -135,11 +152,11 @@ export class GradesMonthComponent implements OnInit {
   }
 
   private filterMonthsByTerm(): void {
-    this.filteredMonths = this.months.filter(m => m.termId ===  this.form.get('selectedTerm')?.value);
+    this.filteredMonths = this.months.filter(m => m.termId === this.form.get('selectedTerm')?.value);
   }
 
   selectClass(_: any): void {
-    
+
     this.getAllMonthlyGrades(
       this.form.get('selectedTerm')?.value,
       this.form.get('selectedMonth')?.value,
@@ -201,7 +218,7 @@ export class GradesMonthComponent implements OnInit {
         gradeTypeID: g.gradeTypeID,
         grade: +g.maxGrade
       }))
-    );    
+    );
 
     console.log('the data are', payload);
     this.monthlyGradesService.updateMonthlyGrades(payload)
@@ -229,13 +246,13 @@ export class GradesMonthComponent implements OnInit {
       this.paginates = res; // تأكد أن res يحتوي totalCount
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
-      console.log('monthly Grades are',this.monthlyGrades);
+      console.log('monthly Grades are', this.monthlyGrades);
       this.isLoading = false;
       this.visible = false;
       if (this.monthlyGrades.length > 0) {
         this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
-      }else{
-        this.CurrentStudent =null!;
+      } else {
+        this.CurrentStudent = null!;
       }
     });
   }
@@ -311,5 +328,7 @@ export class GradesMonthComponent implements OnInit {
     return total.toString();
   }
 
-
+  Delete(): void {
+    this.toastr.info('it is not implemented yet.');
+  }
 }

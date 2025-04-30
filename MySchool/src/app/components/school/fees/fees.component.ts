@@ -50,10 +50,19 @@ export class FeesComponent {
   ngOnDestroy(): void {
   }
   refreshVouchers() {
-    this.voucherService.getAll().subscribe((res) => {
-      this.vouchers = res;  // Update the list of vouchers in the parent component
-      this.updateDisplayedStudents();
-      this.toastr.success('Voucher updated successfully!');
+    this.voucherService.getAll().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.error(res.errorMasseges[0] || 'Failed to load vouchers.');
+          return;
+        }
+        this.vouchers = res.result;
+        this.updateDisplayedStudents();
+      },
+      error: (err) => {
+        this.toastr.error('Server error occurred while loading vouchers.');
+        console.error(err);
+      }
     });
   }
 
@@ -95,8 +104,19 @@ export class FeesComponent {
   }
 
   Delete(id: number) {
-    this.voucherService.Delete(id).subscribe(res => {
-      this.toastr.success('Deleted successfully.', res);
+    this.voucherService.Delete(id).subscribe({
+      next: res=>{
+        if(!res.isSuccess){
+          this.toastr.error(res.errorMasseges[0] || 'Failed to delete voucher.');
+          return;
+        }
+        this.toastr.success(res.result || 'Voucher deleted successfully.');
+        this.refreshVouchers();
+      },
+      error: err => {
+        this.toastr.error('Server error occurred while deleting voucher.');
+        console.error(err);
+      }
     }
     )
   }

@@ -1,4 +1,4 @@
-export interface response {
+export interface ApiResponse<T>{
     statusCode: number;
     isSuccess: boolean;
     errorMasseges: string[];

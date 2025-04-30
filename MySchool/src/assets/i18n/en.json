@@ -131,7 +131,8 @@
     "grades": "Grades",
     "grades_sub": {
       "items": "Grade Items",
-      "monthly": "Monthly Grades"
+      "monthly": "Monthly Grades",
+      "term": "Term Grades"
     },
     "calendar": "Calendar",
     "tests": "Tests",

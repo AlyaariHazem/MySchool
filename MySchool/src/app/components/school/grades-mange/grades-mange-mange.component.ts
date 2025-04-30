@@ -50,9 +50,16 @@ export class GradesMangeComponent implements OnInit {
     this.languageService.currentLanguage();
   }
   getAllGradeTypes(): void {
-    this.gradeTypeServce.getAllGradeType().subscribe(res=>{
-      this.gradeTypes=res;
-      this.updatePaginatedData();
+    this.gradeTypeServce.getAllGradeType().subscribe({
+      next: res=>{
+        if(res.isSuccess){
+          this.gradeTypes=res.result;
+          this.updatePaginatedData();
+        }else{
+          console.log('Error fetching grade types:', res.errorMasseges[0]);
+          this.gradeTypes=[];
+        }
+      }
     })
   }
   updatePaginatedData(): void {

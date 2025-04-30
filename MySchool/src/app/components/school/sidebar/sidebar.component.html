@@ -129,6 +129,7 @@
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('GradeSubmenu')" [attr.dir]="languageService.dir">
             <li><a routerLink="/school/grade/" (click)="cancel()"><span>{{ 'sidebar.grades_sub.items' | translate }}</span></a></li>
             <li><a routerLink="/school/grade/GradeMonth" (click)="cancel()"><span>{{ 'sidebar.grades_sub.monthly' | translate }}</span></a>
+            <li><a routerLink="/school/grade/GradeTerm" (click)="cancel()"><span>{{ 'sidebar.grades_sub.term' | translate }}</span></a>
             </li>
           </ul>
         </li>

@@ -10,5 +10,5 @@ namespace Backend.Interfaces;
 
 public interface IReportRepository
 {
-    Task<Result<List<MonthlyResult>>> GetAllReportsAsync();
+    Task<Result<List<MonthlyResult>>> MonthlyReportsAsync(int yearId,int termId,int monthId, int classId, int divisionId, int studentId);
 }

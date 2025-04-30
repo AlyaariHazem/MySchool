@@ -82,10 +82,16 @@ export class TeachersComponent {
     this.translationService.changeLanguage(this.languageService.langDir);
   }
   getAllEmployees(): void {
-    this.employeeService.getAllEmployees().subscribe((res) => {
-      this.Employees = res;
-      this.isLoading = false;
-      this.updatePaginatedData(); // Initial slicing
+    this.employeeService.getAllEmployees().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.error(res.errorMasseges[0] || 'Failed to load employees.');
+          return;
+        }
+        this.Employees = res.result;
+        this.updatePaginatedData();
+        this.isLoading = false;
+      }
     })
   }
 

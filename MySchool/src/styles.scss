@@ -77,35 +77,3 @@ mat-card-title,
 .cdk-overlay-container {
   z-index: 3000 !important;
 }
-
-//this for print page
-@media print {
-  * {
-    width: auto !important;
-  }
-  body * {
-    visibility: hidden;
-  }
-  #sidebar {
-    display: none;
-  }
-  .page-header {
-    display: none;
-  }
-  .report-title {
-    display: none;
-  }
-  #report * {
-    visibility: visible;
-  }
-  #report {
-    display: block;
-  }
-  .grades-table {
-    direction: rtl;
-    position: absolute;
-    top: 0;
-    font-family: "Tajawal", sans-serif;
-    right: -17rem;
-  }
-}

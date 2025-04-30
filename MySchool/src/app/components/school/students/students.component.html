@@ -82,7 +82,7 @@
                   <tr>
                     <td>{{ $index+1 }}</td>
                     <td>{{ student.studentID}}</td>
-                    <td class="student-name-column">{{student.fullName.firstName +" "+ student.fullName.middleName+" "+
+                    <td  class="student-name-column text-right"><img class="image w-3rem h-3rem" [src]="student.photoUrl" alt="photo" />{{student.fullName.firstName +" "+ student.fullName.middleName+" "+
                       student.fullName.lastName}}</td>
                     <td>{{ student.stageName}}</td>
                     <td>{{ student.className}}</td>

@@ -43,7 +43,7 @@ export class GradesComponent implements OnInit {
   ngOnInit(): void {
     this.getAllClasses();
     this.form.reset();
-    this.YearID=Number(localStorage.getItem("yearId"));
+    this.YearID = Number(localStorage.getItem("yearId"));
   }
 
   openOuterDropdown: any = null;
@@ -53,34 +53,49 @@ export class GradesComponent implements OnInit {
   getAllClasses(): void {
     this.classService.GetAll().subscribe({
       next: (res) => {
-        this.classes = res;
-        this.length = this.classes.length; // Set total item count
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'فشل تحميل الصفوف');
+          this.classes = [];
+          return;
+        }
+
+        this.classes = res.result;
+        this.length = this.classes.length;
         this.updatePaginatedData();
       },
-      error: (err) => {
-        console.error('Error fetching classes:', err);
-        this.toastr.error('Error fetching classes');
+      error: () => {
+        this.toastr.error('Failed to load classes');
+        this.classes = [];
       }
     });
   }
 
   addClass(): void {
-    if (this.form.valid) {
-      const addClassData: CLass = this.form.value;
-      addClassData.yearID=this.YearID;
-      this.classService.Add(addClassData).subscribe({
-        next: () => {
-          this.getAllClasses();
-          this.form.reset();
-          this.isEditMode = false;
-          this.toastr.success('Stage Added successfully');
-        },
-        error: () => this.toastr.error('Something went wrong')
-      });
-    } else {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       this.errorMessage = 'Please fill in the required fields';
-      this.isEditMode = false;
+      return;
     }
+
+    const addClassData: CLass = {
+      ...this.form.value,
+      yearID: this.YearID
+    };
+
+    this.classService.Add(addClassData).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to add class');
+          return;
+        }
+
+        this.toastr.success('Class added successfully');
+        this.getAllClasses();
+        this.form.reset();
+        this.isEditMode = false;
+      },
+      error: () => this.toastr.error('Something went wrong')
+    });
   }
 
   editClass(Class: ClassDTO): void {
@@ -94,22 +109,24 @@ export class GradesComponent implements OnInit {
 
   updateClass(): void {
     this.form.markAllAsTouched();
-    if (this.form.valid && this.classToEditId !== null) {
-      const updateData: updateClass = this.form.value;
-      this.classService.Update(this.classToEditId, updateData).subscribe({
-        next: (response) => {
-          if (response.isSuccess) {
-            this.toastr.success(response.result, "Class Updated Successfully");
-            this.form.reset();
-            this.getAllClasses();
-          }
-        },
-        error: () => this.toastr.error('Failed to update Class', 'Error')
-      });
-      this.form.reset();
-      this.getAllClasses();
-      this.isEditMode = false;
-    }
+    if (this.form.invalid || this.classToEditId === null) return;
+
+    const updateData: updateClass = this.form.value;
+
+    this.classService.Update(this.classToEditId, updateData).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to update class');
+          return;
+        }
+
+        this.toastr.success(res.result, 'Class Updated Successfully');
+        this.form.reset();
+        this.getAllClasses();
+        this.isEditMode = false;
+      },
+      error: () => this.toastr.error('Failed to update Class', 'Error')
+    });
   }
 
   changeState(Class: ClassDTO, isActive: boolean): void {
@@ -133,11 +150,14 @@ export class GradesComponent implements OnInit {
   // Method to delete a Class by ID
   deleteClass(id: number): void {
     this.classService.Delete(id).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.toastr.success(response.result, 'Class Deleted');
-          this.getAllClasses(); // Refresh the list after deletion
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to delete class');
+          return;
         }
+
+        this.toastr.success(res.result, 'Class Deleted');
+        this.getAllClasses();
       },
       error: () => this.toastr.error('Failed to delete Class', 'Error')
     });
@@ -187,18 +207,18 @@ export class GradesComponent implements OnInit {
 
   // Handle paginator events
   first: number = 0; // Current starting index
-    rows: number = 4; // Number of rows per page
-    updatePaginatedData(): void {
-      const start = this.first;
-      const end = this.first + this.rows;
-      this.paginatedGrade = this.classes.slice(start, end);
-    }
-  
-    // Handle page change event from PrimeNG paginator
-    onPageChange(event: PaginatorState): void {
-      this.first = event.first || 0; // Default to 0 if undefined
-      this.rows = event.rows || 4; // Default to 4 rows
-      this.updatePaginatedData();
-    }
+  rows: number = 4; // Number of rows per page
+  updatePaginatedData(): void {
+    const start = this.first;
+    const end = this.first + this.rows;
+    this.paginatedGrade = this.classes.slice(start, end);
+  }
+
+  // Handle page change event from PrimeNG paginator
+  onPageChange(event: PaginatorState): void {
+    this.first = event.first || 0; // Default to 0 if undefined
+    this.rows = event.rows || 4; // Default to 4 rows
+    this.updatePaginatedData();
+  }
 
 }

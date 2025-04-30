@@ -74,10 +74,15 @@ export class FeeClassComponent implements OnInit {
   getAllFees(): void {
     this.feeService.getAllFee().subscribe({
       next: (res) =>{
-        (this.Fees = res),
-        this.isLoading=false;
+        if(res.isSuccess){
+          this.Fees = res.result;
+          this.isLoading=false;
+        }else{
+          this.toastr.error(res.errorMasseges[0]);
+          this.isLoading=false;
+        }
       } ,
-      error: (err) => {
+      error: () => {
         this.toastr.error('Error fetching fees');
         this.isLoading=false;
       }
@@ -88,13 +93,18 @@ export class FeeClassComponent implements OnInit {
   onSubmit(feeForm: NgForm): void {
     if (feeForm.valid) {
       this.editMode ? this.updateFee() : this.addFee();
+      feeForm.resetForm();
     }
   }
 
   addFee(): void {
     this.feeService.AddFee(this.Addfee).subscribe({
-      next: () => {
-        this.toastr.success('تم إضافة الرسوم بنجاح');
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.error(res.errorMasseges[0]);
+          return;
+        }
+        this.toastr.success(res.result);
         this.getAllFees();
         this.resetForm();
       },
@@ -111,12 +121,14 @@ export class FeeClassComponent implements OnInit {
   updateFee(): void {
     if (this.editingFeeId) {
       this.feeService.Update(this.editingFeeId, this.Addfee).subscribe({
-        next: () => {
-          this.toastr.success('تم تعديل الرسوم بنجاح');
+       next: (res)=>{
+        if(res.isSuccess){
+          this.toastr.success(res.result);
           this.getAllFees();
           this.editMode = false;
           this.resetForm();
-        },
+        }
+       },
         error: () => this.toastr.error('حدث خطأ أثناء تعديل الرسوم'),
       });
     }
@@ -145,15 +157,19 @@ deleteFee(id: number): void {
   onSubmitClassFee(classFeeForm: NgForm): void {
     if (classFeeForm.valid) {
       this.editModeClass ? this.updateFeeClass() : this.addFeeClass();
+      classFeeForm.resetForm();
     }
   }
 
   addFeeClass(): void {
+    
     this.feeClassService.AddFeeClass(this.FeeClassDTO).subscribe({
-      next: () => {
-        this.toastr.success('تم إضافة رسوم الصفوف بنجاح');
-        this.getAllClassFees();
-        this.resetClassFeeForm();
+      next: (res) => {
+        if(res.isSuccess){
+          this.toastr.success(res.result);
+          this.getAllClassFees();
+          this.resetClassFeeForm();
+        }
       },
       error: () => this.toastr.error('حدث خطأ أثناء إضافة رسوم الصفوف'),
     });
@@ -212,8 +228,13 @@ deleteFee(id: number): void {
 
   getClasses(): void {
     this.ClassService.GetAll().subscribe({
-      next: (res) => (this.classDTO = res),
-      error: (err) => this.toastr.error('Error fetching classes'),
+      next:res => {
+        if (res.isSuccess) {
+          this.classDTO = res.result;
+        } else {
+          this.toastr.error(res.errorMasseges[0]);
+        }
+      }
     });
   }
 

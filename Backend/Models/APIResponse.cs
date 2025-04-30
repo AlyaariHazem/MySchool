@@ -9,18 +9,14 @@ public class APIResponse
     public List<string> ErrorMasseges { get; set; } = new();
     public object? Result { get; set; }
 
-    public static APIResponse Success(object data,
-                                      HttpStatusCode code = HttpStatusCode.OK)
-        => new()
+    public static APIResponse Success(object data,HttpStatusCode code = HttpStatusCode.OK)=> new()
         {
             IsSuccess = true,
             statusCode = code,
             Result = data
         };
 
-    public static APIResponse Fail(string message,
-                                   HttpStatusCode code = HttpStatusCode.BadRequest)
-        => new()
+    public static APIResponse Fail(string message,HttpStatusCode code = HttpStatusCode.BadRequest)=> new()
         {
             IsSuccess = false,
             statusCode = code,

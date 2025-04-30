@@ -74,7 +74,7 @@ export class PrimaryDataComponent implements OnInit {
   getAllDivision(): void {
     this.Divisions.GetAll().subscribe({
       next: (res) => {
-        this.allDivisions = res;
+        this.allDivisions = res.result;
 
         const initialClassId = this.formGroup.get('classID')?.value;
         if (initialClassId) {
@@ -89,7 +89,10 @@ export class PrimaryDataComponent implements OnInit {
   getAllClass(): void {
     this.Classes.GetAll().subscribe({
       next: (res) => {
-        this.classes = res;
+        if(!res.isSuccess){
+          console.error('Error loading classes:', res.errorMasseges[0]);
+        }
+        this.classes = res.result;
       },
       error: (err) => console.error('Error loading classes:', err)
     });

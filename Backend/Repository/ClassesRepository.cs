@@ -39,9 +39,12 @@ namespace Backend.Repository.School
         }
         public async Task<List<AllClassesDTO>> GetAllNamesAsync()
         {
-            var classList = await _db.Classes.ToListAsync();
-            var classDTOList = _mapper.Map<List<AllClassesDTO>>(classList);
-            return classDTOList;
+            var stageDictionary = await _db.Classes.Select(c =>new AllClassesDTO
+            {
+                ClassID = c.ClassID,//this classID is not return correctlly?
+                ClassName = c.ClassName,
+            }).ToListAsync();
+            return stageDictionary;
         }
         public async Task Update(AddClassDTO model)
         {

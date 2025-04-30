@@ -9,7 +9,7 @@ import { SubjectService } from '../../core/services/subject.service';
 import { ClassService } from '../../core/services/class.service';
 import { Subjects } from '../../core/models/subjects.model';
 import { ClassNames } from '../../core/models/classes.model';
-import { Curriculm, Curriculms } from '../../core/models/Curriculms.model';
+import { Curriculms } from '../../core/models/Curriculms.model';
 import { CurriculmService } from '../../core/services/curriculm.service';
 
 @Component({
@@ -51,31 +51,67 @@ export class CoursesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.subjectService.getAllSubjects().subscribe((res) => {
-      this.subjects = res;
-    });
-    this.classService.GetAllNames().subscribe((res) => {
-      this.classes = res;
-    });
+    this.getAllClasses();
+    this.getAllSubjects();
     this.getAllCurriculm();
     this.form.reset();
-    // Set the current language
     this.languageService.currentLanguage();
   }
-  getAllCurriculm():void{
-    this.curriculmsService.getAllCurriculm().subscribe((res) => {
-      this.curriculms = res;
-      this.updatePaginatedData();
-    }
-    );
+
+  getAllCurriculm(): void {
+    this.curriculmsService.getAllCurriculm().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculums');
+          this.curriculms = [];
+          return;
+        }
+
+        this.curriculms = res.result;
+        this.updatePaginatedData();
+      },
+      error: () => {
+        this.toastr.error('Server error while loading curriculums');
+        this.curriculms = [];
+      }
+    });
+  }
+  getAllSubjects(): void {
+    this.subjectService.getAllSubjects().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load subjects');
+          return;
+        }
+        this.subjects = res.result;
+      },
+      error: (err) => {
+        this.toastr.error('Server error occurred');
+        console.error(err);
+      }
+    });
+  }
+  getAllClasses(): void {
+    this.classService.GetAllNames().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load classes.');
+          return;
+        }
+        this.classes = res.result;
+      },
+      error: (err) => {
+        this.toastr.error('Server error occurred');
+        console.error(err);
+      }
+    });
   }
 
   Add(): void {
     if (this.form.invalid) {
-      console.log('Form is invalid');
+      this.form.markAllAsTouched();
       return;
     }
-
     const subjectID = this.form.get('subjectID')?.value;
     const classID = this.form.get('classID')?.value;
 
@@ -83,82 +119,88 @@ export class CoursesComponent implements OnInit {
     const className = this.classes.find((cls) => cls.classID === classID)?.className || '';
 
     const curriculumName = `${subjectName}-${className}`;
-
-    const localCurriculm: Curriculm = {
+    const newCurriculm: Curriculms = {
       subjectID,
-      curriculumName,
       classID,
-      note: this.form.get('note')?.value,
+      curriculumName,
+      note: this.form.get('note')?.value || '',
       hireDate: new Date().toISOString(),
     };
 
-    const newCurriculms: Curriculms = {
-      subjectID: localCurriculm.subjectID!,
-      curriculumName: localCurriculm.curriculumName,
-      classID: localCurriculm.classID!,
-      note: localCurriculm.note || '',
-      hireDate: localCurriculm.hireDate!,
-    };
+    this.curriculmsService.addCurriculm(newCurriculm).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to add curriculum');
+          return;
+        }
 
-    this.curriculmsService.addCurriculm(newCurriculms).subscribe();
-    newCurriculms.subjectName = subjectName;
-    newCurriculms.className = className;
-    this.curriculms.push(newCurriculms);
-    this.updatePaginatedData();
-    // Reset the form for a new entry
-    this.form.reset();
+        newCurriculm.subjectName = subjectName;
+        newCurriculm.className = className;
+        this.curriculms.push(newCurriculm);
+        this.updatePaginatedData();
+        this.form.reset();
+        this.toastr.success('Curriculum added successfully');
+      },
+      error: () => this.toastr.error('Server error while adding curriculum')
+    });
   }
-  
+
+
   editCurriculum(curriculum: Curriculms): void {
     this.form.patchValue({
       subjectID: curriculum.subjectID,
       classID: curriculum.classID,
       note: curriculum.note,
     });
-    this.editMode=true;
+    this.editMode = true;
   }
   updateCurriculum(): void {
     const subjectID = this.form.get('subjectID')?.value;
     const classID = this.form.get('classID')?.value;
 
-    const subjectName = this.subjects.find((subj) => subj.subjectID === subjectID)?.subjectName || '';
-    const className = this.classes.find((cls) => cls.classID === classID)?.className || '';
-
+    const subjectName = this.subjects.find((s) => s.subjectID === subjectID)?.subjectName || '';
+    const className = this.classes.find((c) => c.classID === classID)?.className || '';
     const curriculumName = `${subjectName}-${className}`;
 
-    // Build your local Curriculm object
-    const localCurriculm: Curriculm = {
+    const updated: Curriculms = {
       subjectID,
-      curriculumName,
       classID,
-      note: this.form.get('note')?.value,
+      curriculumName,
+      note: this.form.get('note')?.value || '',
       hireDate: new Date().toISOString(),
     };
 
-    // Adjust fields to match your exact interface
-    const editCurriculms: Curriculms = {
-      subjectID: localCurriculm.subjectID!,
-      curriculumName: localCurriculm.curriculumName,
-      classID: localCurriculm.classID!,
-      note: localCurriculm.note || '',
-      hireDate: localCurriculm.hireDate!,
-    };
-    this.curriculmsService.updateCurriculm(editCurriculms.subjectID!,editCurriculms.classID!, editCurriculms).subscribe(res=>{
-      this.toastr.success(res);
-      this.getAllCurriculm();
-    });
-    console.log('the edit',editCurriculms);
-    this.editMode=false;
-    this.form.reset();
-  }
-  
-  deleteCurriculm(id1: number,id2:number): void {
-    this.curriculmsService.deleteCurriculm(id1,id2).subscribe(res=>{
-      this.toastr.success(res);
-      this.getAllCurriculm();
+    this.curriculmsService.updateCurriculm(subjectID, classID, updated).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to update curriculum');
+          return;
+        }
+
+        this.toastr.success(res.result || 'Curriculum updated successfully');
+        this.getAllCurriculm();
+        this.form.reset();
+        this.editMode = false;
+      },
+      error: () => this.toastr.error('Server error while updating curriculum')
     });
   }
-  
+
+  deleteCurriculm(id1: number, id2: number): void {
+    this.curriculmsService.deleteCurriculm(id1, id2).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to delete curriculum');
+          return;
+        }
+
+        this.toastr.success(res.result || 'Curriculum deleted successfully');
+        this.getAllCurriculm();
+      },
+      error: () => this.toastr.error('Server error while deleting curriculum')
+    });
+  }
+
   first: number = 0; // Current starting index for pagination
   rows: number = 4; // Number of rows per page
   displayCurriculums: Curriculms[] = [];
@@ -167,9 +209,9 @@ export class CoursesComponent implements OnInit {
     const end = this.first + this.rows;
     this.displayCurriculums = this.curriculms.slice(start, end);
   }
-   onPageChange(event: PaginatorState): void {
-      this.first = event.first || 0; // Update first index based on page
-      this.rows = event.rows || 4; // Update rows per page
-      this.updatePaginatedData();
-    }
+  onPageChange(event: PaginatorState): void {
+    this.first = event.first || 0; // Update first index based on page
+    this.rows = event.rows || 4; // Update rows per page
+    this.updatePaginatedData();
+  }
 }

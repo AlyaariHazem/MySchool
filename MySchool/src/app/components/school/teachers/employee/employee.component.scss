@@ -64,10 +64,6 @@ p-select, input{
     overflow-y: auto;
     padding: 1rem;
   
-    /* Scrollbar customization (اختياري لتحسين المظهر) */
-    scrollbar-width: thin;
-    scrollbar-color: #ccc transparent;
-  
     &::-webkit-scrollbar {
       width: 8px;
     }

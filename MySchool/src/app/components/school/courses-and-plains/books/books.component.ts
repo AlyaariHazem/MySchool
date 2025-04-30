@@ -59,27 +59,44 @@ export class BooksComponent implements OnInit {
       hireDate: new Date().toISOString(),
     };
 
-    this.subjectService.addSubject(this.subjectData).subscribe(res => {
-      this.subjects.push(res);
-      this.updatePaginatedData();
+    this.subjectService.addSubject(this.subjectData).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          this.subjects.push(res.result);
+          this.updatePaginatedData();
+        }
+      },
+      error: () => console.error('Failed to add subject')
     });
-    this.form.reset();
   }
 
   // Fetch paginated data based on page number and rows per page
   updatePaginatedData(): void {
-    this.subjectService.getPaginatedSubjects(this.first / this.rows + 1, this.rows).subscribe((res) => {
-      this.paginates = res;
-      this.subjects = res.data;
+    const page = this.first / this.rows + 1;
+    this.subjectService.getPaginatedSubjects(page, this.rows).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          this.paginates = res.result;
+          this.subjects = res.result.data;
+        }
+      },
+      error: () => console.error('Failed to load paginated subjects')
     });
+
   }
 
   // Deleting a subject
   deleteSubject(id: number) {
-    this.subjectService.deleteSubject(id).subscribe(() => {
-      this.subjects = this.subjects.filter(subject => subject.subjectID !== id);
-      this.updatePaginatedData();
+    this.subjectService.deleteSubject(id).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          this.subjects = this.subjects.filter(subject => subject.subjectID !== id);
+          this.updatePaginatedData();
+        }
+      },
+      error: () => console.error('Failed to delete subject')
     });
+
   }
 
   // Updating a subject
@@ -88,29 +105,32 @@ export class BooksComponent implements OnInit {
       console.log('Form is invalid');
       return;
     }
-    
+
     this.subjectData = {
       ...this.subjectData,  // Keep the existing values of subjectData
       subjectName: formGroup.value.name,
       subjectReplacement: formGroup.value.nameReplacement,
       note: formGroup.value.note,
     };
-    
+
     const subjectID = this.subjectData.subjectID;
-    
+
     if (!subjectID) {
       console.log('subjectID is missing!');
       return; // Return early if subjectID is not set
     }
-    
-    this.subjectService.updateSubject(subjectID, this.subjectData).subscribe(() => {
-      // Update the subject in the list after successful update
-      this.subjects = this.subjects.map(subj =>
-        subj.subjectID === subjectID ? { ...subj, ...this.subjectData } : subj
-      );
-      this.updatePaginatedData(); // Refresh the paginated data
-      this.form.reset();
-    });
+
+    this.subjectService.updateSubject(subjectID, this.subjectData).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          this.subjects = this.subjects.map(subj =>
+            subj.subjectID === subjectID ? { ...subj, ...this.subjectData } : subj
+          );
+          this.updatePaginatedData();
+        }
+      },
+      error: () => console.error('Failed to update subject')
+    });    
 
     this.form.reset();
     this.editMode = false;

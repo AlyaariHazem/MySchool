@@ -1,41 +1,45 @@
 import { inject, Injectable } from '@angular/core';
-import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { Observable } from 'rxjs';
+
+import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { CLass, updateClass } from '../models/class.model';
+import { ApiResponse } from '../../../../core/models/response.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClassService {
-  private API = inject(BackendAspService); // Dependency injection of BackendAspService
+  private API = inject(BackendAspService);
 
   constructor() { }
 
-  // Get all classes
-  GetAll(): Observable<any> {
-    return this.API.getRequest<any>("Classes");
-  }
-  GetAllNames(): Observable<any> {
-    return this.API.getRequest<any>("Classes/GetAllNameClasses");
+  // ✅ Get all classes
+  GetAll(): Observable<ApiResponse<CLass[]>> {
+    return this.API.getRequest<CLass[]>("Classes");
   }
 
-  // Add a new class
-  Add(Class: CLass): Observable<any> {
+  // ✅ Get class names only
+  GetAllNames(): Observable<ApiResponse<CLass[]>> {
+    return this.API.getRequest<CLass[]>("Classes/GetAllNameClasses");
+  }
+
+  // ✅ Add new class
+  Add(Class: CLass): Observable<ApiResponse<CLass>> {
     return this.API.postRequest<CLass>("Classes", Class);
   }
 
-  // Delete a class by ID
-  Delete(id: number): Observable<any> {
-    return this.API.deleteRequest(`Classes/${id}`);
+  // ✅ Delete class
+  Delete(id: number): Observable<ApiResponse<any>> {
+    return this.API.deleteRequest<any>(`Classes/${id}`);
   }
 
-  // Update a class by ID
-  Update(id: number, update: updateClass): Observable<any> {
+  // ✅ Full update
+  Update(id: number, update: updateClass): Observable<ApiResponse<updateClass>> {
     return this.API.putRequest<updateClass>(`Classes/${id}`, update);
   }
 
-  // Partially update a class by ID
-  partialUpdate(id: number, patchDoc: any): Observable<any> {
+  // ✅ Partial update
+  partialUpdate(id: number, patchDoc: any): Observable<ApiResponse<any>> {
     return this.API.patchRequest<any>(`Classes/${id}`, patchDoc);
   }
 }

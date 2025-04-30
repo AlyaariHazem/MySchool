@@ -12,8 +12,8 @@ export class AccountReportComponent {
   @ViewChild('printArea', { static: true })
   printArea!: ElementRef<HTMLDivElement>;
 
-  logo=localStorage.getItem('SchoolImageURL');
-  schoolName=localStorage.getItem('schoolName');
+  logo = localStorage.getItem('SchoolImageURL');
+  schoolName = localStorage.getItem('schoolName');
   header = {
     accountNo: '123456789',
     guardian: 'ولي الأمر: أحمد محمد',
@@ -48,22 +48,22 @@ export class AccountReportComponent {
     // uncomment to auto‑open print preview when component loads
     // setTimeout(() => this.nativePrint(), 0);
   }
-  
+
   nativePrint(): void {
     const page = document.getElementById('page');
     if (!page) { return; }
-  
+
     /* ️نسخ كل ملفات الأنماط الموجودة */
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-                       .map(el => el.outerHTML)
-                       .join('');
-  
-    /* 👈 وسم <base> يجعل الروابط النسبية تعمل داخل popup */
-    const base = `<base href="${document.baseURI}">`;
-  
+      .filter((el: Element) => el.getAttribute('href') !== 'assets/print.css')
+      .map(el => el.outerHTML)
+      .join('');
+ 
+      const base = `<base href="${document.baseURI}">`;
+
     const popup = window.open('', '', 'width=1000px,height=auto');
     if (!popup) { return; }
-  
+
     popup.document.write(`
       <html><head>
       <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
@@ -80,11 +80,11 @@ export class AccountReportComponent {
         ${page.outerHTML}
       </body></html>
     `);
-  
+
     popup.document.close();
     popup.onload = () => popup.print();
   }
-  
-  
+
+
 
 }

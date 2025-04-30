@@ -7,6 +7,6 @@ namespace Backend.DTOS.School.Classes;
 
 public class AllClassesDTO
 {
-    public int? ClassID { get; set; }
+    public int ClassID { get; set; }
     public string ClassName { get; set; } = string.Empty;
 }

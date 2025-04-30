@@ -81,7 +81,7 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
                 {
                     GradeTypeID = g.GradeTypeID,
                     MaxGrade = g.Grade
-                }).ToList()
+                }).ToList() 
             })
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
@@ -157,7 +157,6 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
     if (subjectId != 0)
         query = query.Where(g => g.SubjectID == subjectId);
 
-    // نحسب عدد الطلاب الفريدين فقط، وليس كل السجلات
     return await query
         .Select(g => g.StudentID)
         .Distinct()

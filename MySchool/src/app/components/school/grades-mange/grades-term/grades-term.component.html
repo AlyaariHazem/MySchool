@@ -1,0 +1,197 @@
+<!-- Enhanced Loading Spinner -->
+@if (isLoading){
+<div class="card flex justify-center">
+    <app-progress-spinner [visible]="visible"></app-progress-spinner>
+</div>
+}
+
+
+<div id="id01" class="modal-container" [attr.dir]="dir" [ngClass]="{'English':dir==='ltr'}">
+    <h2 class="school">الدرجات الشهرية</h2>
+
+    <form [formGroup]="form">
+        <div class="group group2">
+            <div class="form-control">
+                <p-floatlabel class="w-full md:w-56" variant="on">
+                    <p-select formControlName="selectedClass" inputId="Class" [options]="AllClasses"
+                        optionLabel="className" (onChange)="selectClass($event.value)" optionValue="classID"
+                        [checkmark]="true" [editable]="true" [showClear]="true" />
+                    <label for="Class">إختار الصف</label>
+                </p-floatlabel>
+
+            </div>
+
+            <div class="form-control">
+                <p-floatlabel class="w-full md:w-56" variant="on">
+                    <p-select [options]="terms" formControlName="selectedTerm" optionValue="id" [checkmark]="true"
+                        optionLabel="name" [editable]="true" [showClear]="true"
+                        (onChange)="selectTerm(form.get('selectedTerm')?.value)" inputId="name" />
+                    <label for="name">إختار الترم</label>
+                </p-floatlabel>
+            </div>
+
+            <div class="form-control">
+                <p-floatlabel class="w-full md:w-56" variant="on">
+                    <p-select [options]="subjects" optionValue="subjectID" formControlName="selectedSubject"
+                        optionLabel="subjectName" [editable]="true" [showClear]="true"
+                        (onChange)="selectSubject(form.get('selectedSubject')?.value)" inputId="subject" />
+                    <label for="subject">إختار المادة</label>
+                </p-floatlabel>
+            </div>
+
+        </div>
+        <p-button class="adding school-btn" variant="outlined" severity="success" (click)="saveAllGrades()"
+            label="حفظ التغيرات" />
+        <div class="mange">
+            <span class="border" (click)="toggleHidden()"><i
+                    [class]="hidden?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
+        </div>
+        
+    </form>
+
+    <div class="table-container" [style]="hidden ? 'display: none' : 'display: block'">
+        <mat-card>
+            <div class="responsive-table">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>التالي</th>
+                            <th>رقم الطالب</th>
+                            <th class="student-name-column">الاسم</th>
+                            <th>المقرر</th>
+                            <th>إمتحان الفصل 30</th>
+                            <th>محصلة الفصل 20</th>
+                            <th>الدرجة النهائية 50</th>
+                            <th>ملاحظة</th>
+                            <th>السابق</th>
+                            <th>العملية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (CurrentStudent) {
+                        <tr>
+                            <td>
+                                <i class="pi pi-angle-double-right" style="font-size:24px;color:#207133;cursor:pointer;"
+                                    (click)="goNextStudent()"></i>
+                            </td>
+
+                            <td>{{ CurrentStudent.studentID }}</td>
+                            <td class="student-name-column text-right"><img class="w-3rem h-3rem image"
+                                    src="{{CurrentStudent.studentURL}}" alt="">{{
+                                CurrentStudent.studentName }}</td>
+                            <td>{{ CurrentStudent.subjectName }}</td>
+
+
+                            <td><input class="form-control input1 no-spinner" type="number"
+                                    [(ngModel)]="CurrentStudent.grade"
+                                    name="g{{CurrentStudent.studentID}}_{{CurrentStudent.studentID}}"
+                                    [ngModelOptions]="{standalone:true}" min="0"
+                                    (ngModelChange)="clampGrade(CurrentStudent)"></td>
+
+                            <td>20</td>
+                            <td>100%</td>
+                            <td><input class="form-control input2 no-spinner" type="text"
+                                    [(ngModel)]="CurrentStudent.note"
+                                    name="n{{CurrentStudent.studentID}}_{{CurrentStudent.termlyGradeID}}"
+                                    [ngModelOptions]="{standalone:true}" min="0"
+                                    (ngModelChange)="clampGrade(CurrentStudent)"></td>
+                            <td>
+                                <i class="pi pi-angle-double-left" style="font-size:24px;color:#207133;cursor:pointer;"
+                                    (click)="goPreviousStudent()"></i>
+                            </td>
+                            <td>
+                                <div class="col text-left">
+                                    <div class="mt-sm-0 mt-2">
+                                        <button class="btn btn-left update" type="button" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-left">
+                                            <a class="dropdown-item">
+                                                <i class="bi bi-pencil-square IconEdit"></i> تعديل
+                                            </a>
+                                            <div role="separator" class="dropdown-divider"></div>
+                                            <a class="dropdown-item">
+                                                <i class="bi bi-trash IconDelete"></i> حذف
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </mat-card>
+    </div>
+    @if (paginates) {
+    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="5"
+        [totalRecords]="paginates.totalCount" [rowsPerPageOptions]="[5, 10, 15]" />
+    }
+    <div class="table-container">
+        <mat-card>
+            <div class="responsive-table">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>رقم الطالب</th>
+                            <th class="student-name-column">الاسم</th>
+                            <th>المقرر</th>
+                            <th>إمتحان الفصل 30</th>
+                            <th>محصلة الفصل 20</th>
+                            <th>الدرجة النهائية 50</th>
+                            <th>ملاحظة</th>
+                            <th>العملية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (student of monthlyGrades; track $index) {
+                        <tr>
+                            <td>{{ $index+1 }}</td>
+                            <td>{{student.studentID}}</td>
+                            <td class="student-name-column text-right"><img class="w-3rem h-3rem image"
+                                    src="{{student.studentURL}}" alt=""> {{student.studentName}}</td>
+                            <td>{{student.subjectName}}</td>
+
+                            <td><input class="form-control input1 no-spinner" type="number" [(ngModel)]="student.grade"
+                                    name="g{{student.studentID}}_{{student.studentID}}"
+                                    [ngModelOptions]="{standalone:true}" min="0"></td>
+                            <td>20</td>
+                            <td>100%</td>
+                            <td><input class="form-control input2 no-spinner" type="text" [(ngModel)]="student.note"
+                                    name="n{{student.studentID}}_{{student.termlyGradeID}}"
+                                    [ngModelOptions]="{standalone:true}" min="0">
+                            </td>
+                            <td>
+                                <div class="col text-left">
+                                    <div class="mt-sm-0 mt-2">
+                                        <button class="btn btn-left update" type="button" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-left">
+                                            <a class="dropdown-item" (click)="Delete()">
+                                                <i class="bi bi-pencil-square IconEdit"></i> تعديل
+                                            </a>
+                                            <div role="separator" class="dropdown-divider"></div>
+                                            <a class="dropdown-item" (click)="Delete()">
+                                                <i class="bi bi-trash IconDelete"></i> حذف
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        }@empty {
+                        <div class="empty">لا يوجد طلاب في هذا الفصل</div>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </mat-card>
+    </div>
+
+</div>

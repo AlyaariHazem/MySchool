@@ -20,6 +20,9 @@ p-paginator {
   right: 0rem;
   z-index: 1;
 }
+.image{
+  border-radius: 23px;
+}
 :host ::ng-deep {
   #pn_id_3_list {
     padding-left: 0px !important;

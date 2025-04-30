@@ -21,7 +21,7 @@ namespace Backend.Models
         public int? TeacherID { get; set; }
 
         [JsonIgnore]
-        public Teacher Teacher { get; set; }//and if I add this I must to add it in the teacher class
+        public Teacher Teacher { get; set; }
         [JsonIgnore]
         public virtual ICollection<FeeClass> FeeClasses { get; set; } = new List<FeeClass>();
         [JsonIgnore]

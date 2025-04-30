@@ -58,7 +58,6 @@ export class AccountsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.toastr.success('Account updated successfully!');
     this.getAllAccounts();
     this.accountType = [
       { name: 'Guardain', code: 1 },
@@ -71,11 +70,28 @@ export class AccountsComponent implements OnInit {
   }
 
   getAllAccounts(): void {
-    this.accountService.getAllAccounts().subscribe(res => {
-      this.accounts = res;
-      this.updateDisplayedaccounts();
+    this.accountService.getAllAccounts().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load accounts.');
+          this.accounts = [];
+          this.displayedaccounts = [];
+          return;
+        }
+  
+        this.accounts = res.result;
+        this.length = this.accounts.length;
+        this.updateDisplayedaccounts();
+      },
+      error: (err) => {
+        this.toastr.error('Server error occurred while fetching accounts.');
+        console.error(err);
+        this.accounts = [];
+        this.displayedaccounts = [];
+      }
     });
   }
+  
   ngOnDestroy(): void {
     if (this.mediaSub) {
       this.mediaSub.unsubscribe();

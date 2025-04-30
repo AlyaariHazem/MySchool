@@ -44,9 +44,7 @@ namespace Backend.Controllers
                 {
                     existingGuardian = await _unitOfWork.Guardians.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
                     if (existingGuardian == null)
-                    {
                         return NotFound(new { message = "Existing Guardian not found." });
-                    }
                 }
 
                 // If no existing guardian is provided, create a new guardian and guardian user
@@ -123,7 +121,7 @@ namespace Backend.Controllers
                     DivisionID = request.DivisionID,
                     PlaceBirth = request.PlaceBirth,
                     StudentDOB = request.StudentDOB,
-                    ImageURL = $"StudentPhotos_{request.StudentID}_{request.StudentImageURL}",
+                    ImageURL = $"StudentPhotos_{request.StudentImageURL}",
                 };
 
 

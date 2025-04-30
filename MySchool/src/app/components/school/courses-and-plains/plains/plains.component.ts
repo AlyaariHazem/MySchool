@@ -30,31 +30,19 @@ import { TeacherService } from '../../core/services/teacher.service';
   ]
 })
 export class PlainsComponent {
-  // Reactive Form
   form: FormGroup;
-
-  // Data arrays
   subjects: Subjects[] = [];
   classes: ClassNames[] = [];
   divisions: divisions[] = [];
   fiteredDivisions: divisions[] = [];
   teachers: Teachers[] = [];
   terms: Terms[] = [];
-
   ClassSubjects: Curriculms[] = [];
-
-  // This is the array that you bind to the Subject dropdown after filtering
   filteredSubjects: Curriculms[] = [];
-
-  // For listing existing plans in the table
   curriculmsPlan: CurriculmsPlans[] = [];
-
-  // Pagination
   first: number = 0;
   rows: number = 4;
   curriculmsPlans: CurriculmsPlans[] = [];
-
-  // Edit/Chips
   editMode: boolean = false;
   values = new FormControl<string[] | null>(null);
   max = 2;
@@ -69,10 +57,9 @@ export class PlainsComponent {
     private divisionSerivce: DivisionService,
     private curriculmsPlanService: CurriculmsPlanService,
     private classService: ClassService,
-    private termService:TermService,
+    private termService: TermService,
     private teacherService: TeacherService
   ) {
-    // Build the form group (include subjectID & yearID)
     this.form = this.formBuilder.group({
       classID: [null, Validators.required],
       subjectID: [null, Validators.required],
@@ -83,10 +70,7 @@ export class PlainsComponent {
   }
 
   ngOnInit(): void {
-    // Example: fetch data from services
-    this.subjectService.getAllSubjects().subscribe((res) => {
-      this.subjects = res;
-    });
+    this.getAllSubjects();
     this.getAllCurriculmPlan();
     this.getAllCurriculm();
     this.getAllClasses();
@@ -94,70 +78,121 @@ export class PlainsComponent {
     this.getAllTerms();
     this.getAllTeachers();
 
-    // When class changes, filter subjects:
     this.form.get('classID')?.valueChanges.subscribe((selectedClassID: number) => {
-      // Filter ClassSubjects
       this.filteredSubjects = this.ClassSubjects.filter(c => c.classID === selectedClassID);
-      this.fiteredDivisions= this.divisions.filter(d=>d.classID===selectedClassID);
-      // Clear the selected subject if class changes
+      this.fiteredDivisions = this.divisions.filter(d => d.classID === selectedClassID);
       this.form.patchValue({ subjectID: null });
     });
 
-    // Possibly set yearID from localStorage if you prefer
     const yearFromLocal = localStorage.getItem('yearID') || '1';
     this.form.patchValue({ yearID: Number(yearFromLocal) });
 
-    // Initialize form & language
     this.form.reset();
     this.languageService.currentLanguage();
   }
+  getAllSubjects(): void {
+    this.subjectService.getAllSubjects().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load subjects');
+          return;
+        }
+        this.subjects = res.result;
+      },
+      error: () => this.toastr.error('Error fetching subjects')
+    });
+  }
 
   getAllCurriculmPlan(): void {
-    this.curriculmsPlanService.getAllCurriculmPlan().subscribe(res => {
-      this.curriculmsPlan = res;
-      this.updatePaginatedData();
+    this.curriculmsPlanService.getAllCurriculmPlan().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculum plans');
+          return;
+        }
+        this.curriculmsPlan = res.result;
+        this.updatePaginatedData();
+      },
+      error: () => this.toastr.error('Error fetching curriculum plans')
     });
   }
 
   getAllCurriculm(): void {
-    this.curriculmsService.getAllCurriculm().subscribe(res => {
-      this.ClassSubjects = res;
-      // If you want to set filteredSubjects to all at the start, do it here
-      this.filteredSubjects = [...this.ClassSubjects];
-      this.updatePaginatedData();
+    this.curriculmsService.getAllCurriculm().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculum');
+          return;
+        }
+        this.ClassSubjects = res.result;
+        this.filteredSubjects = [...this.ClassSubjects];
+        this.updatePaginatedData();
+      },
+      error: () => this.toastr.error('Error fetching curriculum data')
     });
   }
 
   getAllClasses(): void {
-    this.classService.GetAllNames().subscribe(res => {
-      this.classes = res;
-    }
-    );
+    this.classService.GetAllNames().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load classes.');
+          return;
+        }
+        this.classes = res.result;
+      },
+      error: () => this.toastr.error('Server error occurred')
+    });
   }
+
   getAllDivision(): void {
-    this.divisionSerivce.GetAll().subscribe(res => {
-      this.divisions = res;
+    this.divisionSerivce.GetAll().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load divisions.');
+          return;
+        }
+        this.divisions = res.result;
+      },
+      error: () => this.toastr.error('Server error occurred')
     });
   }
+
   getAllTerms(): void {
-    this.termService.getAllTerm().subscribe(res => {
-      this.terms = res;
+    this.termService.getAllTerm().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load terms.');
+          return;
+        }
+        this.terms = res.result;
+      },
+      error: () => this.toastr.error('Server error occurred')
     });
   }
+
   getAllTeachers(): void {
-    this.teacherService.getAllTeacher().subscribe(res => {
-      this.teachers = res;
-      console.log('the teachers are',this.teachers);
-    })
+    this.teacherService.getAllTeacher().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load teachers.');
+          return;
+        }
+        this.teachers = res.result;
+      },
+      error: () => this.toastr.error('Server error occurred')
+    });
   }
+
   Add(): void {
     if (this.form.invalid) {
-      console.log('Form is invalid');
+      this.form.markAllAsTouched();
       return;
     }
+
     const { classID, subjectID, divisionID, teacherID, termID } = this.form.value;
-    const yearID = localStorage.getItem('yearID') || '1';
-    // Build local CurriculmsPlan or your final object
+    const yearID = Number(localStorage.getItem('yearID') || '1');
+
     const localCurriculm: CurriculmsPlan = {
       subjectID,
       classID,
@@ -167,63 +202,63 @@ export class PlainsComponent {
       yearID: Number(yearID),
     };
 
-    console.log('Form Data =>', localCurriculm);
-    this.curriculmsPlanService.addCurriculmPlan(localCurriculm).subscribe(res => {
-      this.toastr.success(res);
-      this.getAllCurriculmPlan();
-      this.updatePaginatedData();
+    this.curriculmsPlanService.addCurriculmPlan(localCurriculm).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to add curriculum');
+          return;
+        }
+        this.toastr.success(res.result || 'Curriculum added successfully');
+        this.getAllCurriculmPlan();
+      },
+      error: () => this.toastr.error('Server error occurred')
     });
-    // Force refresh table or do anything else
 
-    // Reset form after add
     this.form.reset();
   }
 
   editCurriculum(curriculum: Curriculms): void {
-    // Pre-fill form with existing data
     this.form.patchValue({
       subjectID: curriculum.subjectID,
       classID: curriculum.classID,
-      note: curriculum.note,
-      // etc...
+      note: curriculum.note
     });
     this.editMode = true;
   }
 
-  /**
-   * Update the existing curriculum
-   */
   updateCurriculum(): void {
     if (this.form.invalid) {
-      console.log('Form is invalid');
       return;
     }
+
     const { subjectID, classID, note } = this.form.value;
 
-    // Build local Curriculm
     const editCurriculms: Curriculms = {
       subjectID,
       classID,
-      curriculumName: '',   // fill in or compute from subject/class if needed
+      curriculumName: '',
       note,
-      hireDate: new Date().toISOString(),
+      hireDate: new Date().toISOString()
     };
-
     console.log('Editing =>', editCurriculms);
     this.editMode = false;
     this.form.reset();
   }
 
   deleteCurriculm(id1: number, id2: number): void {
-    this.curriculmsService.deleteCurriculm(id1, id2).subscribe((res) => {
-      this.toastr.success(res);
-      this.getAllCurriculm();
+    this.curriculmsService.deleteCurriculm(id1, id2).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to delete curriculum');
+          return;
+        }
+        this.toastr.success(res.result || 'Curriculum deleted');
+        this.getAllCurriculm();
+      },
+      error: () => this.toastr.error('Error while deleting curriculum')
     });
   }
 
-  /**
-   * Pagination Helpers
-   */
   updatePaginatedData(): void {
     const start = this.first;
     const end = this.first + this.rows;

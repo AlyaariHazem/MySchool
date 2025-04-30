@@ -40,27 +40,36 @@ export class AddAccountComponent implements OnInit {
     const today = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
     this.form.patchValue({ createdDate: today });
   }
-  
+
   paymentMethods: PayBy[] = [
     { label: 'Cash', value: 'cash' },
     { label: 'الكريمي', value: 'visa' }
   ];
 
   save() {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const body = this.form.value as Account;
 
     const request$ = this.account
-      ? this.accountSrv.UpdateAccount(this.account.accountID!, body)  // EDIT
-      : this.accountSrv.AddAccount(body);                      // ADD
+      ? this.accountSrv.UpdateAccount(this.account.accountID!, body)
+      : this.accountSrv.AddAccount(body);
 
     request$.subscribe({
-      next: savedAccount => {
+      next: res => {
+        if (!res.isSuccess) {
+          this.toast.warning(res.errorMasseges[0] || 'فشل الحفظ');
+          return;
+        }
+
         this.toast.success('تم الحفظ بنجاح');
-        this.saved.emit(savedAccount); // tell parent we’re done
+        this.saved.emit(res.result); // Emit the saved Account object
       },
       error: () => this.toast.error('حدث خطأ أثناء الحفظ')
     });
   }
+
 }

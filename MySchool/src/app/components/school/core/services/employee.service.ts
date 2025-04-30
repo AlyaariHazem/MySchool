@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
-import { catchError, Observable } from 'rxjs';
 import { Employee } from '../models/employee.model';
+import { ApiResponse } from '../../../../core/models/response.model';
 import { HttpParams } from '@angular/common/http';
 
 @Injectable({
@@ -9,26 +10,22 @@ import { HttpParams } from '@angular/common/http';
 })
 export class EmployeeService {
 
-  API = inject(BackendAspService);
-  getAllEmployees(): Observable<Employee[]> {
-    return this.API.getRequest<Employee[]>('Employee').pipe(
-      catchError(err => {
-        console.error('Error fetching employees:', err);
-        return [];
-      })
-    );
+  private API = inject(BackendAspService);
+
+  getAllEmployees(): Observable<ApiResponse<Employee[]>> {
+    return this.API.getRequest<Employee[]>('Employee');
   }
-  addEmployee(newEmployee: Employee): Observable<Employee> {
+
+  addEmployee(newEmployee: Employee): Observable<ApiResponse<Employee>> {
     return this.API.postRequest<Employee>('Employee', newEmployee);
   }
-  updateEmployee(id:number,employee: Employee): Observable<Employee> {
+
+  updateEmployee(id: number, employee: Employee): Observable<ApiResponse<Employee>> {
     return this.API.putRequest<Employee>(`Employee/${id}`, employee);
   }
 
-  deleteEmployee(id: number, jobType: string) {
+  deleteEmployee(id: number, jobType: string): Observable<ApiResponse<any>> {
     const params = new HttpParams().set('jobType', jobType);
-  
-    return this.API.http.delete(`${this.API.baseUrl}/Employee/${id}`, { params });
+    return this.API.http.delete<ApiResponse<any>>(`${this.API.baseUrl}/Employee/${id}`, { params });
   }
-  
 }

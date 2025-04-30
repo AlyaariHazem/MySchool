@@ -111,9 +111,8 @@ public class StudentManagementService
         // 3. Retrieve the existing account ID associated with the guardian
         var existingAccountStudentGuardian = await _unitOfWork.AccountStudentGuardians.GetAccountStudentGuardianByGuardianIdAsync(existingGuardian.GuardianID);
         if (existingAccountStudentGuardian == null)
-        {
             throw new Exception("No account found for the existing guardian.");
-        }
+        
 
         // 4. Create AccountStudentGuardian Mapping using the existing account ID
         var accountStudentGuardian = new AccountStudentGuardian

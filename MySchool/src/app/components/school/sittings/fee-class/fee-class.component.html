@@ -11,7 +11,7 @@
 
                         <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
                             <input class="inputError w-full h-3rem" type="text" name="feeName" pInputText id="fee"
-                                [(ngModel)]="Addfee.feeName" autocomplete="off" />
+                                [(ngModel)]="Addfee.feeName" autocomplete="off" required />
                             <label for="fee">إدخل بند رسوم</label>
                         </p-floatlabel>
                     </div>
@@ -92,8 +92,8 @@
                     <!-- Class Selector -->
                     <div class="form-control1">
                         <p-floatlabel class="w-full md:w-56" variant="on">
-                            <p-select class="h-3rem" formControlName="selectedClass" inputId="Class"
-                                [options]="classDTO" optionLabel="className"
+                            <p-select class="h-3rem" [(ngModel)]="FeeClassDTO.classID" 
+                                [options]="classDTO" optionLabel="className" name="classID"
                                 (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"
                                 optionValue="classID" [checkmark]="true" [editable]="true" [showClear]="true"
                                 required />
@@ -117,8 +117,8 @@
                     <!-- Amount -->
                     <div class="form-control">
                         <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
-                            <input class="inputText w-full h-3rem" name="feeName" pInputText id="amount" type="number"
-                                name="note" #amount="ngModel" [(ngModel)]="FeeClassDTO.amount" autocomplete="off" />
+                            <input class="inputText w-full h-3rem" name="amount" pInputText id="amount" type="number"
+                                name="note" #amount="ngModel" [(ngModel)]="FeeClassDTO.amount" autocomplete="off" required />
                             <label for="amount">المبلغ</label>
                             @if (amount.invalid && amount.touched) {
                             <div class="error">يجب إدخال مبلغ</div>

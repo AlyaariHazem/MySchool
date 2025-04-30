@@ -80,6 +80,7 @@ import { AccountReportComponent } from './report/account-report/account-report.c
 import { EmployeeComponent } from './teachers/employee/employee.component';
 import { AgePipe } from '../../Pipes/age.pipe';
 import { MonthlyResultComponent } from './report/monthly-result/monthly-result.component';
+import { GradesTermComponent } from './grades-mange/grades-term/grades-term.component';
 
 
 
@@ -127,6 +128,7 @@ const components = [
   GradesMangeComponent,
   AllotmentComponent,
   MonthlyResultComponent,
+  GradesTermComponent,
   AccountReportComponent
 
 ];

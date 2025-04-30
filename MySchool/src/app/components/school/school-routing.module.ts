@@ -27,6 +27,7 @@ import { PageNotFoundComponent } from '../../shared/components/page-not-found/pa
 import { AccountReportComponent } from './report/account-report/account-report.component';
 import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
 import { MonthlyResultComponent } from './report/monthly-result/monthly-result.component';
+import { GradesTermComponent } from './grades-mange/grades-term/grades-term.component';
 
 const routes: Routes = [
   {
@@ -80,7 +81,7 @@ const routes: Routes = [
         path: 'grade', data: { breadcrumb: 'الدرجات' }, children: [
           { path: '', component: GradesMangeComponent, data: { breadcrumb: 'بنود الدرجات' } },
           { path: 'GradeMonth', component: GradesMonthComponent, data: { breadcrumb: 'الدرجات الشهرية' } },
-          { path: 'GradeClass', component: ActionComponent, data: { breadcrumb: 'الدرجات الفصلية' } },
+          { path: 'GradeTerm', component: GradesTermComponent, data: { breadcrumb: 'الدرجات الفصلية' } },
           { path: 'not-found', component: PageNotFoundComponent },
           { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 
