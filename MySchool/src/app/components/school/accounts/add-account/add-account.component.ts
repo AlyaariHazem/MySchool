@@ -1,8 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
+
 import { Account } from '../../core/models/accounts.model';
 import { AccountService } from '../../core/services/account.service';
-import { ToastrService } from 'ngx-toastr';
 import { PayBy } from '../../core/models/payBy.model';
 
 
@@ -10,7 +11,6 @@ import { PayBy } from '../../core/models/payBy.model';
   selector: 'app-add-account',
   templateUrl: './add-account.component.html',
   styleUrls: ['./add-account.component.scss',
-    './../../../../shared/styles/style-primeng-input.scss',
     './../../../../shared/styles/style-select.scss'
   ]
 })
@@ -45,7 +45,14 @@ export class AddAccountComponent implements OnInit {
     { label: 'Cash', value: 'cash' },
     { label: 'الكريمي', value: 'visa' }
   ];
-
+  accountType = [
+    { name: 'Guardain', parentAccount: 1 },
+    { name: 'School', parentAccount: 2 },
+    { name: 'Branches', parentAccount: 3 },
+    { name: 'Funds', parentAccount: 4 },
+    { name: 'Employees', parentAccount: 5 },
+    { name: 'Banks', parentAccount: 6 }
+  ];
   save() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();

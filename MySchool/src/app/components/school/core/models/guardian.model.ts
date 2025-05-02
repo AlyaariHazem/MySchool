@@ -23,3 +23,8 @@ export interface GuardianInfo{
     address: string;
     accountId: number;
 }
+export interface GuardianExist{
+    accountStudentGuardianID?: number;
+    guardianName: string;
+    guardianID: number;
+}

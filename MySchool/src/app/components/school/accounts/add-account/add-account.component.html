@@ -2,43 +2,58 @@
     <div class="schoolInfo">
         <div class="contant">
             <div class="group">
-                <div class="form-control">
-                    <label class="label2 ">اسم الحساب<span style="color:red;"> *</span></label>
-                    <input pInputText class="inputChip" type="text" pSize="large" placeholder="اسم الحساب"
-                        formControlName="accountName" />
+
+                <div class="form-control mt-2">
+                    <p-floatlabel class="w-full h-3rem" variant="on">
+                        <input class="w-full h-3rem" name="accountName" formControlName="accountName" pInputText
+                            id="amount" type="text" autocomplete="off" required />
+                        <label for="amount">اسم الحساب<span style="color:red;"> *</span></label>
+                    </p-floatlabel>
                 </div>
-                <div class="form-control">
-                    <label class="label2">الحساب الأب</label>
-                    <p-dropdown [options]="" optionLabel="name" [editable]="true" [showClear]="true"
-                        formControlName="parentAccount" placeholder="إختار النوع">
-                    </p-dropdown>
+                <div class="form-control1 mt-3">
+                    <p-floatlabel class="w-full h-3rem" variant="on">
+                        <p-select class="w-full h-3rem" [options]="accountType" optionLabel="name" inputId="classID"
+                            formControlName="parentAccount" optionValue="name" [checkmark]="true" [editable]="true"
+                            [showClear]="true" required />
+                        <label for="Class">إختار الصف</label>
+                    </p-floatlabel>
+
                 </div>
+
             </div>
 
             <div class="group">
                 <div class="form-control">
                     <label class="label2">نوع الحساب</label>
-                    <input type="checkbox" formControlName="typeOpenBalance" binary="true"/>
+                    <input class="border-none border-in no-hover-border" type="checkbox"
+                        formControlName="typeOpenBalance" binary="true" />
                 </div>
-                <div class="form-control">
-                    <label class="label2">نوع الحساب</label>
-                    <p-dropdown [options]="paymentMethods" optionLabel="label" [editable]="true" [showClear]="true"
-                       optionvalue="value" formControlName="accountType" placeholder="إختار النوع">
-                    </p-dropdown>
+                <div class="form-control1 mt-3">
+                    <p-floatlabel class="w-full" variant="on">
+                        <p-select class="w-full h-3rem" [options]="paymentMethods" optionLabel="label" inputId="label"
+                            formControlName="accountType" optionValue="label" [checkmark]="true" [editable]="true"
+                            [showClear]="true" required />
+                        <label for="label">نوع الحساب</label>
+                    </p-floatlabel>
+
                 </div>
             </div>
 
             <div class="group">
+
                 <div class="form-control">
                     <label class="label2">الرصيد الإفتتاحي</label>
                     <input pInputText type="number" pSize="large" formControlName="openingBalance" />
                 </div>
-                <div class="form-control">
-                    <label class="label2">نوع الرصيد الإفتتاحي</label>
-                    <p-dropdown [options]="" optionLabel="name" [editable]="true" [showClear]="true"
-                        formControlName="openingBalanceType" placeholder="إختار النوع">
-                    </p-dropdown>
+                <div class="form-control1 mt-4">
+                    <p-floatlabel class="w-full" variant="on">
+                        <p-select class="w-full h-3rem" [options]="" optionLabel="name" inputId="label"
+                            formControlName="openingBalanceType" optionValue="label" [checkmark]="true"
+                            [editable]="true" [showClear]="true" required />
+                        <label for="label">نوع الرصيد الإفتتاحي</label>
+                    </p-floatlabel>
                 </div>
+
             </div>
 
             <div class="group">

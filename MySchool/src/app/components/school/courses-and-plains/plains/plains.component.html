@@ -1,59 +1,68 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
 
-    <h2 class="school">خطط المقررات</h2>
+    <h2 class="title">خطط المقررات</h2>
 
-    <!-- Reactive Form -->
     <form [formGroup]="form">
         <div class="group group2">
-            <!-- الصف -->
             <div class="form-control">
-                <!-- onChange logic is in .ts via valueChanges -->
-                <p-dropdown [options]="classes" formControlName="classID" optionLabel="className" optionValue="classID"
-                    [showClear]="true" placeholder="اختر الصف">
-                </p-dropdown>
+                <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
+                    <p-select class="w-full h-3rem inputError" [options]="classes" formControlName="classID"
+                        optionLabel="className" optionValue="classID" [editable]="true" [showClear]="true"/>
+                    <label for="classID">اختر الصف</label>
+                </p-floatLabel>
             </div>
 
-            <!-- المقرر (subjects filtered by class) -->
             <div class="form-control">
-                <p-dropdown [options]="filteredSubjects" formControlName="subjectID" optionLabel="subjectName"
-                    optionValue="subjectID" [showClear]="true" placeholder="اختر المقرر">
-                </p-dropdown>
+                <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
+                    <p-select class="w-full h-3rem inputError" [options]="filteredSubjects"
+                        formControlName="subjectID" optionLabel="curriculumName" optionValue="subjectID"
+                        [editable]="true" [showClear]="true"/>
+                    <label for="subjectID">اختر المقرر</label>
+                </p-floatLabel>
             </div>
 
             <!-- الشعبة -->
             <div class="form-control">
-                <p-dropdown [options]="fiteredDivisions" formControlName="divisionID" optionLabel="divisionName"
-                    optionValue="divisionID" [showClear]="true" placeholder="إختر الشعبة">
-                </p-dropdown>
+                <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
+                    <p-select class="w-full h-3rem inputError" [options]="fiteredDivisions"
+                        formControlName="divisionID" optionLabel="divisionName" optionValue="divisionID"
+                        [editable]="true" [showClear]="true" />
+                    <label for="divisionID">اختر الشعبة</label>
+                </p-floatLabel>
             </div>
         </div>
 
         <div class="group group2">
+
             <!-- المعلم -->
             <div class="form-control">
-                <p-dropdown [options]="teachers" formControlName="teacherID" optionLabel="fullName"
-                    optionValue="teacherID" [showClear]="true" placeholder="إختر المعلم">
-                </p-dropdown>
+                <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
+                    <p-select class="w-full h-3rem inputError" [options]="teachers" formControlName="teacherID"
+                        optionLabel="fullName" optionValue="teacherID" [editable]="true" [showClear]="true"/>
+                    <label for="teacherID">اختر المعلم</label>
+                </p-floatLabel>
             </div>
 
             <!-- الفصل الدراسي -->
             <div class="form-control term">
-                <p-dropdown [options]="terms" formControlName="termID" optionLabel="name" optionValue="termID"
-                    [showClear]="true" placeholder="إختر الفصل الدراسي">
-                </p-dropdown>
+                <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
+                    <p-select class="w-full h-3rem inputError" [options]="terms" formControlName="termID"
+                        optionLabel="name" optionValue="termID" [editable]="true" [showClear]="true" placeholder=" "/>
+                    <label for="termID">اختر الفصل الدراسي</label>
+                </p-floatLabel>
             </div>
 
         </div>
 
         <!-- زر الحفظ -->
-        <p-button variant="outlined" severity="success" class="showFee" (onClick)="editMode ? updateCurriculum() : Add()"
-            [label]="editMode ? 'تعديل' : 'إضافة'">
+        <p-button variant="outlined" severity="success" class="showFee"
+            (onClick)="editMode ? updateCurriculum() : Add()" [label]="editMode ? 'تعديل' : 'إضافة'">
         </p-button>
 
         <!-- حقل البحث -->
-        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا...">
-        </p-chips>
+        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..."></p-chips>
     </form>
+
 
     <!-- Responsive Table -->
     <div class="table-container">

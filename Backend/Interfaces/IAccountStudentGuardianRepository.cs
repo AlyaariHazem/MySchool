@@ -10,10 +10,10 @@ namespace Backend.Interfaces;
 
 public interface IAccountStudentGuardianRepository
 {
-    Task<Result<bool>> AddAcountStudentGuardianAsync(AccountStudentGuardianDTO dto);
-    Task<Result<List<AccountStudentGuardianDTO>>> GetAllAcountStudentGuardianAsync();
+    // Task<Result<bool>> AddAcountStudentGuardianAsync(AccountStudentGuardianDTO dto);
+    // Task<Result<bool>> UpdateAcountStudentGuardianAsync(AccountStudentGuardianDTO dto);
+    Task<Result<List<AccountsGuardiansDTO>>> GetAllAcountStudentGuardianAsync();
     Task<Result<AccountStudentGuardianDTO>> GetAcountStudentGuardianByIdAsync(int studentId);
-    Task<Result<bool>> UpdateAcountStudentGuardianAsync(AccountStudentGuardianDTO dto);
     Task<AccountStudentGuardian> GetAccountStudentGuardianByGuardianIdAsync(int guardianId);
     Task<AccountStudentGuardian> AddAccountStudentGuardianAsync(AccountStudentGuardian accountStudentGuardian);
 }

@@ -4,14 +4,14 @@
     <div class="group group2">
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
-          <mat-label>اسم المادة</mat-label>
-          <input class="inputError" type="text" matInput />
+          <mat-label>اسم البند</mat-label>
+          <input class="inputError" formControlName="name" type="text" matInput />
         </mat-form-field>
       </div>
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
           <mat-label>الدرجة العظمى</mat-label>
-          <input class="inputError" type="number" matInput />
+          <input class="inputError" formControlName="maxGrade" type="number" matInput />
         </mat-form-field>
       </div>
       <div class="form-control">
@@ -23,12 +23,10 @@
 
       </div>
     </div>
-    <p-button variant="outlined" severity="success" class="showFee" (onClick)="showDialog()" label="إضافة+" />
+    <p-button variant="outlined" severity="success" class="showFee" (onClick)="Add()" label="إضافة+" />
     <p-chips [ngClass]="{'chipsOne':languageService.dir==='rtl','chipsOneEn':languageService.dir==='ltr'}"
       [max]="search" placeholder="ابحث هنا..." />
   </form>
-
-  <!-- ... rest of your table/modal code ... -->
 
   <!-- Responsive Table -->
   <div id="printableTable">
@@ -68,7 +66,7 @@
                         <i class="fas fa-ellipsis-h"></i>
                       </button>
                       <div class="dropdown-menu dropdown-menu-left">
-                        <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                        <a class="dropdown-item" (click)="edit(gradeType)"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
                         <div role="separator" class="dropdown-divider"></div>
                         <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
                       </div>
@@ -82,7 +80,7 @@
         </div>
       </mat-card>
       <p-paginator [attr.dir]="languageService.dir" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-        [totalRecords]="books.length" [rowsPerPageOptions]="[4, 8, 16]" />
+        [totalRecords]="gradeTypes.length" [rowsPerPageOptions]="[4, 8, 16]" />
     </div>
   </div>
 </div>

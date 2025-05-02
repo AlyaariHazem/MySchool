@@ -126,7 +126,7 @@ public class VoucherRepository : IVoucherRepository
         GuardianID = vg.GuardianID,
         ClassName = vg.Division.Class.ClassName,
         RequiredFee = vg.AccountStudentGuardians.Select(a => a.Amount).ToList(),
-        receiptionFee = vg.AccountStudentGuardians.SelectMany(a => a.Vouchers).Select(v => v.Receipt).ToList(),
+        receiptionFee = vg.AccountStudentGuardians.SelectMany(a => a.Vouchers).Sum(v => v.Receipt),
         ImageURL = vg.Attachments.Select(a => a.AttachmentURL).ToList(),
     }).ToListAsync();
     }

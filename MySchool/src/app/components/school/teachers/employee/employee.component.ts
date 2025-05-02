@@ -58,7 +58,10 @@ export class EmployeeComponent implements OnInit {
         gender: employee.gender
       })
       this.mode = this.data.mode;
+    }else{
+      this.form.reset();
     }
+
   }
   AddEmployee() {
     if (this.form.valid) {

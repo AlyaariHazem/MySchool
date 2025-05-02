@@ -1,5 +1,4 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
 
@@ -17,107 +16,57 @@ export class BooksComponent implements OnInit {
   subjectService = inject(SubjectService);
   languageService = inject(LanguageService);
 
-  form: FormGroup;
   subjects: Subjects[] = [];
   paginates!: Paginates;
-  search: any;
   editMode: boolean = false;
+  search: any;
 
-  isSmallScreen = false;
-  langDir!: string;
-  subjectData!: Subjects;
+  subjectData: Subjects = {
+    subjectName: '',
+    subjectReplacement: '',
+    note: '',
+    hireDate: ''
+  };
 
-  first: number = 0; // Current starting index for pagination
-  rows: number = 4; // Number of rows per page
+  first: number = 0;
+  rows: number = 4;
 
-  constructor(
-    private formBuilder: FormBuilder,
-    public dialog: MatDialog
-  ) {
-    this.form = this.formBuilder.group({
-      name: ['', Validators.required],
-      nameReplacement: [''],
-      note: [''],
-    });
-  }
+  constructor(public dialog: MatDialog) {}
 
   ngOnInit(): void {
     this.updatePaginatedData();
     this.languageService.currentLanguage();
   }
 
-  // Adding new subject
-  addSubject(formGroup: FormGroup) {
-    if (formGroup.invalid) {
-      console.log('Form is invalid');
+  addSubject(): void {
+    if (!this.subjectData.subjectName || this.subjectData.subjectName.trim() === '') {
+      console.log('اسم الكتاب مطلوب');
       return;
     }
-    this.subjectData = {
-      subjectName: formGroup.value.name,
-      subjectReplacement: formGroup.value.nameReplacement,
-      note: formGroup.value.note,
-      hireDate: new Date().toISOString(),
+
+    const newSubject: Subjects = {
+      ...this.subjectData,
+      hireDate: new Date().toISOString()
     };
 
-    this.subjectService.addSubject(this.subjectData).subscribe({
+    this.subjectService.addSubject(newSubject).subscribe({
       next: (res) => {
         if (res.isSuccess) {
           this.subjects.push(res.result);
           this.updatePaginatedData();
+          this.resetForm();
         }
       },
-      error: () => console.error('Failed to add subject')
+      error: () => console.error('فشل في إضافة الكتاب')
     });
   }
 
-  // Fetch paginated data based on page number and rows per page
-  updatePaginatedData(): void {
-    const page = this.first / this.rows + 1;
-    this.subjectService.getPaginatedSubjects(page, this.rows).subscribe({
-      next: (res) => {
-        if (res.isSuccess) {
-          this.paginates = res.result;
-          this.subjects = res.result.data;
-        }
-      },
-      error: () => console.error('Failed to load paginated subjects')
-    });
-
-  }
-
-  // Deleting a subject
-  deleteSubject(id: number) {
-    this.subjectService.deleteSubject(id).subscribe({
-      next: (res) => {
-        if (res.isSuccess) {
-          this.subjects = this.subjects.filter(subject => subject.subjectID !== id);
-          this.updatePaginatedData();
-        }
-      },
-      error: () => console.error('Failed to delete subject')
-    });
-
-  }
-
-  // Updating a subject
-  updateSubject(formGroup: FormGroup) {
-    if (formGroup.invalid) {
-      console.log('Form is invalid');
-      return;
-    }
-
-    this.subjectData = {
-      ...this.subjectData,  // Keep the existing values of subjectData
-      subjectName: formGroup.value.name,
-      subjectReplacement: formGroup.value.nameReplacement,
-      note: formGroup.value.note,
-    };
-
+  updateSubject(): void {
     const subjectID = this.subjectData.subjectID;
 
     if (!subjectID) {
       console.log('subjectID is missing!');
-      return; // Return early if subjectID is not set
+      return;
     }
 
     this.subjectService.updateSubject(subjectID, this.subjectData).subscribe({
@@ -127,30 +76,56 @@ export class BooksComponent implements OnInit {
             subj.subjectID === subjectID ? { ...subj, ...this.subjectData } : subj
           );
           this.updatePaginatedData();
+          this.resetForm();
         }
       },
-      error: () => console.error('Failed to update subject')
-    });    
-
-    this.form.reset();
-    this.editMode = false;
-  }
-
-  // Setting the subject for editing
-  editSubject(subject: Subjects) {
-    this.editMode = true;
-    this.subjectData = { ...subject };  // Create a copy of the subject to avoid mutation
-    this.form.patchValue({
-      name: subject.subjectName,
-      nameReplacement: subject.subjectReplacement,
-      note: subject.note,
+      error: () => console.error('فشل في تحديث الكتاب')
     });
   }
 
-  // Handle page change event from PrimeNG paginator
+  editSubject(subject: Subjects): void {
+    this.editMode = true;
+    this.subjectData = { ...subject }; // نسخة مستقلة
+  }
+
+  deleteSubject(id: number): void {
+    this.subjectService.deleteSubject(id).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          this.subjects = this.subjects.filter(subject => subject.subjectID !== id);
+          this.updatePaginatedData();
+        }
+      },
+      error: () => console.error('فشل في حذف الكتاب')
+    });
+  }
+
+  updatePaginatedData(): void {
+    const page = this.first / this.rows + 1;
+    this.subjectService.getPaginatedSubjects(page, this.rows).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          this.paginates = res.result;
+          this.subjects = res.result.data;
+        }
+      },
+      error: () => console.error('فشل في تحميل البيانات')
+    });
+  }
+
   onPageChange(event: PaginatorState): void {
-    this.first = event.first || 0; // Update first index based on page
-    this.rows = event.rows || 4; // Update rows per page
-    this.updatePaginatedData(); // Fetch new page data
+    this.first = event.first || 0;
+    this.rows = event.rows || 4;
+    this.updatePaginatedData();
+  }
+
+  resetForm(): void {
+    this.subjectData = {
+      subjectName: '',
+      subjectReplacement: '',
+      note: '',
+      hireDate: ''
+    };
+    this.editMode = false;
   }
 }

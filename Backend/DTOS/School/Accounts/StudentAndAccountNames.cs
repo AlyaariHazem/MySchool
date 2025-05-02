@@ -10,5 +10,6 @@ public class StudentAndAccountNames
     public int StudentID { get; set; }
     public string? StudentName { get; set; }
     public string? AccountName { get; set; }
+    public int? GuardianID { get; set; }
     public int? AccountStudentGuardianID { get; set; }
 }

@@ -44,7 +44,7 @@ namespace Backend.Controllers.School
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }
-        
+
         [HttpGet("GuardianInfo")]
         public async Task<ActionResult<APIResponse>> GetAllGuardiansInfo()
         {
@@ -66,6 +66,14 @@ namespace Backend.Controllers.School
                 // Optionally, add the actual exception message: response.ErrorMasseges.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
+        }
+        [HttpGet("GuardianExists")]
+        public async Task<IActionResult> GuardianExists()
+        {
+            var guardians = await _unitOfWork.AccountStudentGuardians.GetAllAcountStudentGuardianAsync();
+            return guardians.Ok
+                ? Ok(APIResponse.Success(guardians.Value!))
+                : NotFound(APIResponse.Fail(guardians.Error!));
         }
 
         // GET: api/Guardian/{id}

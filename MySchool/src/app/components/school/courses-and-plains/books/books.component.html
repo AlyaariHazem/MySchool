@@ -1,83 +1,96 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
 
-  <h2 class="school">الكتــب الدراسية</h2>
-  <form [formGroup]="form" class="h-5rem">
+  <h2 class="title">الكتــب الدراسية</h2>
+
+  <!-- Template-driven Form -->
+  <form #formRef="ngForm" class="h-5rem">
+
     <div class="group group2">
+
+      <!-- اسم الكتاب -->
       <div class="form-control">
-        <label class="label2 ">اسم الكتاب<span
-            [style]="(form.get('name')?.invalid && form.get('name'))?'color:red;':'color:rgb(56, 216, 86);'">
-            *</span></label>
-        <input pInputText class="h-3rem" type="text" placeholder="ادخل اسم الكتاب"
-          formControlName="name" />
-      </div>
-      <div class="form-control">
-        <label class="label2 ">الاسم البديل</label>
-        <input pInputText class="h-3rem" type="text" placeholder="ادخل اسم البديل"
-          formControlName="nameReplacement" />
+        <p-floatLabel class="h-3rem mb-3 mt-2" variant="on">
+          <input class="inputError w-full h-3rem" type="text" pInputText id="bookName"
+            [(ngModel)]="subjectData.subjectName" name="name" placeholder=" " autocomplete="off" required />
+          <label for="bookName">اسم الكتاب<span
+              [style]="!formRef.controls['name'].valid! && formRef.controls['name']!.touched ? 'color:red;' : 'color:rgb(56, 216, 86);'">*</span></label>
+        </p-floatLabel>
       </div>
 
+      <!-- الاسم البديل -->
       <div class="form-control">
-        <label class="label2 ">الملاحظة</label>
-        <input pInputText class="h-3rem" type="text"  placeholder="ادخل ملاحظة"
-          formControlName="note" />
+        <p-floatLabel class="h-3rem mb-3 mt-2" variant="on">
+          <input class="inputError w-full h-3rem" type="text" pInputText id="replacementName"
+            [(ngModel)]="subjectData.subjectReplacement" name="nameReplacement" placeholder=" " autocomplete="off" />
+          <label for="replacementName">الاسم البديل</label>
+        </p-floatLabel>
       </div>
+
+      <!-- الملاحظة -->
+      <div class="form-control">
+        <p-floatLabel class="h-3rem mb-3 mt-2" variant="on">
+          <input class="inputError w-full h-3rem" type="text" pInputText id="note" [(ngModel)]="subjectData.note"
+            name="note" placeholder=" " autocomplete="off" />
+          <label for="note">الملاحظة</label>
+        </p-floatLabel>
+      </div>
+
     </div>
-    <p-button variant="outlined" severity="success" class="showFee"
-      (onClick)="subjectData ? updateSubject(form) : addSubject(form)" [label]="editMode ? 'تعديل' : 'إضافة+'" />
 
-    <p-chips class="chipsOne" [max]="search" placeholder="ابحث هنا..." />
+    <p-button variant="outlined" severity="success" class="showFee"
+      (onClick)="editMode ? updateSubject() : addSubject()" [label]="editMode ? 'تعديل' : 'إضافة+'" />
+
+      <p-chips name="search" class="chipsOne" [max]="2" placeholder="ابحث هنا..." />
+
   </form>
 
   <!-- Responsive Table -->
   <div class="table-container mt-3">
-    <div class="table-container">
-      <mat-card>
-        <table class="styled-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>اسم الكتاب</th>
-              <th>الاسم البديل</th>
-              <th>الملاحظة</th>
-              <th>تاريخ الإنشاء</th>
-              <th>العملية</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (subject of subjects; track $index) {
-            <tr>
-              <td>{{ subject.subjectID }}</td>
-              <td>{{subject.subjectName}} </td>
-              <td>{{subject.subjectReplacement}}</td>
-              <td>{{subject.note}}</td>
-              <td>{{subject.hireDate|date:'yyyy-MM-dd'}}</td>
-              <td>
-                <div class="col text-left">
-                  <div class="mt-sm-0 mt-2">
-                    <button class="btn btn-left update" type="button" data-toggle="dropdown" aria-haspopup="true"
-                      aria-expanded="false">
-                      <i class="fas fa-ellipsis-h"></i>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-left">
-                      <a class="dropdown-item" (click)="editSubject(subject)"><i
-                          class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                      <div role="separator" class="dropdown-divider"></div>
-                      <a class="dropdown-item"><i class="bi bi-trash IconDelete"
-                          (click)="deleteSubject(subject.subjectID!)"></i>حذف</a>
-                    </div>
+    <mat-card>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>اسم الكتاب</th>
+            <th>الاسم البديل</th>
+            <th>الملاحظة</th>
+            <th>تاريخ الإنشاء</th>
+            <th>العملية</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (subject of subjects; track $index) {
+          <tr>
+            <td>{{ subject.subjectID }}</td>
+            <td>{{subject.subjectName}}</td>
+            <td>{{subject.subjectReplacement}}</td>
+            <td>{{subject.note}}</td>
+            <td>{{subject.hireDate | date:'yyyy-MM-dd'}}</td>
+            <td>
+              <div class="col text-left">
+                <div class="mt-sm-0 mt-2">
+                  <button class="btn btn-left update" type="button" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+                    <i class="fas fa-ellipsis-h"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-left">
+                    <a class="dropdown-item" (click)="editSubject(subject)"><i
+                        class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                    <div role="separator" class="dropdown-divider"></div>
+                    <a class="dropdown-item"><i class="bi bi-trash IconDelete"
+                        (click)="deleteSubject(subject.subjectID!)"></i>حذف</a>
                   </div>
                 </div>
-              </td>
-            </tr>
-            }@empty {
-            <p>No Data available in a Table</p>
-            }
-          </tbody>
-        </table>
-        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-          [totalRecords]="paginates.totalCount" [rowsPerPageOptions]="[4, 10, 20]" />
-      </mat-card>
-    </div>
-
+              </div>
+            </td>
+          </tr>
+          }@empty {
+          <p>No Data available in a Table</p>
+          }
+        </tbody>
+      </table>
+      <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+        [totalRecords]="paginates.totalCount!" [rowsPerPageOptions]="[4, 10, 20]" />
+    </mat-card>
   </div>
 </div>

@@ -22,14 +22,17 @@
             <p-floatLabel>
               <p-dropdown [options]="accounts" [(ngModel)]="selectedAccount"
                 (ngModelChange)="setAccountStudentGuardianID($event)" formControlName="accountStudentGuardianID"
-                optionLabel="accountName" [checkmark]="true" [editable]="true" [showClear]="true"
-                placeholder="حساب ولي الأمر" />
+                optionLabel="accountName" [checkmark]="true" [editable]="true" [showClear]="true" id="amount" />
+              <label for="amount">حساب ولي الأمر<span style="color:red;"> *</span></label>
             </p-floatLabel>
           </div>
           <div class="form-control">
-            <p-dropdown [options]="accounts" [(ngModel)]="selectedAccount" formControlName="studentID"
-              optionLabel="studentName" (ngModelChange)="setStudentID($event)" [editable]="true" [showClear]="true"
-              placeholder="الطالب" />
+            <p-floatLabel>
+              <p-dropdown [options]="filteredAccounts" [(ngModel)]="selectedAccount" formControlName="studentID"
+                optionLabel="studentName" (ngModelChange)="setStudentID($event)" [editable]="true" [showClear]="true"
+                id="student" />
+              <label for="student">الطالب<span style="color:red;"> *</span></label>
+            </p-floatLabel>
           </div>
         </div>
         <div class="group group2">
@@ -43,7 +46,6 @@
             <p-dropdown [options]="paymentMethods" [(ngModel)]="payBy" (ngModelChange)="setPayBy($event)"
               formControlName="payBy" optionLabel="label" placeholder="الدفع بواسطة">
             </p-dropdown>
-
 
           </div>
         </div>
@@ -73,23 +75,27 @@
 
     <p-panel header="فواتير ولي الأمر" *ngIf="showDiv2">
       <button pButton icon="pi pi-print" class="p-button-rounded p-button-text print" (click)="print()"> طباعة </button>
-
-      <div class="card flex justify-content-center">
+      <div id="report">
         @for (voucher of filteredVouchers; track $index) {
-        <p-card id="report">
-          <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
-          <span style="position: absolute;">{{voucher.studentName}}</span>
-          <div class="m-2">الصـف: <span>{{voucher.className}}</span></div>
-          <div class="m-2">الرسوم المطلوبة: <span>{{voucher.requiredFee}}</span></div>
-          <span class="typeFee">رسوم طالب</span>
-          <hr>
-          <p>المدفوع: <span>{{voucher.receiptionFee}}</span></p>
-          <hr>
-          <p>مدين عليكم: <span>{{ +voucher.requiredFee! - +voucher.receiptionFee! }}</span></p>
-          <p style="text-align: center; font-weight: bold;">{{ (+voucher.requiredFee! - +voucher.receiptionFee!) | numberToArabicText}}</p>
-          <button class="details">تفاصيل</button>
-        </p-card>
-        }@empty {
+        <div class="card flex justify-content-center">
+          <p-card>
+            <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
+            <span style="position: absolute;">{{voucher.studentName}}</span>
+            <div class="m-2">الصـف: <span>{{voucher.className}}</span></div>
+            <div class="m-2">الرسوم المطلوبة: <span>{{voucher.requiredFee}}</span></div>
+            <span class="typeFee">رسوم طالب</span>
+            <hr>
+            <p>المدفوع: <span>{{voucher.receiptionFee}}</span></p>
+            <hr>
+            <p>مدين عليكم: <span>{{ +voucher.requiredFee! - +voucher.receiptionFee! }}</span></p>
+            <p style="text-align: center; font-weight: bold;">{{ (+voucher.requiredFee! - +voucher.receiptionFee!) |
+              numberToArabicText}}</p>
+            <button class="details">تفاصيل</button>
+          </p-card>
+        </div>
+        }
+        @empty {
+        <div class="card flex justify-content-center" id="report">
           <p-card>
             <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
             <span style="position: absolute;">الاسم</span>
@@ -103,6 +109,7 @@
             <p style="text-align: center; font-weight: bold;">المبلغ كتابتاً</p>
             <button class="details">تفاصيل</button>
           </p-card>
+        </div>
         }
       </div>
     </p-panel>

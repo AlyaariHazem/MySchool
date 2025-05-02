@@ -1,16 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
 
 import { LanguageService } from '../../../core/services/language.service';
 import { GradeTypeService } from '../core/services/grade-type.service';
 import { GradeType } from '../core/models/gradeType.model';
 
-interface City {
-  name: string;
-  code: string;
-}
 
 @Component({
   selector: 'app-grades-mange',
@@ -19,13 +14,11 @@ interface City {
 })
 export class GradesMangeComponent implements OnInit {
   form: FormGroup;
-  cities: City[] | undefined;
   search: any;
   gradeTypeServce=inject(GradeTypeService);
 
   gradeTypes:GradeType[]=[];
   paginatedGradeTypes: GradeType[] = []; 
-  books: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   isActive: boolean = false;
 
   // Paginator properties
@@ -35,12 +28,10 @@ export class GradesMangeComponent implements OnInit {
   languageService=inject(LanguageService);
 
   constructor(
-    private formBuilder: FormBuilder,
-    public dialog: MatDialog
-  ) {
+    private formBuilder: FormBuilder,) {
     this.form = this.formBuilder.group({
-      BookID: ['', Validators.required],
-      ClassID: ['', Validators.required],
+      name: ['',Validators.required],
+      maxGrade: [0,Validators.required],
     });
   }
 
@@ -62,6 +53,13 @@ export class GradesMangeComponent implements OnInit {
       }
     })
   }
+  edit(gradeType: GradeType): void {
+    this.form.patchValue({
+      name: gradeType.name,
+      maxGrade: gradeType.maxGrade,
+    });
+  }
+  
   updatePaginatedData(): void {
     const start = this.first;
     const end = this.first + this.rows;
@@ -78,7 +76,9 @@ export class GradesMangeComponent implements OnInit {
     gradeType.isActive=!gradeType.isActive;
   }
 
-  showDialog() {
+  Add() {
     console.log('the Book is added successfully!');
+    console.log('the data are',this.form.value);
+    this.form.reset();
   }
 }

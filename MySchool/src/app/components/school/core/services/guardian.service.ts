@@ -19,6 +19,15 @@ export class GuardianService {
       })
     );
   }
+  getAllGuardiansExist(): Observable<any> {
+    return this.API.http.get<any>(`${this.API.baseUrl}/Guardian/GuardianExists`).pipe(
+      map(response => response.result),
+      catchError((error) => {
+        console.error('Error fetching guardians:', error);
+        return throwError(() => new Error('Failed to fetch guardians.'));
+      })
+    );
+  }
   
   getGuardianById(id: number): Observable<any> {
     return this.API.http.get<any>(`${this.API.baseUrl}/Guardian/${id}`).pipe(

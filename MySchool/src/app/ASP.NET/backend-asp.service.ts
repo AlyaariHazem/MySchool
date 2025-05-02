@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, Observable, tap, throwError } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { catchError, Observable, throwError } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { ApiResponse } from '../core/models/response.model';
@@ -14,7 +13,7 @@ export class BackendAspService {
 
   public baseUrl = environment.baseUrl;
 
-  constructor(public http: HttpClient, public router: Router, private toastr: ToastrService) { }
+  constructor(public http: HttpClient, public router: Router) { }
 
   getRequest<T>(name: string): Observable<ApiResponse<T>> {
     return this.http.get<ApiResponse<T>>(`${this.baseUrl}/${name}`).pipe(
@@ -54,19 +53,7 @@ export class BackendAspService {
   }
 
   deleteRequest<T>(name: string): Observable<ApiResponse<T>> {
-    return this.http.delete<ApiResponse<T>>(`${this.baseUrl}/${name}`).pipe(
-      tap(res => {
-        if (res.isSuccess) {
-          this.toastr.success(res.result);
-        } else {
-          this.toastr.error(res.errorMasseges[0]);
-        }
-      }),
-      catchError(err => {
-        console.error("Error when Delete:", err);
-        throw err;
-      })
-    );
+    return this.http.delete<ApiResponse<T>>(`${this.baseUrl}/${name}`)
   }
 
   patchRequest<T>(name: string, body: any): Observable<ApiResponse<T>> {

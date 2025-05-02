@@ -1,7 +1,5 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
-  <mat-paginator class="cPaginator" [length]="accounts.length" [pageSize]="pageSize"
-    [pageSizeOptions]="[5, 10, 25, 100]" (page)="onPageChange($event)">
-  </mat-paginator>
+  
   <h2 class="school">الحسابات</h2>
   <form [attr.dir]="languageService.dir">
     <div class="group group2">
@@ -65,26 +63,26 @@
             </tr>
           </thead>
           <tbody>
-            @for (student of displayedaccounts; track $index) {
+            @for (account of displayedaccounts; track $index) {
             <tr>
-              <td>{{ $index }}</td>
-              <td>{{student.accountName}}</td>
+              <td>{{ $index+1 }}</td>
+              <td>{{account.accountName}}</td>
               <td>
                 <p class="dain">مدين</p>
               </td>
-              <td>{{student.typeAccountID==1?'Guardian':student.typeAccountID}}</td>
-              <td>{{student.openBalance}}</td>
-              <td>{{student.typeOpenBalance}}</td>
+              <td>{{account.typeAccountID==1?'Guardian':account.typeAccountID}}</td>
+              <td>{{account.openBalance}}</td>
+              <td>{{account.typeOpenBalance}}</td>
               <td>
-                <button class="active" (click)="changeState(student)">
-                  <i class="bi bi-record-circle" [ngStyle]="{'color': student.state ? '#2fdf85':'red'}">
+                <button class="active" (click)="changeState(account)">
+                  <i class="bi bi-record-circle" [ngStyle]="{'color': account.state ? '#2fdf85':'red'}">
                   </i>
-                  {{ student.state ? 'نشط' : 'غير نشط' }}
+                  {{ account.state ? 'نشط' : 'غير نشط' }}
                   <span class="bi bi-caret-down-fill"></span>
                 </button>
               </td>
-              <td>{{student.note}}</td>
-              <td>{{student.hireDate | date:'yyyy-mm-dd'}}</td>
+              <td>{{account.note}}</td>
+              <td>{{account.hireDate | date:'yyyy-mm-dd'}}</td>
               <td>
                 <div class="col text-left">
                   <div class="mt-sm-0 mt-2">
@@ -94,7 +92,7 @@
                     </button>
                     <div class="dropdown-menu dropdown-menu-left">
                       <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"
-                          (click)="editAccount(student)"></i>تعديل</a>
+                          (click)="editAccount(account)"></i>تعديل</a>
                       <div role="separator" class="dropdown-divider"></div>
                       <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
                     </div>
@@ -105,7 +103,8 @@
             }
           </tbody>
         </table>
-
+        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="accounts.length" [rowsPerPageOptions]="[4, 10, 20]" />
       </mat-card>
     </div>
 

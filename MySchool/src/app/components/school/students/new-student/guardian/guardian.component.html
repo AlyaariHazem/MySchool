@@ -50,7 +50,7 @@
         <label for="existingGuardianId" class="label1">اختر ولي أمر</label>
         <select name="existingGuardianId" id="existingGuardianId" (change)="onGuardianChange($event)">
           @for (guardian of guardians; track $index) {
-            <option [value]="guardian.guardianID">{{guardian.fullName}}</option>
+            <option [value]="guardian.guardianID">{{guardian.guardianName}}</option>
           }
         </select>
       </div>

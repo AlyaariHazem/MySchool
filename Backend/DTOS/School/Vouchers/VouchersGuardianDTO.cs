@@ -12,5 +12,5 @@ public class VouchersGuardianDTO
     public List<decimal>? RequiredFee { get; set; }
     public List<string>? ImageURL { get; set; }
     public string? StudentName { get; set; }
-    public List<decimal>? receiptionFee { get; set; }
+    public decimal? receiptionFee { get; set; }
 }

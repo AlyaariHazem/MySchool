@@ -16,5 +16,6 @@ export interface StudentAccounts{
     accountName: string;
     studentName: string;
     studentID: number;
+    guardianID: number;
     accountStudentGuardianID:number;
 }

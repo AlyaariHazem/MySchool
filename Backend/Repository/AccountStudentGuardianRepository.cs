@@ -21,10 +21,6 @@ public class AccountStudentGuardianRepository : IAccountStudentGuardianRepositor
         _context = context;
         _mapper = mapper;
     }
-    public Task<Result<bool>> AddAcountStudentGuardianAsync(AccountStudentGuardianDTO dto)
-    {
-        throw new NotImplementedException();
-    }
 
     public async Task<Result<AccountStudentGuardianDTO>> GetAcountStudentGuardianByIdAsync(int studentId)
     {
@@ -45,9 +41,24 @@ public class AccountStudentGuardianRepository : IAccountStudentGuardianRepositor
         }
     }
 
-    public Task<Result<List<AccountStudentGuardianDTO>>> GetAllAcountStudentGuardianAsync()
+    public async Task<Result<List<AccountsGuardiansDTO>>> GetAllAcountStudentGuardianAsync()
     {
-        throw new NotImplementedException();
+        var guardians = await _context.AccountStudentGuardians
+    .Include(g => g.Guardian)
+    .GroupBy(g => new { g.GuardianID, g.Guardian.FullName })
+    .Select(g => new AccountsGuardiansDTO
+    {
+        GuardianID = g.Key.GuardianID,
+        GuardianName = g.Key.FullName,
+        AccountStudentGuardianID = g.Select(x => x.AccountStudentGuardianID).FirstOrDefault(),
+    })
+    .OrderBy(g => g.GuardianName)
+    .ToListAsync();
+
+        if (guardians == null || !guardians.Any())
+            return Result<List<AccountsGuardiansDTO>>.Fail("No data found.");
+
+        return Result<List<AccountsGuardiansDTO>>.Success(guardians);
     }
     public async Task<AccountStudentGuardian> GetAccountStudentGuardianByGuardianIdAsync(int guardianId) =>
          await _context.AccountStudentGuardians.FirstOrDefaultAsync(a => a.GuardianID == guardianId);
@@ -57,9 +68,5 @@ public class AccountStudentGuardianRepository : IAccountStudentGuardianRepositor
         await _context.AccountStudentGuardians.AddAsync(accountStudentGuardian);
         await _context.SaveChangesAsync();
         return accountStudentGuardian;
-    }
-    public Task<Result<bool>> UpdateAcountStudentGuardianAsync(AccountStudentGuardianDTO dto)
-    {
-        throw new NotImplementedException();
     }
 }

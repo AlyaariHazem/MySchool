@@ -114,11 +114,11 @@
               </div>
             </mat-card>
           </div>
-        </div>
-        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-          [totalRecords]="Employees.length" [rowsPerPageOptions]="[4, 10, 20]" />
+        </div>  
         }
       </div>
+      <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+          [totalRecords]="Employees.length" [rowsPerPageOptions]="[4, 10, 20]" />
     </div>
   </div>
 </div>

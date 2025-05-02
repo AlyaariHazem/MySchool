@@ -1,6 +1,7 @@
 // student-month-result.component.ts
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 
 import { MonthlyResultService } from '../../core/services/monthly-resultt.service';
 import { MonthlyResult } from '../../core/models/monthly-result.model';
@@ -9,12 +10,9 @@ import { Month } from '../../core/models/month.model';
 import { DivisionService } from '../../core/services/division.service';
 import { divisions } from '../../core/models/division.model';
 import { PaginatorState } from 'primeng/paginator';
-import { ToastrService } from 'ngx-toastr';
+import { Terms } from '../../core/models/term.model';
 
-interface Term {
-  termID: number;
-  termName: string;
-}
+
 
 @Component({
   selector: 'app-student-month-result',
@@ -45,16 +43,17 @@ export class StudentMonthResultComponent implements OnInit {
           return;
         }
         this.monthlyResults = res.result;
+        this.toastr.success('the data fetched successful.');
       },
       error: (err) => {
-        this.toastr.error('Something went wrong');
+        this.toastr.warning('لا يوجد طلاب في هذا!');
         console.error(err);
       }
     });
   }
-  terms: Term[] = [
-    { termID: 1, termName: 'الاول' },
-    { termID: 2, termName: 'الثاني' },
+  terms: Terms[] = [
+    { termID: 1, name: 'الاول' },
+    { termID: 2, name: 'الثاني' },
   ];
   months: Month[] = [
     { id: 5, name: 'مايو', termId: 1 },
@@ -91,11 +90,11 @@ export class StudentMonthResultComponent implements OnInit {
     this.getAllClasses();
     this.getAllDivision();
     this.form = new FormBuilder().group({
-      termId: [, Validators.required],
-      classId: [, Validators.required],
-      studentId: [, Validators.required],
-      monthId: [, Validators.required],
-      divisionId: [, Validators.required]
+      termId: [1, Validators.required],
+      classId: [1, Validators.required],
+      studentId: [0, Validators.required],
+      monthId: [6, Validators.required],
+      divisionId: [1, Validators.required]
     });
     this.form.get('termId')?.valueChanges.subscribe((termId: number) => {
       this.filteredMonths = this.months.filter(month => month.termId === termId);
@@ -103,10 +102,7 @@ export class StudentMonthResultComponent implements OnInit {
     this.form.get('classId')?.valueChanges.subscribe((classId: number) => {
       this.fiteredDivisions = this.divisions.filter(d => d.classID === classId);
     });
-  }
-  selectTerm(): void {
-    const selectedTerm = this.form.get('termID')?.value;
-    this.filteredMonths = this.months.filter(month => month.termId === selectedTerm);
+    this.form.reset();
   }
   getAllDivision(): void {
     this.divisionSerivce.GetAll().subscribe({
@@ -120,16 +116,17 @@ export class StudentMonthResultComponent implements OnInit {
       error: () => this.toastr.error('Server error occurred')
     });
   }
-  selectDivision(): void {
+  getAllGrades(): void {
     const selectedDivision = this.form.get('divisionId')?.value;
     const selectedClass = this.form.get('classId')?.value;
     const selectedTerm = this.form.get('termId')?.value;
     const selectedMonth = this.form.get('monthId')?.value;
-    // const selectedStudent = this.form.get('studentId')?.value;
-    this.getAllMonthlyGradesReport(selectedTerm, selectedMonth, selectedClass, selectedDivision, 0);
+    const selectedStudent = this.form.get('studentId')?.value||0;
+    this.getAllMonthlyGradesReport(selectedTerm, selectedMonth, selectedClass, selectedDivision,selectedStudent);
 
   }
   printReport(subj: MonthlyResult): void {
+    console.log('Printing report for:', subj);
     const page = document.getElementById(`report-${subj.studentID}`);
     if (!page) return;
     this.title = `${subj.studentName}_${subj.year}_${subj.month}_${subj.class}`;

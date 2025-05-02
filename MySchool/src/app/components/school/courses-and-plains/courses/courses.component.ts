@@ -29,6 +29,7 @@ export class CoursesComponent implements OnInit {
   curriculms: Curriculms[] = [];         // Entire array of curriculums
 
   editMode: boolean = false; // Flag to check if in edit mode
+  isLoading: boolean = true;
 
   values = new FormControl<string[] | null>(null);
   max = 2;
@@ -77,6 +78,7 @@ export class CoursesComponent implements OnInit {
     });
   }
   getAllSubjects(): void {
+    this.isLoading = true;
     this.subjectService.getAllSubjects().subscribe({
       next: (res) => {
         if (!res.isSuccess) {
@@ -84,6 +86,7 @@ export class CoursesComponent implements OnInit {
           return;
         }
         this.subjects = res.result;
+        this.isLoading = false;
       },
       error: (err) => {
         this.toastr.error('Server error occurred');
@@ -92,6 +95,7 @@ export class CoursesComponent implements OnInit {
     });
   }
   getAllClasses(): void {
+    this.isLoading = true;
     this.classService.GetAllNames().subscribe({
       next: (res) => {
         if (!res.isSuccess) {
@@ -99,6 +103,7 @@ export class CoursesComponent implements OnInit {
           return;
         }
         this.classes = res.result;
+        this.isLoading = false;
       },
       error: (err) => {
         this.toastr.error('Server error occurred');

@@ -33,6 +33,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   private fileService = inject(FileService);
 
   accounts: StudentAccounts[] = [];
+  filteredAccounts:StudentAccounts[]=[];
   attachments: string[] = [];
   files: File[] = [];
   selectedAccount!: StudentAccounts;
@@ -52,18 +53,17 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   ];
 
   constructor(private formBuilder: FormBuilder, private cdr: ChangeDetectorRef,
-    private toastr: ToastrService, private datePipe: DatePipe) {
+    private toastr: ToastrService) {
     this.formGroup = this.formBuilder.group({
-      voucherID: [''],
+      voucherID: ['', Validators.required],
       receipt: [''],
-      hireDate: [this.datePipe.transform(Date.now(), 'yyyy-MM-dd')], // format the date here
+      hireDate: ['', Validators.required], // format the date here
       note: [''],
-      payBy: [''],
+      payBy: ['', Validators.required],
       accountStudentGuardianID: ['', Validators.required],
       attachments: [[]],
       studentID: ['', Validators.required],
     });
-
   }
 
   addVoucher(formGroup: FormGroup) {
@@ -117,28 +117,37 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   }
   filteredVouchers: VouchersGuardian[] = [];
   setStudentID(value: any): void {
-    if (value) {
-      this.studentID = value.studentID;
-      console.log('Selected Student ID:', this.studentID);
+    if (!value) {
+      this.studentID = 0;
+      this.filteredVouchers = [];
+      return;
     }
+  
+    this.studentID = value.studentID;
     this.cdr.detectChanges();  // Trigger change detection
-    this.filteredVouchers = this.vouchersGuardian.filter(v => v.guardianID == this.studentID);
   }
+  
 
   setAccountStudentGuardianID(value: any): void {
-    this.filteredVouchers = this.vouchersGuardian.filter(v => v.guardianID == value.accountStudentGuardianID);
-    if (value) {
-      this.accountStudentGuardianID = value.accountStudentGuardianID;
-      console.log('Selected Account Student Guardian ID:', this.accountStudentGuardianID);
+    if (!value) {
+      
+      this.filteredAccounts = this.accounts;
+      this.accountStudentGuardianID = 0;
+      return;
     }
+  
+    this.filteredVouchers = this.vouchersGuardian.filter(v => v.guardianID == value.guardianID);
+    this.filteredAccounts = this.accounts.filter(a => a.guardianID == value.guardianID);
+  
+    this.accountStudentGuardianID = value.accountStudentGuardianID;
     this.cdr.detectChanges();  // Trigger change detection
   }
+  
 
   printVoucher() {
     const page = document.getElementById('reportVoucher');
     if (!page) { return; }
   
-    /* ️نسخ كل ملفات الأنماط الموجودة */
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
       .filter((el: Element) => el.getAttribute('href') !== 'assets/print.css')
       .map(el => el.outerHTML)
@@ -185,6 +194,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
           return;
         }
         this.accounts = res.result;
+        this.filteredAccounts=this.accounts;
         
       },
       error: err => {
@@ -198,6 +208,8 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
     this.getAccounts();
     this.ngOnChanges();
     this.getAllVouchersGuardian();
+    const today = new Date().toISOString().split('T')[0];
+    this.formGroup.patchValue({ hireDate: today });
   }
 
   ngOnChanges() {
@@ -213,7 +225,10 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (this.voucherData == undefined)
-      this.formGroup.reset();
+      this.formGroup.reset({
+        hireDate: new Date().toISOString().split('T')[0]
+      });
+      
   }
 
   ngOnDestroy() {
@@ -280,7 +295,6 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
     const page = document.getElementById('report');
     if (!page) { return; }
   
-    /* ️نسخ كل ملفات الأنماط الموجودة */
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
       .filter((el: Element) => el.getAttribute('href') !== 'assets/print.css')
       .map(el => el.outerHTML)
@@ -294,7 +308,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
     popup.document.write(`
       <html><head>
       <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-      <title>prinat any thing you want</title>
+      <title>prinat ${this.selectedAccount.studentName+"_"+this.selectedAccount.studentID}</title>
         ${base}
         ${links}
         <style>

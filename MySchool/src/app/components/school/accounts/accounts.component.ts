@@ -1,13 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { MatDialog } from '@angular/material/dialog';
-import { PageEvent } from '@angular/material/paginator';
-import { Subscription } from 'rxjs';
 
 import { LanguageService } from '../../../core/services/language.service';
 import { AccountService } from '../core/services/account.service';
 import { Account } from '../core/models/accounts.model';
+import { PaginatorState } from 'primeng/paginator';
 
 interface AccountType {
   name: string;
@@ -33,18 +32,11 @@ export class AccountsComponent implements OnInit {
   }
   form: FormGroup;
   accountType: AccountType[] | undefined;
-
-  values = new FormControl<string[] | null>(null);
   max = 2;
-
-  selectedCity: AccountType | undefined;
 
   languageService = inject(LanguageService);
 
   displayedaccounts: Account[] = []; // Students for the current page
-
-  isSmallScreen = false;
-  private mediaSub: Subscription | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -59,14 +51,6 @@ export class AccountsComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllAccounts();
-    this.accountType = [
-      { name: 'Guardain', code: 1 },
-      { name: 'School', code: 2 },
-      { name: 'Branches', code: 3 },
-      { name: 'Funds', code: 4 },
-      { name: 'Employees', code: 5 },
-      { name: 'Banks', code: 6 }
-    ];
   }
 
   getAllAccounts(): void {
@@ -80,8 +64,7 @@ export class AccountsComponent implements OnInit {
         }
   
         this.accounts = res.result;
-        this.length = this.accounts.length;
-        this.updateDisplayedaccounts();
+        this.updatePaginatedData();
       },
       error: (err) => {
         this.toastr.error('Server error occurred while fetching accounts.');
@@ -92,30 +75,28 @@ export class AccountsComponent implements OnInit {
     });
   }
   
-  ngOnDestroy(): void {
-    if (this.mediaSub) {
-      this.mediaSub.unsubscribe();
+    isLoading: boolean = true; // Loading state for the component
+    first: number = 0; // Current starting index
+    rows: number = 4; // Number of rows per page
+    updatePaginatedData(): void {
+      const start = this.first;
+      const end = this.first + this.rows;
+      this.displayedaccounts = this.accounts.slice(start, end);
     }
-  }
-  currentPage: number = 0; // Current page index
-  pageSize: number = 5; // Number of items per page
-  length: number = 0; // Total number of items
-  updateDisplayedaccounts(): void {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.displayedaccounts = this.accounts.slice(startIndex, endIndex);
-  }
-  // Handle paginator events
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updateDisplayedaccounts();
-  }
+  
+    // Handle page change event from PrimeNG paginator
+    onPageChange(event: PaginatorState): void {
+      this.first = event.first || 0; // Default to 0 if undefined
+      this.rows = event.rows || 4; // Default to 4 rows
+      this.updatePaginatedData();
+    }
+
   changeState(student: Account) {
     student.state = !student.state;
   }
   editAccount(account: Account) {
     this.EditAccount = account;
     this.visible = true;
+    console.log('Editing =>', account);
   }
 }

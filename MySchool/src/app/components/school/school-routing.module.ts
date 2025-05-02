@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { PageHeaderComponent } from './page-header/page-header.component';
+// import { PageHeaderComponent } from './page-header/page-header.component';
 import { NavigateComponent } from './navigate/navigate.component';
 import { AllStudentsComponent } from './students/all-students/all-students.component';
 import { TeachersComponent } from './teachers/teachers.component';
@@ -28,6 +28,7 @@ import { AccountReportComponent } from './report/account-report/account-report.c
 import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
 import { MonthlyResultComponent } from './report/monthly-result/monthly-result.component';
 import { GradesTermComponent } from './grades-mange/grades-term/grades-term.component';
+import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 
 const routes: Routes = [
   {
@@ -35,7 +36,7 @@ const routes: Routes = [
     component: NavigateComponent, data: { breadcrumb: 'الرئيسية  / ' },
     children: [
       { path: 'dashboard', component: DashboardComponent, data: { breadcrumb: '' } },
-      { path: 'sidebar', component: PageHeaderComponent, data: { breadcrumb: 'Sidebar' } },
+      { path: 'sidebar', component: BreadcrumbComponent, data: { breadcrumb: 'Sidebar' } },
       {
         path: 'reports', data: { breadcrumb: 'تقارير' }, children: [
           {path:'',redirectTo:'account',pathMatch:'full'},

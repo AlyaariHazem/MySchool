@@ -84,6 +84,7 @@ public class AccountRepository : IAccountRepository
             {
                 StudentName = a.Student.FullName.FirstName + " " + a.Student.FullName.MiddleName + " " + a.Student.FullName.LastName,
                 StudentID = a.Student.StudentID,
+                GuardianID = a.GuardianID,
                 AccountStudentGuardianID = a.AccountStudentGuardianID,
                 AccountName = a.Accounts.AccountName
             }).ToListAsync();

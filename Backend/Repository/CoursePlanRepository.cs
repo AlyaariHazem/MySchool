@@ -170,6 +170,7 @@ public class CoursePlanRepository : ICoursePlanRepository
                 SubjectID = s.SubjectID,
                 SubjectName = s.Subject.SubjectName,
             })
+            .Distinct()
             .ToListAsync();
         return subjects;
     }

@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { GuardianService } from '../../../core/services/guardian.service';
-import { Guardians } from '../../../core/models/guardian.model';
+import { GuardianExist } from '../../../core/models/guardian.model';
 
 @Component({
   selector: 'app-guardian',
@@ -13,7 +13,7 @@ export class GuardianComponent implements OnInit {
   @Input() formGroup!: FormGroup;
   @Output() existingGuardianId = new EventEmitter<number>();
 
-  guardians: Guardians[] = [];
+  guardians: GuardianExist[] = [];
 
   constructor(private guardianService: GuardianService) { }
 
@@ -24,7 +24,7 @@ export class GuardianComponent implements OnInit {
       this.formGroup.get('guardianDOB')?.setValue(this.formatDateForInput(dobValue));
     }
 
-    this.guardianService.getAllGuardians().subscribe({
+    this.guardianService.getAllGuardiansExist().subscribe({
       next: (res) => {
         this.guardians = res;
         console.log('Guardians fetched successfully:', this.guardians);
