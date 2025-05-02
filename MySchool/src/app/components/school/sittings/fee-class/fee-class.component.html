@@ -56,7 +56,14 @@
                                 <td>{{ fee.feeNameAlis }}</td>
                                 <td>{{ fee.hireDate|date:"dd-MM-yyyy" }}</td>
                                 <td>{{ fee.note }}</td>
-                                <td>{{ fee.state }}</td>
+                                <td>
+                                    <button class="active" (click)="changeFee(fee)">
+                                      <i class="bi bi-record-circle" [ngStyle]="{'color': fee.state ? '#2fdf85':'red'}">
+                                      </i>
+                                      {{ fee.state ? 'نشط' : 'غير نشط' }}
+                                      <span class="bi bi-caret-down-fill"></span>
+                                    </button>
+                                  </td>
                                 <td>
                                     <div class="col text-left">
                                         <div class="mt-sm-0 mt-2">
@@ -92,8 +99,8 @@
                     <!-- Class Selector -->
                     <div class="form-control1">
                         <p-floatlabel class="w-full md:w-56" variant="on">
-                            <p-select class="h-3rem" [(ngModel)]="FeeClassDTO.classID" 
-                                [options]="classDTO" optionLabel="className" name="classID"
+                            <p-select class="h-3rem" [(ngModel)]="FeeClassDTO.classID" [options]="classDTO"
+                                optionLabel="className" name="classID"
                                 (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)"
                                 optionValue="classID" [checkmark]="true" [editable]="true" [showClear]="true"
                                 required />
@@ -118,7 +125,8 @@
                     <div class="form-control">
                         <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
                             <input class="inputText w-full h-3rem" name="amount" pInputText id="amount" type="number"
-                                name="note" #amount="ngModel" [(ngModel)]="FeeClassDTO.amount" autocomplete="off" required />
+                                name="note" #amount="ngModel" [(ngModel)]="FeeClassDTO.amount" autocomplete="off"
+                                required />
                             <label for="amount">المبلغ</label>
                             @if (amount.invalid && amount.touched) {
                             <div class="error">يجب إدخال مبلغ</div>
@@ -156,7 +164,14 @@
                                 <td>{{ fee.amount }}</td>
                                 <td>{{ fee.className }}</td>
                                 <td>{{ fee.classYear|date:"dd-MM-yyyy" }}</td>
-                                <td>{{ fee.mandatory }}</td>
+                                <td>
+                                    <button class="active" (click)="changeFeeClass(fee)">
+                                      <i class="bi bi-record-circle" [ngStyle]="{'color': fee.mandatory ? '#2fdf85':'red'}">
+                                      </i>
+                                      {{ fee.mandatory ? 'نشط' : 'غير نشط' }}
+                                      <span class="bi bi-caret-down-fill"></span>
+                                    </button>
+                                  </td>
                                 <td>
                                     <div class="col text-left">
                                         <div class="mt-sm-0 mt-2">

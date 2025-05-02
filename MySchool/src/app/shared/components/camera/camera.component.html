@@ -1,0 +1,21 @@
+<div class="camera-container">
+    
+    <div class="camera-frame">
+        <webcam [trigger]="triggerObservable" [videoOptions]="videoOptions" [allowCameraSwitch]="true"
+            (imageCapture)="handleImage($event)">
+        </webcam>
+    </div>
+
+    <div class="preview-section" *ngIf="webcamImage">
+        <h4 class="preview-title">📷 المعاينة</h4>
+        <img [src]="webcamImage.imageAsDataUrl" alt="الصورة الملتقطة" class="captured-image" />
+    </div>
+</div>
+
+<div class="action-buttons">
+    <button pButton type="button" class="p-button-success" icon="pi pi-camera"
+        (click)="triggerSnapshot()">التقاط</button>
+    <button *ngIf="webcamImage" pButton type="button" class="p-button-info" icon="pi pi-save"
+        (click)="saveImage()">حفظ</button>
+    <button pButton type="button" class="p-button-danger" icon="pi pi-times" (click)="cancel.emit()">إلغاء</button>
+</div>

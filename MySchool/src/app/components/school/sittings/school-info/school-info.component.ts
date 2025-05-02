@@ -155,7 +155,7 @@ export class SchoolInfoComponent implements OnInit {
       if(this.SchoolImage!=undefined)
        {
         schoolData.imageURL = this.SchoolImage.name;
-        localStorage.setItem('SchoolImageURL', this.SchoolImageURL);
+        localStorage.setItem('SchoolImageURL', this.currentSchool!.imageURL);
        }else{
         schoolData.imageURL=localStorage.getItem('SchoolImageURL')!;
        }

@@ -13,6 +13,22 @@ form {
   .IconDelete {
     color: red;
   }
+  
+.isActive{
+  color: #2fdf85 !important;
+}
+.bi-caret-down-fill{
+  color:#6b7280;
+}
+.active{
+    border: 1px solid #aca6a6;
+    width: 9rem;
+    border-radius: 18px;
+    height: 2.5rem;
+    color: black;
+    margin-top: 0.5rem;
+    background-color: white;
+}
   .error{
     position: absolute;
     top: 0rem;

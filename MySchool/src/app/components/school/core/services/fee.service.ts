@@ -25,4 +25,7 @@ export class FeeService {
   Update(id: number, fee: Fee): Observable<ApiResponse<Fee>> {
     return this.API.putRequest<Fee>(`Fees/${id}`, fee);
   }
+  partialUpdate(id: number, patchDoc: any): Observable<ApiResponse<any>> {
+    return this.API.patchRequest<any>(`Fees/${id}`, patchDoc);
+  }
 }

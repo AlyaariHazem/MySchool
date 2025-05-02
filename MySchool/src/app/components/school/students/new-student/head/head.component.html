@@ -2,11 +2,19 @@
   <div class="student-photo-section">
     <div class="student-photo">
       <label for="fileInput">
-        <img src="assets/img/user.jpg" alt="Student Photo" />
+        <img [src]="photoUrl || 'assets/img/user.jpg'" alt="Student Photo" />
       </label>
       <input type="file" id="fileInput" accept="image/*" (change)="uploadPhoto($event)" style="display: none" />
-      <button (click)="takePhoto()" class="btn btn-primary">التقاط صورة</button>
+    
+      <button (click)="takePhoto()" class="btn btn-primary">📷 التقاط صورة</button>
+      
+      <!-- كاميرا الفيديو -->
+      <video #video autoplay style="width: 200px; display: none;"></video>
+    
+      <!-- زر التقاط الصورة من الكاميرا -->
+      <button *ngIf="showCaptureBtn" (click)="capturePhoto()">📸 حفظ الصورة</button>
     </div>
+    
   </div>
 
   <div class="student-info-section">

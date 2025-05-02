@@ -118,7 +118,7 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
     const patchDoc = [
       { op: "replace", path: "/active", value: isActive }
     ];
-
+    console.log('patchDoc', patchDoc);
     this.stageService.partialUpdate(stage.stageID, patchDoc).subscribe({
       next: (response) => {
         if (response) {

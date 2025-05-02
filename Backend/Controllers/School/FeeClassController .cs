@@ -1,7 +1,9 @@
 using System.Net;
+using Backend.DTOS.School.FeeClass;
 using Backend.DTOS.School.Fees;
 using Backend.Interfaces;
 using Backend.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.School;
@@ -103,6 +105,19 @@ public class FeeClassController : ControllerBase
 
         return result.Ok
             ? Ok(APIResponse.Success("FeeClass deleted successfully."))
+            : NotFound(APIResponse.Fail(result.Error!));
+    }
+
+    [HttpPatch("{feeClassID:int}")]
+    public async Task<IActionResult> ChangeStateFeeClass(int feeClassID, [FromBody] JsonPatchDocument<ChangeStateFeeClassDTO> dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(APIResponse.Fail("Invalid FeeClass data."));
+
+        var result = await _unitOfWork.FeeClasses.UpdatePartial(feeClassID, dto);
+
+        return result.Ok
+            ? Ok(APIResponse.Success("FeeClass updated successfully."))
             : NotFound(APIResponse.Fail(result.Error!));
     }
 }

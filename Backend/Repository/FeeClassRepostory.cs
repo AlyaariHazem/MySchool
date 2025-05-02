@@ -1,10 +1,12 @@
 using AutoMapper;
 using Backend.Common;
 using Backend.Data;
+using Backend.DTOS.School.FeeClass;
 using Backend.DTOS.School.Fees;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository.School.Classes;
@@ -148,5 +150,21 @@ public class FeeClassRepository : IFeeClassRepository
         {
             return Result<bool>.Fail($"Error deleting fee-class: {ex.Message}");
         }
+    }
+
+    public async Task<Result<bool>> UpdatePartial(int id, JsonPatchDocument<ChangeStateFeeClassDTO> partialClass)
+    {
+        var existingClass = await _db.FeeClass.FirstOrDefaultAsync(c => c.FeeClassID == id);
+        if (existingClass != null)
+        {
+            var classToUpdate = _mapper.Map<ChangeStateFeeClassDTO>(existingClass);
+
+            partialClass.ApplyTo(classToUpdate);
+            _mapper.Map(classToUpdate, existingClass);
+            _db.Entry(existingClass).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        return Result<bool>.Fail("Fee-class not found.");
     }
 }

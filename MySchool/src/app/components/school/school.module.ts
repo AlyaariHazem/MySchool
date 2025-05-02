@@ -30,7 +30,6 @@ import { TableModule }       from 'primeng/table';
 import { SchoolRoutingModule } from './school-routing.module';
 import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
-// import { PageHeaderComponent } from './page-header/page-header.component';
 import { ChartForStudentComponent } from './students/chart-for-student/chart-for-student.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllParentsComponent } from './parents/all-parents/all-parents.component';
@@ -88,7 +87,6 @@ import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 const components = [
   DashboardComponent,
   HeaderComponent,
-  // PageHeaderComponent,
   AllParentsComponent,
   EditParentsComponent,
   SidebarComponent,

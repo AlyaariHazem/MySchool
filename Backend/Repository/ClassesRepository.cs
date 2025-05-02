@@ -84,7 +84,21 @@ namespace Backend.Repository.School
             .Include(d => d.Divisions)
             .ThenInclude(s => s.Students).ToListAsync();
 
-            var ClassDTOList = _mapper.Map<List<ClassDTO>>(ClassList);
+            var ClassDTOList = ClassList.Select(c => new ClassDTO
+            {
+                ClassID = c.ClassID,
+                ClassName = c.ClassName,
+                StageID = c.StageID,
+                State = c.State,
+                StageName = c.Stage.StageName,
+                StudentCount = c.Divisions.Sum(d => d.Students.Count()),
+                Divisions = c.Divisions.Select(d => new DivisionINClassDTO
+                {
+                    DivisionID = d.DivisionID,
+                    DivisionName = d.DivisionName,
+                    StudentCount = d.Students.Count()
+                }).ToList()
+            }).ToList();
             return ClassDTOList;
         }
 

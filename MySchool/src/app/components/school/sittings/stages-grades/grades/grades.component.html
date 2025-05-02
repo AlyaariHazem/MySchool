@@ -45,10 +45,10 @@
             <tbody>
               @for (division of getPaginatedClasses(Class); track $index) {
               <tr>
-                <td style="text-align: center">
+                <td class="text-center">
                   {{ division.divisionName }}
                 </td>
-                <td>{{ division.studentCount || "لا يوجد طلاب حالياً" }}</td>
+                <td class="text-center">{{ division.studentCount }}</td>
                 <td>
                   <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false">

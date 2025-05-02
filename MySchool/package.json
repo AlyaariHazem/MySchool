@@ -41,6 +41,7 @@
     "multer": "1.4.5-lts.1",
     "ngx-toastr": "18.0.0",
     "ngx-translate-messageformat-compiler": "7.1.0",
+    "ngx-webcam": "^0.4.1",
     "patch-package": "8.0.0",
     "postinstall-postinstall": "2.1.0",
     "primeflex": "4.0.0",

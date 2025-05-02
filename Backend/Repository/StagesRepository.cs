@@ -76,14 +76,37 @@ namespace Backend.Repository
 
         public async Task<List<StageDTO>> GetAll()
         {
-            var stageList = await context.Stages
-                .Include(stage => stage.Classes)  // Include Classes
-                .ThenInclude(c => c.FeeClasses) // Include StudentClass for counting students
-                .ThenInclude(fc => fc.StudentClassFees)
+            var stages = await context.Stages
+                .Include(stage => stage.Classes)
+                    .ThenInclude(cls => cls.FeeClasses)
+                        .ThenInclude(fc => fc.StudentClassFees)
                 .ToListAsync();
 
-            var ListstageDTO = _mapper.Map<List<StageDTO>>(stageList);
-            return ListstageDTO;
+            var stageDTOs = stages.Select(stage => new StageDTO
+            {
+                StageID = stage.StageID,
+                StageName = stage.StageName,
+                Note = stage.Note,
+                Active = stage.Active,
+                Classes = stage.Classes.Select(cls => new ClassInStageDTO
+                {
+                    ClassID = cls.ClassID,
+                    ClassName = cls.ClassName,
+                    StudentCount = cls.FeeClasses
+                        .SelectMany(fc => fc.StudentClassFees)
+                        .Select(fee => fee.StudentID)
+                        .Distinct()
+                        .Count()
+                }).ToList(),
+                StudentCount = stage.Classes
+                    .SelectMany(cls => cls.FeeClasses)
+                    .SelectMany(fc => fc.StudentClassFees)
+                    .Select(fee => fee.StudentID)
+                    .Distinct()
+                    .Count()
+            }).ToList();
+
+            return stageDTOs;
         }
 
         public async Task<bool> UpdatePartial(int id, JsonPatchDocument<StagesDTO> partialStage)

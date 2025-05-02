@@ -1,73 +1,72 @@
-<div id="page" class="p-4 md:p-6  bg-white">
-    <!-- أزرار الإجراء -->
-    <div class="toolbar flex flex-wrap gap-2 justify-end mb-4 print:hidden">
-      <button pButton label="طباعة" icon="pi pi-print" (click)="nativePrint()" class="p-button-sm"></button>
+<div id="page" class="p-4 md:p-6 bg-white rounded-lg shadow-sm">
+  <!-- ✅ أدوات الطباعة والتصدير -->
+  <div class="toolbar flex flex-wrap gap-2 justify-end mb-4 print:hidden">
+    <button pButton label="طباعة" icon="pi pi-print" (click)="nativePrint()" class="p-button-sm"></button>
       <button pButton label="PDF" icon="pi pi-file-pdf" severity="danger" class="p-button-sm"></button>
       <button pButton label="CSV" icon="pi pi-file-excel" severity="success" class="p-button-sm"></button>
-    </div>
-  
-    <!-- محتوى التقرير -->
-    <div #printArea class="report bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo">
-  
-      <!-- رأس الصفحة -->
-      <div class="flex flex-column md:flex-row md:justify-between md:items-start gap-4 border-bottom-1 pb-4 mb-4">
-        
-        <!-- معلومات الحساب -->
-        <div class="summary flex-1 text-center md:text-start">
-          <h2 class="m-0 font-bold text-xl md:text-2xl text-primary">#{{ header.accountNo }} رقم الحساب</h2>
-          <h3 class="mt-2 mb-1 text-lg">{{ header.guardian }}</h3>
-          <p class="text-gray-600">تاريخ الإنشاء: <strong>{{ header.createdDate }}</strong></p>
-  
-          <div class="mt-4 space-y-1">
-            <div class="flex justify-between border-bottom-1 pb-1">
-              <span class="font-bold text-gray-700">إجمالي المديونية</span>
-              <span>YR {{ header.totalDebit | number:'1.0-2' }}</span>
-            </div>
-            <div class="flex justify-between border-bottom-1 pb-1">
-              <span class="font-bold text-gray-700">إجمالي المدفوعات</span>
-              <span>YR {{ header.totalCredit | number:'1.0-2' }}</span>
-            </div>
-            <div class="flex justify-between font-bold"
-                 [ngClass]="header.balance < 0 ? 'text-orange-600' : 'text-green-700'">
-              <span>الرصيد</span>
-              <span>YR {{ header.balance | number:'1.0-2' }}</span>
-            </div>
+  </div>
+
+  <!-- ✅ تقرير الحساب -->
+  <div #printArea class="report bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo">
+    <!-- ✅ رأس التقرير -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 border-b pb-4 mb-4">
+      <!-- معلومات الحساب -->
+      <div class="flex-1 text-end md:text-end md:self-start">
+        <h2 class="text-xl md:text-2xl font-bold text-primary mb-1">
+          رقم الحساب: <span class="text-black">#{{ header.accountNo }}</span>
+        </h2>
+        <h3 class="text-lg mb-1">{{ header.guardian }}</h3>
+        <p class="text-gray-600 mb-2">تاريخ الإنشاء: <strong>{{ header.createdDate }}</strong></p>
+
+        <!-- المبالغ -->
+        <div class="space-y-1 text-sm md:text-base">
+          <div class="flex justify-between border-b pb-1 font-medium">
+            <span>إجمالي المديونية</span>
+            <span>YR {{ header.totalDebit | number:'1.0-2' }}</span>
+          </div>
+          <div class="flex justify-between border-b pb-1 font-medium">
+            <span>إجمالي المدفوعات</span>
+            <span>YR {{ header.totalCredit | number:'1.0-2' }}</span>
+          </div>
+          <div class="flex justify-between font-bold"
+            [ngClass]="header.balance < 0 ? 'text-orange-600' : 'text-green-700'">
+            <span>الرصيد</span>
+            <span>YR {{ header.balance | number:'1.0-2' }}</span>
           </div>
         </div>
-  
-        <!-- شعار المدرسة -->
-        <div class="school text-center md:text-end min-w-max">
-          <img [src]="logo" alt="logo" class="h-12 mb-2 mx-auto md:mx-0" />
-          <div class="font-bold text-lg">{{schoolName}}</div>
-          <div class="text-gray-600">شملان | مديرية معين | صنعاء</div>
-          <div class="text-gray-600">Tel: 01‑xxxxxxx</div>
-          <div class="text-sm mt-1 text-gray-500">2021‑2022</div>
-        </div>
       </div>
-  
-      <!-- تفاصيل إضافية -->
-      <div class="grid grid-cols-2 gap-2 text-gray-700 mb-4">
-        <div class="text-end">Sep 28, 2021</div>
-        <div class="text-start">تاريخ الإنشاء</div>
-        <div class="text-end">Sep 28, 2021</div>
-        <div class="text-start">تاريخ الإلغاء</div>
-        <div class="text-end font-bold"
-             [ngClass]="header.balance < 0 ? 'text-orange-600' : 'text-green-700'">
-          {{ header.balance < 0 ? 'مدين' : 'دائن' }}
-        </div>
-        <div class="text-start">الحالة</div>
+
+      <!-- شعار المدرسة -->
+      <div class="min-w-max text-left md:text-end">
+        <img [src]="logo" alt="شعار المدرسة" class="h-12 mx-auto md:mx-0 mb-2" />
+        <div class="font-bold text-lg">{{ schoolName }}</div>
+        <div class="text-gray-600">شملان | مديرية معين | صنعاء</div>
+        <div class="text-gray-600">Tel: 01‑xxxxxxx</div>
+        <div class="text-sm mt-1 text-gray-500">2021‑2022</div>
       </div>
-  
-      <!-- جدول الرسوم -->
+    </div>
+
+    <!-- ✅ معلومات إضافية -->
+    <div class="grid grid-cols-2 gap-2 text-gray-700 text-sm md:text-base mb-4">
+      <div class="text-end">Sep 28, 2021</div>
+      <div class="text-start">تاريخ الإنشاء</div>
+      <div class="text-end">Sep 28, 2021</div>
+      <div class="text-start">تاريخ الإلغاء</div>
+      <div class="text-end font-bold" [ngClass]="header.balance < 0 ? 'text-orange-600' : 'text-green-700'">
+        {{ header.balance < 0 ? 'مدين' : 'دائن' }} </div>
+          <div class="text-start">الحالة</div>
+      </div>
+
+      <!-- ✅ جدول التفاصيل -->
       <div class="overflow-x-auto">
-        <table class="fees w-full text-center border-collapse">
-          <thead class="bg-gray-200 text-gray-800">
+        <table class="w-full text-center border-collapse">
+          <thead class="bg-gray-100 text-gray-800 text-sm">
             <tr>
               <th class="p-2 border">#</th>
-              <th class="p-2 border">Fee Item</th>
-              <th class="p-2 border">Discount</th>
-              <th class="p-2 border">Amount</th>
-              <th class="p-2 border">Date</th>
+              <th class="p-2 border">البند</th>
+              <th class="p-2 border">النوع</th>
+              <th class="p-2 border">المبلغ</th>
+              <th class="p-2 border">التاريخ</th>
             </tr>
           </thead>
           <tbody>
@@ -78,6 +77,8 @@
               <td class="p-2 border">YR {{ r.amount | number:'1.0-2' }}</td>
               <td class="p-2 border">{{ r.date }}</td>
             </tr>
+
+            <!-- ✅ الإجمالي -->
             <tr class="font-bold bg-yellow-50">
               <td colspan="4" class="text-end p-2 border">إجمالي المديونية:</td>
               <td class="p-2 border">YR {{ header.totalDebit | number:'1.0-2' }}</td>
@@ -87,4 +88,3 @@
       </div>
     </div>
   </div>
-  

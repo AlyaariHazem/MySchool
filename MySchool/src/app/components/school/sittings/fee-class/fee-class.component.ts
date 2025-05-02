@@ -242,4 +242,36 @@ deleteFee(id: number): void {
     this.exist = this.FeeClass.some((fc) => fc.classID === classId && fc.feeID === feeId);
     return this.exist;
   }
+
+  changeFeeClass(feeClass: FeeClasses): void {
+    const patchDoc = [
+      { op: "replace", path: "/mandatory", value: !feeClass.mandatory }
+    ];
+    console.log('patchDoc', patchDoc);
+    this.feeClassService.partialUpdate(feeClass.feeClassID, patchDoc).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.toastr.success(response.result);
+          this.getAllClassFees();
+        }
+      },
+      error: () => this.toastr.error('Failed to update FeeClass', 'Error')
+    });
+  }
+  changeFee(fee: Fees): void {
+    const patchDoc = [
+      { op: "replace", path: "/state", value: !fee.state }
+    ];
+    console.log('patchDoc', patchDoc);
+    this.feeService.partialUpdate(fee.feeID, patchDoc).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.toastr.success(response.result);
+          this.getAllFees();
+        }
+      },
+      error: () => this.toastr.error('Failed to update FeeClass', 'Error')
+    });
+  }
+  
 }

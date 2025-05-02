@@ -30,11 +30,22 @@
       </div>
 
       <div class="buttons">
-        <button class="btn btn-success" type="submit" [disabled]="!formGroup.valid" (click)="isEditMode?onUpdate():onSubmit()">{{isEditMode? 'تعديل' : 'إضافة'}}</button>
-        <button class="btn btn-info">جديد</button>
+        <button class="btn btn-success" type="submit" [disabled]="!formGroup.valid"
+          (click)="isEditMode?onUpdate():onSubmit()">{{isEditMode? 'تعديل' : 'إضافة'}}</button>
+        <button class="btn btn-info" (click)="resetForm()">جديد</button>
         <button class="btn btn-warning">الشهادة</button>
+        
+        <button type="button" class="btn btn-primary" (click)="showCameraFun()">📷التقاط من الكاميرا</button>
       </div>
     </div>
+    @if (showCamera) {
+    <p-dialog [(visible)]="showCamera" header="📸التقاط صورة" [modal]="true" >
+      <app-camera (imageCaptured)="handleCapturedImage($event)" (cancel)="showCamera = false">
+      </app-camera>
+    </p-dialog>
+    }
+
+
   </div>
 
   <div id="id01" class="" dir="rtl">

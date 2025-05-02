@@ -6,13 +6,20 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import {MatInputModule} from '@angular/material/input';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
-import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { RouterLink } from '@angular/router';
-import { ProgressSpinnerComponent } from './components/progress-spinner/progress-spinner.component';
 import { DialogModule } from 'primeng/dialog';
 import { MatSelectModule } from '@angular/material/select';
 
-const components=[PageNotFoundComponent,ProgressSpinnerComponent];
+import { ProgressSpinnerComponent } from './components/progress-spinner/progress-spinner.component';
+import { CameraComponent } from './components/camera/camera.component';
+import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
+import { WebcamModule } from 'ngx-webcam';
+
+const components=[
+  PageNotFoundComponent,
+  ProgressSpinnerComponent,
+  CameraComponent
+];
 
 const modules=[
   FormsModule,
@@ -29,7 +36,8 @@ const modules=[
     DialogModule,
     MatDialogModule,
     MatSelectModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    WebcamModule 
 ]
 
 @NgModule({

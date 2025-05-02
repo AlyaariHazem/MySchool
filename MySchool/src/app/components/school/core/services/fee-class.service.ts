@@ -4,6 +4,7 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { FeeClass, FeeClasses } from '../models/Fee.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { ApiResponse } from '../../../../core/models/response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -49,7 +50,10 @@ export class FeeClassService {
       catchError(err => this.handleError(err, "Failed to fetch fee classes by class ID"))
     );
   }
-  
+  partialUpdate(id: number, patchDoc: any): Observable<ApiResponse<any>> {
+      return this.API.patchRequest<any>(`FeeClass/${id}`, patchDoc);
+    }
+    
   buildFeeClassFormGroup(feeClass: FeeClasses): FormGroup {
     return this.fb.group({
       feeName: [feeClass.feeName || ''],

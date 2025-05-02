@@ -173,6 +173,7 @@ export class GradesComponent implements OnInit {
     }
     const startIndex = this.currentClassPage[item.classID] * this.maxClassesPerPage;
     const endIndex = startIndex + this.maxClassesPerPage;
+    console.log('divisions data are', item);
     return item.divisions.slice(startIndex, endIndex);
   }
 

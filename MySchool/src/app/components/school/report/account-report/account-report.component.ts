@@ -24,10 +24,11 @@ export class AccountReportComponent {
   };
 
   rows = [
-    { id: 1, desc: 'رسوم دراسية', type: 'Debit', date: '2024‑09‑05', amount: 200_000 },
-    { id: 2, desc: 'خصم أخوة', type: 'Credit', date: '2024‑09‑10', amount: 40_000 },
-    { id: 3, desc: 'رسوم مواصلات', type: 'Debit', date: '2024‑09‑12', amount: 100_000 },
+    { id: 1, desc: 'رسوم دراسية', type: 'Debit', date: '2024‑09‑05', amount: 200_000, discount: 0, required: 200_000 },
+    { id: 2, desc: 'خصم أخوة', type: 'Credit', date: '2024‑09‑10', amount: 40_000, discount: 40_000, required: 0 },
+    { id: 3, desc: 'رسوم مواصلات', type: 'Debit', date: '2024‑09‑12', amount: 100_000, discount: 0, required: 100_000 },
   ];
+  
 
   /* ---------- زر "طباعة" ---------- */
   print(): void {

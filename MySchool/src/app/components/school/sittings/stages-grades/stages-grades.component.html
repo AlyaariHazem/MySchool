@@ -64,8 +64,8 @@
                     <tbody>
                       @for ( Class of getPaginatedClasses(item); track $index) {
                       <tr>
-                        <td>{{ Class.className }}</td>
-                        <td>لا يوجد طلاب حالياً</td>
+                        <td class="text-center">{{ Class.className }}</td>
+                        <td class="text-center">{{Class.studentCount}} </td>
                         <td>
                           <!-- this is for edit and delete  -->
                           <div class="col text-left">
@@ -104,7 +104,7 @@
                 </div>
                 }
               </td>
-              <td>لا يوجد طلاب</td>
+              <td>{{item.studentCount}} </td>
               <td>{{ item.note }}</td>
               <td>
                 <div class="dropdown dropdown-toggle" ngClass="{{ item.active ? '' : 'active1' }}"

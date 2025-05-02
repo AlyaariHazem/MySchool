@@ -1,5 +1,5 @@
 // new-student.component.ts (Parent Component)
-import { Component, AfterViewInit, OnInit, Inject, ChangeDetectorRef, SimpleChanges, OnChanges, inject, EventEmitter } from '@angular/core';
+import { Component, AfterViewInit, OnInit, Inject, ChangeDetectorRef, SimpleChanges, OnChanges, inject, EventEmitter, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AddStudent, StudentPayload, UpdateDiscount } from '../../../../core/models/students.model';
 import { Discount, FeeClasses } from '../../core/models/Fee.model';
 import { StudentService } from '../../../../core/services/student.service';
+import { WebcamImage } from 'ngx-webcam';
 
 @Component({
   selector: 'app-new-student',
@@ -127,7 +128,10 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
       console.log('Form is not valid', this.formGroup.value);
     }
   }
-
+  resetForm(): void {
+    this.formGroup.reset();
+  }
+  
   onRequiredFeesChanged(requiredFees: number): void {
     this.formGroup.get('primaryData.amount')?.patchValue(requiredFees);
     console.log('Required Fees:', requiredFees);
@@ -378,4 +382,36 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
     console.log('Refreshing fees data...');
     this.feeClassesChanged.emit(this.formGroup.get('fees.discounts')?.value);
   }
+  @Output() imageCaptured = new EventEmitter<string>(); // Base64 image
+  webcamImage: WebcamImage | null = null;
+  saveImage(): void {
+    if (this.webcamImage) {
+      this.imageCaptured.emit(this.webcamImage.imageAsDataUrl);
+    }
+  }
+  showCamera: boolean = false;
+  showCameraFun(): void {
+    this.showCamera = true;
+  }
+  handleCapturedImage(imageDataUrl: any | null): void {
+    if (imageDataUrl !== null) {
+      this.studentImageURL = imageDataUrl; // عرض الصورة
+      this.studentImageURL2 = `camera_${this.studentID}.png`;
+      this.StudentImage = this.dataURLToFile(imageDataUrl, this.studentImageURL2);
+      this.showCamera = false;
+    }
+  }
+
+  dataURLToFile(dataUrl: string, filename: string): File {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+
 }
