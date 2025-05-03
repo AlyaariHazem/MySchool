@@ -1,10 +1,11 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { ClassService } from '../../../core/services/class.service';
 import { DivisionService } from '../../../core/services/division.service';
 import { ClassDTO } from '../../../core/models/class.model';
 import { divisions } from '../../../core/models/division.model';
+import { StudentFormStoreService } from '../../../core/store/student-form-store.service';
 
 @Component({
   selector: 'app-primary-data',
@@ -14,15 +15,19 @@ import { divisions } from '../../../core/models/division.model';
     '../../../../../shared/styles/style-input.scss']// this is very important
 })
 export class PrimaryDataComponent implements OnInit {
-  @Input() formGroup!: FormGroup;
-  @Output() classSelected = new EventEmitter<number>();
+  formGroup: FormGroup;
 
+  constructor(private formStore: StudentFormStoreService) {
+    this.formGroup = this.formStore.getForm();
+    this.formGroup.get('primaryData');
+    console.log('Primary Data:', this.formGroup.value);
+  }
   get fullNameAr(): string {
-    return `${this.formGroup.get('studentFirstName')?.value} ${this.formGroup.get('studentMiddleName')?.value} ${this.formGroup.get('studentLastName')?.value}`.trim();
+    return `${this.formGroup.get('primaryData.studentFirstName')?.value} ${this.formGroup.get('primaryData.studentMiddleName')?.value} ${this.formGroup.get('primaryData.studentLastName')?.value}`.trim();
   }
 
   get fullNameEn(): string {
-    return `${this.formGroup.get('studentFirstNameEng')?.value} ${this.formGroup.get('studentMiddleNameEng')?.value} ${this.formGroup.get('studentLastNameEng')?.value}`.trim();
+    return `${this.formGroup.get('primaryData.studentFirstNameEng')?.value} ${this.formGroup.get('primaryData.studentMiddleNameEng')?.value} ${this.formGroup.get('primaryData.studentLastNameEng')?.value}`.trim();
   }
 
   selectedClass!: string;
@@ -49,18 +54,19 @@ export class PrimaryDataComponent implements OnInit {
     this.getAllDivision();
     this.getAllClass();
 
-    const dobValue = this.formGroup.get('studentDOB')?.value;
+    const dobValue = this.formGroup.get('primaryData.studentDOB')?.value;
     if (dobValue) {
-      this.formGroup.get('studentDOB')?.setValue(this.formatDateForInput(dobValue));
+      this.formGroup.get('primaryData.studentDOB')?.setValue(this.formatDateForInput(dobValue));
     }
 
-    const initialClass = this.formGroup.get('classID')?.value;
+    const initialClass = this.formGroup.get('primaryData.classID')?.value;
     if (initialClass) {
       this.onSelectionChange('classID', initialClass);
     }
+   
 
-    console.log('Class id is:', this.formGroup.get('classID')?.value);
-    console.log('Primary Data Group:', this.formGroup.value);
+    console.log('Class id is:', this.formGroup.get('primaryData.classID')?.value);
+    console.log('Primary Data Group:', this.formGroup);
   }
 
   formatDateForInput(isoDate: string): string {
@@ -76,7 +82,7 @@ export class PrimaryDataComponent implements OnInit {
       next: (res) => {
         this.allDivisions = res.result;
 
-        const initialClassId = this.formGroup.get('classID')?.value;
+        const initialClassId = this.formGroup.get('primaryData.classID')?.value;
         if (initialClassId) {
           this.updateDivisionsByClass(initialClassId);
         }
@@ -89,7 +95,7 @@ export class PrimaryDataComponent implements OnInit {
   getAllClass(): void {
     this.Classes.GetAll().subscribe({
       next: (res) => {
-        if(!res.isSuccess){
+        if (!res.isSuccess) {
           console.error('Error loading classes:', res.errorMasseges[0]);
         }
         this.classes = res.result;
@@ -100,29 +106,34 @@ export class PrimaryDataComponent implements OnInit {
 
 
   onSelectionChange(type: string, value: string): void {
+    const primaryData = this.formGroup.get('primaryData');
+    
     if (type === 'classID') {
       this.selectedClass = value;
       this.isClassSelected = !!value;
-      this.classSelected.emit(+value);
       this.updateDivisionsByClass(value); // Automatically set the first division
     } else if (type === 'divisionID') {
       this.selectedDivision = value;
       this.isDivisionSelected = !!value;
-    } else if (type === 'studentGender') {
+      primaryData?.get('divisionID')?.setValue(value);
+    } 
+    if (type === 'studentGender') {
       this.selectedSex = value;
       this.isSexSelected = !!value;
+      primaryData?.get('studentGender')?.setValue(value);  // ✅ صح
     }
+
   }
-  
+
   updateDivisionsByClass(classId: string): void {
     // Filter divisions based on selected class
     this.divisions = this.allDivisions.filter(
       (division) => division.classID === +classId
     );
-    
+
     if (this.divisions.length > 0) {
       const firstDivisionId = this.divisions[0].divisionID;
-      this.formGroup.get('divisionID')?.setValue(firstDivisionId);
+      this.formGroup.get('primaryData.divisionID')?.setValue(firstDivisionId);
       this.selectedDivision = firstDivisionId.toString(); // Convert to string
       this.isDivisionSelected = true;
     } else {
@@ -130,22 +141,25 @@ export class PrimaryDataComponent implements OnInit {
       this.selectedDivision = '';
       this.isDivisionSelected = false;
     }
+
   }
-  
+
   clearSelection(type: string): void {
+    const primaryData = this.formGroup.get('primaryData');
+
     if (type === 'classID') {
       this.selectedClass = '';
       this.isClassSelected = false;
-      this.formGroup.get('classID')?.setValue(null);
-      this.divisions = []; // Clear divisions when class is cleared
+      primaryData?.get('classID')?.setValue(null);
+      this.divisions = [];
     } else if (type === 'divisionID') {
       this.selectedDivision = '';
       this.isDivisionSelected = false;
-      this.formGroup.get('divisionID')?.setValue(null);
+      primaryData?.get('divisionID')?.setValue(null);
     } else if (type === 'studentGender') {
       this.selectedSex = '';
       this.isSexSelected = false;
-      this.formGroup.get('studentGender')?.setValue(null);
     }
   }
+
 }

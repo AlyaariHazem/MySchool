@@ -1,0 +1,44 @@
+/* confirm-dialog.component.scss */
+.confirm-dialog-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    text-align: center;
+    max-width: 100%;
+  
+    .icon-container {
+      background-color: #fff3cd;
+      border-radius: 50%;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+  
+    .warn-icon {
+      font-size: 48px;
+    }
+  
+    .dialog-title {
+      font-weight: 600;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+  
+    .dialog-content {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #555;
+    }
+  
+    .dialog-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      width: 100%;
+  
+      button {
+        min-width: 100px;
+      }
+    }
+  }
+  

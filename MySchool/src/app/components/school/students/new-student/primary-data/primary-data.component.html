@@ -1,101 +1,105 @@
 <div id="DataStudent" [formGroup]="formGroup" class="container" dir="rtl">
-  <!-- Group 1: Full Names -->
-  <div class="group group1">
-    <div class="form-control">
-      <label for="fullNameAr" class="label1">الاسم الكامل</label>
-      <input type="text" id="fullNameAr" [value]="fullNameAr" class="inputAb" readonly />
-    </div>
-    <div class="form-control">
-      <label for="fullNameEn" class="label1">Full Name</label>
-      <input type="text" id="fullNameEn" [value]="fullNameEn" dir="ltr" class="inputEn" readonly />
-    </div>
-  </div>
-
-  <!-- Group 2: Arabic Names -->
-  <div class="group group2">
-    <div class="form-control">
-      <label for="studentFirstName"  class="label2">الاسم الأول<span style="color:red;"> *</span></label>
-      <input type="text" id="studentFirstName" formControlName="studentFirstName" placeholder="الاسم الأول" />
-    </div>
-    <div class="form-control">
-      <label for="studentMiddleName" class="label2">الاسم الثاني<span style="color:red;"> *</span></label>
-      <input type="text" id="studentMiddleName" formControlName="studentMiddleName" placeholder="الاسم الثاني" />
-    </div>
-    <div class="form-control">
-      <label for="studentLastName" class="label2">الاسم الأخير<span style="color:red;"> *</span></label>
-      <input type="text" id="studentLastName" formControlName="studentLastName" placeholder="اسم العائلة" />
-    </div>
-  </div>
-
-  <!-- Group 3: English Names -->
-  <div class="group group3">
-    <div class="form-control">
-      <label for="studentFirstNameEng" class="label2">First</label>
-      <input type="text" id="studentFirstNameEng" formControlName="studentFirstNameEng" placeholder="First Name" />
-    </div>
-    <div class="form-control">
-      <label for="studentMiddleNameEng" class="label2">Middle</label>
-      <input type="text" id="studentMiddleNameEng" formControlName="studentMiddleNameEng" placeholder="Middle Name" />
-    </div>
-    <div class="form-control">
-      <label for="studentLastNameEng" class="label2">Last</label>
-      <input type="text" id="studentLastNameEng" formControlName="studentLastNameEng" placeholder="Last Name" />
-    </div>
-  </div>
-
-  <!-- Group 4: Other Information -->
-  <div class="group group4">
-    <!-- Student DOB -->
-    <div class="form-control">
-      <label for="studentDOB" class="label2">تاريخ الميلاد<span style="color:red;"> *</span></label>
-      <input type="date" id="studentDOB" formControlName="studentDOB" />
+  <div formGroupName="primaryData">
+    <!-- Group 1: Full Names -->
+    <div class="group group1">
+      <div class="form-control">
+        <label for="fullNameAr" class="label1">الاسم الكامل</label>
+        <input type="text" id="fullNameAr" [value]="fullNameAr" class="inputAb" readonly />
+      </div>
+      <div class="form-control">
+        <label for="fullNameEn" class="label1">Full Name</label>
+        <input type="text" id="fullNameEn" [value]="fullNameEn" dir="ltr" class="inputEn" readonly />
+      </div>
     </div>
 
-    <!-- Class -->
-    <div class="form-control">
-      <label for="class" class="label2">الصـف<span style="color:red;"> *</span></label>
-      <mat-form-field appearance="outline">
-        <mat-label>إختار الصف</mat-label>
-        <mat-select formControlName="classID" (selectionChange)="onSelectionChange('classID', $event.value)">
-          <mat-option [value]="null">None</mat-option>
-          <mat-option *ngFor="let classItem of classes" [value]="classItem.classID">
-            {{ classItem.className }}
-          </mat-option>
-        </mat-select>
-        <span *ngIf="isClassSelected" mat-icon-button class="cancel" (click)="clearSelection('classID')">✖</span>
-      </mat-form-field>
+    <!-- Group 2: Arabic Names -->
+    <div class="group group2">
+      <div class="form-control">
+        <label for="studentFirstName" class="label2">الاسم الأول<span style="color:red;"> *</span></label>
+        <input type="text" id="studentFirstName" formControlName="studentFirstName" placeholder="الاسم الأول" />
+      </div>
+      <div class="form-control">
+        <label for="studentMiddleName" class="label2">الاسم الثاني<span style="color:red;"> *</span></label>
+        <input type="text" id="studentMiddleName" formControlName="studentMiddleName" placeholder="الاسم الثاني" />
+      </div>
+      <div class="form-control">
+        <label for="studentLastName" class="label2">الاسم الأخير<span style="color:red;"> *</span></label>
+        <input type="text" id="studentLastName" formControlName="studentLastName" placeholder="اسم العائلة" />
+      </div>
     </div>
 
-    <!-- Division -->
-    <div class="form-control">
-      <label for="division" class="label2">الشعبة<span style="color:red;"> *</span></label>
-      <mat-form-field appearance="outline">
-        <mat-label>إختار الشعبة</mat-label>
-        <mat-select formControlName="divisionID" (selectionChange)="onSelectionChange('divisionID', $event.value)">
-          <mat-option [value]="null">None</mat-option>
-          <mat-option *ngFor="let division of divisions" [value]="division.divisionID">
-            {{ division.divisionName }}
-          </mat-option>
-        </mat-select>
-        <span *ngIf="isDivisionSelected" mat-icon-button class="cancel" (click)="clearSelection('divisionID')">✖</span>
-      </mat-form-field>
+    <!-- Group 3: English Names -->
+    <div class="group group3">
+      <div class="form-control">
+        <label for="studentFirstNameEng" class="label2">First</label>
+        <input type="text" id="studentFirstNameEng" formControlName="studentFirstNameEng" placeholder="First Name" />
+      </div>
+      <div class="form-control">
+        <label for="studentMiddleNameEng" class="label2">Middle</label>
+        <input type="text" id="studentMiddleNameEng" formControlName="studentMiddleNameEng" placeholder="Middle Name" />
+      </div>
+      <div class="form-control">
+        <label for="studentLastNameEng" class="label2">Last</label>
+        <input type="text" id="studentLastNameEng" formControlName="studentLastNameEng" placeholder="Last Name" />
+      </div>
     </div>
 
-    <!-- Gender -->
-    <div class="form-control">
-      <label for="studentGender" class="label2">الجنس<span style="color:red;"> *</span></label>
-      <mat-form-field appearance="outline">
-        <mat-label>إختار النوع</mat-label>
-        <mat-select formControlName="studentGender" (selectionChange)="onSelectionChange('studentGender', $event.value)">
-          <mat-option [value]="null">None</mat-option>
-          @for (gender of genderOptions; track $index) {
+    <!-- Group 4: Other Information -->
+    <div class="group group4">
+      <!-- Student DOB -->
+      <div class="form-control">
+        <label for="studentDOB" class="label2">تاريخ الميلاد<span style="color:red;"> *</span></label>
+        <input type="date" id="studentDOB" formControlName="studentDOB" />
+      </div>
+
+      <!-- Class -->
+      <div class="form-control">
+        <label for="class" class="label2">الصـف<span style="color:red;"> *</span></label>
+        <mat-form-field appearance="outline">
+          <mat-label>إختار الصف</mat-label>
+          <mat-select formControlName="classID" (selectionChange)="onSelectionChange('classID', $event.value)">
+            <mat-option [value]="null">None</mat-option>
+            <mat-option *ngFor="let classItem of classes" [value]="classItem.classID">
+              {{ classItem.className }}
+            </mat-option>
+          </mat-select>
+          <span *ngIf="isClassSelected" mat-icon-button class="cancel" (click)="clearSelection('classID')">✖</span>
+        </mat-form-field>
+      </div>
+
+      <!-- Division -->
+      <div class="form-control">
+        <label for="division" class="label2">الشعبة<span style="color:red;"> *</span></label>
+        <mat-form-field appearance="outline">
+          <mat-label>إختار الشعبة</mat-label>
+          <mat-select formControlName="divisionID" (selectionChange)="onSelectionChange('divisionID', $event.value)">
+            <mat-option [value]="null">None</mat-option>
+            <mat-option *ngFor="let division of divisions" [value]="division.divisionID">
+              {{ division.divisionName }}
+            </mat-option>
+          </mat-select>
+          <span *ngIf="isDivisionSelected" mat-icon-button class="cancel"
+            (click)="clearSelection('divisionID')">✖</span>
+        </mat-form-field>
+      </div>
+
+      <!-- Gender -->
+      <div class="form-control">
+        <label for="studentGender" class="label2">الجنس<span style="color:red;"> *</span></label>
+        <mat-form-field appearance="outline">
+          <mat-label>إختار النوع</mat-label>
+          <mat-select formControlName="studentGender"
+            (selectionChange)="onSelectionChange('studentGender', $event.value)">
+            <mat-option [value]="null">None</mat-option>
+            @for (gender of genderOptions; track $index) {
             <mat-option [value]="gender.value">
               {{ gender.label }}
             </mat-option>
-          }
-        </mat-select>
-        <span *ngIf="isSexSelected" mat-icon-button class="cancel" (click)="clearSelection('studentGender')">✖</span>
-      </mat-form-field>
+            }
+          </mat-select>
+          <span *ngIf="isSexSelected" mat-icon-button class="cancel" (click)="clearSelection('studentGender')">✖</span>
+        </mat-form-field>
+      </div>
     </div>
   </div>
 </div>

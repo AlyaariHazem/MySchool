@@ -1,140 +1,113 @@
-// fee.component.ts
-import { Component, EventEmitter, inject, Input, OnInit, Output, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
-import { FormControl, FormGroup, FormArray } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 
 import { FeeClassService } from '../../../core/services/fee-class.service';
 import { FeeClasses } from '../../../core/models/Fee.model';
-import { ClassService } from '../../../core/services/class.service';
-import { ClassDTO } from '../../../core/models/class.model';
-import { ToastrService } from 'ngx-toastr';
+import { StudentFormStoreService } from '../../../core/store/student-form-store.service';
 
 @Component({
   selector: 'app-fee',
   templateUrl: './fee.component.html',
   styleUrls: ['./fee.component.scss']
 })
-export class FeeComponent implements OnInit, OnChanges {
-  @Input() formGroup!: FormGroup;
-  @Output() feeClassesChanged = new EventEmitter<FeeClasses[]>(); // Output for notifying parent
-  @Output() requiredFeesChanged = new EventEmitter<number>(); // Output for notifying parent about required fees
-  @Input() selectedClassID!: number | string;
-  @Input('feeClasses') set feeClassesInput(value: FeeClasses[]) {
-    this.feeClasses = value;
-    this.updateFormGroup();
-  }
-  myControl = new FormControl('');
-  classes: ClassDTO[] = [];
-  feeClasses: FeeClasses[] = [];
-  filteredOptions!: Observable<string[]>;
-  isOptionSelected = false; // Tracks if an option is selected
+export class FeeComponent implements OnInit {
+  formGroup: FormGroup;
+  feesFormGroup!: FormGroup;
 
   feeClassService = inject(FeeClassService);
   changeDetectorRef = inject(ChangeDetectorRef);
-  classService = inject(ClassService);
-  toastr=inject(ToastrService);
+  toastr = inject(ToastrService);
+  formStore = inject(StudentFormStoreService);
+  formBuilder = inject(FormBuilder);
 
-  ngOnInit() {
-    this.GetAllClasses();
+  constructor() {
+    this.formGroup = this.formStore.getForm();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedClassID'] && this.selectedClassID) {
-      // Ensure it's a string before setting it in the autocomplete control
-      const classIDValue = typeof this.selectedClassID === 'number'
-        ? this.selectedClassID.toString()
-        : this.selectedClassID;
-  
-      this.myControl.setValue(classIDValue);
-  
-      // Call the existing method
-      this.onOptionSelected({ option: { value: classIDValue } });
+  ngOnInit(): void {
+    const feesGroup = this.formGroup.get('fees');
+    if (feesGroup instanceof FormGroup) {
+      this.feesFormGroup = feesGroup;
+    } else {
+      throw new Error('fees is not a FormGroup');
+    }
+
+    // Watch for class changes
+    this.formGroup.get('primaryData.classID')?.valueChanges.subscribe(classID => {
+      if (classID) {
+        this.loadFeeClasses(classID);
+      } else {
+        this.clearFeeDiscounts();
+      }
+    });
+
+    // Initial load
+    const initialClassID = this.formGroup.get('primaryData.classID')?.value;
+    if (initialClassID) {
+      this.loadFeeClasses(initialClassID);
     }
   }
 
-  GetAllClasses(): void {
-    this.classService.GetAll().subscribe({
-      next: (res) => {
-        if (!res.isSuccess) {
-          this.toastr.warning(res.errorMasseges[0] || 'Failed to load classes');
-          this.classes = [];
-        } else {
-          this.classes = res.result;
-        }
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
-  }
 
-  onOptionSelected(event: any) {
-    const feeClassID = event.option.value;
-    this.isOptionSelected = true;
-
-    this.feeClassService.GetAllByID(feeClassID).subscribe((res: any) => {
+  loadFeeClasses(classID: number): void {
+    this.feeClassService.GetAllByID(classID).subscribe((res: any) => {
       if (res.isSuccess) {
-        this.feeClasses = res.result;
-        this.feeClassesChanged.emit(this.feeClasses); // Notify parent
-        this.updateFormGroup();
+        const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
+  
+        // Store existing values before clearing
+        const existingValues: { [key: number]: any } = {};
+        this.feeFormArray.controls.forEach(ctrl => {
+          const id = ctrl.get('feeClassID')?.value;
+          if (id != null) {
+            existingValues[id] = ctrl.value;
+          }
+        });
+  
+        discountsArray.clear();
+  
+        res.result.forEach((fee: FeeClasses) => {
+          const existing = existingValues[fee.feeClassID];
+  
+          const formGroup = this.feeClassService.buildFeeClassFormGroup(fee);
+  
+          if (existing) {
+            formGroup.patchValue({
+              amountDiscount: existing.amountDiscount,
+              noteDiscount: existing.noteDiscount,
+              mandatory: existing.mandatory
+            });
+          }
+  
+          discountsArray.push(formGroup);
+        });
+  
         this.changeDetectorRef.detectChanges();
       }
     });
   }
-
-  updateFeeClassField<K extends keyof FeeClasses>(fieldName: K, value: FeeClasses[K], feeClass: FeeClasses): void {
-    feeClass[fieldName] = value;
-    this.feeClassesChanged.emit(this.feeClasses); // Emit the updated array
-    this.updateFormGroup();
+  
+  clearFeeDiscounts(): void {
+    const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
+    discountsArray.clear();
   }
 
-  handleNoteChange(value: string, feeClass: FeeClasses) {
-    this.updateFeeClassField('noteDiscount', value, feeClass);
-  }
-
-  clearSelection() {
-    this.myControl.setValue(''); // Clear the input value
-    this.isOptionSelected = false; // Reset the selection state
+  get feeFormArray(): FormArray {
+    return this.formStore.getForm().get('fees.discounts') as FormArray;
   }
 
   getTotalFees(): number {
-    return this.feeClasses
-      .filter(fee => fee.mandatory) // Filter only the fees where mandatory is true
-      .reduce((sum, fee) => sum + (fee.amount || 0), 0); // Sum the amounts of the filtered fees
-  }  
+    return this.feeFormArray.controls
+      .filter(ctrl => ctrl.get('mandatory')?.value)
+      .reduce((sum, ctrl) => sum + (+ctrl.get('amount')?.value || 0), 0);
+  }
 
   getTotalDiscounts(): number {
-    return this.feeClasses.reduce((sum, fee) => sum + (fee.amountDiscount || 0), 0);
-  }
-
-  changeMandatory(event: any, feeClass: FeeClasses) {
-    const isChecked = event.target.checked;
-    this.updateFeeClassField('mandatory', isChecked, feeClass);
-    this.getRequiredFees(); // Trigger recalculation and emit
-  }
-
-  handleDiscountChange(value: number, feeClass: FeeClasses) {
-    if (value < 0 || value > (feeClass.amount || 0)) {
-      console.error('Invalid discount value');
-      return;
-    }
-    this.updateFeeClassField('amountDiscount', value, feeClass);
-    this.getRequiredFees(); // Trigger recalculation and emit
+    return this.feeFormArray.controls
+      .reduce((sum, ctrl) => sum + (+ctrl.get('amountDiscount')?.value || 0), 0);
   }
 
   getRequiredFees(): number {
-    const requiredFees = this.getTotalFees() - this.getTotalDiscounts();
-    this.requiredFeesChanged.emit(requiredFees); // Emit the required fees to parent
-    return requiredFees;
-  }  
-
-  private updateFormGroup(): void {
-    const discountsArray = this.formGroup.get('discounts') as FormArray;
-    discountsArray.clear();
-    this.feeClasses.forEach(fee => {
-      discountsArray.push(
-        this.feeClassService.buildFeeClassFormGroup(fee)
-      );
-    });
+    return this.getTotalFees() - this.getTotalDiscounts();
   }
 }

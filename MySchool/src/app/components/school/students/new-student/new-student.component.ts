@@ -1,417 +1,254 @@
-// new-student.component.ts (Parent Component)
-import { Component, AfterViewInit, OnInit, Inject, ChangeDetectorRef, SimpleChanges, OnChanges, inject, EventEmitter, Output } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {Component, OnInit, AfterViewInit, Inject, ChangeDetectorRef,inject, OnDestroy} from '@angular/core';
+import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
-import { AddStudent, StudentPayload, UpdateDiscount } from '../../../../core/models/students.model';
-import { Discount, FeeClasses } from '../../core/models/Fee.model';
+import {
+  AddStudent, StudentPayload, UpdateDiscount
+} from '../../../../core/models/students.model';
+import { FeeClasses } from '../../core/models/Fee.model';
 import { StudentService } from '../../../../core/services/student.service';
 import { WebcamImage } from 'ngx-webcam';
+import { StudentFormStoreService } from '../../core/store/student-form-store.service';
+
+interface Attachment {
+  attachmentID: number;
+  attachmentURL: string;
+  voucherID?: number;
+  studentID?: number;
+}
 
 @Component({
   selector: 'app-new-student',
   templateUrl: './new-student.component.html',
   styleUrls: ['./new-student.component.scss']
 })
-export class NewStudentComponent implements OnInit, AfterViewInit, OnChanges {
-  activeTab: string = 'DataStudent'; // Default active tab
-  formGroup: FormGroup;
-  toastr = inject(ToastrService)
-  combinedData$: Observable<any[]> | undefined;
-  currentPage: { [key: string]: number } = {};
-  studentService = inject(StudentService);
-  studentID: number = 0; // Initialize with a default placeholder value
-  files!: File[];
+export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private changeDetectorRef: ChangeDetectorRef,
-    public dialogRef: MatDialogRef<NewStudentComponent>, // Inject MatDialogRef
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
-    // Create the main form
+  /* ---------- reactive‑form ---------- */
+  formGroup: FormGroup = this.formStore.getForm();
+  get discountsArray() { return this.formGroup.get('fees.discounts') as FormArray; }
 
-    this.formGroup = this.formBuilder.group({
-      studentID: [this.studentID],
-      existingGuardianId: [null],
-      primaryData: this.formBuilder.group({
-        studentFirstName: ['', Validators.required],
-        studentMiddleName: ['', Validators.required],
-        studentLastName: ['', Validators.required],
-        studentFirstNameEng: [''],
-        studentMiddleNameEng: [''],
-        studentLastNameEng: [''],
-        studentGender: ['Male', Validators.required],
-        studentDOB: ['', Validators.required],
-        studentPassword: ['Student'],
-        classID: [null, Validators.required],
-        amount: [0, Validators.required],
-        divisionID: [null, Validators.required],
-        studentAddress: [''],
-      }),
-      optionData: this.formBuilder.group({
-        placeBirth: [''],
-        studentPhone: [776137120],
-        studentAddress: [''],
-      }),
-      guardian: this.formBuilder.group({
-        guardianFullName: [''],
-        guardianType: [''],
-        guardianEmail: [''],
-        guardianPassword: ['Guardian'],
-        guardianPhone: [''],
-        guardianGender: ['Male'],
-        guardianDOB: [''],
-        guardianAddress: ['']
-      }),
-      fees: this.formBuilder.group({
-        discounts: this.formBuilder.array([], Validators.required)
-      }),
-      documents: this.formBuilder.group({
-        attachments: [[], Validators.required], // Array of strings for URLs
-      }),
-      studentImageURL: [''],
-    });
-  }
-
-  get discountsArray() {
-    return this.formGroup.get('fees.discounts') as FormArray;
-  }
-
-  existingGuardian(event: number) {
-    this.formGroup.get('existingGuardianId')?.patchValue(event);
-  }
-
-  // Submit form data as an `AddStudent` object
-  onSubmit() {
-    if (this.formGroup.valid) {
-      const fees = this.formGroup.get('fees')?.value;
-      const discounts = fees.discounts; // Access submitted discounts
-
-      // Process each discount
-      discounts.forEach((discount: Discount) => {
-        console.log('Discount Amount:', discount.amount);
-      });
-
-      const formData: AddStudent = {
-        studentID: this.formGroup.get('studentID')?.value,
-        existingGuardianId: this.formGroup.get('existingGuardianId')?.value,
-        ...this.formGroup.get('primaryData')?.value,
-        ...this.formGroup.get('guardian')?.value,
-        ...this.formGroup.get('optionData')?.value,
-        ...this.formGroup.get('fees')?.value,
-        attachments: this.formGroup.get('documents.attachments')?.value || [],
-        studentImageURL: this.studentImageURL2
-      };
-      this.studentService.addStudent(formData).subscribe({
-        next: (res) => {
-          this.toastr.success('Student added successfully', res.message);
-        }
-      });
-      this.studentService.uploadStudentImage(this.StudentImage, this.studentID).subscribe(() => {
-        console.log('Image is uploaded successfully!');
-      });
-      this.studentService.uploadFiles(this.files, this.studentID).subscribe({
-        next: () => {
-          this.toastr.success('Files uploaded successfully!');
-        },
-        error: (error) => {
-          console.error('File upload failed:', error);
-          this.toastr.error('Failed to upload files.');
-        }
-      });
-      console.log('Form is valid', formData);
-      this.generateStudentID();
-    } else {
-      console.log('Form is not valid', this.formGroup.value);
-    }
-  }
-  resetForm(): void {
-    this.formGroup.reset();
-  }
-  
-  onRequiredFeesChanged(requiredFees: number): void {
-    this.formGroup.get('primaryData.amount')?.patchValue(requiredFees);
-    console.log('Required Fees:', requiredFees);
-  }
-
+  /* ---------- UI state ---------- */
+  activeTab = 'DataStudent';
   isEditMode = false;
-  ngOnInit(): void {
-    // If dialog data indicates EDIT mode:
-    if (this.data && this.data.mode === 'edit' && this.data.student) {
+  studentID = 0;
+  studentImageURL = '';
+  studentImageURL2 = '';
+  files: File[] = [];
+  attachments: string[] = [];
+
+  /* ---------- DI ---------- */
+  private toastr = inject(ToastrService);
+  private studentService = inject(StudentService);
+
+  /* ---------- ctor ---------- */
+  constructor(
+    private fb: FormBuilder,
+    private cd: ChangeDetectorRef,
+    private formStore: StudentFormStoreService,
+    public dialogRef: MatDialogRef<NewStudentComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) { }
+  ngOnDestroy(): void {
+    this.formStore.resetForm();
+  }
+
+  /* ---------- lifecycle ---------- */
+  ngOnInit(): void { this.initAddOrEdit(); }
+  ngAfterViewInit(): void { setTimeout(() => document.getElementById('defaultOpen')?.click()); }
+
+  /* ---------- submit ---------- */
+  onSubmit(): void { this.isEditMode ? this.onUpdate() : this.onAdd(); }
+
+  /* ---------- add ---------- */
+  private onAdd(): void {
+    if (this.formGroup.invalid) return;
+
+    const formData: AddStudent = {
+      studentID: this.formGroup.get('studentID')!.value,
+      existingGuardianId: this.formGroup.get('existingGuardianId')!.value,
+      ...this.formGroup.getRawValue().primaryData,
+      ...this.formGroup.getRawValue().guardian,
+      ...this.formGroup.getRawValue().optionData,
+      ...this.formGroup.getRawValue().fees,
+      attachments: this.attachments,
+      studentImageURL: this.studentImageURL2
+    };
+
+    this.studentService.addStudent(formData).subscribe({
+      next: r => {
+        this.toastr.success('Student Added Successfully! ', r.message);
+      }
+      
+    });
+
+    this.uploadImageAndFiles();
+    this.generateStudentID();
+  }
+
+  /* ---------- update ---------- */
+   onUpdate(): void {
+    const updateDiscounts: UpdateDiscount[] = this.discountsArray.value.map((d: any) => ({
+      studentClassFeeID: d.studentClassFeeID ?? 0,
+      studentID: this.formGroup.get('studentID')!.value,
+      feeClassID: d.feeClassID,
+      amountDiscount: d.amountDiscount ?? 0,
+      noteDiscount: d.noteDiscount ?? '',
+      mandatory: d.mandatory ?? false
+    }));
+
+    const payload: StudentPayload = {
+      ...this.formGroup.getRawValue().primaryData,
+      ...this.formGroup.getRawValue().guardian,
+      studentID: this.formGroup.get('studentID')!.value,
+      existingGuardianId: this.formGroup.get('existingGuardianId')!.value,
+      attachments: this.attachments,
+      studentImageURL: this.studentImageURL2 || '',
+      updateDiscounts
+    };
+
+    this.studentService.updateStudent(payload).subscribe({
+      next: (res) => {
+        this.toastr.success('Student updated successfully', res.message);
+        this.formStore.resetForm();
+        this.dialogRef.close();
+        this.uploadImageAndFiles();
+      }
+    });
+  }
+
+  /* ---------- helpers ---------- */
+  private uploadImageAndFiles(): void {
+    if (this.StudentImage)
+      this.studentService.uploadStudentImage(this.StudentImage, this.studentID).subscribe();
+
+    if (this.files.length)
+      this.studentService.uploadFiles(this.files, this.studentID).subscribe();
+  }
+
+  private initAddOrEdit(): void {
+    
+    if (this.data?.mode === 'edit' && this.data.student) {
       this.isEditMode = true;
-      const student = this.data.student;
-      console.log("the student that want to edit is", student);
+      const s = this.data.student;
 
-      // First, patch top-level fields:
       this.formGroup.patchValue({
-        studentID: student.studentID,
-        existingGuardianId: student.existingGuardianId || null,
-        studentImageURL: student.studentImageURL || '',
-
-        // Then, patch the nested "primaryData" group
+        studentID: s.studentID,
+        existingGuardianId: s.existingGuardianId,
+        studentImageURL: s.studentImageURL,
         primaryData: {
-          studentFirstName: student.studentFirstName || '',
-          studentMiddleName: student.studentMiddleName || '',
-          studentLastName: student.studentLastName || '',
-          studentFirstNameEng: student.studentFirstNameEng || '',
-          studentMiddleNameEng: student.studentMiddleNameEng || '',
-          studentLastNameEng: student.studentLastNameEng || '',
-          studentGender: student.studentGender || 'Male',
-          studentDOB: student.studentDOB,
-          studentPassword: student.studentPassword || 'Student',
-          classID: student.classID,
-          divisionID: student.divisionID,
-          amount: student.amount || 0
+          studentFirstName: s.studentFirstName,
+          studentMiddleName: s.studentMiddleName,
+          studentLastName: s.studentLastName,
+          studentFirstNameEng: s.studentFirstNameEng,
+          studentMiddleNameEng: s.studentMiddleNameEng,
+          studentLastNameEng: s.studentLastNameEng,
+          studentGender: s.studentGender,
+          studentDOB: s.studentDOB,
+          classID: s.classID,
+          divisionID: s.divisionID,
+          amount: s.amount
         },
-
-        // The "optionData" group
         optionData: {
-          placeBirth: student.placeBirth || '',
-          studentPhone: student.studentPhone || '',
-          studentAddress: student.studentAddress || '',
+          placeBirth: s.placeBirth,
+          studentPhone: s.studentPhone,
+          studentAddress: s.studentAddress
         },
-
-        // The "guardian" group
         guardian: {
-          guardianFullName: student.guardianFullName || '',
-          guardianGender: student.guardianGender || 'Male',
-          guardianDOB: student.guardianDOB,
-          guardianAddress: student.guardianAddress || '',
-          guardianEmail: student.guardianEmail || '',
-          guardianPhone: student.guardianPhone || '',
-          guardianType: student.guardianType || '',
-          guardianPassword: student.guardianPassword || 'Guardian'
+          guardianFullName: s.guardianFullName,
+          guardianGender: s.guardianGender,
+          guardianDOB: s.guardianDOB,
+          guardianAddress: s.guardianAddress,
+          guardianEmail: s.guardianEmail,
+          guardianPhone: s.guardianPhone,
+          guardianType: s.guardianType
         },
-
-        // The "documents" group
-        documents: {
-          attachments: [""]
-        },
-
       });
 
-      // Now, patch the fees discounts array
-      this.patchFees(student.discounts);
+      const attachments= s.attachments.map((a: Attachment) => a.attachmentURL);
+      this.formGroup.get('documents.attachments')!.setValue(attachments);
+      this.formGroup.get('documents.attachmentsURLs')!.setValue(attachments);
+      
+      this.formStore.updateForm({
+        arguments:attachments,
+      });
 
-      // If you want a local image preview in the component
-      this.studentImageURL = student.studentImageURL || '';
-
-      // Refresh fee UI if needed
-      this.refreshFees();
-
+      this.studentImageURL = s.studentImageURL || '';
+      this.patchFees(s.discounts);
     } else {
-      // Otherwise, we are in ADD (create) mode
-      this.isEditMode = false;
       this.generateStudentID();
     }
   }
-  onUpdate(): void {
-    const updateDiscounts: UpdateDiscount[] =
-      (this.formGroup.get('fees.discounts') as FormArray).value.map((d: any) => ({
-        studentClassFeeID: d.studentClassFeeID ?? 0,      // or omit if new
-        studentID: this.formGroup.get('studentID')?.value,
-        feeClassID: d.feeClassID,
-        amountDiscount: d.amountDiscount ?? 0,
-        noteDiscount: d.noteDiscount ?? '',
-        mandatory: d.mandatory ?? false
-      }));
 
-    const formData: StudentPayload = {
-      ...this.formGroup.get('primaryData')?.value,
-      ...this.formGroup.get('guardian')?.value,
-      studentID: this.formGroup.get('studentID')?.value,
-      existingGuardianId: this.formGroup.get('existingGuardianId')?.value,
-      attachments: this.formGroup.get('documents.attachments')?.value ?? [],
-      studentImageURL: this.studentImageURL2 ? this.StudentImage.name : '',
-      updateDiscounts: updateDiscounts
-    };
-    console.log('updated', formData);
-    this.studentService.updateStudent(formData).subscribe(res => {
-      this.toastr.success(res);
-      this.dialogRef.close();
-      this.studentService.uploadStudentImage(this.StudentImage, formData.studentID).subscribe(() => {
-        console.log('Image is uploaded successfully!');
-      });
-      this.studentService.uploadFiles(this.files, this.studentID).subscribe({
-        next: () => {
-          this.toastr.success('Files uploaded successfully!');
-        },
-        error: (error) => {
-          console.error('File upload failed:', error);
-          this.toastr.error('Failed to upload files.');
-        }
-      });
-    });
-
-  }
   private patchFees(discounts: FeeClasses[] = []): void {
-    const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
-    discountsArray.clear(); // remove existing
-    discounts.forEach((fee) => {
-      discountsArray.push(
-        this.formBuilder.group({
-          feeClassID: [fee.feeClassID],
-          amountDiscount: [fee.amountDiscount],
-          noteDiscount: [fee.noteDiscount],
-          className: [fee.className],
-          feeName: [fee.feeName],
-          mandatory: [fee.mandatory],
-        })
-      );
-    });
-  }
-  feeClasses: FeeClasses[] = [];
-  loadFeesForClass(feeClasses: FeeClasses[]) {
-    const discountsArray = this.formGroup.get('fees.discounts') as FormArray;
-    discountsArray.clear(); // Clear any existing discounts
-
-    feeClasses.forEach((fee) => {
-      discountsArray.push(
-        this.formBuilder.group({
-          noteDiscount: [fee.noteDiscount || ''],
-          amountDiscount: [fee.amountDiscount || 0],
-          feeClassID: [fee.feeClassID, Validators.required],
-          feeName: [fee.feeName || ''], // Add feeName if needed
-          amount: [fee.amount || 0],
-          className: [fee.className || ''], // Add className if needed
-          mandatory: [fee.mandatory || false],
-        })
-      );
-    });
-
-    this.feeClasses = feeClasses;
+    const arr = this.discountsArray;
+    arr.clear();
+    discounts.forEach(f =>
+      arr.push(this.fb.group({
+        feeClassID: [f.feeClassID],
+        amountDiscount: [f.amountDiscount],
+        noteDiscount: [f.noteDiscount],
+        className: [f.className],
+        feeName: [f.feeName],
+        mandatory: [f.mandatory]
+      }))
+    );
   }
 
   private generateStudentID(): void {
     this.studentService.MaxStudentID().subscribe({
-      next: (res) => {
-        const maxValue = (res && typeof res === 'number') ? res + 1 : 1; // Default to 1 if invalid
-        this.studentID = maxValue;
-        this.formGroup.patchValue({ studentID: maxValue });
-      },
-      error: (err) => {
-        this.toastr.error('Could not fetch maximum student ID. Defaulting to 1.');
-        this.formGroup.patchValue({ studentID: 1 });
-      }
+      next: n => this.formGroup.patchValue({ studentID: (n ?? 0) + 1 }),
+      error: () => this.formGroup.patchValue({ studentID: 1 })
     });
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      const defaultOpen = document.getElementById('defaultOpen');
-      if (defaultOpen) {
-        defaultOpen.click();
-      }
-    }, 0);
+  /* ---------- UI ---------- */
+  openPage(tab: string, btn: EventTarget | null): void {
+    this.activeTab = tab;
+    Array.from(document.getElementsByClassName('tablink')).forEach(b => b.classList.remove('active'));
+    (btn as HTMLElement)?.classList.add('active');
+    this.cd.detectChanges();
   }
 
-  openPage(pageName: string, elmnt: EventTarget | null): void {
-    this.activeTab = pageName; // Update activeTab property
+  closeModal(): void { this.dialogRef.close(); }
 
-    // Remove active class from all buttons
-    const tablinks = document.getElementsByClassName("tablink") as HTMLCollectionOf<HTMLElement>;
-    for (let i = 0; i < tablinks.length; i++) {
-      tablinks[i].classList.remove('active');
-    }
-
-    // Add active class to the clicked button
-    if (elmnt instanceof HTMLElement) {
-      elmnt.classList.add('active');
-    }
-
-    // Force change detection (optional)
-    this.changeDetectorRef.detectChanges();
-  }
-
-  closeModal(): void {
-    this.dialogRef.close(); // Close the modal
-  }
-
-  updateAttachments(event: { attachments: string[]; files: File[] }): void {
-    this.formGroup.get('documents.attachments')?.setValue(event.attachments);
-    this.attachments = event.attachments;
-    this.files = event.files;
-
-    console.log('Updated Attachments:', this.attachments);
-    console.log('Updated files:', this.files);
-  }
-
-  attachments: string[] = [];
-
+  /* ---------- photo / camera ---------- */
   StudentImage!: File;
-  studentImageURL: string = '';
-  studentImageURL2: string = '';
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-
-    if (input.files?.[0]) {
-      this.StudentImage = input.files[0]; // Assign the single file
-
-      // Generate a preview URL
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.studentImageURL = e.target.result;
-      };
-      this.studentImageURL2 = `${this.studentID}_${this.StudentImage.name}`;
-      reader.readAsDataURL(this.StudentImage);
-    } else {
-      console.error('No file selected');
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['activeTab'] && this.activeTab === 'fees') {
-      // Refresh fees data if needed
-      this.refreshFees();
-    }
-  }
-
-  selectedClassID: number | string = '';
-  onClassSelected(classID: number | string) {
-    this.selectedClassID = classID;
-    this.formGroup.get('primaryData.classID')?.setValue(classID);
-  }
-
-  feeClassesChanged = new EventEmitter<any[]>();
-
-  refreshFees(): void {
-    console.log('Refreshing fees data...');
-    this.feeClassesChanged.emit(this.formGroup.get('fees.discounts')?.value);
-  }
-  @Output() imageCaptured = new EventEmitter<string>(); // Base64 image
+  showCamera = false;
   webcamImage: WebcamImage | null = null;
-  saveImage(): void {
-    if (this.webcamImage) {
-      this.imageCaptured.emit(this.webcamImage.imageAsDataUrl);
-    }
-  }
-  showCamera: boolean = false;
-  showCameraFun(): void {
-    this.showCamera = true;
-  }
-  handleCapturedImage(imageDataUrl: any | null): void {
-    if (imageDataUrl !== null) {
-      this.studentImageURL = imageDataUrl; // عرض الصورة
-      this.studentImageURL2 = `camera_${this.studentID}.png`;
-      this.StudentImage = this.dataURLToFile(imageDataUrl, this.studentImageURL2);
-      this.showCamera = false;
-    }
+
+  onFileSelected(e: Event): void {
+    const f = (e.target as HTMLInputElement).files?.[0];
+    if (!f) return;
+    this.StudentImage = f;
+    const reader = new FileReader();
+    reader.onload = ev => this.studentImageURL = ev.target?.result as string;
+    this.studentImageURL2 = `${this.studentID}_${f.name}`;
+    reader.readAsDataURL(f);
   }
 
-  dataURLToFile(dataUrl: string, filename: string): File {
-    const arr = dataUrl.split(',');
-    const mime = arr[0].match(/:(.*?);/)![1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], filename, { type: mime });
-  }
+  showCameraFun() { this.showCamera = true; }
 
+  handleCapturedImage(payload: { file: File; previewUrl: string }): void {
+    if (!payload) return;
+  
+    this.StudentImage     = payload.file;
+    this.studentImageURL  = payload.previewUrl;
+    this.studentImageURL2 = `${this.studentID}_${payload.file.name}`;
+  
+    this.showCamera = false;
+  }
+  
+  public resetForm(): void {
+
+    this.formStore.resetForm();
+  }
+  
+  /* ---------- receive attachments from <app-document> ---------- */
+  updateAttachments(e: { attachments: string[]; files: File[] }) {
+    this.attachments = e.attachments;
+    this.files = e.files;
+    this.formGroup.get('documents.attachments')!.setValue(e.attachments);
+  }
 }

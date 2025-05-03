@@ -44,10 +44,11 @@ export class StudentFormStoreService {
         guardianAddress: ['']
       }),
       fees: this.fb.group({
-        discounts: this.fb.array([], Validators.required)
+        discounts: this.fb.array([])
       }),
       documents: this.fb.group({
         attachments: [[], Validators.required],
+        attachmentsURLs: [[]]
       }),
       studentImageURL: [''],
     });
@@ -74,7 +75,67 @@ export class StudentFormStoreService {
   }
 
   resetForm() {
-    this.getForm().reset();
+    this.getForm().reset({
+      studentID: this.formSubject.getValue().get('studentID')?.value+1,
+      existingGuardianId: null,
+      primaryData: {
+        studentFirstName: '',
+        studentMiddleName: '',
+        studentLastName: '',
+        studentFirstNameEng: '',
+        studentMiddleNameEng: '',
+        studentLastNameEng: '',
+        studentGender: 'Male',
+        studentDOB: '',
+        studentPassword: 'Student',
+        classID: null,
+        amount: 0,
+        divisionID: null,
+        studentAddress: '',
+      },
+      optionData: {
+        placeBirth: '',
+        studentPhone: 776137120,
+        studentAddress: '',
+      },
+      guardian: {
+        guardianFullName: '',
+        guardianType: '',
+        guardianEmail: '',
+        guardianPassword: 'Guardian',
+        guardianPhone: '',
+        guardianGender: 'Male',
+        guardianDOB: '',
+        guardianAddress: ''
+      },
+      fees: {
+        discounts: []
+      },
+      documents: {
+        attachments: []
+      }
+    });
     this.formSubject.next(this.getForm());
   }
+
+  //this is for Files and images
+  private selectedFiles: File[] = [];
+  private studentImage: File | null = null;
+
+  setFiles(files: File[]): void {
+    this.selectedFiles = files;
+  }
+
+  getFiles(): File[] {
+    return this.selectedFiles;
+  }
+
+  setStudentImage(file: File): void {
+    this.studentImage = file;
+  }
+
+  getStudentImage(): File | null {
+    return this.studentImage;
+  }
+
 }

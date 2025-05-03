@@ -1,0 +1,20 @@
+<div class="p-4 surface-card border-round shadow-2 w-full sm:w-30rem text-center">
+
+    <div
+        class="bg-red-100 text-red-600 border-circle w-5rem h-5rem flex align-items-center justify-content-center mx-auto mb-3">
+        <i class="pi pi-exclamation-triangle text-3xl"></i>
+    </div>
+
+    <h2 class="text-2xl font-bold mb-2">{{ config.data.data }}</h2>
+
+    <p class="text-color-secondary mb-4">{{ config.data.message }}</p>
+
+    <div class="flex justify-content-center gap-3 mt-4">
+        <button type="button" pButton class="p-button-outlined p-button-secondary w-8rem"
+            (click)="reject()">Cancel
+        </button>
+
+        <button type="button" pButton class="p-button-danger w-8rem" (click)="accept()">Delete
+        </button>
+    </div>
+</div>

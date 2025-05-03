@@ -57,7 +57,7 @@ export class FeeClassService {
   buildFeeClassFormGroup(feeClass: FeeClasses): FormGroup {
     return this.fb.group({
       feeName: [feeClass.feeName || ''],
-      amount: [feeClass.amount || 0],
+      amount: [feeClass.amount || null],
       amountDiscount: [feeClass.amountDiscount || 0],
       noteDiscount: [feeClass.noteDiscount || ''],
       feeClassID: [feeClass.feeClassID || null],

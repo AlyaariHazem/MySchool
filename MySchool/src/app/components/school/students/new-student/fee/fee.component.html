@@ -1,63 +1,67 @@
-<form class="example-form">
-  <div class="group group1" [formGroup]="formGroup">
-    <div class="form-control">
-      <mat-form-field class="inputText">
-        <mat-label>إجمالي الرسوم</mat-label>
-        <input class="input1" disabled [value]="getTotalFees()" type="text" matInput />
-      </mat-form-field>
-    </div>
-    <div class="form-control">
-      <mat-form-field class="inputText">
-        <mat-label>إجمالي الخصومات</mat-label>
-        <input class="input1" disabled [value]="getTotalDiscounts()" type="text" matInput />
-      </mat-form-field>
-    </div>
-    <div class="form-control">
-      <mat-form-field class="inputText">
-        <mat-label>الرسوم المطلوبة</mat-label>
-        <input class="input1" disabled [value]="getRequiredFees()" type="text" matInput />
-      </mat-form-field>
-    </div>
+<div [formGroup]="feesFormGroup">
+  <div class="table-container">
+    <form class="example-form">
+      <div class="group group1">
+        <div class="form-control">
+          <mat-form-field class="inputText">
+            <mat-label>إجمالي الرسوم</mat-label>
+            <input class="input1" disabled [value]="getTotalFees()" type="text" matInput />
+          </mat-form-field>
+        </div>
+        <div class="form-control">
+          <mat-form-field class="inputText">
+            <mat-label>إجمالي الخصومات</mat-label>
+            <input class="input1" disabled [value]="getTotalDiscounts()" type="text" matInput />
+          </mat-form-field>
+        </div>
+        <div class="form-control">
+          <mat-form-field class="inputText">
+            <mat-label>الرسوم المطلوبة</mat-label>
+            <input class="input1" disabled [value]="getRequiredFees()" type="text" matInput />
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
 
+    <p class="text-center">
+      المبلغ المتوجب دفعة كتابةً:
+      <span class="font-bold">{{ getRequiredFees() | numberToArabicText }}</span>
+    </p>
+
+    <div formArrayName="discounts" class="table-container">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th class="ID-colum">#</th>
+            <th>بند الرسوم</th>
+            <th>المبلغ</th>
+            <th>إدراج خصم بالمبلغ</th>
+            <th>ملاحظة الخصم</th>
+            <th>الصف</th>
+            <th class="selected-colum">إختيار</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let feeControl of feeFormArray.controls; let i = index" [formGroupName]="i">
+            <td class="ID-colum">{{ i + 1 }}</td>
+            <td>{{ feeControl.get('feeName')?.value }}</td>
+            <td>{{ feeControl.get('amount')?.value }}</td>
+            <td>
+              <input class="InCount text-center" type="number" min="0" formControlName="amountDiscount" />
+            </td>
+            <td>
+              <input class="Note p-2" type="text" formControlName="noteDiscount" />
+            </td>
+            <td>{{ feeControl.get('className')?.value }}</td>
+            <td>
+              <label>
+                <input type="checkbox" formControlName="mandatory" />
+                <span class="custom-checkbox" [ngClass]="feeControl.get('mandatory')?.value ? 'mandatory' : ''"></span>
+              </label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</form>
-<p class=" text-center">المبلغ المتوجب دفعة كتابةً: <span class="font-bold">{{getRequiredFees()|numberToArabicText}}</span></p>
-<div class="table-container">
-  <table class="styled-table">
-    <thead>
-      <tr>
-        <th class="ID-colum">#</th>
-        <th>بند الرسوم</th>
-        <th>المبلغ</th>
-        <th>إدراج خصم بالمبلغ</th>
-        <th>ملاحظة الخصم</th>
-        <th>الصف</th>
-        <th class="selected-colum">إختيار</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let feeClass of feeClasses; let i = index">
-        <td class="ID-colum">{{ i + 1 }}</td>
-        <td>{{ feeClass.feeName }}</td>
-        <td>{{ feeClass.amount }}</td>
-        <td>
-          <input class="InCount" type="number" [(ngModel)]="feeClass.amountDiscount"
-            (ngModelChange)="handleDiscountChange($event, feeClass)" />
-          <input class="InCount" type="hidden" [(ngModel)]="feeClass.feeClassID" />
-        </td>
-        <td>
-          <input class="Note" type="text" [(ngModel)]="feeClass.noteDiscount"
-            (ngModelChange)="handleNoteChange($event, feeClass)" />
-        </td>
-        <td>{{ feeClass.className }}</td>
-        <td>
-          <label>
-            <input type="checkbox" [checked]="feeClass.mandatory" (change)="changeMandatory($event, feeClass)" />
-            <span class="custom-checkbox" [ngClass]="feeClass.mandatory ? 'mandatory' : ''"></span>
-          </label>
-        </td>
-      </tr>
-    </tbody>
-
-  </table>
 </div>

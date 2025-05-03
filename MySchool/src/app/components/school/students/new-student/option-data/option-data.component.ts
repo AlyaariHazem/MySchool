@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
-import {  FormGroup } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { StudentFormStoreService } from '../../../core/store/student-form-store.service'; // تأكد من المسار
 
 @Component({
   selector: 'app-option-data',
@@ -7,12 +8,12 @@ import {  FormGroup } from '@angular/forms';
   styleUrls: ['./option-data.component.scss']
 })
 export class OptionDataComponent implements OnInit {
-  @Input() formGroup!: FormGroup;
+  formGroup!: FormGroup;
 
-  constructor() {}
+  constructor(private formStore: StudentFormStoreService) { }
 
   ngOnInit(): void {
-   
+    const fullForm = this.formStore.getForm();
+    this.formGroup = fullForm.get('optionData') as FormGroup;
   }
-
 }

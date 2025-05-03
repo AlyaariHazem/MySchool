@@ -9,16 +9,22 @@ import { TranslateModule } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 
 import { ProgressSpinnerComponent } from './components/progress-spinner/progress-spinner.component';
 import { CameraComponent } from './components/camera/camera.component';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { WebcamModule } from 'ngx-webcam';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { DialogService, DynamicDialog } from 'primeng/dynamicdialog';
+
+
 
 const components=[
   PageNotFoundComponent,
   ProgressSpinnerComponent,
-  CameraComponent
+  CameraComponent,
+  ConfirmDialogComponent
 ];
 
 const modules=[
@@ -37,6 +43,8 @@ const modules=[
     MatDialogModule,
     MatSelectModule,
     ProgressSpinnerModule,
+    ConfirmDialog,
+    DynamicDialog,
     WebcamModule 
 ]
 
@@ -45,6 +53,7 @@ const modules=[
   imports: modules,
   exports:[
    ...components,...modules
-  ]
+  ],
+  providers: [DialogService]
 })
 export class ShardModule { }

@@ -11,9 +11,9 @@ public class AddStudentWithGuardianRequest
     public int StudentID { get; set; }
      // Guardian details
     public string GuardianEmail { get; set; }=string.Empty;
-    public string GuardianPassword { get; set; } = string.Empty;
+    public string GuardianPassword { get; set; } = "Guardian";
     public string GuardianAddress { get; set; }=string.Empty;
-    public string GuardianGender { get; set; } = "Guardian";
+    public string GuardianGender { get; set; } = "Male";
     public string GuardianFullName { get; set; }=string.Empty;
     public string? GuardianType { get; set; }=string.Empty;
     public string GuardianPhone { get; set; } = string.Empty;
@@ -21,9 +21,9 @@ public class AddStudentWithGuardianRequest
 
     // Student details
     public string? StudentEmail { get; set; }
-    public string StudentPassword { get; set; }=string.Empty;
+    public string StudentPassword { get; set; }="Student";
     public string StudentAddress { get; set; }
-    public string StudentGender { get; set; }
+    public string StudentGender { get; set; }="Male";
     public string StudentFirstName { get; set; }
     public string? StudentMiddleName { get; set; }
     public string StudentLastName { get; set; }
@@ -34,7 +34,7 @@ public class AddStudentWithGuardianRequest
     public int DivisionID { get; set; }
     public int? ClassID { get; set; }
     public string? PlaceBirth { get; set; }
-     public string StudentPhone { get; set; } = string.Empty;
+     public string StudentPhone { get; set; } = "776137120";
     public DateTime StudentDOB { get; set; }
     public DateTime HireDate { get; set; }= DateTime.Now;
     // public List<IFormFile>? Files { get; set; }

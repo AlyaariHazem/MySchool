@@ -1,35 +1,55 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+
+import { StudentFormStoreService } from '../../../core/store/student-form-store.service';
 
 @Component({
   selector: 'app-document',
   templateUrl: './document.component.html',
   styleUrls: ['./document.component.scss'],
 })
-export class DocumentComponent {
-  @Input() formGroup!: FormGroup;
-  @Output() filesChanged = new EventEmitter<{ attachments: string[]; files: File[] }>(); // Emit both file names and files
-
+export class DocumentComponent implements OnInit {
+  documentsFormGroup!: FormGroup;
   selectedFiles: File[] = [];
-  attachments: string[] = [];
+  filePreviews: { name: string; url: string }[] = [];
+
+  private formStore = inject(StudentFormStoreService);
+
+  ngOnInit(): void {
+    const fullForm = this.formStore.getForm();
+    console.log('the full form is', fullForm.value);
+    const docs = fullForm.get('documents');
+    if (docs instanceof FormGroup) {
+      this.documentsFormGroup = docs;
+
+      const existingNames = this.documentsFormGroup.get('attachments')?.value;
+      const existingURLs = this.documentsFormGroup.get('attachmentsURLs')?.value;
+      if (Array.isArray(existingNames)) {
+        // Optional: populate restored names for UI consistency
+        this.filePreviews = existingNames.map((name, index) => ({ name, url: existingURLs[index] }));
+      }
+    } else {
+      throw new Error('documents is not a FormGroup');
+    }
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
 
     if (input.files && input.files.length > 0) {
       const selectedFile = input.files[0];
+      const exists = this.selectedFiles.some(file => file.name === selectedFile.name);
 
-      // Avoid duplicate files
-      const fileExists = this.selectedFiles.some(file => file.name === selectedFile.name);
-      if (!fileExists) {
+      if (!exists) {
         this.selectedFiles.push(selectedFile);
-        this.attachments.push(selectedFile.name);
 
-        // Emit updated attachments and files to parent
-        this.filesChanged.emit({
-          attachments: this.attachments,
-          files: this.selectedFiles,
-        });
+        const fileURL = URL.createObjectURL(selectedFile);
+        this.filePreviews.push({ name: selectedFile.name, url: fileURL });
+        
+        // Save file names to form state
+        const fileNames = this.filePreviews.map(f => f.name);
+        this.documentsFormGroup.get('attachments')?.setValue(fileNames);
+        this.documentsFormGroup.get('attachmentsURLs')?.setValue(this.filePreviews.map(f => f.url));
       } else {
         alert('This file has already been selected.');
       }

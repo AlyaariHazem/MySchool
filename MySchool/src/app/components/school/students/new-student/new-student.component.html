@@ -34,24 +34,22 @@
           (click)="isEditMode?onUpdate():onSubmit()">{{isEditMode? 'تعديل' : 'إضافة'}}</button>
         <button class="btn btn-info" (click)="resetForm()">جديد</button>
         <button class="btn btn-warning">الشهادة</button>
-        
+
         <button type="button" class="btn btn-primary" (click)="showCameraFun()">📷التقاط من الكاميرا</button>
       </div>
     </div>
     @if (showCamera) {
-    <p-dialog [(visible)]="showCamera" header="📸التقاط صورة" [modal]="true" >
+    <p-dialog [(visible)]="showCamera" header="📸التقاط صورة" [modal]="true">
       <app-camera (imageCaptured)="handleCapturedImage($event)" (cancel)="showCamera = false">
       </app-camera>
     </p-dialog>
     }
-
-
   </div>
 
   <div id="id01" class="" dir="rtl">
     <div class="modal-content" style="background-color: #ffffff !important">
       <div class="container">
-        <button [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }" id="defaultOpen"
+        <button [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }" [id]="isEditMode?'':'defaultOpen'"
           (click)="openPage('DataStudent', $event.target)">
           <span>بيانات الطالب</span>
         </button>
@@ -63,7 +61,7 @@
           (click)="openPage('guardian', $event.target)">
           <span>ولي الأمر</span>
         </button>
-        <button [ngClass]="{ tablink: true, active: activeTab === 'fees' }" (click)="openPage('fees', $event.target)">
+        <button [ngClass]="{ tablink: true, active: activeTab === 'fees' }" [id]="isEditMode?'defaultOpen':''" (click)="openPage('fees', $event.target)">
           <span>رسوم الطالب</span>
         </button>
         <button [ngClass]="{ tablink: true, active: activeTab === 'document' }"
@@ -76,31 +74,23 @@
 
     @if (activeTab === 'DataStudent') {
     <div class="tabcontent">
-      <app-primary-data [formGroup]="$any(formGroup.get('primaryData'))" (classSelected)="onClassSelected($event)">
-      </app-primary-data>
-      <!-- this is not work when I add fromGroup but can I do that with anuther way?  -->
+      <app-primary-data></app-primary-data>
     </div>
     } @if (activeTab === 'OptionData') {
     <div class="tabcontent">
-      <app-option-data [formGroup]="$any(formGroup.get('optionData'))"></app-option-data>
+      <app-option-data></app-option-data>
     </div>
     } @if (activeTab === 'guardian') {
     <div class="tabcontent">
-      <app-guardian [formGroup]="$any(formGroup.get('guardian'))"
-        (existingGuardianId)="existingGuardian($event)"></app-guardian>
+      <app-guardian></app-guardian>
     </div>
     } @if (activeTab === 'fees') {
     <div class="tabcontent">
-      <!-- new-student.component.html -->
-      <app-fee [formGroup]="$any(formGroup.get('fees'))" [selectedClassID]="selectedClassID" [feeClasses]="feeClasses"
-        (feeClassesChanged)="loadFeesForClass($event)" (requiredFeesChanged)="onRequiredFeesChanged($event)">
-      </app-fee>
-
+      <app-fee></app-fee>
     </div>
     } @if (activeTab === 'document') {
     <div class="tabcontent">
-      <app-document [formGroup]="$any(formGroup.get('documents'))"
-        (filesChanged)="updateAttachments($event)"></app-document>
+      <app-document></app-document>
     </div>
     }
   </div>
