@@ -164,7 +164,7 @@ public class StudentRepository : IStudentRepository
             FullName = new NameDTO
             {
                 FirstName = student.FullName.FirstName,
-                MiddleName = student.FullName.MiddleName,
+                MiddleName = student.FullName.MiddleName!,
                 LastName = student.FullName.LastName
             },
             PhotoUrl = student.ImageURL != null
@@ -193,6 +193,7 @@ public class StudentRepository : IStudentRepository
             },
             Guardians = new GuardianDto
             {
+                guardianID = student.GuardianID,
                 guardianFullName = student.Guardian.FullName,
                 guardianType = student.Guardian.Type!,
                 guardianEmail = student.ApplicationUser.Email,

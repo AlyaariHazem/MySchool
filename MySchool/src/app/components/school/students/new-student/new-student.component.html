@@ -17,13 +17,13 @@
         <div class="student-name">
           <div class="form-group StudentName">
             <label for="studentName">اسم الطالب:</label>
-            <input [disabled]="true" type="text" id="studentName" [readonly]="true" />
+            <input [disabled]="true" class="w-16rem pr-2" [value]="studentName$ | async" type="text" id="studentName" [readonly]="true" />
           </div>
         </div>
         <div class="student-id">
           <div class="form-group">
             <label for="studentID">رقم الطالب:</label>
-            <input [disabled]="true" type="text" id="studentID" formControlName="studentID" [readonly]="true" />
+            <input class="pr-3" [disabled]="true" type="text" id="studentID" formControlName="studentID" [readonly]="true" />
           </div>
           <!-- <span>{{ student?.id }}</span> -->
         </div>

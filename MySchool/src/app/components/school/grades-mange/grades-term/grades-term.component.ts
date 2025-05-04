@@ -115,7 +115,8 @@ export class GradesTermComponent implements OnInit {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculum plans');
           return;
         }
-        this.subjects = res.result;
+        // this.subjects = res.result;
+        this.subjects =[{subjectID:0,subjectName:'All'},...res.result];
       },
       error: () => {
         this.toastr.error('Error fetching curriculum plans');

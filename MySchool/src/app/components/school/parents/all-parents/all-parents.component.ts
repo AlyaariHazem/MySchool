@@ -17,8 +17,13 @@ export class AllParentsComponent implements OnInit {
   ngOnInit(): void {
     this.guardianSerivce.getGuardiansInfo().subscribe({
       next: (res) => {
-        this.guardians = res;
-        console.log('Guardians fetched successfully:', this.guardians);
+        if(!res.isSuccess) {
+          console.error('Error fetching guardians:', res.errorMasseges[0]);
+          this.guardians = [];
+          return;
+        } else {
+          this.guardians = res.result;
+        }
       },
       error: (err) => console.error('Error occurred while fetching guardians:', err)
     });

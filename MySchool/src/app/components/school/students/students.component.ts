@@ -12,6 +12,8 @@ import { StudentService } from '../../../core/services/student.service';
 import { TranslationService } from '../../../core/services/translation.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { GuardianService } from '../core/services/guardian.service';
+import { EditParentsComponent } from '../parents/edit-parents/edit-parents.component';
 
 @Component({
   selector: 'app-students',
@@ -23,6 +25,7 @@ export class StudentsComponent implements OnInit, OnChanges {
 
   translationService = inject(TranslationService);
   studentService = inject(StudentService);
+  guardianService = inject(GuardianService);
   languageService = inject(LanguageService);
 
   Students: StudentDetailsDTO[] = []
@@ -132,7 +135,7 @@ export class StudentsComponent implements OnInit, OnChanges {
   
 
   // students.component.ts
-  EditDialog(id: number): void {
+  EditStudentDialog(id: number): void {
     this.studentService.getStudentById(id).subscribe((res) => {
       console.log("Editing student data:", res);
 
@@ -150,11 +153,42 @@ export class StudentsComponent implements OnInit, OnChanges {
       const dialogRef = this.dialog.open(NewStudentComponent, dialogConfig);
 
       dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          this.toastr.success('تم تعديل الطالب بنجاح');
-          this.getAllStudents(); // Refresh table or handle updates
+        if (result && result.studentID) {
+          this.paginatedStudents = this.paginatedStudents.map((student) =>
+            student.studentID === result.studentID ? { ...student, ...result } : student
+        );
+          this.updatePaginatedData(); // refresh visible list if using pagination
         }
       });
+      
+    });
+  }
+  EditGuardianDialog(id: number): void {
+    this.guardianService.getGuardianById(id).subscribe((res) => {
+      console.log("Editing guardian data:", res);
+
+      // Pass the student data and a 'mode' flag to the dialog
+      const dialogConfig = new MatDialogConfig();
+      dialogConfig.width = '80%';
+      dialogConfig.panelClass = 'custom-dialog-container';
+
+      // IMPORTANT: Pass data to the dialog using 'data' property
+      dialogConfig.data = {
+        mode: 'edit',
+        student: res, // edit student
+      };
+
+      const dialogRef = this.dialog.open(EditParentsComponent, dialogConfig);
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result && result.studentID) {
+          this.paginatedStudents = this.paginatedStudents.map((student) =>
+            student.studentID === result.studentID ? { ...student, ...result } : student
+        );
+          this.updatePaginatedData(); // refresh visible list if using pagination
+        }
+      });
+      
     });
   }
 

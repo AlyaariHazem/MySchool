@@ -28,7 +28,13 @@ export class GuardianComponent implements OnInit {
 
     this.guardianService.getAllGuardiansExist().subscribe({
       next: (res) => {
-        this.guardians = res;
+        if(!res.isSuccess) {
+          console.error('Error fetching guardians:', res.errorMasseges[0]);
+          this.guardians = [];
+          return;
+        } else {
+          this.guardians = res.result;
+        }
       },
       error: (err) => console.error('Error fetching guardians:', err)
     });

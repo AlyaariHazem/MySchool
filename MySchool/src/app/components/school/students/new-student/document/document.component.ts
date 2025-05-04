@@ -45,6 +45,7 @@ export class DocumentComponent implements OnInit {
 
         const fileURL = URL.createObjectURL(selectedFile);
         this.filePreviews.push({ name: selectedFile.name, url: fileURL });
+        this.formStore.setFiles(this.selectedFiles);
         
         // Save file names to form state
         const fileNames = this.filePreviews.map(f => f.name);

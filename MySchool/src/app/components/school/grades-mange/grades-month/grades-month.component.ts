@@ -129,7 +129,8 @@ export class GradesMonthComponent implements OnInit {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculums.');
           return;
         }
-        this.curriculmsPlan = res.result;
+        // this.curriculmsPlan = res.result;
+        this.curriculmsPlan =[{subjectID: 0, subjectName: 'الكل'},...res.result];
       },
       error: (err) => {
         this.toastr.error('Server error occurred');

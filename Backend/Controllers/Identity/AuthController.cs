@@ -27,7 +27,7 @@ namespace Backend.Controllers
             _context = context;
         }
 
-        [HttpPost("Register")] // POST api/Account/Register
+        [HttpPost("Register")] // POST api/auth/Register
         public async Task<IActionResult> Register(RegisterDto UserFromRequest)
         {
             if (ModelState.IsValid)

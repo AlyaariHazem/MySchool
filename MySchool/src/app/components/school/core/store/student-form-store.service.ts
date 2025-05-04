@@ -9,6 +9,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class StudentFormStoreService {
   private formSubject: BehaviorSubject<FormGroup>;
 
+  private fullNameSubject = new BehaviorSubject<string>('');
+  fullName$ = this.fullNameSubject.asObservable(); 
+
   constructor(private fb: FormBuilder) {
     const initialForm = this.fb.group({
       studentID: [0],
@@ -52,8 +55,13 @@ export class StudentFormStoreService {
       }),
       studentImageURL: [''],
     });
-
+    
     this.formSubject = new BehaviorSubject<FormGroup>(initialForm);
+    const primary = initialForm.get('primaryData') as FormGroup;
+    this.emitFullName(primary.value);
+
+    // react to every change in the three name controls
+    primary.valueChanges.subscribe(() => this.emitFullName(primary.value));
   }
 
   getForm$() {
@@ -118,6 +126,13 @@ export class StudentFormStoreService {
     this.formSubject.next(this.getForm());
   }
 
+  //this is emiting Student Full Name
+  private emitFullName(v: any) {
+    const full = `${v.studentFirstName} ${v.studentMiddleName} ${v.studentLastName}`.trim();
+    this.fullNameSubject.next(full);
+  }
+
+  
   //this is for Files and images
   private selectedFiles: File[] = [];
   private studentImage: File | null = null;

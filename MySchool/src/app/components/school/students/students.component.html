@@ -45,8 +45,8 @@
               </div>
               <ng-template pTemplate="footer">
                 <div class="flex gap-3 mt-1">
-                  <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
-                  <p-button label="ولي أمر" class="w-full" styleClass="custom-button guardain" />
+                  <p-button label="الرسوم" (click)="EditStudentDialog(student.studentID)" class="w-full" styleClass="custom-button" />
+                  <p-button label="ولي أمر" (click)="EditGuardianDialog(student.guardians.guardianID)" class="w-full" styleClass="custom-button guardain" />
 
                 </div>
               </ng-template>
@@ -98,7 +98,7 @@
                             <i class="fas fa-ellipsis-h"></i>
                           </button>
                           <div class="dropdown-menu dropdown-menu-left">
-                            <a class="dropdown-item" (click)="EditDialog(student.studentID)"><i
+                            <a class="dropdown-item" (click)="EditStudentDialog(student.studentID)"><i
                                 class="bi bi-pencil-square IconEdit"></i>تعديل</a>
                             <div role="separator" class="dropdown-divider"></div>
                             <a class="dropdown-item" (click)="deleteStudent(student.studentID)">

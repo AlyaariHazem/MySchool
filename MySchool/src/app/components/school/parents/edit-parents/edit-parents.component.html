@@ -1,1 +1,68 @@
-<p>edit-parents works!</p>
+<form #form="ngForm" dir="rtl">
+    <h2 class="p-2">تعديل ولي الأمر</h2>
+    <div class="form-control">
+        <p-button class="editButton" variant="outlined" severity="success" type="submit" (click)="onSubmit(form)" label="تعديل" />
+    </div>
+    <div id="guardian" class="group5 m-4">
+        <!-- الاسم وصلة القرابة -->
+          <!-- زر الإرسال -->
+        <div class="group group1">
+            <div class="form-control">
+                <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
+                    <input type="text" id="guardianFullName" name="guardianFullName"
+                        [(ngModel)]="guardian.guardianFullName" pInputText required class="w-full h-3rem" />
+                    <label for="guardianFullName">اسم ولي الأمر</label>
+                </p-floatlabel>
+            </div>
+
+            <div class="form-control">
+                <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
+                    <input type="text" id="guardianType" name="guardianType" [(ngModel)]="guardian.guardianType"
+                        pInputText required class="w-full h-3rem" />
+                    <label for="guardianType">صلة القرابة</label>
+                </p-floatlabel>
+                <small *ngIf="form.submitted && !guardian.guardianType" style="color:red">
+                    صلة القرابة مطلوبة
+                </small>
+            </div>
+        </div>
+
+        <!-- بيانات التواصل -->
+        <div class="group group1">
+            <div class="form-control">
+                <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
+                    <input type="email" id="guardianEmail" name="guardianEmail" [(ngModel)]="guardian.guardianEmail"
+                        pInputText class="w-full h-3rem" />
+                    <label for="guardianEmail">البريد الإلكتروني</label>
+                </p-floatlabel>
+            </div>
+
+            <div class="form-control">
+                <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
+                    <input type="tel" id="guardianPhone" name="guardianPhone" [(ngModel)]="guardian.guardianPhone"
+                        pInputText class="w-full h-3rem" />
+                    <label for="guardianPhone">الجوال</label>
+                </p-floatlabel>
+            </div>
+        </div>
+
+        <!-- تاريخ الميلاد والعنوان -->
+        <div class="group group1">
+            <div class="form-control">
+                <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
+                    <input type="date" id="guardianDOB" name="guardianDOB" [(ngModel)]="guardian.guardianDOB" pInputText
+                        class="w-full h-3rem" />
+                    <label for="guardianDOB">تاريخ الميلاد</label>
+                </p-floatlabel>
+            </div>
+
+            <div class="form-control">
+                <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
+                    <input type="text" id="guardianAddress" name="guardianAddress"
+                        [(ngModel)]="guardian.guardianAddress" pInputText class="w-full h-3rem" />
+                    <label for="guardianAddress">العنوان</label>
+                </p-floatlabel>
+            </div>
+        </div>
+    </div>
+</form>

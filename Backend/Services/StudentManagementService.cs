@@ -112,7 +112,7 @@ public class StudentManagementService
         var existingAccountStudentGuardian = await _unitOfWork.AccountStudentGuardians.GetAccountStudentGuardianByGuardianIdAsync(existingGuardian.GuardianID);
         if (existingAccountStudentGuardian == null)
             throw new Exception("No account found for the existing guardian.");
-        
+
 
         // 4. Create AccountStudentGuardian Mapping using the existing account ID
         var accountStudentGuardian = new AccountStudentGuardian
@@ -198,15 +198,12 @@ public class StudentManagementService
             {
                 if (request.ExistingGuardianId.Value == student.GuardianID)
                 {
-
-                    var guardian = await _unitOfWork.Guardians.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
+                    var guardian = await _unitOfWork.Guardians.GetGuardianByGuardianIdAsync(request.ExistingGuardianId.Value);
                     if (guardian != null)
                     {
                         guardian.FullName = request.GuardianFullName ?? guardian.FullName;
                         guardian.GuardianDOB = request.GuardianDOB != default ? request.GuardianDOB : guardian.GuardianDOB;
                         guardian.Type = request.GuardianType ?? guardian.Type;
-
-
 
                         var guardianUser = await _userManager.Users
                             .FirstOrDefaultAsync(u => u.Id == guardian.UserID);
@@ -216,10 +213,13 @@ public class StudentManagementService
                             guardianUser.PhoneNumber = request.GuardianPhone ?? guardianUser.PhoneNumber;
                             guardianUser.Address = request.GuardianAddress ?? guardianUser.Address;
 
-                            _dbContext.Entry(guardianUser).State = EntityState.Modified;
+                            await _userManager.UpdateAsync(guardianUser); // update via Identity manager
                         }
+
+                        await _dbContext.SaveChangesAsync(); // save guardian changes
                     }
                 }
+
                 else
                 {
                     // Step 1: Get the wrapper result

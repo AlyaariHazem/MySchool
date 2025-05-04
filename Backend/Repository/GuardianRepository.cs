@@ -151,4 +151,10 @@ public class GuardianRepository : IGuardianRepository
 
         return mappedGuardians;
     }
+
+    public async Task<Guardian> GetGuardianByGuardianIdAsync(int guardianId)
+    {
+        return await _db.Guardians
+            .FirstOrDefaultAsync(g => g.GuardianID == guardianId)?? null!;
+    }
 }

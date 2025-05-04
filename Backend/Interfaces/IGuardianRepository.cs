@@ -13,6 +13,7 @@ public interface IGuardianRepository
     Task<List<GuardianDTO>> GetAllGuardiansAsync();
     Task<List<GuardiansInfo>> GetAllGuardiansInfoAsync();
     Task<GuardianDTO> GetGuardianByIdAsync(int guardianId);
+    Task<Guardian> GetGuardianByGuardianIdAsync(int guardianId);
     Task<GuardianDTO> GetGuardianByIdForUpdateAsync(int guardianId);
     Task UpdateGuardianAsync(GuardianDTO guardian);
 }

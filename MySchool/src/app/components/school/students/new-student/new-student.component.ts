@@ -1,4 +1,4 @@
-import {Component, OnInit, AfterViewInit, Inject, ChangeDetectorRef,inject, OnDestroy} from '@angular/core';
+import { Component, OnInit, AfterViewInit, Inject, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -23,7 +23,7 @@ interface Attachment {
   templateUrl: './new-student.component.html',
   styleUrls: ['./new-student.component.scss']
 })
-export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
+export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /* ---------- reactive‑form ---------- */
   formGroup: FormGroup = this.formStore.getForm();
@@ -37,6 +37,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
   studentImageURL2 = '';
   files: File[] = [];
   attachments: string[] = [];
+  studentName$ = this.formStore.fullName$;
 
   /* ---------- DI ---------- */
   private toastr = inject(ToastrService);
@@ -55,8 +56,13 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
   }
 
   /* ---------- lifecycle ---------- */
-  ngOnInit(): void { this.initAddOrEdit(); }
-  ngAfterViewInit(): void { setTimeout(() => document.getElementById('defaultOpen')?.click()); }
+  ngOnInit(): void {
+    this.initAddOrEdit();
+    this.studentID=this.formGroup.get('studentID')!.value;
+  }
+  ngAfterViewInit(): void {
+    setTimeout(() => document.getElementById('defaultOpen')?.click());
+  }
 
   /* ---------- submit ---------- */
   onSubmit(): void { this.isEditMode ? this.onUpdate() : this.onAdd(); }
@@ -64,6 +70,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
   /* ---------- add ---------- */
   private onAdd(): void {
     if (this.formGroup.invalid) return;
+    this.attachments = this.formGroup.get('documents.attachments')?.value || [];
 
     const formData: AddStudent = {
       studentID: this.formGroup.get('studentID')!.value,
@@ -79,16 +86,16 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
     this.studentService.addStudent(formData).subscribe({
       next: r => {
         this.toastr.success('Student Added Successfully! ', r.message);
+        this.uploadImageAndFiles();
+        this.generateStudentID();
       }
-      
-    });
 
-    this.uploadImageAndFiles();
-    this.generateStudentID();
+    });
   }
 
   /* ---------- update ---------- */
-   onUpdate(): void {
+  onUpdate(): void {
+    this.attachments = this.formGroup.get('documents.attachments')?.value || [];
     const updateDiscounts: UpdateDiscount[] = this.discountsArray.value.map((d: any) => ({
       studentClassFeeID: d.studentClassFeeID ?? 0,
       studentID: this.formGroup.get('studentID')!.value,
@@ -111,9 +118,9 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
     this.studentService.updateStudent(payload).subscribe({
       next: (res) => {
         this.toastr.success('Student updated successfully', res.message);
-        this.formStore.resetForm();
-        this.dialogRef.close();
         this.uploadImageAndFiles();
+        this.formStore.resetForm();
+        this.dialogRef.close(payload);
       }
     });
   }
@@ -123,12 +130,14 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
     if (this.StudentImage)
       this.studentService.uploadStudentImage(this.StudentImage, this.studentID).subscribe();
 
-    if (this.files.length)
-      this.studentService.uploadFiles(this.files, this.studentID).subscribe();
+    const files=this.formStore.getFiles();
+    
+    if (files.length)
+      this.studentService.uploadFiles(files, this.studentID).subscribe();
   }
 
   private initAddOrEdit(): void {
-    
+
     if (this.data?.mode === 'edit' && this.data.student) {
       this.isEditMode = true;
       const s = this.data.student;
@@ -166,12 +175,12 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
         },
       });
 
-      const attachments= s.attachments.map((a: Attachment) => a.attachmentURL);
+      const attachments = s.attachments.map((a: Attachment) => a.attachmentURL);
       this.formGroup.get('documents.attachments')!.setValue(attachments);
       this.formGroup.get('documents.attachmentsURLs')!.setValue(attachments);
-      
+
       this.formStore.updateForm({
-        arguments:attachments,
+        arguments: attachments,
       });
 
       this.studentImageURL = s.studentImageURL || '';
@@ -198,8 +207,15 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
 
   private generateStudentID(): void {
     this.studentService.MaxStudentID().subscribe({
-      next: n => this.formGroup.patchValue({ studentID: (n ?? 0) + 1 }),
-      error: () => this.formGroup.patchValue({ studentID: 1 })
+      next: n => {
+        const nextId = (n ?? 0) + 1;
+        this.studentID = nextId;                      // keep the field in sync
+        this.formGroup.patchValue({ studentID: nextId });
+      },
+      error: () => {
+        this.studentID = 1;
+        this.formGroup.patchValue({ studentID: 1 });
+      }
     });
   }
 
@@ -224,7 +240,8 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
     this.StudentImage = f;
     const reader = new FileReader();
     reader.onload = ev => this.studentImageURL = ev.target?.result as string;
-    this.studentImageURL2 = `${this.studentID}_${f.name}`;
+    this.studentImageURL2 = f.name;
+    console.log('studentImageURl2', this.studentImageURL2);
     reader.readAsDataURL(f);
   }
 
@@ -232,23 +249,16 @@ export class NewStudentComponent implements OnInit, AfterViewInit,OnDestroy {
 
   handleCapturedImage(payload: { file: File; previewUrl: string }): void {
     if (!payload) return;
-  
-    this.StudentImage     = payload.file;
-    this.studentImageURL  = payload.previewUrl;
-    this.studentImageURL2 = `${this.studentID}_${payload.file.name}`;
-  
+
+    this.StudentImage = payload.file;
+    this.studentImageURL = payload.previewUrl;
+    this.studentImageURL2 = payload.file.name;
+
     this.showCamera = false;
   }
-  
+
   public resetForm(): void {
 
     this.formStore.resetForm();
-  }
-  
-  /* ---------- receive attachments from <app-document> ---------- */
-  updateAttachments(e: { attachments: string[]; files: File[] }) {
-    this.attachments = e.attachments;
-    this.files = e.files;
-    this.formGroup.get('documents.attachments')!.setValue(e.attachments);
   }
 }

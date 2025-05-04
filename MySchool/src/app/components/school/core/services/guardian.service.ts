@@ -1,7 +1,9 @@
 import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { Guardians } from '../models/guardian.model';
+import { ApiResponse } from '../../../../core/models/response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,53 +12,23 @@ export class GuardianService {
   private API = inject(BackendAspService);
   constructor() { }
   
-  getAllGuardians(): Observable<any> {
-    return this.API.http.get<any>(`${this.API.baseUrl}/Guardian`).pipe(
-      map(response => response.result),
-      catchError((error) => {
-        console.error('Error fetching guardians:', error);
-        return throwError(() => new Error('Failed to fetch guardians.'));
-      })
-    );
+  getAllGuardians(): Observable<ApiResponse<Guardians[]>> {
+    return this.API.getRequest<Guardians[]>('Guardian');
   }
-  getAllGuardiansExist(): Observable<any> {
-    return this.API.http.get<any>(`${this.API.baseUrl}/Guardian/GuardianExists`).pipe(
-      map(response => response.result),
-      catchError((error) => {
-        console.error('Error fetching guardians:', error);
-        return throwError(() => new Error('Failed to fetch guardians.'));
-      })
-    );
+  getAllGuardiansExist(): Observable<ApiResponse<Guardians[]>> {
+    return this.API.getRequest<Guardians[]>('Guardian/GuardianExist');
   }
   
-  getGuardianById(id: number): Observable<any> {
-    return this.API.http.get<any>(`${this.API.baseUrl}/Guardian/${id}`).pipe(
-      map(response => response.result),
-      catchError((error) => {
-        console.error('Error fetching guardian:', error);
-        return throwError(() => new Error('Failed to fetch guardian.'));
-      })
-    );
+  getGuardianById(id: number): Observable<ApiResponse<Guardians>> {
+    return this.API.getRequest<Guardians>(`Guardian/${id}`);
   }
   
- getGuardiansInfo(): Observable<any> {
-    return this.API.http.get<any>(`${this.API.baseUrl}/Guardian/GuardianInfo`).pipe(
-      map(response => response.result),
-      catchError((error) => {
-        console.error('Error fetching guardian:', error);
-        return throwError(() => new Error('Failed to fetch guardian.'));
-      })
-    );
+ getGuardiansInfo(): Observable<ApiResponse<Guardians[]>> {
+    return this.API.getRequest<Guardians[]>('Guardian/GetAllGuardianInfo');
   }
 
-  updateGuardian(id: number, guardian: any): Observable<any> {
-    return this.API.http.put<any>(`${this.API.baseUrl}/Guardian/${id}`, guardian).pipe(
-      map(response => response.result),
-      catchError((error) => {
-        console.error('Error updating guardian:', error);
-        return throwError(() => new Error('Failed to update guardian.'));
-      })
-    );
+  updateGuardian(id: number, guardian: any): Observable<ApiResponse<Guardians>> {
+    return this.API.putRequest<Guardians>(`Guardian/${id}`, guardian);
   }
 
 
