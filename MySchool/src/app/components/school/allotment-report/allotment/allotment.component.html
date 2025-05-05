@@ -2,12 +2,12 @@
     <h2 class="title">تخصيص التقارير</h2>
     <div class="select">
         <p-select [options]="reportOptions" optionLabel="label" optionValue="value" [ngModel]="selectedReportType"
-            (ngModelChange)="onReportSelect($event)" placeholder="Select a report" />
+            placeholder="Select a report" />
 
     </div>
 
     <div class="flex flex-wrap gap-3 save">
-        <button class="w-3" pButton type="button" label="حفظ التغيرات" icon="pi pi-save" (click)="exportPDF()">
+        <button class="w-3" pButton type="button" label="حفظ التغيرات" icon="pi pi-save">
         </button>
     </div>
 

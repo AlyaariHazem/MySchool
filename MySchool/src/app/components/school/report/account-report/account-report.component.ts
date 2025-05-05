@@ -1,5 +1,4 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import html2pdf, { Html2PdfOptions } from 'html2pdf.js';
 
 
 @Component({
@@ -30,19 +29,6 @@ export class AccountReportComponent {
   ];
   
 
-  /* ---------- زر "طباعة" ---------- */
-  print(): void {
-    const opt: Html2PdfOptions = {
-      margin: 10,
-      filename: `account-${this.header.accountNo}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as 'portrait' }
-    };
-
-    /* html2pdf تطبع فقط محتوى printArea */
-    html2pdf().set(opt).from(this.printArea.nativeElement).save();
-  }
 
   /* لو أردت معاينة مباشرة عبر window.print(): */
   ngAfterViewInit(): void {

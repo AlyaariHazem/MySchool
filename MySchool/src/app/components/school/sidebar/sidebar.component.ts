@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, inject } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+
 import { TranslationService } from '../../../core/services/translation.service';
 import { LanguageService } from '../../../core/services/language.service';
 
@@ -26,7 +27,10 @@ import { LanguageService } from '../../../core/services/language.service';
   ]
 })
 export class SidebarComponent implements OnInit {
+  
   translationService=inject(TranslationService);
+  languageService=inject(LanguageService);
+
   isSubmenuOpen: { [key: string]: boolean } = {
     sittings: false,
     teachersSubmenu: false,
@@ -42,7 +46,6 @@ export class SidebarComponent implements OnInit {
     employeesSubmenu: false,
     reportsSubmenu: false,
   };
-languageService=inject(LanguageService);
 
   @Input() sidebar: boolean = false;
 

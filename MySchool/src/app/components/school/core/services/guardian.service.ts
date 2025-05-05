@@ -24,7 +24,7 @@ export class GuardianService {
   }
   
  getGuardiansInfo(): Observable<ApiResponse<Guardians[]>> {
-    return this.API.getRequest<Guardians[]>('Guardian/GetAllGuardianInfo');
+    return this.API.getRequest<Guardians[]>('Guardian/GuardianInfo');
   }
 
   updateGuardian(id: number, guardian: any): Observable<ApiResponse<Guardians>> {

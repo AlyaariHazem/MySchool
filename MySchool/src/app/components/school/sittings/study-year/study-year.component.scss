@@ -106,6 +106,19 @@ mat-form-field {
   //     color: rgb(35, 22, 213);
   // }
 }
+:host ::ng-deep p-dialog-mask{
+height: auto!important;
+}
+/* إذا كان المكوّن يستعمل ViewEncapsulation، أضف ::ng-deep */
+:host ::ng-deep .year-dialog {
+  height: auto !important;          /* الصندوق */
+}
+
+/* لضبط المحتوى فقط: */
+:host ::ng-deep .year-dialog .p-dialog-content {
+  max-height: none !important;      /* يلغي 100% */
+  overflow: visible;                /* يمنع خط التمرير */
+}
 
 //this is for talbes
 /* Resetting some default styles */

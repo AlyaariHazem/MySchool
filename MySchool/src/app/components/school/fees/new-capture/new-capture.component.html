@@ -10,7 +10,7 @@
     </button>
 
     <button class="button1 typing" (click)="printVoucher()">طباعة</button> <!-- Print button -->
-    <img class="image-header" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
+    <img class="image-header" src="assets/img/user.png" alt="photo">
   </div>
 
   <div class="content" id="reportVoucher">
@@ -79,7 +79,7 @@
         @for (voucher of filteredVouchers; track $index) {
         <div class="card flex justify-content-center">
           <p-card>
-            <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
+            <img class="image" src="assets/img/user.png" alt="photo">
             <span style="position: absolute;">{{voucher.studentName}}</span>
             <div class="m-2">الصـف: <span>{{voucher.className}}</span></div>
             <div class="m-2">الرسوم المطلوبة: <span>{{voucher.requiredFee}}</span></div>
@@ -97,7 +97,7 @@
         @empty {
         <div class="card flex justify-content-center" id="report">
           <p-card>
-            <img class="image" src="assets/images/٢٠٢٢٠٧٠٩_١٠٠٧٣٨.png" alt="photo">
+            <img class="image" src="assets/img/user.png" alt="photo">
             <span style="position: absolute;">الاسم</span>
             <div class="m-2">الصـف: <span>....</span></div>
             <div class="m-2">الرسوم المطلوبة: <span>....</span></div>

@@ -6,9 +6,9 @@
         <p-button class="showFee" variant="outlined" severity="success" (onClick)="showDialogAddYear()" label="+ سنة جديدة" />
 
         <!-- Dialog for adding a new year -->
-        <p-dialog header="إضافة سنة" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }"
+        <p-dialog header="إضافة سنة" [modal]="true" styleClass="year-dialog" [(visible)]="visible" [style]="{ width: '50rem' }"
           [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
-          <!-- Listen to the "yearAdded" event -->
+          
           <app-new-year (yearAdded)="handleYearAdded($event)"></app-new-year>
         </p-dialog>
 
