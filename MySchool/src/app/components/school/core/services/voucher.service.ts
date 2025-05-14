@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
-import { Voucher, VoucherAdd } from '../models/voucher.model';
+import { Voucher, VoucherAddUpdate } from '../models/voucher.model';
 import { VouchersGuardian } from '../models/vouchers-guardian.model';
 import { ApiResponse } from '../../../../core/models/response.model';
 
@@ -21,7 +21,7 @@ export class VoucherService {
     return this.API.getRequest<VouchersGuardian[]>('Vouchers/vouchersGuardian');
   }
 
-  Add(voucher: VoucherAdd): Observable<ApiResponse<string>> {
+  Add(voucher: VoucherAddUpdate): Observable<ApiResponse<string>> {
     return this.API.postRequest<string>('Vouchers', voucher);
   }
 
@@ -29,7 +29,7 @@ export class VoucherService {
     return this.API.deleteRequest<any>(`Vouchers/${id}`);
   }
 
-  Update(id: number | undefined, voucher: VoucherAdd): Observable<ApiResponse<any>> {
+  Update(id: number | undefined, voucher: VoucherAddUpdate): Observable<ApiResponse<any>> {
     return this.API.putRequest<any>(`Vouchers/${id}`, voucher);
   }
 }

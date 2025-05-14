@@ -6,6 +6,8 @@ import { Stage } from '../../../core/models/stages-grades.modul';
 import { ClassService } from '../../../core/services/class.service';
 import { CLass, ClassDTO, updateClass } from '../../../core/models/class.model';
 import { PaginatorState } from 'primeng/paginator';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { DialogService } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-grades',
@@ -33,7 +35,7 @@ export class GradesComponent implements OnInit {
   private classService = inject(ClassService);
   errorMessage: string = "";
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder,private dialogService: DialogService) {
     this.form = this.fb.group({
       className: ['', Validators.required],
       stageID: ['', Validators.required]
@@ -146,22 +148,26 @@ export class GradesComponent implements OnInit {
 
     this.isEditMode = false;
   }
-
-  // Method to delete a Class by ID
-  deleteClass(id: number): void {
-    this.classService.Delete(id).subscribe({
-      next: (res) => {
-        if (!res.isSuccess) {
-          this.toastr.warning(res.errorMasseges[0] || 'Failed to delete class');
-          return;
+  
+    deleteClass(id: number): void {
+      const ref = this.dialogService.open(ConfirmDialogComponent, {
+        header: 'Delete Class',
+        width: 'auto',
+        data: {
+          title: 'Delete Class',
+          message: 'هل أنت متأكد من أنك تريد حذف هذه الصف؟',
+          deleteFn: () => this.classService.Delete(id),
+          successMessage: 'class deleted successfully'
         }
-
-        this.toastr.success(res.result, 'Class Deleted');
-        this.getAllClasses();
-      },
-      error: () => this.toastr.error('Failed to delete Class', 'Error')
-    });
-  }
+      });
+  
+      ref.onClose.subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          this.paginatedGrade = this.paginatedGrade.filter(s => s.classID !== id);
+        }
+      });
+    }
+  
 
   toggleOuterDropdown(item: any): void {
     this.openOuterDropdown = this.openOuterDropdown === item ? null : item;

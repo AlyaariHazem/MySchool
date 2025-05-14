@@ -1,4 +1,4 @@
-<div [ngClass]="{'active': sidebar,'sidebar':languageService.dir==='rtl','sidebarEn':languageService.dir==='ltr'}"
+<div [ngClass]="{'active fadeinright animation-duration-500': sidebar,'sidebar':languageService.dir==='rtl','sidebarEn':languageService.dir==='ltr'}"
   id="sidebar">
   <div class="sidebar-inner">
     <div id="sidebar-menu" class="sidebar-menu">
@@ -84,9 +84,10 @@
                   }}</span></a></li>
             <li><a routerLink="/school/students/add-student/1" (click)="cancel()"><span>{{ 'sidebar.students_sub.add' | translate
                   }}</span></a></li>
-            <li><a routerLink="/school/students/edit-student" (click)="cancel()"><span>{{ 'sidebar.students_sub.edit' | translate
+            <li><a routerLink="/school/students/edit-student" (click)="cancel()"><span>{{ 'sidebar.students_sub.new' | translate
                   }}</span></a></li>
-            <li><a routerLink="/school/students/about-students" (click)="cancel()"><span>عن الطلاب</span></a></li>
+            <li><a routerLink="/school/students/edit-student" (click)="cancel()"><span>{{ 'sidebar.students_sub.upgrade' | translate
+                  }}</span></a></li>
           </ul>
         </li>
 
@@ -145,7 +146,7 @@
             [attr.dir]="languageService.dir">
             <li><a routerLink="/school/reports" (click)="cancel()"><span>{{ 'sidebar.report.reports' | translate }}</span></a></li>
             <li><a routerLink="/school/reports/account" (click)="cancel()"><span>{{ 'sidebar.report.account' | translate }}</span></a></li>
-            <li><a routerLink="/school/reports/month-result" (click)="cancel()"><span>الدرجات الشهرية</span></a></li>
+            <li><a routerLink="/school/reports/term-result" (click)="cancel()"><span>الدرجات الفصلية</span></a></li>
             <li><a routerLink="/school/reports/grades-month" (click)="cancel()"><span>{{ 'sidebar.report.gradesMonth' | translate
                   }}</span></a></li>
           </ul>

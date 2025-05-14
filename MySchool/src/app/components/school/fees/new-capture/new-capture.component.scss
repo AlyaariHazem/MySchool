@@ -18,7 +18,9 @@
 .p-button-rounded {
   position: unset;
 }
-
+#header{
+  display: none;
+}
 textarea {
   border: 2px solid #d6d6d6 !important;
   border-radius: 7px !important;
@@ -81,6 +83,9 @@ p-panel {
 
 .p-button-text {
   color: #4caf50; /* Green icon color */
+}
+:host ::ng-deep .p-iconwrapper {
+  z-index: 2 !important;
 }
 .print {
   color: #2d2e2d;
@@ -179,9 +184,9 @@ input {
 .image-header {
   position: absolute;
   top: 1px;
-  width: 4.5rem;
+  width: 3.5rem;
   border-radius: 28px;
-  left: 3%;
+  left: 5%;
 }
 .custom-button:hover {
   background-color: #0f6c00;
@@ -198,4 +203,9 @@ input {
 .custom-button:hover .upload-icon {
   filter: brightness(0) saturate(100%) invert(80%) sepia(50%) saturate(500%)
     hue-rotate(100deg); /* Change color on hover */
+}
+@media print{
+  #header{
+    display:block!important;
+  }
 }

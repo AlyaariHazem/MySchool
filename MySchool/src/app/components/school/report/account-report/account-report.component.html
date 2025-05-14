@@ -1,16 +1,13 @@
 <div id="page" class="p-4 md:p-6 bg-white rounded-lg shadow-sm">
-  <!-- ✅ أدوات الطباعة والتصدير -->
+
   <div class="toolbar flex flex-wrap gap-2 justify-end mb-4 print:hidden">
     <button pButton label="طباعة" icon="pi pi-print" (click)="nativePrint()" class="p-button-sm"></button>
       <button pButton label="PDF" icon="pi pi-file-pdf" severity="danger" class="p-button-sm"></button>
       <button pButton label="CSV" icon="pi pi-file-excel" severity="success" class="p-button-sm"></button>
   </div>
 
-  <!-- ✅ تقرير الحساب -->
   <div #printArea class="report bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo">
-    <!-- ✅ رأس التقرير -->
     <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 border-b pb-4 mb-4">
-      <!-- معلومات الحساب -->
       <div class="flex-1 text-end md:text-end md:self-start">
         <h2 class="text-xl md:text-2xl font-bold text-primary mb-1">
           رقم الحساب: <span class="text-black">#{{ header.accountNo }}</span>
@@ -18,7 +15,6 @@
         <h3 class="text-lg mb-1">{{ header.guardian }}</h3>
         <p class="text-gray-600 mb-2">تاريخ الإنشاء: <strong>{{ header.createdDate }}</strong></p>
 
-        <!-- المبالغ -->
         <div class="space-y-1 text-sm md:text-base">
           <div class="flex justify-between border-b pb-1 font-medium">
             <span>إجمالي المديونية</span>
@@ -36,7 +32,6 @@
         </div>
       </div>
 
-      <!-- شعار المدرسة -->
       <div class="min-w-max text-left md:text-end">
         <img [src]="logo" alt="شعار المدرسة" class="h-12 mx-auto md:mx-0 mb-2" />
         <div class="font-bold text-lg">{{ schoolName }}</div>
@@ -46,7 +41,6 @@
       </div>
     </div>
 
-    <!-- ✅ معلومات إضافية -->
     <div class="grid grid-cols-2 gap-2 text-gray-700 text-sm md:text-base mb-4">
       <div class="text-end">Sep 28, 2021</div>
       <div class="text-start">تاريخ الإنشاء</div>

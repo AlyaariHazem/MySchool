@@ -7,6 +7,8 @@ import { ClassDTO } from '../../core/models/class.model';
 import { AddStage, Stage, updateStage } from '../../core/models/stages-grades.modul';
 import { StageService } from '../../core/services/stage.service';
 import { ClassService } from '../../core/services/class.service';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-stages-grades',
@@ -35,7 +37,8 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
   constructor(
     private stageService: StageService,
     private formBuilder: FormBuilder,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private dialogService: DialogService
   ) {
     this.form = this.formBuilder.group({
       StageName: ['', Validators.required],
@@ -132,36 +135,25 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
     this.isEditMode = false;
   }
 
+  deleteClass(id: number): void {
+    const ref = this.dialogService.open(ConfirmDialogComponent, {
+      header: 'Delete Class',
+      width: 'auto',
+      data: {
+        title: 'Delete Class',
+        message: 'هل أنت متأكد من أنك تريد حذف هذه الصف؟',
+        deleteFn: () => this.classService.Delete(id),
+        successMessage: 'class deleted successfully'
+      }
+    });
 
-
-  // Method to delete a stage by ID
-  deleteStage(id: number): void {
-    this.stageService.DeleteStage(id).subscribe({
-      next: (response) => {
-        if (response) {
-          this.toastr.success(response, 'Stage Deleted');
-          this.getStage(); // Refresh the list after deletion
-        }
-      },
-      error: () => this.toastr.error('Failed to delete stage', 'Error')
+    ref.onClose.subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.paginatedStage = this.paginatedStage.filter(s => s.stageID !== id);
+      }
     });
   }
-  //these for Class
-  deleteClass(ID: number): void {
-    this.classService.Delete(ID).subscribe({
-      next: (res) => {
-        if (!res.isSuccess) {
-          this.toastr.warning(res.errorMasseges[0] || 'الصف غير فارغ');
-          return;
-        }
 
-        this.toastr.success('Class deleted');
-        this.getAllClasses();
-      },
-      error: () => this.toastr.error('يجب أن يكون الصف فارغ', 'خطأ')
-    });
-  }
-  
   getAllClasses(): void {
     this.classService.GetAll().subscribe({
       next: (res) => {
@@ -177,6 +169,24 @@ export class StagesGradesComponent implements AfterViewInit, OnInit {
       error: () => {
         this.toastr.error('Failed to load classes');
         this.classes = [];
+      }
+    });
+  }
+  deleteStage(id: number): void {
+    const ref = this.dialogService.open(ConfirmDialogComponent, {
+      header: 'Delete Stage',
+      width: 'auto',
+      data: {
+        title: 'Delete Stage',
+        message: 'هل أنت متأكد من أنك تريد حذف هذه المرحلة؟',
+        deleteFn: () => this.stageService.DeleteStage(id),
+        successMessage: 'stage deleted successfully'
+      }
+    });
+
+    ref.onClose.subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.paginatedStage = this.paginatedStage.filter(s => s.stageID !== id);
       }
     });
   }

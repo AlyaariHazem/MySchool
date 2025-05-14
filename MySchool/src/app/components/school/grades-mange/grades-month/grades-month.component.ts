@@ -10,12 +10,10 @@ import { ClassService } from '../../core/services/class.service';
 import { CurriculmsPlanService } from '../../core/services/curriculms-plan.service';
 import { CurriculmsPlanSubject } from '../../core/models/curriculmsPlans.model';
 import { Paginates } from '../../core/models/Pagination.model';
-import { Month } from '../../core/models/month.model';
-
-interface Term {
-  name: string;
-  id: number;
-}
+import { IMonth } from '../../core/models/month.model';
+import { ITerm } from '../../core/models/term.model';
+import { TERMS } from '../../core/data/terms';
+import { MONTHS } from '../../core/data/months';
 
 
 @Component({
@@ -37,7 +35,9 @@ export class GradesMonthComponent implements OnInit {
 
   monthlyGrades: MonthlyGrade[] = [];
   displayedStudents: MonthlyGrade[] = [];
-  filteredMonths: Month[] = [];
+  filteredMonths: IMonth[] = [];
+  terms: ITerm[] = TERMS;
+  months: IMonth[] = MONTHS;
 
   // Track the loading state
   isLoading = true;
@@ -88,22 +88,6 @@ export class GradesMonthComponent implements OnInit {
     this.updatePaginatedData();
   }
 
-  // Example data for dropdowns
-  terms: Term[] = [
-    { name: 'الأول', id: 1 },
-    { name: 'الثاني', id: 2 }
-  ];
-
-  months: Month[] = [
-    { id: 5, name: 'مايو', termId: 1 },
-    { id: 6, name: 'يونيو', termId: 1 },
-    { id: 7, name: 'يوليو', termId: 1 },
-    { id: 8, name: 'أغسطس', termId: 1 },
-    { id: 9, name: 'سبتمبر', termId: 2 },
-    { id: 10, name: 'أكتوبر', termId: 2 },
-    { id: 11, name: 'نوفمبر', termId: 2 },
-    { id: 12, name: 'ديسمبر', termId: 2 },
-  ];
 
   getAllClasses() {
     this.classService.GetAllNames().subscribe({
@@ -130,7 +114,7 @@ export class GradesMonthComponent implements OnInit {
           return;
         }
         // this.curriculmsPlan = res.result;
-        this.curriculmsPlan =[{subjectID: 0, subjectName: 'الكل'},...res.result];
+        this.curriculmsPlan = [{ subjectID: 0, subjectName: 'الكل' }, ...res.result];
       },
       error: (err) => {
         this.toastr.error('Server error occurred');
@@ -229,14 +213,18 @@ export class GradesMonthComponent implements OnInit {
         },
         error: err => {
           console.error(err);
-          this.toastr.error('Error occurred while saving');
+          this.toastr.warning('you must to insert or update the grades first');
         }
       });
   }
 
   hidden: boolean = false;
+  hiddenFrom: boolean = false;
   toggleHidden() {
     this.hidden = !this.hidden;
+  }
+  toggleHiddenFrom() {
+    this.hiddenFrom = !this.hiddenFrom;
   }
   first: number = 0;
   rows: number = 5;
@@ -248,8 +236,6 @@ export class GradesMonthComponent implements OnInit {
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
       console.log('monthly Grades are', this.monthlyGrades);
-      this.isLoading = false;
-      this.visible = false;
       if (this.monthlyGrades.length > 0) {
         this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
       } else {
@@ -259,14 +245,13 @@ export class GradesMonthComponent implements OnInit {
   }
 
   updatePaginatedData(): void {
-    this.visible = true;
-    this.isLoading = true;
-    this.monthlyGradesService.getAllMonthlyGrades(this.form.get('selectedTerm')?.value, this.form.get('selectedMonth')?.value, this.form.get('selectedClass')?.value, this.form.get('selectedSubject')?.value, this.first / this.rows + 1, this.rows).subscribe((res) => {
+    this.monthlyGradesService.getAllMonthlyGrades(this.form.get('selectedTerm')?.value, this.form.get('selectedMonth')?.value, this.form.get('selectedClass')?.value, this.form.get('selectedSubject')?.value, this.first / this.rows + 1, this.rows).subscribe(res => {
       this.paginates = res;
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
-      this.isLoading = false;
-      this.visible = false;
+      if (this.monthlyGrades.length == 0) {
+        this.toastr.info('No students found for the selected criteria.');
+      }
     });
   }
 

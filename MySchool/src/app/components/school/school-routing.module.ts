@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
-// import { PageHeaderComponent } from './page-header/page-header.component';
 import { NavigateComponent } from './navigate/navigate.component';
 import { AllStudentsComponent } from './students/all-students/all-students.component';
 import { TeachersComponent } from './teachers/teachers.component';
@@ -26,7 +25,7 @@ import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.c
 import { PageNotFoundComponent } from '../../shared/components/page-not-found/page-not-found.component';
 import { AccountReportComponent } from './report/account-report/account-report.component';
 import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
-import { MonthlyResultComponent } from './report/monthly-result/monthly-result.component';
+import { TermResultComponent } from './report/termly-result/term-result.component';
 import { GradesTermComponent } from './grades-mange/grades-term/grades-term.component';
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 
@@ -43,7 +42,9 @@ const routes: Routes = [
           { path: 'account', component: AccountReportComponent, data: { breadcrumb: 'حسابات' } },
           { path: 'allotment', component: AllotmentComponent, data: { breadcrumb: 'تخصيص التقارير' } },
           { path: 'grades-month', component: StudentMonthResultComponent, data: { breadcrumb: 'تقارير شهرية' } },
-          { path: 'month-result', component: MonthlyResultComponent, data: { breadcrumb: 'الدرجات شهرية' } },
+          { path: 'term-result', component: TermResultComponent, data: { breadcrumb: 'الدرجات الفصلية' } },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
         ]
       },
       {

@@ -11,7 +11,6 @@ import { MessagesComponent } from './messages/messages.component';
 import { FileManagerComponent } from './file-manager/file-manager.component';
 import { SittingComponent } from './sitting/sitting.component';
 import { SchoolsComponent } from './schools/schools.component';
-// import { SchoolInfoComponent } from './school-info/school-info.component';
 import { PageNotFoundComponent } from '../../shared/components/page-not-found/page-not-found.component';
 
 const routes: Routes = [

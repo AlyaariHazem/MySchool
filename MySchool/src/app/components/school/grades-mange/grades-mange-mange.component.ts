@@ -20,6 +20,7 @@ export class GradesMangeComponent implements OnInit {
   gradeTypes:GradeType[]=[];
   paginatedGradeTypes: GradeType[] = []; 
   isActive: boolean = false;
+  isLoading: boolean = true;
 
   // Paginator properties
   first: number = 0;
@@ -31,7 +32,7 @@ export class GradesMangeComponent implements OnInit {
     private formBuilder: FormBuilder,) {
     this.form = this.formBuilder.group({
       name: ['',Validators.required],
-      maxGrade: [0,Validators.required],
+      maxGrade: [,Validators.required],
     });
   }
 
@@ -46,9 +47,11 @@ export class GradesMangeComponent implements OnInit {
         if(res.isSuccess){
           this.gradeTypes=res.result;
           this.updatePaginatedData();
+          this.isLoading=false;
         }else{
           console.log('Error fetching grade types:', res.errorMasseges[0]);
           this.gradeTypes=[];
+          this.isLoading=false;
         }
       }
     })

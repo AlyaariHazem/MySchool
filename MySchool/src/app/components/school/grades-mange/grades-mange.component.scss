@@ -27,6 +27,9 @@
     left: 0%;
   }
 }
+.styled-table{
+  width: 98%!important;
+}
 [dir="rtl"] .styled-table th,
 [dir="rtl"] .styled-table td {
     text-align: center; /* Adjust alignment for Arabic */

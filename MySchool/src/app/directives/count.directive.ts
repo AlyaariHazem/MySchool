@@ -12,6 +12,7 @@ export class CountDirective implements OnInit {
   ngOnInit(): void {
     const isCountExist = this.count > 0 ? this.count : 'Invalid';
     this.render.setProperty(this.elementRef.nativeElement, 'innerText', isCountExist);
+    
   }
 
 }

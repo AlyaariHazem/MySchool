@@ -1,47 +1,55 @@
-<!-- Enhanced Loading Spinner -->
-<div *ngIf="isLoading" class="card flex justify-center">
-  <app-progress-spinner [visible]="visible"></app-progress-spinner>
- </div>
 
 
- <!-- Your Login Form -->
+<!-- Login Form -->
 <div class="form">
   <form class="form-inline" action="" dir="rtl" #loginForm="ngForm" (ngSubmit)="login(loginForm.value)">
-    <h2 style="margin-right:3rem;">تسجيل الدخول لنظام مدرستي</h2>
+    <h2 style="margin-right:2rem;">تسجيل الدخول لنظام مدرستي</h2>
 
     <!-- Phone Input Field -->
     <mat-form-field appearance="outline" class="input2">
       <mat-label>إدخل اسم المستخدم</mat-label>
       <input matInput placeholder="اسم المستخدم" autocomplete="username" #userName="ngModel" ngModel name="userName"
         required minlength="3" maxlength="22" />
-      <mat-error *ngIf="userName.errors?.['required']">يجب إدخال اسم المستخدم</mat-error>
-      <mat-error *ngIf="userName.errors?.['minlength']">اسم المستخدم يجب أن يكون 3 أرقام على الأقل</mat-error>
+      @if (userName.errors?.['required']) {
+      <mat-error>يجب إدخال اسم المستخدم</mat-error>
+      }
+      @if (userName.errors?.['minlength']) {
+      <mat-error>اسم المستخدم يجب أن يكون 3 أرقام على الأقل</mat-error>
+      }
     </mat-form-field>
-
     <!-- Password Input Field -->
     <mat-form-field appearance="outline" class="input2">
       <mat-label>كلمة السر</mat-label>
       <input matInput placeholder="كلمة السر" autocomplete="current-password" ngModel name="password" type="password"
         required minlength="3" maxlength="22" #password="ngModel" />
-      <mat-error *ngIf="password.errors?.['required']">كلمة السر مطلوبة</mat-error>
-      <mat-error *ngIf="password.errors?.['minlength']">يجب أن تكون كلمة السر أكبر من 3 أحرف</mat-error>
+      @if (password.errors?.['required']) {
+      <mat-error>كلمة السر مطلوبة</mat-error>
+      }
+      @if (password.errors?.['minlength']) {
+      <mat-error>يجب أن تكون كلمة السر أكبر من 3 أحرف</mat-error>
+      }
     </mat-form-field>
 
     <!-- User Type Selection -->
     <mat-form-field appearance="outline" class="input2">
       <mat-label>نوع المستخدم</mat-label>
       <mat-select #userType="ngModel" ngModel name="userType" required>
-        <mat-option *ngFor="let type of userTypes" [value]="type.value">
+        @for (type of userTypes; track $index) {
+        <mat-option [value]="type.value">
           {{ type.label }}
         </mat-option>
+        }
       </mat-select>
-      <mat-error *ngIf="userType.errors?.['required']">يجب اختيار نوع المستخدم</mat-error>
+      @if (userType.errors?.['required']) {
+
+      <mat-error>يجب اختيار نوع المستخدم</mat-error>
+      }
     </mat-form-field>
 
     <!-- Login and Register Buttons -->
     <br />
     <button type="submit" class="btn btn-success btn-custom mb-2 buttonSend">تسجيل دخول</button>
-    
+
 
     <a class="forgot-password" (click)="openRegisterDialog()">هل نسيت كلمة السر؟</a>
   </form>

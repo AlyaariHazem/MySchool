@@ -7,6 +7,8 @@ import { DivisionService } from '../../../core/services/division.service';
 import { ClassService } from '../../../core/services/class.service';
 import { ClassDTO } from '../../../core/models/class.model';
 import { PaginatorState } from 'primeng/paginator';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-division',
@@ -32,7 +34,7 @@ export class DivisionComponent implements OnInit {
   divisionService = inject(DivisionService);
   classService = inject(ClassService);
 
-  constructor(private formBuilder: FormBuilder) {
+  constructor(private formBuilder: FormBuilder,private dialogService: DialogService) {
     this.form = this.formBuilder.group({
       classID: ['', Validators.required],
       divisionName: ['', Validators.required]
@@ -105,16 +107,23 @@ export class DivisionComponent implements OnInit {
   }
 
   DeleteDivision(id: number): void {
-    this.divisionService.Delete(id).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.toastr.success(response.result, 'Division Deleted');
-          this.getAllDivisions(); // Refresh the list after deletion
-        }
-      },
-      error: () => this.toastr.error('Failed to delete Division', 'Error')
-    });
-  }
+        const ref = this.dialogService.open(ConfirmDialogComponent, {
+          header: 'Delete Division',
+          width: 'auto',
+          data: {
+            title: 'Delete Division',
+            message: 'هل أنت متأكد من أنك تريد حذف هذه الشعبة؟',
+            deleteFn: () => this.divisionService.Delete(id),
+            successMessage: 'division deleted successfully'
+          }
+        });
+    
+        ref.onClose.subscribe((confirmed: boolean) => {
+          if (confirmed) {
+            this.PaginatedDivisions = this.PaginatedDivisions.filter(s => s.divisionID !== id);
+          }
+        });
+      }
 
   updateDivision(): void {
     this.form.markAllAsTouched();

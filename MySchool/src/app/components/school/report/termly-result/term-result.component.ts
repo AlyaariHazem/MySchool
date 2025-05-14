@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 
 
 @Component({
-  selector: 'app-monthly-result',
-  templateUrl: './monthly-result.component.html',
-  styleUrls: ['./monthly-result.component.scss']
+  selector: 'app-term-result',
+  templateUrl: './term-result.component.html',
+  styleUrls: ['./term-result.component.scss']
 })
-export class MonthlyResultComponent implements OnInit {
+export class TermResultComponent implements OnInit {
 
   monthlyReports: MonthlyResult[] = [];
   constructor() { }

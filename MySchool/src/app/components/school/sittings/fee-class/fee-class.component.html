@@ -1,14 +1,11 @@
-<app-progress-spinner [visible]="isLoading"></app-progress-spinner>
 <div class="Fee" [attr.dir]="languageService.dir">
     <h2 class="school">إعدادات الرسوم</h2>
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
-        <!-- Tab 1: بند الرسوم -->
         <mat-tab label="بند الرسوم">
             <form #feeForm="ngForm">
                 <div class="group">
                     <!-- Input for Fee Name -->
                     <div class="form-control">
-
                         <p-floatlabel class="h-3rem mb-3 mt-2" variant="on">
                             <input class="inputError w-full h-3rem" type="text" name="feeName" pInputText id="fee"
                                 [(ngModel)]="Addfee.feeName" autocomplete="off" required />
@@ -201,6 +198,6 @@
             </div>
         </mat-tab>
     </mat-tab-group>
-    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+    <p-paginator dir="ltr" (onPageChange)="handlePageChange($event)" [first]="paginatorService.first()" [rows]="paginatorService.rows()"
         [totalRecords]="FeeClass.length" [rowsPerPageOptions]="[4, 8, 16]" />
 </div>

@@ -10,6 +10,7 @@ import { FeeClasses } from '../../core/models/Fee.model';
 import { StudentService } from '../../../../core/services/student.service';
 import { WebcamImage } from 'ngx-webcam';
 import { StudentFormStoreService } from '../../core/store/student-form-store.service';
+import { FileStoreService } from '../../core/store/file-store.service';
 
 interface Attachment {
   attachmentID: number;
@@ -48,6 +49,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
     private fb: FormBuilder,
     private cd: ChangeDetectorRef,
     private formStore: StudentFormStoreService,
+    private fileStore: FileStoreService,
     public dialogRef: MatDialogRef<NewStudentComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
@@ -130,7 +132,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.StudentImage)
       this.studentService.uploadStudentImage(this.StudentImage, this.studentID).subscribe();
 
-    const files=this.formStore.getFiles();
+    const files=this.fileStore.getFiles();
     
     if (files.length)
       this.studentService.uploadFiles(files, this.studentID).subscribe();

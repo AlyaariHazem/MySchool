@@ -6,9 +6,10 @@ export interface Voucher {
     payBy: string;
     note: string;
     accountAttachments: number;
+    accountStudentGuardianID: number;
     studentID: number;
 }
-export interface VoucherAdd {
+export interface VoucherAddUpdate {
     voucherID?: number;
     receipt: number;
     hireDate: Date;

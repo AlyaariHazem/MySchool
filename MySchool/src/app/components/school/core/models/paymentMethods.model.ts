@@ -1,4 +1,4 @@
-export interface PayBy {
+export interface IpaymentMethods {
     label: string;
     value: string;
 }

@@ -25,7 +25,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { TextareaModule } from 'primeng/textarea';
 import { FloatLabel } from "primeng/floatlabel"
 import { TableModule }       from 'primeng/table';
-
+import { Tooltip } from 'primeng/tooltip';
+import { ChartModule } from 'primeng/chart';
 
 import { SchoolRoutingModule } from './school-routing.module';
 import { HeaderComponent } from './header/header.component';
@@ -78,9 +79,10 @@ import { NumberToArabicTextPipe } from '../../Pipes/number-to-arabic-text.pipe';
 import { AccountReportComponent } from './report/account-report/account-report.component';
 import { EmployeeComponent } from './teachers/employee/employee.component';
 import { AgePipe } from '../../Pipes/age.pipe';
-import { MonthlyResultComponent } from './report/monthly-result/monthly-result.component';
+import {  TermResultComponent } from './report/termly-result/term-result.component';
 import { GradesTermComponent } from './grades-mange/grades-term/grades-term.component';
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
+import { HeaderReportComponent } from './report/header-report/header-report.component';
 
 
 
@@ -127,8 +129,9 @@ const components = [
   AddAccountComponent,
   GradesMangeComponent,
   AllotmentComponent,
-  MonthlyResultComponent,
+  TermResultComponent,
   GradesTermComponent,
+  HeaderReportComponent,
   AccountReportComponent
 
 ];
@@ -146,6 +149,7 @@ const modules = [
   MatOption,
   EditorModule,
   FormsModule,
+  ChartModule,
   DropdownModule,
   PaginatorModule,
   MatSelectModule,
@@ -174,7 +178,8 @@ const modules = [
   FloatLabel,
   DatePipe,
   NumberToArabicTextPipe,
-  AgePipe
+  AgePipe,
+  Tooltip
 ];
 
 @NgModule({

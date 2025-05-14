@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ProgressSpinnerComponent } from './progress-spinner.component';
+import { HeaderReportComponent } from './header-report.component';
 
-describe('ProgressSpinnerComponent', () => {
-  let component: ProgressSpinnerComponent;
-  let fixture: ComponentFixture<ProgressSpinnerComponent>;
+describe('HeaderReportComponent', () => {
+  let component: HeaderReportComponent;
+  let fixture: ComponentFixture<HeaderReportComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProgressSpinnerComponent]
+      imports: [HeaderReportComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ProgressSpinnerComponent);
+    fixture = TestBed.createComponent(HeaderReportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

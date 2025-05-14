@@ -1,19 +1,26 @@
-<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
+<div id="id01" class="modal-container" dir="rtl">
 
   <h2 class="title">الكتــب الدراسية</h2>
 
-  <!-- Template-driven Form -->
   <form #formRef="ngForm" class="h-5rem">
 
     <div class="group group2">
 
-      <!-- اسم الكتاب -->
       <div class="form-control">
         <p-floatLabel class="h-3rem mb-3 mt-2" variant="on">
           <input class="inputError w-full h-3rem" type="text" pInputText id="bookName"
-            [(ngModel)]="subjectData.subjectName" name="name" placeholder=" " autocomplete="off" required />
-          <label for="bookName">اسم الكتاب<span
-              [style]="!formRef.controls['name'].valid! && formRef.controls['name']!.touched ? 'color:red;' : 'color:rgb(56, 216, 86);'">*</span></label>
+            [(ngModel)]="subjectData.subjectName" #name="ngModel" name="name" placeholder=" " autocomplete="off"
+            required />
+          <label for="bookName">
+            اسم الكتاب
+            <span [style.color]="name.invalid && name.touched ? 'red' : ''">*</span>
+          </label>
+
+          <!-- رسالة الخطأ -->
+          @if(name.invalid && name.touched){
+          <p class="text-danger">الرجاء إدخال اسم الكتاب</p>
+          }
+
         </p-floatLabel>
       </div>
 
@@ -37,10 +44,10 @@
 
     </div>
 
-    <p-button variant="outlined" severity="success" class="showFee"
-      (onClick)="editMode ? updateSubject() : addSubject()" [label]="editMode ? 'تعديل' : 'إضافة+'" />
+    <p-button variant="outlined" severity="success" class="showFee" [disabled]="!formRef.valid"
+      (onClick)="editMode ? updateSubject(formRef) : addSubject(formRef)" [label]="editMode ? 'تعديل' : 'إضافة+'" />
 
-      <p-chips name="search" class="chipsOne" [max]="2" placeholder="ابحث هنا..." />
+    <p-chips name="search" class="chipsOne" [max]="2" placeholder="ابحث هنا..." />
 
   </form>
 
@@ -73,12 +80,12 @@
                     aria-expanded="false">
                     <i class="fas fa-ellipsis-h"></i>
                   </button>
-                  <div class="dropdown-menu dropdown-menu-left">
-                    <a class="dropdown-item" (click)="editSubject(subject)"><i
-                        class="bi bi-pencil-square IconEdit"></i>تعديل</a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="editSubject(subject)"><i
+                        class="pi pi-file-edit"></i>تعديل</a>
                     <div role="separator" class="dropdown-divider"></div>
-                    <a class="dropdown-item"><i class="bi bi-trash IconDelete"
-                        (click)="deleteSubject(subject.subjectID!)"></i>حذف</a>
+                    <a class="dropdown-item d-flex align-items-center gap-2"
+                      (click)="deleteSubject(subject.subjectID!)"><i class="pi pi-trash"></i>حذف</a>
                   </div>
                 </div>
               </div>
@@ -89,8 +96,9 @@
           }
         </tbody>
       </table>
-      <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-        [totalRecords]="paginates.totalCount!" [rowsPerPageOptions]="[4, 10, 20]" />
+      <p-paginator dir="ltr" [first]="first" [rows]="rows" [totalRecords]="totalRecords"
+        [rowsPerPageOptions]="[4, 10, 20]" (onPageChange)="handlePageChange($event)">
+      </p-paginator>
     </mat-card>
   </div>
 </div>

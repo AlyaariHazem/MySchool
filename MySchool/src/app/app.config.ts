@@ -1,4 +1,4 @@
-import { ApplicationConfig, importProvidersFrom, isDevMode} from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, isDevMode } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -18,36 +18,34 @@ import { AppTranslateModule } from './shared/modules/app-translate.module';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';;
 
-// import { IntercepterService } from './core/services/intercepter.service';
-
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideRouter(routes, withComponentInputBinding()),
-    importProvidersFrom(AppTranslateModule.forRoot()),
-    provideAnimationsAsync(),
-    providePrimeNG({ 
-        theme: {
-            preset: Aura,
-            options: {
-                darkModeSelector: false || 'none'
+    providers: [
+        provideRouter(routes, withComponentInputBinding()),
+        importProvidersFrom(AppTranslateModule.forRoot()),
+        provideAnimationsAsync(),
+        providePrimeNG({
+            theme: {
+                preset: Aura,
+                options: {
+                    darkModeSelector: false || 'none'
+                }
             }
-        }
-    }),
-    provideHttpClient(withInterceptorsFromDi()),
-    provideHttpClient(withFetch()),
-    provideAnimations(), // required animations providers
-    provideStore({ counter: counterReducer }),
-    provideStore({ language: languageReduser }),
-    provideEffects([LanguageEffect]),
-    provideToastr({
-        timeOut: 5000,
-    }),
-    {
-        provide: HTTP_INTERCEPTORS,
-        useClass: TokenInterceptor,
-        multi: true,
-    },
-    // {provide: HTTP_INTERCEPTORS, useClass: IntercepterService, multi: true},
-    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })
-]
+        }),
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withFetch()),
+        provideAnimations(), // required animations providers
+        provideStore({ counter: counterReducer }),
+        provideStore({ language: languageReduser }),
+        provideEffects([LanguageEffect]),
+        provideToastr({
+            timeOut: 5000,
+        }),
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: TokenInterceptor,
+            multi: true,
+        },
+        // {provide: HTTP_INTERCEPTORS, useClass: IntercepterService, multi: true},
+        provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })
+    ]
 };

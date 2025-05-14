@@ -116,7 +116,8 @@
     "students_sub": {
       "all": "All Students",
       "add": "Add Student",
-      "edit": "Edit Student"
+      "new": "New Students",
+      "upgrade":"upgrade Students"
     },
     "parents": "Parents",
     "parents_sub": {

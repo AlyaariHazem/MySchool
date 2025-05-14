@@ -9,10 +9,11 @@ import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../../core/services/account.service';
 import { StudentAccounts } from '../../core/models/accounts.model';
 import { VoucherService } from '../../core/services/voucher.service';
-import { Voucher, VoucherAdd } from '../../core/models/voucher.model';
+import { Voucher, VoucherAddUpdate } from '../../core/models/voucher.model';
 import { FileService } from '../../../../core/services/file.service';
 import { VouchersGuardian } from '../../core/models/vouchers-guardian.model';
-import { PayBy } from '../../core/models/payBy.model';
+import { IpaymentMethods } from '../../core/models/paymentMethods.model';
+import { PAYMENTMETHODS } from '../../core/data/paymentMethods';
 
 
 @Component({
@@ -37,7 +38,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   attachments: string[] = [];
   files: File[] = [];
   selectedAccount!: StudentAccounts;
-  payBy!: PayBy;
+  payBy!: IpaymentMethods;
   voucherID: number | undefined;
   vouchersGuardian: VouchersGuardian[] = [];
 
@@ -47,15 +48,12 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   voucherAdded = false; // New flag for success
   formSubmitted = false; // Track if form is submitted
 
-  paymentMethods: PayBy[] = [
-    { label: 'Cash', value: 'cash' },
-    { label: 'الكريمي', value: 'visa' }
-  ];
+  paymentMethods:IpaymentMethods[]=PAYMENTMETHODS;
 
   constructor(private formBuilder: FormBuilder, private cdr: ChangeDetectorRef,
     private toastr: ToastrService) {
     this.formGroup = this.formBuilder.group({
-      voucherID: ['', Validators.required],
+      voucherID: [''],
       receipt: [''],
       hireDate: ['', Validators.required], // format the date here
       note: [''],
@@ -69,12 +67,12 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   addVoucher(formGroup: FormGroup) {
     // Ensure the form is valid before proceeding
     if (formGroup.invalid) {
-      console.log('Form is invalid');
+      console.log('Form is invalid',this.formGroup.value);
       return;
     }
     console.log('formGroup', formGroup.value);
     // Create the voucher data object
-    const voucherData: VoucherAdd = {
+    const voucherData: VoucherAddUpdate = {
       receipt: formGroup.value.receipt,
       hireDate: formGroup.value.hireDate,
       note: formGroup.value.note,
@@ -91,7 +89,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
       this.voucherAdded = true; // Set the flag to true on success
       this.formSubmitted = true; // Mark the form as submitted
 
-      this.uploadFiles(this.voucherID!);// I want to upload file withe voucherID but it is being undefined how can do that
+      this.uploadFiles(this.voucherID!);
     });
     console.log('Voucher Data:', voucherData);
     // Optionally reset the form after submission
@@ -146,7 +144,9 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
 
   printVoucher() {
     const page = document.getElementById('reportVoucher');
+    const header = document.getElementById('header');
     if (!page) { return; }
+    if (!header) { return; }
   
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
       .filter((el: Element) => el.getAttribute('href') !== 'assets/print.css')
@@ -167,11 +167,13 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
         <style>
         
           @media print {
+           .print{display:none;}
             body{margin:0;direction:rtl;font-family:"Cairo","Tahoma",sans-serif}
-            .report,*{letter-spacing:0!important}   /* إبقاء العربية متصلة */
+            .report,*{letter-spacing:0!important}
           }
         </style>
       </head><body dir="rtl">
+        ${header.outerHTML}
         ${page.outerHTML}
       </body></html>
     `);
@@ -223,7 +225,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
         studentID: this.voucherData.accountName
       });
     }
-
+    
     if (this.voucherData == undefined)
       this.formGroup.reset({
         hireDate: new Date().toISOString().split('T')[0]
@@ -256,7 +258,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
       this.toastr.error('Please fill in all fields.');
       return;
     }
-    const updatedVoucher: VoucherAdd = {
+    const updatedVoucher: VoucherAddUpdate = {
       receipt: this.formGroup.value.receipt,
       hireDate: this.formGroup.value.hireDate,
       note: this.formGroup.value.note,
@@ -308,7 +310,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
     popup.document.write(`
       <html><head>
       <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-      <title>prinat ${this.selectedAccount.studentName+"_"+this.selectedAccount.studentID}</title>
+      <title>prinat ${this.selectedAccount.accountName+"_"+this.selectedAccount.studentID}</title>
         ${base}
         ${links}
         <style>

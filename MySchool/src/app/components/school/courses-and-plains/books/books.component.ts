@@ -1,11 +1,12 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
+import { ToastrService } from 'ngx-toastr';
 
 import { LanguageService } from '../../../../core/services/language.service';
 import { SubjectService } from '../../core/services/subject.service';
 import { Subjects } from '../../core/models/subjects.model';
-import { Paginates } from '../../core/models/Pagination.model';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-books',
@@ -13,119 +14,116 @@ import { Paginates } from '../../core/models/Pagination.model';
   styleUrls: ['./books.component.scss', './../../../../shared/styles/style-table.scss']
 })
 export class BooksComponent implements OnInit {
-  subjectService = inject(SubjectService);
-  languageService = inject(LanguageService);
+  /* ───────── injections ───────── */
+  private subjectService = inject(SubjectService);
+  private languageService = inject(LanguageService);
+  private toastr = inject(ToastrService);
 
+  /* ───────── data ───────── */
   subjects: Subjects[] = [];
-  paginates!: Paginates;
-  editMode: boolean = false;
-  search: any;
+  totalRecords = 0;
 
-  subjectData: Subjects = {
-    subjectName: '',
-    subjectReplacement: '',
-    note: '',
-    hireDate: ''
-  };
+  /* paginator state (lazy-load from server) */
+  first = 0;
+  rows = 4;
 
-  first: number = 0;
-  rows: number = 4;
+  /* form helpers */
+  editMode = false;
+  subjectData: Subjects = { subjectName: '', subjectReplacement: '', note: '', hireDate: '' };
 
-  constructor(public dialog: MatDialog) {}
+  constructor(public dialog: MatDialog) { }
 
+  /* ───────── lifecycle ───────── */
   ngOnInit(): void {
-    this.updatePaginatedData();
+    this.loadPage();        // first page
     this.languageService.currentLanguage();
   }
 
-  addSubject(): void {
-    if (!this.subjectData.subjectName || this.subjectData.subjectName.trim() === '') {
-      console.log('اسم الكتاب مطلوب');
+  /* ───────── CRUD ───────── */
+  addSubject(form: NgForm): void {
+    if (!this.subjectData.subjectName?.trim()) {
+      this.toastr.warning('اسم الكتاب مطلوب');
       return;
     }
-
-    const newSubject: Subjects = {
-      ...this.subjectData,
-      hireDate: new Date().toISOString()
-    };
-
-    this.subjectService.addSubject(newSubject).subscribe({
-      next: (res) => {
+  
+    const dto: Subjects = { ...this.subjectData, hireDate: new Date().toISOString() };
+  
+    this.subjectService.addSubject(dto).subscribe({
+      next: res => {
         if (res.isSuccess) {
-          this.subjects.push(res.result);
-          this.updatePaginatedData();
-          this.resetForm();
+          this.toastr.success('تمت إضافة الكتاب');
+          this.loadPage();
+          this.resetForm(form);
         }
       },
-      error: () => console.error('فشل في إضافة الكتاب')
+      error: () => this.toastr.error('فشل في إضافة الكتاب')
     });
   }
+  
 
-  updateSubject(): void {
-    const subjectID = this.subjectData.subjectID;
+  updateSubject(form:NgForm): void {
+    if (!this.subjectData.subjectID) return;
 
-    if (!subjectID) {
-      console.log('subjectID is missing!');
-      return;
-    }
-
-    this.subjectService.updateSubject(subjectID, this.subjectData).subscribe({
-      next: (res) => {
+    this.subjectService.updateSubject(this.subjectData.subjectID, this.subjectData).subscribe({
+      next: res => {
         if (res.isSuccess) {
-          this.subjects = this.subjects.map(subj =>
-            subj.subjectID === subjectID ? { ...subj, ...this.subjectData } : subj
-          );
-          this.updatePaginatedData();
-          this.resetForm();
+          this.toastr.success('تم التعديل الكتاب بنجاح');
+          this.loadPage();
+          this.resetForm(form);
         }
       },
-      error: () => console.error('فشل في تحديث الكتاب')
+      error: () => this.toastr.error('فشل في التعديل')
     });
-  }
-
-  editSubject(subject: Subjects): void {
-    this.editMode = true;
-    this.subjectData = { ...subject }; // نسخة مستقلة
   }
 
   deleteSubject(id: number): void {
     this.subjectService.deleteSubject(id).subscribe({
-      next: (res) => {
+      next: res => {
         if (res.isSuccess) {
-          this.subjects = this.subjects.filter(subject => subject.subjectID !== id);
-          this.updatePaginatedData();
+          this.toastr.success(' تم الحذف الكتاب بنجاح');
+          this.loadPage();
         }
       },
-      error: () => console.error('فشل في حذف الكتاب')
+      error: () => this.toastr.error('فشل في الحذف')
     });
   }
 
-  updatePaginatedData(): void {
+  editSubject(row: Subjects): void {
+    this.editMode = true;
+    this.subjectData = { ...row };   // deep copy
+  }
+
+  /* ───────── pagination ───────── */
+  handlePageChange(evt: PaginatorState): void {
+    this.first = evt.first ?? 0;
+    this.rows = evt.rows ?? 4;
+    this.loadPage();
+  }
+
+  private loadPage(): void {
     const page = this.first / this.rows + 1;
-    this.subjectService.getPaginatedSubjects(page, this.rows).subscribe({
-      next: (res) => {
-        if (res.isSuccess) {
-          this.paginates = res.result;
-          this.subjects = res.result.data;
-        }
-      },
-      error: () => console.error('فشل في تحميل البيانات')
-    });
+
+    this.subjectService
+      .getPaginatedSubjects(page, this.rows)
+      .subscribe({
+        next: res => {
+          if (res.isSuccess && res.result) {
+            this.subjects = res.result.data;
+            this.totalRecords = res.result.totalCount;
+          } else {
+            this.subjects = [];
+            this.totalRecords = 0;
+          }
+        },
+        error: () => this.toastr.error('فشل في تحميل البيانات')
+      });
   }
 
-  onPageChange(event: PaginatorState): void {
-    this.first = event.first || 0;
-    this.rows = event.rows || 4;
-    this.updatePaginatedData();
-  }
-
-  resetForm(): void {
-    this.subjectData = {
-      subjectName: '',
-      subjectReplacement: '',
-      note: '',
-      hireDate: ''
-    };
+  /* ───────── utils ───────── */
+  resetForm(form:NgForm): void {
+    this.subjectData = { subjectName: '', subjectReplacement: '', note: '', hireDate: '' };
     this.editMode = false;
+    form.reset();
+
   }
 }

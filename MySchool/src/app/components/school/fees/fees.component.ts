@@ -37,7 +37,7 @@ export class FeesComponent {
   }
 
   ngOnInit(): void {
-    this.refreshVouchers();
+    this.getAllVouchers();
 
     this.updateDisplayedStudents(); // Initialize the displayed students
     this.languageService.currentLanguage();
@@ -49,7 +49,7 @@ export class FeesComponent {
   }
   ngOnDestroy(): void {
   }
-  refreshVouchers() {
+  getAllVouchers() {
     this.voucherService.getAll().subscribe({
       next: (res) => {
         if (!res.isSuccess) {
@@ -111,7 +111,7 @@ export class FeesComponent {
           return;
         }
         this.toastr.success(res.result || 'Voucher deleted successfully.');
-        this.refreshVouchers();
+        this.getAllVouchers();
       },
       error: err => {
         this.toastr.error('Server error occurred while deleting voucher.');

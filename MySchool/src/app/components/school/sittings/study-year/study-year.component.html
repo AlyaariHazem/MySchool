@@ -3,12 +3,13 @@
     <h2 class="school">العام الدارسي</h2>
     <div class="container">
       <div class="tabcontent">
-        <p-button class="showFee" variant="outlined" severity="success" (onClick)="showDialogAddYear()" label="+ سنة جديدة" />
+        <p-button class="showFee" variant="outlined" severity="success" (onClick)="showDialogAddYear()"
+          label="+ سنة جديدة" />
 
         <!-- Dialog for adding a new year -->
-        <p-dialog header="إضافة سنة" [modal]="true" styleClass="year-dialog" [(visible)]="visible" [style]="{ width: '50rem' }"
-          [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
-          
+        <p-dialog header="إضافة سنة" [modal]="true" styleClass="year-dialog" [(visible)]="visible"
+          [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
+
           <app-new-year (yearAdded)="handleYearAdded($event)"></app-new-year>
         </p-dialog>
 
@@ -57,13 +58,16 @@
                           aria-expanded="false">
                           <i class="fas fa-ellipsis-h"></i>
                         </button>
-                        <div class="dropdown-menu dropdown-menu-left">
-                          <a class="dropdown-item">
-                            <i class="bi bi-pencil-square IconEdit"></i>تعديل
+                        <div class="dropdown-menu" dir="rtl">
+                          <a class="dropdown-item d-flex align-items-center gap-2">
+                            <i class="pi pi-file-edit text-primary"></i>
+                            <span>تعديل</span>
                           </a>
-                          <div role="separator" class="dropdown-divider"></div>
-                          <a class="dropdown-item" (click)="deleteYear(year.yearID)">
-                            <i class="bi bi-trash IconDelete"></i>حذف
+
+                          <div class="dropdown-divider my-1"></div>
+                          <a class="dropdown-item d-flex align-items-center gap-2" (click)="deleteYear(year.yearID)">
+                            <i class="pi pi-trash text-danger"></i>
+                            <span>حذف</span>
                           </a>
                         </div>
                       </div>
@@ -73,8 +77,8 @@
               </tbody>
             </table>
           </mat-card>
-          <p-paginator  (onPageChange)="onPageChange($event)" [first]="first"
-            [rows]="rows" [totalRecords]="years.length" [rowsPerPageOptions]="[4, 8, 16]" />
+          <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="years.length"
+            [rowsPerPageOptions]="[4, 8, 16]" />
         </div>
       </div>
     </div>

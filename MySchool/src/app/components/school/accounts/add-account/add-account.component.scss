@@ -20,7 +20,7 @@ form {
 }
 .save {
   position: absolute;
-  right: 9rem;
+  left: 9rem;
   top: 1rem;
   background-color: #12a212;
 }
@@ -103,7 +103,7 @@ button:hover {
   background-color: #0056b3;
 }
 
-@media (max-width: 768px) {
+@media (width<768px) {
   .container {
     padding: 15px;
   }
@@ -122,7 +122,7 @@ button:hover {
   }
 
   button {
-    width: 100%;
+    width: 19%;
     text-align: center;
   }
 }

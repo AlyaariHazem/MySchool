@@ -30,6 +30,7 @@
     "@ngx-translate/http-loader": "16.0.1",
     "@popperjs/core": "2.11.8",
     "@primeng/themes": "18.0.2",
+    "chart.js": "^4.4.9",
     "html2pdf.js": "0.10.3",
     "ngx-toastr": "18.0.0",
     "ngx-translate-messageformat-compiler": "7.1.0",

@@ -21,6 +21,7 @@ export class StudyYearComponent implements OnInit {
   max = 2;
   years: Year[] = [];
   viewYear: Year[] = [];
+  isLoading: boolean = true;
 
   yearService = inject(YearService);
   languageService = inject(LanguageService);
@@ -41,6 +42,7 @@ export class StudyYearComponent implements OnInit {
     this.yearService.getAllYears().subscribe(res => {
       this.years = res;
       this.viewYear = this.years;
+      this.isLoading=false;
       this.updatePaginatedData();
     });
   }

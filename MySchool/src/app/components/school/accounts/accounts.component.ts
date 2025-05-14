@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { LanguageService } from '../../../core/services/language.service';
 import { AccountService } from '../core/services/account.service';
 import { Account } from '../core/models/accounts.model';
+import { PaginatorService } from '../../../core/services/paginator.service';
 import { PaginatorState } from 'primeng/paginator';
 
 interface AccountType {
@@ -23,9 +24,11 @@ export class AccountsComponent implements OnInit {
   visible: boolean = false;
 
   accountService = inject(AccountService);
+  paginatorService = inject(PaginatorService);
 
   accounts: Account[] = [];
   EditAccount: Account | undefined;
+  isLoading: boolean = true;
 
   showDialog() {
     this.visible = true;
@@ -62,34 +65,24 @@ export class AccountsComponent implements OnInit {
           this.displayedaccounts = [];
           return;
         }
-  
+        this.isLoading=false;
         this.accounts = res.result;
-        this.updatePaginatedData();
+        this.displayedaccounts = this.paginatorService.pageSlice(this.accounts);
       },
       error: (err) => {
         this.toastr.error('Server error occurred while fetching accounts.');
         console.error(err);
         this.accounts = [];
+        this.isLoading=false;
         this.displayedaccounts = [];
       }
     });
   }
   
-    isLoading: boolean = true; // Loading state for the component
-    first: number = 0; // Current starting index
-    rows: number = 4; // Number of rows per page
-    updatePaginatedData(): void {
-      const start = this.first;
-      const end = this.first + this.rows;
-      this.displayedaccounts = this.accounts.slice(start, end);
-    }
-  
-    // Handle page change event from PrimeNG paginator
-    onPageChange(event: PaginatorState): void {
-      this.first = event.first || 0; // Default to 0 if undefined
-      this.rows = event.rows || 4; // Default to 4 rows
-      this.updatePaginatedData();
-    }
+  handlePageChange(event: PaginatorState): void {
+    this.paginatorService.onPageChange(event);
+    this.displayedaccounts = this.paginatorService.pageSlice(this.accounts);
+  }
 
   changeState(student: Account) {
     student.state = !student.state;

@@ -1,4 +1,3 @@
-// ✅ Program.cs
 using System.Text;
 using Backend;
 using Backend.Data;

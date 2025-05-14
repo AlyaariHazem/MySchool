@@ -1,11 +1,17 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
+import { LoaderService } from '../../../core/services/loader.service';
 
 @Component({
   selector: 'app-progress-spinner',
   templateUrl: './progress-spinner.component.html',
-  styleUrl: './progress-spinner.component.scss'
+  styleUrls: ['./progress-spinner.component.scss']
 })
 export class ProgressSpinnerComponent {
-@Input() visible: boolean = false;
+  visible = false;
 
+  constructor(private loaderService: LoaderService) {
+    this.loaderService.loading$.subscribe(status => {
+      this.visible = status;
+    });
+  }
 }

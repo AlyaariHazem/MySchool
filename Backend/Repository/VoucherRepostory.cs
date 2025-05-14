@@ -45,6 +45,7 @@ public class VoucherRepository : IVoucherRepository
             HireDate = v.HireDate,
             AccountName = v.AccountStudentGuardians.Accounts.AccountName,
             AccountAttachments = v.Attachments.Count,
+            AccountStudentGuardianID = v.AccountStudentGuardianID,
             StudentID = v.AccountStudentGuardians.StudentID,
         }).ToList();
         return vouchersDTO;

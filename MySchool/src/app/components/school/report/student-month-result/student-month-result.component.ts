@@ -6,11 +6,13 @@ import { ToastrService } from 'ngx-toastr';
 import { MonthlyResultService } from '../../core/services/monthly-resultt.service';
 import { MonthlyResult } from '../../core/models/monthly-result.model';
 import { ClassService } from '../../core/services/class.service';
-import { Month } from '../../core/models/month.model';
+import { IMonth } from '../../core/models/month.model';
 import { DivisionService } from '../../core/services/division.service';
 import { divisions } from '../../core/models/division.model';
 import { PaginatorState } from 'primeng/paginator';
-import { Terms } from '../../core/models/term.model';
+import { ITerm } from '../../core/models/term.model';
+import { MONTHS } from '../../core/data/months';
+import { TERMS } from '../../core/data/terms';
 
 
 
@@ -21,12 +23,14 @@ import { Terms } from '../../core/models/term.model';
 })
 export class StudentMonthResultComponent implements OnInit {
   form: FormGroup = new FormGroup({});
-  monthlyResults!: MonthlyResult[];
+  monthlyResults: MonthlyResult[] = [];
   private title = 'Student Month Result';
   AllClasses: any;
-  filteredMonths: Month[] = [];
+  filteredMonths: IMonth[] = [];
   divisions: divisions[] = [];
   fiteredDivisions: divisions[] = [];
+  terms: ITerm[] = TERMS;
+  months: IMonth[] = MONTHS;
 
   yearId = Number(localStorage.getItem('yearId'));
   divisionSerivce = inject(DivisionService);
@@ -34,61 +38,11 @@ export class StudentMonthResultComponent implements OnInit {
   monthlyResult = inject(MonthlyResultService);
   private toastr = inject(ToastrService);
 
-  getAllMonthlyGradesReport(termId = 1, monthId = 5, classId = 1, divisionId = 1, studentId: number = 0): void {
-    this.monthlyResult.getMonthlyGradesReport(this.yearId, termId, monthId, classId, divisionId, studentId).subscribe({
-      next: (res) => {
-        if (!res.isSuccess) {
-          this.toastr.warning(res.errorMasseges[0] || 'Unexpected error');
-          this.monthlyResults = [];
-          return;
-        }
-        this.monthlyResults = res.result;
-        this.toastr.success('the data fetched successful.');
-      },
-      error: (err) => {
-        this.toastr.warning('لا يوجد طلاب في هذا!');
-        console.error(err);
-      }
-    });
-  }
-  terms: Terms[] = [
-    { termID: 1, name: 'الاول' },
-    { termID: 2, name: 'الثاني' },
-  ];
-  months: Month[] = [
-    { id: 5, name: 'مايو', termId: 1 },
-    { id: 6, name: 'يونيو', termId: 1 },
-    { id: 7, name: 'يوليو', termId: 1 },
-    { id: 8, name: 'أغسطس', termId: 1 },
-    { id: 9, name: 'سبتمبر', termId: 2 },
-    { id: 10, name: 'أكتوبر', termId: 2 },
-    { id: 11, name: 'نوفمبر', termId: 2 },
-    { id: 12, name: 'ديسمبر', termId: 2 },
-  ];
-
-  getTitle(): string {
-    return this.title;
-  }
-  getAllClasses(): void {
-    this.classService.GetAllNames().subscribe({
-      next: (res) => {
-        if (!res.isSuccess) {
-          this.toastr.warning(res.errorMasseges[0] || 'Failed to load classes.');
-          return;
-        }
-        this.AllClasses = res.result;
-      },
-      error: (err) => {
-        this.toastr.error('Server error occurred');
-        console.error(err);
-      }
-    })
-  }
   SchoolLogo = localStorage.getItem('SchoolImageURL');
   ngOnInit(): void {
-    this.getAllMonthlyGradesReport();
     this.getAllClasses();
     this.getAllDivision();
+    this.getAllMonthlyGradesReport();
     this.form = new FormBuilder().group({
       termId: [1, Validators.required],
       classId: [1, Validators.required],
@@ -103,6 +57,40 @@ export class StudentMonthResultComponent implements OnInit {
       this.fiteredDivisions = this.divisions.filter(d => d.classID === classId);
     });
     this.form.reset();
+  }
+
+  getAllMonthlyGradesReport(termId = 1, monthId = 5, classId = 1, divisionId = 1, studentId: number = 0): void {
+    this.monthlyResult.getMonthlyGradesReport(this.yearId, termId, monthId, classId, divisionId, studentId).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Unexpected error');
+          this.monthlyResults = [];
+          return;
+        }
+        this.monthlyResults = res.result;
+      },
+      error: (err) => {
+        this.toastr.warning('لا يوجد طلاب في هذا!');
+        console.error(err);
+        this.monthlyResults = [];
+      }
+    });
+  }
+
+  getAllClasses(): void {
+    this.classService.GetAllNames().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to load classes.');
+          return;
+        }
+        this.AllClasses = res.result;
+      },
+      error: (err) => {
+        this.toastr.error('Server error occurred');
+        console.error(err);
+      }
+    })
   }
   getAllDivision(): void {
     this.divisionSerivce.GetAll().subscribe({
@@ -121,8 +109,8 @@ export class StudentMonthResultComponent implements OnInit {
     const selectedClass = this.form.get('classId')?.value;
     const selectedTerm = this.form.get('termId')?.value;
     const selectedMonth = this.form.get('monthId')?.value;
-    const selectedStudent = this.form.get('studentId')?.value||0;
-    this.getAllMonthlyGradesReport(selectedTerm, selectedMonth, selectedClass, selectedDivision,selectedStudent);
+    const selectedStudent = this.form.get('studentId')?.value || 0;
+    this.getAllMonthlyGradesReport(selectedTerm, selectedMonth, selectedClass, selectedDivision, selectedStudent);
 
   }
   printReport(subj: MonthlyResult): void {

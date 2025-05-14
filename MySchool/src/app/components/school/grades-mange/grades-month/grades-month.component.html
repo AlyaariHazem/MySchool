@@ -1,18 +1,13 @@
-<!-- Enhanced Loading Spinner -->
-<div *ngIf="isLoading" class="card flex justify-center">
-    <app-progress-spinner [visible]="visible"></app-progress-spinner>
-</div>
-
 
 <div id="id01" class="modal-container" [attr.dir]="dir" [ngClass]="{'English':dir==='ltr'}">
     <h2 class="school">الدرجات الشهرية</h2>
 
     <form [formGroup]="form">
-        <div class="group group2">
+        <div [ngClass]="{'group group2':!hiddenFrom,'displayNone':hiddenFrom}">
             <div class="form-control">
                 <p-floatlabel class="w-full md:w-56" variant="on">
                     <p-select formControlName="selectedClass" inputId="Class" [options]="AllClasses"
-                        optionLabel="className"  (onChange)="selectClass($event.value)" optionValue="classID"
+                        optionLabel="className" (onChange)="selectClass($event.value)" optionValue="classID"
                         [checkmark]="true" [editable]="true" [showClear]="true" />
                     <label for="Class">إختار الصف</label>
                 </p-floatlabel>
@@ -31,30 +26,29 @@
             <div class="form-control">
                 <p-floatlabel class="w-full md:w-56" variant="on">
                     <p-select [options]="curriculmsPlan" optionValue="subjectID" formControlName="selectedSubject"
-                    optionLabel="subjectName" [editable]="true" [showClear]="true"
-                    (onChange)="selectSubject(form.get('selectedSubject')?.value)" inputId="subject" />
+                        optionLabel="subjectName" [editable]="true" [showClear]="true"
+                        (onChange)="selectSubject(form.get('selectedSubject')?.value)" inputId="subject" />
                     <label for="subject">إختار المادة</label>
                 </p-floatlabel>
             </div>
 
             <div class="form-control">
                 <p-floatlabel class="w-full md:w-56" variant="on">
-                    <p-select [options]="filteredMonths" formControlName="selectedMonth" optionValue="id" [checkmark]="true"
-                    optionLabel="name" [editable]="true" [showClear]="true"
-                    (onChange)="selectMonth(form.get('selectedMonth')?.value)" inputId="month" />
+                    <p-select [options]="filteredMonths" formControlName="selectedMonth" optionValue="id"
+                        [checkmark]="true" optionLabel="name" [editable]="true" [showClear]="true"
+                        (onChange)="selectMonth(form.get('selectedMonth')?.value)" inputId="month" />
                     <label for="month">إختار الشهر</label>
                 </p-floatlabel>
             </div>
         </div>
-        <p-button class="adding school-btn" variant="outlined" severity="success" (click)="saveAllGrades()"
-            label="حفظ التغيرات" />
+        <p-button class="adding" [ngClass]="{'school-btn':!hiddenFrom,'school-btn-Hidden':hiddenFrom}"
+            variant="outlined" severity="success" (click)="saveAllGrades()" label="حفظ التغيرات" />
         <div class="mange">
-            <span class="border" (click)="toggleHidden()"><i
+            <span class="border p-1" (click)="toggleHidden()" pTooltip="Show or Hide the form" showDelay="200"><i
                     [class]="hidden?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
+            <span class="border p-1" (click)="toggleHiddenFrom()" pTooltip="Show or Hide search form" showDelay="200"><i
+                    hideDelay="300" [class]="hiddenFrom?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
         </div>
-
-        <p-chips class="chipsOne" [max]="max" placeholder="ابحث هنا...">
-        </p-chips>
     </form>
 
     <div class="table-container" [style]="hidden ? 'display: none' : 'display: block'">
@@ -87,7 +81,8 @@
                             </td>
 
                             <td>{{ CurrentStudent.studentID }}</td>
-                            <td><img class="w-3rem h-3rem image" src="{{CurrentStudent.studentURL}}" alt="">{{ CurrentStudent.studentName }}</td>
+                            <td><img class="w-3rem h-3rem image" src="{{CurrentStudent.studentURL}}" alt="">{{
+                                CurrentStudent.studentName }}</td>
                             <td>{{ CurrentStudent.subjectName }}</td>
 
                             @for (grade of CurrentStudent.grades; track $index) {
@@ -159,7 +154,8 @@
                         <tr>
                             <td>{{ $index+1 }}</td>
                             <td>{{student.studentID}}</td>
-                            <td class="student-name-column text-right"><img class="w-3rem h-3rem image" src="{{student.studentURL}}" alt=""> {{student.studentName}}</td>
+                            <td class="student-name-column text-right"><img class="w-3rem h-3rem image"
+                                    src="{{student.studentURL}}" alt=""> {{student.studentName}}</td>
                             <td>{{student.subjectName}}</td>
                             @for (grade of student.grades; track $index) {
                             <td><input class="form-control input1 no-spinner" type="number" [(ngModel)]="grade.maxGrade"
@@ -190,7 +186,7 @@
                             </td>
                         </tr>
                         }@empty {
-                            <div class="empty">لا يوجد طلاب في هذا الفصل</div>
+                        <div class="empty">لا يوجد طلاب في هذا الفصل</div>
                         }
                     </tbody>
                 </table>

@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
 import { SchoolInfoComponent } from '../school-info/school-info.component';
 import { SchoolService } from '../../../core/services/school.service';
 import { School } from '../../../core/models/school.modul';
+import { PaginatorService } from '../../../core/services/paginator.service';
 import { PaginatorState } from 'primeng/paginator';
 
 @Component({
@@ -13,24 +14,29 @@ import { PaginatorState } from 'primeng/paginator';
 })
 export class SchoolsComponent implements OnInit {
 
+  paginatorService = inject(PaginatorService);
   schools: School[] = [];
   paginatedSchools: School[] = [];
   constructor(private schoolService: SchoolService, public dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.getAllSchools();
-    
+
   }
 
   getAllSchools(): void {
     this.schoolService.getAllSchools().subscribe(
       res => {
         this.schools = res;
-        this.updatePaginatedData();
+        this.paginatedSchools = this.paginatorService.pageSlice(this.schools);
       },
     );
   }
 
+  handlePageChange(event: PaginatorState): void {
+      this.paginatorService.onPageChange(event);
+      this.paginatedSchools = this.paginatorService.pageSlice(this.schools);
+    }
   displayedColumns: string[] = ['schoolName', 'schoolNameEn', 'schoolCreaDate', 'schoolType', 'city', 'schoolPhone', 'email', 'actions'];
   //how can I fix this to wrok fine?
   openAddSchoolForm() {
@@ -64,17 +70,5 @@ export class SchoolsComponent implements OnInit {
       });
     }
   }
-  first: number = 0;
-  rows: number = 4;
-  updatePaginatedData(): void {
-    const start = this.first;
-    const end = this.first + this.rows;
-    this.paginatedSchools = this.schools.slice(start, end);
-  }
 
-  onPageChange(event: PaginatorState) {
-    this.first = event.first || 0; // Default to 0 if undefined
-    this.rows = event.rows!;
-    this.updatePaginatedData();
-  }
 }

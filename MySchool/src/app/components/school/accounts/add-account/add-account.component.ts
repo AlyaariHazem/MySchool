@@ -4,7 +4,8 @@ import { ToastrService } from 'ngx-toastr';
 
 import { Account } from '../../core/models/accounts.model';
 import { AccountService } from '../../core/services/account.service';
-import { PayBy } from '../../core/models/payBy.model';
+import { IpaymentMethods } from '../../core/models/paymentMethods.model';
+import { PAYMENTMETHODS } from '../../core/data/paymentMethods';
 
 
 @Component({
@@ -18,6 +19,8 @@ export class AddAccountComponent implements OnInit {
   @Input() account?: Account;
   @Output() saved = new EventEmitter<Account>();
 
+  paymentMethods:IpaymentMethods[]=PAYMENTMETHODS;
+  
   form = this.fb.group({
     accountName: ['', Validators.required],
     parentAccount: [null],
@@ -41,10 +44,6 @@ export class AddAccountComponent implements OnInit {
     this.form.patchValue({ createdDate: today });
   }
 
-  paymentMethods: PayBy[] = [
-    { label: 'Cash', value: 'cash' },
-    { label: 'الكريمي', value: 'visa' }
-  ];
   accountType = [
     { name: 'Guardain', parentAccount: 1 },
     { name: 'School', parentAccount: 2 },

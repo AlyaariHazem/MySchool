@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 import { StudentFormStoreService } from '../../../core/store/student-form-store.service';
+import { FileStoreService } from '../../../core/store/file-store.service';
 
 @Component({
   selector: 'app-document',
@@ -14,6 +15,7 @@ export class DocumentComponent implements OnInit {
   filePreviews: { name: string; url: string }[] = [];
 
   private formStore = inject(StudentFormStoreService);
+  private fileStore =inject(FileStoreService);
 
   ngOnInit(): void {
     const fullForm = this.formStore.getForm();
@@ -45,7 +47,7 @@ export class DocumentComponent implements OnInit {
 
         const fileURL = URL.createObjectURL(selectedFile);
         this.filePreviews.push({ name: selectedFile.name, url: fileURL });
-        this.formStore.setFiles(this.selectedFiles);
+        this.fileStore.setFiles(this.selectedFiles);
         
         // Save file names to form state
         const fileNames = this.filePreviews.map(f => f.name);

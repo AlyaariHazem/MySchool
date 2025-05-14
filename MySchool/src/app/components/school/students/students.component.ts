@@ -1,7 +1,7 @@
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Component, inject, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { PaginatorState } from 'primeng/paginator';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, inject, OnChanges, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { PaginatorState } from 'primeng/paginator';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
 import { DialogService } from 'primeng/dynamicdialog';
@@ -14,6 +14,7 @@ import { LanguageService } from '../../../core/services/language.service';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { GuardianService } from '../core/services/guardian.service';
 import { EditParentsComponent } from '../parents/edit-parents/edit-parents.component';
+import { PaginatorService } from '../../../core/services/paginator.service';
 
 @Component({
   selector: 'app-students',
@@ -27,26 +28,11 @@ export class StudentsComponent implements OnInit, OnChanges {
   studentService = inject(StudentService);
   guardianService = inject(GuardianService);
   languageService = inject(LanguageService);
+  paginatorService = inject(PaginatorService);
 
   Students: StudentDetailsDTO[] = []
-  values = new FormControl<string[] | null>(null);
-  paginatedStudents: StudentDetailsDTO[] = []; // Paginated data
-  max = 2;
-  isLoading: boolean = true; // Loading state for the component
-  first: number = 0; // Current starting index
-  rows: number = 4; // Number of rows per page
-  updatePaginatedData(): void {
-    const start = this.first;
-    const end = this.first + this.rows;
-    this.paginatedStudents = this.Students.slice(start, end);
-  }
-
-  // Handle page change event from PrimeNG paginator
-  onPageChange(event: PaginatorState): void {
-    this.first = event.first || 0; // Default to 0 if undefined
-    this.rows = event.rows || 4; // Default to 4 rows
-    this.updatePaginatedData();
-  }
+  paginatedStudents: StudentDetailsDTO[] = [];
+  hiddenFrom: boolean = false;
 
   showGrid: boolean = false;
   showCulomn: boolean = true;
@@ -58,7 +44,10 @@ export class StudentsComponent implements OnInit, OnChanges {
     this.showCulomn = false;
     this.showGrid = true;
   }
-
+  handlePageChange(event: PaginatorState): void {
+    this.paginatorService.onPageChange(event);
+    this.paginatedStudents = this.paginatorService.pageSlice(this.Students);
+  }
   constructor(
     private formBuilder: FormBuilder,
     private toastr: ToastrService,
@@ -71,7 +60,10 @@ export class StudentsComponent implements OnInit, OnChanges {
       gradeName: ['', Validators.required],
     });
   }
-  ngOnChanges(changes: SimpleChanges): void {
+  toggleHidden() {
+    this.hiddenFrom = !this.hiddenFrom;
+  }
+  ngOnChanges(): void {
     this.languageService.currentLanguage();
     this.translationService.changeLanguage(this.languageService.langDir);
   }
@@ -90,8 +82,7 @@ export class StudentsComponent implements OnInit, OnChanges {
   getAllStudents(): void {
     this.studentService.getAllStudents().subscribe((res) => {
       this.Students = res;
-      this.isLoading = false;
-      this.updatePaginatedData(); // Initial slicing
+      this.paginatedStudents = this.paginatorService.pageSlice(this.Students);
     })
   }
   getStudentByID(id: number): void {
@@ -125,16 +116,14 @@ export class StudentsComponent implements OnInit, OnChanges {
         successMessage: 'Student deleted successfully'
       }
     });
-  
+
     ref.onClose.subscribe((confirmed: boolean) => {
       if (confirmed) {
         this.paginatedStudents = this.paginatedStudents.filter(s => s.studentID !== id);
       }
     });
   }
-  
 
-  // students.component.ts
   EditStudentDialog(id: number): void {
     this.studentService.getStudentById(id).subscribe((res) => {
       console.log("Editing student data:", res);
@@ -156,11 +145,11 @@ export class StudentsComponent implements OnInit, OnChanges {
         if (result && result.studentID) {
           this.paginatedStudents = this.paginatedStudents.map((student) =>
             student.studentID === result.studentID ? { ...student, ...result } : student
-        );
-          this.updatePaginatedData(); // refresh visible list if using pagination
+          );
+          this.paginatedStudents = this.paginatorService.pageSlice(this.Students);
         }
       });
-      
+
     });
   }
   EditGuardianDialog(id: number): void {
@@ -184,11 +173,11 @@ export class StudentsComponent implements OnInit, OnChanges {
         if (result && result.studentID) {
           this.paginatedStudents = this.paginatedStudents.map((student) =>
             student.studentID === result.studentID ? { ...student, ...result } : student
-        );
-          this.updatePaginatedData(); // refresh visible list if using pagination
+          );
+          this.paginatedStudents = this.paginatorService.pageSlice(this.Students);
         }
       });
-      
+
     });
   }
 

@@ -1,16 +1,8 @@
-<!-- Enhanced Loading Spinner -->
-@if (isLoading){
-<div class="card flex justify-center">
-    <app-progress-spinner [visible]="visible"></app-progress-spinner>
-</div>
-}
-
-
 <div id="id01" class="modal-container" [attr.dir]="dir" [ngClass]="{'English':dir==='ltr'}">
     <h2 class="school">الدرجات الشهرية</h2>
 
     <form [formGroup]="form">
-        <div class="group group2">
+        <div  [ngClass]="{'group group2':!hiddenFrom,'displayNone':hiddenFrom}">
             <div class="form-control">
                 <p-floatlabel class="w-full md:w-56" variant="on">
                     <p-select formControlName="selectedClass" inputId="Class" [options]="AllClasses"
@@ -40,13 +32,15 @@
             </div>
 
         </div>
-        <p-button class="adding school-btn" variant="outlined" severity="success" (click)="saveAllGrades()"
-            label="حفظ التغيرات" />
+        <p-button class="adding" [ngClass]="{'school-btn':!hiddenFrom,'school-btn-Hidden':hiddenFrom}"
+            variant="outlined" severity="success" (click)="saveAllGrades()" label="حفظ التغيرات" />
         <div class="mange">
-            <span class="border" (click)="toggleHidden()"><i
+            <span class="border p-1" (click)="toggleHidden()" pTooltip="إخفاء او اظهار نموذج الدرجات" showDelay="200"><i
                     [class]="hidden?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
+            <span class="border p-1" (click)="toggleHiddenFrom()" pTooltip="إخفاء او اظهار أدوات البحث" showDelay="200"><i
+                    hideDelay="300" [class]="hiddenFrom?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
         </div>
-        
+
     </form>
 
     <div class="table-container" [style]="hidden ? 'display: none' : 'display: block'">

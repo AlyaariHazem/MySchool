@@ -8,14 +8,9 @@ import { ClassService } from '../../core/services/class.service';
 import { CurriculmsPlanService } from '../../core/services/curriculms-plan.service';
 import { CurriculmsPlanSubject } from '../../core/models/curriculmsPlans.model';
 import { Paginates } from '../../core/models/Pagination.model';
-import { TermGrades, TermlyGrade } from '../../core/models/term.model';
+import { ITerm, TermGrades, TermlyGrade } from '../../core/models/term.model';
 import { TermlyGradeService } from '../../core/services/termly-grade.service';
-
-interface Term {
-  name: string;
-  id: number;
-}
-
+import { TERMS } from '../../core/data/terms';
 
 @Component({
   selector: 'app-grades-term',
@@ -33,6 +28,7 @@ export class GradesTermComponent implements OnInit {
   termlyGradeService = inject(TermlyGradeService);
   classService = inject(ClassService);
 
+  terms: ITerm[] = TERMS;
   monthlyGrades: TermGrades[] = [];
   displayedStudents: TermlyGrade[] = [];
 
@@ -85,12 +81,6 @@ export class GradesTermComponent implements OnInit {
     this.updatePaginatedData();
   }
 
-  // Example data for dropdowns
-  terms: Term[] = [
-    { name: 'الأول', id: 1 },
-    { name: 'الثاني', id: 2 }
-  ];
-
   getAllClasses() {
     this.classService.GetAllNames().subscribe({
       next: (res) => {
@@ -116,7 +106,7 @@ export class GradesTermComponent implements OnInit {
           return;
         }
         // this.subjects = res.result;
-        this.subjects =[{subjectID:0,subjectName:'All'},...res.result];
+        this.subjects = [{ subjectID: 0, subjectName: 'All' }, ...res.result];
       },
       error: () => {
         this.toastr.error('Error fetching curriculum plans');
@@ -215,9 +205,14 @@ export class GradesTermComponent implements OnInit {
   }
 
   hidden: boolean = false;
+  hiddenFrom: boolean = false;
   toggleHidden() {
     this.hidden = !this.hidden;
   }
+  toggleHiddenFrom() {
+    this.hiddenFrom = !this.hiddenFrom;
+  }
+  
   first: number = 0;
   rows: number = 5;
 
@@ -241,12 +236,15 @@ export class GradesTermComponent implements OnInit {
   updatePaginatedData(): void {
     this.visible = true;
     this.isLoading = true;
-    this.termlyGradeService.getTermlyGradesReport(this.form.get('selectedTerm')?.value, this.yearID, this.form.get('selectedClass')?.value, this.form.get('selectedSubject')?.value, this.first / this.rows + 1, this.rows).subscribe((res) => {
+    this.termlyGradeService.getTermlyGradesReport(this.form.get('selectedTerm')?.value, this.yearID, this.form.get('selectedClass')?.value, this.form.get('selectedSubject')?.value, this.first / this.rows + 1, this.rows).subscribe(res => {
       this.paginates = res;
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
       this.isLoading = false;
       this.visible = false;
+      if (this.monthlyGrades.length == 0) {
+        this.toastr.info('No students found for the selected criteria.');
+      }
     });
   }
 

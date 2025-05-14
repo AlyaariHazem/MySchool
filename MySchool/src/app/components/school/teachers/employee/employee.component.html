@@ -15,11 +15,9 @@
         </p-tablist>
 
         <p-tabpanels [formGroup]="form">
-            <!-- معلومات الموظف -->
             <p-tabpanel value="0">
                 <div class="employee-form">
                     <div class="grid p-fluid">
-                        <!-- الاسم الأول -->
                         <div class="form-row col-12 md:col-6">
                             <p-floatLabel  variant="on">
                                 <input pInputText formControlName="firstName" id="firstName" type="text"
@@ -28,7 +26,6 @@
                             </p-floatLabel>
                         </div>
 
-                        <!-- الاسم الأخير -->
                         <div class="form-row col-12 md:col-6">
                             <p-floatLabel  variant="on">
                                 <input pInputText formControlName="lastName" id="lastName" type="text"
@@ -39,7 +36,6 @@
                     </div>
 
                     <div class="grid p-fluid">
-                        <!-- الجنس -->
                         <div class="form-row col-12 md:col-4">
                             <p-floatLabel  variant="on">
                                 <p-select formControlName="gender" [options]="genders" optionLabel="name"
@@ -49,7 +45,6 @@
                             </p-floatLabel>
                         </div>
 
-                        <!-- الوظيفة -->
                         <div class="form-row col-12 md:col-4">
                             <p-floatLabel  variant="on">
                                 <p-select formControlName="jopName" [options]="employeeTypes" optionLabel="name"
@@ -59,7 +54,6 @@
                             </p-floatLabel>
                         </div>
 
-                        <!-- تاريخ الميلاد -->
                         <div class="form-row col-12 md:col-4">
                             <p-floatLabel  variant="on">
                                 <input pInputText formControlName="dob" id="dob" type="date" class="w-full" />
@@ -70,10 +64,8 @@
                 </div>
             </p-tabpanel>
 
-            <!-- معلومات اختيارية -->
             <p-tabpanel value="1">
                 <div class="grid p-fluid">
-                    <!-- مكان الميلاد -->
                     <div class="col-12 md:col-6">
                         <p-floatLabel >
                             <input pInputText formControlName="birthPlace" id="birthPlace" type="text"
@@ -82,7 +74,6 @@
                         </p-floatLabel>
                     </div>
 
-                    <!-- العنوان -->
                     <div class="col-12 md:col-6">
                         <p-floatLabel  variant="on">
                             <input pInputText formControlName="address" id="address" type="text" placeholder=" " />
@@ -90,7 +81,6 @@
                         </p-floatLabel>
                     </div>
 
-                    <!-- رقم الهاتف -->
                     <div class="col-12 md:col-6">
                         <p-floatLabel  variant="on">
                             <input pInputText formControlName="mobile" id="mobile" type="text" placeholder=" " />
@@ -98,7 +88,6 @@
                         </p-floatLabel>
                     </div>
 
-                    <!-- البريد الإلكتروني -->
                     <div class="col-12 md:col-6">
                         <p-floatLabel  variant="on">
                             <input pInputText formControlName="email" id="email" type="email" placeholder=" " />

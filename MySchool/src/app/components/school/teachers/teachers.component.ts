@@ -10,11 +10,12 @@ import { LanguageService } from '../../../core/services/language.service';
 import { EmployeeComponent } from './employee/employee.component';
 import { EmployeeService } from '../core/services/employee.service';
 import { Employee } from '../core/models/employee.model';
+import { PaginatorService } from '../../../core/services/paginator.service';
 
 @Component({
   selector: 'app-teachers',
   templateUrl: './teachers.component.html',
-  styleUrls: ['./teachers.component.scss','./../../../shared/styles/style-table.scss'],
+  styleUrls: ['./teachers.component.scss', './../../../shared/styles/style-table.scss'],
 })
 export class TeachersComponent {
   form: FormGroup;
@@ -22,26 +23,12 @@ export class TeachersComponent {
   translationService = inject(TranslationService);
   employeeService = inject(EmployeeService);
   languageService = inject(LanguageService);
+  paginatorService = inject(PaginatorService);
 
   Employees: Employee[] = []
   paginated: Employee[] = []; // Paginated data
   max = 2;
   isLoading: boolean = true; // Loading state for the component
-  first: number = 0; // Current starting index
-  rows: number = 4; // Number of rows per page
-  DateNow: Date = new Date();
-  updatePaginatedData(): void {
-    const start = this.first;
-    const end = this.first + this.rows;
-    this.paginated = this.Employees.slice(start, end);
-  }
-
-  // Handle page change event from PrimeNG paginator
-  onPageChange(event: PaginatorState): void {
-    this.first = event.first || 0; // Default to 0 if undefined
-    this.rows = event.rows || 4; // Default to 4 rows
-    this.updatePaginatedData();
-  }
 
   showGrid: boolean = false;
   showCulomn: boolean = true;
@@ -54,6 +41,10 @@ export class TeachersComponent {
     this.showGrid = true;
   }
 
+  handlePageChange(event: PaginatorState): void {
+    this.paginatorService.onPageChange(event);
+    this.paginated = this.paginatorService.pageSlice(this.Employees);
+  }
   constructor(
     private formBuilder: FormBuilder,
     private toastr: ToastrService,
@@ -89,7 +80,7 @@ export class TeachersComponent {
           return;
         }
         this.Employees = res.result;
-        this.updatePaginatedData();
+        this.paginated = this.paginatorService.pageSlice(this.Employees);
         this.isLoading = false;
       }
     })
@@ -124,16 +115,16 @@ export class TeachersComponent {
 
     const dialogRef = this.dialog.open(EmployeeComponent, dialogConfig);
 
-    dialogRef.afterClosed().subscribe((result:Employee) => {
+    dialogRef.afterClosed().subscribe((result: Employee) => {
       if (result) {
         this.paginated = this.paginated.map(emp => emp.employeeID === result.employeeID ? result : emp);
         this.toastr.success('تم تعديل الطالب بنجاح');
       }
     });
   }
-  deleteEmployee(id:number,jobType:string): void {
-    this.employeeService.deleteEmployee(id,jobType).subscribe(res => {
-      this.paginated = this.paginated.filter(employee => employee.employeeID !==id);
+  deleteEmployee(id: number, jobType: string): void {
+    this.employeeService.deleteEmployee(id, jobType).subscribe(res => {
+      this.paginated = this.paginated.filter(employee => employee.employeeID !== id);
       console.log('Employee deleted successfully', res);
       this.toastr.success('تم حذف الموظف بنجاح');
     });

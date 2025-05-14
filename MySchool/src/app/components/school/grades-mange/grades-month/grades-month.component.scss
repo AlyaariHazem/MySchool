@@ -14,6 +14,9 @@
 .image{
   border-radius: 10rem;
 }
+.displayNone{
+  display:none;
+}
 .empty{
   position: absolute;
   top: 4rem;
@@ -79,6 +82,10 @@ form {
 .school-btn {
   position: relative;
   top: -6rem !important;
+}
+.school-btn-Hidden {
+  position: relative;
+  top: -2rem !important;
 }
 // this for form
 

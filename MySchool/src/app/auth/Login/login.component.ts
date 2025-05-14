@@ -23,6 +23,7 @@ export class LoginComponent {
   visible: boolean = false;
 
     showDialog() {
+      this.isLoading = true;
         this.visible = true;
     }
 
@@ -46,7 +47,6 @@ export class LoginComponent {
       return;
     }
 
-    this.isLoading = true; // Start loading
     this.showDialog();
     this.authService.login(user).subscribe({
       next: (response: any) => {

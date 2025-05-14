@@ -1,6 +1,5 @@
 <div id="id01" class="modal-container" [attr.dir]="languageService.dir">
-  
-  <h2 class="school">الحسابات</h2>
+  <h2 class="school p-3">الحسابات</h2>
   <form [attr.dir]="languageService.dir">
     <div class="group group2">
       <div class="form-control">
@@ -36,7 +35,7 @@
   </form>
 
   <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '75%' }" [draggable]="false" [resizable]="false">
-    <h1 class="Title">حساب جديد</h1>
+    <h2 class="Title">حساب جديد</h2>
     <button class="button typing">طباعة</button>
     @if(visible) {
     <app-add-account [account]="EditAccount"></app-add-account>
@@ -103,10 +102,12 @@
             }
           </tbody>
         </table>
-        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-          [totalRecords]="accounts.length" [rowsPerPageOptions]="[4, 10, 20]" />
+        <p-paginator class="relative" dir="ltr" (onPageChange)="handlePageChange($event)" [first]="paginatorService.first()"
+          [rows]="paginatorService.rows()" [totalRecords]="accounts.length" [rowsPerPageOptions]="[4, 10, 20]" >
+        </p-paginator>
       </mat-card>
     </div>
 
   </div>
+
 </div>
