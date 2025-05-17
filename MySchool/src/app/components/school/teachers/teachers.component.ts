@@ -1,16 +1,17 @@
-import { Component, inject, SimpleChanges } from '@angular/core';
+import { Component, inject} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaginatorState } from 'primeng/paginator';
 import { ToastrService } from 'ngx-toastr';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 
-import { TranslationService } from '../../../core/services/translation.service';
-import { LanguageService } from '../../../core/services/language.service';
 import { EmployeeComponent } from './employee/employee.component';
 import { EmployeeService } from '../core/services/employee.service';
 import { Employee } from '../core/models/employee.model';
 import { PaginatorService } from '../../../core/services/paginator.service';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 
 @Component({
   selector: 'app-teachers',
@@ -20,9 +21,7 @@ import { PaginatorService } from '../../../core/services/paginator.service';
 export class TeachersComponent {
   form: FormGroup;
 
-  translationService = inject(TranslationService);
   employeeService = inject(EmployeeService);
-  languageService = inject(LanguageService);
   paginatorService = inject(PaginatorService);
 
   Employees: Employee[] = []
@@ -32,6 +31,9 @@ export class TeachersComponent {
 
   showGrid: boolean = false;
   showCulomn: boolean = true;
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
   showteacherCulomn(): void {
     this.showCulomn = true;
     this.showGrid = false;
@@ -49,16 +51,13 @@ export class TeachersComponent {
     private formBuilder: FormBuilder,
     private toastr: ToastrService,
     public dialog: MatDialog,
+    private store:Store,
     private route: ActivatedRoute
   ) {
     this.form = this.formBuilder.group({
       stage: ['', Validators.required],
       gradeName: ['', Validators.required],
     });
-  }
-  ngOnChanges(changes: SimpleChanges): void {
-    this.languageService.currentLanguage();
-    this.translationService.changeLanguage(this.languageService.langDir);
   }
 
   id!: number;
@@ -69,8 +68,6 @@ export class TeachersComponent {
       this.openDialog();
     }
     this.getAllEmployees();
-    this.languageService.currentLanguage();
-    this.translationService.changeLanguage(this.languageService.langDir);
   }
   getAllEmployees(): void {
     this.employeeService.getAllEmployees().subscribe({

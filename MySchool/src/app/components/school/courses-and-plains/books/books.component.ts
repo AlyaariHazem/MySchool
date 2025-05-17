@@ -2,11 +2,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
 import { ToastrService } from 'ngx-toastr';
+import { NgForm } from '@angular/forms';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
 
-import { LanguageService } from '../../../../core/services/language.service';
 import { SubjectService } from '../../core/services/subject.service';
 import { Subjects } from '../../core/models/subjects.model';
-import { NgForm } from '@angular/forms';
+import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
 @Component({
   selector: 'app-books',
@@ -16,7 +18,6 @@ import { NgForm } from '@angular/forms';
 export class BooksComponent implements OnInit {
   /* ───────── injections ───────── */
   private subjectService = inject(SubjectService);
-  private languageService = inject(LanguageService);
   private toastr = inject(ToastrService);
 
   /* ───────── data ───────── */
@@ -31,12 +32,15 @@ export class BooksComponent implements OnInit {
   editMode = false;
   subjectData: Subjects = { subjectName: '', subjectReplacement: '', note: '', hireDate: '' };
 
-  constructor(public dialog: MatDialog) { }
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
+
+  constructor(public dialog: MatDialog,private store:Store) { }
 
   /* ───────── lifecycle ───────── */
   ngOnInit(): void {
-    this.loadPage();        // first page
-    this.languageService.currentLanguage();
+    this.loadPage();
   }
 
   /* ───────── CRUD ───────── */

@@ -1,4 +1,4 @@
-<div class="schoolInfo" [attr.dir]="languageService.dir">
+<div class="schoolInfo" [attr.dir]="dir$ | async">
     <h2 class="schoolTitle">{{ 'schoolInfo' | translate }}</h2>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="contant">
@@ -30,7 +30,7 @@
                 <div class="form-control">
                     <label for="schoolType" class="label2">{{'labels.schoolType'|translate}}</label>
                     <p-dropdown formControlName="schoolType" [options]="schoolType" optionLabel="name"
-                        [ngClass]="{'en': languageService.dir==='ltr'}" [editable]="true" optionValue="code"
+                        [ngClass]="{'en': (dir$ | async)==='ltr'}" [editable]="true" optionValue="code"
                         [showClear]="true" placeholder="إختار النوع"></p-dropdown>
                 </div>
                 <div class="form-control">

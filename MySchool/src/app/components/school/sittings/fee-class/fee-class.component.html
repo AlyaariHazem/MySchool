@@ -1,4 +1,4 @@
-<div class="Fee" [attr.dir]="languageService.dir">
+<div class="Fee" [attr.dir]="dir$ | async">
     <h2 class="school">إعدادات الرسوم</h2>
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
         <mat-tab label="بند الرسوم">
@@ -23,7 +23,7 @@
                     <!-- Submit Button -->
 
                     <p-button variant="outlined" severity="success" type="submit"
-                        [ngClass]="languageService.dir==='rtl'?'AddEn':'add'" class="btn" [disabled]="feeForm.invalid"
+                        [ngClass]="(dir$ | async)==='rtl'?'AddEn':'add'" class="btn" [disabled]="feeForm.invalid"
                         (click)="onSubmit(feeForm)" label="{{ editMode ? 'تعديل' : 'إضافة+' }}" />
 
 
@@ -65,7 +65,7 @@
                                     <div class="col text-left">
                                         <div class="mt-sm-0 mt-2">
                                             <button class="btn btn-left"
-                                                [ngClass]="{'btnEn': languageService.dir==='rtl'}" type="button"
+                                                [ngClass]="{'btnEn': (dir$ | async)==='rtl'}" type="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
@@ -110,7 +110,7 @@
                         <p-floatlabel class="w-full md:w-56" variant="on">
                             <p-select class="h-3rem" [options]="Fees" [(ngModel)]="FeeClassDTO.feeID" name="feeID"
                                 optionLabel="feeName" optionValue="feeID" [showClear]="true"
-                                [ngClass]="{'en': languageService.dir==='ltr'}"
+                                [ngClass]="{'en': (dir$ | async)==='ltr'}"
                                 (onChange)="getFeeClassByID(FeeClassDTO.classID, FeeClassDTO.feeID)" [checkmark]="true"
                                 [editable]="true" [showClear]="true" required />
                             <label for="Class">إختار بند الرسوم</label>
@@ -133,7 +133,7 @@
                     </div>
                     <!-- Submit Button -->
                     <p-button variant="outlined" severity="success" type="button"
-                        (click)="onSubmitClassFee(classFeeForm)" [ngClass]="languageService.dir==='rtl'?'AddEn':'add'"
+                        (click)="onSubmitClassFee(classFeeForm)" [ngClass]="(dir$ | async)==='rtl'?'AddEn':'add'"
                         class="btn" [disabled]="classFeeForm.invalid||exist"
                         label="{{ editModeClass ? 'تعديل' : 'إضافة+' }}" />
 

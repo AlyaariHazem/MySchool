@@ -1,4 +1,4 @@
-<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
+<div id="id01" class="modal-container" [attr.dir]="dir$ | async">
 
     <h2 class="title">خطط المقررات</h2>
 
@@ -6,7 +6,7 @@
         <div class="group group2">
             <div class="form-control">
                 <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
-                    <p-select class="w-full h-3rem inputError" [options]="classes" formControlName="classID"
+                    <p-select class="w-full h-3rem inputError" [options]="classes" [checkmark]="true" formControlName="classID"
                         optionLabel="className" optionValue="classID" [editable]="true" [showClear]="true"/>
                     <label for="classID">اختر الصف</label>
                 </p-floatLabel>
@@ -58,9 +58,6 @@
         <p-button variant="outlined" severity="success" class="showFee"
             (onClick)="editMode ? updateCurriculum() : Add()" [label]="editMode ? 'تعديل' : 'إضافة خطة'">
         </p-button>
-
-        <!-- حقل البحث -->
-        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..."></p-chips>
     </form>
 
 

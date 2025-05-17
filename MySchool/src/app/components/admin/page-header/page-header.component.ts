@@ -1,24 +1,23 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component} from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { MenuItem } from 'primeng/api';
+import { Store } from '@ngrx/store';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 
-import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
   styleUrls: ['./page-header.component.scss']
 })
-export class PageHeaderComponent implements OnInit {
+export class PageHeaderComponent  {
 
   // PrimeNG breadcrumb items
   items: MenuItem[] = [];
   home: MenuItem = { icon: 'pi pi-home', routerLink: ['/'] };
 
-  languageService = inject(LanguageService);
-
-  constructor(private router: Router, private route: ActivatedRoute) {
+  constructor(private router: Router, private route: ActivatedRoute,private store:Store) {
     // Listen to NavigationEnd events to update breadcrumbs dynamically
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -26,10 +25,9 @@ export class PageHeaderComponent implements OnInit {
       this.items = this.buildBreadCrumb(this.route.root);
     });
   }
-
-  ngOnInit(): void {
-    this.languageService.currentLanguage();
-  }
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
 
   buildBreadCrumb(route: ActivatedRoute, url: string = '', breadcrumbs: MenuItem[] = []): MenuItem[] {
     // Get the child routes of the current route

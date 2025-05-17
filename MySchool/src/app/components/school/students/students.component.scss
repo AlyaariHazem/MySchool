@@ -36,17 +36,6 @@ p-paginator {
 .student-name-column {
   width: 280px; /* Set your desired width */
 }
-
-.form {
-  position: absolute;
-  right: 0rem;
-  top: 4rem;
-}
-.formEn {
-  position: absolute;
-  left: 2rem;
-  top: 4rem;
-}
 .col-4 {
   position: absolute;
   left: 0rem;
@@ -61,6 +50,10 @@ p-paginator {
   }
 }
 .col-4En {
+  position: absolute;
+  right: 18%;
+  top: 1rem;
+  display: flex;
   i:hover {
     color: #2fdf84;
     cursor: pointer;

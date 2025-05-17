@@ -1,5 +1,5 @@
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Component, inject, OnChanges, OnInit } from '@angular/core';
+import { Component, inject,  OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
 import { ToastrService } from 'ngx-toastr';
@@ -9,26 +9,29 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { NewStudentComponent } from './new-student/new-student.component';
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { StudentService } from '../../../core/services/student.service';
-import { TranslationService } from '../../../core/services/translation.service';
-import { LanguageService } from '../../../core/services/language.service';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { GuardianService } from '../core/services/guardian.service';
 import { EditParentsComponent } from '../parents/edit-parents/edit-parents.component';
 import { PaginatorService } from '../../../core/services/paginator.service';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
+import { map } from 'rxjs';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-students',
   templateUrl: './students.component.html',
   styleUrls: ['./students.component.scss'],
 })
-export class StudentsComponent implements OnInit, OnChanges {
+export class StudentsComponent implements OnInit {
   form: FormGroup;
 
-  translationService = inject(TranslationService);
   studentService = inject(StudentService);
   guardianService = inject(GuardianService);
-  languageService = inject(LanguageService);
   paginatorService = inject(PaginatorService);
+  
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
 
   Students: StudentDetailsDTO[] = []
   paginatedStudents: StudentDetailsDTO[] = [];
@@ -52,6 +55,7 @@ export class StudentsComponent implements OnInit, OnChanges {
     private formBuilder: FormBuilder,
     private toastr: ToastrService,
     public dialog: MatDialog,
+    private store: Store,
     private route: ActivatedRoute,
     private dialogService: DialogService
   ) {
@@ -63,10 +67,6 @@ export class StudentsComponent implements OnInit, OnChanges {
   toggleHidden() {
     this.hiddenFrom = !this.hiddenFrom;
   }
-  ngOnChanges(): void {
-    this.languageService.currentLanguage();
-    this.translationService.changeLanguage(this.languageService.langDir);
-  }
 
   id!: number;
   ngOnInit(): void {
@@ -76,8 +76,6 @@ export class StudentsComponent implements OnInit, OnChanges {
       this.openDialog();
     }
     this.getAllStudents();
-    this.languageService.currentLanguage();
-    this.translationService.changeLanguage(this.languageService.langDir);
   }
   getAllStudents(): void {
     this.studentService.getAllStudents().subscribe((res) => {

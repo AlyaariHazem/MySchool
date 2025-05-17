@@ -2,16 +2,18 @@ import { Component, inject, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { PaginatorState } from 'primeng/paginator';
+import { DialogService } from 'primeng/dynamicdialog';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
 
 import { FeeService } from '../../core/services/fee.service';
 import { Fees, FeeClasses, Fee, FeeClass } from '../../core/models/Fee.model';
 import { ClassService } from '../../core/services/class.service';
 import { ClassDTO } from '../../core/models/class.model';
 import { FeeClassService } from '../../core/services/fee-class.service';
-import { LanguageService } from '../../../../core/services/language.service';
 import { PaginatorService } from '../../../../core/services/paginator.service';
-import { DialogService } from 'primeng/dynamicdialog';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
 @Component({
   selector: 'app-fee-class',
@@ -45,12 +47,14 @@ export class FeeClassComponent implements OnInit {
   private ClassService = inject(ClassService);
   private feeClassService = inject(FeeClassService);
 
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
   constructor(private feeService: FeeService, private toastr: ToastrService
-    ,private dialogService: DialogService
-  ) {}
+    , private store: Store,private dialogService: DialogService) { }
+
   paginatedClassFee: FeeClasses[] = []; // Paginated data
 
-  languageService=inject(LanguageService);
   paginatorService = inject(PaginatorService);
   handlePageChange(event: PaginatorState): void {
     this.paginatorService.onPageChange(event);
@@ -60,29 +64,28 @@ export class FeeClassComponent implements OnInit {
   ngOnInit(): void {
     this.getAllFees();
     this.getClasses();
-    this.paginatedClassFee =this.paginatorService.pageSlice(this.FeeClass);
+    this.paginatedClassFee = this.paginatorService.pageSlice(this.FeeClass);
     this.getAllClassFees();
-    this.languageService.currentLanguage();
   }
 
   // Fee Operations
   getAllFees(): void {
     this.feeService.getAllFee().subscribe({
-      next: (res) =>{
-        if(res.isSuccess){
+      next: (res) => {
+        if (res.isSuccess) {
           this.Fees = res.result;
-          this.isLoading=false;
-        }else{
+          this.isLoading = false;
+        } else {
           this.toastr.error(res.errorMasseges[0]);
-          this.isLoading=false;
+          this.isLoading = false;
         }
-      } ,
+      },
       error: () => {
         this.toastr.error('Error fetching fees');
-        this.isLoading=false;
+        this.isLoading = false;
       }
     });
-    
+
   }
 
   onSubmit(feeForm: NgForm): void {
@@ -116,37 +119,37 @@ export class FeeClassComponent implements OnInit {
   updateFee(): void {
     if (this.editingFeeId) {
       this.feeService.Update(this.editingFeeId, this.Addfee).subscribe({
-       next: (res)=>{
-        if(res.isSuccess){
-          this.toastr.success(res.result);
-          this.getAllFees();
-          this.editMode = false;
-          this.resetForm();
-        }
-       },
+        next: (res) => {
+          if (res.isSuccess) {
+            this.toastr.success(res.result);
+            this.getAllFees();
+            this.editMode = false;
+            this.resetForm();
+          }
+        },
         error: () => this.toastr.error('حدث خطأ أثناء تعديل الرسوم'),
       });
     }
   }
 
-deleteFee(id: number): void {
-  const ref = this.dialogService.open(ConfirmDialogComponent, {
-    header: 'Delete Fee',
-    width: 'auto',
-    data: {
-      title: 'Delete Fee',
-      message: 'هل أنت متأكد من أنك تريد حذف هذه رسوم؟',
-      deleteFn: () => this.feeService.DeleteFee(id),
-      successMessage: 'Fee deleted successfully'
-    }
-  });
+  deleteFee(id: number): void {
+    const ref = this.dialogService.open(ConfirmDialogComponent, {
+      header: 'Delete Fee',
+      width: 'auto',
+      data: {
+        title: 'Delete Fee',
+        message: 'هل أنت متأكد من أنك تريد حذف هذه رسوم؟',
+        deleteFn: () => this.feeService.DeleteFee(id),
+        successMessage: 'Fee deleted successfully'
+      }
+    });
 
-  ref.onClose.subscribe((confirmed: boolean) => {
-    if (confirmed) {
-      this.Fees = this.Fees.filter(s => s.feeID !== id);
-    }
-  });
-}
+    ref.onClose.subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.Fees = this.Fees.filter(s => s.feeID !== id);
+      }
+    });
+  }
 
   resetForm(): void {
     this.Addfee = new Fee();
@@ -163,10 +166,10 @@ deleteFee(id: number): void {
   }
 
   addFeeClass(): void {
-    
+
     this.feeClassService.AddFeeClass(this.FeeClassDTO).subscribe({
       next: (res) => {
-        if(res.isSuccess){
+        if (res.isSuccess) {
           this.toastr.success(res.result);
           this.getAllClassFees();
           this.resetClassFeeForm();
@@ -216,13 +219,13 @@ deleteFee(id: number): void {
   }
   getAllClassFees(): void {
     this.feeClassService.getAllFeeClass().subscribe({
-      next: (res) =>{
+      next: (res) => {
         (this.FeeClass = res);
-        this.paginatedClassFee =this.paginatorService.pageSlice(this.FeeClass);
+        this.paginatedClassFee = this.paginatorService.pageSlice(this.FeeClass);
       },
       error: () => this.toastr.error('Error fetching class fees'),
     });
-    
+
   }
 
   resetClassFeeForm(): void {
@@ -234,7 +237,7 @@ deleteFee(id: number): void {
 
   getClasses(): void {
     this.ClassService.GetAll().subscribe({
-      next:res => {
+      next: res => {
         if (res.isSuccess) {
           this.classDTO = res.result;
         } else {
@@ -279,5 +282,5 @@ deleteFee(id: number): void {
       error: () => this.toastr.error('Failed to update FeeClass', 'Error')
     });
   }
-  
+
 }

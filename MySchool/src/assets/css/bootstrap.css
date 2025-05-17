@@ -482,12 +482,6 @@ select:disabled {
   display: none !important;
 }
 
-button,
-[type=button],
-[type=reset],
-[type=submit] {
-  -webkit-appearance: button;
-}
 button:not(:disabled),
 [type=button]:not(:disabled),
 [type=reset]:not(:disabled),
@@ -543,7 +537,6 @@ legend + * {
 }
 
 [type=search] {
-  -webkit-appearance: textfield;
   outline-offset: -2px;
 }
 
@@ -570,7 +563,6 @@ legend + * {
 
 ::file-selector-button {
   font: inherit;
-  -webkit-appearance: button;
 }
 
 output {
@@ -2405,9 +2397,6 @@ textarea.form-control-lg {
   background-position: center;
   background-size: contain;
   border: var(--bs-border-width) solid var(--bs-border-color);
-  -webkit-print-color-adjust: exact;
-  color-adjust: exact;
-  print-color-adjust: exact;
 }
 .form-check-input[type=checkbox] {
   border-radius: 0.25em;

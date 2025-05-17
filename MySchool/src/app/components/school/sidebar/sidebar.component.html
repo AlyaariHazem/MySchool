@@ -1,5 +1,7 @@
-<div [ngClass]="{'active fadeinright animation-duration-500': sidebar,'sidebar':languageService.dir==='rtl','sidebarEn':languageService.dir==='ltr'}"
-  id="sidebar">
+<div id="sidebar" [attr.dir]="dir$ | async" [ngClass]="{'active fadeinright animation-duration-500': sidebar,
+      'sidebar'  : (dir$ | async) === 'rtl',
+      'sidebarEn': (dir$ | async) === 'ltr'
+  }">
   <div class="sidebar-inner">
     <div id="sidebar-menu" class="sidebar-menu">
       <div class="header-left">
@@ -12,22 +14,22 @@
 
       <ul class="sidebar-ul">
 
-        <li [attr.dir]="languageService.dir">{{ 'sidebar.menu' | translate }}</li>
+        <li>{{ 'sidebar.menu' | translate }}</li>
 
-        <li class="active" [attr.dir]="languageService.dir">
+        <li class="active">
           <a routerLink="/school/dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-1.png" alt="icon">
             <span>{{ 'sidebar.home' | translate }}</span>
           </a>
         </li>
 
-        <li class="submenu" (click)="toggleSubmenu('sittings')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('sittings')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-14.png" alt="icon">
             <span>{{ 'settings.title' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['sittings']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('sittings')" [attr.dir]="languageService.dir">
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('sittings')">
             <li>
               <a routerLink="/school/sitting/years" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'settings.yearStudy' | translate }}</span>
@@ -53,107 +55,122 @@
 
 
         <!-- المدرسين -->
-        <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-10.png" alt="icon">
             <span>{{ 'sidebar.teachers' | translate }}</span>
             <span style="float:left;" class="menu-arrow"
               [ngClass]="{'rotate-arrow': isSubmenuOpen['teachersSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('teachersSubmenu')"
-            [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/teacher" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.all' | translate }}</span></a></li>
-            <li><a routerLink="/school/teacher/action" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.add' | translate }}</span></a>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('teachersSubmenu')">
+            <li><a routerLink="/school/teacher" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.all' | translate
+                  }}</span></a></li>
+            <li><a routerLink="/school/teacher/action" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.add' |
+                  translate }}</span></a>
             </li>
-            <li><a routerLink="/school/parants" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.edit' | translate }}</span></a></li>
-            <li><a routerLink="/school/about-teachers" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.about' | translate }}</span></a>
+            <li><a routerLink="/school/parants" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.edit' | translate
+                  }}</span></a></li>
+            <li><a routerLink="/school/about-teachers" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.about' |
+                  translate }}</span></a>
             </li>
           </ul>
         </li>
 
         <!-- الطلاب -->
-        <li class="submenu" (click)="toggleSubmenu('studentsSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('studentsSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-10.png" alt="icon">
             <span>{{ 'sidebar.students' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['studentsSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('studentsSubmenu')"
-            [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/students/all-students" (click)="cancel()"><span>{{ 'sidebar.students_sub.all' | translate
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('studentsSubmenu')">
+            <li><a routerLink="/school/students/all-students" (click)="cancel()"><span>{{ 'sidebar.students_sub.all' |
+                  translate
                   }}</span></a></li>
-            <li><a routerLink="/school/students/add-student/1" (click)="cancel()"><span>{{ 'sidebar.students_sub.add' | translate
+            <li><a routerLink="/school/students/add-student/1" (click)="cancel()"><span>{{ 'sidebar.students_sub.add' |
+                  translate
                   }}</span></a></li>
-            <li><a routerLink="/school/students/edit-student" (click)="cancel()"><span>{{ 'sidebar.students_sub.new' | translate
+            <li><a routerLink="/school/students/un-reg-students" (click)="cancel()"><span>{{ 'sidebar.students_sub.new'
+                  |
+                  translate
                   }}</span></a></li>
-            <li><a routerLink="/school/students/edit-student" (click)="cancel()"><span>{{ 'sidebar.students_sub.upgrade' | translate
+            <li><a routerLink="/school/students/un-reg-students" (click)="cancel()"><span>{{
+                  'sidebar.students_sub.upgrade'
+                  | translate
                   }}</span></a></li>
           </ul>
         </li>
 
         <!-- أولياء الأمور -->
-        <li class="submenu" (click)="toggleSubmenu('guardianSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('guardianSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-4.png" alt="icon">
             <span>{{ 'sidebar.parents' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['guardianSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('guardianSubmenu')"
-            [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/guardian/" (click)="cancel()"><span>{{ 'sidebar.parents_sub.all' | translate }}</span></a></li>
-            <li><a routerLink="/edit-student" (click)="cancel()"><span>{{ 'sidebar.parents_sub.editStudent' | translate }}</span></a></li>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('guardianSubmenu')">
+            <li><a routerLink="/school/guardian/" (click)="cancel()"><span>{{ 'sidebar.parents_sub.all' | translate
+                  }}</span></a></li>
+            <li><a routerLink="/edit-student" (click)="cancel()"><span>{{ 'sidebar.parents_sub.editStudent' | translate
+                  }}</span></a></li>
           </ul>
         </li>
 
         <!-- الحسابات -->
-        <li class="submenu" (click)="toggleSubmenu('accountSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('accountSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-3.png" alt="icon">
             <span>{{ 'sidebar.accounts' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['accountSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('accountSubmenu')"
-            [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/account/" (click)="cancel()"><span>{{ 'sidebar.accounts_sub.accounts' | translate }}</span></a></li>
-            <li><a routerLink="/school/account/bill" (click)="cancel()"><span>{{ 'sidebar.accounts_sub.bills' | translate }}</span></a>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('accountSubmenu')">
+            <li><a routerLink="/school/account/" (click)="cancel()"><span>{{ 'sidebar.accounts_sub.accounts' | translate
+                  }}</span></a></li>
+            <li><a routerLink="/school/account/bill" (click)="cancel()"><span>{{ 'sidebar.accounts_sub.bills' |
+                  translate }}</span></a>
             </li>
           </ul>
         </li>
 
         <!-- درجات الطلاب -->
-        <li class="submenu" (click)="toggleSubmenu('GradeSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('GradeSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-3.png" alt="icon">
             <span>{{ 'sidebar.grades' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['GradeSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('GradeSubmenu')" [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/grade/" (click)="cancel()"><span>{{ 'sidebar.grades_sub.items' | translate }}</span></a></li>
-            <li><a routerLink="/school/grade/GradeMonth" (click)="cancel()"><span>{{ 'sidebar.grades_sub.monthly' | translate }}</span></a>
-            <li><a routerLink="/school/grade/GradeTerm" (click)="cancel()"><span>{{ 'sidebar.grades_sub.term' | translate }}</span></a>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('GradeSubmenu')">
+            <li><a routerLink="/school/grade/" (click)="cancel()"><span>{{ 'sidebar.grades_sub.items' | translate
+                  }}</span></a></li>
+            <li><a routerLink="/school/grade/GradeMonth" (click)="cancel()"><span>{{ 'sidebar.grades_sub.monthly' |
+                  translate }}</span></a>
+            <li><a routerLink="/school/grade/GradeTerm" (click)="cancel()"><span>{{ 'sidebar.grades_sub.term' |
+                  translate }}</span></a>
             </li>
           </ul>
         </li>
 
-        <li class="submenu" (click)="toggleSubmenu('reportsSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('reportsSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-11.png" alt="icon">
             <span>{{ 'sidebar.reports' | translate }}</span>
             <span style="float:left;" class="menu-arrow"
               [ngClass]="{'rotate-arrow': isSubmenuOpen['reportsSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('reportsSubmenu')"
-            [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/reports" (click)="cancel()"><span>{{ 'sidebar.report.reports' | translate }}</span></a></li>
-            <li><a routerLink="/school/reports/account" (click)="cancel()"><span>{{ 'sidebar.report.account' | translate }}</span></a></li>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('reportsSubmenu')">
+            <li><a routerLink="/school/reports" (click)="cancel()"><span>{{ 'sidebar.report.reports' | translate
+                  }}</span></a></li>
+            <li><a routerLink="/school/reports/account" (click)="cancel()"><span>{{ 'sidebar.report.account' | translate
+                  }}</span></a></li>
             <li><a routerLink="/school/reports/term-result" (click)="cancel()"><span>الدرجات الفصلية</span></a></li>
-            <li><a routerLink="/school/reports/grades-month" (click)="cancel()"><span>{{ 'sidebar.report.gradesMonth' | translate
+            <li><a routerLink="/school/reports/grades-month" (click)="cancel()"><span>{{ 'sidebar.report.gradesMonth' |
+                  translate
                   }}</span></a></li>
           </ul>
 
         </li>
         <!-- التقويم -->
-        <li [attr.dir]="languageService.dir">
+        <li>
           <a routerLink="/school/allotment" (click)="cancel()">
             <img src="assets/img/sidebar/icon-6.png" alt="icon">
             <span>{{ 'sidebar.calendar' | translate }}</span>
@@ -161,7 +178,7 @@
         </li>
 
         <!-- الإختبارات -->
-        <li [attr.dir]="languageService.dir">
+        <li>
           <a routerLink="dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-7.png" alt="icon">
             <span>{{ 'sidebar.tests' | translate }}</span>
@@ -169,7 +186,7 @@
         </li>
 
         <!-- العطل -->
-        <li [attr.dir]="languageService.dir">
+        <li>
           <a routerLink="dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-8.png" alt="icon">
             <span>{{ 'sidebar.holidays' | translate }}</span>
@@ -177,7 +194,7 @@
         </li>
 
         <!-- الأحداث -->
-        <li [attr.dir]="languageService.dir">
+        <li>
           <a routerLink="dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-9.png" alt="icon">
             <span>{{ 'sidebar.events' | translate }}</span>
@@ -185,59 +202,66 @@
         </li>
 
         <!-- الرسوم -->
-        <li class="submenu" (click)="toggleSubmenu('accountsSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('accountsSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-11.png" alt="icon">
             <span>{{ 'sidebar.fees' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['accountsSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('accountsSubmenu')"
-            [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.feeSettings' | translate }}</span></a>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('accountsSubmenu')">
+            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.feeSettings' |
+                  translate }}</span></a>
             </li>
-            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.receipt' | translate }}</span></a></li>
-            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.expenses' | translate }}</span></a></li>
-            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.taxes' | translate }}</span></a></li>
+            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.receipt' | translate
+                  }}</span></a></li>
+            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.expenses' | translate
+                  }}</span></a></li>
+            <li><a routerLink="/school/CaptureBonds" (click)="cancel()"><span>{{ 'sidebar.fees_sub.taxes' | translate
+                  }}</span></a></li>
           </ul>
         </li>
 
         <!-- المقررات و الخطط -->
-        <li class="submenu" (click)="toggleSubmenu('courses')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('courses')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-19.png" alt="icon">
             <span>{{ 'sidebar.courses' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['courses']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('courses')" [attr.dir]="languageService.dir">
-            <li><a routerLink="/school/course/" (click)="cancel()"><span>{{ 'sidebar.courses_sub.books' | translate }}</span></a></li>
-            <li><a routerLink="/school/course/courses" (click)="cancel()"><span>{{ 'sidebar.courses_sub.curricula' | translate
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('courses')">
+            <li><a routerLink="/school/course/" (click)="cancel()"><span>{{ 'sidebar.courses_sub.books' | translate
                   }}</span></a></li>
-            <li><a routerLink="/school/course/plain" (click)="cancel()"><span>{{ 'sidebar.courses_sub.plans' | translate }}</span></a></li>
+            <li><a routerLink="/school/course/courses" (click)="cancel()"><span>{{ 'sidebar.courses_sub.curricula' |
+                  translate
+                  }}</span></a></li>
+            <li><a routerLink="/school/course/plain" (click)="cancel()"><span>{{ 'sidebar.courses_sub.plans' | translate
+                  }}</span></a></li>
           </ul>
         </li>
 
         <!-- كشف المرتبات -->
-        <li class="submenu" (click)="toggleSubmenu('payrollSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('payrollSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-11.png" alt="icon">
             <span>{{ 'sidebar.payroll' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['payrollSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('payrollSubmenu')"
-            [attr.dir]="languageService.dir">
-            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.payroll_sub.salaries' | translate }}</span></a></li>
-            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.payroll_sub.installments' | translate }}</span></a></li>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('payrollSubmenu')">
+            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.payroll_sub.salaries' | translate
+                  }}</span></a></li>
+            <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.payroll_sub.installments' | translate
+                  }}</span></a></li>
           </ul>
         </li>
 
         <!-- المدونات -->
-        <li class="submenu" (click)="toggleSubmenu('blogSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('blogSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-12.png" alt="icon">
             <span>{{ 'sidebar.blogs' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['blogSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('blogSubmenu')" [attr.dir]="languageService.dir">
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('blogSubmenu')">
             <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.blogs_sub.blog' | translate }}</span></a></li>
             <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.blogs_sub.view' | translate }}</span></a></li>
             <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.blogs_sub.add' | translate }}</span></a></li>
@@ -246,36 +270,38 @@
         </li>
 
         <!-- إدارة -->
-        <li class="submenu" (click)="toggleSubmenu('mangmentSubmenu')" [attr.dir]="languageService.dir">
+        <li class="submenu" (click)="toggleSubmenu('mangmentSubmenu')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-3.png" alt="icon">
             <span>{{ 'sidebar.management' | translate }}</span>
             <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['mangmentSubmenu']}"></span>
           </a>
-          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('mangmentSubmenu')"
-            [attr.dir]="languageService.dir">
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('mangmentSubmenu')">
 
             <!-- الموظفين (nested submenu) -->
-            <li class="submenu" (click)="toggleSubmenu('employeesSubmenu', 'mangmentSubmenu')"
-              [attr.dir]="languageService.dir">
+            <li class="submenu" (click)="toggleSubmenu('employeesSubmenu', 'mangmentSubmenu')">
               <a href="javascript:void(0);">
                 <img src="assets/img/sidebar/icon-3.png" alt="icon">
                 <span>{{ 'sidebar.employees' | translate }}</span>
                 <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['employeesSubmenu']}"></span>
               </a>
-              <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('employeesSubmenu')"
-                [attr.dir]="languageService.dir">
-                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.all' | translate }}</span></a></li>
-                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.holidays' | translate }}</span></a></li>
+              <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('employeesSubmenu')">
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.all' | translate
+                      }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.holidays' | translate
+                      }}</span></a></li>
                 <li>
                   <a href="inbox.html" (click)="cancel()">
                     <span>{{ 'sidebar.employees_sub.leaveRequests' | translate }}</span>
                     <span class="badge badge-pill bg-primary float-right">1</span>
                   </a>
                 </li>
-                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.attendance' | translate }}</span></a></li>
-                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.departments' | translate }}</span></a></li>
-                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.tasks' | translate }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.attendance' | translate
+                      }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.departments' | translate
+                      }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.employees_sub.tasks' | translate
+                      }}</span></a></li>
               </ul>
             </li>
 
@@ -290,17 +316,17 @@
             </li>
 
             <!-- التقارير (nested submenu) -->
-            <li class="submenu" (click)="toggleSubmenu('reportsSubmenu', 'mangmentSubmenu')"
-              [attr.dir]="languageService.dir">
+            <li class="submenu" (click)="toggleSubmenu('reportsSubmenu', 'mangmentSubmenu')">
               <a href="javascript:void(0);">
                 <img src="assets/img/sidebar/icon-3.png" alt="icon">
                 <span>{{ 'sidebar.reports' | translate }}</span>
                 <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['reportsSubmenu']}"></span>
               </a>
-              <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('reportsSubmenu')"
-                [attr.dir]="languageService.dir">
-                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.reports_sub.expensesReport' | translate }}</span></a></li>
-                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.reports_sub.billReport' | translate }}</span></a></li>
+              <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('reportsSubmenu')">
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.reports_sub.expensesReport' | translate
+                      }}</span></a></li>
+                <li><a href="inbox.html" (click)="cancel()"><span>{{ 'sidebar.reports_sub.billReport' | translate
+                      }}</span></a></li>
               </ul>
             </li>
 

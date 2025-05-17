@@ -9,6 +9,14 @@
   .forgot-password{
     cursor: pointer;
   }
+  .toast-center-center {
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    z-index: 999999 !important; /* Ensure it appears on top */
+  }
   form {
     width: 100%;
     max-width: 400px;

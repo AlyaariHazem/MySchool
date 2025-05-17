@@ -1,6 +1,6 @@
-<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
+<div id="id01" class="modal-container" [attr.dir]="dir$ | async">
   <h2 class="school p-3">الحسابات</h2>
-  <form [attr.dir]="languageService.dir">
+  <form [attr.dir]="dir$ | async">
     <div class="group group2">
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">

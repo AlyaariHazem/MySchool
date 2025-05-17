@@ -26,8 +26,8 @@ export class AuthAPIService {
         if (response.yearId) {
           localStorage.setItem('yearId', response.yearId);
         }
-        if (response.managerName===" ") {
-          localStorage.setItem('managerName',"Admin");
+        if (response.managerName === " ") {
+          localStorage.setItem('managerName', "Admin");
         }
         if (response.schoolName) {
           localStorage.setItem('schoolName', response.schoolName);
@@ -49,10 +49,14 @@ export class AuthAPIService {
   }
 
 
-  logout() {
-    localStorage.removeItem('token');
-    // Navigate to the login page
-    this.API.router.navigate(['/']);
-    localStorage.removeItem('token');
+  logout(): Observable<void> {
+     return this.API.http.post<void>(`${this.API.baseUrl}/auth/logout`, {},
+      { withCredentials: true })               // what this will do?
+      .pipe(
+        tap(() => {
+          ['token', 'managerName', 'yearId', 'schoolName', 'userName', 'schoolId'].forEach(item => localStorage.removeItem(item));
+          this.router.navigate(['/']);
+        })
+      );
   }
 }

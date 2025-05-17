@@ -1,10 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaginatorState } from 'primeng/paginator';
+import { map } from 'rxjs';
+import { Store } from '@ngrx/store';
 
-import { LanguageService } from '../../../core/services/language.service';
 import { GradeTypeService } from '../core/services/grade-type.service';
 import { GradeType } from '../core/models/gradeType.model';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 
 
 @Component({
@@ -26,10 +28,13 @@ export class GradesMangeComponent implements OnInit {
   first: number = 0;
   rows: number = 4;
 
-  languageService=inject(LanguageService);
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
 
   constructor(
-    private formBuilder: FormBuilder,) {
+    private formBuilder: FormBuilder,
+  private store:Store) {
     this.form = this.formBuilder.group({
       name: ['',Validators.required],
       maxGrade: [,Validators.required],
@@ -39,7 +44,6 @@ export class GradesMangeComponent implements OnInit {
   ngOnInit(): void {
     this.getAllGradeTypes();
     this.updatePaginatedData();
-    this.languageService.currentLanguage();
   }
   getAllGradeTypes(): void {
     this.gradeTypeServce.getAllGradeType().subscribe({

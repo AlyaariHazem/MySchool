@@ -8,7 +8,6 @@ import { TeachersComponent } from './teachers/teachers.component';
 import { StudyYearComponent } from './sittings/study-year/study-year.component';
 import { SchoolInfoComponent } from './sittings/school-info/school-info.component';
 import { StagesGradesComponent } from './sittings/stages-grades/stages-grades.component';
-import { ChartForStudentComponent } from './students/chart-for-student/chart-for-student.component';
 import { StudentsComponent } from './students/students.component';
 import { FeeClassComponent } from './sittings/fee-class/fee-class.component';
 import { ActionComponent } from './action/action.component';
@@ -52,8 +51,7 @@ const routes: Routes = [
           { path: 'all-students', component: StudentsComponent, data: { breadcrumb: 'جميع الطلاب' } },
           { path: 'about-students', component: StudentsComponent, data: { breadcrumb: 'عن الطلاب' } },
           { path: 'add-student/:id', component: StudentsComponent, data: { breadcrumb: 'إضافة طالب' } },
-          { path: 'edit-student', component: AllStudentsComponent, data: { breadcrumb: 'تعديل طالب' } },
-          { path: 'chart-for-student', component: ChartForStudentComponent, data: { breadcrumb: ' طالب' } },
+          { path: 'un-reg-students', component: AllStudentsComponent, data: { breadcrumb: 'الطلاب غير المسجلين' } },
           { path: '', redirectTo: 'all-students', pathMatch: 'full' },
           { path: 'not-found', component: PageNotFoundComponent },
           { path: '**', redirectTo: 'not-found', pathMatch: 'full' }

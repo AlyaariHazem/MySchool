@@ -82,23 +82,30 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
-var jwtKey = Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"] ?? throw new InvalidOperationException("JWT:SecretKey missing"));
+var key = Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]!);
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         options.SaveToken = true;
-        options.RequireHttpsMetadata = false;
+        options.RequireHttpsMetadata = false;   // dev only
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration["JWT:IssuerIP"],
             ValidateAudience = true,
             ValidAudience = builder.Configuration["JWT:AudienceIP"],
-            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(jwtKey)
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateLifetime = false
         };
+
         options.Events = new JwtBearerEvents
         {
             OnChallenge = context =>
@@ -106,19 +113,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 context.HandleResponse();
                 context.Response.StatusCode = 401;
                 context.Response.ContentType = "application/json";
-                return context.Response.WriteAsync("{\"error\": \"Unauthorized\"}");
+                return context.Response.WriteAsync("{\"error\":\"Unauthorized\"}");
             }
         };
     });
-builder.Services.AddAuthorization();
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("MyPolicy", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+    options.AddPolicy("MyPolicy", p => p
+        .WithOrigins("http://localhost:4200")   // the Angular dev server
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());                   // ★ allow cookies
 });
 builder.Services.AddScoped<StudentManagementService>();
 builder.Services.AddScoped<mangeFilesService>();
@@ -160,7 +166,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new[] { "GUARDIAN", "STUDENT", "TEACHER", "MANAGER" };
+    var roles = new[] { "ADMIN","GUARDIAN", "STUDENT", "TEACHER", "MANAGER" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))

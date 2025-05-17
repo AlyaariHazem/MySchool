@@ -1,86 +1,83 @@
-<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
+<!-- study-year.component.html -->
+<div id="id01" class="modal-container" [attr.dir]="dir$ | async">
+
   <div class="modal-content">
-    <h2 class="school">العام الدارسي</h2>
-    <div class="container">
-      <div class="tabcontent">
-        <p-button class="showFee" variant="outlined" severity="success" (onClick)="showDialogAddYear()"
-          label="+ سنة جديدة" />
+    <h2 class="text-justify">العام الدارسي</h2>
 
-        <!-- Dialog for adding a new year -->
-        <p-dialog header="إضافة سنة" [modal]="true" styleClass="year-dialog" [(visible)]="visible"
-          [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
+    <!-- + سنة جديدة button -->
+    <p-button class="showFee" variant="outlined" severity="success" (onClick)="showDialogAddYear()" label="+ سنة جديدة">
+    </p-button>
 
-          <app-new-year (yearAdded)="handleYearAdded($event)"></app-new-year>
-        </p-dialog>
+    <!-- dialog -->
+    <p-dialog header="إضافة سنة" [(visible)]="visible" [modal]="true" styleClass="year-dialog"
+      [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
+      <app-new-year (yearAdded)="handleYearAdded()"></app-new-year>
+    </p-dialog>
 
-        <!-- Responsive Table -->
-        <div class="table-container">
-          <mat-card>
-            <table class="styled-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>تاريخ بدء الدراسة</th>
-                  <th>ملاحظة</th>
-                  <th>تاريخ إنتهاء الدراسة</th>
-                  <th>تاريخ الإنشاء</th>
-                  <th>الحالة</th>
-                  <th>العملية</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Assuming you're using Angular's *ngFor (adjust syntax as needed) -->
-                <tr *ngFor="let year of viewYear; let i = index">
-                  <td>{{ i }}</td>
-                  <td>{{ year.yearDateStart | customDate }}</td>
-                  <td>لا يوجد</td>
-                  <td>{{ year.yearDateEnd | customDate }}</td>
-                  <td>{{ year.hireDate | customDate }}</td>
-                  <td>
-                    <div class="dropdown dropdown-toggle" ngClass="{{ year.active ? '' : 'active' }}"
-                      data-toggle="dropdown">
-                      @if (year.active) {
-                      <span>نشط </span>
-                      } @else {
-                      <span>خامل </span>
+    <!-- table -->
+    <mat-card>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>تاريخ بدء الدراسة</th>
+            <th>ملاحظة</th>
+            <th>تاريخ إنتهاء الدراسة</th>
+            <th>تاريخ الإنشاء</th>
+            <th>الحالة</th>
+            <th>العملية</th>
+          </tr>
+        </thead>
 
-                      }
-                      <div class="dropdown-menu" style="margin-left: 2rem">
-                        <span class="dropdown-item" (click)="changeYear(year, true)">نشط</span>
-                        <span class="dropdown-item" (click)="changeYear(year, false)">خامل</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="col text-left">
-                      <div class="mt-sm-0 mt-2">
-                        <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                          aria-expanded="false">
-                          <i class="fas fa-ellipsis-h"></i>
-                        </button>
-                        <div class="dropdown-menu" dir="rtl">
-                          <a class="dropdown-item d-flex align-items-center gap-2">
-                            <i class="pi pi-file-edit text-primary"></i>
-                            <span>تعديل</span>
-                          </a>
+        <tbody>
+          <tr *ngFor="let year of paginatedYears; let i = index">
+            <td>{{ first + i + 1 }}</td>
 
-                          <div class="dropdown-divider my-1"></div>
-                          <a class="dropdown-item d-flex align-items-center gap-2" (click)="deleteYear(year.yearID)">
-                            <i class="pi pi-trash text-danger"></i>
-                            <span>حذف</span>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </mat-card>
-          <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="years.length"
-            [rowsPerPageOptions]="[4, 8, 16]" />
-        </div>
-      </div>
-    </div>
+            <td>{{ year.yearDateStart | customDate }}</td>
+            <td>لا يوجد</td>
+            <td>{{ year.yearDateEnd | customDate }}</td>
+            <td>{{ year.hireDate | customDate }}</td>
+
+            <!-- الحالة -->
+            <td class="position-relative">
+              <div class="dropdown" [ngClass]="{ 'inactive': !year.active }" data-toggle="dropdown">
+                <span>{{ year.active ? 'نشط' : 'خامل' }}</span>
+                <div class="dropdown-menu" style="margin-left: 2rem">
+                  <span class="dropdown-item" (click)="changeYear(year, true)">نشط</span>
+                  <span class="dropdown-item" (click)="changeYear(year, false)">خامل</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- العملية -->
+            <td>
+              <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+                <i class="fas fa-ellipsis-h"></i>
+              </button>
+
+              <div class="dropdown-menu" dir="rtl">
+                <a class="dropdown-item d-flex align-items-center gap-2">
+                  <i class="pi pi-file-edit text-primary"></i>
+                  <span>تعديل</span>
+                </a>
+
+                <div class="dropdown-divider my-1"></div>
+
+                <a class="dropdown-item d-flex align-items-center gap-2" (click)="deleteYear(year.yearID)">
+                  <i class="pi pi-trash text-danger"></i>
+                  <span>حذف</span>
+                </a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </mat-card>
+
+    <!-- paginator -->
+    <p-paginator [first]="first" [rows]="rows" [totalRecords]="years.length" [rowsPerPageOptions]="[4, 8, 16]"
+      (onPageChange)="onPageChange($event)">
+    </p-paginator>
   </div>
 </div>

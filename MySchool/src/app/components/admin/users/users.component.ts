@@ -3,11 +3,12 @@ import { PaginatorState } from 'primeng/paginator';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
-import { LanguageService } from '../../../core/services/language.service';
-import { TranslationService } from '../../../core/services/translation.service';
 import { AddManagerComponent } from './add-manager/add-manager.component';
 import { managerInfo } from '../core/models/managerInfo.model';
 import { ManagerService } from '../../../core/services/manager.service';
+import { map } from 'rxjs';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-users',
@@ -17,18 +18,18 @@ import { ManagerService } from '../../../core/services/manager.service';
 export class UsersComponent {
   constructor(
     private toastr: ToastrService,
+    private store: Store,
     public dialog: MatDialog) {
 
   }
   managerInfo: managerInfo[] = [];
   managerService = inject(ManagerService);
-  languageService = inject(LanguageService);
-  translationService = inject(TranslationService);
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
 
   ngOnInit(): void {
-    this.languageService.currentLanguage();
     this.getAllManagers();
-    this.translationService.changeLanguage(this.languageService.langDir);
   }
   getAllManagers(): void {
     this.managerService.getAllManagers().subscribe(res => this.managerInfo = res);

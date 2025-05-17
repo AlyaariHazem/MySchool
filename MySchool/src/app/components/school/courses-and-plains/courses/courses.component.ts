@@ -3,14 +3,16 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { PaginatorState } from 'primeng/paginator';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
 
-import { LanguageService } from '../../../../core/services/language.service';
 import { SubjectService } from '../../core/services/subject.service';
 import { ClassService } from '../../core/services/class.service';
 import { Subjects } from '../../core/models/subjects.model';
 import { ClassNames } from '../../core/models/classes.model';
 import { Curriculms } from '../../core/models/Curriculms.model';
 import { CurriculmService } from '../../core/services/curriculm.service';
+import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
 @Component({
   selector: 'app-courses',
@@ -34,10 +36,14 @@ export class CoursesComponent implements OnInit {
   values = new FormControl<string[] | null>(null);
   max = 2;
 
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
+
   constructor(
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
-    public languageService: LanguageService,
+    private store:Store,
     private subjectService: SubjectService,
     private classService: ClassService,
     private curriculmsService: CurriculmService,
@@ -56,7 +62,6 @@ export class CoursesComponent implements OnInit {
     this.getAllSubjects();
     this.getAllCurriculm();
     this.form.reset();
-    this.languageService.currentLanguage();
   }
 
   getAllCurriculm(): void {
@@ -146,7 +151,10 @@ export class CoursesComponent implements OnInit {
         this.form.reset();
         this.toastr.success('Curriculum added successfully');
       },
-      error: () => this.toastr.error('Server error while adding curriculum')
+      error: (err) => {
+        console.log(err);
+        this.toastr.error('this Curriculum is existing')
+      }
     });
   }
 

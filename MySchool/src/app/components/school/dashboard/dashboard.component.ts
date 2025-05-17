@@ -1,23 +1,14 @@
-import {
-  Component,
-  ChangeDetectorRef,
-  OnInit,
-  PLATFORM_ID,
-  inject,
-  effect,
-} from '@angular/core';
+import {Component,ChangeDetectorRef,OnInit,PLATFORM_ID,inject,effect,} from '@angular/core';
+import { Store } from '@ngrx/store';
 import { isPlatformBrowser } from '@angular/common';
 import { PaginatorState } from 'primeng/paginator';
-import { combineLatest } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { Year } from '../../../core/models/year.model';
-
 import { StudentService } from '../../../core/services/student.service';
 import { YearService } from '../../../core/services/year.service';
-import { LanguageService } from '../../../core/services/language.service';
-import { TranslationService } from '../../../core/services/translation.service';
-
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -27,12 +18,13 @@ export class DashboardComponent implements OnInit {
   // ────────────────────────────  DI
   private studentService = inject(StudentService);
   private yearService = inject(YearService);
-  languageService = inject(LanguageService);
-  translationService = inject(TranslationService);
   private platformId = inject(PLATFORM_ID);
 
-  constructor(private cd: ChangeDetectorRef) { }
+  constructor(private cd: ChangeDetectorRef,private store:Store) { }
 
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
   // ────────────────────────────  Data
   students: StudentDetailsDTO[] = [];
   years: Year[] = [];
@@ -61,9 +53,6 @@ export class DashboardComponent implements OnInit {
       this.initChart();
     });
 
-    // اللغة
-    this.languageService.currentLanguage();
-    this.translationService.changeLanguage(this.languageService.langDir);
   }
 
   private countStudentsPerYear(): number[] {

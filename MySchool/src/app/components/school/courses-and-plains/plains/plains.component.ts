@@ -3,8 +3,9 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { PaginatorState } from 'primeng/paginator';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
 
-import { LanguageService } from '../../../../core/services/language.service';
 import { SubjectService } from '../../core/services/subject.service';
 import { ClassNames } from '../../core/models/classes.model';
 import { Curriculms } from '../../core/models/Curriculms.model';
@@ -19,6 +20,7 @@ import { DivisionService } from '../../core/services/division.service';
 import { Terms } from '../../core/models/term.model';
 import { TermService } from '../../core/services/term.service';
 import { TeacherService } from '../../core/services/teacher.service';
+import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
 @Component({
   selector: 'app-plains',
@@ -32,13 +34,13 @@ import { TeacherService } from '../../core/services/teacher.service';
 export class PlainsComponent {
   form: FormGroup;
   subjects: Subjects[] = [];
-  classes: ClassNames[] = [];
+  classes: ClassNames[] | undefined;
   divisions: divisions[] = [];
-  fiteredDivisions: divisions[] = [];
-  teachers: Teachers[] = [];
+  fiteredDivisions: divisions[] | undefined;
+  teachers: Teachers[] | undefined;
   terms: Terms[] = [];
   ClassSubjects: Curriculms[] = [];
-  filteredSubjects: Curriculms[] = [];
+  filteredSubjects: Curriculms[] | undefined;
   curriculmsPlan: CurriculmsPlans[] = [];
   first: number = 0;
   rows: number = 4;
@@ -47,10 +49,13 @@ export class PlainsComponent {
   values = new FormControl<string[] | null>(null);
   max = 2;
 
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
+
   constructor(
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
-    public languageService: LanguageService,
     private subjectService: SubjectService,
     private curriculmsService: CurriculmService,
     private toastr: ToastrService,
@@ -58,6 +63,7 @@ export class PlainsComponent {
     private curriculmsPlanService: CurriculmsPlanService,
     private classService: ClassService,
     private termService: TermService,
+    private store:Store,
     private teacherService: TeacherService
   ) {
     this.form = this.formBuilder.group({
@@ -88,7 +94,6 @@ export class PlainsComponent {
     this.form.patchValue({ yearID: Number(yearFromLocal) });
 
     this.form.reset();
-    this.languageService.currentLanguage();
   }
   getAllSubjects(): void {
     this.subjectService.getAllSubjects().subscribe({

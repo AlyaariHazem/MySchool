@@ -3,9 +3,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 
 import { SchoolService } from '../../../../core/services/school.service';
-import { LanguageService } from '../../../../core/services/language.service';
 import { School } from '../../../../core/models/school.modul';
 import { FileService } from '../../../../core/services/file.service';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
+import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
 @Component({
   selector: 'app-school-info',
@@ -20,7 +22,6 @@ import { FileService } from '../../../../core/services/file.service';
 export class SchoolInfoComponent implements OnInit {
   private schoolService = inject(SchoolService);
   private toaster = inject(ToastrService);
-  languageService = inject(LanguageService);
 
   form: FormGroup;
   schoolType: any[] = [];
@@ -30,7 +31,11 @@ export class SchoolInfoComponent implements OnInit {
   fileManage = inject(FileService);
   isLoading: boolean = true;
 
-  constructor(private fb: FormBuilder) {
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
+  
+  constructor(private fb: FormBuilder,private store:Store) {
     // Set up validators as needed
     this.form = this.fb.group({
       schoolID: [0],
@@ -79,7 +84,6 @@ export class SchoolInfoComponent implements OnInit {
       { name: 'تمهيدي,أساسي', code: 'SECONDARY,PRIMARY' },
     ];
 
-    this.languageService.currentLanguage();
   }
 
   loadSchool(schoolId: number): void {

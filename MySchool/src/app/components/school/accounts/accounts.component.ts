@@ -2,12 +2,14 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { MatDialog } from '@angular/material/dialog';
+import { Store } from '@ngrx/store';
+import { PaginatorState } from 'primeng/paginator';
+import { map } from 'rxjs';
 
-import { LanguageService } from '../../../core/services/language.service';
 import { AccountService } from '../core/services/account.service';
 import { Account } from '../core/models/accounts.model';
 import { PaginatorService } from '../../../core/services/paginator.service';
-import { PaginatorState } from 'primeng/paginator';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 
 interface AccountType {
   name: string;
@@ -36,15 +38,16 @@ export class AccountsComponent implements OnInit {
   form: FormGroup;
   accountType: AccountType[] | undefined;
   max = 2;
-
-  languageService = inject(LanguageService);
-
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
   displayedaccounts: Account[] = []; // Students for the current page
 
   constructor(
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
     private toastr: ToastrService,
+    private store:Store
   ) {
     this.form = this.formBuilder.group({
       stage: ['', Validators.required],

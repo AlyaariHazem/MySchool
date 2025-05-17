@@ -1,15 +1,17 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component} from '@angular/core';
 
-import { LanguageService } from '../../../core/services/language.service';
+import { Store } from '@ngrx/store';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-navigate',
   templateUrl: './navigate.component.html',
   styleUrl: './navigate.component.scss'
 })
-export class NavigateComponent implements OnInit {
-  languageService=inject(LanguageService);
-   ngOnInit() {
-    this.languageService.currentLanguage();
-  }
+export class NavigateComponent {
+  constructor(private store:Store){}
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
 }

@@ -1,8 +1,9 @@
-import { Component, OnInit, Input, inject } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
-import { TranslationService } from '../../../core/services/translation.service';
-import { LanguageService } from '../../../core/services/language.service';
+import { map } from 'rxjs';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-sidebar',
@@ -28,8 +29,10 @@ import { LanguageService } from '../../../core/services/language.service';
 })
 export class SidebarComponent implements OnInit {
   
-  translationService=inject(TranslationService);
-  languageService=inject(LanguageService);
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+      map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+    );
+    constructor(private store: Store) { }
 
   isSubmenuOpen: { [key: string]: boolean } = {
     sittings: false,
@@ -50,8 +53,6 @@ export class SidebarComponent implements OnInit {
   @Input() sidebar: boolean = false;
 
   ngOnInit() {
-    this.languageService.currentLanguage();
-    this.translationService.changeLanguage(this.languageService.langDir);
   }
   SchoolLogo=localStorage.getItem('SchoolImageURL');
   schoolName=localStorage.getItem('schoolName');

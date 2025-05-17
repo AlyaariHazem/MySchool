@@ -3,8 +3,10 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { SchoolService } from '../../../core/services/school.service';
 import { School } from '../../../core/models/school.modul';
-import { LanguageService } from '../../../core/services/language.service';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 
 @Component({
   selector: 'app-school-info',
@@ -19,16 +21,19 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 export class SchoolInfoComponent implements OnInit {
   private schoolService = inject(SchoolService);
   private toaster = inject(ToastrService);
-  languageService = inject(LanguageService);
 
   form: FormGroup;
   schoolType: any[] = [];
   schoolCategory: any[] = [];
   currentSchool?: School;
   isAddMode: boolean = true;
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
 
   constructor(
     private fb: FormBuilder,
+    private store:Store,
     private dialogRef: MatDialogRef<SchoolInfoComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -81,8 +86,6 @@ export class SchoolInfoComponent implements OnInit {
       { name: 'ثانوي,تمهيدي,أساسي', code: 'SECONDARY,KINDERGARTEN,PRIMARY' },
       { name: 'تمهيدي,أساسي', code: 'SECONDARY,PRIMARY' },
     ];
-
-    this.languageService.currentLanguage();
   }
 
   initializeForm(school: School): void {

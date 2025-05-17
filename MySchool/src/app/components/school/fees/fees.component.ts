@@ -2,11 +2,13 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
+import { ToastrService } from 'ngx-toastr';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
 
-import { LanguageService } from '../../../core/services/language.service';
 import { VoucherService } from '../core/services/voucher.service';
 import { Voucher } from '../core/models/voucher.model';
-import { ToastrService } from 'ngx-toastr';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 
 @Component({
   selector: 'app-fees',
@@ -18,17 +20,21 @@ export class FeesComponent {
   form: FormGroup;
 
   private voucherService = inject(VoucherService);
-  languageService = inject(LanguageService);
   
   visible: boolean = false;
   vouchers: Voucher[] = [];
   vouchersDisplay: Voucher[] = [];
   selectedVoucher: Voucher | undefined;
 
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
+
   constructor(
     private formBuilder: FormBuilder,
     public dialog: MatDialog,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private store:Store
   ) {
     this.form = this.formBuilder.group({
       stage: ['', Validators.required],
@@ -40,7 +46,6 @@ export class FeesComponent {
     this.getAllVouchers();
 
     this.updateDisplayedStudents(); // Initialize the displayed students
-    this.languageService.currentLanguage();
   }
 
   showDialog() {

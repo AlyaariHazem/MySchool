@@ -1,17 +1,26 @@
-import { Actions, createEffect, ofType } from "@ngrx/effects";
-import { languageAction } from "./language.action";
+import {  createEffect } from "@ngrx/effects";
+
 import { tap } from "rxjs";
 import { Injectable } from "@angular/core";
+import { Store } from "@ngrx/store";
+import { TranslateService } from "@ngx-translate/core";
+import { selectLanguage } from "./language.selectors";
 
 @Injectable()
-export class LanguageEffect {
+export class LanguageEffects {
+  syncTranslate$ = createEffect(
+    () => this.store.select(selectLanguage).pipe(
+      tap(lang => {
+        this.translate.use(lang);
+        document.documentElement.dir =               // <html dir="rtl|ltr">
+          lang === 'ar' ? 'rtl' : 'ltr';
+      }),
+    ),
+    { dispatch: false },
+  );
 
-    saveLanguage=createEffect(()=>this.actions.pipe(
-        ofType(languageAction),
-        tap((action)=>{
-            localStorage.setItem('lang',action.lang)
-        })
-    ),{dispatch:false})
-    constructor(private actions:Actions){}
-    
+  constructor(
+    private store: Store,
+    private translate: TranslateService,
+  ) {}
 }

@@ -1,4 +1,4 @@
-<div [ngClass]="{'active': sidebar,'sidebar':languageService.dir==='rtl','sidebarEn':languageService.dir==='ltr'}" id="sidebar">
+<div [ngClass]="{'active': sidebar,'sidebar':(dir$ | async)==='rtl','sidebarEn':(dir$ | async)==='ltr'}" id="sidebar">
     <div class="sidebar-inner">
       <div id="sidebar-menu" class="sidebar-menu">
         <div class="header-left">

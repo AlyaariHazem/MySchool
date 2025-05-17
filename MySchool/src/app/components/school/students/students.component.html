@@ -1,10 +1,10 @@
 
-<div id="id01" [attr.dir]="languageService.dir" class="modal-container">
+<div id="id01" [attr.dir]="dir$ | async" class="modal-container">
   <div class="modal-content">
     <h2 class="school">{{ 'student.title' | translate }}</h2>
     <div class="container">
       <div class="tabcontent">
-        <div [ngClass]="{'col-4':languageService.dir==='rtl','col-4En':languageService.dir==='ltr'}">
+        <div [ngClass]="{'col-4':(dir$ | async)==='rtl','col-4En':(dir$ | async)==='ltr'}">
           <i class="pi pi-bars mt-1" pTooltip="Show Students as row" showDelay="200" hideDelay="300"
             (click)="showStudentCulomn()"></i>
           <i class="pi mx-4 pi-th-large mt-1" pTooltip="Show Students as grid" showDelay="200" hideDelay="300"
@@ -13,7 +13,7 @@
               hideDelay="300" [class]="hiddenFrom?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span>
         </div>
         <form [formGroup]="form" [style]="hiddenFrom? 'display:none': 'display:flex'"
-          [ngClass]="{'formEn':languageService.dir==='ltr','form':languageService.dir==='rlt'}">
+        [ngClass]="{'formEn': (dir$ | async) === 'ltr', 'form': (dir$ | async) !== 'ltr'}">
           <!-- First Dropdown -->
           <div class="group3">
             <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
@@ -28,7 +28,7 @@
         </form>
 
         <p-button label="تصدير" variant="outlined" severity="success" (click)="openDialog()"
-          [ngClass]="{'add':languageService.dir==='rtl','addEn':languageService.dir==='ltr'}" label="إضافة طالب+" />
+          [ngClass]="{'add':(dir$ | async)==='rtl','addEn':(dir$ | async)==='ltr'}" label="إضافة طالب+" />
 
         @if (showGrid) {
         <div class="group group2">
@@ -66,7 +66,7 @@
         }
 
         @if (showCulomn) {
-        <div [class]="hiddenFrom?'':'table-container'" [attr.dir]="languageService.dir">
+        <div [class]="hiddenFrom?'':'table-container'" [attr.dir]="(dir$ | async)">
           <mat-card>
             <table class="styled-table">
               <thead>

@@ -12,7 +12,7 @@ import { counterReducer } from './core/store/counter/counter.reducer';
 import { provideStore } from '@ngrx/store';
 import { languageReduser } from './core/store/language/language.reducer';
 import { provideEffects } from '@ngrx/effects';
-import { LanguageEffect } from './core/store/language/language.effect';
+import { LanguageEffects } from './core/store/language/language.effect';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { AppTranslateModule } from './shared/modules/app-translate.module';
 import { providePrimeNG } from 'primeng/config';
@@ -31,12 +31,18 @@ export const appConfig: ApplicationConfig = {
                 }
             }
         }),
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClient(withFetch()),
+        
+        provideHttpClient(
+            withFetch(),
+            withInterceptorsFromDi()
+        ),
+
         provideAnimations(), // required animations providers
-        provideStore({ counter: counterReducer }),
-        provideStore({ language: languageReduser }),
-        provideEffects([LanguageEffect]),
+        provideStore({
+            counter : counterReducer,
+            language: languageReduser,
+          }),
+        provideEffects([LanguageEffects]),
         provideToastr({
             timeOut: 5000,
         }),

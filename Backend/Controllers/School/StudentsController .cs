@@ -9,10 +9,12 @@ using Backend.Repository.School.Classes;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers
 {
+    [Authorize(Roles = "ADMIN,MANAGER")]
     [Route("api/[controller]")]
     [ApiController]
     public class StudentsController : ControllerBase

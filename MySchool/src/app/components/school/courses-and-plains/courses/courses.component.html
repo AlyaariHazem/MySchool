@@ -1,4 +1,4 @@
-<div id="id01" class="modal-container" [attr.dir]="languageService.dir">
+<div id="id01" class="modal-container" [attr.dir]="dir$ | async">
     <h2 class="title">المقررات الدراسية</h2>
 
     <form [formGroup]="form" class="h-5rem">
@@ -39,9 +39,6 @@
         <p-button variant="outlined" severity="success" class="showFee"
             (onClick)="editMode ? updateCurriculum() : Add()" [label]="editMode ? 'تعديل' : 'إضافة'">
         </p-button>
-
-        <!-- حقل البحث -->
-        <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..."></p-chips>
     </form>
 
 

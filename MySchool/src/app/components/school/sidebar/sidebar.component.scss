@@ -3,28 +3,10 @@
   display: none;
 }
 
-.sidebar {
-  overflow-y: hidden;
-  right: 10px;
-}
-
-.sidebarEn {
-  overflow-y: hidden;
-}
-
-.sidebarEr {
-  overflow-y: hidden;
-  left: 10px !important;
-  direction: ltr;
-}
-
 .sidebar-ul {
   direction: rtl;
   overflow-y: scroll;
   max-height: 100vh;
-
-  // scrollbar-width: thin;
-  // scrollbar-color: #adadad #f1f1f1;
 }
 
 .sidebar-ul ul {
@@ -64,9 +46,6 @@
   left: 20px;
 }
 
-.sidebar {
-  right: 10px;
-}
 .sidebarEn {
   left: 20px;
   .rotate-arrow {
@@ -134,7 +113,7 @@
 }
 
 /* RESPONSIVE BREAKPOINTS */
-@media only screen and (max-width: 991.98px) {
+@media only screen and (width<991.98px ) {
   .sidebar.active {
     top: 0;
     height: 100%;

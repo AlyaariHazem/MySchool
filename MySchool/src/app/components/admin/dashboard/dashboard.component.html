@@ -1,4 +1,4 @@
-<div class="contant" style="margin-top: 0rem" [attr.dir]="languageService.dir">
+<div class="contant" style="margin-top: 0rem" [attr.dir]="dir$ | async">
   <div class="row">
     <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
       <div class="dash-widget dash-widget5">
@@ -52,7 +52,7 @@
                   aria-expanded="false">
                   <i class="fas fa-ellipsis-h"></i>
                 </button>
-                <div class="dropdown-menu dropdown-menu-right" [attr.dir]="languageService.dir">
+                <div class="dropdown-menu dropdown-menu-right" [attr.dir]="dir$ | async">
                   <a class="dropdown-item" href="#">Action</a>
                   <div role="separator" class="dropdown-divider"></div>
                   <a class="dropdown-item" href="#">Another action</a>
@@ -81,7 +81,7 @@
                   aria-expanded="false">
                   <i class="fas fa-ellipsis-h"></i>
                 </button>
-                <div class="dropdown-menu dropdown-menu-right" [attr.dir]="languageService.dir">
+                <div class="dropdown-menu dropdown-menu-right" [attr.dir]="dir$ | async">
                   <a class="dropdown-item" href="#">Action</a>
                   <div role="separator" class="dropdown-divider"></div>
                   <a class="dropdown-item" href="#">Another action</a>
@@ -92,7 +92,7 @@
             </div>
           </div>
         </div>
-        <div class="card-body" [attr.dir]="languageService.dir">
+        <div class="card-body" [attr.dir]="dir$ | async">
           <div class="row">
             <div class="col-md-12">
               <div class="table-responsive">

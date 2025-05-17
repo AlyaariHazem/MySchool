@@ -22,15 +22,15 @@ export class LoginComponent {
   isLoading = false;
   visible: boolean = false;
 
-    showDialog() {
-      this.isLoading = true;
-        this.visible = true;
-    }
+  showDialog() {
+    this.isLoading = true;
+    this.visible = true;
+  }
 
-    hideDialog() {
-        this.visible = false;
-        this.isLoading = false;
-    }
+  hideDialog() {
+    this.visible = false;
+    this.isLoading = false;
+  }
 
   // Define user types for the dropdown
   userTypes = [
@@ -55,6 +55,10 @@ export class LoginComponent {
             this.authService.router.navigateByUrl('admin');
           } else {
             this.authService.router.navigateByUrl('school');
+            console.log(response);
+            this.toastr.success('مرحبا بك : ' + response.managerName, '', {
+              positionClass: 'toast-center-center'
+            });
           }
         }
       },

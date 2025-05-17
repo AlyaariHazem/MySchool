@@ -51,9 +51,7 @@ mat-form-field {
   border-radius: 23px;
 }
 
-.school {
-  text-align: right;
-}
+
 
 .styled-table {
   position: relative;
@@ -84,9 +82,6 @@ mat-form-field {
 @media (max-width: 900px) {
   form {
     right: -1rem;
-  }
-  .school {
-    color: red;
   }
   .styled-table th,
   .styled-table td {

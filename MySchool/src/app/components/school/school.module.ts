@@ -31,11 +31,9 @@ import { ChartModule } from 'primeng/chart';
 import { SchoolRoutingModule } from './school-routing.module';
 import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
-import { ChartForStudentComponent } from './students/chart-for-student/chart-for-student.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllParentsComponent } from './parents/all-parents/all-parents.component';
 import { EditParentsComponent } from './parents/edit-parents/edit-parents.component';
-import { AboutStudentComponent } from './students/about-student/about-student.component';
 import { TeachersComponent } from './teachers/teachers.component';
 import { NavigateComponent } from './navigate/navigate.component';
 import { RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -83,6 +81,7 @@ import {  TermResultComponent } from './report/termly-result/term-result.compone
 import { GradesTermComponent } from './grades-mange/grades-term/grades-term.component';
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 import { HeaderReportComponent } from './report/header-report/header-report.component';
+import { AllStudentsComponent } from './students/all-students/all-students.component';
 
 
 
@@ -92,14 +91,13 @@ const components = [
   AllParentsComponent,
   EditParentsComponent,
   SidebarComponent,
-  AboutStudentComponent,
-  ChartForStudentComponent,
   TeachersComponent,
   StudentMonthResultComponent,
   NavigateComponent,
   StudyYearComponent,
   StagesGradesComponent,
   SchoolInfoComponent,
+  AllStudentsComponent,
   StudentsComponent,
   EmployeeComponent,
   GradesComponent,

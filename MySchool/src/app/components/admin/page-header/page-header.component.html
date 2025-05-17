@@ -1,7 +1,7 @@
-<div [ngClass]="{'english': languageService.dir === 'ltr'}">
+<div [ngClass]="{'english': (dir$ | async) === 'ltr'}">
     <div class="page-header">
         <div class="row">
-            <nav aria-label="breadcrumb" [attr.dir]="languageService.dir">
+            <nav aria-label="breadcrumb" [attr.dir]="dir$ | async">
                 <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
             </nav>
         </div>

@@ -1,9 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { MenuItem } from 'primeng/api';
 
-import { LanguageService } from '../../../core/services/language.service';
+import { Store } from '@ngrx/store';
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 
 @Component({
   selector: 'app-breadcrumb',
@@ -17,9 +18,11 @@ export class BreadcrumbComponent implements OnInit {
   items: MenuItem[] = [];
   home: MenuItem = { icon: 'pi pi-home', routerLink: ['/school/dashboard'] };
 
-  languageService = inject(LanguageService);
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
 
-  constructor(private router: Router, private route: ActivatedRoute) {
+  constructor(private router: Router, private route: ActivatedRoute,private store:Store) {
     // Listen to NavigationEnd events to update breadcrumbs dynamically
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -28,9 +31,7 @@ export class BreadcrumbComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.languageService.currentLanguage();
-  }
+  ngOnInit(): void {}
 
   buildBreadCrumb(route: ActivatedRoute, url: string = '', breadcrumbs: MenuItem[] = []): MenuItem[] {
     // Get the child routes of the current route
