@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -22,7 +22,6 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
-// import { ChipsModule } from 'primeng/chips';
 import { InputMaskModule } from 'primeng/inputmask';
 import { CardModule } from 'primeng/card';
 import { MatTableModule } from '@angular/material/table';
@@ -50,6 +49,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AdminRoutingModule } from './admin-routing.module';
 import { SchoolInfoComponent } from './school-info/school-info.component';
 import { AddManagerComponent } from './users/add-manager/add-manager.component';
+import { ChartModule } from 'primeng/chart';
 
 
 const components = [
@@ -80,6 +80,7 @@ const modules = [
   MatMenuModule,
   ReactiveFormsModule,
   MatTableModule,
+  ChartModule,
   MatFormFieldModule,
   MatInputModule,
   TranslateModule,
@@ -108,7 +109,6 @@ const modules = [
   DialogModule,
   ButtonModule,
   PanelModule,
-  // ChipsModule,
   InputMaskModule,
   CardModule,
   InputTextModule,
@@ -117,6 +117,7 @@ const modules = [
 ];
 
 @NgModule({
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   declarations: components,
   imports: [
     ...modules,

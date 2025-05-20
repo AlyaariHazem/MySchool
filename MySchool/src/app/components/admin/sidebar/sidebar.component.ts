@@ -1,78 +1,56 @@
-import { Component, OnInit, Input} from '@angular/core';
+/* sidebar.component.ts */
+import {
+  Component, EventEmitter, Input, Output
+} from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
-import { Store } from '@ngrx/store';
 import { map } from 'rxjs';
-
 import { selectLanguage } from '../../../core/store/language/language.selectors';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss',
+  styleUrls: [
+    './sidebar.component.scss',
     '../../../../assets/css/sideBar.css'
   ],
   animations: [
     trigger('submenuToggle', [
-      state('closed', style({
-        height: '0',
-        opacity: 0
-      })),
-      state('open', style({
-        height: '*',
-        opacity: 1
-      })),
-      transition('closed <=> open', [
-        animate('300ms ease-in-out')
-      ])
-    ])
-  ]
+      state('closed', style({ height: 0, opacity: 0 })),
+      state('open', style({ height: '*', opacity: 1 })),
+      transition('closed <=> open', animate('300ms ease-in-out')),
+    ]),
+  ],
 })
-export class SidebarComponent implements OnInit {
-  isSubmenuOpen: { [key: string]: boolean } = {
-    sittings: false,
-    teachersSubmenu: false,
-    studentsSubmenu: false,
-    guardianSubmenu: false,
-    accountSubmenu: false,
-    accountsSubmenu: false,
-    blogSubmenu: false,
-    courses: false,
-    GradeSubmenu: false,
-    payrollSubmenu: false,
-    mangmentSubmenu: false,
-    employeesSubmenu: false,
-    reportsSubmenu: false,
-  };
-  constructor(private store: Store) { }
-
-  @Input() sidebar: boolean = false;
-
+export class SidebarComponent {
+  /* rtl / ltr as an observable for the template */
   readonly dir$ = this.store.select(selectLanguage).pipe(
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
   );
-  
-  ngOnInit() {}
+  constructor(private store: Store) { }
 
-  toggleSubmenu(submenu: string, parentSubmenu?: string) {
-    if (parentSubmenu) {
-      this.closeOtherSubmenus(parentSubmenu, submenu);
-    }
-    this.isSubmenuOpen[submenu] = !this.isSubmenuOpen[submenu];
+  /* ---------- open / close from the header ---------- */
+  @Input() open = false;
+  @Output() closed = new EventEmitter<void>();
+
+  cancel() {                 // called by the X button
+    this.closed.emit();
   }
 
-  closeOtherSubmenus(parentSubmenu: string, currentSubmenu: string) {
-    for (const submenu in this.isSubmenuOpen) {
-      if (submenu !== currentSubmenu && submenu.startsWith(parentSubmenu)) {
-        this.isSubmenuOpen[submenu] = false;
-      }
-    }
-  }
+  /* ---------- submenu logic (unchanged) ------------- */
+  isSubmenuOpen: Record<string, boolean> = { /* … your keys … */ };
 
-  getSubmenuState(submenu: string): string {
-    return this.isSubmenuOpen[submenu] ? 'open' : 'closed';
+  toggleSubmenu(key: string, parent?: string) {
+    if (parent) this.closeOtherSubmenus(parent, key);
+    this.isSubmenuOpen[key] = !this.isSubmenuOpen[key];
   }
+  closeOtherSubmenus(parent: string, current: string) {
+    for (const k in this.isSubmenuOpen)
+      if (k !== current && k.startsWith(parent)) this.isSubmenuOpen[k] = false;
+  }
+  getSubmenuState(key: string) { return this.isSubmenuOpen[key] ? 'open' : 'closed'; }
 
-  cancel() {
-    this.sidebar = false;
-  }
+  /* ---------- misc fields (logo, school name) ------- */
+  SchoolLogo = localStorage.getItem('SchoolImageURL');
+  schoolName = localStorage.getItem('schoolName');
 }

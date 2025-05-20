@@ -1,100 +1,92 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+// study-year.component.ts
+import { Component, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { PaginatorState } from 'primeng/paginator';
 
-import { LanguageService } from '../../../../core/services/language.service';
 import { YearService } from '../../../../core/services/year.service';
 import { Year } from '../../../../core/models/year.model';
+import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
 @Component({
-  selector: 'app-study-year',
+  selector   : 'app-study-year',
   templateUrl: './study-year.component.html',
-  styleUrls: [
+  styleUrls  : [
     './study-year.component.scss',
-    './../../../../shared/styles/style-input.scss'
-  ]
+    './../../../../shared/styles/style-input.scss',
+  ],
 })
 export class StudyYearComponent implements OnInit {
-  visible: boolean = false;
-  values = new FormControl<string[] | null>(null);
-  max = 2;
-  years: Year[] = [];
-  viewYear: Year[] = [];
-  isLoading: boolean = true;
+  
+  readonly dir$ = this.store.select(selectLanguage).pipe(
+    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+  );
 
-  yearService = inject(YearService);
-  languageService = inject(LanguageService);
-  toaster = inject(ToastrService);
-
-  currentPage: number = 0; // Current page index
-  pageSize: number = 5; // Number of items per page
-
-  ngOnInit(): void {
-    this.getAllYears();
-  }
-
+  visible = false;
   showDialogAddYear() {
     this.visible = true;
   }
 
+  /* ---------- data ---------- */
+  years: Year[] = [];
+  paginatedYears: Year[] = [];
+  isLoading = true;
+
+  /* ---------- paginator ---------- */
+  first = 0;
+  rows  = 4;
+  onPageChange({ first = 0, rows = 4 }: PaginatorState) {
+    this.first = first;
+    this.rows  = rows;
+    this.updatePaginatedData();
+  }
+
+  constructor(
+    private store      : Store,
+    private yearService: YearService,
+    private toaster    : ToastrService,
+  ) {}
+
+  ngOnInit() {
+    this.getAllYears();
+  }
+
   getAllYears() {
     this.yearService.getAllYears().subscribe(res => {
-      this.years = res;
-      this.viewYear = this.years;
-      this.isLoading=false;
+      this.years     = res;
+      this.isLoading = false;
       this.updatePaginatedData();
     });
   }
 
+  /* pagination helper */
+  private updatePaginatedData() {
+    this.paginatedYears = this.years.slice(this.first, this.first + this.rows);
+  }
+
+  /* ---------- CRUD ---------- */
   deleteYear(id: number) {
-    this.yearService.deleteYear(id).subscribe(res => {
+    this.yearService.deleteYear(id).subscribe(() => {
       this.getAllYears();
       this.toaster.success('تم حذف العام الدراسي بنجاح');
     });
   }
 
- 
-  isEditMode: boolean = false;
-  changeYear(year: Year, isActive: boolean): void {
-    const patchDoc = [
-      { op: "replace", path: "/active", value: isActive }
-    ];
-
-    this.yearService.partialUpdate(year.yearID, patchDoc).subscribe({
-      next: (response) => {
-        if (response) {
-          this.toaster.success(response);
-          this.getAllYears(); // Refresh the list to show updated data
-        }
+  changeYear(year: Year, isActive: boolean) {
+    const patch = [{ op: 'replace', path: '/active', value: isActive }];
+    this.yearService.partialUpdate(year.yearID, patch).subscribe({
+      next : msg => {
+        this.toaster.success(msg);
+        this.getAllYears();
       },
-      error: () => this.toaster.error('Failed to update year', 'Error')
+      error: () => this.toaster.error('Failed to update year', 'Error'),
     });
-
-    this.isEditMode = false;
   }
 
-  // Paginator properties
-  first: number = 0;
-  rows: number = 4;
-  paginatedYears: Year[] = [];
-  updatePaginatedData(): void {
-    const start = this.first;
-    const end = this.first + this.rows;
-    this.paginatedYears = this.years.slice(start, end);
-  }
-  // Handle paginator events
-  onPageChange(event: PaginatorState): void {
-    this.first = event.first || 0;
-    this.rows = event.rows || 4;
-    this.updatePaginatedData();
-  }
-
-  // This method will be called when a new year is added
-  handleYearAdded(newYear: Year) {
-    // Optionally refresh the years list
+  /* emitted from <app-new-year> */
+  handleYearAdded() {
     this.getAllYears();
-    // Close the dialog
     this.visible = false;
   }
 }

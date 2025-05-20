@@ -1,4 +1,4 @@
-<div id="sidebar" [attr.dir]="dir$ | async" [ngClass]="{'active fadeinright animation-duration-500': sidebar,
+<div id="sidebar" [attr.dir]="dir$ | async" [ngClass]="{'active fadeinright animation-duration-500': open,
       'sidebar'  : (dir$ | async) === 'rtl',
       'sidebarEn': (dir$ | async) === 'ltr'
   }">
@@ -9,7 +9,7 @@
           <img [src]="SchoolLogo" width="40" height="40" alt="">
           <span class="text-uppercase">{{schoolName}}</span>
         </a>
-        <span (click)="cancel()" class="cancel" *ngIf="sidebar">X</span>
+        <span (click)="cancel()" class="cancel">X</span>
       </div>
 
       <ul class="sidebar-ul">

@@ -1,9 +1,12 @@
 <div class="header-outer" [ngClass]="{'English':dir==='ltr'}" [attr.dir]="dir">
     <div class="header">
-        <a style="cursor: pointer;" (click)="open()"
-            [ngClass]="{'mobile_btn-Ar': dir === 'rtl','mobile_btn-En': dir === 'ltr'}" class="mobile_btn float-left"><i
-                class="fas fa-bars"></i></a>
-        <app-sidebar [sidebar]=toggle></app-sidebar>
+        <a (click)="toggleSidebar()"
+        [ngClass]="{'mobile_btn-Ar': dir === 'rtl','mobile_btn-En': dir === 'ltr'}" class="mobile_btn float-left">
+            <i class="fas fa-bars"></i>
+        </a>
+
+        <!-- ✔ the sidebar is created / destroyed by *ngIf -->
+        <app-sidebar #sidebar  [open]="isSidebarOpen()" (closed)="onSidebarClosed()"></app-sidebar>
         <a id="toggle_btn" [ngClass]="{'toggle_btn-Ar': dir === 'rtl','toggle_btn-En': dir === 'ltr'}"
             class="float-right" href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-21.png" alt="">
@@ -117,7 +120,7 @@
             </li>
             <li class="nav-item dropdown has-arrow">
                 <a href="#" class=" nav-link user-link" data-toggle="dropdown">
-                    <span class="user-img"><img [src]="'assets/img/' + languageimage" width="30" alt="language">
+                    <span class="user-img"><img [src]="'assets/img/' + languageImage" width="30" alt="language">
                         <span class="status online"></span></span>
                     <span>{{langName}}</span>
                 </a>
@@ -131,13 +134,13 @@
                     <span class="user-img"><img class="rounded-circle" src="assets/img/user-06.jpg" width="30"
                             alt="Admin">
                         <span class="status online"></span></span>
-                    <span>{{userName}}</span> 
+                    <span>{{userName}}</span>
                 </a>
                 <div class="dropdown-menu">
                     <a class="dropdown-item" href="#">الملف الشخصي</a>
                     <a class="dropdown-item" href="#">تعديل الملف الشخصي</a>
                     <a class="dropdown-item" href="inbox.html">الإعدادات</a>
-                    <a class="dropdown-item" (click)="Logout()">خروج</a>
+                    <a class="dropdown-item" (click)="logout()">خروج</a>
                 </div>
             </li>
         </ul>

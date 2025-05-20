@@ -26,7 +26,9 @@ import { TextareaModule } from 'primeng/textarea';
 import { FloatLabel } from "primeng/floatlabel"
 import { TableModule }       from 'primeng/table';
 import { Tooltip } from 'primeng/tooltip';
+import { Select } from 'primeng/select';
 import { ChartModule } from 'primeng/chart';
+import { MatSelectModule } from '@angular/material/select';
 
 import { SchoolRoutingModule } from './school-routing.module';
 import { HeaderComponent } from './header/header.component';
@@ -51,7 +53,6 @@ import { GuardianComponent } from './students/new-student/guardian/guardian.comp
 import { OptionDataComponent } from './students/new-student/option-data/option-data.component';
 import { HeadComponent } from './students/new-student/head/head.component';
 import { ShardModule } from '../../shared/shard.module';
-import { MatSelectModule } from '@angular/material/select';
 import { FeeClassComponent } from './sittings/fee-class/fee-class.component';
 import { NewYearComponent } from './sittings/study-year/new-year/new-year.component';
 import { NewCaptureComponent } from './fees/new-capture/new-capture.component';
@@ -72,7 +73,6 @@ import { StudentMonthResultComponent } from './report/student-month-result/stude
 import { ReportComponent } from './report/report.component';
 import { CustomDatePipe } from '../../Pipes/customDate.pipe';
 import { InputTextModule } from 'primeng/inputtext';
-import { Select } from 'primeng/select';
 import { NumberToArabicTextPipe } from '../../Pipes/number-to-arabic-text.pipe';
 import { AccountReportComponent } from './report/account-report/account-report.component';
 import { EmployeeComponent } from './teachers/employee/employee.component';
@@ -142,7 +142,6 @@ const modules = [
   TabsModule,
   TableModule,
   CustomDatePipe,
-  Select,
   MatInputModule,
   MatOption,
   EditorModule,
@@ -174,6 +173,7 @@ const modules = [
   MatDatepickerModule,
   MatNativeDateModule,
   FloatLabel,
+  Select,
   DatePipe,
   NumberToArabicTextPipe,
   AgePipe,
