@@ -11,18 +11,18 @@ import { ApiResponse } from '../../../../core/models/response.model';
 export class GuardianService {
   private API = inject(BackendAspService);
   constructor() { }
-  
+
   getAllGuardians(): Observable<ApiResponse<Guardians[]>> {
     return this.API.getRequest<Guardians[]>('Guardian');
   }
   getAllGuardiansExist(): Observable<ApiResponse<Guardians[]>> {
-    return this.API.getRequest<Guardians[]>('Guardian/GuardianExist');
+    return this.API.getRequest<Guardians[]>('Guardian/GuardianExists');
   }
-  
+
   getGuardianById(id: number): Observable<ApiResponse<Guardians>> {
     return this.API.getRequest<Guardians>(`Guardian/${id}`);
   }
-  
+
  getGuardiansInfo(): Observable<ApiResponse<Guardians[]>> {
     return this.API.getRequest<Guardians[]>('Guardian/GuardianInfo');
   }

@@ -38,7 +38,7 @@ public class TenantProvisioningService
         }
 
         // 3) Build the connection string for the new database
-        var newDbConnString = $"Server=Hazem\\SQLEXPRESS01;Database={newDbName};Trusted_Connection=True;TrustServerCertificate=True";
+        var newDbConnString = $"Server=localhost\\SQLEXPRESS;Database={newDbName};Trusted_Connection=True;TrustServerCertificate=True";
 
         // 4) Migrate the new DB
         var builder = new DbContextOptionsBuilder<DatabaseContext>();
