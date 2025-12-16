@@ -42,18 +42,20 @@ namespace Backend.Controllers
                 GuardianDTO existingGuardian = null!;
 
                 // Step 1: Check if we are adding a student to an existing guardian.
-                if (request.ExistingGuardianId.HasValue && !request.ExistingGuardianId.Value.Equals(0))
+                // IMPORTANT: If ExistingGuardianId is provided and valid, we MUST NOT create a new guardian
+                if (request.ExistingGuardianId.HasValue && request.ExistingGuardianId.Value > 0)
                 {
                     existingGuardian = await _unitOfWork.Guardians.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
                     if (existingGuardian == null)
-                        return NotFound(new { message = "Existing Guardian not found." });
+                        return NotFound(new { message = $"Existing Guardian with ID {request.ExistingGuardianId.Value} not found." });
                 }
 
-                // If no existing guardian is provided, create a new guardian and guardian user
+                // If no existing guardian is provided (null or 0), create a new guardian and guardian user
                 ApplicationUser guardianUser = null!;
                 Guardian guardian = null!;
                 AccountsDTO account = null!;
 
+                // Only create a new guardian if no existing guardian was found/selected
                 if (existingGuardian == null)
                 {
                     var userName = "Guardain_" + Guid.NewGuid().ToString("N").Substring(0, 5);
@@ -164,14 +166,22 @@ namespace Backend.Controllers
                 Student createdStudent;
                 if (existingGuardian == null)
                 {
+                    // Only create new guardian, guardian user, and account when no existing guardian is selected
+                    if (guardianUser == null || guardian == null || account == null)
+                        return BadRequest(new { message = "Guardian information is required when creating a new guardian." });
+
                     createdStudent = await _studentManagementService.AddStudentWithGuardianAsync(
-                        guardianUser!, request.GuardianPassword, guardian!,
+                        guardianUser, request.GuardianPassword, guardian,
                         studentUser, request.StudentPassword, student,
-                        account!, accountStudentGuardian, attachments, studentClassFees);
+                        account, accountStudentGuardian, attachments, studentClassFees);
                 }
                 else
                 {
-                    //if guardian exist
+                    // IMPORTANT: When existing guardian is selected, DO NOT create:
+                    // - New Guardian User (AspNetUsers record)
+                    // - New Guardian (Guardians table record)
+                    // - New Account (Accounts table record)
+                    // Only create the student and link to existing guardian
                     createdStudent = await _studentManagementService.AddStudentToExistingGuardianAsync(
                         existingGuardian,
                         studentUser, request.StudentPassword, student,

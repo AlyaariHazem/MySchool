@@ -100,7 +100,13 @@ public class StudentManagementService
       ApplicationUser studentUser, string studentPassword, Student student,
       List<Attachments> attachments, List<StudentClassFeeDTO> studentClassFees, AccountStudentGuardian accountStudentGuardianPram)
     {
-        // 1. Create student user
+        // IMPORTANT: This method is called when an EXISTING guardian is selected.
+        // DO NOT create:
+        // - New Guardian User (AspNetUsers record) - the guardian user already exists
+        // - New Guardian (Guardians table record) - the guardian already exists
+        // - New Account (Accounts table record) - use the existing guardian's account
+        
+        // 1. Create student user (only create student-related records)
         var createdStudentUser = await _unitOfWork.Users.CreateUserAsync(studentUser, studentPassword, "Student");
         student.UserID = createdStudentUser.Id;
         student.GuardianID = existingGuardian.GuardianID;
@@ -194,10 +200,18 @@ public class StudentManagementService
             _dbContext.Entry(student).State = EntityState.Modified;
 
             // **Update Guardian User and Entity**
-            if (request.ExistingGuardianId.HasValue)
+            // IMPORTANT: When ExistingGuardianId is provided, we should NEVER create a new guardian
+            // We only update the existing guardian or change the reference to another existing guardian
+            if (request.ExistingGuardianId.HasValue && request.ExistingGuardianId.Value > 0)
             {
+                // Verify the existing guardian exists
+                var existingGuardian = await _unitOfWork.Guardians.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
+                if (existingGuardian == null)
+                    throw new Exception($"Existing Guardian with ID {request.ExistingGuardianId.Value} not found.");
+
                 if (request.ExistingGuardianId.Value == student.GuardianID)
                 {
+                    // Update the current guardian's information
                     var guardian = await _unitOfWork.Guardians.GetGuardianByGuardianIdAsync(request.ExistingGuardianId.Value);
                     if (guardian != null)
                     {
@@ -219,9 +233,9 @@ public class StudentManagementService
                         await _dbContext.SaveChangesAsync(); // save guardian changes
                     }
                 }
-
                 else
                 {
+                    // Change the student's guardian to a different existing guardian
                     // Step 1: Get the wrapper result
                     var accountStudentGuardianResult = await _unitOfWork.AccountStudentGuardians.GetAcountStudentGuardianByIdAsync(studentId);
 
@@ -235,7 +249,7 @@ public class StudentManagementService
                     if (entity == null)
                         throw new Exception("AccountStudentGuardian entity not found.");
 
-                    // Step 4: Update the guardian reference
+                    // Step 4: Update the guardian reference to the existing guardian
                     entity.GuardianID = request.ExistingGuardianId.Value;
 
                     // Step 5: Update student as well
@@ -248,7 +262,30 @@ public class StudentManagementService
                     // Step 6: Mark as modified
                     _dbContext.Entry(entity).State = EntityState.Modified;
                     _dbContext.Entry(studentEntity).State = EntityState.Modified;
+                }
+            }
+            else
+            {
+                // If ExistingGuardianId is not provided, update the current guardian (don't create a new one)
+                var currentGuardian = await _unitOfWork.Guardians.GetGuardianByGuardianIdAsync(student.GuardianID);
+                if (currentGuardian != null)
+                {
+                    currentGuardian.FullName = request.GuardianFullName ?? currentGuardian.FullName;
+                    currentGuardian.GuardianDOB = request.GuardianDOB != default ? request.GuardianDOB : currentGuardian.GuardianDOB;
+                    currentGuardian.Type = request.GuardianType ?? currentGuardian.Type;
 
+                    var guardianUser = await _userManager.Users
+                        .FirstOrDefaultAsync(u => u.Id == currentGuardian.UserID);
+                    if (guardianUser != null)
+                    {
+                        guardianUser.Email = request.GuardianEmail ?? guardianUser.Email;
+                        guardianUser.PhoneNumber = request.GuardianPhone ?? guardianUser.PhoneNumber;
+                        guardianUser.Address = request.GuardianAddress ?? guardianUser.Address;
+
+                        await _userManager.UpdateAsync(guardianUser);
+                    }
+
+                    await _dbContext.SaveChangesAsync();
                 }
             }
 
