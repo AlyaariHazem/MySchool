@@ -13,7 +13,7 @@
                   <span class="ml-2">Add User</span>
                 </button>
                 <button class="btn btn-light" type="button" data-toggle="dropdown" aria-haspopup="true"
-                  aria-expanded="false">
+                  aria-expanded="false" title="More options">
                   <i class="fas fa-ellipsis-h"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
@@ -71,16 +71,16 @@
                         <div class="col text-left">
                           <div class="mt-sm-0 mt-2">
                             <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                              aria-expanded="false">
+                              aria-expanded="false" title="Actions">
                               <i class="fas fa-ellipsis-h"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-left">
                               <!-- when I click here chage in the form from "إضافة" to be like "تعديل"  -->
-                              <a class="dropdown-item"><i
+                              <a class="dropdown-item" (click)="editUser(manager)"><i
                                   class="bi bi-pencil-square IconEdit"></i>تعديل</a>
                               <div role="separator" class="dropdown-divider"></div>
-                              <a class="dropdown-item" ><i
-                                  class="bi bi-trash IconDelete" (click)="deleteUser(manager.managerID)"></i>حذف</a>
+                              <a class="dropdown-item" (click)="deleteUser(manager.managerID)"><i
+                                  class="bi bi-trash IconDelete"></i>حذف</a>
                             </div>
                           </div>
                         </div>

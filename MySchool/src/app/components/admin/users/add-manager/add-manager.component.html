@@ -1,5 +1,5 @@
 <div id="DataStudent" class="container" dir="rtl">
-    <h2 class="title">إضافة مدير مدرسة</h2>
+    <h2 class="title">{{ pageTitle }}</h2>
 
     <form [formGroup]="managerForm" (ngSubmit)="onSubmit(managerForm)" class="p-fluid">
         <div class="group group1">
@@ -58,7 +58,7 @@
         </div>
 
         <div class="text-center mt-3">
-            <input type="submit" class="school-btn" pButton [disabled]="managerForm.invalid" placeholder="إضافة +"/> 
+            <input type="submit" class="school-btn" pButton [disabled]="managerForm.invalid" [value]="isEditMode ? 'تعديل' : 'إضافة +'"/> 
         </div>
     </form>
 </div>

@@ -52,6 +52,23 @@ export class UsersComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.toastr.success('تم إضافة الطالب بنجاح');
+        this.getAllManagers(); // Refresh the list
+      }
+    });
+  }
+
+  editUser(manager: managerInfo): void {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.width = '95%';
+    dialogConfig.panelClass = 'custom-dialog-container';
+    dialogConfig.data = { manager: manager, isEditMode: true };
+
+    const dialogRef = this.dialog.open(AddManagerComponent, dialogConfig);
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.toastr.success('تم تحديث الطالب بنجاح');
+        this.getAllManagers(); // Refresh the list
       }
     });
   }

@@ -51,4 +51,14 @@ export class ManagerService {
     );
   }
 
+  updateManager(id: number, manager: manager): Observable<any> {
+    return this.API.http.put<any>(`${this.API.baseUrl}/Manager/${id}`, manager).pipe(
+      map(response => response.result),
+      catchError(error => {
+        console.error("Error updating manager:", error);
+        throw error;
+      })
+    );
+  }
+
 }
