@@ -12,7 +12,8 @@ yarn-error.log
 # ASP.NET build outputs
 Backend/bin/
 Backend/obj/
-
+# ignore the wwwroot folder as it contains static files generated during build
+Backend/wwwroot
 # IDEs and editors
 .idea/
 .project
