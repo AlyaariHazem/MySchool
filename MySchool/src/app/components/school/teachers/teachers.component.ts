@@ -86,7 +86,7 @@ export class TeachersComponent {
   openDialog(): void {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.panelClass = 'custom-dialog-container';
-    dialogConfig.height = '65%';
+    dialogConfig.height = '50%';
 
     const dialogRef = this.dialog.open(EmployeeComponent, dialogConfig);
 

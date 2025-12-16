@@ -1,101 +1,135 @@
 <div class="employee-form-container">
-    <h2>بيانات الموظف</h2>
-
-    <div class="form-actions">
-        <p-button class="btn-save" variant="outlined" severity="success"
-            (click)="mode === 'add' ? AddEmployee() : UpdateEmployee()"
-            [label]="mode === 'add' ? 'حفظ الموظف' : 'تعديل الموظف'">
+    <div class="employee-header">
+      <h2>بيانات الموظف</h2>
+  
+      <div class="employee-actions">
+        <p-button
+          class="btn-save"
+          severity="success"
+          variant="outlined"
+          icon="pi pi-save"
+          [label]="mode === 'add' ? 'حفظ الموظف' : 'تعديل الموظف'"
+          (onClick)="mode === 'add' ? AddEmployee() : UpdateEmployee()">
         </p-button>
+      </div>
     </div>
+  
+    <p-tabs value="0" class="employee-tabs">
+      <p-tablist>
+        <p-tab value="0">معلومات الموظف</p-tab>
+        <p-tab value="1">معلومات اختيارية</p-tab>
+      </p-tablist>
+  
+      <p-tabpanels [formGroup]="form">
+        <p-tabpanel value="0">
+          <div class="form-shell">
+            <!-- Row 1: first & last name -->
+            <div class="grid p-fluid mt-3">
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <input pInputText id="firstName" formControlName="firstName" type="text" />
+                  <label for="firstName">الاسم الأول</label>
+                </p-floatLabel>
+              </div>
 
-    <p-tabs value="0">
-        <p-tablist>
-            <p-tab value="0">معلومات الموظف</p-tab>
-            <p-tab value="1">معلومات اختيارية</p-tab>
-        </p-tablist>
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <input pInputText id="lastName" formControlName="lastName" type="text" />
+                  <label for="lastName">الاسم الأخير</label>
+                </p-floatLabel>
+              </div>
+            </div>
 
-        <p-tabpanels [formGroup]="form">
-            <p-tabpanel value="0">
-                <div class="employee-form">
-                    <div class="grid p-fluid">
-                        <div class="form-row col-12 md:col-6">
-                            <p-floatLabel  variant="on">
-                                <input pInputText formControlName="firstName" id="firstName" type="text"
-                                    placeholder=" " />
-                                <label for="firstName">الاسم الأول</label>
-                            </p-floatLabel>
-                        </div>
+            <!-- Row 2: gender & job type -->
+            <div class="grid p-fluid mt-3">
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <p-select
+                    id="gender"
+                    formControlName="gender"
+                    [options]="genders"
+                    optionLabel="name"
+                    optionValue="value"
+                    [showClear]="true"
+                    class="w-full">
+                  </p-select>
+                  <label for="gender">الجنس *</label>
+                </p-floatLabel>
+              </div>
 
-                        <div class="form-row col-12 md:col-6">
-                            <p-floatLabel  variant="on">
-                                <input pInputText formControlName="lastName" id="lastName" type="text"
-                                    placeholder=" " />
-                                <label for="lastName">الاسم الأخير</label>
-                            </p-floatLabel>
-                        </div>
-                    </div>
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <p-select
+                    id="jopName"
+                    formControlName="jopName"
+                    [options]="employeeTypes"
+                    optionLabel="name"
+                    optionValue="value"
+                    [showClear]="true"
+                    class="w-full">
+                  </p-select>
+                  <label for="jopName">نوع الموظف *</label>
+                </p-floatLabel>
+              </div>
+            </div>
 
-                    <div class="grid p-fluid">
-                        <div class="form-row col-12 md:col-4">
-                            <p-floatLabel  variant="on">
-                                <p-select formControlName="gender" [options]="genders" optionLabel="name"
-                                    optionValue="value" [editable]="true" [checkmark]="true" [showClear]="true"
-                                    id="gender" class="w-full" />
-                                <label for="gender">الجنس *</label>
-                            </p-floatLabel>
-                        </div>
+            <!-- Row 3: date of birth (single) -->
+            <div class="grid p-fluid mt-3">
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <p-datepicker
+                    id="dob"
+                    formControlName="dob"
+                    dateFormat="dd/mm/yy"
+                    [showIcon]="true"
+                    iconDisplay="input"
+                    appendTo="body"
+                    class="w-full" />
+                  <label for="dob">تاريخ الميلاد *</label>
+                </p-floatLabel>
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+  
+        <p-tabpanel value="1">
+          <div class="form-shell">
+            <!-- Row 1: birth place & address -->
+            <div class="grid p-fluid mt-3">
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <input pInputText id="birthPlace" formControlName="birthPlace" type="text" />
+                  <label for="birthPlace">مكان الميلاد</label>
+                </p-floatLabel>
+              </div>
 
-                        <div class="form-row col-12 md:col-4">
-                            <p-floatLabel  variant="on">
-                                <p-select formControlName="jopName" [options]="employeeTypes" optionLabel="name"
-                                    optionValue="value" [editable]="true" [checkmark]="true" [showClear]="true"
-                                    id="jopName" class="w-full" />
-                                <label for="jopName">نوع الموظف *</label>
-                            </p-floatLabel>
-                        </div>
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <input pInputText id="address" formControlName="address" type="text" />
+                  <label for="address">العنوان *</label>
+                </p-floatLabel>
+              </div>
+            </div>
 
-                        <div class="form-row col-12 md:col-4">
-                            <p-floatLabel  variant="on">
-                                <input pInputText formControlName="dob" id="dob" type="date" class="w-full" />
-                                <label for="dob">تاريخ الميلاد *</label>
-                            </p-floatLabel>
-                        </div>
-                    </div>
-                </div>
-            </p-tabpanel>
+            <!-- Row 2: mobile & email -->
+            <div class="grid p-fluid mt-3">
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <input pInputText id="mobile" formControlName="mobile" type="text" />
+                  <label for="mobile">رقم الهاتف</label>
+                </p-floatLabel>
+              </div>
 
-            <p-tabpanel value="1">
-                <div class="grid p-fluid">
-                    <div class="col-12 md:col-6">
-                        <p-floatLabel >
-                            <input pInputText formControlName="birthPlace" id="birthPlace" type="text"
-                                placeholder=" " />
-                            <label for="birthPlace">مكان الميلاد</label>
-                        </p-floatLabel>
-                    </div>
-
-                    <div class="col-12 md:col-6">
-                        <p-floatLabel  variant="on">
-                            <input pInputText formControlName="address" id="address" type="text" placeholder=" " />
-                            <label for="address">العنوان *</label>
-                        </p-floatLabel>
-                    </div>
-
-                    <div class="col-12 md:col-6">
-                        <p-floatLabel  variant="on">
-                            <input pInputText formControlName="mobile" id="mobile" type="text" placeholder=" " />
-                            <label for="mobile">رقم الهاتف</label>
-                        </p-floatLabel>
-                    </div>
-
-                    <div class="col-12 md:col-6">
-                        <p-floatLabel  variant="on">
-                            <input pInputText formControlName="email" id="email" type="email" placeholder=" " />
-                            <label for="email">البريد الإلكتروني</label>
-                        </p-floatLabel>
-                    </div>
-                </div>
-            </p-tabpanel>
-        </p-tabpanels>
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <input pInputText id="email" formControlName="email" type="email" />
+                  <label for="email">البريد الإلكتروني</label>
+                </p-floatLabel>
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
     </p-tabs>
-</div>
+  </div>
+  

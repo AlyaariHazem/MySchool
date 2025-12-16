@@ -82,6 +82,7 @@ import { GradesTermComponent } from './grades-mange/grades-term/grades-term.comp
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 import { HeaderReportComponent } from './report/header-report/header-report.component';
 import { AllStudentsComponent } from './students/all-students/all-students.component';
+import { DatePicker } from 'primeng/datepicker';
 
 
 
@@ -146,6 +147,7 @@ const modules = [
   MatOption,
   EditorModule,
   FormsModule,
+  DatePicker,
   ChartModule,
   DropdownModule,
   PaginatorModule,

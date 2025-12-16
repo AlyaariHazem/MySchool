@@ -41,7 +41,13 @@ body {
 .mat-text-field--outlined .mdc-notched-outline_leading {
   border-color: red !important;
 }
-// Increase the z-index so the datepicker is above dialogs
+
+// Angular Material dialogs container z-index
 .cdk-overlay-container {
   z-index: 3000 !important;
+}
+
+// Make PrimeNG DatePicker overlay appear above Angular Material dialogs
+.p-datepicker-panel {
+  z-index: 4000 !important;
 }

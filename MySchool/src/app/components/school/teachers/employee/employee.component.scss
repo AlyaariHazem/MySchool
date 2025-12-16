@@ -1,80 +1,149 @@
 .employee-form-container {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: auto;
-  margin: auto;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   direction: rtl;
+  background: var(--p-surface-card, #fff);
+  border-radius: 16px;
+  padding: 20px 24px 26px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.employee-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 
   h2 {
-    text-align: center;
-    margin-bottom: 20px;
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.2px;
   }
-  input,select {
-    width: 100% !important;
+}
+
+.employee-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .btn-save {
+    border-radius: 999px;
+    font-weight: 700;
+    padding-inline: 18px;
   }
-  .form-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    justify-content: end;
-    .btn-clear {
-      background: #ccc;
-      padding: 8px 12px;
-      border: none;
+}
+
+/* Centers the form area to remove the big empty space you see in the dialog */
+.form-shell {
+  max-width: 720px;
+  margin-inline: auto;
+  padding-top: 6px;
+}
+
+/* Better spacing between fields */
+:host ::ng-deep .grid.p-fluid {
+  row-gap: 16px;
+}
+
+/* Tabs look like a modern pill/segmented control */
+:host ::ng-deep .employee-tabs {
+  .p-tablist {
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.04);
+  }
+
+  .p-tab {
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-weight: 700;
+    color: #334155;
+    transition: transform 0.12s ease, background 0.12s ease;
+  }
+
+  .p-tab.p-tab-active {
+    background: var(--p-primary-50, rgba(16, 185, 129, 0.12));
+    color: var(--p-primary-700, #065f46);
+  }
+
+  .p-tab:not(.p-tab-active):hover {
+    background: rgba(15, 23, 42, 0.06);
+    transform: translateY(-1px);
+  }
+
+  .p-tabpanels {
+    padding-top: 14px;
+  }
+}
+
+/* Consistent input/select/calendar sizing + nicer focus */
+:host ::ng-deep {
+  .p-inputtext,
+  .p-select,
+  .p-calendar .p-inputtext {
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .p-inputtext,
+  .p-calendar .p-inputtext {
+    height: 44px;
+    padding-inline: 12px;
+  }
+
+  .p-select {
+    height: 44px;
+
+    .p-select-label {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding-inline: 12px;
     }
+  }
+
+  .p-inputtext:focus,
+  .p-select.p-focus,
+  .p-calendar.p-focus .p-inputtext {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.55);
+  }
+
+  /* FloatLabel readability */
+  .p-floatlabel > label {
+    font-weight: 600;
+    color: #64748b;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .employee-form-container {
+    padding: 14px 14px 18px;
+    border-radius: 14px;
+  }
+
+  .employee-header {
+    flex-direction: column;
+    align-items: flex-start;
 
     .btn-save {
-      padding: 8px 12px;
-      border: none;
-    }
-
-    .employee-id {
-      font-size: 14px;
-      color: #555;
+      width: 100%;
+      justify-content: center;
     }
   }
 
-  .employee-form {
-    .form-row {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 10px;
-
-      label {
-        margin-bottom: 5px;
-        font-weight: bold;
-      }
-
-      input,
-      select {
-        padding: 6px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-      }
-    }
+  .form-shell {
+    max-width: 100%;
   }
+  
 }
-p-select, input{
-  height: 3rem!important;
-}
-.scroll-wrapper {
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 1rem;
-  
-    &::-webkit-scrollbar {
-      width: 8px;
-    }
-  
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-  
-    &::-webkit-scrollbar-thumb {
-      background-color: #c5c5c5;
-      border-radius: 4px;
-    }
-  }
-  
