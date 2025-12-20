@@ -62,7 +62,7 @@
           }
         </div>
         <p-paginator dir="ltr" (onPageChange)="handlePageChange($event)" [first]="paginatorService.first()"
-          [rows]="paginatorService.rows()" [totalRecords]="Students.length" [rowsPerPageOptions]="[4, 10, 20]" />
+          [rows]="paginatorService.rows()" [totalRecords]="totalRecords" [rowsPerPageOptions]="[8, 16, 25]" />
         }
 
         @if (showCulomn) {

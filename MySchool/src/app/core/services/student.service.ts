@@ -27,6 +27,27 @@ export class StudentService {
             })
         )
     }
+
+    getAllStudentsPaginated(pageNumber: number = 1, pageSize: number = 8): Observable<any> {
+        return this.API.http.get<any>(`${this.API.baseUrl}/Students?pageNumber=${pageNumber}&pageSize=${pageSize}`).pipe(
+            map(response => {
+                // Handle both wrapped (APIResponse) and unwrapped responses
+                const data = response.result || response;
+                // Map PagedResult properties (C# uses PascalCase, but JSON might be camelCase)
+                return {
+                    data: data.Data || data.data || [],
+                    pageNumber: data.PageNumber ?? data.pageNumber ?? pageNumber,
+                    pageSize: data.PageSize ?? data.pageSize ?? pageSize,
+                    totalCount: data.TotalCount ?? data.totalCount ?? 0,
+                    totalPages: data.TotalPages ?? data.totalPages ?? 0
+                };
+            }),
+            catchError(error => {
+                console.error("Error fetching paginated Student Details:", error);
+                throw error;
+            })
+        )
+    }
     DeleteStudent(id: number): Observable<any> {
         return this.API.http.delete(`${this.API.baseUrl}/Students/${id}`).pipe(
             catchError(error => {

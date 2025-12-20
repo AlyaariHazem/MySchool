@@ -1,3 +1,4 @@
+using Backend.Common;
 using Backend.DTOS;
 using Backend.DTOS.School.Accounts;
 using Backend.DTOS.School.Guardians;
@@ -11,6 +12,7 @@ using Backend.Repository.School.Interfaces;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 
 namespace Backend.Controllers
 {
@@ -244,13 +246,29 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllStudents()
+        public async Task<ActionResult<PagedResult<StudentDetailsDTO>>> GetAllStudents(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 8,
+            CancellationToken cancellationToken = default)
         {
-            var students = await _unitOfWork.Students.GetAllStudentsAsync();
-            if (students == null)
-                return NotFound(new { message = "Students not found." });
+            // Clamp values to avoid abuse (e.g., pageSize=100000)
+            const int maxPageSize = 100;
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 8;
+            if (pageSize > maxPageSize) pageSize = maxPageSize;
 
-            return Ok(students);
+            var (items, totalCount) = await _unitOfWork.Students
+                .GetStudentsPageAsync(pageNumber, pageSize, cancellationToken);
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return Ok(new PagedResult<StudentDetailsDTO>(
+                items,
+                pageNumber,
+                pageSize,
+                totalCount,
+                totalPages
+            ));
         }
 
         [HttpGet("MaxValue")]

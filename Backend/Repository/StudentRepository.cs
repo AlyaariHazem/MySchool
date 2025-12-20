@@ -288,6 +288,11 @@ public class StudentRepository : IStudentRepository
 
         string baseUrl = $"{GetBaseUrl()}/uploads/StudentPhotos";
 
+        return MapStudentsToDTOs(students, users, baseUrl);
+    }
+
+    private List<StudentDetailsDTO> MapStudentsToDTOs(List<Student> students, Dictionary<string, ApplicationUser> users, string baseUrl)
+    {
         return students.Select(student =>
         {
             var user = users.ContainsKey(student.UserID) ? users[student.UserID] : null;
@@ -336,6 +341,45 @@ public class StudentRepository : IStudentRepository
                 } : null
             };
         }).ToList();
+    }
+
+    public async Task<(List<StudentDetailsDTO> Items, int TotalCount)> GetStudentsPageAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    {
+        // Get total count first (before pagination)
+        var totalCount = await _context.Students.CountAsync(cancellationToken);
+
+        if (totalCount == 0)
+            return (new List<StudentDetailsDTO>(), 0);
+
+        var students = await _context.Students
+            .Include(s => s.Division)        // Include Division details
+                .ThenInclude(d => d.Class)   // Include Class details
+                    .ThenInclude(c => c.Stage) // Include Stage details
+            .Include(ASG => ASG.AccountStudentGuardians)
+            .Include(s => s.Guardian)        // Include Guardian details
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        if (students == null || !students.Any())
+            return (new List<StudentDetailsDTO>(), totalCount);
+
+        // Fetch all user data in batch from admin database
+        var userIds = students.Select(s => s.UserID).Distinct().ToList();
+        var users = new Dictionary<string, ApplicationUser>();
+        foreach (var userId in userIds)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user != null)
+            {
+                users[userId] = user;
+            }
+        }
+
+        string baseUrl = $"{GetBaseUrl()}/uploads/StudentPhotos";
+
+        var items = MapStudentsToDTOs(students, users, baseUrl);
+        return (items, totalCount);
     }
 
     public async Task<GetStudentForUpdateDTO?> GetUpdateStudentWithGuardianRequestData(int studentId)

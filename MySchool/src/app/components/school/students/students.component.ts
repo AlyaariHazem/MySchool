@@ -37,6 +37,11 @@ export class StudentsComponent implements OnInit {
   paginatedStudents: StudentDetailsDTO[] = [];
   hiddenFrom: boolean = false;
 
+  // Pagination properties
+  totalRecords: number = 0;
+  currentPage: number = 1;
+  pageSize: number = 10;
+
   showGrid: boolean = false;
   showCulomn: boolean = true;
   showStudentCulomn(): void {
@@ -48,8 +53,9 @@ export class StudentsComponent implements OnInit {
     this.showGrid = true;
   }
   handlePageChange(event: PaginatorState): void {
-    this.paginatorService.onPageChange(event);
-    this.paginatedStudents = this.paginatorService.pageSlice(this.Students);
+    this.currentPage = Math.floor((event.first || 0) / (event.rows || this.pageSize)) + 1;
+    this.pageSize = event.rows || 8;
+    this.getAllStudents();
   }
   constructor(
     private formBuilder: FormBuilder,
@@ -75,12 +81,31 @@ export class StudentsComponent implements OnInit {
       //this for add student 
       this.openDialog();
     }
+    // Initialize pagination
+    this.currentPage = 1;
+    this.pageSize = 8;
+    this.paginatorService.first.set(0);
+    this.paginatorService.rows.set(8);
     this.getAllStudents();
   }
   getAllStudents(): void {
-    this.studentService.getAllStudents().subscribe((res) => {
-      this.Students = res;
-      this.paginatedStudents = this.paginatorService.pageSlice(this.Students);
+    this.studentService.getAllStudentsPaginated(this.currentPage, this.pageSize).subscribe({
+      next: (res) => {
+        this.paginatedStudents = res.data || res; // Handle both wrapped and unwrapped responses
+        this.totalRecords = res.totalCount || 0;
+        this.currentPage = res.pageNumber || this.currentPage;
+        this.pageSize = res.pageSize || this.pageSize;
+        
+        // Update paginator service for UI consistency
+        this.paginatorService.first.set((this.currentPage - 1) * this.pageSize);
+        this.paginatorService.rows.set(this.pageSize);
+      },
+      error: (err) => {
+        console.error("Error fetching students:", err);
+        this.toastr.error('فشل في تحميل بيانات الطلاب. تأكد من تشغيل الخادم.', 'خطأ');
+        this.paginatedStudents = [];
+        this.totalRecords = 0;
+      }
     })
   }
   getStudentByID(id: number): void {

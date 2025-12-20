@@ -26,16 +26,24 @@ export class DashboardComponent implements OnInit {
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
   );
   // ────────────────────────────  Data
-  students: StudentDetailsDTO[] = [];
+  students: StudentDetailsDTO[] = []; // All students for chart
+  paginatedStudents: StudentDetailsDTO[] = []; // Paginated students for table
   years: Year[] = [];
   isLoading = true;
 
   // ────────────────────────────  Pagination
   first = 0;
-  rows = 4;
+  rows = 10;
+  currentPage = 1;
+  pageSize = 10;
+  totalRecords = 0;
+  
   onPageChange(event: PaginatorState): void {
     this.first = event.first ?? 0;
-    this.rows = event.rows ?? 4;
+    this.rows = event.rows ?? this.pageSize;
+    this.currentPage = Math.floor((event.first || 0) / (event.rows || this.pageSize)) + 1;
+    this.pageSize = event.rows || 10;
+    this.loadPaginatedStudents();
   }
 
   basicData: any;
@@ -45,14 +53,43 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     combineLatest([
       this.yearService.getAllYears(),
-      this.studentService.getAllStudents(),
-    ]).subscribe(([years, students]) => {
-      this.years = years;
-      this.students = students;
-      this.isLoading = false;
-      this.initChart();
+      // Fetch students with max page size (10) for chart
+      // Note: Chart will only show data for first 10 students due to API limit
+      this.studentService.getAllStudentsPaginated(1, 10), // Max page size
+    ]).subscribe({
+      next: ([years, paginatedResult]) => {
+        this.years = years;
+        // Extract students array from paginated result
+        this.students = paginatedResult.data || []; // Students for chart (max 10)
+        this.totalRecords = paginatedResult.totalCount || 0;
+        this.isLoading = false;
+        this.initChart();
+        this.loadPaginatedStudents(); // Load paginated data for table
+      },
+      error: (err) => {
+        console.error("Error loading dashboard data:", err);
+        this.isLoading = false;
+        this.loadPaginatedStudents(); // Still try to load paginated data
+      }
     });
+  }
 
+  private loadPaginatedStudents(): void {
+    this.studentService.getAllStudentsPaginated(this.currentPage, this.pageSize).subscribe({
+      next: (res) => {
+        this.paginatedStudents = res.data || [];
+        this.totalRecords = res.totalCount || 0;
+        this.currentPage = res.pageNumber || this.currentPage;
+        this.pageSize = res.pageSize || this.pageSize;
+        this.first = (this.currentPage - 1) * this.pageSize;
+        this.rows = this.pageSize;
+      },
+      error: (err) => {
+        console.error("Error fetching paginated students:", err);
+        this.paginatedStudents = [];
+        this.totalRecords = 0;
+      }
+    });
   }
 
   private countStudentsPerYear(): number[] {
