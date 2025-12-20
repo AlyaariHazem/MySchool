@@ -297,6 +297,21 @@ namespace Backend.Data
             modelBuilder.Entity<Attachments>()
                 .HasKey(a => a.AttachmentID);
             
+            // Attachments -> Student
+            modelBuilder.Entity<Attachments>()
+                .HasOne(a => a.Student)
+                .WithMany(s => s.Attachments)
+                .HasForeignKey(a => a.StudentID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Attachments -> Voucher
+            modelBuilder.Entity<Attachments>()
+                .HasOne(a => a.Voucher)
+                .WithMany(v => v.Attachments)
+                .HasForeignKey(a => a.VoucherID)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            
             modelBuilder.Entity<StudentClassFees>()
                 .HasKey(a => a.StudentClassFeesID);
             

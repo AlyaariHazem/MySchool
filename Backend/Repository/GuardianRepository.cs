@@ -16,11 +16,13 @@ public class GuardianRepository : IGuardianRepository
 {
     private readonly TenantDbContext _db;
     private readonly IMapper _mapper;
+    private readonly IUserRepository _userRepository;
 
-    public GuardianRepository(TenantDbContext db, IMapper mapper)
+    public GuardianRepository(TenantDbContext db, IMapper mapper, IUserRepository userRepository)
     {
         _db = db;
         _mapper = mapper;
+        _userRepository = userRepository;
     }
 
     public async Task<GuardianDTO> AddGuardianAsync(Guardian guardian)
@@ -33,23 +35,39 @@ public class GuardianRepository : IGuardianRepository
 
     public async Task<List<GuardianDTO>> GetAllGuardiansAsync()
     {
-        var guardiansData = await _db.Guardians
-        .Include(g => g.ApplicationUser).ToListAsync();
+        // ApplicationUser is in admin database, not tenant database, so we can't Include it
+        var guardiansData = await _db.Guardians.ToListAsync();
 
         if (guardiansData == null)
             throw new Exception("Guardian not found.");
 
-        var mappedGuardians = guardiansData.Select(guardian => new GuardianDTO
+        // Fetch all user data in batch from admin database
+        var userIds = guardiansData.Select(g => g.UserID).Distinct().ToList();
+        var users = new Dictionary<string, ApplicationUser>();
+        foreach (var userId in userIds)
         {
-            GuardianID = guardian.GuardianID,
-            FullName = guardian.FullName,
-            Gender = guardian.ApplicationUser.Gender,
-            Type = guardian.Type,
-            UserID = guardian.UserID,
-            GuardianAddress = guardian.ApplicationUser.Address!,
-            GuardianDOB = guardian.GuardianDOB,
-            GuardianEmail = guardian.ApplicationUser.Email!,
-            GuardianPhone = guardian.ApplicationUser.PhoneNumber
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user != null)
+            {
+                users[userId] = user;
+            }
+        }
+
+        var mappedGuardians = guardiansData.Select(guardian =>
+        {
+            var user = users.ContainsKey(guardian.UserID) ? users[guardian.UserID] : null;
+            return new GuardianDTO
+            {
+                GuardianID = guardian.GuardianID,
+                FullName = guardian.FullName,
+                Gender = user?.Gender ?? string.Empty,
+                Type = guardian.Type,
+                UserID = guardian.UserID,
+                GuardianAddress = user?.Address ?? string.Empty,
+                GuardianDOB = guardian.GuardianDOB,
+                GuardianEmail = user?.Email ?? string.Empty,
+                GuardianPhone = user?.PhoneNumber ?? string.Empty
+            };
         }).ToList();
 
         return mappedGuardians;
@@ -57,47 +75,54 @@ public class GuardianRepository : IGuardianRepository
 
     public async Task<GuardianDTO> GetGuardianByIdAsync(int guardianId)
     {
+        // ApplicationUser is in admin database, not tenant database, so we can't Include it
         var guardianData = await _db.Guardians
-         .Include(g => g.ApplicationUser)
-         .FirstOrDefaultAsync(g => g.GuardianID == guardianId);
+            .FirstOrDefaultAsync(g => g.GuardianID == guardianId);
 
         if (guardianData == null)
             return null!;
+
+        // Fetch user data from admin database separately
+        var user = await _userRepository.GetUserByIdAsync(guardianData.UserID);
 
         var guardian = new GuardianDTO
         {
             GuardianID = guardianData.GuardianID,
             FullName = guardianData.FullName,
-            Gender = guardianData.ApplicationUser.Gender,
+            Gender = user?.Gender ?? string.Empty,
             Type = guardianData.Type,
             UserID = guardianData.UserID,
-            GuardianAddress = guardianData.ApplicationUser.Address!,
+            GuardianAddress = user?.Address ?? string.Empty,
             GuardianDOB = guardianData.GuardianDOB,
-            GuardianEmail = guardianData.ApplicationUser.Email!,
-            GuardianPhone = guardianData.ApplicationUser.PhoneNumber
+            GuardianEmail = user?.Email ?? string.Empty,
+            GuardianPhone = user?.PhoneNumber ?? string.Empty
         };
         return guardian;
     }
 
     public async Task<GuardianDTO> GetGuardianByIdForUpdateAsync(int guardianId)
     {
+        // ApplicationUser is in admin database, not tenant database, so we can't Include it
         var guardianData = await _db.Guardians
-        .Include(g => g.ApplicationUser)
-        .FirstOrDefaultAsync(g => g.GuardianID == guardianId);
+            .FirstOrDefaultAsync(g => g.GuardianID == guardianId);
+        
         if (guardianData == null)
             throw new Exception("Guardian not found.");
+
+        // Fetch user data from admin database separately
+        var user = await _userRepository.GetUserByIdAsync(guardianData.UserID);
 
         var guardian = new GuardianDTO
         {
             GuardianID = guardianData.GuardianID,
             FullName = guardianData.FullName,
-            Gender = guardianData.ApplicationUser.Gender,
+            Gender = user?.Gender ?? string.Empty,
             Type = guardianData.Type,
             UserID = guardianData.UserID,
-            GuardianAddress = guardianData.ApplicationUser.Address!,
+            GuardianAddress = user?.Address ?? string.Empty,
             GuardianDOB = guardianData.GuardianDOB,
-            GuardianEmail = guardianData.ApplicationUser.Email!,
-            GuardianPhone = guardianData.ApplicationUser.PhoneNumber
+            GuardianEmail = user?.Email ?? string.Empty,
+            GuardianPhone = user?.PhoneNumber ?? string.Empty
         };
         return guardian;
     }
@@ -110,19 +135,27 @@ public class GuardianRepository : IGuardianRepository
             guardianExist.FullName = guardian!.FullName;
             guardianExist.GuardianDOB = guardian.GuardianDOB;
             guardianExist.Type = guardian.Type;
-            guardianExist.ApplicationUser.Address = guardian.GuardianAddress;
-            guardianExist.ApplicationUser.Email = guardian.GuardianEmail;
-            guardianExist.ApplicationUser.PhoneNumber = guardian.GuardianPhone;
-            _db.Entry(guardian).State = EntityState.Modified;
+            
+            // Update user data in admin database (ApplicationUser is not in TenantDbContext)
+            var user = await _userRepository.GetUserByIdAsync(guardianExist.UserID);
+            if (user != null)
+            {
+                user.Address = guardian.GuardianAddress;
+                user.Email = guardian.GuardianEmail;
+                user.PhoneNumber = guardian.GuardianPhone;
+                await _userRepository.UpdateAsync(user);
+            }
+            
+            _db.Entry(guardianExist).State = EntityState.Modified;
             await _db.SaveChangesAsync();
         }
     }
     public async Task<List<GuardiansInfo>> GetAllGuardiansInfoAsync()
     {
         // Use AsNoTracking to prevent duplicate entity tracking issues
+        // ApplicationUser is in admin database, not tenant database, so we can't Include it
         var guardiansData = await _db.Guardians
         .AsNoTracking()
-        .Include(g => g.ApplicationUser)
         .Include(g => g.AccountStudentGuardians)
             .ThenInclude(ASG => ASG.Vouchers)
         .Include(g => g.AccountStudentGuardians)
@@ -133,6 +166,18 @@ public class GuardianRepository : IGuardianRepository
         if (guardiansData == null)
             throw new Exception("Guardian not found.");
 
+        // Fetch all user data in batch from admin database
+        var userIds = guardiansData.Select(g => g.UserID).Distinct().ToList();
+        var users = new Dictionary<string, ApplicationUser>();
+        foreach (var userId in userIds)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user != null)
+            {
+                users[userId] = user;
+            }
+        }
+
         // Group by GuardianID to ensure we only get one record per guardian
         // Filter out guardians with no students (StudentCount = 0)
         var mappedGuardians = guardiansData
@@ -140,6 +185,7 @@ public class GuardianRepository : IGuardianRepository
             .Select(group => 
             {
                 var guardian = group.First();
+                var user = users.ContainsKey(guardian.UserID) ? users[guardian.UserID] : null;
                 var studentCount = guardian.AccountStudentGuardians?.Count() ?? 0;
                 
                 // Skip guardians with no students
@@ -153,14 +199,14 @@ public class GuardianRepository : IGuardianRepository
                 {
                     GuardianID = guardian.GuardianID,
                     FullName = guardian.FullName,
-                    Gender = guardian.ApplicationUser?.Gender ?? "Unknown",
+                    Gender = user?.Gender ?? "Unknown",
                     StudentCount = studentCount,
                     RequiredFee = requiredFee,
                     Piad = piad,
                     Remaining = requiredFee - piad,
-                    Address = guardian.ApplicationUser?.Address ?? "N/A",
+                    Address = user?.Address ?? "N/A",
                     DOB = guardian.GuardianDOB,
-                    Phone = guardian.ApplicationUser?.PhoneNumber ?? "N/A",
+                    Phone = user?.PhoneNumber ?? "N/A",
                     AccountId = guardian.AccountStudentGuardians?.FirstOrDefault()?.Accounts?.AccountID ?? 1
                 };
             })

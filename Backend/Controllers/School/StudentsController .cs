@@ -192,7 +192,25 @@ namespace Backend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                // Log the full exception details
+                var errorDetails = new
+                {
+                    message = ex.Message,
+                    innerException = ex.InnerException?.Message,
+                    innerExceptionType = ex.InnerException?.GetType()?.FullName,
+                    stackTrace = ex.StackTrace,
+                    exceptionType = ex.GetType().FullName
+                };
+                
+                // Log to console/logger for debugging
+                Console.WriteLine($"Error adding student: {System.Text.Json.JsonSerializer.Serialize(errorDetails)}");
+                
+                // Return detailed error information
+                return StatusCode(500, new 
+                { 
+                    error = "An error occurred while saving the entity changes. See the inner exception for details.",
+                    details = errorDetails
+                });
             }
         }
         [HttpPut("updateStudentWithGuardian/{id}")]

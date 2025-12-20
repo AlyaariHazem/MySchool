@@ -14,5 +14,5 @@ public class Attachments
     public Student Student { get; set; }
     
     public int? VoucherID { get; set; }
-    public Vouchers Vouchers { get; set; }
+    public Vouchers Voucher { get; set; }
 }

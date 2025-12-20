@@ -7,6 +7,7 @@ using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
 using Backend.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,20 +19,118 @@ public class StudentRepository : IStudentRepository
     private readonly IGuardianRepository _guardianRepo;
     private readonly mangeFilesService _mangeFilesService;
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<StudentRepository> _logger;
 
-    public StudentRepository(TenantDbContext context, IGuardianRepository guardianRepo, mangeFilesService mangeFilesService, IUserRepository userRepository)
+    public StudentRepository(TenantDbContext context, IGuardianRepository guardianRepo, mangeFilesService mangeFilesService, IUserRepository userRepository, ILogger<StudentRepository> logger)
     {
         _context = context;
         _guardianRepo = guardianRepo;
         _mangeFilesService = mangeFilesService;
         _userRepository = userRepository;
+        _logger = logger;
     }
 
     // Create: Add a new student
     public async Task<Student> AddStudentAsync(Student student)
     {
-        _context.Students.Add(student);
-        await _context.SaveChangesAsync();
+        // Always auto-generate StudentID to avoid duplicate key errors
+        // Since StudentID is configured with ValueGeneratedNever(), we must calculate it manually
+        // Retry logic to handle race conditions and ensure unique ID
+        const int maxRetries = 5;
+        int retryCount = 0;
+        
+        while (retryCount < maxRetries)
+        {
+            int nextId = 0;
+            int maxValue = 0;
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Always recalculate max value to ensure we get the latest
+                maxValue = await _context.Students.MaxAsync(s => (int?)s.StudentID) ?? 0;
+                
+                // Calculate next ID, but also check for gaps in case of deletions
+                nextId = maxValue + 1;
+                
+                // Double-check this ID doesn't exist (handles race conditions and gaps)
+                var exists = await _context.Students.AnyAsync(s => s.StudentID == nextId);
+                int attempts = 0;
+                while (exists && attempts < 10) // Try up to 10 times to find a free ID
+                {
+                    nextId++;
+                    exists = await _context.Students.AnyAsync(s => s.StudentID == nextId);
+                    attempts++;
+                }
+                
+                if (exists)
+                {
+                    // Still exists after checking - this shouldn't happen, but handle it
+                    _logger.LogWarning("Could not find available StudentID after {Attempts} attempts. MaxValue: {MaxValue}, LastNextId: {NextId}", attempts, maxValue, nextId);
+                    await transaction.RollbackAsync();
+                    retryCount++;
+                    continue;
+                }
+                
+                // Explicitly set the StudentID to ensure it's updated
+                student.StudentID = nextId;
+                
+                _logger.LogInformation("Attempting to add student with StudentID: {StudentID}, MaxValue was: {MaxValue}", student.StudentID, maxValue);
+                Console.WriteLine($"[LOG] Attempting to add student with StudentID: {student.StudentID}, MaxValue was: {maxValue}");
+                
+                _context.Students.Add(student);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                
+                _logger.LogInformation("Successfully added student with StudentID: {StudentID}", student.StudentID);
+                Console.WriteLine($"[LOG] Successfully added student with StudentID: {student.StudentID}");
+                break; // Success, exit retry loop
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException ex) when (ex.InnerException?.Message?.Contains("duplicate key") == true || ex.InnerException?.Message?.Contains("PRIMARY KEY constraint") == true)
+            {
+                // Duplicate key error - rollback and retry
+                _logger.LogWarning(ex, 
+                    "Duplicate key error when adding student. Attempt {RetryCount}/{MaxRetries}. StudentID: {StudentID}, MaxValue: {MaxValue}, NextId: {NextId}. Inner Exception: {InnerException}", 
+                    retryCount + 1, maxRetries, student.StudentID, maxValue, nextId, ex.InnerException?.Message);
+                Console.WriteLine($"[WARNING] Duplicate key error - Attempt {retryCount + 1}/{maxRetries}. StudentID: {student.StudentID}, MaxValue: {maxValue}, NextId: {nextId}. Error: {ex.InnerException?.Message}");
+                
+                await transaction.RollbackAsync();
+                retryCount++;
+                if (retryCount >= maxRetries)
+                {
+                    _logger.LogError(ex, "Max retries reached for duplicate key error. StudentID: {StudentID}, MaxValue: {MaxValue}, NextId: {NextId}", student.StudentID, maxValue, nextId);
+                    throw; // Re-throw if max retries reached
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log detailed error information
+                var innerException = ex.InnerException;
+                var errorDetails = new System.Text.StringBuilder();
+                errorDetails.AppendLine($"Error Type: {ex.GetType().FullName}");
+                errorDetails.AppendLine($"Error Message: {ex.Message}");
+                
+                if (innerException != null)
+                {
+                    errorDetails.AppendLine($"Inner Exception Type: {innerException.GetType().FullName}");
+                    errorDetails.AppendLine($"Inner Exception Message: {innerException.Message}");
+                    if (!string.IsNullOrEmpty(innerException.StackTrace))
+                        errorDetails.AppendLine($"Inner Exception Stack Trace: {innerException.StackTrace}");
+                }
+                
+                if (!string.IsNullOrEmpty(ex.StackTrace))
+                    errorDetails.AppendLine($"Stack Trace: {ex.StackTrace}");
+                
+                errorDetails.AppendLine($"StudentID Attempted: {student.StudentID}");
+                errorDetails.AppendLine($"MaxValue: {maxValue}");
+                errorDetails.AppendLine($"NextId Calculated: {nextId}");
+                
+                _logger.LogError(ex, "Error adding student: {ErrorDetails}", errorDetails.ToString());
+                Console.WriteLine($"[ERROR] Error adding student: {errorDetails.ToString()}");
+                
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
 
         // Add student to manthly and termly grades
         student = await _context.Students
@@ -101,9 +200,7 @@ public class StudentRepository : IStudentRepository
             .FirstOrDefaultAsync(s => s.StudentID == id);
 
         if (student == null)
-        {
             return null;
-        }
 
         // Fetch user data from admin database
         var user = await _userRepository.GetUserByIdAsync(student.UserID);
@@ -242,7 +339,9 @@ public class StudentRepository : IStudentRepository
 
         string PhotoUrl = "https://localhost:7258/uploads/StudentPhotos";
         string AttachmentUrl = "https://localhost:7258/uploads/Attachments";
-        var guardianInfo = _guardianRepo.GetGuardianByIdForUpdateAsync(student!.GuardianID);
+        
+        // Await the async call properly instead of using .Result
+        var guardianInfo = await _guardianRepo.GetGuardianByIdForUpdateAsync(student!.GuardianID);
 
         var guardian = student.Guardian;
 
@@ -250,14 +349,14 @@ public class StudentRepository : IStudentRepository
         {
             // Guardian Details
             ExistingGuardianId = guardian?.GuardianID,
-            GuardianEmail = guardianInfo.Result.GuardianEmail!,
+            GuardianEmail = guardianInfo.GuardianEmail!,
             GuardianPassword = string.Empty,
-            GuardianAddress = guardianInfo.Result.GuardianAddress!,
-            GuardianGender = guardianInfo.Result.Gender!,
-            GuardianFullName = guardianInfo.Result.FullName,
-            GuardianType = guardianInfo.Result.Type!,
-            GuardianPhone = guardianInfo.Result.GuardianPhone!,
-            GuardianDOB = guardianInfo.Result.GuardianDOB,
+            GuardianAddress = guardianInfo.GuardianAddress!,
+            GuardianGender = guardianInfo.Gender!,
+            GuardianFullName = guardianInfo.FullName,
+            GuardianType = guardianInfo.Type!,
+            GuardianPhone = guardianInfo.GuardianPhone!,
+            GuardianDOB = guardianInfo.GuardianDOB,
 
             // Student Details
             StudentID = student.StudentID,

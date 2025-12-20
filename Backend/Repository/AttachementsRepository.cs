@@ -24,10 +24,16 @@ public class AttachmentsRepository : IAttachmentRepository
     {
         var entity = new Attachments
         {
-            StudentID=dto.StudentID,
+            StudentID = dto.StudentID,
             AttachmentURL = dto.AttachmentURL,
-            VoucherID = dto.VoucherID
+            VoucherID = dto.VoucherID // Can be null
         };
+
+        // Don't set navigation properties if foreign keys are null to avoid EF Core tracking issues
+        if (dto.VoucherID.HasValue)
+        {
+            // EF Core will handle the relationship automatically via the foreign key
+        }
 
         _context.Attachments.Add(entity);
         await _context.SaveChangesAsync();

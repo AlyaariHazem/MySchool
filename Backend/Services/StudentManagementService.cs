@@ -21,13 +21,15 @@ namespace Backend.Services;
 
 public class StudentManagementService
 {
-    private readonly DatabaseContext _dbContext;
+    private readonly TenantDbContext _tenantContext; // For tenant-specific operations
+    private readonly DatabaseContext _dbContext; // For admin operations (if needed)
     private readonly mangeFilesService _mangeFilesService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public StudentManagementService(
+        TenantDbContext tenantContext,
         DatabaseContext dbContext,
         IMapper mapper,
         mangeFilesService mangeFilesService,
@@ -35,6 +37,7 @@ public class StudentManagementService
         UserManager<ApplicationUser> userManager) // Inject UserManager
 
     {
+        _tenantContext = tenantContext;
         _dbContext = dbContext;
         _mapper = mapper;
         _mangeFilesService = mangeFilesService;
@@ -164,28 +167,28 @@ public class StudentManagementService
 
     public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentId, UpdateStudentWithGuardianRequestDTO request)
     {
-        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        using var transaction = await _tenantContext.Database.BeginTransactionAsync();
 
         try
         {
-            // **Update Student User**
-            var studentUser = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.Student != null && u.Student.StudentID == studentId);
+            // **Update Student Entity** - Get student first to get UserID
+            var student = await _unitOfWork.Students.GetStudentAsync(studentId);
+            if (student == null)
+                throw new Exception("Student not found.");
 
+            // **Update Student User** - Use UserID from student to find user in admin database
+            var studentUser = await _userManager.FindByIdAsync(student.UserID);
             if (studentUser is null)
                 throw new Exception("Student user not found.");
-
 
             studentUser.Email = request.StudentEmail ?? studentUser.Email;
             studentUser.PhoneNumber = request.StudentPhone ?? studentUser.PhoneNumber;
             studentUser.Address = request.StudentAddress ?? studentUser.Address;
+            studentUser.Gender = request.StudentGender ?? studentUser.Gender;
+            if (request.HireDate.HasValue && request.HireDate.Value != default)
+                studentUser.HireDate = request.HireDate.Value;
 
-            _dbContext.Entry(studentUser).State = EntityState.Modified;
-
-            // **Update Student Entity**
-            var student = await _unitOfWork.Students.GetStudentAsync(studentId);
-            if (student == null)
-                throw new Exception("Student not found.");
+            await _userManager.UpdateAsync(studentUser); // Update via Identity manager
 
 
             student.FullName.FirstName = request.StudentFirstName ?? student.FullName.FirstName;
@@ -206,7 +209,7 @@ public class StudentManagementService
 
             student.StudentDOB = request.StudentDOB != default ? request.StudentDOB : student.StudentDOB;
 
-            _dbContext.Entry(student).State = EntityState.Modified;
+            // No need to manually set EntityState.Modified - EF Core tracks changes automatically
 
             // **Update Guardian User and Entity**
             // IMPORTANT: When ExistingGuardianId is provided, we should NEVER create a new guardian
@@ -239,7 +242,7 @@ public class StudentManagementService
                             await _userManager.UpdateAsync(guardianUser); // update via Identity manager
                         }
 
-                        await _dbContext.SaveChangesAsync(); // save guardian changes
+                        await _tenantContext.SaveChangesAsync(); // save guardian changes
                     }
                 }
                 else
@@ -254,7 +257,7 @@ public class StudentManagementService
                         throw new Exception("AccountStudentGuardian not found.");
 
                     // Step 3: Get the entity from the DB to update
-                    var entity = await _dbContext.AccountStudentGuardians.FindAsync(dto.AccountStudentGuardianID);
+                    var entity = await _tenantContext.AccountStudentGuardians.FindAsync(dto.AccountStudentGuardianID);
                     if (entity == null)
                         throw new Exception("AccountStudentGuardian entity not found.");
 
@@ -268,9 +271,7 @@ public class StudentManagementService
 
                     studentEntity.GuardianID = request.ExistingGuardianId.Value;
 
-                    // Step 6: Mark as modified
-                    _dbContext.Entry(entity).State = EntityState.Modified;
-                    _dbContext.Entry(studentEntity).State = EntityState.Modified;
+                    // No need to manually set EntityState.Modified - EF Core tracks changes automatically
                 }
             }
             else
@@ -294,7 +295,7 @@ public class StudentManagementService
                         await _userManager.UpdateAsync(guardianUser);
                     }
 
-                    await _dbContext.SaveChangesAsync();
+                    await _tenantContext.SaveChangesAsync();
                 }
             }
 
@@ -306,10 +307,10 @@ public class StudentManagementService
             if (request.UpdateDiscounts != null && request.UpdateDiscounts.Any())
             {
                 var existingDiscounts = request.UpdateDiscounts;
-                var studentsClassFees = await _dbContext.StudentClassFees
+                var studentsClassFees = await _tenantContext.StudentClassFees
                     .Where(s => s.StudentID == request.StudentID)
                     .ToListAsync();
-                _dbContext.StudentClassFees.RemoveRange(studentsClassFees);
+                _tenantContext.StudentClassFees.RemoveRange(studentsClassFees);
 
                 foreach (var discount in existingDiscounts)
                 {
@@ -335,7 +336,7 @@ public class StudentManagementService
                         continue;
 
                     // تأكد من عدم التكرار
-                    bool alreadyExists = await _dbContext.Attachments
+                    bool alreadyExists = await _tenantContext.Attachments
                         .AnyAsync(a =>
                             a.AttachmentURL == $"Attachments_{request.StudentID}_{attachment}"
                             && a.StudentID == request.StudentID
@@ -348,7 +349,7 @@ public class StudentManagementService
                             StudentID = request.StudentID,
                             AttachmentURL = $"Attachments_{request.StudentID}_{attachment}"
                         };
-                        await _dbContext.Attachments.AddAsync(newAttachment);
+                        await _tenantContext.Attachments.AddAsync(newAttachment);
                     }
                 }
             }
@@ -356,7 +357,7 @@ public class StudentManagementService
 
 
             // **Save Changes and Commit Transaction**
-            await _dbContext.SaveChangesAsync();
+            await _tenantContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
             // Return updated student details

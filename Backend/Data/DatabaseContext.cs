@@ -315,17 +315,27 @@ namespace Backend.Data
                 .HasForeignKey(mg => mg.GradeTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+        // Configure Attachments entity - explicitly map VoucherID property first to avoid shadow property issues
+        modelBuilder.Entity<Attachments>()
+               .Property(a => a.VoucherID)
+               .HasColumnName("VoucherID")
+               .IsRequired(false);
+        
+        // Configure Student relationship
         modelBuilder.Entity<Attachments>()
                .HasOne(a => a.Student)
                .WithMany(s => s.Attachments)
                .HasForeignKey(a => a.StudentID)
-               .OnDelete(DeleteBehavior.Cascade);// Optional relationship
+               .IsRequired(false)
+               .OnDelete(DeleteBehavior.Cascade);
 
+        // Configure Vouchers relationship
         modelBuilder.Entity<Attachments>()
-               .HasOne(a => a.Vouchers)
+               .HasOne(a => a.Voucher)
                .WithMany(v => v.Attachments)
                .HasForeignKey(a => a.VoucherID)
-               .OnDelete(DeleteBehavior.Cascade);// Optional relationship
+               .IsRequired(false)
+               .OnDelete(DeleteBehavior.SetNull);
 
 
         // One-to-One: ApplicationUser ↔ Teacher
