@@ -7,6 +7,8 @@ export interface managerInfo{
     };
     hireDate?: Date;
     schoolName: string;
+    tenantID?: number;
+    tenantName?: string;
     userName: string;
     email: string;
     userType: string;

@@ -9,10 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 public class MonthlyGradeRepository : IMonthlyGradeRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
 
-    public MonthlyGradeRepository(DatabaseContext context, IMapper mapper)
+    public MonthlyGradeRepository(TenantDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;

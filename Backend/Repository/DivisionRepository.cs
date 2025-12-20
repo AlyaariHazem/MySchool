@@ -15,9 +15,9 @@ namespace FirstProjectWithMVC.Repository.School
 {
     public class DivisionRepository : IDivisionRepository
     {
-        private readonly DatabaseContext _db;
+        private readonly TenantDbContext _db;
         private readonly IMapper _mapper;
-        public DivisionRepository(DatabaseContext db, IMapper mapper)
+        public DivisionRepository(TenantDbContext db, IMapper mapper)
         {
             _db = db;
             _mapper = mapper;

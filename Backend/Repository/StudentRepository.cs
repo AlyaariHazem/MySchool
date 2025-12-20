@@ -14,15 +14,17 @@ using System.Threading.Tasks;
 
 public class StudentRepository : IStudentRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
     private readonly IGuardianRepository _guardianRepo;
     private readonly mangeFilesService _mangeFilesService;
+    private readonly IUserRepository _userRepository;
 
-    public StudentRepository(DatabaseContext context, IGuardianRepository guardianRepo, mangeFilesService mangeFilesService)
+    public StudentRepository(TenantDbContext context, IGuardianRepository guardianRepo, mangeFilesService mangeFilesService, IUserRepository userRepository)
     {
         _context = context;
         _guardianRepo = guardianRepo;
         _mangeFilesService = mangeFilesService;
+        _userRepository = userRepository;
     }
 
     // Create: Add a new student
@@ -95,7 +97,6 @@ public class StudentRepository : IStudentRepository
     public async Task<StudentDetailsDTO?> GetStudentByIdAsync(int id)
     {
         var student = await _context.Students
-            .Include(s => s.ApplicationUser)
             .Include(s => s.Division)
             .FirstOrDefaultAsync(s => s.StudentID == id);
 
@@ -103,6 +104,9 @@ public class StudentRepository : IStudentRepository
         {
             return null;
         }
+
+        // Fetch user data from admin database
+        var user = await _userRepository.GetUserByIdAsync(student.UserID);
 
         string baseUrl = "https://localhost:7258/uploads/StudentPhotos";
 
@@ -121,13 +125,13 @@ public class StudentRepository : IStudentRepository
             DivisionID = student.DivisionID,
             PlaceBirth = student.PlaceBirth,
             UserID = student.UserID,
-            ApplicationUser = new ApplicationUserDTO
+            ApplicationUser = user != null ? new ApplicationUserDTO
             {
-                Id = student.ApplicationUser.Id,
-                UserName = student.ApplicationUser.UserName!,
-                Email = student.ApplicationUser.Email!,
-                Gender = student.ApplicationUser.Gender
-            }
+                Id = user.Id,
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                Gender = user.Gender
+            } : null
         };
     }
     public async Task<Student?> GetStudentAsync(int id)
@@ -145,7 +149,6 @@ public class StudentRepository : IStudentRepository
     public async Task<List<StudentDetailsDTO>> GetAllStudentsAsync()
     {
         var students = await _context.Students
-            .Include(s => s.ApplicationUser)  // Include ApplicationUser details
             .Include(s => s.Division)        // Include Division details
                 .ThenInclude(d => d.Class)   // Include Class details
                     .ThenInclude(c => c.Stage) // Include Stage details
@@ -156,58 +159,73 @@ public class StudentRepository : IStudentRepository
         if (students == null || !students.Any())
             return new List<StudentDetailsDTO>();
 
+        // Fetch all user data in batch from admin database
+        var userIds = students.Select(s => s.UserID).Distinct().ToList();
+        var users = new Dictionary<string, ApplicationUser>();
+        foreach (var userId in userIds)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user != null)
+            {
+                users[userId] = user;
+            }
+        }
+
         string baseUrl = "https://localhost:7258/uploads/StudentPhotos";
 
-        return students.Select(student => new StudentDetailsDTO
+        return students.Select(student =>
         {
-            StudentID = student.StudentID,
-            FullName = new NameDTO
+            var user = users.ContainsKey(student.UserID) ? users[student.UserID] : null;
+            return new StudentDetailsDTO
             {
-                FirstName = student.FullName.FirstName,
-                MiddleName = student.FullName.MiddleName!,
-                LastName = student.FullName.LastName
-            },
-            PhotoUrl = student.ImageURL != null
-                ? $"{baseUrl}/{student.ImageURL}"
-                : $"{baseUrl}/default-placeholder.png",
-            DivisionID = student.DivisionID,
-            DivisionName = student.Division?.DivisionName,
-            ClassName = student.Division?.Class?.ClassName,
-            StageName = student.Division?.Class?.Stage?.StageName,
-            Age = student.StudentDOB.HasValue
-                ? DateTime.Now.Year - student.StudentDOB.Value.Year
-                : (int?)null,
-            Gender = student.ApplicationUser.Gender,
-            HireDate = student.ApplicationUser.HireDate,
-            PlaceBirth = student.PlaceBirth,
-            Fee = student.AccountStudentGuardians?.Sum(asg => asg.Amount) ?? 0, // Aggregate Fee Amount
-            StudentPhone = student.ApplicationUser.PhoneNumber,
-            StudentAddress = student.ApplicationUser.Address,
-            UserID = student.UserID,
-            ApplicationUser = new ApplicationUserDTO
-            {
-                Id = student.ApplicationUser.Id,
-                UserName = student.ApplicationUser.UserName!,
-                Email = student.ApplicationUser.Email!,
-                Gender = student.ApplicationUser.Gender
-            },
-            Guardians = new GuardianDto
-            {
-                guardianID = student.GuardianID,
-                guardianFullName = student.Guardian.FullName,
-                guardianType = student.Guardian.Type!,
-                guardianEmail = student.ApplicationUser.Email,
-                guardianPhone = student.ApplicationUser.PhoneNumber!,
-                guardianDOB = student.ApplicationUser.HireDate,
-                guardianAddress = student.ApplicationUser.Address!
-            }
+                StudentID = student.StudentID,
+                FullName = new NameDTO
+                {
+                    FirstName = student.FullName.FirstName,
+                    MiddleName = student.FullName.MiddleName!,
+                    LastName = student.FullName.LastName
+                },
+                PhotoUrl = student.ImageURL != null
+                    ? $"{baseUrl}/{student.ImageURL}"
+                    : $"{baseUrl}/default-placeholder.png",
+                DivisionID = student.DivisionID,
+                DivisionName = student.Division?.DivisionName,
+                ClassName = student.Division?.Class?.ClassName,
+                StageName = student.Division?.Class?.Stage?.StageName,
+                Age = student.StudentDOB.HasValue
+                    ? DateTime.Now.Year - student.StudentDOB.Value.Year
+                    : (int?)null,
+                Gender = user?.Gender,
+                HireDate = user?.HireDate ?? DateTime.MinValue,
+                PlaceBirth = student.PlaceBirth,
+                Fee = student.AccountStudentGuardians?.Sum(asg => asg.Amount) ?? 0, // Aggregate Fee Amount
+                StudentPhone = user?.PhoneNumber,
+                StudentAddress = user?.Address,
+                UserID = student.UserID,
+                ApplicationUser = user != null ? new ApplicationUserDTO
+                {
+                    Id = user.Id,
+                    UserName = user.UserName ?? string.Empty,
+                    Email = user.Email ?? string.Empty,
+                    Gender = user.Gender
+                } : null,
+                Guardians = user != null ? new GuardianDto
+                {
+                    guardianID = student.GuardianID,
+                    guardianFullName = student.Guardian?.FullName ?? string.Empty,
+                    guardianType = student.Guardian?.Type ?? string.Empty,
+                    guardianEmail = user.Email ?? string.Empty,
+                    guardianPhone = user.PhoneNumber ?? string.Empty,
+                    guardianDOB = user.HireDate,
+                    guardianAddress = user.Address ?? string.Empty
+                } : null
+            };
         }).ToList();
     }
 
     public async Task<GetStudentForUpdateDTO?> GetUpdateStudentWithGuardianRequestData(int studentId)
     {
         var student = await _context.Students
-            .Include(s => s.ApplicationUser)
             .Include(s => s.Guardian)
             .Include(s => s.Attachments)
             .Include(s => s.Division)
@@ -218,6 +236,9 @@ public class StudentRepository : IStudentRepository
 
         if (student == null)
             return null;
+
+        // Fetch user data from admin database
+        var user = await _userRepository.GetUserByIdAsync(student.UserID);
 
         string PhotoUrl = "https://localhost:7258/uploads/StudentPhotos";
         string AttachmentUrl = "https://localhost:7258/uploads/Attachments";
@@ -240,10 +261,10 @@ public class StudentRepository : IStudentRepository
 
             // Student Details
             StudentID = student.StudentID,
-            StudentEmail = student.ApplicationUser?.Email ?? string.Empty,
+            StudentEmail = user?.Email ?? string.Empty,
             StudentPassword = string.Empty, // Passwords are not retrievable
-            StudentAddress = student.ApplicationUser?.Address ?? string.Empty,
-            StudentGender = student.ApplicationUser?.Gender ?? "Not Specified",
+            StudentAddress = user?.Address ?? string.Empty,
+            StudentGender = user?.Gender ?? "Not Specified",
             StudentFirstName = student.FullName?.FirstName ?? string.Empty,
             StudentMiddleName = student.FullName?.MiddleName ?? string.Empty,
             StudentLastName = student.FullName?.LastName ?? string.Empty,
@@ -254,9 +275,9 @@ public class StudentRepository : IStudentRepository
             ClassID = student.Division?.ClassID ?? 0,
             DivisionID = student.DivisionID,
             PlaceBirth = student.PlaceBirth ?? string.Empty,
-            StudentPhone = student.ApplicationUser?.PhoneNumber ?? string.Empty,
+            StudentPhone = user?.PhoneNumber ?? string.Empty,
             StudentDOB = student.StudentDOB ?? DateTime.MinValue,
-            HireDate = student.ApplicationUser?.HireDate ?? DateTime.MinValue,
+            HireDate = user?.HireDate ?? DateTime.MinValue,
 
             // Attachments and Discounts
             Files = new List<IFormFile>(), // Default empty list

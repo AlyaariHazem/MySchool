@@ -14,9 +14,9 @@ namespace Backend.Repository;
 
 public class AccountStudentGuardianRepository : IAccountStudentGuardianRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
-    public AccountStudentGuardianRepository(DatabaseContext context, IMapper mapper)
+    public AccountStudentGuardianRepository(TenantDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;

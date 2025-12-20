@@ -50,6 +50,7 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { SchoolInfoComponent } from './school-info/school-info.component';
 import { AddManagerComponent } from './users/add-manager/add-manager.component';
 import { ChartModule } from 'primeng/chart';
+import { Select } from 'primeng/select';
 
 
 const components = [
@@ -107,6 +108,7 @@ const modules = [
   AsyncPipe,
   RouterLinkActive,
   DialogModule,
+  Select,
   ButtonModule,
   PanelModule,
   InputMaskModule,

@@ -13,9 +13,9 @@ namespace Backend.Repository.School.Classes;
 
 public class StudentClassFeeRepository : IStudentClassFeeRepository
 {
-    private readonly DatabaseContext _db;
+    private readonly TenantDbContext _db;
     private readonly IMapper _mapper;
-    public StudentClassFeeRepository(DatabaseContext db, IMapper mapper)
+    public StudentClassFeeRepository(TenantDbContext db, IMapper mapper)
     {
         _db = db;
         _mapper = mapper;

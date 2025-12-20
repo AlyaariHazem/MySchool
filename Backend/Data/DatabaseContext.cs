@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -12,7 +8,12 @@ namespace Backend.Data
     public class DatabaseContext : IdentityDbContext<ApplicationUser>
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
+
+        // Master / multi-tenant tables
         public DbSet<Tenant> Tenants { get; set; }
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+        // School domain tables (also available per-tenant)
         public DbSet<Attachments> Attachments { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<Class> Classes { get; set; }
@@ -27,7 +28,6 @@ namespace Backend.Data
         public DbSet<Stage> Stages { get; set; }
         public DbSet<Year> Years { get; set; }
         public DbSet<Fee> Fees { get; set; }
-        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<Curriculum> Curriculums { get; set; }
         public DbSet<Month> Months { get; set; }
         public DbSet<FeeClass> FeeClass { get; set; }
@@ -36,18 +36,22 @@ namespace Backend.Data
         public DbSet<Term> Terms { get; set; }
         public DbSet<MonthlyGrade> MonthlyGrades { get; set; }
         public DbSet<TypeAccount> TypeAccounts { get; set; }
-        // public DbSet<SubjectStudent> SubjectStudents { get; set; }
         public DbSet<GradeType> GradeTypes { get; set; }
         public DbSet<YearTermMonth> YearTermMonths { get; set; }
         public DbSet<StudentClassFees> StudentClassFees { get; set; }
-        // public DbSet<TeacherStudent> TeacherStudents { get; set; }
         public DbSet<TermlyGrade> TermlyGrades { get; set; }
         public DbSet<AccountStudentGuardian> AccountStudentGuardians { get; set; }
-        // public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Tenant>(entity =>
+            {
+                entity.HasKey(t => t.TenantId);
+            });
+
+                    modelBuilder.Entity<Tenant>(entity =>
             {
                 entity.HasKey(t => t.TenantId);
             });
@@ -571,7 +575,6 @@ modelBuilder.Entity<ApplicationUser>().HasData(
         EmailConfirmed = true,
         UserType = "ADMIN" // You can assign a specific role or user type if needed
     });
-
         }
     }
 }

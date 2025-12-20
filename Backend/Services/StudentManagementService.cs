@@ -6,6 +6,7 @@ using AutoMapper;
 using Backend.Data;
 using Backend.DTOS;
 using Backend.DTOS.School.Accounts;
+using Backend.DTOS.School.Attachments;
 using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.StudentClassFee;
 using Backend.DTOS.School.Students;
@@ -73,9 +74,15 @@ public class StudentManagementService
         if (attachments != null && attachments.Any())
         {
             foreach (var attachment in attachments)
-            { // Associate with student
-                await _dbContext.Attachments.AddAsync(attachment);
-                await _dbContext.SaveChangesAsync();
+            {
+                // Use UnitOfWork to save to tenant database (not admin database)
+                var attachmentDTO = new AttachmentDTO
+                {
+                    StudentID = attachment.StudentID,
+                    AttachmentURL = attachment.AttachmentURL,
+                    VoucherID = attachment.VoucherID
+                };
+                await _unitOfWork.Attachments.AddAsync(attachmentDTO);
             }
         }
 
@@ -83,9 +90,8 @@ public class StudentManagementService
         {
             foreach (var studentClassFee in studentClassFees)
             {
-                var studentClassFeeMapped = _mapper.Map<StudentClassFees>(studentClassFee);
-                await _dbContext.StudentClassFees.AddAsync(studentClassFeeMapped);
-                await _dbContext.SaveChangesAsync();
+                // Use UnitOfWork to save to tenant database (not admin database)
+                await _unitOfWork.StudentClassFees.AddAsync(studentClassFee);
             }
         }
         catch (Exception ex)
@@ -131,23 +137,26 @@ public class StudentManagementService
 
         await _unitOfWork.AccountStudentGuardians.AddAccountStudentGuardianAsync(accountStudentGuardian);
 
-        // 5. Handle attachments
+        // 5. Handle attachments - use UnitOfWork to save to tenant database
         if (attachments != null && attachments.Any())
         {
             foreach (var attachment in attachments)
-            { // Associate with student
+            {
                 attachment.StudentID = addedStudent.StudentID;
-                await _dbContext.Attachments.AddAsync(attachment);
-                await _dbContext.SaveChangesAsync();
+                var attachmentDTO = new AttachmentDTO
+                {
+                    StudentID = attachment.StudentID,
+                    AttachmentURL = attachment.AttachmentURL,
+                    VoucherID = attachment.VoucherID
+                };
+                await _unitOfWork.Attachments.AddAsync(attachmentDTO);
             }
         }
 
-        // 6. Handle class fees
+        // 6. Handle class fees - use UnitOfWork to save to tenant database
         foreach (var studentClassFee in studentClassFees)
         {
-            var studentClassFeeMapped = _mapper.Map<StudentClassFees>(studentClassFee);
-            await _dbContext.StudentClassFees.AddAsync(studentClassFeeMapped);
-            await _dbContext.SaveChangesAsync();
+            await _unitOfWork.StudentClassFees.AddAsync(studentClassFee);
         }
 
         return addedStudent;

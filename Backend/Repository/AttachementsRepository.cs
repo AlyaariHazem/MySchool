@@ -13,9 +13,9 @@ namespace Backend.Repository;
 
 public class AttachmentsRepository : IAttachmentRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
 
-    public AttachmentsRepository(DatabaseContext context)
+    public AttachmentsRepository(TenantDbContext context)
     {
         _context = context;
     }

@@ -14,10 +14,10 @@ namespace Backend.Repository.School.Classes;
 
 public class GuardianRepository : IGuardianRepository
 {
-    private readonly DatabaseContext _db;
+    private readonly TenantDbContext _db;
     private readonly IMapper _mapper;
 
-    public GuardianRepository(DatabaseContext db, IMapper mapper)
+    public GuardianRepository(TenantDbContext db, IMapper mapper)
     {
         _db = db;
         _mapper = mapper;

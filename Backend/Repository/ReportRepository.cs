@@ -12,8 +12,8 @@ namespace Backend.Repository;
 
 public class ReportRepository : IReportRepository
 {
-    private readonly DatabaseContext _context;
-    public ReportRepository(DatabaseContext context)
+    private readonly TenantDbContext _context;
+    public ReportRepository(TenantDbContext context)
     {
         _context = context;
     }

@@ -13,9 +13,9 @@ namespace Backend.Repository;
 
 public class EmployeeRepository : IEmployeeRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
     private readonly IUserRepository _userRepository;
-    public EmployeeRepository(DatabaseContext context, IUserRepository userRepository)
+    public EmployeeRepository(TenantDbContext context, IUserRepository userRepository)
     {
         _context = context;
         _userRepository = userRepository;
@@ -90,20 +90,17 @@ public class EmployeeRepository : IEmployeeRepository
         }
     }
 
-    public Task DeleteEmployeeAsync(int employeeId, string jopName)
+    public async Task DeleteEmployeeAsync(int employeeId, string jopName)
     {
         if (jopName == "Teacher")
         {
             var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherID == employeeId);
             if (teacher != null)
             {
-                var user= _context.Users.FirstOrDefault(u => u.Id == teacher.UserID);
-                if (user != null)
-                {
-                    _context.Users.Remove(user);
-                }
+                // Use IUserRepository to delete user (works with DatabaseContext)
+                await _userRepository.DeleteAsync(teacher.UserID);
                 _context.Teachers.Remove(teacher);
-                return _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
         else if (jopName == "Manager")
@@ -111,16 +108,12 @@ public class EmployeeRepository : IEmployeeRepository
             var manager = _context.Managers.FirstOrDefault(m => m.ManagerID == employeeId);
             if (manager != null)
             {
-                var user = _context.Users.FirstOrDefault(u => u.Id == manager.UserID);
-                if (user != null)
-                {
-                    _context.Users.Remove(user);
-                }
+                // Use IUserRepository to delete user (works with DatabaseContext)
+                await _userRepository.DeleteAsync(manager.UserID);
                 _context.Managers.Remove(manager);
-                return _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
-        return Task.CompletedTask;
     }
 
     public async Task<List<EmployeeDTO>> GetAllEmployeesAsync()

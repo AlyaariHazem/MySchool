@@ -14,11 +14,11 @@ namespace Backend.Repository;
 
 public class VoucherRepository : IVoucherRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
     private readonly mangeFilesService _mangeFilesService;
 
-    public VoucherRepository(DatabaseContext context, IMapper mapper, mangeFilesService mangeFilesService)
+    public VoucherRepository(TenantDbContext context, IMapper mapper, mangeFilesService mangeFilesService)
     {
         _context = context;
         _mapper = mapper;

@@ -80,19 +80,17 @@ namespace Backend.Controllers.School
                 // (if you want to store basic info in master, you can do it here)
 
                 // 2) Use the provisioning service to create & migrate the new db
+                // This creates the School in both admin DB and tenant DB with matching SchoolID
                 var tenant = await _tenantProvisioningService.CreateSchoolDatabaseAsync(schoolDTO.SchoolName, schoolDTO);
 
                 // 3) Return the newly created resource, incl. tenant ID or connection
+                // The school has already been created in both databases by the provisioning service
                 response.Result = new
                 {
                     TenantId = tenant.TenantId,
                     SchoolName = tenant.SchoolName,
                     ConnectionString = tenant.ConnectionString
                 };
-                await _unitOfWork.Schools.AddAsync(schoolDTO);
-
-                // Return the newly created resource
-                response.Result = schoolDTO;
                 response.statusCode = HttpStatusCode.Created;
                 return StatusCode((int)HttpStatusCode.Created, response);
             }

@@ -15,9 +15,9 @@ namespace Backend.Repository.School.Classes;
 
 public class YearRepository : IYearRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
-    public YearRepository(DatabaseContext context, IMapper mapper)
+    public YearRepository(TenantDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;

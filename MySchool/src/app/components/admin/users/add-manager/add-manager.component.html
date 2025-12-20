@@ -46,9 +46,8 @@
             </div>
             <div class="form-control">
                 <label for="tenantID">Tenant Name:</label>
-                <p-dropdown id="tenantID" formControlName="tenantID" [options]="tenants" optionLabel="schoolName"
-                    optionValue="tenantID" placeholder="Select Tenant" required>
-                </p-dropdown>
+                <p-select id="tenantID" formControlName="tenantID" class="w-full md:w-56" [options]="tenants" optionLabel="schoolName"
+                    optionValue="tenantID" placeholder="Select Tenant" required/>
 
             </div>
             <div class="form-control">

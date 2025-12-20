@@ -13,10 +13,10 @@ namespace Backend.Repository.School.Classes;
 
 public class AccountRepository : IAccountRepository
 {
-    private readonly DatabaseContext _dbContext;
+    private readonly TenantDbContext _dbContext;
     private readonly IMapper _mapper;
 
-    public AccountRepository(DatabaseContext dbContext, IMapper mapper)
+    public AccountRepository(TenantDbContext dbContext, IMapper mapper)
     {
         _mapper = mapper;
 

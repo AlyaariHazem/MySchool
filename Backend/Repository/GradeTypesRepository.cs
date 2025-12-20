@@ -13,10 +13,10 @@ namespace Backend.Repository
 {
     public class GradeTypesRepository : IGradeTypesRepository
     {
-        private readonly DatabaseContext _context;
+        private readonly TenantDbContext _context;
         private readonly IMapper _mapper;
 
-        public GradeTypesRepository(DatabaseContext context, IMapper mapper)
+        public GradeTypesRepository(TenantDbContext context, IMapper mapper)
         {
             _mapper = mapper;
             _context = context;

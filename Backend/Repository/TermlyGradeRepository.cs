@@ -15,10 +15,10 @@ namespace Backend.Repository
 {
     public class TermlyGradeRepository : ITermlyGradeRepository
     {
-        private readonly DatabaseContext _context;
+        private readonly TenantDbContext _context;
         private readonly IMapper _mapper;
 
-        public TermlyGradeRepository(DatabaseContext context, IMapper mapper)
+        public TermlyGradeRepository(TenantDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

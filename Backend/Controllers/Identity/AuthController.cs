@@ -6,11 +6,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Linq;
 using Backend.Models;
 using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Data.SqlClient;
 
 namespace Backend.Controllers
 {
@@ -83,8 +85,85 @@ namespace Backend.Controllers
             if (!string.Equals(userFromDb.UserType, userFromRequest.userType, StringComparison.OrdinalIgnoreCase))
                 return BadRequest(new { message = "Unauthorized: User type does not match." });
 
+            // Pre-load school / tenant info so we can issue TenantId claim
+            dynamic? schoolData = null;
+            string? managerName = null;
+            int yearID = 1;
+            string? userName = null;
+            string? tenantDatabaseName = null;
+            int? tenantId = null;
+
+            if (userFromDb.UserType != "ADMIN")
+            {
+                // First, resolve tenant and database name for this manager/user from admin database
+                var managerWithTenant = await _context.Managers
+                    .Include(m => m.Tenant)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m => m.UserID == userFromDb.Id);
+
+                if (managerWithTenant?.Tenant != null)
+                {
+                    tenantId = managerWithTenant.Tenant.TenantId;
+                    try
+                    {
+                        var builder = new SqlConnectionStringBuilder(managerWithTenant.Tenant.ConnectionString);
+                        tenantDatabaseName = builder.InitialCatalog; // e.g., School_6b23a052
+                    }
+                    catch
+                    {
+                        // Fallback: if parsing fails, just return the raw connection string
+                        tenantDatabaseName = managerWithTenant.Tenant.ConnectionString;
+                    }
+
+                    // Query tenant database instead of admin database
+                    var tenantInfo = new TenantInfo
+                    {
+                        TenantId = tenantId,
+                        ConnectionString = managerWithTenant.Tenant.ConnectionString
+                    };
+
+                    var tenantOptions = new DbContextOptionsBuilder<TenantDbContext>()
+                        .UseSqlServer(managerWithTenant.Tenant.ConnectionString, sql =>
+                        {
+                            sql.CommandTimeout(180);
+                        })
+                        .Options;
+
+                    using var tenantContext = new TenantDbContext(tenantOptions, tenantInfo);
+
+                    schoolData = await tenantContext.Schools
+                        .AsNoTracking()
+                        .Where(s => s.Manager != null && s.Manager.UserID == userFromDb.Id)
+                        .Select(s => new
+                        {
+                            s.SchoolName,
+                            SchoolId = s.SchoolID,
+                            ManagerFirstName = s.Manager != null ? s.Manager.FullName.FirstName : null,
+                            ManagerLastName  = s.Manager != null ? s.Manager.FullName.LastName  : null,
+
+                            // Do NOT materialize Years entities; only select the YearID
+                            ActiveYearId = s.Years
+                                .Where(y => y.Active == true)     // works even if Active is nullable in DB
+                                .Select(y => (int?)y.YearID)
+                                .FirstOrDefault()
+                        })
+                        .FirstOrDefaultAsync();
+
+                    yearID = schoolData?.ActiveYearId ?? 1;
+                    managerName = (schoolData?.ManagerFirstName + " " + schoolData?.ManagerLastName)?.Trim();
+                    userName = schoolData?.ManagerFirstName;
+                }
+            }
+
             // 🟩 Get actual role(s) from ASP.NET Identity
             var userRoles = await userManager.GetRolesAsync(userFromDb);
+
+            // Ensure ADMIN users have the ADMIN role assigned
+            if (userFromDb.UserType == "ADMIN" && !userRoles.Contains("ADMIN"))
+            {
+                await userManager.AddToRoleAsync(userFromDb, "ADMIN");
+                userRoles = await userManager.GetRolesAsync(userFromDb);
+            }
 
             List<Claim> userClaims = new List<Claim>
             {
@@ -94,10 +173,22 @@ namespace Backend.Controllers
                 new Claim("UserType", userFromDb.UserType)
             };
 
-            // ⬅️ Add each role as a Role claim (important for [Authorize(Roles = "...")])
+            // ⬅️ Add each role as a Role claim (important for [Authorize(Roles = \"...\")])
             foreach (var role in userRoles)
             {
                 userClaims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            // Fallback: If UserType is ADMIN but no ADMIN role claim exists, add it
+            // This ensures [Authorize(Roles = "ADMIN")] works even if role assignment is missing
+            if (userFromDb.UserType == "ADMIN" && !userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "ADMIN"))
+            {
+                userClaims.Add(new Claim(ClaimTypes.Role, "ADMIN"));
+            }
+
+            if (tenantId.HasValue)
+            {
+                userClaims.Add(new Claim("TenantId", tenantId.Value.ToString()));
             }
 
             var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecretKey"]!));
@@ -112,34 +203,6 @@ namespace Backend.Controllers
             );
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
-            dynamic? schoolData = null;
-            string? managerName = null;
-            int yearID = 1;
-            string? userName = null;
-
-            if (userFromDb.UserType != "ADMIN")
-            {
-                schoolData = await _context.Schools
-                    .AsNoTracking()
-                    .Include(s => s.Manager)
-                    .Include(s => s.Years)
-                    .Where(s => s.Manager.UserID == userFromDb.Id)
-                    .Select(s => new
-                    {
-                        SchoolName = s.SchoolName,
-                        ManagerName = s.Manager.FullName,
-                        SchoolId = s.SchoolID,
-                        yearID = s.Years.FirstOrDefault(y => y.Active)!.YearID
-                    })
-                    .FirstOrDefaultAsync();
-
-                int? schoolId = schoolData?.SchoolId;
-                yearID = schoolData?.yearID;
-
-                managerName = $"{schoolData?.ManagerName.FirstName} {schoolData?.ManagerName.LastName}";
-                userName = schoolData?.ManagerName.FirstName;
-            }
 
             var accessToken = tokenString;
             var accessExpiry = token.ValidTo;
@@ -172,6 +235,8 @@ namespace Backend.Controllers
                 userName,
                 schoolId = schoolData?.SchoolId,
                 yearId = yearID,
+                tenantId,
+                tenantDatabase = tenantDatabaseName,
                 token = accessToken,
                 expiration = accessExpiry
             });

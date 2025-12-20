@@ -11,10 +11,10 @@ namespace Backend.Repository
 {
     public class StagesRepository : IStagesRepository
     {
-        private readonly DatabaseContext context;
+        private readonly TenantDbContext context;
         private readonly IMapper _mapper;
 
-        public StagesRepository(DatabaseContext _context, IMapper mapper)
+        public StagesRepository(TenantDbContext _context, IMapper mapper)
         {
             context = _context;
             _mapper = mapper;

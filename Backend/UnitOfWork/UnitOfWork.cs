@@ -15,52 +15,58 @@ using Microsoft.AspNetCore.Identity; // Assuming your DbContext is here
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _tenantContext; // For tenant-specific data
+    private readonly DatabaseContext _adminContext; // For master DB (Tenants, AspNetUsers, etc.)
     private readonly IMapper _mapper;
     private readonly mangeFilesService _mangeFilesService;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public UnitOfWork(
-        DatabaseContext context,
+        TenantDbContext tenantContext,
+        DatabaseContext adminContext,
         IMapper mapper,
         mangeFilesService mangeFilesService,
         UserManager<ApplicationUser> userManager
     )
     {
-        _context = context;
+        _tenantContext = tenantContext;
+        _adminContext = adminContext;
         _mapper = mapper;
         _mangeFilesService = mangeFilesService;
         _userManager = userManager;
 
-        // أنشئ الريبو بالترتيب الذي يعتمد عليه بعضهم بعضًا
-        Guardians = new GuardianRepository(_context, _mapper);
-        Subjects = new SubjectRepository(_context, _mapper);
-        Students = new StudentRepository(_context, Guardians, _mangeFilesService);
-        Classes = new ClassesRepository(_context, _mapper);
-        Divisions = new DivisionRepository(_context, _mapper);
+        // Tenant-specific repositories use TenantDbContext
+        // Initialize Users first since it's needed by Students, Teachers, and Employees
         Users = new UsersRepository(_userManager);
-        Stages = new StagesRepository(_context, _mapper);
-        Accounts = new AccountRepository(_context, _mapper);
-        FeeClasses = new FeeClassRepository(_context, _mapper);
-        Fees = new FeesRepository(_context, _mapper);
-        Tenants = new TenantRepository(_context, _mapper);
-        Managers = new ManagerRepository(_context, Users, Tenants, _userManager.PasswordHasher);
-        Years = new YearRepository(_context, _mapper);
-        Schools = new SchoolRepository(_context, Years, _mapper);
-        StudentClassFees = new StudentClassFeeRepository(_context, _mapper);
-        Vouchers = new VoucherRepository(_context, _mapper, _mangeFilesService);
-        Attachments = new AttachmentsRepository(_context);
-        Curriculums = new CurriculumRepository(_context, _mapper);
-        CoursePlans = new CoursePlanRepository(_context, _mapper);
-        Teachers = new TeacherRepository(_context);
-        GradeTypes = new GradeTypesRepository(_context, _mapper);
-        Terms = new TermRepository(_context, _mapper);
-        Months = new MonthRepository(_context, _mapper);
-        Employees = new EmployeeRepository(_context, Users);
-        AccountStudentGuardians = new AccountStudentGuardianRepository(_context, _mapper);
-        Reports = new ReportRepository(_context);
-        MonthlyGrades = new MonthlyGradeRepository(_context, _mapper);
-        TermlyGrades = new TermlyGradeRepository(_context, _mapper);
+        Guardians = new GuardianRepository(_tenantContext, _mapper);
+        Subjects = new SubjectRepository(_tenantContext, _mapper);
+        Students = new StudentRepository(_tenantContext, Guardians, _mangeFilesService, Users);
+        Classes = new ClassesRepository(_tenantContext, _mapper);
+        Divisions = new DivisionRepository(_tenantContext, _mapper);
+        Stages = new StagesRepository(_tenantContext, _mapper);
+        Accounts = new AccountRepository(_tenantContext, _mapper);
+        FeeClasses = new FeeClassRepository(_tenantContext, _mapper);
+        Fees = new FeesRepository(_tenantContext, _mapper);
+        Years = new YearRepository(_tenantContext, _mapper);
+        Schools = new SchoolRepository(_tenantContext, Years, _mapper);
+        StudentClassFees = new StudentClassFeeRepository(_tenantContext, _mapper);
+        Vouchers = new VoucherRepository(_tenantContext, _mapper, _mangeFilesService);
+        Attachments = new AttachmentsRepository(_tenantContext);
+        Curriculums = new CurriculumRepository(_tenantContext, _mapper);
+        CoursePlans = new CoursePlanRepository(_tenantContext, _mapper);
+        Teachers = new TeacherRepository(_tenantContext, Users);
+        GradeTypes = new GradeTypesRepository(_tenantContext, _mapper);
+        Terms = new TermRepository(_tenantContext, _mapper);
+        Months = new MonthRepository(_tenantContext, _mapper);
+        Employees = new EmployeeRepository(_tenantContext, Users);
+        AccountStudentGuardians = new AccountStudentGuardianRepository(_tenantContext, _mapper);
+        Reports = new ReportRepository(_tenantContext);
+        MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper);
+        TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper);
+        
+        // Master DB repositories use DatabaseContext
+        Tenants = new TenantRepository(_adminContext, _mapper);
+        Managers = new ManagerRepository(_adminContext, Users, Tenants, _userManager.PasswordHasher);
     }
 
     public ISubjectsRepository Subjects { get; private set; }
@@ -94,11 +100,13 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task<int> CompleteAsync()
     {
-        return await _context.SaveChangesAsync();
+        // Save changes to tenant database
+        return await _tenantContext.SaveChangesAsync();
     }
 
     public void Dispose()
     {
-        _context.Dispose();
+        _tenantContext?.Dispose();
+        _adminContext?.Dispose();
     }
 }

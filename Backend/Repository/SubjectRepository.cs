@@ -13,10 +13,10 @@ namespace Backend.Repository.School.Classes
 {
     public class SubjectRepository : ISubjectsRepository
     {
-        private readonly DatabaseContext _context;
+        private readonly TenantDbContext _context;
         private readonly IMapper _mapper;
 
-        public SubjectRepository(DatabaseContext context, IMapper mapper)
+        public SubjectRepository(TenantDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

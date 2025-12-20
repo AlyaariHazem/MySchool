@@ -13,9 +13,9 @@ namespace Backend.Repository;
 
 public class TermRepository : ITermRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
-    public TermRepository(DatabaseContext context, IMapper mapper)
+    public TermRepository(TenantDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;

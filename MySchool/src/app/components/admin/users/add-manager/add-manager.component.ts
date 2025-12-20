@@ -99,7 +99,7 @@ export class AddManagerComponent implements OnInit {
       password: '', // Leave password empty in edit mode
       email: manager.email,
       userType: manager.userType,
-      tenantID: null, // Will be selected by user in edit mode
+      tenantID: manager.tenantID ?? null,
       phoneNumber: manager.phoneNumber
     });
   }

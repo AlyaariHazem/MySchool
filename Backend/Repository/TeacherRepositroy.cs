@@ -6,17 +6,20 @@ using Backend.Data;
 using Backend.DTOS.School.Teachers;
 using Backend.Interfaces;
 using Backend.Models;
+using Backend.Repository.School.Implements;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository
 {
     public class TeacherRepository : ITeacherRepository
     {
-        private readonly DatabaseContext _context;
+        private readonly TenantDbContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public TeacherRepository(DatabaseContext context)
+        public TeacherRepository(TenantDbContext context, IUserRepository userRepository)
         {
             _context = context;
+            _userRepository = userRepository;
         }
 
         // Add a new Teacher
@@ -25,7 +28,7 @@ namespace Backend.Repository
             if (teacher == null)
                 throw new ArgumentNullException(nameof(teacher), "Teacher DTO cannot be null.");
 
-            // Create the User for Teacher
+            // Create the User for Teacher using IUserRepository (works with DatabaseContext)
             var teacherUser = new ApplicationUser
             {
                 UserName = teacher.UserName,
@@ -37,12 +40,9 @@ namespace Backend.Repository
                 UserType = "TEACHER" // Ensure the UserType field exists in the ApplicationUser model
             };
             
-
-            // Add User to database
-            _context.Users.Add(teacherUser);
-            await _context.SaveChangesAsync(); // Use SaveChangesAsync() for async IO
-
-            teacher.UserID = teacherUser.Id;
+            // Use IUserRepository to create user (this uses DatabaseContext, not TenantDbContext)
+            var createdUser = await _userRepository.CreateUserAsync(teacherUser, "TEACHER", "TEACHER");
+            teacher.UserID = createdUser.Id;
 
             // Create Teacher entity
             var newTeacher = new Teacher

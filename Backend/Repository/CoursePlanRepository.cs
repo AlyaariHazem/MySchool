@@ -9,10 +9,10 @@ namespace Backend.Repository;
 
 public class CoursePlanRepository : ICoursePlanRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
 
-    public CoursePlanRepository(DatabaseContext context, IMapper mapper)
+    public CoursePlanRepository(TenantDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;

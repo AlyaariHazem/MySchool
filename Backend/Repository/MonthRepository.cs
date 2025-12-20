@@ -10,10 +10,10 @@ namespace Backend.Repository;
 
 public class MonthRepository : IMonthRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
 
-    public MonthRepository(DatabaseContext context, IMapper mapper)
+    public MonthRepository(TenantDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;

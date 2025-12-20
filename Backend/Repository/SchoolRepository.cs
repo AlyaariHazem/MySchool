@@ -14,11 +14,11 @@ namespace Backend.Repository.School.Classes
 {
     public class SchoolRepository : ISchoolRepository
     {
-        private readonly DatabaseContext _db;
+        private readonly TenantDbContext _db;
         private readonly IMapper _mapper;
         private readonly IYearRepository _yearRepository;
 
-        public SchoolRepository(DatabaseContext db, IYearRepository yearRepository, IMapper mapper)
+        public SchoolRepository(TenantDbContext db, IYearRepository yearRepository, IMapper mapper)
         {
             _db = db;
             _mapper = mapper;

@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Backend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,9 +29,36 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("SqlAdminConnection"),
-        sqlOptions => sqlOptions.CommandTimeout(180)
+        sql => sql.CommandTimeout(180)
     )
 );
+
+builder.Services.AddScoped<TenantInfo>();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+
+// Register TenantDbContext - connection string will be set dynamically from TenantInfo
+// The configuration will be evaluated when the DbContext is resolved (after middleware runs)
+builder.Services.AddDbContext<TenantDbContext>((serviceProvider, optionsBuilder) =>
+{
+    // Get TenantInfo from service provider (scoped, resolved per request)
+    // The middleware sets ConnectionString before the controller/DbContext is resolved
+    var tenantInfo = serviceProvider.GetRequiredService<TenantInfo>();
+    
+    // Get connection string - either from TenantInfo (set by middleware) or fallback to admin connection for ADMIN users
+    string? connectionString = tenantInfo.ConnectionString;
+    
+    // If connection string is available (set by middleware), use it
+    if (!string.IsNullOrWhiteSpace(connectionString))
+    {
+        optionsBuilder.UseSqlServer(connectionString, sql =>
+        {
+            sql.CommandTimeout(180);
+        });
+    }
+    // If ConnectionString is not set, OnConfiguring will try to configure it
+    // This ensures dynamic tenant resolution works correctly
+});
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
@@ -187,6 +215,7 @@ if (app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseCors("MyPolicy");
 app.UseAuthentication();
+app.UseMiddleware<TenantResolutionMiddleware>(); // Resolve tenant from JWT before authorization
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
