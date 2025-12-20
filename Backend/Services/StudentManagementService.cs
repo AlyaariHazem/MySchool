@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -204,8 +205,22 @@ public class StudentManagementService
 
             student.DivisionID = request.DivisionID != 0 ? request.DivisionID : student.DivisionID;
             student.PlaceBirth = request.PlaceBirth ?? student.PlaceBirth;
-            if (request.StudentImageURL != "")
-                student.ImageURL = $"StudentPhotos_{studentId}_{request.StudentImageURL}";
+            
+            // Handle image URL - if it's already in the correct format, use it; otherwise construct it
+            if (!string.IsNullOrWhiteSpace(request.StudentImageURL))
+            {
+                // If it already starts with "StudentPhotos_", use it as-is (already uploaded)
+                if (request.StudentImageURL.StartsWith("StudentPhotos_"))
+                {
+                    student.ImageURL = request.StudentImageURL;
+                }
+                else
+                {
+                    // Extract just the filename if a full path is provided
+                    var fileName = Path.GetFileName(request.StudentImageURL);
+                    student.ImageURL = $"StudentPhotos_{studentId}_{fileName}";
+                }
+            }
 
             student.StudentDOB = request.StudentDOB != default ? request.StudentDOB : student.StudentDOB;
 
@@ -299,8 +314,15 @@ public class StudentManagementService
                 }
             }
 
-            if (request.StudentImageURL != "")
-                _mangeFilesService.RemoveFile("StudentPhotos", request.StudentID);
+            // Remove old image only if a new image is being uploaded
+            if (!string.IsNullOrWhiteSpace(request.StudentImageURL) && student.ImageURL != request.StudentImageURL)
+            {
+                // Only remove if there was a previous image
+                if (!string.IsNullOrWhiteSpace(student.ImageURL))
+                {
+                    _mangeFilesService.RemoveFile("StudentPhotos", studentId);
+                }
+            }
 
 
             // **Update Discounts**
@@ -331,14 +353,51 @@ public class StudentManagementService
             {
                 foreach (var attachment in request.Attachments)
                 {
-
                     if (string.IsNullOrWhiteSpace(attachment))
                         continue;
 
-                    // تأكد من عدم التكرار
+                    // Extract the actual filename from the attachment string
+                    // The frontend sends full URLs like: "https://localhost:7258/uploads/Attachments/Attachments_6_CV.pdf"
+                    // But the database stores just: "Attachments_6_CV.pdf"
+                    string attachmentURL;
+                    
+                    // Check if it's a full URL (contains http:// or https://)
+                    if (attachment.StartsWith("http://") || attachment.StartsWith("https://"))
+                    {
+                        // Extract just the filename from the full URL
+                        // e.g., "https://localhost:7258/uploads/Attachments/Attachments_6_CV.pdf" -> "Attachments_6_CV.pdf"
+                        attachmentURL = Path.GetFileName(attachment);
+                    }
+                    // Check if it already has the correct prefix format (just the filename)
+                    else if (attachment.StartsWith($"Attachments_{request.StudentID}_"))
+                    {
+                        attachmentURL = attachment; // Already in correct format: "Attachments_6_CV.pdf"
+                    }
+                    else if (attachment.StartsWith("Attachments_"))
+                    {
+                        // Has prefix but might be for different student ID, extract the actual filename
+                        var parts = attachment.Split('_');
+                        if (parts.Length >= 3)
+                        {
+                            // Extract everything after "Attachments_{id}_"
+                            var actualFileName = string.Join("_", parts.Skip(2));
+                            attachmentURL = $"Attachments_{request.StudentID}_{actualFileName}";
+                        }
+                        else
+                        {
+                            attachmentURL = $"Attachments_{request.StudentID}_{attachment}";
+                        }
+                    }
+                    else
+                    {
+                        // Just a filename without prefix
+                        attachmentURL = $"Attachments_{request.StudentID}_{attachment}";
+                    }
+
+                    // تأكد من عدم التكرار - Check if this attachment already exists in database
                     bool alreadyExists = await _tenantContext.Attachments
                         .AnyAsync(a =>
-                            a.AttachmentURL == $"Attachments_{request.StudentID}_{attachment}"
+                            a.AttachmentURL == attachmentURL
                             && a.StudentID == request.StudentID
                         );
 
@@ -347,7 +406,7 @@ public class StudentManagementService
                         var newAttachment = new Attachments
                         {
                             StudentID = request.StudentID,
-                            AttachmentURL = $"Attachments_{request.StudentID}_{attachment}"
+                            AttachmentURL = attachmentURL
                         };
                         await _tenantContext.Attachments.AddAsync(newAttachment);
                     }

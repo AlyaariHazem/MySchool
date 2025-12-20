@@ -6,6 +6,7 @@ using Backend.Models;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
 using Backend.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -20,14 +21,31 @@ public class StudentRepository : IStudentRepository
     private readonly mangeFilesService _mangeFilesService;
     private readonly IUserRepository _userRepository;
     private readonly ILogger<StudentRepository> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public StudentRepository(TenantDbContext context, IGuardianRepository guardianRepo, mangeFilesService mangeFilesService, IUserRepository userRepository, ILogger<StudentRepository> logger)
+    public StudentRepository(TenantDbContext context, IGuardianRepository guardianRepo, mangeFilesService mangeFilesService, IUserRepository userRepository, ILogger<StudentRepository> logger, IHttpContextAccessor httpContextAccessor)
     {
         _context = context;
         _guardianRepo = guardianRepo;
         _mangeFilesService = mangeFilesService;
         _userRepository = userRepository;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    // Helper method to get base URL dynamically
+    private string GetBaseUrl()
+    {
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request == null)
+        {
+            // Fallback if HttpContext is not available
+            return "https://localhost:7258";
+        }
+
+        var scheme = request.Scheme;
+        var host = request.Host.Value;
+        return $"{scheme}://{host}";
     }
 
     // Create: Add a new student
@@ -205,7 +223,7 @@ public class StudentRepository : IStudentRepository
         // Fetch user data from admin database
         var user = await _userRepository.GetUserByIdAsync(student.UserID);
 
-        string baseUrl = "https://localhost:7258/uploads/StudentPhotos";
+        string baseUrl = $"{GetBaseUrl()}/uploads/StudentPhotos";
 
         return new StudentDetailsDTO
         {
@@ -268,7 +286,7 @@ public class StudentRepository : IStudentRepository
             }
         }
 
-        string baseUrl = "https://localhost:7258/uploads/StudentPhotos";
+        string baseUrl = $"{GetBaseUrl()}/uploads/StudentPhotos";
 
         return students.Select(student =>
         {
@@ -337,8 +355,9 @@ public class StudentRepository : IStudentRepository
         // Fetch user data from admin database
         var user = await _userRepository.GetUserByIdAsync(student.UserID);
 
-        string PhotoUrl = "https://localhost:7258/uploads/StudentPhotos";
-        string AttachmentUrl = "https://localhost:7258/uploads/Attachments";
+        string baseUrl = GetBaseUrl();
+        string PhotoUrl = $"{baseUrl}/uploads/StudentPhotos";
+        string AttachmentUrl = $"{baseUrl}/uploads/Attachments";
         
         // Await the async call properly instead of using .Result
         var guardianInfo = await _guardianRepo.GetGuardianByIdForUpdateAsync(student!.GuardianID);

@@ -11,6 +11,7 @@ using FirstProjectWithMVC.Repository.School;
 using AutoMapper;
 using Backend.Services;
 using Backend.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity; // Assuming your DbContext is here
 using Microsoft.Extensions.Logging;
 
@@ -22,6 +23,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly mangeFilesService _mangeFilesService;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILogger<StudentRepository> _studentRepositoryLogger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UnitOfWork(
         TenantDbContext tenantContext,
@@ -29,7 +31,8 @@ public class UnitOfWork : IUnitOfWork
         IMapper mapper,
         mangeFilesService mangeFilesService,
         UserManager<ApplicationUser> userManager,
-        ILogger<StudentRepository> studentRepositoryLogger
+        ILogger<StudentRepository> studentRepositoryLogger,
+        IHttpContextAccessor httpContextAccessor
     )
     {
         _tenantContext = tenantContext;
@@ -38,13 +41,14 @@ public class UnitOfWork : IUnitOfWork
         _mangeFilesService = mangeFilesService;
         _userManager = userManager;
         _studentRepositoryLogger = studentRepositoryLogger;
+        _httpContextAccessor = httpContextAccessor;
 
         // Tenant-specific repositories use TenantDbContext
         // Initialize Users first since it's needed by Students, Teachers, and Employees
         Users = new UsersRepository(_userManager);
         Guardians = new GuardianRepository(_tenantContext, _mapper, Users);
         Subjects = new SubjectRepository(_tenantContext, _mapper);
-        Students = new StudentRepository(_tenantContext, Guardians, _mangeFilesService, Users, _studentRepositoryLogger);
+        Students = new StudentRepository(_tenantContext, Guardians, _mangeFilesService, Users, _studentRepositoryLogger, _httpContextAccessor);
         Classes = new ClassesRepository(_tenantContext, _mapper);
         Divisions = new DivisionRepository(_tenantContext, _mapper);
         Stages = new StagesRepository(_tenantContext, _mapper);
