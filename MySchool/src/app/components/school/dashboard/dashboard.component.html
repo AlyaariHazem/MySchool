@@ -314,13 +314,13 @@
                         <h2>
                           <a href="#" class="avatar text-white"><img [src]="student.photoUrl" alt="" /></a><a
                             href="#">{{
-                            (student.fullName?.firstName || '') + " " + (student.fullName?.lastName || '')
+                            (student.fullName.firstName || '') + " " + (student.fullName.lastName || '')
                             }}<span></span></a>
                         </h2>
                       </td>
                       <td>{{ student.studentPhone || '' }}</td>
-                      <td>{{ student.guardians?.guardianFullName || '' }}</td>
-                      <td>{{ student.guardians?.guardianPhone || '' }}</td>
+                      <td>{{ student.guardians.guardianFullName || '' }}</td>
+                      <td>{{ student.guardians.guardianPhone || '' }}</td>
                       <td>{{ student.placeBirth }}</td>
                       <td>{{ student.hireDate|date:"dd-MM-yyyy" }}</td>
                       <td>{{ student.fee }}</td>

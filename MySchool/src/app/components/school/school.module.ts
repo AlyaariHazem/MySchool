@@ -83,6 +83,7 @@ import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 import { HeaderReportComponent } from './report/header-report/header-report.component';
 import { AllStudentsComponent } from './students/all-students/all-students.component';
 import { DatePicker } from 'primeng/datepicker';
+import { CustomTableComponent } from '../../shared/components/custom-table/custom-table.component';
 
 
 
@@ -138,6 +139,7 @@ const components = [
 const modules = [
   ShardModule,
   ReactiveFormsModule,
+  CustomTableComponent,
   MatFormFieldModule,
   MatPaginatorModule,
   TabsModule,

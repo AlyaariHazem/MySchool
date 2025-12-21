@@ -1,0 +1,93 @@
+.custom-table-wrapper {
+  width: 100%;
+
+  .table-filters {
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+  }
+
+  .filter-input-wrapper {
+    margin-top: 4px;
+  }
+
+  .column-filter-input {
+    font-size: 12px;
+  }
+}
+
+// Keep existing table styles - preserve green header
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 0.9em;
+  font-family: sans-serif;
+  min-width: 400px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  table-layout: auto; // Auto width for columns
+}
+
+.styled-table thead tr {
+  background-color: #009879; // Keep existing green header
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 12px 1rem;
+  border: 1px solid #dddddd;
+  white-space: nowrap; // Prevent text wrapping
+}
+
+.styled-table th {
+  width: auto; // Auto width
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+  transition: background-color 0.2s;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+  font-weight: bold;
+  color: #009879;
+}
+
+.student-name-column {
+  text-align: right;
+  
+  .image {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-inline-end: 8px;
+  }
+}
+
+.empty-message {
+  text-align: center;
+  padding: 2rem 0;
+  font-weight: 600;
+  color: #0d0e0d;
+}
+
+.image {
+  border-radius: 23px;
+}
+

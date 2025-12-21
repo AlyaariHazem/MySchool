@@ -1,0 +1,114 @@
+<div class="custom-table-wrapper">
+  
+
+  <div class="table-container" [attr.dir]="'rtl'">
+    <mat-card>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            @for (col of columns; track col.field) {
+              <th>
+                {{ col.header }}
+                @if (col.filterable) {
+                  <div class="filter-input-wrapper">
+                    <input
+                      type="text"
+                      class="column-filter-input"
+                      [value]="columnFilters[col.field] || ''"
+                      (input)="onColumnFilter(col.field, $any($event.target).value)"
+                      [placeholder]="'فلترة ' + col.header"
+                      style="width: 100%; padding: 4px 8px; margin-top: 4px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;" />
+                  </div>
+                }
+              </th>
+            }
+            @if (showActions) {
+              <th>{{ actionHeader }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of data; track getTrackByValue($index, row); let i = $index) {
+            <tr (click)="closeDropdown(); onRowClick(row)" style="cursor: pointer;">
+              <td>{{ i + 1 + first }}</td>
+              @for (col of columns; track col.field) {
+                <td [class.student-name-column]="col.field === 'fullName'">
+                  @if (col.field === 'fullName' && row.photoUrl) {
+                    <div class="flex align-items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
+                      <img
+                        [src]="row.photoUrl"
+                        [alt]="getFormattedValue(row, col)"
+                        [title]="getFormattedValue(row, col) || ''"
+                        class="image w-3rem h-3rem"
+                        style="width: 3rem; height: 3rem; border-radius: 50%; object-fit: cover;" />
+                      <span>{{ getFormattedValue(row, col) }}</span>
+                    </div>
+                  } @else if (col.template === 'custom' && col.formatter) {
+                    {{ getFormattedValue(row, col) }}
+                  } @else if (col.template === 'date') {
+                    {{ getFieldValue(row, col.field) | date: 'MM-yyyy' }}
+                  } @else {
+                    {{ getFormattedValue(row, col) }}
+                  }
+                </td>
+              }
+              @if (showActions) {
+                <td>
+                  <div class="col text-left" style="position: relative;">
+                    <div class="mt-sm-0 mt-2">
+                      <button
+                        class="btn btn-left"
+                        type="button"
+                        aria-haspopup="true"
+                        [attr.aria-expanded]="isDropdownOpen(i)"
+                        style="background: none; border: none; cursor: pointer;"
+                        (click)="toggleDropdown(i, $event)">
+                        <i class="fas fa-ellipsis-h"></i>
+                      </button>
+                      @if (isDropdownOpen(i)) {
+                        <div class="dropdown-menu show" dir="rtl" style="display: block; position: absolute; z-index: 1000; right: 0; top: 100%; margin-top: 0.125rem; min-width: 10rem; padding: 0.5rem 0; background-color: #fff; border: 1px solid rgba(0,0,0,.15); border-radius: 0.375rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);">
+                          <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            (click)="onEdit(row); closeDropdown(); $event.stopPropagation()"
+                            style="cursor: pointer; padding: 8px 16px; display: flex; align-items: center; gap: 8px; color: #212529; text-decoration: none; background-color: transparent; border: 0; width: 100%; clear: both; font-weight: 400; text-align: inherit; white-space: nowrap;">
+                            <i class="pi pi-file-edit text-primary"></i>
+                            <span>تعديل</span>
+                          </a>
+                          <div class="dropdown-divider my-1" style="height: 0; margin: 0.5rem 0; overflow: hidden; border-top: 1px solid rgba(0,0,0,.15); opacity: 1;"></div>
+                          <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            (click)="onDelete(row); closeDropdown(); $event.stopPropagation()"
+                            style="cursor: pointer; padding: 8px 16px; display: flex; align-items: center; gap: 8px; color: #212529; text-decoration: none; background-color: transparent; border: 0; width: 100%; clear: both; font-weight: 400; text-align: inherit; white-space: nowrap;">
+                            <i class="pi pi-trash text-danger"></i>
+                            <span>حذف</span>
+                          </a>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="columns.length + (showActions ? 2 : 1)" class="empty-message">
+                {{ emptyMessage }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </mat-card>
+  </div>
+
+  <p-paginator
+    dir="ltr"
+    (onPageChange)="onPageChange($event)"
+    [first]="first"
+    [rows]="rows"
+    [totalRecords]="totalRecords"
+    [rowsPerPageOptions]="rowsPerPageOptions">
+  </p-paginator>
+</div>
+
