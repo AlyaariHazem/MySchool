@@ -42,6 +42,7 @@ namespace Backend.Controllers
             try
             {
                 GuardianDTO existingGuardian = null!;
+                bool isUsingExistingGuardian = false;
 
                 // Step 1: Check if we are adding a student to an existing guardian.
                 // IMPORTANT: If ExistingGuardianId is provided and valid, we MUST NOT create a new guardian
@@ -50,6 +51,8 @@ namespace Backend.Controllers
                     existingGuardian = await _unitOfWork.Guardians.GetGuardianByIdAsync(request.ExistingGuardianId.Value);
                     if (existingGuardian == null)
                         return NotFound(new { message = $"Existing Guardian with ID {request.ExistingGuardianId.Value} not found." });
+                    
+                    isUsingExistingGuardian = true; // Mark that we're using an existing guardian
                 }
 
                 // If no existing guardian is provided (null or 0), create a new guardian and guardian user
@@ -58,8 +61,15 @@ namespace Backend.Controllers
                 AccountsDTO account = null!;
 
                 // Only create a new guardian if no existing guardian was found/selected
-                if (existingGuardian == null)
+                if (!isUsingExistingGuardian && existingGuardian == null)
                 {
+                    // Validate guardian information is provided when creating a new guardian
+                    if (string.IsNullOrWhiteSpace(request.GuardianEmail) || 
+                        string.IsNullOrWhiteSpace(request.GuardianFullName))
+                    {
+                        return BadRequest(new { message = "Guardian email and full name are required when creating a new guardian." });
+                    }
+
                     var userName = "Guardain_" + Guid.NewGuid().ToString("N").Substring(0, 5);
                     guardianUser = new ApplicationUser
                     {
@@ -77,7 +87,7 @@ namespace Backend.Controllers
                         Type = request.GuardianType,
                         GuardianDOB = request.GuardianDOB
                     };
-                    // Add Account
+                    // Add Account - only create account when creating a new guardian
                     account = new AccountsDTO
                     {
                         AccountName = request.GuardianFullName,
@@ -88,8 +98,11 @@ namespace Backend.Controllers
                 }
                 else
                 {
-                    // We already have a guardian, so no new guardian user or guardian entity needed
-                    // If the guardian was created previously, its user should also already exist.
+                    // IMPORTANT: When using an existing guardian:
+                    // - DO NOT create a new guardian user
+                    // - DO NOT create a new guardian entity
+                    // - DO NOT create a new account
+                    // The existing guardian already has an account that will be reused
                 }
 
                 var userNameStudent = "St_" + Guid.NewGuid().ToString("N").Substring(0, 5);
@@ -131,9 +144,11 @@ namespace Backend.Controllers
                 };
 
 
+                // Create AccountStudentGuardian object with the amount from the request
+                // This will be used to link the student to the guardian's account
                 var accountStudentGuardian = new AccountStudentGuardian
                 {
-                    Amount = request.Amount
+                    Amount = request.Amount // Ensure amount is set from the request
                 };
 
                 // Process attachments
@@ -166,7 +181,34 @@ namespace Backend.Controllers
                 }
 
                 Student createdStudent;
-                if (existingGuardian == null)
+                
+                // IMPORTANT: Use isUsingExistingGuardian flag to ensure correct method is called
+                if (isUsingExistingGuardian && existingGuardian != null)
+                {
+                    // IMPORTANT: When existing guardian is selected, DO NOT create:
+                    // - New Guardian User (AspNetUsers record)
+                    // - New Guardian (Guardians table record)
+                    // - New Account (Accounts table record)
+                    // Only create the student and link to existing guardian's account
+                    
+                    // Validate that amount is provided
+                    if (request.Amount < 0)
+                    {
+                        return BadRequest(new { message = "Amount must be a valid non-negative number." });
+                    }
+
+                    // Ensure guardian-related objects are null when using existing guardian
+                    if (guardianUser != null || guardian != null || account != null)
+                    {
+                        return BadRequest(new { message = "Guardian-related data should not be provided when using an existing guardian." });
+                    }
+
+                    createdStudent = await _studentManagementService.AddStudentToExistingGuardianAsync(
+                        existingGuardian,
+                        studentUser, request.StudentPassword, student,
+                        attachments, studentClassFees, accountStudentGuardian);
+                }
+                else
                 {
                     // Only create new guardian, guardian user, and account when no existing guardian is selected
                     if (guardianUser == null || guardian == null || account == null)
@@ -176,18 +218,6 @@ namespace Backend.Controllers
                         guardianUser, request.GuardianPassword, guardian,
                         studentUser, request.StudentPassword, student,
                         account, accountStudentGuardian, attachments, studentClassFees);
-                }
-                else
-                {
-                    // IMPORTANT: When existing guardian is selected, DO NOT create:
-                    // - New Guardian User (AspNetUsers record)
-                    // - New Guardian (Guardians table record)
-                    // - New Account (Accounts table record)
-                    // Only create the student and link to existing guardian
-                    createdStudent = await _studentManagementService.AddStudentToExistingGuardianAsync(
-                        existingGuardian,
-                        studentUser, request.StudentPassword, student,
-                        attachments, studentClassFees, accountStudentGuardian);
                 }
 
                 return Ok(new { success = true, message = "Student added successfully.", student = createdStudent });

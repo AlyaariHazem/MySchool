@@ -51,59 +51,74 @@ public class StudentManagementService
         ApplicationUser studentUser, string studentPassword, Student student,
     AccountsDTO account, AccountStudentGuardian accountStudentGuardian, List<Attachments> attachments, List<StudentClassFeeDTO> studentClassFees)
     {
-        // Step 1: Add Guardian's User
-        var createdGuardianUser = await _unitOfWork.Users.CreateUserAsync(guardianUser, guardianPassword, "Guardian");
-        guardian.UserID = createdGuardianUser.Id;
-
-        // Step 2: Add Guardian
-        var addedGuardian = await _unitOfWork.Guardians.AddGuardianAsync(guardian);
-
-        // Step 3: Add Student's User
-        var createdStudentUser = await _unitOfWork.Users.CreateUserAsync(studentUser, studentPassword, "Student");
-        student.UserID = createdStudentUser.Id;
-        student.GuardianID = addedGuardian.GuardianID;
-
-        var addedStudent = await _unitOfWork.Students.AddStudentAsync(student);
-
-
-        // Step 4: Create Account
-        var createdAccount = await _unitOfWork.Accounts.AddAccountAsync(account);
-
-        // Step 5: Create AccountStudentGuardian Mapping
-        accountStudentGuardian.AccountID = createdAccount.AccountID ?? default(int);
-        accountStudentGuardian.GuardianID = addedGuardian.GuardianID;
-        accountStudentGuardian.StudentID = addedStudent.StudentID;
-        await _unitOfWork.AccountStudentGuardians.AddAccountStudentGuardianAsync(accountStudentGuardian);
-
-        if (attachments != null && attachments.Any())
-        {
-            foreach (var attachment in attachments)
-            {
-                // Use UnitOfWork to save to tenant database (not admin database)
-                var attachmentDTO = new AttachmentDTO
-                {
-                    StudentID = attachment.StudentID,
-                    AttachmentURL = attachment.AttachmentURL,
-                    VoucherID = attachment.VoucherID
-                };
-                await _unitOfWork.Attachments.AddAsync(attachmentDTO);
-            }
-        }
-
+        using var transaction = await _tenantContext.Database.BeginTransactionAsync();
+        
         try
         {
-            foreach (var studentClassFee in studentClassFees)
+            // Step 1: Add Guardian's User
+            var createdGuardianUser = await _unitOfWork.Users.CreateUserAsync(guardianUser, guardianPassword, "Guardian");
+            guardian.UserID = createdGuardianUser.Id;
+
+            // Step 2: Add Guardian
+            var addedGuardian = await _unitOfWork.Guardians.AddGuardianAsync(guardian);
+
+            // Step 3: Add Student's User
+            var createdStudentUser = await _unitOfWork.Users.CreateUserAsync(studentUser, studentPassword, "Student");
+            student.UserID = createdStudentUser.Id;
+            student.GuardianID = addedGuardian.GuardianID;
+
+            var addedStudent = await _unitOfWork.Students.AddStudentAsync(student);
+
+            // Step 4: Create Account (only when creating a new guardian)
+            var createdAccount = await _unitOfWork.Accounts.AddAccountAsync(account);
+            if (createdAccount?.AccountID == null)
             {
-                // Use UnitOfWork to save to tenant database (not admin database)
-                await _unitOfWork.StudentClassFees.AddAsync(studentClassFee);
+                throw new Exception("Failed to create account. AccountID is null.");
             }
+
+            // Step 5: Create AccountStudentGuardian Mapping
+            accountStudentGuardian.AccountID = createdAccount.AccountID.Value;
+            accountStudentGuardian.GuardianID = addedGuardian.GuardianID;
+            accountStudentGuardian.StudentID = addedStudent.StudentID;
+            // Ensure amount is set (should already be set from the request)
+            await _unitOfWork.AccountStudentGuardians.AddAccountStudentGuardianAsync(accountStudentGuardian);
+
+            // Step 6: Handle attachments
+            if (attachments != null && attachments.Any())
+            {
+                foreach (var attachment in attachments)
+                {
+                    attachment.StudentID = addedStudent.StudentID; // Ensure StudentID is set
+                    var attachmentDTO = new AttachmentDTO
+                    {
+                        StudentID = attachment.StudentID,
+                        AttachmentURL = attachment.AttachmentURL,
+                        VoucherID = attachment.VoucherID
+                    };
+                    await _unitOfWork.Attachments.AddAsync(attachmentDTO);
+                }
+            }
+
+            // Step 7: Handle class fees
+            if (studentClassFees != null && studentClassFees.Any())
+            {
+                foreach (var studentClassFee in studentClassFees)
+                {
+                    studentClassFee.StudentID = addedStudent.StudentID; // Ensure StudentID is set
+                    await _unitOfWork.StudentClassFees.AddAsync(studentClassFee);
+                }
+            }
+
+            // Commit the transaction
+            await transaction.CommitAsync();
+
+            return addedStudent;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error saving StudentClassFees: {ex.Message}");
+            await transaction.RollbackAsync();
+            throw new Exception($"Error adding student with guardian: {ex.Message}", ex);
         }
-
-        return addedStudent;
     }
     public async Task<Student> AddStudentToExistingGuardianAsync(
       GuardianDTO existingGuardian,
@@ -116,54 +131,92 @@ public class StudentManagementService
         // - New Guardian (Guardians table record) - the guardian already exists
         // - New Account (Accounts table record) - use the existing guardian's account
         
-        // 1. Create student user (only create student-related records)
-        var createdStudentUser = await _unitOfWork.Users.CreateUserAsync(studentUser, studentPassword, "Student");
-        student.UserID = createdStudentUser.Id;
-        student.GuardianID = existingGuardian.GuardianID;
-
-        // 2. Add Student
-        var addedStudent = await _unitOfWork.Students.AddStudentAsync(student);
-
-        // 3. Retrieve the existing account ID associated with the guardian
-        var existingAccountStudentGuardian = await _unitOfWork.AccountStudentGuardians.GetAccountStudentGuardianByGuardianIdAsync(existingGuardian.GuardianID);
-        if (existingAccountStudentGuardian == null)
-            throw new Exception("No account found for the existing guardian.");
-
-
-        // 4. Create AccountStudentGuardian Mapping using the existing account ID
-        var accountStudentGuardian = new AccountStudentGuardian
+        // Validate that existingGuardian is provided and has a valid ID
+        if (existingGuardian == null)
+            throw new ArgumentNullException(nameof(existingGuardian), "Existing guardian must be provided.");
+        
+        if (existingGuardian.GuardianID <= 0)
+            throw new ArgumentException("Existing guardian must have a valid GuardianID.", nameof(existingGuardian));
+        
+        try
         {
-            AccountID = existingAccountStudentGuardian.AccountID, // Use the existing account ID
-            GuardianID = existingGuardian.GuardianID,
-            StudentID = addedStudent.StudentID,
-            Amount = accountStudentGuardianPram.Amount
-        };
-
-        await _unitOfWork.AccountStudentGuardians.AddAccountStudentGuardianAsync(accountStudentGuardian);
-
-        // 5. Handle attachments - use UnitOfWork to save to tenant database
-        if (attachments != null && attachments.Any())
-        {
-            foreach (var attachment in attachments)
+            // Verify the guardian exists in the database (defensive check)
+            var guardianExists = await _tenantContext.Guardians
+                .AnyAsync(g => g.GuardianID == existingGuardian.GuardianID);
+            
+            if (!guardianExists)
             {
-                attachment.StudentID = addedStudent.StudentID;
-                var attachmentDTO = new AttachmentDTO
-                {
-                    StudentID = attachment.StudentID,
-                    AttachmentURL = attachment.AttachmentURL,
-                    VoucherID = attachment.VoucherID
-                };
-                await _unitOfWork.Attachments.AddAsync(attachmentDTO);
+                throw new Exception($"Guardian with ID {existingGuardian.GuardianID} does not exist in the database.");
             }
-        }
 
-        // 6. Handle class fees - use UnitOfWork to save to tenant database
-        foreach (var studentClassFee in studentClassFees)
+            // 1. Create student user (only create student-related records)
+            // DO NOT create any guardian user or guardian entity here
+            var createdStudentUser = await _unitOfWork.Users.CreateUserAsync(studentUser, studentPassword, "Student");
+            student.UserID = createdStudentUser.Id;
+            student.GuardianID = existingGuardian.GuardianID; // Link to existing guardian
+
+            // 2. Add Student (this method has its own transaction, so we don't wrap it)
+            var addedStudent = await _unitOfWork.Students.AddStudentAsync(student);
+
+            // 3. Retrieve the existing account ID associated with the guardian
+            // Query directly from the context to ensure we get the account ID correctly
+            var existingAccountStudentGuardian = await _tenantContext.AccountStudentGuardians
+                .Where(asg => asg.GuardianID == existingGuardian.GuardianID)
+                .FirstOrDefaultAsync();
+
+            if (existingAccountStudentGuardian == null)
+            {
+                throw new Exception($"No account found for the existing guardian with ID {existingGuardian.GuardianID}. The guardian must have at least one student with an associated account.");
+            }
+
+            // Get the account ID from the existing record
+            int existingAccountID = existingAccountStudentGuardian.AccountID;
+
+            // 4. Create AccountStudentGuardian Mapping using the existing account ID
+            // IMPORTANT: Use the amount from the request parameter, not from the existing record
+            // Note: AddAccountStudentGuardianAsync calls SaveChangesAsync internally, so we don't need a transaction here
+            var accountStudentGuardian = new AccountStudentGuardian
+            {
+                AccountID = existingAccountID, // Use the existing account ID (DO NOT create a new account)
+                GuardianID = existingGuardian.GuardianID,
+                StudentID = addedStudent.StudentID,
+                Amount = accountStudentGuardianPram.Amount // Use the amount from the request
+            };
+
+            await _unitOfWork.AccountStudentGuardians.AddAccountStudentGuardianAsync(accountStudentGuardian);
+
+            // 5. Handle attachments - use UnitOfWork to save to tenant database
+            if (attachments != null && attachments.Any())
+            {
+                foreach (var attachment in attachments)
+                {
+                    attachment.StudentID = addedStudent.StudentID;
+                    var attachmentDTO = new AttachmentDTO
+                    {
+                        StudentID = attachment.StudentID,
+                        AttachmentURL = attachment.AttachmentURL,
+                        VoucherID = attachment.VoucherID
+                    };
+                    await _unitOfWork.Attachments.AddAsync(attachmentDTO);
+                }
+            }
+
+            // 6. Handle class fees - use UnitOfWork to save to tenant database
+            if (studentClassFees != null && studentClassFees.Any())
+            {
+                foreach (var studentClassFee in studentClassFees)
+                {
+                    studentClassFee.StudentID = addedStudent.StudentID; // Ensure StudentID is set
+                    await _unitOfWork.StudentClassFees.AddAsync(studentClassFee);
+                }
+            }
+
+            return addedStudent;
+        }
+        catch (Exception ex)
         {
-            await _unitOfWork.StudentClassFees.AddAsync(studentClassFee);
+            throw new Exception($"Error adding student to existing guardian: {ex.Message}", ex);
         }
-
-        return addedStudent;
     }
 
     public async Task<StudentDetailsDTO> UpdateStudentWithGuardianAsync(int studentId, UpdateStudentWithGuardianRequestDTO request)
