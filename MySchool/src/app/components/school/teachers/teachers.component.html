@@ -4,27 +4,38 @@
     <div class="container">
       <div class="tabcontent">
         <div [ngClass]="{'col-4':(dir$ | async)==='rtl','col-4En':(dir$ | async)==='ltr'}">
-          <i class="pi pi-bars mt-1" pTooltip="Show Students as row" showDelay="200" hideDelay="300"
-            (click)="showteacherCulomn()"></i>
-          <i class="pi mx-4 pi-th-large mt-1" pTooltip="Show Students as grid" showDelay="200" hideDelay="300"
-            (click)="showteacherGrid()"></i>
-        </div>
-        <form [formGroup]="form" [ngClass]="{'formEn': (dir$ | async) === 'ltr', 'form': (dir$ | async) !== 'ltr'}">
-          <!-- First Dropdown -->
-          <div class="group3">
-            <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
-              [showClear]="true" placeholder="إختار طالب" />
-
-            <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
-              [showClear]="true" placeholder="إختار المرحلة" />
-
-            <p-select [options]="" optionValue="classID" [checkmark]="true" optionLabel="className" [editable]="true"
-              [showClear]="true" placeholder="إختار الصف" />
+          <div class="view-toggle-buttons">
+            <button 
+              type="button"
+              class="view-toggle-btn"
+              [class.active]="showCulomn"
+              (click)="showteacherCulomn()"
+              pTooltip="عرض كجدول" 
+              showDelay="200" 
+              hideDelay="300">
+              <i class="pi pi-bars"></i>
+            </button>
+            <button 
+              type="button"
+              class="view-toggle-btn"
+              [class.active]="showGrid"
+              (click)="showteacherGrid()"
+              pTooltip="عرض كبطاقات" 
+              showDelay="200" 
+              hideDelay="300">
+              <i class="pi pi-th-large"></i>
+            </button>
           </div>
-        </form>
-
-        <p-button label="تصدير" variant="outlined" severity="success" (click)="openDialog()"
-          [ngClass]="{'add':(dir$ | async)==='rtl','addEn':(dir$ | async)==='ltr'}" label="إضافة موظف+"/>
+        </div>
+        
+        <p-button 
+          label="إضافة موظف+" 
+          variant="outlined" 
+          severity="success" 
+          (click)="openDialog()"
+          icon="pi pi-plus"
+          [ngClass]="{'add':(dir$ | async)==='rtl','addEn':(dir$ | async)==='ltr','index':true}">
+        </p-button>
 
         @if (showGrid) {
         <div class="group group2">
@@ -51,6 +62,10 @@
               </ng-template>
             </p-card>
           </div>
+          }@empty {
+            <div class="empty-message">
+              <p>لا يوجد موظفين</p>
+            </div>
           }
         </div>
           <p-paginator dir="ltr" (onPageChange)="handlePageChange($event)" [first]="paginatorService.first()" [rows]="paginatorService.rows()"
@@ -58,68 +73,22 @@
         }
 
         @if (showCulomn) {
-        <div class="table-container" [attr.dir]="(dir$ | async)">
-          <div class="table-container">
-            <mat-card>
-              <div class="responsive-table">
-                <table class="styled-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>اسم المستخدم</th>
-                      <th>الوضيفة</th>
-                      <th>رقم المستخدم</th>
-                      <th>العمر</th>
-                      <th>النوع</th>
-                      <th>تاريخ الإنشاء</th>
-                      <th>العنوان</th>
-                      <th>رقم الهاتف</th>
-                      <th>العملية</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (employee of paginated; track $index) {
-                    <tr>
-                      <td>{{ $index+1 }}</td>
-                      <td class="student-name-column">{{employee.firstName +" "+employee.lastName}}</td>
-                      <td>{{ employee.jopName}}</td>
-                      <td>{{ employee.employeeID}}</td>
-                      <td>{{ employee.dob | age }}</td>
-                      <td>{{ employee.gender=="Male"?"ذكر":"انثى" }}</td>
-                      <td>{{ employee.hireDate| date:"MM-yyyy" }}</td>
-                      <td>{{ employee.address }}</td>
-                      <td>{{ employee.mobile }}</td>
-                      <td>
-                        <div class="col text-left">
-                          <div class="mt-sm-0 mt-2">
-                            <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                              aria-expanded="false">
-                              <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-left">
-                              <a class="dropdown-item" (click)="EditDialog(employee)"><i
-                                  class="bi bi-pencil-square IconEdit"></i>تعديل</a>
-                              <div role="separator" class="dropdown-divider"></div>
-                              <a class="dropdown-item" (click)="deleteEmployee(employee.employeeID!,employee.jopName)">
-                                <i class="bi bi-trash IconDelete"></i>حذف</a>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                    }@empty {
-                    <p animate-width>No Data available in a Table</p>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            </mat-card>
-          </div>
-        </div>  
+          <app-custom-table
+            [data]="paginated"
+            [columns]="tableColumns"
+            [loading]="isLoading"
+            [totalRecords]="totalRecords"
+            [rows]="paginatorService.rows()"
+            [first]="paginatorService.first()"
+            [rowsPerPageOptions]="[4, 10, 20]"
+            [showGlobalFilter]="false"
+            [trackByField]="'employeeID'"
+            (pageChange)="handlePageChange($event)"
+            (rowEdit)="onRowEdit($event)"
+            (rowDelete)="onRowDelete($event)">
+          </app-custom-table>
         }
       </div>
-      <p-paginator dir="ltr" (onPageChange)="handlePageChange($event)" [first]="paginatorService.first()" [rows]="paginatorService.rows()"
-          [totalRecords]="Employees.length" [rowsPerPageOptions]="[4, 10, 20]"/>
         
     </div>
   </div>

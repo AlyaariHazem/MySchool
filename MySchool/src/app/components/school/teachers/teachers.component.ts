@@ -12,6 +12,7 @@ import { PaginatorService } from '../../../core/services/paginator.service';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
+import { TableColumn } from '../../../shared/components/custom-table/custom-table.component';
 
 @Component({
   selector: 'app-teachers',
@@ -28,9 +29,45 @@ export class TeachersComponent {
   paginated: Employee[] = []; // Paginated data
   max = 2;
   isLoading: boolean = true; // Loading state for the component
+  totalRecords: number = 0;
 
   showGrid: boolean = false;
   showCulomn: boolean = true;
+  
+  // Table columns configuration
+  tableColumns: TableColumn[] = [
+    { 
+      field: 'fullName', 
+      header: 'اسم المستخدم', 
+      sortable: true, 
+      filterable: true,
+      template: 'custom',
+      formatter: (value: any, row: Employee) => {
+        return `${row.firstName || ''} ${row.lastName || ''}`.trim();
+      }
+    },
+    { field: 'jopName', header: 'الوضيفة', sortable: true, filterable: true },
+    { field: 'employeeID', header: 'رقم المستخدم', sortable: true, filterable: true },
+    { 
+      field: 'age', 
+      header: 'العمر', 
+      sortable: true, 
+      filterable: true
+    },
+    { 
+      field: 'gender', 
+      header: 'النوع', 
+      sortable: true, 
+      filterable: true,
+      template: 'custom',
+      formatter: (value: any, row: Employee) => {
+        return row.gender === 'Male' ? 'ذكر' : 'انثى';
+      }
+    },
+    { field: 'hireDate', header: 'تاريخ الإنشاء', sortable: true, filterable: true, template: 'date' },
+    { field: 'address', header: 'العنوان', sortable: true, filterable: true },
+    { field: 'mobile', header: 'رقم الهاتف', sortable: true, filterable: true },
+  ];
   readonly dir$ = this.store.select(selectLanguage).pipe(
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
   );
@@ -46,6 +83,18 @@ export class TeachersComponent {
   handlePageChange(event: PaginatorState): void {
     this.paginatorService.onPageChange(event);
     this.paginated = this.paginatorService.pageSlice(this.Employees);
+  }
+  
+  // Handle row edit
+  onRowEdit(employee: Employee): void {
+    this.EditDialog(employee);
+  }
+  
+  // Handle row delete
+  onRowDelete(employee: Employee): void {
+    if (employee.employeeID && employee.jopName) {
+      this.deleteEmployee(employee.employeeID, employee.jopName);
+    }
   }
   constructor(
     private formBuilder: FormBuilder,
@@ -77,6 +126,7 @@ export class TeachersComponent {
           return;
         }
         this.Employees = res.result;
+        this.totalRecords = this.Employees.length;
         this.paginated = this.paginatorService.pageSlice(this.Employees);
         this.isLoading = false;
       }

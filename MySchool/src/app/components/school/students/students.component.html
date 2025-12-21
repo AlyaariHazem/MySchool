@@ -5,12 +5,28 @@
     <div class="container">
       <div class="tabcontent">
         <div [ngClass]="{'col-4':(dir$ | async)==='rtl','col-4En':(dir$ | async)==='ltr'}">
-          <i class="pi pi-bars mt-1" pTooltip="Show Students as row" showDelay="200" hideDelay="300"
-            (click)="showStudentCulomn()"></i>
-          <i class="pi mx-4 pi-th-large mt-1" pTooltip="Show Students as grid" showDelay="200" hideDelay="300"
-            (click)="showStudentGrid()"></i>
-          <!-- <span class="border p-1" (click)="toggleHidden()"><i pTooltip="Show or Hide search form" showDelay="200"
-              hideDelay="300" [class]="hiddenFrom?'pi pi-sort-down-fill':'pi pi-sort-up-fill'"></i></span> -->
+          <div class="view-toggle-buttons">
+            <button 
+              type="button"
+              class="view-toggle-btn"
+              [class.active]="showCulomn"
+              (click)="showStudentCulomn()"
+              pTooltip="عرض كجدول" 
+              showDelay="200" 
+              hideDelay="300">
+              <i class="pi pi-bars"></i>
+            </button>
+            <button 
+              type="button"
+              class="view-toggle-btn"
+              [class.active]="showGrid"
+              (click)="showStudentGrid()"
+              pTooltip="عرض كبطاقات" 
+              showDelay="200" 
+              hideDelay="300">
+              <i class="pi pi-th-large"></i>
+            </button>
+          </div>
         </div>
         <!-- First Dropdown -->
         <!-- <form [formGroup]="form" [style]="hiddenFrom? 'display:none': 'display:flex'"
@@ -28,7 +44,7 @@
         </form> -->
 
         <p-button label="تصدير" variant="outlined" severity="success" (click)="openDialog()"
-          [ngClass]="{'add':(dir$ | async)==='rtl','addEn':(dir$ | async)==='ltr'}" label="إضافة طالب+" />
+          [ngClass]="{'add':(dir$ | async)==='rtl','addEn':(dir$ | async)==='ltr','index':true}" label="إضافة طالب+" />
 
         @if (showGrid) {
         <div class="group group2">

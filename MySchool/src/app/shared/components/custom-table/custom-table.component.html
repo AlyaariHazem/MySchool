@@ -44,10 +44,26 @@
                         style="width: 3rem; height: 3rem; border-radius: 50%; object-fit: cover;" />
                       <span>{{ getFormattedValue(row, col) }}</span>
                     </div>
+                  } @else if (col.field === 'fullName' && row.imageURL) {
+                    <div class="flex align-items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
+                      <img
+                        [src]="row.imageURL"
+                        [alt]="getFormattedValue(row, col)"
+                        [title]="getFormattedValue(row, col) || ''"
+                        class="image w-3rem h-3rem"
+                        style="width: 3rem; height: 3rem; border-radius: 50%; object-fit: cover;" />
+                      <span>{{ getFormattedValue(row, col) }}</span>
+                    </div>
                   } @else if (col.template === 'custom' && col.formatter) {
                     {{ getFormattedValue(row, col) }}
                   } @else if (col.template === 'date') {
                     {{ getFieldValue(row, col.field) | date: 'MM-yyyy' }}
+                  } @else if (col.field === 'age') {
+                    @if (row.dob) {
+                      {{ row.dob | age }}
+                    } @else {
+                      {{ getFormattedValue(row, col) }}
+                    }
                   } @else {
                     {{ getFormattedValue(row, col) }}
                   }

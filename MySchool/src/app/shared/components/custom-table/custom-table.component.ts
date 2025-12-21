@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { PaginatorModule } from 'primeng/paginator';
 import { DatePipe } from '@angular/common';
 import { StudentsDataService } from '../../../core/services/students-data.service';
+import { AgePipe } from '../../../Pipes/age.pipe';
 
 export interface TableColumn {
   field: string;
@@ -18,7 +19,7 @@ export interface TableColumn {
 @Component({
   selector: 'app-custom-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, PaginatorModule, DatePipe],
+  imports: [CommonModule, FormsModule, MatCardModule, PaginatorModule, DatePipe, AgePipe],
   templateUrl: './custom-table.component.html',
   styleUrls: ['./custom-table.component.scss'],
 })

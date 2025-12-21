@@ -28,31 +28,117 @@ p-paginator {
 .student-name-column {
   width: 280px; /* Set your desired width */
 }
+.index{
+  z-index: 1000;
+}
 
+// View toggle buttons positioned at top left (matching students page)
 .col-4 {
   position: absolute;
   left: 0rem;
   top: 1rem;
   display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+.col-4En {
+  position: absolute;
+  right: 0rem;
+  top: 1rem;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+.col-4,
+.col-4En {
+  i {
+    font-size: 1.2rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      color: #2fdf84;
+      background-color: #f8f9fa;
+      transform: scale(1.1);
+    }
+  }
+}
+
+// View toggle buttons - styled version
+.view-toggle-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 0.25rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #6c757d;
+  font-size: 1.1rem;
+  
+  i {
+    transition: all 0.3s ease;
+    color: inherit;
+  }
+  
+  &:hover:not(.active) {
+    background: #e9ecef;
+    color: #000000;
+    transform: translateY(-1px);
+    
+    i {
+      transform: scale(1.1);
+      color: #000000 !important;
+    }
+  }
+  
+  &.active {
+    background: #009879;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 152, 121, 0.3);
+    
+    i {
+      color: #ffffff !important;
+    }
+    
+    &:hover {
+      background: #007a63;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 152, 121, 0.4);
+      
+      i {
+        color: #000000 !important;
+      }
+    }
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+.active:hover{
+  color:#000000!important;
 }
 td,th{
   text-align: center;
-}
-.col-4 {
-  i:hover {
-    color: #2fdf84;
-    cursor: pointer;
-  }
-}
-.col-4En {
-  position: absolute;
-  right:18%;
-  top: 1rem;
-  display: flex;
-  i:hover {
-    color: #2fdf84;
-    cursor: pointer;
-  }
 }
 .table-container {
   margin-top: 3rem;
