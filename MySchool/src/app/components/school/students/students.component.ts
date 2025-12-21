@@ -53,8 +53,15 @@ export class StudentsComponent implements OnInit {
     this.showGrid = true;
   }
   handlePageChange(event: PaginatorState): void {
-    this.currentPage = Math.floor((event.first || 0) / (event.rows || this.pageSize)) + 1;
-    this.pageSize = event.rows || 8;
+    // Update paginator service state first
+    this.paginatorService.first.set(event.first || 0);
+    this.paginatorService.rows.set(event.rows || this.pageSize);
+    
+    // Calculate current page and page size
+    this.pageSize = event.rows || this.pageSize;
+    this.currentPage = Math.floor((event.first || 0) / this.pageSize) + 1;
+    
+    // Fetch new data
     this.getAllStudents();
   }
   constructor(
