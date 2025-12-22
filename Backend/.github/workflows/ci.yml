@@ -1,0 +1,102 @@
+name: CI (.NET + SQL Server)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: "Developer"
+          MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
+        ports:
+          - 1433:1433
+        options: >-
+          --name sqlserver
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: |
+            Backend/**/*.csproj
+            Backend/**/*.sln
+
+      - name: Wait for SQL Server and create CI database
+        shell: bash
+        env:
+          SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
+        run: |
+          set -e
+
+          # English: find sqlcmd path (some images use tools18)
+          SQLCMD="/opt/mssql-tools/bin/sqlcmd"
+          if ! docker exec sqlserver test -x "$SQLCMD"; then
+            SQLCMD="/opt/mssql-tools18/bin/sqlcmd"
+          fi
+
+          # English: wait until SQL Server is ready
+          for i in {1..40}; do
+            if docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -Q "SELECT 1" >/dev/null 2>&1; then
+              echo "SQL Server is ready."
+              break
+            fi
+            echo "Waiting for SQL Server... ($i/40)"
+            sleep 3
+          done
+
+          # English: create a database for CI (safe if already exists)
+          docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -Q "IF DB_ID('MySchool_CI') IS NULL CREATE DATABASE MySchool_CI;"
+
+      - name: Locate solution/project
+        id: locate
+        shell: bash
+        run: |
+          set -e
+
+          # English: prefer a solution if present
+          if ls Backend/*.sln >/dev/null 2>&1; then
+            SOLN="$(ls Backend/*.sln | head -n1)"
+            echo "target=$SOLN" >> "$GITHUB_OUTPUT"
+            echo "Found solution: $SOLN"
+            exit 0
+          fi
+
+          # English: fallback to first csproj under Backend/
+          CSPROJ="$(find Backend -name '*.csproj' | head -n1)"
+          if [ -z "$CSPROJ" ]; then
+            echo "No .sln or .csproj found under Backend/"
+            exit 1
+          fi
+
+          echo "target=$CSPROJ" >> "$GITHUB_OUTPUT"
+          echo "Found project: $CSPROJ"
+
+      - name: Restore
+        run: dotnet restore "${{ steps.locate.outputs.target }}"
+
+      - name: Build
+        run: dotnet build "${{ steps.locate.outputs.target }}" --configuration Release --no-restore
+
+      - name: Test
+        env:
+          # English: overrides appsettings ConnectionStrings:SqlAdminConnection
+          ConnectionStrings__SqlAdminConnection: "Server=localhost,1433;Database=MySchool_CI;User Id=sa;Password=${{ secrets.MSSQL_SA_PASSWORD }};TrustServerCertificate=True;Encrypt=False"
+          ASPNETCORE_ENVIRONMENT: "Development"
+        run: dotnet test "${{ steps.locate.outputs.target }}" --configuration Release --no-build --verbosity normal
