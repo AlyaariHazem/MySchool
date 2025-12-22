@@ -24,8 +24,16 @@ export class StudyYearComponent implements OnInit {
   );
 
   visible = false;
+  visibleEdit = false;
+  selectedYear: Year | null = null;
+
   showDialogAddYear() {
     this.visible = true;
+  }
+
+  showDialogEditYear(year: Year) {
+    this.selectedYear = year;
+    this.visibleEdit = true;
   }
 
   /* ---------- data ---------- */
@@ -88,5 +96,12 @@ export class StudyYearComponent implements OnInit {
   handleYearAdded() {
     this.getAllYears();
     this.visible = false;
+  }
+
+  /* emitted from <app-new-year> when editing */
+  handleYearUpdated() {
+    this.getAllYears();
+    this.visibleEdit = false;
+    this.selectedYear = null;
   }
 }

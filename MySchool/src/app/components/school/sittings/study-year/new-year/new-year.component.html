@@ -65,6 +65,7 @@
 
     <div class="form-actions">
         
-        <p-button class="button add" variant="outlined" severity="success" (onClick)="yearAdd()" label="إضافة+" />
+        <p-button class="button add" variant="outlined" severity="success" (onClick)="yearAdd()" 
+          [label]="isEditMode ? 'تحديث' : 'إضافة+'" />
     </div>
 </form>

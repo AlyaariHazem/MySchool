@@ -131,23 +131,38 @@ namespace Backend.Controllers
 
                     using var tenantContext = new TenantDbContext(tenantOptions, tenantInfo);
 
-                    schoolData = await tenantContext.Schools
+                    // I want to connect with the tenant database and get the manager and school data
+                    var manager = await tenantContext.Managers
                         .AsNoTracking()
-                        .Where(s => s.Manager != null && s.Manager.UserID == userFromDb.Id)
-                        .Select(s => new
-                        {
-                            s.SchoolName,
-                            SchoolId = s.SchoolID,
-                            ManagerFirstName = s.Manager != null ? s.Manager.FullName.FirstName : null,
-                            ManagerLastName  = s.Manager != null ? s.Manager.FullName.LastName  : null,
-
-                            // Do NOT materialize Years entities; only select the YearID
-                            ActiveYearId = s.Years
-                                .Where(y => y.Active == true)     // works even if Active is nullable in DB
-                                .Select(y => (int?)y.YearID)
-                                .FirstOrDefault()
-                        })
                         .FirstOrDefaultAsync();
+
+                    if (manager != null)
+                    {
+                        // Query School using the Manager's SchoolID
+                        var school = await tenantContext.Schools
+                            .AsNoTracking()
+                            .Where(s => s.SchoolID == manager.SchoolID)
+                            .FirstOrDefaultAsync();
+
+                        if (school != null)
+                        {
+                            // Query active year
+                            var activeYearId = await tenantContext.Years
+                                .AsNoTracking()
+                                .Where(y => y.SchoolID == school.SchoolID && y.Active == true)
+                                .Select(y => (int?)y.YearID)
+                                .FirstOrDefaultAsync();
+
+                            schoolData = new
+                            {
+                                SchoolName = school.SchoolName,
+                                SchoolId = school.SchoolID,
+                                ManagerFirstName = manager.FullName?.FirstName,
+                                ManagerLastName = manager.FullName?.LastName,
+                                ActiveYearId = activeYearId
+                            };
+                        }
+                    }
 
                     yearID = schoolData?.ActiveYearId ?? 1;
                     managerName = (schoolData?.ManagerFirstName + " " + schoolData?.ManagerLastName)?.Trim();

@@ -8,10 +8,16 @@
     <p-button class="showFee" variant="outlined" severity="success" (onClick)="showDialogAddYear()" label="+ سنة جديدة">
     </p-button>
 
-    <!-- dialog -->
+    <!-- Add dialog -->
     <p-dialog header="إضافة سنة" [(visible)]="visible" [modal]="true" styleClass="year-dialog"
       [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
       <app-new-year (yearAdded)="handleYearAdded()"></app-new-year>
+    </p-dialog>
+
+    <!-- Edit dialog -->
+    <p-dialog header="تعديل سنة" [(visible)]="visibleEdit" [modal]="true" styleClass="year-dialog"
+      [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
+      <app-new-year [year]="selectedYear" [isEditMode]="true" (yearAdded)="handleYearUpdated()"></app-new-year>
     </p-dialog>
 
     <!-- table -->
@@ -57,7 +63,7 @@
               </button>
 
               <div class="dropdown-menu" dir="rtl">
-                <a class="dropdown-item d-flex align-items-center gap-2">
+                <a class="dropdown-item d-flex align-items-center gap-2" (click)="showDialogEditYear(year)">
                   <i class="pi pi-file-edit text-primary"></i>
                   <span>تعديل</span>
                 </a>

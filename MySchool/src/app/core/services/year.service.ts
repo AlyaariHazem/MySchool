@@ -18,10 +18,18 @@ export class YearService {
     );
   }
 
-  updateYear(year: Year, id: number): void {
-    this.API.http.put(`${this.API.baseUrl}/Year/${id}`, year).subscribe(res => {
-      console.log("updated year is ", res);
-    });
+  updateYear(year: Year, id: number): Observable<Year> {
+    // Send data directly like POST request
+    return this.API.http.put<any>(`${this.API.baseUrl}/Year/${id}`, year).pipe(
+      map(response => {
+        // Handle both wrapped and direct responses
+        return response?.result || response;
+      }),
+      catchError(error => {
+        console.error("Error updating Year:", error);
+        throw error;
+      })
+    );
   }
 
   getAllYears(): Observable<Year[]> {

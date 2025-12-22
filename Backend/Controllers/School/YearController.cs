@@ -123,6 +123,9 @@ namespace Backend.Controllers.School
                     return NotFound(response);
                 }
 
+                // Set the YearID from the route parameter to ensure it matches
+                model.YearID = id;
+                model.SchoolID = existingYear.SchoolID;
                 await _unitOfWork.Years.Update(model);
                 response.Result = "Year updated successfully.";
                 response.statusCode = HttpStatusCode.OK;

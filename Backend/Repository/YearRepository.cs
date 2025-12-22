@@ -121,14 +121,12 @@ public class YearRepository : IYearRepository
         if (obj == null)
             throw new ArgumentNullException(nameof(obj), "The model cannot be null.");
 
-        var existingYear = _context.Years.FirstOrDefault(x => x.YearID == obj.YearID);
+        var existingYear = await _context.Years.FirstOrDefaultAsync(x => x.YearID == obj.YearID);
         if (existingYear == null)
             throw new ArgumentNullException(nameof(existingYear), "The year cannot be null.");
 
-        existingYear.YearDateStart = obj.YearDateStart;
-        existingYear.YearDateEnd = obj.YearDateEnd;
-        existingYear.Active = obj.Active;
-        existingYear.SchoolID = obj.SchoolID;
+        // Use AutoMapper to update all properties from DTO to entity
+        _mapper.Map(obj, existingYear);
 
         _context.Entry(existingYear).State = EntityState.Modified;
         await _context.SaveChangesAsync();
