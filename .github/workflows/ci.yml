@@ -45,15 +45,11 @@ jobs:
         run: |
           set -e
 
-          # English: find sqlcmd path (some images use tools18)
-          SQLCMD="/opt/mssql-tools/bin/sqlcmd"
-          if ! docker exec sqlserver test -x "$SQLCMD"; then
-            SQLCMD="/opt/mssql-tools18/bin/sqlcmd"
-          fi
-
-          # English: wait until SQL Server is ready
+          # English: wait until SQL Server accepts connections using mssql-tools18 (reliable)
           for i in {1..40}; do
-            if docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -Q "SELECT 1" >/dev/null 2>&1; then
+            if docker run --rm --network host mcr.microsoft.com/mssql-tools18 \
+              /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U sa -P "$SA_PASSWORD" -Q "SELECT 1" \
+              >/dev/null 2>&1; then
               echo "SQL Server is ready."
               break
             fi
@@ -61,8 +57,14 @@ jobs:
             sleep 3
           done
 
-          # English: create a database for CI (safe if already exists)
-          docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -Q "IF DB_ID('MySchool_CI') IS NULL CREATE DATABASE MySchool_CI;"
+          # English: create CI database (safe if already exists)
+          docker run --rm --network host mcr.microsoft.com/mssql-tools18 \
+            /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U sa -P "$SA_PASSWORD" \
+            -Q "IF DB_ID('MySchool_CI') IS NULL CREATE DATABASE MySchool_CI;"
+
+      - name: Show SQL Server logs (on failure)
+        if: failure()
+        run: docker logs sqlserver || true
 
       - name: Locate solution/project
         id: locate

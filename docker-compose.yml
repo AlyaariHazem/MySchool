@@ -5,17 +5,23 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
-      SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345}"
+      # English: SQL Server expects MSSQL_SA_PASSWORD (not SA_PASSWORD)
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345}"
     ports:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $$SA_PASSWORD -Q 'SELECT 1' || exit 1"]
+      # English: run sqlcmd from tools container (more reliable than relying on tools inside SQL image)
+      test:
+        [
+          "CMD-SHELL",
+          "docker run --rm --network host mcr.microsoft.com/mssql-tools18 /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U sa -P $$MSSQL_SA_PASSWORD -Q \"SELECT 1\" >/dev/null 2>&1 || exit 1"
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
-      start_period: 20s
+      start_period: 30s
 
   backend:
     build:
