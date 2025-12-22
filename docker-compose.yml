@@ -1,21 +1,37 @@
 services:
-  server:
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
-    container_name: dotnet-container
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: myschool-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345}"
     ports:
-      - "5000:80"
-    # Add environment variables if needed
-    # environment:
-    #   - ASPNETCORE_ENVIRONMENT=Production
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $$SA_PASSWORD -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
 
-  client:
+  backend:
     build:
-      context: ./Myschool
-      dockerfile: Dockerfile
-    container_name: angular-container
-    ports:
-      - "4200:80"
+      context: .
+      dockerfile: Backend/Dockerfile
+    container_name: myschool-api
     depends_on:
-      - server
+      sqlserver:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      # English: this maps to Configuration.GetConnectionString("SqlAdminConnection")
+      ConnectionStrings__SqlAdminConnection: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345};TrustServerCertificate=True;Encrypt=False"
+      ASPNETCORE_URLS: "http://+:8080"
+    ports:
+      - "8080:8080"
+
+volumes:
+  sql_data:
