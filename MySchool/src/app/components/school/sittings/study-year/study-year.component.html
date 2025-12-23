@@ -16,74 +16,26 @@
 
     <!-- Edit dialog -->
     <p-dialog header="تعديل سنة" [(visible)]="visibleEdit" [modal]="true" styleClass="year-dialog"
-      [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
+      [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false"
+      (onHide)="selectedYear = null">
       <app-new-year [year]="selectedYear" [isEditMode]="true" (yearAdded)="handleYearUpdated()"></app-new-year>
     </p-dialog>
 
-    <!-- table -->
-    <mat-card>
-      <table class="styled-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>تاريخ بدء الدراسة</th>
-            <th>ملاحظة</th>
-            <th>تاريخ إنتهاء الدراسة</th>
-            <th>تاريخ الإنشاء</th>
-            <th>الحالة</th>
-            <th>العملية</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr *ngFor="let year of paginatedYears; let i = index">
-            <td>{{ first + i + 1 }}</td>
-
-            <td>{{ year.yearDateStart | customDate }}</td>
-            <td>لا يوجد</td>
-            <td>{{ year.yearDateEnd | customDate }}</td>
-            <td>{{ year.hireDate | customDate }}</td>
-
-            <!-- الحالة -->
-            <td class="position-relative">
-              <div class="dropdown" [ngClass]="{ 'inactive': !year.active }" data-toggle="dropdown">
-                <span>{{ year.active ? 'نشط' : 'خامل' }}</span>
-                <div class="dropdown-menu" style="margin-left: 2rem">
-                  <span class="dropdown-item" (click)="changeYear(year, true)">نشط</span>
-                  <span class="dropdown-item" (click)="changeYear(year, false)">خامل</span>
-                </div>
-              </div>
-            </td>
-
-            <!-- العملية -->
-            <td>
-              <button class="btn btn-left" type="button" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-                <i class="fas fa-ellipsis-h"></i>
-              </button>
-
-              <div class="dropdown-menu" dir="rtl">
-                <a class="dropdown-item d-flex align-items-center gap-2" (click)="showDialogEditYear(year)">
-                  <i class="pi pi-file-edit text-primary"></i>
-                  <span>تعديل</span>
-                </a>
-
-                <div class="dropdown-divider my-1"></div>
-
-                <a class="dropdown-item d-flex align-items-center gap-2" (click)="deleteYear(year.yearID)">
-                  <i class="pi pi-trash text-danger"></i>
-                  <span>حذف</span>
-                </a>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </mat-card>
-
-    <!-- paginator -->
-    <p-paginator [first]="first" [rows]="rows" [totalRecords]="years.length" [rowsPerPageOptions]="[4, 8, 16]"
-      (onPageChange)="onPageChange($event)">
-    </p-paginator>
+    <!-- custom table -->
+    <app-custom-table
+      [data]="paginatedYears"
+      [columns]="tableColumns"
+      [loading]="isLoading"
+      [totalRecords]="totalRecords"
+      [rows]="pageSize"
+      [first]="paginatorService.first()"
+      [rowsPerPageOptions]="[8, 16, 25]"
+      [showGlobalFilter]="false"
+      [trackByField]="'yearID'"
+      (pageChange)="handlePageChange($event)"
+      (rowEdit)="editYear($event)"
+      (rowDelete)="deleteYear($event)"
+      (filterChange)="onFilterChange($event)">
+    </app-custom-table>
   </div>
 </div>

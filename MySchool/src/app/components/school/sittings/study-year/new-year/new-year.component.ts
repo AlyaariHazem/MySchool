@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, OnChanges, SimpleChanges, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { YearService } from '../../../../../core/services/year.service';
 import { Year } from '../../../../../core/models/year.model';
@@ -9,7 +9,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './new-year.component.html',
   styleUrls: ['./new-year.component.scss']
 })
-export class NewYearComponent implements OnInit {
+export class NewYearComponent implements OnInit, OnChanges {
   formGroup: FormGroup;
   isActive: boolean = true;
   
@@ -36,31 +36,59 @@ export class NewYearComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.isEditMode && this.year) {
-      // Populate form with existing year data
-      const yearDateStart = this.year.yearDateStart ? new Date(this.year.yearDateStart) : new Date();
-      const yearDateEnd = this.year.yearDateEnd ? new Date(this.year.yearDateEnd) : new Date();
-      const hireDate = this.year.hireDate ? new Date(this.year.hireDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-      
-      // Ensure schoolID is a number, fallback to current school if null
-      const schoolId = this.year.schoolID ? Number(this.year.schoolID) : (this.currantSchool ? Number(this.currantSchool) : null);
-      
-      this.formGroup.patchValue({
-        yearDateStart: yearDateStart,
-        yearDateEnd: yearDateEnd,
-        hireDate: hireDate,
-        active: this.year.active,
-        schoolID: schoolId
-      });
-      
-      this.isActive = this.year.active;
-    } else if (!this.isEditMode) {
-      // Ensure schoolID is set correctly for new year
-      const schoolId = this.currantSchool ? Number(this.currantSchool) : null;
-      this.formGroup.patchValue({
-        schoolID: schoolId
-      });
+    // Initialize form for new year by default
+    const schoolId = this.currantSchool ? Number(this.currantSchool) : null;
+    this.formGroup.patchValue({
+      schoolID: schoolId
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // React to changes in the year input or edit mode
+    if (changes['year'] || changes['isEditMode']) {
+      if (this.isEditMode && this.year) {
+        this.populateForm(this.year);
+      } else if (!this.isEditMode) {
+        // Reset form for new year mode
+        this.resetForm();
+      } else if (this.isEditMode && !this.year) {
+        // Year cleared in edit mode - reset form
+        this.resetForm();
+      }
     }
+  }
+
+  private populateForm(year: Year): void {
+    // Populate form with existing year data
+    const yearDateStart = year.yearDateStart ? new Date(year.yearDateStart) : new Date();
+    const yearDateEnd = year.yearDateEnd ? new Date(year.yearDateEnd) : new Date();
+    const hireDate = year.hireDate ? new Date(year.hireDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    
+    // Ensure schoolID is a number, fallback to current school if null
+    const schoolId = year.schoolID ? Number(year.schoolID) : (this.currantSchool ? Number(this.currantSchool) : null);
+    
+    this.formGroup.patchValue({
+      yearDateStart: yearDateStart,
+      yearDateEnd: yearDateEnd,
+      hireDate: hireDate,
+      active: year.active,
+      schoolID: schoolId
+    });
+    
+    this.isActive = year.active;
+  }
+
+  private resetForm(): void {
+    // Reset form to default values for new year
+    const schoolId = this.currantSchool ? Number(this.currantSchool) : null;
+    this.formGroup.patchValue({
+      yearDateStart: new Date(),
+      yearDateEnd: new Date(),
+      hireDate: new Date().toISOString().split('T')[0],
+      active: true,
+      schoolID: schoolId
+    });
+    this.isActive = true;
   }
 
   toggleIsActive() {

@@ -69,4 +69,54 @@ export class YearService {
       })
     );
   }
+
+  getYearsPage(pageNumber: number = 1, pageSize: number = 8, filters: Record<string, string> = {}): Observable<any> {
+    // Transform filters from Record<string, string> to backend FilterRequest format
+    const filtersDict: Record<string, { value: string }> = {};
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value.trim() !== '') {
+        filtersDict[key] = { value: value };
+      }
+    });
+
+    const requestBody = {
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+      filters: filtersDict
+    };
+
+    return this.API.http.post<any>(`${this.API.baseUrl}/Year/page`, requestBody).pipe(
+      map(response => {
+        // POST /api/Year/page returns PagedResult directly (not wrapped in APIResponse)
+        // Handle both PascalCase (C# default) and camelCase (JSON serialization)
+        const data = response;
+        
+        // Extract data array - handle both cases
+        let items: any[] = [];
+        if (Array.isArray(data)) {
+          items = data;
+        } else if (data?.Data) {
+          items = Array.isArray(data.Data) ? data.Data : [];
+        } else if (data?.data) {
+          items = Array.isArray(data.data) ? data.data : [];
+        } else if (data?.result?.Data) {
+          items = Array.isArray(data.result.Data) ? data.result.Data : [];
+        } else if (data?.result?.data) {
+          items = Array.isArray(data.result.data) ? data.result.data : [];
+        }
+        
+        return {
+          data: items,
+          pageNumber: data?.PageNumber ?? data?.pageNumber ?? pageNumber,
+          pageSize: data?.PageSize ?? data?.pageSize ?? pageSize,
+          totalCount: data?.TotalCount ?? data?.totalCount ?? 0,
+          totalPages: data?.TotalPages ?? data?.totalPages ?? 0
+        };
+      }),
+      catchError(error => {
+        console.error("Error fetching paginated Year Details:", error);
+        throw error;
+      })
+    );
+  }
 }
