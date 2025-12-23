@@ -1,36 +1,41 @@
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: myschool-sql
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
-      # English: SQL Server expects MSSQL_SA_PASSWORD
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345}"
+      # English: do not fallback to a default password (fail if missing)
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD is required}"
     ports:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
     healthcheck:
-      # English: sqlcmd is inside the SQL Server container at this path
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $$MSSQL_SA_PASSWORD -C -Q \"SELECT 1\" -b -o /dev/null || exit 1"]
+      # English: try tools18 first then legacy tools, fail if neither exists
+      test:
+        [
+          "CMD-SHELL",
+          "SQLCMD=''; \
+           if [ -x /opt/mssql-tools18/bin/sqlcmd ]; then SQLCMD=/opt/mssql-tools18/bin/sqlcmd; \
+           elif [ -x /opt/mssql-tools/bin/sqlcmd ]; then SQLCMD=/opt/mssql-tools/bin/sqlcmd; \
+           else echo 'sqlcmd not found'; exit 1; fi; \
+           $SQLCMD -S localhost -U sa -P $$MSSQL_SA_PASSWORD -C -Q \"SELECT 1\" -b -o /dev/null"
+        ]
       interval: 10s
       timeout: 5s
-      retries: 20
+      retries: 30
       start_period: 30s
 
   backend:
     build:
       context: .
       dockerfile: Backend/Dockerfile
-    container_name: myschool-api
     depends_on:
       sqlserver:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
-      # English: this maps to Configuration.GetConnectionString("SqlAdminConnection")
-      ConnectionStrings__SqlAdminConnection: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345};TrustServerCertificate=True;Encrypt=False"
+      ConnectionStrings__SqlAdminConnection: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
       ASPNETCORE_URLS: "http://+:8080"
     ports:
       - "8080:8080"

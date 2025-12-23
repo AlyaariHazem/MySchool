@@ -24,6 +24,10 @@ jobs:
           - 1433:1433
         options: >-
           --name sqlserver
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 30
 
     steps:
       - name: Checkout
@@ -45,8 +49,34 @@ jobs:
         run: |
           set -e
 
+          # English: fail fast if secret not provided (common in forks/PRs)
+          if [ -z "${SA_PASSWORD:-}" ]; then
+            echo "MSSQL_SA_PASSWORD secret is empty or not available to this workflow."
+            echo "If this is a PR from a fork, GitHub does not pass secrets by default."
+            exit 1
+          fi
+
+          # English: safe debug (prints length only)
+          echo "SA_PASSWORD length: ${#SA_PASSWORD}"
+
           # English: verify container is running
           docker ps -a | grep -i sqlserver || true
+
+          # English: wait for container health if available
+          for i in {1..60}; do
+            status="$(docker inspect -f '{{.State.Health.Status}}' sqlserver 2>/dev/null || echo 'unknown')"
+            if [ "$status" = "healthy" ]; then
+              echo "SQL Server container is healthy."
+              break
+            fi
+            echo "Waiting for container health... ($i/60) status=$status"
+            if (( i % 10 == 0 )); then
+              echo "---- SQL Server logs (health wait attempt $i) ----"
+              docker logs --tail 80 sqlserver || true
+              echo "-----------------------------------------------"
+            fi
+            sleep 5
+          done
 
           # English: pick sqlcmd path (tools18 or legacy tools)
           SQLCMD=""
@@ -63,14 +93,13 @@ jobs:
 
           echo "Using sqlcmd: $SQLCMD"
 
-          # English: wait until SQL Server accepts connections
+          # English: wait until SQL Server accepts connections (login + query)
           for i in {1..80}; do
             if docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -C -Q "SELECT 1" >/dev/null 2>&1; then
               echo "SQL Server is ready."
               break
             fi
 
-            # English: show logs every 10 attempts to reveal root cause early
             if (( i % 10 == 0 )); then
               echo "---- SQL Server logs (attempt $i) ----"
               docker logs --tail 80 sqlserver || true
@@ -88,7 +117,7 @@ jobs:
             exit 1
           fi
 
-          # English: create CI database
+          # English: create CI database (safe if exists)
           docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -C \
             -Q "IF DB_ID('MySchool_CI') IS NULL CREATE DATABASE MySchool_CI;"
 
