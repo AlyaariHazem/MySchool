@@ -6,7 +6,7 @@
       <table class="styled-table">
         <thead>
           <tr>
-            <th>#</th>
+            <!-- <th>#</th> -->
             @for (col of columns; track col.field) {
               <th>
                 {{ col.header }}
@@ -31,7 +31,7 @@
         <tbody>
           @for (row of data; track getTrackByValue($index, row); let i = $index) {
             <tr (click)="closeDropdown(); onRowClick(row)" style="cursor: pointer;">
-              <td>{{ i + 1 + first }}</td>
+              <!-- <td>{{ i + 1 + first }}</td> --> 
               @for (col of columns; track col.field) {
                 <td [class.student-name-column]="col.field === 'fullName'">
                   @if (col.field === 'fullName' && row.photoUrl) {

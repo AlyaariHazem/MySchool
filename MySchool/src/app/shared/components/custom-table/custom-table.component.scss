@@ -41,7 +41,9 @@
   border: 1px solid #dddddd;
   white-space: nowrap; // Prevent text wrapping
 }
-
+td{
+  text-align: center;
+}
 .styled-table th {
   width: auto; // Auto width
 }

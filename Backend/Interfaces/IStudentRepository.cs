@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Common;
 using Backend.Models;
 using Backend.DTOS.School.Students;
 using Backend.DTOS;
@@ -14,6 +15,7 @@ public interface IStudentRepository
     Task<Student> AddStudentAsync(Student student);
     Task<List<StudentDetailsDTO>> GetAllStudentsAsync();
     Task<(List<StudentDetailsDTO> Items, int TotalCount)> GetStudentsPageAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);
+    Task<(List<StudentDetailsDTO> Items, int TotalCount)> GetStudentsPageWithFiltersAsync(int pageNumber, int pageSize, Dictionary<string, Backend.Common.FilterValue> filters, CancellationToken cancellationToken = default);
     Task<StudentDetailsDTO?> GetStudentByIdAsync(int id);
     Task<Student?> GetStudentAsync(int id);
     Task<int> MaxValue();

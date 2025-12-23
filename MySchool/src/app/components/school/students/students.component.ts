@@ -15,7 +15,7 @@ import { EditParentsComponent } from '../parents/edit-parents/edit-parents.compo
 import { PaginatorService } from '../../../core/services/paginator.service';
 import { StudentsDataService } from '../../../core/services/students-data.service';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
-import { map, takeUntil } from 'rxjs';
+import { map } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
 import { TableColumn } from '../../../shared/components/custom-table/custom-table.component';
@@ -92,25 +92,10 @@ export class StudentsComponent implements OnInit, OnDestroy {
     const newPageSize = event.rows || this.pageSize;
     const newPage = Math.floor((event.first || 0) / newPageSize) + 1;
     
-    // Check if filters are active
-    const hasFilters = Object.keys(this.studentsDataService.getCurrentFilters()).length > 0;
-    
-    // If page size changed, fetch new data from server
-    if (newPageSize !== this.pageSize) {
-      this.pageSize = newPageSize;
-      this.currentPage = 1;
-      this.getAllStudents();
-    } else if (hasFilters) {
-      // If filters are active, use client-side pagination on filtered results
-      this.currentPage = newPage;
-      this.updatePaginatedStudents();
-      this.paginatorService.first.set((this.currentPage - 1) * this.pageSize);
-    } else {
-      // No filters: fetch new page from server
-      this.currentPage = newPage;
-      this.pageSize = newPageSize;
-      this.getAllStudents();
-    }
+    // Always fetch from server (server-side pagination and filtering)
+    this.currentPage = newPage;
+    this.pageSize = newPageSize;
+    this.getAllStudents();
   }
   constructor(
     private formBuilder: FormBuilder,
@@ -142,19 +127,6 @@ export class StudentsComponent implements OnInit, OnDestroy {
     this.paginatorService.first.set(0);
     this.paginatorService.rows.set(8);
     this.getAllStudents();
-
-    // Subscribe to filtered students from service
-    this.studentsDataService.filteredStudents$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(students => {
-        // Only process filtered students if filters are actually active
-        const hasFilters = Object.keys(this.studentsDataService.getCurrentFilters()).length > 0;
-        if (hasFilters) {
-          this.filteredStudents = students;
-          this.updatePaginatedStudents();
-        }
-        // If no filters, ignore this update - we use server-side pagination
-      });
   }
 
   ngOnDestroy(): void {
@@ -163,33 +135,18 @@ export class StudentsComponent implements OnInit, OnDestroy {
   }
 
   getAllStudents(): void {
-    // Check if filters are active
-    const hasFilters = Object.keys(this.studentsDataService.getCurrentFilters()).length > 0;
-    
-    if (hasFilters && this.allStudentsCache.length === 0) {
-      // Filters active but no cache: load all students for filtering
-      this.loadAllStudentsForFiltering();
-      return;
-    }
-    
-    if (hasFilters && this.allStudentsCache.length > 0) {
-      // Filters active and cache exists: use cache, filtering is handled by service
-      this.studentsDataService.setStudents(this.allStudentsCache);
-      this.updatePaginatedStudents();
-      return;
-    }
-    
-    // No filters: fetch current page from server
+    // Use POST endpoint with filters for server-side filtering and pagination
     this.studentsDataService.setLoading(true);
-    this.studentService.getAllStudentsPaginated(this.currentPage, this.pageSize).subscribe({
+    const currentFilters = this.studentsDataService.getCurrentFilters();
+    this.studentService.getStudentsPage(this.currentPage, this.pageSize, currentFilters).subscribe({
       next: (res) => {
         const students = res.data || res;
-        // IMPORTANT: Always get totalRecords from server when no filters
+        // Get totalRecords from server (includes filtered count if filters are active)
         this.totalRecords = res.totalCount || 0;
         this.currentPage = res.pageNumber || this.currentPage;
         this.pageSize = res.pageSize || this.pageSize;
         
-        // No filters: use server-side pagination
+        // Update students and paginated students
         this.Students = students;
         this.paginatedStudents = students;
         
@@ -217,81 +174,24 @@ export class StudentsComponent implements OnInit, OnDestroy {
     })
   }
 
-  loadAllStudentsForFiltering(): void {
-    // Load all students when filters are first applied
-    this.studentsDataService.setLoading(true);
-    this.studentService.getAllStudentsPaginated(1, 10000).subscribe({
-      next: (res) => {
-        const allStudents = res.data || res;
-        this.allStudentsCache = allStudents; // Cache all students
-        this.Students = allStudents;
-        
-        // Update service with all students for filtering
-        this.studentsDataService.setStudents(allStudents);
-        
-        // Filtered students will be updated via subscription, then paginate
-        this.updatePaginatedStudents();
-        this.studentsDataService.setLoading(false);
-      },
-      error: (err) => {
-        console.error("Error fetching all students:", err);
-        this.studentsDataService.setLoading(false);
-      }
-    });
-  }
-
-  updatePaginatedStudents(): void {
-    // Check if filters are active
-    const hasFilters = Object.keys(this.studentsDataService.getCurrentFilters()).length > 0;
-    this.filtersActive = hasFilters;
-    
-    if (hasFilters) {
-      // Apply pagination to filtered students (client-side)
-      const start = (this.currentPage - 1) * this.pageSize;
-      const end = start + this.pageSize;
-      this.paginatedStudents = this.filteredStudents.slice(start, end);
-      // Update total records to reflect filtered count
-      this.totalRecords = this.filteredStudents.length;
-      
-      // Update paginator service
-      this.paginatorService.first.set((this.currentPage - 1) * this.pageSize);
-      this.paginatorService.rows.set(this.pageSize);
-    } else {
-      // No filters: paginatedStudents should already be set from getAllStudents
-      // totalRecords should come from server response, not filtered count
-      if (this.paginatedStudents.length === 0 && this.Students.length > 0) {
-        this.paginatedStudents = this.Students;
-      }
-      // Don't update totalRecords here - it should come from server
-    }
-  }
 
   onFilterChange(filters: Record<string, string>): void {
     // Check if filters were added or removed
     const hasFilters = Object.keys(filters).length > 0;
     
-    if (hasFilters && !this.filtersActive) {
-      // Filters added for the first time: load all students for client-side filtering
-      this.currentPage = 1;
-      this.paginatorService.first.set(0);
-      this.allStudentsCache = []; // Clear cache to force reload
-      this.loadAllStudentsForFiltering();
-    } else if (!hasFilters && this.filtersActive) {
-      // Filters cleared: go back to server-side pagination
-      this.currentPage = 1;
-      this.paginatorService.first.set(0);
-      this.allStudentsCache = []; // Clear cache
-      this.filtersActive = false;
-      // Reset filtered students to empty to prevent subscription from interfering
+    // Always use server-side filtering with POST endpoint
+    this.currentPage = 1;
+    this.paginatorService.first.set(0);
+    this.filtersActive = hasFilters;
+    
+    if (!hasFilters) {
+      // Filters cleared: clear cache and filtered students
+      this.allStudentsCache = [];
       this.filteredStudents = [];
-      // Fetch fresh data from server with correct totalRecords
-      this.getAllStudents();
-    } else if (hasFilters) {
-      // Filters changed but were already active: just update pagination
-      this.currentPage = 1;
-      this.paginatorService.first.set(0);
-      this.updatePaginatedStudents();
     }
+    
+    // Fetch data from server with current filters (server-side filtering)
+    this.getAllStudents();
   }
   getStudentByID(id: number): void {
     this.studentService.getStudentById(id).subscribe({

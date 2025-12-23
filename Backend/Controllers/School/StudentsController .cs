@@ -301,6 +301,34 @@ namespace Backend.Controllers
             ));
         }
 
+        [HttpPost("page")]
+        public async Task<ActionResult<PagedResult<StudentDetailsDTO>>> GetStudentsWithFilters(
+            [FromBody] FilterRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Clamp values to avoid abuse (e.g., pageSize=100000)
+            const int maxPageSize = 100;
+            if (request.PageNumber < 1) request.PageNumber = 1;
+            if (request.PageSize < 1) request.PageSize = 8;
+            if (request.PageSize > maxPageSize) request.PageSize = maxPageSize;
+
+            var (items, totalCount) = await _unitOfWork.Students
+                .GetStudentsPageWithFiltersAsync(request.PageNumber, request.PageSize, request.Filters, cancellationToken);
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
+
+            return Ok(new PagedResult<StudentDetailsDTO>(
+                items,
+                request.PageNumber,
+                request.PageSize,
+                totalCount,
+                totalPages
+            ));
+        }
+
         [HttpGet("MaxValue")]
         public async Task<IActionResult> GetMaxValue()
         {

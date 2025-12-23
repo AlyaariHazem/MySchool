@@ -1,3 +1,4 @@
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS;
 using Backend.DTOS.School.Attachments;
@@ -357,6 +358,89 @@ public class StudentRepository : IStudentRepository
                     .ThenInclude(c => c.Stage) // Include Stage details
             .Include(ASG => ASG.AccountStudentGuardians)
             .Include(s => s.Guardian)        // Include Guardian details
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        if (students == null || !students.Any())
+            return (new List<StudentDetailsDTO>(), totalCount);
+
+        // Fetch all user data in batch from admin database
+        var userIds = students.Select(s => s.UserID).Distinct().ToList();
+        var users = new Dictionary<string, ApplicationUser>();
+        foreach (var userId in userIds)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user != null)
+            {
+                users[userId] = user;
+            }
+        }
+
+        string baseUrl = $"{GetBaseUrl()}/uploads/StudentPhotos";
+
+        var items = MapStudentsToDTOs(students, users, baseUrl);
+        return (items, totalCount);
+    }
+
+    public async Task<(List<StudentDetailsDTO> Items, int TotalCount)> GetStudentsPageWithFiltersAsync(int pageNumber, int pageSize, Dictionary<string, Backend.Common.FilterValue> filters, CancellationToken cancellationToken = default)
+    {
+        // Start with base query
+        var query = _context.Students
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Stage)
+            .Include(ASG => ASG.AccountStudentGuardians)
+            .Include(s => s.Guardian)
+            .AsQueryable();
+
+        // Apply filters dynamically
+        foreach (var filter in filters)
+        {
+            var columnName = filter.Key;
+            var filterValue = filter.Value;
+
+            query = columnName.ToLower() switch
+            {
+                "userid" or "userId" => !string.IsNullOrEmpty(filterValue.Value)
+                    ? query.Where(s => s.UserID == filterValue.Value)
+                    : query,
+                "studentid" or "studentId" => filterValue.IntValue.HasValue 
+                    ? query.Where(s => s.StudentID == filterValue.IntValue.Value)
+                    : query,
+                "divisionid" or "divisionId" => filterValue.IntValue.HasValue
+                    ? query.Where(s => s.DivisionID == filterValue.IntValue.Value)
+                    : query,
+                "guardianid" or "guardianId" => filterValue.IntValue.HasValue
+                    ? query.Where(s => s.GuardianID == filterValue.IntValue.Value)
+                    : query,
+                "placebirth" or "placeBirth" => !string.IsNullOrEmpty(filterValue.Value)
+                    ? query.Where(s => s.PlaceBirth != null && s.PlaceBirth.Contains(filterValue.Value))
+                    : query,
+                "studentdob" or "studentDob" => filterValue.DateValue.HasValue
+                    ? query.Where(s => s.StudentDOB.HasValue && s.StudentDOB.Value.Date == filterValue.DateValue.Value.Date)
+                    : query,
+                "firstname" or "firstName" => !string.IsNullOrEmpty(filterValue.Value)
+                    ? query.Where(s => s.FullName.FirstName.Contains(filterValue.Value))
+                    : query,
+                "lastname" or "lastName" => !string.IsNullOrEmpty(filterValue.Value)
+                    ? query.Where(s => s.FullName.LastName.Contains(filterValue.Value))
+                    : query,
+                "middlename" or "middleName" => !string.IsNullOrEmpty(filterValue.Value)
+                    ? query.Where(s => s.FullName.MiddleName != null && s.FullName.MiddleName.Contains(filterValue.Value))
+                    : query,
+                _ => query // Unknown filter, ignore it
+            };
+        }
+
+        // Get total count with filters applied
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        if (totalCount == 0)
+            return (new List<StudentDetailsDTO>(), 0);
+
+        // Apply pagination
+        var students = await query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
