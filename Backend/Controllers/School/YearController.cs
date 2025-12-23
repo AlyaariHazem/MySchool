@@ -1,5 +1,7 @@
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using Backend.Common;
 using Backend.DTOS.School.Years;
 using Backend.Interfaces;
 using Backend.Models;
@@ -69,6 +71,35 @@ namespace Backend.Controllers.School
                 response.ErrorMasseges.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
+        }
+
+        // POST api/year/page
+        [HttpPost("page")]
+        public async Task<ActionResult<PagedResult<YearDTO>>> GetYearsWithFilters(
+            [FromBody] FilterRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Clamp values to avoid abuse (e.g., pageSize=100000)
+            const int maxPageSize = 100;
+            if (request.PageNumber < 1) request.PageNumber = 1;
+            if (request.PageSize < 1) request.PageSize = 8;
+            if (request.PageSize > maxPageSize) request.PageSize = maxPageSize;
+
+            var (items, totalCount) = await _unitOfWork.Years
+                .GetYearsPageWithFiltersAsync(request.PageNumber, request.PageSize, request.Filters, cancellationToken);
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
+
+            return Ok(new PagedResult<YearDTO>(
+                items,
+                request.PageNumber,
+                request.PageSize,
+                totalCount,
+                totalPages
+            ));
         }
 
         // GET api/year/{id}

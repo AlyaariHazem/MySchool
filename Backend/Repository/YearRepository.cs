@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.Years;
 using Backend.Models;
@@ -155,5 +157,60 @@ public class YearRepository : IYearRepository
             _context.Entry(year).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return true;   
+    }
+
+    public async Task<(List<YearDTO> Items, int TotalCount)> GetYearsPageWithFiltersAsync(int pageNumber, int pageSize, Dictionary<string, FilterValue> filters, CancellationToken cancellationToken = default)
+    {
+        // Start with base query
+        var query = _context.Years.AsQueryable();
+
+        // Apply filters dynamically
+        foreach (var filter in filters)
+        {
+            var columnName = filter.Key;
+            var filterValue = filter.Value;
+
+            query = columnName.ToLower() switch
+            {
+                "yearid" or "yearId" => filterValue.IntValue.HasValue
+                    ? query.Where(y => y.YearID == filterValue.IntValue.Value)
+                    : query,
+                "schoolid" or "schoolId" => filterValue.IntValue.HasValue
+                    ? query.Where(y => y.SchoolID == filterValue.IntValue.Value)
+                    : query,
+                "yeardatestart" or "yearDateStart" => filterValue.DateValue.HasValue
+                    ? query.Where(y => y.YearDateStart.Date == filterValue.DateValue.Value.Date)
+                    : query,
+                "yeardateend" or "yearDateEnd" => filterValue.DateValue.HasValue
+                    ? query.Where(y => y.YearDateEnd.HasValue && y.YearDateEnd.Value.Date == filterValue.DateValue.Value.Date)
+                    : query,
+                "hiredate" or "hireDate" => filterValue.DateValue.HasValue
+                    ? query.Where(y => y.HireDate.Date == filterValue.DateValue.Value.Date)
+                    : query,
+                "active" => filterValue.BoolValue.HasValue
+                    ? query.Where(y => y.Active == filterValue.BoolValue.Value)
+                    : query,
+                _ => query // Unknown filter, ignore it
+            };
+        }
+
+        // Get total count with filters applied
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        if (totalCount == 0)
+            return (new List<YearDTO>(), 0);
+
+        // Apply pagination
+        var years = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        if (years == null || !years.Any())
+            return (new List<YearDTO>(), totalCount);
+
+        // Map to DTOs
+        var items = _mapper.Map<List<YearDTO>>(years);
+        return (items, totalCount);
     }
 }
