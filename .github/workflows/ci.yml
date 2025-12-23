@@ -45,21 +45,28 @@ jobs:
         run: |
           set -e
 
-          # English: wait until SQL Server accepts connections using mssql-tools18 (reliable)
-          for i in {1..40}; do
-            if docker run --rm --network host mcr.microsoft.com/mssql-tools18 \
-              /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U sa -P "$SA_PASSWORD" -Q "SELECT 1" \
-              >/dev/null 2>&1; then
+          SQLCMD="/opt/mssql-tools18/bin/sqlcmd"
+
+          # English: wait until SQL Server is ready (sqlcmd exists in this image path)
+          for i in {1..60}; do
+            if docker exec sqlserver test -x "$SQLCMD" && \
+               docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -C -Q "SELECT 1" >/dev/null 2>&1; then
               echo "SQL Server is ready."
               break
             fi
-            echo "Waiting for SQL Server... ($i/40)"
+            echo "Waiting for SQL Server... ($i/60)"
             sleep 3
           done
 
+          # English: fail clearly if still not ready
+          if ! docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -C -Q "SELECT 1" >/dev/null 2>&1; then
+            echo "SQL Server did not become ready in time."
+            docker logs sqlserver || true
+            exit 1
+          fi
+
           # English: create CI database (safe if already exists)
-          docker run --rm --network host mcr.microsoft.com/mssql-tools18 \
-            /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U sa -P "$SA_PASSWORD" \
+          docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -C \
             -Q "IF DB_ID('MySchool_CI') IS NULL CREATE DATABASE MySchool_CI;"
 
       - name: Show SQL Server logs (on failure)
