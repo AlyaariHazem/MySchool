@@ -2,16 +2,21 @@ name: CI (.NET + SQL Server)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
 
 jobs:
   build-test:
+    # English: secrets are not available on PRs from forks; skip those to avoid false failures
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
+
+    env:
+      SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
 
     services:
       sqlserver:
@@ -24,10 +29,6 @@ jobs:
           - 1433:1433
         options: >-
           --name sqlserver
-          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 30
 
     steps:
       - name: Checkout
@@ -42,60 +43,45 @@ jobs:
             Backend/**/*.csproj
             Backend/**/*.sln
 
+      - name: Validate SA password
+        shell: bash
+        run: |
+          set -euo pipefail
+          # English: fail early with a clear message if secret is missing
+          if [ -z "${SA_PASSWORD}" ]; then
+            echo "Missing secret MSSQL_SA_PASSWORD (fork PR? secret not set in repo settings?)."
+            exit 1
+          fi
+
       - name: Wait for SQL Server and create CI database
         shell: bash
-        env:
-          SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
         run: |
-          set -e
+          set -euo pipefail
 
-          # English: fail fast if secret not provided (common in forks/PRs)
-          if [ -z "${SA_PASSWORD:-}" ]; then
-            echo "MSSQL_SA_PASSWORD secret is empty or not available to this workflow."
-            echo "If this is a PR from a fork, GitHub does not pass secrets by default."
-            exit 1
-          fi
+          # English: run sqlcmd either from inside the SQL container (if present) or via the tools image
+          run_sqlcmd() {
+            local query="$1"
 
-          # English: safe debug (prints length only)
-          echo "SA_PASSWORD length: ${#SA_PASSWORD}"
-
-          # English: verify container is running
-          docker ps -a | grep -i sqlserver || true
-
-          # English: wait for container health if available
-          for i in {1..60}; do
-            status="$(docker inspect -f '{{.State.Health.Status}}' sqlserver 2>/dev/null || echo 'unknown')"
-            if [ "$status" = "healthy" ]; then
-              echo "SQL Server container is healthy."
-              break
+            if docker exec sqlserver test -x /opt/mssql-tools18/bin/sqlcmd; then
+              docker exec sqlserver /opt/mssql-tools18/bin/sqlcmd \
+                -S localhost -U sa -P "${SA_PASSWORD}" -C -Q "${query}"
+              return
             fi
-            echo "Waiting for container health... ($i/60) status=$status"
-            if (( i % 10 == 0 )); then
-              echo "---- SQL Server logs (health wait attempt $i) ----"
-              docker logs --tail 80 sqlserver || true
-              echo "-----------------------------------------------"
+
+            if docker exec sqlserver test -x /opt/mssql-tools/bin/sqlcmd; then
+              docker exec sqlserver /opt/mssql-tools/bin/sqlcmd \
+                -S localhost -U sa -P "${SA_PASSWORD}" -C -Q "${query}"
+              return
             fi
-            sleep 5
-          done
 
-          # English: pick sqlcmd path (tools18 or legacy tools)
-          SQLCMD=""
-          if docker exec sqlserver test -x /opt/mssql-tools18/bin/sqlcmd; then
-            SQLCMD="/opt/mssql-tools18/bin/sqlcmd"
-          elif docker exec sqlserver test -x /opt/mssql-tools/bin/sqlcmd; then
-            SQLCMD="/opt/mssql-tools/bin/sqlcmd"
-          else
-            echo "sqlcmd not found inside SQL Server container."
-            docker exec sqlserver ls -la /opt || true
-            docker logs sqlserver || true
-            exit 1
-          fi
+            # English: fallback to official tools container, sharing the SQL Server container network namespace
+            docker run --rm --network container:sqlserver mcr.microsoft.com/mssql-tools18 \
+              /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${SA_PASSWORD}" -C -Q "${query}"
+          }
 
-          echo "Using sqlcmd: $SQLCMD"
-
-          # English: wait until SQL Server accepts connections (login + query)
+          # English: wait until SQL Server accepts connections
           for i in {1..80}; do
-            if docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -C -Q "SELECT 1" >/dev/null 2>&1; then
+            if run_sqlcmd "SELECT 1" >/dev/null 2>&1; then
               echo "SQL Server is ready."
               break
             fi
@@ -110,22 +96,14 @@ jobs:
             sleep 3
           done
 
-          # English: final check (fail clearly if still not ready)
-          if ! docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -C -Q "SELECT 1" >/dev/null 2>&1; then
-            echo "SQL Server did not become ready in time."
-            docker logs sqlserver || true
-            exit 1
-          fi
-
-          # English: create CI database (safe if exists)
-          docker exec sqlserver "$SQLCMD" -S localhost -U sa -P "$SA_PASSWORD" -C \
-            -Q "IF DB_ID('MySchool_CI') IS NULL CREATE DATABASE MySchool_CI;"
+          # English: create CI database
+          run_sqlcmd "IF DB_ID('MySchool_CI') IS NULL CREATE DATABASE MySchool_CI;"
 
       - name: Locate solution/project
         id: locate
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
           if ls Backend/*.sln >/dev/null 2>&1; then
             SOLN="$(ls Backend/*.sln | head -n1)"
