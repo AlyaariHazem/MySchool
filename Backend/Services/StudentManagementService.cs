@@ -77,10 +77,12 @@ public class StudentManagementService
             }
 
             // Step 5: Create AccountStudentGuardian Mapping
+            // Preserve the Amount that was set in the controller from request.Amount
+            var amount = accountStudentGuardian.Amount;
             accountStudentGuardian.AccountID = createdAccount.AccountID.Value;
             accountStudentGuardian.GuardianID = addedGuardian.GuardianID;
             accountStudentGuardian.StudentID = addedStudent.StudentID;
-            // Ensure amount is set (should already be set from the request)
+            accountStudentGuardian.Amount = amount; // Ensure Amount is preserved and explicitly set
             await _unitOfWork.AccountStudentGuardians.AddAccountStudentGuardianAsync(accountStudentGuardian);
 
             // Step 6: Handle attachments
@@ -398,6 +400,19 @@ public class StudentManagementService
                         Mandatory = discount.Mandatory
                     });
                     await _unitOfWork.StudentClassFees.AddAsync(studentClassFees);
+                }
+            }
+
+            // **Update AccountStudentGuardian Amount**
+            if (request.Amount.HasValue)
+            {
+                var accountStudentGuardian = await _tenantContext.AccountStudentGuardians
+                    .FirstOrDefaultAsync(asg => asg.StudentID == studentId);
+                
+                if (accountStudentGuardian != null)
+                {
+                    accountStudentGuardian.Amount = request.Amount.Value;
+                    _tenantContext.AccountStudentGuardians.Update(accountStudentGuardian);
                 }
             }
 

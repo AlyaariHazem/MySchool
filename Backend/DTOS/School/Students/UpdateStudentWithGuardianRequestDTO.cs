@@ -47,5 +47,8 @@ namespace Backend.DTOS.School.Students
 
         // Discounts
         public List<StudentClassFeeDTO> UpdateDiscounts { get; set; } = new();
+
+        // Amount for AccountStudentGuardian
+        public decimal? Amount { get; set; }
     }
 }

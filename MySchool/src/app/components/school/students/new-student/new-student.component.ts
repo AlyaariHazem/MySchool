@@ -74,6 +74,12 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.formGroup.invalid) return;
     this.attachments = this.formGroup.get('documents.attachments')?.value || [];
 
+    // Calculate the required fees amount (total fees - total discounts)
+    const calculatedAmount = this.calculateRequiredFees();
+    
+    // Update the amount in the form before submitting
+    this.formGroup.get('primaryData.amount')?.setValue(calculatedAmount);
+
     const formData: AddStudent = {
       studentID: this.formGroup.get('studentID')!.value,
       existingGuardianId: this.formGroup.get('existingGuardianId')!.value,
@@ -98,6 +104,13 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
   /* ---------- update ---------- */
   onUpdate(): void {
     this.attachments = this.formGroup.get('documents.attachments')?.value || [];
+    
+    // Calculate the required fees amount (total fees - total discounts)
+    const calculatedAmount = this.calculateRequiredFees();
+    
+    // Update the amount in the form before submitting
+    this.formGroup.get('primaryData.amount')?.setValue(calculatedAmount);
+    
     const updateDiscounts: UpdateDiscount[] = this.discountsArray.value.map((d: any) => ({
       studentClassFeeID: d.studentClassFeeID ?? 0,
       studentID: this.formGroup.get('studentID')!.value,
@@ -128,6 +141,23 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /* ---------- helpers ---------- */
+  private calculateRequiredFees(): number {
+    const discountsArray = this.discountsArray;
+    if (!discountsArray || discountsArray.length === 0) return 0;
+
+    // Calculate total fees (sum of amounts for mandatory fees)
+    const totalFees = discountsArray.controls
+      .filter(ctrl => ctrl.get('mandatory')?.value)
+      .reduce((sum, ctrl) => sum + (+ctrl.get('amount')?.value || 0), 0);
+
+    // Calculate total discounts
+    const totalDiscounts = discountsArray.controls
+      .reduce((sum, ctrl) => sum + (+ctrl.get('amountDiscount')?.value || 0), 0);
+
+    // Return required fees (total fees - total discounts)
+    return totalFees - totalDiscounts;
+  }
+
   private uploadImageAndFiles(): void {
     if (this.StudentImage)
       this.studentService.uploadStudentImage(this.StudentImage, this.studentID).subscribe();

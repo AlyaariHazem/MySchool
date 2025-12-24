@@ -53,7 +53,7 @@ public class DashboardRepository : IDashboardRepository
             .Include(cp => cp.Year)
             .OrderByDescending(cp => cp.YearID)
             .ThenByDescending(cp => cp.TermID)
-            .Take(10)
+            .Take(7)
             .ToListAsync();
 
         if (coursePlans == null || !coursePlans.Any())
