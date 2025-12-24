@@ -202,20 +202,26 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-if (app.Environment.IsDevelopment())
+// Enable Swagger in all environments (or change to IsDevelopment() if you only want it in dev)
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ASP.NET 8 Web API V1");
-        c.RoutePrefix = "swagger";
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ASP.NET 8 Web API V1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseStaticFiles();
 app.UseCors("MyPolicy");
 app.UseAuthentication();
 app.UseMiddleware<TenantResolutionMiddleware>(); // Resolve tenant from JWT before authorization
 app.UseAuthorization();
+
+// Add a default route to redirect to Swagger
+app.MapGet("/", async (HttpContext context) =>
+{
+    context.Response.Redirect("/swagger");
+    await Task.CompletedTask;
+});
+
 app.MapControllers();
 app.Run();

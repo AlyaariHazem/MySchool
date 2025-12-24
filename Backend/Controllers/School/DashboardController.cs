@@ -53,5 +53,26 @@ public class DashboardController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, response);
         }
     }
+
+    [HttpGet("exams")]
+    public async Task<ActionResult<APIResponse>> GetExams()
+    {
+        var response = new APIResponse();
+        try
+        {
+            var exams = await _unitOfWork.Dashboard.GetAllExamsAsync();
+
+            response.Result = exams;
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
 }
 

@@ -8,6 +8,7 @@ public interface IDashboardRepository
 {
     Task<DashboardSummaryDTO> GetDashboardSummaryAsync();
     Task<List<RecentExamDTO>> GetRecentExamsAsync();
+    Task<List<RecentExamDTO>> GetAllExamsAsync();
     Task<List<StudentEnrollmentTrendDTO>> GetStudentEnrollmentTrendAsync();
 }
 

@@ -73,6 +73,42 @@ public class DashboardRepository : IDashboardRepository
         return recentExams;
     }
 
+    public async Task<List<RecentExamDTO>> GetAllExamsAsync()
+    {
+        // Get all course plans (exams) with all related data
+        var coursePlans = await _tenantContext.CoursePlans
+            .Include(cp => cp.Subject)
+            .Include(cp => cp.Class)
+            .Include(cp => cp.Division)
+            .Include(cp => cp.Term)
+            .Include(cp => cp.Year)
+            .ToListAsync();
+
+        // Order in memory to avoid null propagating operator in expression tree
+        coursePlans = coursePlans
+            .OrderByDescending(cp => cp.Year?.YearDateStart ?? DateTime.MinValue)
+            .ThenByDescending(cp => cp.TermID)
+            .ThenBy(cp => cp.ClassID)
+            .ThenBy(cp => cp.SubjectID)
+            .ToList();
+
+        if (coursePlans == null || !coursePlans.Any())
+            return new List<RecentExamDTO>();
+
+        var exams = coursePlans.Select((cp, index) => new RecentExamDTO
+        {
+            ExamId = cp.YearID * 10000 + cp.TermID * 1000 + cp.ClassID * 100 + cp.SubjectID + index,
+            Date = cp.Year?.YearDateStart ?? DateTime.Now.AddDays(-index),
+            Time = "10:00 AM", // Default time - adjust if you have exam time in your model
+            DivisionName = cp.Division?.DivisionName ?? "",
+            ClassName = cp.Class?.ClassName ?? "",
+            SubjectName = cp.Subject?.SubjectName ?? "",
+            ExamType = "C" // Default exam type - adjust based on your model
+        }).ToList();
+
+        return exams;
+    }
+
     public async Task<List<StudentEnrollmentTrendDTO>> GetStudentEnrollmentTrendAsync()
     {
         // Get all students from tenant database
