@@ -263,6 +263,13 @@ export class StudentsComponent implements OnInit, OnDestroy {
 
     });
   }
+  handleImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = './../../../../../assets/img/user.jpg';
+    }
+  }
+
   EditGuardianDialog(id: number): void {
     this.guardianService.getGuardianById(id).subscribe((res) => {
       console.log("Editing guardian data:", res);

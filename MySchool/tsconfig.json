@@ -5,6 +5,7 @@
     "typeRoots": ["node_modules/@types", "src/typings"],
     "allowSyntheticDefaultImports": true,
     "outDir": "./dist/out-tsc",
+    "baseUrl": "./src",
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,

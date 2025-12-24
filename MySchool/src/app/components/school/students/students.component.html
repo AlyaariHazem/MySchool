@@ -47,38 +47,130 @@
           [ngClass]="{'add':(dir$ | async)==='rtl','addEn':(dir$ | async)==='ltr','index':true}" label="إضافة طالب+" />
 
         @if (showGrid) {
-        <div class="group group2">
-          @for (student of paginatedStudents; track $index) {
-          <div class="form-control">
-            <p-card class="responsive-card">
-              <ng-template pTemplate="header">
-                <img alt="Card" [src]="student.photoUrl" />
-              </ng-template>
-              <div>
-                الاسم:{{student.fullName.firstName +" "+ student.fullName.middleName+" "+ student.fullName.lastName}}
-                الصف:{{student.className}}
-                <hr>
-                النوع:{{student.gender=="Male"?"ذكر":"إنثى"}}
-                المرحلة:{{student.stageName}}
-                الرسوم المطلوبة:{{student.fee}}
-                <hr>
-
-              </div>
-              <ng-template pTemplate="footer">
-                <div class="flex gap-3 mt-1">
-                  <p-button label="الرسوم" (click)="EditStudentDialog(student.studentID)" class="w-full"
-                    styleClass="custom-button" />
-                  <p-button label="ولي أمر" (click)="EditGuardianDialog(student.guardians.guardianID)" class="w-full"
-                    styleClass="custom-button guardain" />
-
-                </div>
-              </ng-template>
-            </p-card>
+        <div class="students-grid-container">
+          <div class="header-section" *ngIf="paginatedStudents.length > 0">
+            <div class="stats-badge">
+              <i class="bi bi-people-fill"></i>
+              <span class="badge-text">إجمالي الطلاب: {{totalRecords}}</span>
+            </div>
           </div>
-          }
+          
+          <div class="group group2">
+            @for (student of paginatedStudents; track $index) {
+            <div class="form-control">
+              <p-card class="responsive-card student-card">
+                <ng-template pTemplate="header">
+                  <div class="card-header-wrapper">
+                    <img 
+                      alt="Student" 
+                      class="student-image" 
+                      [src]="student.photoUrl || './../../../../../assets/img/user.jpg'" 
+                      (error)="handleImageError($event)" />
+                    <div class="student-id-badge">
+                      <i class="bi bi-person-badge"></i>
+                      <span>#{{student.studentID}}</span>
+                    </div>
+                  </div>
+                </ng-template>
+                
+                <div class="card-content">
+                  <div class="student-name">
+                    <i class="bi bi-person-fill name-icon"></i>
+                    <span class="name-text">
+                      {{student.fullName.firstName +" "+ student.fullName.middleName+" "+ student.fullName.lastName}}
+                    </span>
+                  </div>
+                  
+                  <div class="info-section">
+                    <div class="info-row">
+                      <span class="info-label">
+                        <i class="bi bi-book-fill"></i>
+                        الصف:
+                      </span>
+                      <span class="info-value">{{student.className || 'غير محدد'}}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                      <span class="info-label">
+                        <i class="bi bi-layers-fill"></i>
+                        المرحلة:
+                      </span>
+                      <span class="info-value">{{student.stageName || 'غير محدد'}}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                      <span class="info-label">
+                        <i class="bi bi-gender-ambiguous"></i>
+                        النوع:
+                      </span>
+                      <span class="info-value gender-badge" [class.male]="student.gender === 'Male'" [class.female]="student.gender !== 'Male'">
+                        {{student.gender == "Male" ? "ذكر" : "أنثى"}}
+                      </span>
+                    </div>
+                    
+                    @if (student.divisionName) {
+                    <div class="info-row">
+                      <span class="info-label">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        الشعبة:
+                      </span>
+                      <span class="info-value">{{student.divisionName}}</span>
+                    </div>
+                    }
+                  </div>
+                  
+                  <div class="fees-section">
+                    <div class="fee-item highlight">
+                      <span class="fee-label">
+                        <i class="bi bi-cash-stack"></i>
+                        الرسوم المطلوبة:
+                      </span>
+                      <span class="fee-value">{{student.fee | number}} ريال</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <ng-template pTemplate="footer">
+                  <div class="card-footer">
+                    <div class="action-buttons">
+                      <p-button 
+                        label="الرسوم" 
+                        icon="bi bi-cash-stack" 
+                        (click)="EditStudentDialog(student.studentID)" 
+                        class="w-full fees-button"
+                        styleClass="custom-button" />
+                      @if (student.guardians.guardianID) {
+                      <p-button 
+                        label="ولي أمر" 
+                        icon="bi bi-person-heart" 
+                        (click)="EditGuardianDialog(student.guardians.guardianID)" 
+                        class="w-full guardian-button"
+                        styleClass="custom-button guardian" />
+                      }
+                    </div>
+                  </div>
+                </ng-template>
+              </p-card>
+            </div>
+            } @empty {
+            <div class="empty-message">
+              <div class="empty-icon">
+                <i class="bi bi-person-x"></i>
+              </div>
+              <p class="empty-text">لا يوجد طلاب متاحين</p>
+              <p class="empty-subtext">لم يتم إضافة أي طالب حتى الآن</p>
+            </div>
+            }
+          </div>
+          
+          <p-paginator 
+            dir="ltr" 
+            (onPageChange)="handlePageChange($event)" 
+            [first]="paginatorService.first()"
+            [rows]="paginatorService.rows()" 
+            [totalRecords]="totalRecords" 
+            [rowsPerPageOptions]="[8, 16, 25]" />
         </div>
-        <p-paginator dir="ltr" (onPageChange)="handlePageChange($event)" [first]="paginatorService.first()"
-          [rows]="paginatorService.rows()" [totalRecords]="totalRecords" [rowsPerPageOptions]="[8, 16, 25]" />
         }
 
         @if (showCulomn) {
