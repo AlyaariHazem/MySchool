@@ -71,6 +71,7 @@ public class UnitOfWork : IUnitOfWork
         Reports = new ReportRepository(_tenantContext);
         MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper);
         TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper);
+        Dashboard = new DashboardRepository(_tenantContext, Users);
         
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
@@ -105,6 +106,7 @@ public class UnitOfWork : IUnitOfWork
     public IReportRepository Reports { get; private set; }
     public IMonthlyGradeRepository MonthlyGrades { get; private set; }
     public ITermlyGradeRepository TermlyGrades { get; private set; }
+    public IDashboardRepository Dashboard { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

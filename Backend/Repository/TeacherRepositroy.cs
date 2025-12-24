@@ -70,27 +70,45 @@ namespace Backend.Repository
         // Get all Teachers
         public async Task<List<TeacherDTO>> GetAllTeachersAsync()
         {
-            // Include the Manager data and map it to TeacherDTO
+            // ApplicationUser is in admin database, not tenant database, so we can't Include it
             var teachers = await _context.Teachers
                 .Include(t => t.Manager)
-                .Include(t => t.ApplicationUser) // Include manager info if applicable
                 .ToListAsync();
 
-            // Map the Teacher entity to TeacherDTO
-            return teachers.Select(t => new TeacherDTO
+            // Fetch user data from admin database separately
+            var userIds = teachers.Select(t => t.UserID).Distinct().ToList();
+            var users = new Dictionary<string, ApplicationUser>();
+            foreach (var userId in userIds)
             {
-                TeacherID = t.TeacherID,
-                FirstName = t.FullName.FirstName,
-                MiddleName = t.FullName.MiddleName,
-                LastName = t.FullName.LastName,
-                PhoneNumber = t.ApplicationUser.PhoneNumber??"776137120",
-                UserID = t.UserID,
-                DOB = t.DOB,
-                ImageURL = "https://localhost:7258/uploads/Teacher/"+t.ImageURL,
-                Gender = t.ApplicationUser.Gender??"Male",
-                Address = t.ApplicationUser.Address??"Yemen",
-                Email = t.ApplicationUser.Email??"User@gmail.com",
-                ManagerID = t.ManagerID
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var user = await _userRepository.GetUserByIdAsync(userId);
+                    if (user != null)
+                    {
+                        users[userId] = user;
+                    }
+                }
+            }
+
+            // Map the Teacher entity to TeacherDTO
+            return teachers.Select(t =>
+            {
+                var user = users.GetValueOrDefault(t.UserID);
+                return new TeacherDTO
+                {
+                    TeacherID = t.TeacherID,
+                    FirstName = t.FullName.FirstName,
+                    MiddleName = t.FullName.MiddleName,
+                    LastName = t.FullName.LastName,
+                    PhoneNumber = user?.PhoneNumber ?? "776137120",
+                    UserID = t.UserID,
+                    DOB = t.DOB,
+                    ImageURL = "https://localhost:7258/uploads/Teacher/" + t.ImageURL,
+                    Gender = user?.Gender ?? "Male",
+                    Address = user?.Address ?? "Yemen",
+                    Email = user?.Email ?? "User@gmail.com",
+                    ManagerID = t.ManagerID
+                };
             }).ToList();
         }
     }

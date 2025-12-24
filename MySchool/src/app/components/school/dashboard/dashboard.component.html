@@ -5,7 +5,7 @@
         <span class="float-right"><img src="assets/img/dash/dash-1.png" alt="" width="80" /></span>
         <div class="dash-widget-info text-right">
           <span>{{'dashboard.studentsLabel'| translate}}</span>
-          <h3>{{students.length}}</h3>
+          <h3>{{dashboardSummary?.studentsCount || 0}}</h3>
         </div>
       </div>
     </div>
@@ -13,7 +13,7 @@
       <div class="dash-widget dash-widget5">
         <div class="dash-widget-info text-right d-inline-block">
           <span>{{'dashboard.teachersLabel'| translate}}</span>
-          <h3>4</h3>
+          <h3>{{dashboardSummary?.teachersCount || 0}}</h3>
         </div>
         <span class="float-right"><img src="assets/img/dash/dash-2.png" width="80" alt="" /></span>
       </div>
@@ -23,7 +23,7 @@
         <span class="float-right"><img src="assets/img/dash/dash-3.png" alt="" width="80" /></span>
         <div class="dash-widget-info text-right">
           <span>{{'dashboard.parentsLabel'| translate}}</span>
-          <h3>3</h3>
+          <h3>{{dashboardSummary?.parentsCount || 0}}</h3>
         </div>
       </div>
     </div>
@@ -31,7 +31,7 @@
       <div class="dash-widget dash-widget5">
         <div class="dash-widget-info d-inline-block text-left">
           <span>{{'dashboard.totalMoney'| translate}}</span>
-          <h3>$20,000</h3>
+          <h3>${{dashboardSummary?.totalMoney || 0 | number:'1.0-0'}}</h3>
         </div>
         <span class="float-right"><img src="assets/img/dash/dash-4.png" alt="" width="80" /></span>
       </div>
