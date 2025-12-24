@@ -1,37 +1,101 @@
-<div style="background-color: white;">
-    <!-- <p-chips [formControl]="values" class="chipsOne" [max]="max" placeholder="ابحث هنا..." /> -->
-    <h2 class="guardian" dir="rtl">أولياء الأمور</h2>
+<div class="parents-container" style="background-color: white;">
+    <div class="header-section">
+        <h2 class="guardian" dir="rtl">أولياء الأمور</h2>
+        @if (guardians.length > 0) {
+        <div class="stats-badge">
+            <span class="badge-text">إجمالي: {{guardians.length}}</span>
+        </div>
+        }
+    </div>
+    
     <div class="group group2">
         @for (guardian of guardians; track $index) {
         <div class="form-control">
-            <p-card class="responsive-card">
+            <p-card class="responsive-card guardian-card">
                 <ng-template pTemplate="header">
-                    <img alt="Card" class="image" src="./../../../../../assets/img/user.png" />
+                    <div class="card-header-wrapper">
+                        <img alt="Guardian" class="guardian-image" src="./../../../../../assets/img/user.png" />
+                        <div class="student-count-badge">
+                            <i class="bi bi-people-fill"></i>
+                            <span>{{guardian.studentCount}}</span>
+                        </div>
+                    </div>
                 </ng-template>
+                
                 <div class="card-content">
-                    الاسم: {{guardian.fullName}} <br>
-                    <hr>
-                    عدد الطلاب:{{guardian.studentCount}} <br>
-                    النوع:{{guardian.gender}} <br>
-                    المرحلة:الثانية <br>
-                    الرسوم المطلوبة:{{guardian.requiredFee}} <br>
-                    الرسوم المدفوعة:{{guardian.piad}} <br>
-                    الرسوم المتبقية:{{guardian.remaining}} <br>
-                    الهاتف:{{guardian.phone}} العنوان:{{guardian.address}} <br>
-                    العمر:{{guardian.dob | date: 'yyyy-MM-dd'}} AccountID:{{guardian.accountId}} <br>
-                    <hr>
-  
+                    <div class="guardian-name">
+                        <i class="bi bi-person-fill name-icon"></i>
+                        <span class="name-text">{{guardian.fullName}}</span>
+                    </div>
+                    
+                    <div class="info-section">
+                        <div class="info-row">
+                            <span class="info-label">
+                                <i class="bi bi-gender-ambiguous"></i>
+                                النوع:
+                            </span>
+                            <span class="info-value">{{guardian.gender === 'Male' ? 'ذكر' : 'أنثى'}}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">
+                                <i class="bi bi-telephone-fill"></i>
+                                الهاتف:
+                            </span>
+                            <span class="info-value">{{guardian.phone}}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">
+                                <i class="bi bi-geo-alt-fill"></i>
+                                العنوان:
+                            </span>
+                            <span class="info-value">{{guardian.address || 'غير محدد'}}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">
+                                <i class="bi bi-calendar-event"></i>
+                                تاريخ الميلاد:
+                            </span>
+                            <span class="info-value">{{guardian.dob | date: 'yyyy-MM-dd'}}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="fees-section">
+                        <div class="fee-item">
+                            <span class="fee-label">الرسوم المطلوبة:</span>
+                            <span class="fee-value required">{{guardian.requiredFee | number}} ريال</span>
+                        </div>
+                        <div class="fee-item">
+                            <span class="fee-label">الرسوم المدفوعة:</span>
+                            <span class="fee-value paid">{{guardian.piad | number}} ريال</span>
+                        </div>
+                        <div class="fee-item highlight">
+                            <span class="fee-label">الرسوم المتبقية:</span>
+                            <span class="fee-value remaining">{{guardian.remaining | number}} ريال</span>
+                        </div>
+                    </div>
                 </div>
+                
                 <ng-template pTemplate="footer">
-                    <div class="flex gap-3 mt-1">
-                        <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
+                    <div class="card-footer">
+                        <p-button 
+                            label="الرسوم" 
+                            icon="bi bi-cash-stack" 
+                            class="w-full fees-button" 
+                            styleClass="custom-button" />
                     </div>
                 </ng-template>
             </p-card>
         </div>
         } @empty {
         <div class="empty-message">
-            <p>لا يوجد أولياء أمور متاحين</p>
+            <div class="empty-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <p class="empty-text">لا يوجد أولياء أمور متاحين</p>
+            <p class="empty-subtext">لم يتم إضافة أي ولي أمر حتى الآن</p>
         </div>
         }
     </div>
