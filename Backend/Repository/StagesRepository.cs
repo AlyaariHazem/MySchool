@@ -77,9 +77,11 @@ namespace Backend.Repository
         public async Task<List<StageDTO>> GetAll()
         {
             var stages = await context.Stages
+                .Include(stage => stage.Year)
                 .Include(stage => stage.Classes)
                     .ThenInclude(cls => cls.FeeClasses)
                         .ThenInclude(fc => fc.StudentClassFees)
+                .Where(stage => stage.Year != null && stage.Year.Active == true)
                 .ToListAsync();
 
             var stageDTOs = stages.Select(stage => new StageDTO

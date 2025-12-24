@@ -5,8 +5,9 @@ import { adminGuardGuard } from './core/guards/admin-guard.guard';
 import { PageNotFoundComponent } from './shared/components/page-not-found/page-not-found.component';
 
 export const routes: Routes = [
+    {path:'',redirectTo:'login',pathMatch:'full'},
     {
-        path:'',
+        path:'login',
         component:LoginComponent
     },
     {
@@ -20,6 +21,6 @@ export const routes: Routes = [
         canMatch:[adminGuardGuard]
     },
     {path:'not-found',component:PageNotFoundComponent},
-    { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
+    { path: '**', redirectTo: 'login', pathMatch: 'full' }
     
 ];

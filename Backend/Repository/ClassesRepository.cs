@@ -39,11 +39,17 @@ namespace Backend.Repository.School
         }
         public async Task<List<AllClassesDTO>> GetAllNamesAsync()
         {
-            var stageDictionary = await _db.Classes.Select(c =>new AllClassesDTO
-            {
-                ClassID = c.ClassID,//this classID is not return correctlly?
-                ClassName = c.ClassName,
-            }).ToListAsync();
+            var stageDictionary = await _db.Classes
+                .Include(c => c.Year)
+                .Include(c => c.Stage)
+                    .ThenInclude(s => s.Year)
+                .Where(c => (c.Year != null && c.Year.Active == true) || 
+                           (c.Stage != null && c.Stage.Year != null && c.Stage.Year.Active == true))
+                .Select(c => new AllClassesDTO
+                {
+                    ClassID = c.ClassID,//this classID is not return correctlly?
+                    ClassName = c.ClassName,
+                }).ToListAsync();
             return stageDictionary;
         }
         public async Task Update(AddClassDTO model)
@@ -80,9 +86,14 @@ namespace Backend.Repository.School
         public async Task<List<ClassDTO>> GetAllAsync()
         {
             var ClassList = await _db.Classes
-             .Include(c => c.Stage) 
-            .Include(d => d.Divisions)
-            .ThenInclude(s => s.Students).ToListAsync();
+                .Include(c => c.Year)
+                .Include(c => c.Stage)
+                    .ThenInclude(s => s.Year)
+                .Include(d => d.Divisions)
+                    .ThenInclude(s => s.Students)
+                .Where(c => (c.Year != null && c.Year.Active == true) || 
+                           (c.Stage != null && c.Stage.Year != null && c.Stage.Year.Active == true))
+                .ToListAsync();
 
             var ClassDTOList = ClassList.Select(c => new ClassDTO
             {
@@ -90,7 +101,7 @@ namespace Backend.Repository.School
                 ClassName = c.ClassName,
                 StageID = c.StageID,
                 State = c.State,
-                StageName = c.Stage.StageName,
+                StageName = c.Stage != null ? c.Stage.StageName : string.Empty,
                 StudentCount = c.Divisions.Sum(d => d.Students.Count()),
                 Divisions = c.Divisions.Select(d => new DivisionINClassDTO
                 {

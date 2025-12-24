@@ -127,6 +127,20 @@ public class YearRepository : IYearRepository
         if (existingYear == null)
             throw new ArgumentNullException(nameof(existingYear), "The year cannot be null.");
 
+        // If setting this year to active, set all other years to inactive
+        if (obj.Active)
+        {
+            var otherYears = await _context.Years
+                .Where(y => y.YearID != obj.YearID && y.SchoolID == obj.SchoolID && y.Active)
+                .ToListAsync();
+            
+            foreach (var year in otherYears)
+            {
+                year.Active = false;
+                _context.Entry(year).State = EntityState.Modified;
+            }
+        }
+
         // Use AutoMapper to update all properties from DTO to entity
         _mapper.Map(obj, existingYear);
 
@@ -146,9 +160,29 @@ public class YearRepository : IYearRepository
 
             // Map the year entity to the DTO (this will be modified)
             var yearDTO = _mapper.Map<YearDTO>(year);
+            var wasActive = yearDTO.Active;
+
+            // Check if the patch modifies the Active property
+            var activePropertyModified = partialyear.Operations
+                .Any(op => op.path.Equals("/active", StringComparison.OrdinalIgnoreCase) || 
+                          op.path.Equals("/Active", StringComparison.OrdinalIgnoreCase));
 
             // Apply the patch to the DTO
             partialyear.ApplyTo(yearDTO);
+
+            // If Active property was modified and is now true, set all other years to inactive
+            if (activePropertyModified && yearDTO.Active)
+            {
+                var otherYears = await _context.Years
+                    .Where(y => y.YearID != id && y.SchoolID == year.SchoolID && y.Active)
+                    .ToListAsync();
+                
+                foreach (var otherYear in otherYears)
+                {
+                    otherYear.Active = false;
+                    _context.Entry(otherYear).State = EntityState.Modified;
+                }
+            }
 
             // Map the patched DTO back to the entity (year)
             _mapper.Map(yearDTO, year);
