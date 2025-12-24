@@ -160,3 +160,12 @@ input {
     }
   }
 }
+
+.empty-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 0;
+  font-weight: 600;
+  color: #0d0e0d;
+  font-size: 1.2rem;
+}
