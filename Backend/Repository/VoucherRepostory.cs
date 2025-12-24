@@ -30,8 +30,25 @@ public class VoucherRepository : IVoucherRepository
     {
         var vouchers = await _context.Vouchers
             .Include(v => v.AccountStudentGuardians)
-             .ThenInclude(v => v.Accounts)
+                .ThenInclude(asg => asg.Student)
+                    .ThenInclude(s => s.Division)
+                        .ThenInclude(d => d.Class)
+                            .ThenInclude(c => c.Year)
+            .Include(v => v.AccountStudentGuardians)
+                .ThenInclude(asg => asg.Student)
+                    .ThenInclude(s => s.Division)
+                        .ThenInclude(d => d.Class)
+                            .ThenInclude(c => c.Stage)
+                                .ThenInclude(s => s.Year)
+            .Include(v => v.AccountStudentGuardians)
+                .ThenInclude(v => v.Accounts)
             .Include(v => v.Attachments)
+            .Where(v => v.AccountStudentGuardians != null && 
+                       v.AccountStudentGuardians.Student != null &&
+                       v.AccountStudentGuardians.Student.Division != null &&
+                       v.AccountStudentGuardians.Student.Division.Class != null &&
+                       ((v.AccountStudentGuardians.Student.Division.Class.Year != null && v.AccountStudentGuardians.Student.Division.Class.Year.Active == true) || 
+                        (v.AccountStudentGuardians.Student.Division.Class.Stage != null && v.AccountStudentGuardians.Student.Division.Class.Stage.Year != null && v.AccountStudentGuardians.Student.Division.Class.Stage.Year.Active == true)))
             .ToListAsync();
         if (vouchers == null)
             return new List<VouchersReturnDTO>();
@@ -43,10 +60,10 @@ public class VoucherRepository : IVoucherRepository
             Note = v.Note,
             PayBy = v.PayBy,
             HireDate = v.HireDate,
-            AccountName = v.AccountStudentGuardians.Accounts.AccountName,
-            AccountAttachments = v.Attachments.Count,
+            AccountName = v.AccountStudentGuardians?.Accounts?.AccountName ?? string.Empty,
+            AccountAttachments = v.Attachments?.Count ?? 0,
             AccountStudentGuardianID = v.AccountStudentGuardianID,
-            StudentID = v.AccountStudentGuardians.StudentID,
+            StudentID = v.AccountStudentGuardians?.StudentID ?? 0,
         }).ToList();
         return vouchersDTO;
     }
@@ -116,19 +133,28 @@ public class VoucherRepository : IVoucherRepository
     public async Task<List<VouchersGuardianDTO>> GetAllVouchersGuardian()
     {
         return await _context.Students
-    .Include(s => s.AccountStudentGuardians)
-        .ThenInclude(a => a.Vouchers)
-    .Include(s => s.Division)
-        .ThenInclude(d => d.Class)
-    .Include(s => s.Attachments)
-    .Select(vg => new VouchersGuardianDTO()
-    {
-        StudentName = vg.FullName.FirstName + " " + vg.FullName.MiddleName + " " + vg.FullName.LastName,
-        GuardianID = vg.GuardianID,
-        ClassName = vg.Division.Class.ClassName,
-        RequiredFee = vg.AccountStudentGuardians.Select(a => a.Amount).ToList(),
-        receiptionFee = vg.AccountStudentGuardians.SelectMany(a => a.Vouchers).Sum(v => v.Receipt),
-        ImageURL = vg.Attachments.Select(a => a.AttachmentURL).ToList(),
-    }).ToListAsync();
+            .Include(s => s.AccountStudentGuardians)
+                .ThenInclude(a => a.Vouchers)
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Year)
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Stage)
+                        .ThenInclude(s => s.Year)
+            .Include(s => s.Attachments)
+            .Where(s => s.Division != null && 
+                       s.Division.Class != null && 
+                       ((s.Division.Class.Year != null && s.Division.Class.Year.Active == true) || 
+                        (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.Active == true)))
+            .Select(vg => new VouchersGuardianDTO()
+            {
+                StudentName = vg.FullName.FirstName + " " + vg.FullName.MiddleName + " " + vg.FullName.LastName,
+                GuardianID = vg.GuardianID,
+                ClassName = vg.Division != null && vg.Division.Class != null ? vg.Division.Class.ClassName : string.Empty,
+                RequiredFee = vg.AccountStudentGuardians != null ? vg.AccountStudentGuardians.Select(a => a.Amount).ToList() : new List<decimal>(),
+                receiptionFee = vg.AccountStudentGuardians != null ? vg.AccountStudentGuardians.SelectMany(a => a.Vouchers ?? new List<Vouchers>()).Sum(v => v.Receipt) : 0,
+                ImageURL = vg.Attachments != null ? vg.Attachments.Select(a => a.AttachmentURL).ToList() : new List<string>(),
+            }).ToListAsync();
     }
 }

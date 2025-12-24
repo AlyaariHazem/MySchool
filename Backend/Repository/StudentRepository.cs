@@ -267,9 +267,17 @@ public class StudentRepository : IStudentRepository
         var students = await _context.Students
             .Include(s => s.Division)        // Include Division details
                 .ThenInclude(d => d.Class)   // Include Class details
+                    .ThenInclude(c => c.Year) // Include Class direct Year
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
                     .ThenInclude(c => c.Stage) // Include Stage details
+                        .ThenInclude(s => s.Year) // Include Stage Year
             .Include(ASG => ASG.AccountStudentGuardians)
             .Include(s => s.Guardian)        // Include Guardian details
+            .Where(s => s.Division != null && 
+                      s.Division.Class != null && 
+                      ((s.Division.Class.Year != null && s.Division.Class.Year.Active == true) || 
+                       (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.Active == true)))
             .ToListAsync();
 
         if (students == null || !students.Any())
@@ -346,18 +354,29 @@ public class StudentRepository : IStudentRepository
 
     public async Task<(List<StudentDetailsDTO> Items, int TotalCount)> GetStudentsPageAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
     {
-        // Get total count first (before pagination)
-        var totalCount = await _context.Students.CountAsync(cancellationToken);
+        // Base query with filtering for active year
+        var baseQuery = _context.Students
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Year)
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Stage)
+                        .ThenInclude(s => s.Year)
+            .Where(s => s.Division != null && 
+                       s.Division.Class != null && 
+                       ((s.Division.Class.Year != null && s.Division.Class.Year.Active == true) || 
+                        (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.Active == true)));
+
+        // Get total count with filters applied
+        var totalCount = await baseQuery.CountAsync(cancellationToken);
 
         if (totalCount == 0)
             return (new List<StudentDetailsDTO>(), 0);
 
-        var students = await _context.Students
-            .Include(s => s.Division)        // Include Division details
-                .ThenInclude(d => d.Class)   // Include Class details
-                    .ThenInclude(c => c.Stage) // Include Stage details
+        var students = await baseQuery
             .Include(ASG => ASG.AccountStudentGuardians)
-            .Include(s => s.Guardian)        // Include Guardian details
+            .Include(s => s.Guardian)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -385,13 +404,21 @@ public class StudentRepository : IStudentRepository
 
     public async Task<(List<StudentDetailsDTO> Items, int TotalCount)> GetStudentsPageWithFiltersAsync(int pageNumber, int pageSize, Dictionary<string, Backend.Common.FilterValue> filters, CancellationToken cancellationToken = default)
     {
-        // Start with base query
+        // Start with base query - include all necessary relationships first
         var query = _context.Students
             .Include(s => s.Division)
                 .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Year)
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
                     .ThenInclude(c => c.Stage)
+                        .ThenInclude(s => s.Year)
             .Include(ASG => ASG.AccountStudentGuardians)
             .Include(s => s.Guardian)
+            .Where(s => s.Division != null && 
+                       s.Division.Class != null && 
+                       ((s.Division.Class.Year != null && s.Division.Class.Year.Active == true) || 
+                        (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.Active == true)))
             .AsQueryable();
 
         // Apply filters dynamically

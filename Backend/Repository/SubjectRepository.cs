@@ -29,6 +29,19 @@ namespace Backend.Repository.School.Classes
                 throw new ArgumentException("Page number and page size must be greater than zero.");
 
             var subjects = await _context.Subjects
+                .Include(s => s.CoursePlans)
+                    .ThenInclude(cp => cp.Year)
+                .Include(s => s.Curriculums)
+                    .ThenInclude(c => c.Class)
+                        .ThenInclude(c => c.Year)
+                .Include(s => s.Curriculums)
+                    .ThenInclude(c => c.Class)
+                        .ThenInclude(c => c.Stage)
+                            .ThenInclude(s => s.Year)
+                .Where(s => (s.CoursePlans != null && s.CoursePlans.Any(cp => cp.Year != null && cp.Year.Active == true)) ||
+                           (s.Curriculums != null && s.Curriculums.Any(c => c.Class != null && 
+                                                                           ((c.Class.Year != null && c.Class.Year.Active == true) || 
+                                                                            (c.Class.Stage != null && c.Class.Stage.Year != null && c.Class.Stage.Year.Active == true)))))
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -39,7 +52,21 @@ namespace Backend.Repository.School.Classes
 
         public async Task<int> GetTotalSubjectsCountAsync()
         {
-            return await _context.Subjects.CountAsync();
+            return await _context.Subjects
+                .Include(s => s.CoursePlans)
+                    .ThenInclude(cp => cp.Year)
+                .Include(s => s.Curriculums)
+                    .ThenInclude(c => c.Class)
+                        .ThenInclude(c => c.Year)
+                .Include(s => s.Curriculums)
+                    .ThenInclude(c => c.Class)
+                        .ThenInclude(c => c.Stage)
+                            .ThenInclude(s => s.Year)
+                .Where(s => (s.CoursePlans != null && s.CoursePlans.Any(cp => cp.Year != null && cp.Year.Active == true)) ||
+                           (s.Curriculums != null && s.Curriculums.Any(c => c.Class != null && 
+                                                                           ((c.Class.Year != null && c.Class.Year.Active == true) || 
+                                                                            (c.Class.Stage != null && c.Class.Stage.Year != null && c.Class.Stage.Year.Active == true)))))
+                .CountAsync();
         }
 
 
@@ -76,7 +103,21 @@ namespace Backend.Repository.School.Classes
         // READ ALL
         public async Task<List<SubjectsNameDTO>> GetAllSubjectsAsync()
         {
-            var subjects = await _context.Subjects.ToListAsync();
+            var subjects = await _context.Subjects
+                .Include(s => s.CoursePlans)
+                    .ThenInclude(cp => cp.Year)
+                .Include(s => s.Curriculums)
+                    .ThenInclude(c => c.Class)
+                        .ThenInclude(c => c.Year)
+                .Include(s => s.Curriculums)
+                    .ThenInclude(c => c.Class)
+                        .ThenInclude(c => c.Stage)
+                            .ThenInclude(s => s.Year)
+                .Where(s => (s.CoursePlans != null && s.CoursePlans.Any(cp => cp.Year != null && cp.Year.Active == true)) ||
+                           (s.Curriculums != null && s.Curriculums.Any(c => c.Class != null && 
+                                                                           ((c.Class.Year != null && c.Class.Year.Active == true) || 
+                                                                            (c.Class.Stage != null && c.Class.Stage.Year != null && c.Class.Stage.Year.Active == true)))))
+                .ToListAsync();
             var subjectDtos = _mapper.Map<List<SubjectsNameDTO>>(subjects);
             return subjectDtos;
         }

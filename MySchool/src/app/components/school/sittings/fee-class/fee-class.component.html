@@ -82,7 +82,11 @@
                                     </div>
                                 </td>
                             </tr>
-                            }
+                            }@empty {
+                                <tr>
+                                  <td colspan="7" class="empty-message">No Data available in a Table</td>
+                                </tr>
+                                }
                         </tbody>
                     </table>
                 </mat-card>
@@ -190,7 +194,9 @@
                                 </td>
                             </tr>
                             }@empty {
-                            <p>there is no data</p>
+                                <tr>
+                                  <td colspan="7" class="empty-message">No Data available in a Table</td>
+                                </tr>
                             }
                         </tbody>
                     </table>

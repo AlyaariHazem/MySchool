@@ -36,7 +36,26 @@ public class GuardianRepository : IGuardianRepository
     public async Task<List<GuardianDTO>> GetAllGuardiansAsync()
     {
         // ApplicationUser is in admin database, not tenant database, so we can't Include it
-        var guardiansData = await _db.Guardians.ToListAsync();
+        // Filter guardians that have students in active years
+        var guardiansData = await _db.Guardians
+            .Include(g => g.AccountStudentGuardians)
+                .ThenInclude(asg => asg.Student)
+                    .ThenInclude(s => s.Division)
+                        .ThenInclude(d => d.Class)
+                            .ThenInclude(c => c.Year)
+            .Include(g => g.AccountStudentGuardians)
+                .ThenInclude(asg => asg.Student)
+                    .ThenInclude(s => s.Division)
+                        .ThenInclude(d => d.Class)
+                            .ThenInclude(c => c.Stage)
+                                .ThenInclude(s => s.Year)
+            .Where(g => g.AccountStudentGuardians != null && 
+                       g.AccountStudentGuardians.Any(asg => asg.Student != null &&
+                                                           asg.Student.Division != null &&
+                                                           asg.Student.Division.Class != null &&
+                                                           ((asg.Student.Division.Class.Year != null && asg.Student.Division.Class.Year.Active == true) || 
+                                                            (asg.Student.Division.Class.Stage != null && asg.Student.Division.Class.Stage.Year != null && asg.Student.Division.Class.Stage.Year.Active == true))))
+            .ToListAsync();
 
         if (guardiansData == null)
             throw new Exception("Guardian not found.");
@@ -155,13 +174,30 @@ public class GuardianRepository : IGuardianRepository
         // Use AsNoTracking to prevent duplicate entity tracking issues
         // ApplicationUser is in admin database, not tenant database, so we can't Include it
         var guardiansData = await _db.Guardians
-        .AsNoTracking()
-        .Include(g => g.AccountStudentGuardians)
-            .ThenInclude(ASG => ASG.Vouchers)
-        .Include(g => g.AccountStudentGuardians)
-            .ThenInclude(ASG => ASG.Accounts)
-        .AsSplitQuery()
-        .ToListAsync();
+            .AsNoTracking()
+            .Include(g => g.AccountStudentGuardians)
+                .ThenInclude(ASG => ASG.Student)
+                    .ThenInclude(s => s.Division)
+                        .ThenInclude(d => d.Class)
+                            .ThenInclude(c => c.Year)
+            .Include(g => g.AccountStudentGuardians)
+                .ThenInclude(ASG => ASG.Student)
+                    .ThenInclude(s => s.Division)
+                        .ThenInclude(d => d.Class)
+                            .ThenInclude(c => c.Stage)
+                                .ThenInclude(s => s.Year)
+            .Include(g => g.AccountStudentGuardians)
+                .ThenInclude(ASG => ASG.Vouchers)
+            .Include(g => g.AccountStudentGuardians)
+                .ThenInclude(ASG => ASG.Accounts)
+            .Where(g => g.AccountStudentGuardians != null && 
+                       g.AccountStudentGuardians.Any(asg => asg.Student != null &&
+                                                           asg.Student.Division != null &&
+                                                           asg.Student.Division.Class != null &&
+                                                           ((asg.Student.Division.Class.Year != null && asg.Student.Division.Class.Year.Active == true) || 
+                                                            (asg.Student.Division.Class.Stage != null && asg.Student.Division.Class.Stage.Year != null && asg.Student.Division.Class.Stage.Year.Active == true))))
+            .AsSplitQuery()
+            .ToListAsync();
 
         if (guardiansData == null)
             throw new Exception("Guardian not found.");

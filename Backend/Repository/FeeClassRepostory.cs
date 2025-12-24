@@ -32,7 +32,14 @@ public class FeeClassRepository : IFeeClassRepository
         {
             var list = await _db.FeeClass
                                 .Include(fc => fc.Class)
+                                    .ThenInclude(c => c.Year)
+                                .Include(fc => fc.Class)
+                                    .ThenInclude(c => c.Stage)
+                                        .ThenInclude(s => s.Year)
                                 .Include(fc => fc.Fee)
+                                .Where(fc => fc.Class != null && 
+                                           ((fc.Class.Year != null && fc.Class.Year.Active == true) || 
+                                            (fc.Class.Stage != null && fc.Class.Stage.Year != null && fc.Class.Stage.Year.Active == true)))
                                 .Select(fc => new FeeClassDTO
                                 {
                                     FeeClassID = fc.FeeClassID,
@@ -40,9 +47,10 @@ public class FeeClassRepository : IFeeClassRepository
                                     FeeID      = fc.FeeID,
                                     Amount     = fc.Amount,
                                     Mandatory  = fc.Mandatory,
-                                    ClassYear  = fc.Class.Year.YearDateStart.ToString("yyyy-MM-dd"),
-                                    ClassName  = fc.Class.ClassName,
-                                    FeeName    = fc.Fee.FeeName
+                                    ClassYear  = fc.Class.Year != null ? fc.Class.Year.YearDateStart.ToString("yyyy-MM-dd") : 
+                                                (fc.Class.Stage != null && fc.Class.Stage.Year != null ? fc.Class.Stage.Year.YearDateStart.ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd")),
+                                    ClassName  = fc.Class != null ? fc.Class.ClassName : string.Empty,
+                                    FeeName    = fc.Fee != null ? fc.Fee.FeeName : string.Empty
                                 })
                                 .ToListAsync();
 
@@ -81,8 +89,15 @@ public class FeeClassRepository : IFeeClassRepository
         {
             var list = await _db.FeeClass
                                 .Include(fc => fc.Class)
+                                    .ThenInclude(c => c.Year)
+                                .Include(fc => fc.Class)
+                                    .ThenInclude(c => c.Stage)
+                                        .ThenInclude(s => s.Year)
                                 .Include(fc => fc.Fee)
-                                .Where(fc => fc.ClassID == classId)
+                                .Where(fc => fc.ClassID == classId && 
+                                           fc.Class != null && 
+                                           ((fc.Class.Year != null && fc.Class.Year.Active == true) || 
+                                            (fc.Class.Stage != null && fc.Class.Stage.Year != null && fc.Class.Stage.Year.Active == true)))
                                 .Select(fc => _mapper.Map<FeeClassDTO>(fc))
                                 .ToListAsync();
 

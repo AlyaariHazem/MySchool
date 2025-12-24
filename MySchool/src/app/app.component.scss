@@ -11,3 +11,10 @@
 :host ::ng-deep h2, mat-option {
   font-family: 'Noto Kufi Arabic', sans-serif;
   }
+
+ :host ::ng-deep .empty-message {
+    text-align: center!important;
+    padding: 2rem 0!important;
+    font-weight: 600!important;
+    color: #0d0e0d!important;
+  }

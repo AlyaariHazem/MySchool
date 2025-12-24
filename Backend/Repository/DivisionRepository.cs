@@ -64,12 +64,19 @@ namespace FirstProjectWithMVC.Repository.School
         {
             var divisions = await _db.Divisions
                 .Include(d => d.Class)
+                    .ThenInclude(c => c.Year)
+                .Include(d => d.Class)
+                    .ThenInclude(c => c.Stage)
+                        .ThenInclude(s => s.Year)
+                .Where(d => d.Class != null && 
+                           ((d.Class.Year != null && d.Class.Year.Active == true) || 
+                            (d.Class.Stage != null && d.Class.Stage.Year != null && d.Class.Stage.Year.Active == true)))
                 .Select(d => new DivisionDTO
                 {
                     DivisionID = d.DivisionID,
                     DivisionName = d.DivisionName,
                     ClassID = d.ClassID,
-                    ClassesName = d.Class.ClassName,  // Access the class name
+                    ClassesName = d.Class != null ? d.Class.ClassName : string.Empty,  // Access the class name
                     StudentCount = d.Students != null ? d.Students.Count() : 0,
                     State = d.State,
                 }).ToListAsync();
