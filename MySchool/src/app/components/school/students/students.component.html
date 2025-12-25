@@ -169,7 +169,7 @@
             [first]="paginatorService.first()"
             [rows]="paginatorService.rows()" 
             [totalRecords]="totalRecords" 
-            [rowsPerPageOptions]="[8, 16, 25]" />
+            [rowsPerPageOptions]="[10, 20, 30]" />
         </div>
         }
 
@@ -181,7 +181,7 @@
             [totalRecords]="totalRecords"
             [rows]="pageSize"
             [first]="paginatorService.first()"
-            [rowsPerPageOptions]="[8, 16, 25]"
+            [rowsPerPageOptions]="[10, 20, 30]"
             [showGlobalFilter]="false"
             [trackByField]="'studentID'"
             (pageChange)="handlePageChange($event)"

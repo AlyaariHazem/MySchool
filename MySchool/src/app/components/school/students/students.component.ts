@@ -123,9 +123,9 @@ export class StudentsComponent implements OnInit, OnDestroy {
     }
     // Initialize pagination
     this.currentPage = 1;
-    this.pageSize = 8;
+    this.pageSize = 10;
     this.paginatorService.first.set(0);
-    this.paginatorService.rows.set(8);
+    this.paginatorService.rows.set(10);
     this.getAllStudents();
   }
 

@@ -69,7 +69,7 @@
           }
         </div>
           <p-paginator dir="ltr" (onPageChange)="handlePageChange($event)" [first]="paginatorService.first()" [rows]="paginatorService.rows()"
-          [totalRecords]="Employees.length" [rowsPerPageOptions]="[4, 10, 20]"/>
+          [totalRecords]="totalRecords" [rowsPerPageOptions]="[4, 10, 20]"/>
         }
 
         @if (showCulomn) {

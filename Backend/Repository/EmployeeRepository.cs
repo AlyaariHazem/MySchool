@@ -177,56 +177,80 @@ public class EmployeeRepository : IEmployeeRepository
     {
         if (dto.JopName == "Teacher")
         {
+            // Note: FullName is an owned entity, so it's automatically included - no need to .Include() it
             var teacher = await _context.Teachers
-                .Include(t => t.FullName)
-                .Include(t => t.ApplicationUser)
                 .FirstOrDefaultAsync(t => t.TeacherID == id);
 
             if (teacher == null) return "Teacher not found";
 
-            teacher.ApplicationUser ??= new ApplicationUser();
+            // Update Teacher entity in tenant database
+            if (teacher.FullName == null)
+            {
+                teacher.FullName = new Name();
+            }
 
             teacher.FullName.FirstName = dto.FirstName;
             teacher.FullName.LastName = dto.LastName;
             teacher.DOB = dto.DOB;
             teacher.ImageURL = dto.ImageURL;
             teacher.ManagerID = dto.ManagerID ?? 1;
-            teacher.ApplicationUser.Address = dto.Address;
-            teacher.ApplicationUser.Email = dto.Email;
-            teacher.ApplicationUser.Gender = dto.Gender;
-            teacher.ApplicationUser.PhoneNumber = dto.Mobile;
 
             _context.Entry(teacher).State = EntityState.Modified;
-            _context.Entry(teacher.ApplicationUser).State = EntityState.Modified;
-
             await _context.SaveChangesAsync();
+
+            // Update ApplicationUser in admin database using IUserRepository
+            if (!string.IsNullOrEmpty(teacher.UserID))
+            {
+                var existingUser = await _userRepository.GetUserByIdAsync(teacher.UserID);
+                if (existingUser != null)
+                {
+                    existingUser.Address = dto.Address;
+                    existingUser.Email = dto.Email;
+                    existingUser.Gender = dto.Gender;
+                    existingUser.PhoneNumber = dto.Mobile;
+                    await _userRepository.UpdateAsync(existingUser);
+                }
+            }
+
             return "Teacher updated successfully";
         }
 
         if (dto.JopName == "Manager")
         {
+            // Note: FullName is an owned entity, so it's automatically included - no need to .Include() it
             var manager = await _context.Managers
-                .Include(m => m.FullName)
-                .Include(m => m.ApplicationUser)
                 .FirstOrDefaultAsync(m => m.ManagerID == id);
 
             if (manager == null) return "Manager not found";
 
-            manager.ApplicationUser ??= new ApplicationUser();
+            // Update Manager entity in tenant database
+            if (manager.FullName == null)
+            {
+                manager.FullName = new Name();
+            }
 
             manager.FullName.FirstName = dto.FirstName;
             manager.FullName.LastName = dto.LastName;
             manager.DOB = dto.DOB;
             manager.ImageURL = dto.ImageURL;
-            manager.ApplicationUser.Email = dto.Email;
-            manager.ApplicationUser.Address = dto.Address;
-            manager.ApplicationUser.PhoneNumber = dto.Mobile;
-            manager.ApplicationUser.Gender = dto.Gender;
 
             _context.Entry(manager).State = EntityState.Modified;
-            _context.Entry(manager.ApplicationUser).State = EntityState.Modified;
-
             await _context.SaveChangesAsync();
+
+            // Update ApplicationUser in admin database using IUserRepository
+            if (!string.IsNullOrEmpty(manager.UserID))
+            {
+                var existingUser = await _userRepository.GetUserByIdAsync(manager.UserID);
+                if (existingUser != null)
+                {
+                    existingUser.Email = dto.Email;
+                    existingUser.Address = dto.Address;
+                    existingUser.PhoneNumber = dto.Mobile;
+                    existingUser.Gender = dto.Gender;
+                    await _userRepository.UpdateAsync(existingUser);
+                }
+            }
+
             return "Manager updated successfully";
         }
 

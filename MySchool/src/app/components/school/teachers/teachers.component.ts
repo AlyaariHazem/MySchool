@@ -1,4 +1,4 @@
-import { Component, inject} from '@angular/core';
+import { Component, inject, OnInit} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaginatorState } from 'primeng/paginator';
 import { ToastrService } from 'ngx-toastr';
@@ -19,7 +19,7 @@ import { TableColumn } from '../../../shared/components/custom-table/custom-tabl
   templateUrl: './teachers.component.html',
   styleUrls: ['./teachers.component.scss', './../../../shared/styles/style-table.scss'],
 })
-export class TeachersComponent {
+export class TeachersComponent implements OnInit {
   form: FormGroup;
 
   employeeService = inject(EmployeeService);
@@ -31,11 +31,16 @@ export class TeachersComponent {
   isLoading: boolean = true; // Loading state for the component
   totalRecords: number = 0;
 
+  // Pagination properties
+  currentPage: number = 1;
+  pageSize: number = 10;
+
   showGrid: boolean = false;
   showCulomn: boolean = true;
   
   // Table columns configuration
   tableColumns: TableColumn[] = [
+    { field: 'employeeID', header: 'رقم المستخدم', sortable: true, filterable: true },
     { 
       field: 'fullName', 
       header: 'اسم المستخدم', 
@@ -81,8 +86,18 @@ export class TeachersComponent {
   }
 
   handlePageChange(event: PaginatorState): void {
-    this.paginatorService.onPageChange(event);
-    this.paginated = this.paginatorService.pageSlice(this.Employees);
+    // Update paginator service state first
+    this.paginatorService.first.set(event.first || 0);
+    this.paginatorService.rows.set(event.rows || this.pageSize);
+    
+    // Calculate current page and page size
+    const newPageSize = event.rows || this.pageSize;
+    const newPage = Math.floor((event.first || 0) / newPageSize) + 1;
+    
+    // Always fetch from server (server-side pagination)
+    this.currentPage = newPage;
+    this.pageSize = newPageSize;
+    this.getAllEmployees();
   }
   
   // Handle row edit
@@ -116,21 +131,65 @@ export class TeachersComponent {
       //this for add teacher 
       this.openDialog();
     }
+    // Initialize pagination
+    this.currentPage = 1;
+    this.pageSize = 10;
+    this.paginatorService.first.set(0);
+    this.paginatorService.rows.set(10);
     this.getAllEmployees();
   }
+  
   getAllEmployees(): void {
-    this.employeeService.getAllEmployees().subscribe({
+    this.isLoading = true;
+    this.employeeService.getEmployeesPage(this.currentPage, this.pageSize, {}).subscribe({
       next: (res) => {
-        if (!res.isSuccess) {
-          this.toastr.error(res.errorMasseges[0] || 'Failed to load employees.');
-          return;
-        }
-        this.Employees = res.result;
-        this.totalRecords = this.Employees.length;
-        this.paginated = this.paginatorService.pageSlice(this.Employees);
+        const rawEmployees = res.data || [];
+        
+        // Map API response to Employee model structure
+        // API returns teacherID, phoneNumber but Employee model expects employeeID, mobile
+        const employees = rawEmployees.map((teacher: any) => ({
+          employeeID: teacher.teacherID, // Map teacherID to employeeID
+          firstName: teacher.firstName || '',
+          middleName: teacher.middleName || '',
+          lastName: teacher.lastName || '',
+          jopName: teacher.jopName || 'Teacher', // Default to Teacher if not provided
+          address: teacher.address || null,
+          mobile: teacher.phoneNumber || '', // Map phoneNumber to mobile
+          gender: teacher.gender || 'Male',
+          hireDate: teacher.hireDate || new Date(),
+          dob: teacher.dob || new Date(),
+          email: teacher.email || null,
+          imageURL: teacher.imageURL || null,
+          managerID: teacher.managerID || null,
+          // Keep original fields for reference
+          teacherID: teacher.teacherID,
+          userID: teacher.userID,
+          userName: teacher.userName
+        }));
+        
+        // Get totalRecords from server
+        this.totalRecords = res.totalCount || 0;
+        this.currentPage = res.pageNumber || this.currentPage;
+        this.pageSize = res.pageSize || this.pageSize;
+        
+        // Update employees and paginated employees
+        this.Employees = employees;
+        this.paginated = employees;
+        
+        // Update paginator service for UI consistency
+        this.paginatorService.first.set((this.currentPage - 1) * this.pageSize);
+        this.paginatorService.rows.set(this.pageSize);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error("Error fetching employees:", err);
+        this.toastr.error('فشل في تحميل بيانات الموظفين. تأكد من تشغيل الخادم.', 'خطأ');
+        this.paginated = [];
+        this.Employees = [];
+        this.totalRecords = 0;
         this.isLoading = false;
       }
-    })
+    });
   }
 
   openDialog(): void {
@@ -142,8 +201,9 @@ export class TeachersComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.paginated.push(result);
-        this.toastr.success('تم إضافة الطالب بنجاح');
+        this.toastr.success('تم إضافة الموظف بنجاح');
+        // Reload employees to get updated list from server
+        this.getAllEmployees();
       }
     });
   }
@@ -164,16 +224,24 @@ export class TeachersComponent {
 
     dialogRef.afterClosed().subscribe((result: Employee) => {
       if (result) {
-        this.paginated = this.paginated.map(emp => emp.employeeID === result.employeeID ? result : emp);
-        this.toastr.success('تم تعديل الطالب بنجاح');
+        this.toastr.success('تم تعديل الموظف بنجاح');
+        // Reload employees to get updated list from server
+        this.getAllEmployees();
       }
     });
   }
   deleteEmployee(id: number, jobType: string): void {
-    this.employeeService.deleteEmployee(id, jobType).subscribe(res => {
-      this.paginated = this.paginated.filter(employee => employee.employeeID !== id);
-      console.log('Employee deleted successfully', res);
-      this.toastr.success('تم حذف الموظف بنجاح');
+    this.employeeService.deleteEmployee(id, jobType).subscribe({
+      next: (res) => {
+        console.log('Employee deleted successfully', res);
+        this.toastr.success('تم حذف الموظف بنجاح');
+        // Reload employees to get updated list from server
+        this.getAllEmployees();
+      },
+      error: (err) => {
+        console.error('Error deleting employee:', err);
+        this.toastr.error('فشل في حذف الموظف', 'خطأ');
+      }
     });
   }
 }

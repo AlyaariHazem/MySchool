@@ -53,6 +53,9 @@ public class UsersRepository : IUserRepository
                 existingUser.Gender = user.Gender;
                 existingUser.HireDate = user.HireDate;
                 existingUser.UserType = user.UserType;
+                existingUser.Email = user.Email;
+                existingUser.PhoneNumber = user.PhoneNumber;
+                existingUser.UserName = user.UserName;
                 // Update other properties if needed
                 await _userManager.UpdateAsync(existingUser);
             }
