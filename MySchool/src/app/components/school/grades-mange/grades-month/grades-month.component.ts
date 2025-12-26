@@ -64,6 +64,8 @@ export class GradesMonthComponent implements OnInit {
   selectedMonth = 6;
   selectedClass = 1;
   selectedSubject = 1;
+  private classesLoaded = false;
+  private subjectsLoaded = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -100,6 +102,7 @@ export class GradesMonthComponent implements OnInit {
           return;
         }
         this.AllClasses = res.result;
+        this.classesLoaded = true;
         
         // Set the form value after classes are loaded
         // Find the class with ID matching selectedClass, or use first class if available
@@ -108,10 +111,12 @@ export class GradesMonthComponent implements OnInit {
           if (this.form && defaultClass) {
             this.form.patchValue({ selectedClass: defaultClass.classID });
             this.selectedClass = defaultClass.classID;
-            
-            // Reload data with the correct class value
-            this.updatePaginatedData();
           }
+        }
+        
+        // Only call updatePaginatedData once when both classes and subjects are loaded
+        if (this.subjectsLoaded) {
+          this.updatePaginatedData();
         }
       },
       error: (err) => {
@@ -131,6 +136,7 @@ export class GradesMonthComponent implements OnInit {
         }
         // this.curriculmsPlan = res.result;
         this.curriculmsPlan = [{ subjectID: 0, subjectName: 'الكل' }, ...res.result];
+        this.subjectsLoaded = true;
         
         // Set the form value after subjects are loaded
         // Find the subject with ID matching selectedSubject, or use first subject if available
@@ -139,12 +145,12 @@ export class GradesMonthComponent implements OnInit {
           if (this.form && defaultSubject) {
             this.form.patchValue({ selectedSubject: defaultSubject.subjectID });
             this.selectedSubject = defaultSubject.subjectID;
-            
-            // Reload data with the correct subject value if class is already loaded
-            if (this.AllClasses && this.AllClasses.length > 0) {
-              this.updatePaginatedData();
-            }
           }
+        }
+        
+        // Only call updatePaginatedData once when both classes and subjects are loaded
+        if (this.classesLoaded) {
+          this.updatePaginatedData();
         }
       },
       error: (err) => {
@@ -183,15 +189,12 @@ export class GradesMonthComponent implements OnInit {
   }
 
   selectClass(_: any): void {
-    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
-    const monthId = this.form.get('selectedMonth')?.value ?? this.selectedMonth;
     const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
-    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
     
     // Update component properties
     this.selectedClass = classId;
     
-    this.getAllMonthlyGrades(termId, monthId, classId, subjectId);
+    // Only call updatePaginatedData (it will make the API call)
     this.updatePaginatedData();
     this.filterMonthsByTerm();
   }
@@ -200,41 +203,32 @@ export class GradesMonthComponent implements OnInit {
     this.filterMonthsByTerm();
     
     const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
-    const monthId = this.form.get('selectedMonth')?.value ?? this.selectedMonth;
-    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
-    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
     
     // Update component properties
     this.selectedTerm = termId;
     
-    this.getAllMonthlyGrades(termId, monthId, classId, subjectId);
+    // Only call updatePaginatedData (it will make the API call)
     this.updatePaginatedData();
   }
 
   selectSubject(_: any): void {
-    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
-    const monthId = this.form.get('selectedMonth')?.value ?? this.selectedMonth;
-    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
     const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
     
     // Update component properties
     this.selectedSubject = subjectId;
     
-    this.getAllMonthlyGrades(termId, monthId, classId, subjectId);
+    // Only call updatePaginatedData (it will make the API call)
     this.updatePaginatedData();
     this.filterMonthsByTerm();
   }
 
   selectMonth(_: any): void {
-    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
     const monthId = this.form.get('selectedMonth')?.value ?? this.selectedMonth;
-    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
-    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
     
     // Update component properties
     this.selectedMonth = monthId;
     
-    this.getAllMonthlyGrades(termId, monthId, classId, subjectId);
+    // Only call updatePaginatedData (it will make the API call)
     this.updatePaginatedData();
     this.filterMonthsByTerm();
   }

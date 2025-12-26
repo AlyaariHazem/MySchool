@@ -57,6 +57,8 @@ export class GradesTermComponent implements OnInit {
   note = "";
   selectedClass = 1;
   selectedSubject = 0; // Default to "All" (0 represents "All")
+  private classesLoaded = false;
+  private subjectsLoaded = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -75,13 +77,9 @@ export class GradesTermComponent implements OnInit {
     this.currentLanguage();
     
     // Load classes and subjects first, then set form values
+    // updatePaginatedData() will be called once after both are loaded
     this.getAllClasses();
     this.getAllSubjects();
-    
-    // Load data after form is initialized (send yearID from localStorage, backend will use active year)
-    // Default to subject 0 (All) for initial load
-    this.getAllMonthlyGrades(1, this.yearID, 1, 0);
-    this.updatePaginatedData();
   }
 
   getAllClasses() {
@@ -92,6 +90,7 @@ export class GradesTermComponent implements OnInit {
           return;
         }
         this.AllClasses = res.result;
+        this.classesLoaded = true;
         
         // Set the form value after classes are loaded
         if (this.AllClasses && this.AllClasses.length > 0) {
@@ -99,10 +98,12 @@ export class GradesTermComponent implements OnInit {
           if (this.form && defaultClass) {
             this.form.patchValue({ selectedClass: defaultClass.classID });
             this.selectedClass = defaultClass.classID;
-            
-            // Reload data with the correct class value
-            this.updatePaginatedData();
           }
+        }
+        
+        // Only call updatePaginatedData once when both classes and subjects are loaded
+        if (this.subjectsLoaded) {
+          this.updatePaginatedData();
         }
       },
       error: (err) => {
@@ -122,6 +123,7 @@ export class GradesTermComponent implements OnInit {
         }
         // this.subjects = res.result;
         this.subjects = [{ subjectID: 0, subjectName: 'All' }, ...res.result];
+        this.subjectsLoaded = true;
         
         // Set the form value after subjects are loaded - default to "All" (subjectID: 0)
         if (this.subjects && this.subjects.length > 0) {
@@ -130,12 +132,12 @@ export class GradesTermComponent implements OnInit {
           if (this.form && defaultSubject) {
             this.form.patchValue({ selectedSubject: defaultSubject.subjectID });
             this.selectedSubject = defaultSubject.subjectID;
-            
-            // Reload data with the correct subject value if class is already loaded
-            if (this.AllClasses && this.AllClasses.length > 0) {
-              this.updatePaginatedData();
-            }
           }
+        }
+        
+        // Only call updatePaginatedData once when both classes and subjects are loaded
+        if (this.classesLoaded) {
+          this.updatePaginatedData();
         }
       },
       error: () => {
@@ -158,52 +160,38 @@ export class GradesTermComponent implements OnInit {
   }
 
   selectClass(_: any): void {
-    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
     const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
-    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
     
     // Update component property
     this.selectedClass = classId;
     
-    // Send yearID from localStorage (backend will ignore it and use active year)
-    this.getAllMonthlyGrades(termId, this.yearID, classId, subjectId);
+    // Only call updatePaginatedData (it will make the API call)
     this.updatePaginatedData();
   }
 
   selectTerm(_: any): void {
     const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
-    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
-    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
     
     // Update component property
     this.selectedTerm = termId;
     
-    // Send yearID from localStorage (backend will ignore it and use active year)
-    this.getAllMonthlyGrades(termId, this.yearID, classId, subjectId);
+    // Only call updatePaginatedData (it will make the API call)
     this.updatePaginatedData();
   }
 
   selectSubject(_: any): void {
-    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
-    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
     const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
     
     // Update component property
     this.selectedSubject = subjectId;
     
-    // Send yearID from localStorage (backend will ignore it and use active year)
-    this.getAllMonthlyGrades(termId, this.yearID, classId, subjectId);
+    // Only call updatePaginatedData (it will make the API call)
     this.updatePaginatedData();
   }
 
   selectMonth(_: any): void {
     // This method is not used for term grades, but keeping for consistency
-    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
-    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
-    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
-    
-    // Send yearID from localStorage (backend will ignore it and use active year)
-    this.getAllMonthlyGrades(termId, this.yearID, classId, subjectId);
+    // Only call updatePaginatedData (it will make the API call)
     this.updatePaginatedData();
   }
 
