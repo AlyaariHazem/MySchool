@@ -100,8 +100,17 @@ namespace Backend.Repository
             if (pageNumber < 1 || pageSize < 1)
                 return Result<List<TermlyGradesReturnDTO>>.Fail("Page number must be greater than 0.");
 
+            // Get the active year - ignore the yearId parameter from frontend
+            var activeYear = await _context.Years
+                .Where(y => y.Active == true)
+                .OrderBy(y => y.YearID)
+                .FirstOrDefaultAsync();
+
+            if (activeYear == null)
+                return Result<List<TermlyGradesReturnDTO>>.Fail("No active year found. Please activate a year before viewing termly grades.");
+
             var baseQuery = _context.TermlyGrades
-                .Where(g => g.TermID == term && g.ClassID == classId && g.YearID == yearId);
+                .Where(g => g.TermID == term && g.ClassID == classId && g.YearID == activeYear.YearID);
 
             if (subjectId != 0)
                 baseQuery = baseQuery.Where(g => g.SubjectID == subjectId);
@@ -140,9 +149,18 @@ namespace Backend.Repository
 
         public async Task<int> GetTotalMonthlyGradesCountAsync(int term, int yearId, int classId, int subjectId)
         {
+            // Get the active year - ignore the yearId parameter from frontend
+            var activeYear = await _context.Years
+                .Where(y => y.Active == true)
+                .OrderBy(y => y.YearID)
+                .FirstOrDefaultAsync();
+
+            if (activeYear == null)
+                return 0;
+
             var query = _context.TermlyGrades
           .Where(g => g.TermID == term &&
-                      g.YearID == yearId &&
+                      g.YearID == activeYear.YearID &&
                       g.ClassID == classId);
 
             if (subjectId != 0)

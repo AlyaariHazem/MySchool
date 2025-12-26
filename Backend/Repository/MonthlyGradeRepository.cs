@@ -45,8 +45,18 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
         if (pageNumber < 1 || pageSize < 1)
             return Result<List<MonthlyGradesReternDTO>>.Fail("Page number must be greater than 0.");
 
+        // Get the active year - monthly grades should always be read from the active year
+        var activeYear = await _context.Years
+            .Where(y => y.Active == true)
+            .OrderBy(y => y.YearID)
+            .FirstOrDefaultAsync();
+
+        if (activeYear == null)
+            return Result<List<MonthlyGradesReternDTO>>.Fail("No active year found. Please activate a year before viewing monthly grades.");
+
         var baseQuery = _context.MonthlyGrades
             .Where(g => g.TermID == term &&
+                        g.YearID == activeYear.YearID &&
                         g.MonthID == monthId &&
                         g.ClassID == classId);
 
@@ -173,17 +183,27 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
 
     public async Task<int> GetTotalMonthlyGradesCountAsync(int term, int monthId, int classId, int subjectId)
     {
-          var query = _context.MonthlyGrades
-        .Where(g => g.TermID == term &&
-                    g.MonthID == monthId &&
-                    g.ClassID == classId);
+        // Get the active year - keep count consistent with GetAllAsync
+        var activeYear = await _context.Years
+            .Where(y => y.Active == true)
+            .OrderBy(y => y.YearID)
+            .FirstOrDefaultAsync();
 
-    if (subjectId != 0)
-        query = query.Where(g => g.SubjectID == subjectId);
+        if (activeYear == null)
+            return 0;
 
-    return await query
-        .Select(g => g.StudentID)
-        .Distinct()
-        .CountAsync();
+        var query = _context.MonthlyGrades
+            .Where(g => g.TermID == term &&
+                        g.YearID == activeYear.YearID &&
+                        g.MonthID == monthId &&
+                        g.ClassID == classId);
+
+        if (subjectId != 0)
+            query = query.Where(g => g.SubjectID == subjectId);
+
+        return await query
+            .Select(g => g.StudentID)
+            .Distinct()
+            .CountAsync();
     }
 }

@@ -56,7 +56,7 @@ export class GradesTermComponent implements OnInit {
   selectedTerm = 1;
   note = "";
   selectedClass = 1;
-  selectedSubject = 1;
+  selectedSubject = 0; // Default to "All" (0 represents "All")
 
   constructor(
     private formBuilder: FormBuilder,
@@ -65,19 +65,22 @@ export class GradesTermComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getAllClasses();
-    this.getAllSubjects();
-    // Initialize form
-    this.getAllMonthlyGrades(1, 1, 1, 0);
+    // Initialize form first - default subject to 0 (All)
     this.form = this.formBuilder.group({
-      selectedClass: [this.selectedClass],
+      selectedClass: [null],
       selectedTerm: [this.selectedTerm],
-      selectedSubject: [this.selectedSubject],
+      selectedSubject: [0], // Default to "All" (0)
       note: [this.note],
     });
     this.currentLanguage();
-    // Example data for dropdowns
-
+    
+    // Load classes and subjects first, then set form values
+    this.getAllClasses();
+    this.getAllSubjects();
+    
+    // Load data after form is initialized (send yearID from localStorage, backend will use active year)
+    // Default to subject 0 (All) for initial load
+    this.getAllMonthlyGrades(1, this.yearID, 1, 0);
     this.updatePaginatedData();
   }
 
@@ -89,6 +92,18 @@ export class GradesTermComponent implements OnInit {
           return;
         }
         this.AllClasses = res.result;
+        
+        // Set the form value after classes are loaded
+        if (this.AllClasses && this.AllClasses.length > 0) {
+          const defaultClass = this.AllClasses.find((c: any) => c.classID === this.selectedClass) || this.AllClasses[0];
+          if (this.form && defaultClass) {
+            this.form.patchValue({ selectedClass: defaultClass.classID });
+            this.selectedClass = defaultClass.classID;
+            
+            // Reload data with the correct class value
+            this.updatePaginatedData();
+          }
+        }
       },
       error: (err) => {
         this.toastr.error('Server error occurred');
@@ -107,6 +122,21 @@ export class GradesTermComponent implements OnInit {
         }
         // this.subjects = res.result;
         this.subjects = [{ subjectID: 0, subjectName: 'All' }, ...res.result];
+        
+        // Set the form value after subjects are loaded - default to "All" (subjectID: 0)
+        if (this.subjects && this.subjects.length > 0) {
+          // Find "All" option (subjectID: 0) or use the first one
+          const defaultSubject = this.subjects.find((s: any) => s.subjectID === 0) || this.subjects.find((s: any) => s.subjectID === this.selectedSubject) || this.subjects[0];
+          if (this.form && defaultSubject) {
+            this.form.patchValue({ selectedSubject: defaultSubject.subjectID });
+            this.selectedSubject = defaultSubject.subjectID;
+            
+            // Reload data with the correct subject value if class is already loaded
+            if (this.AllClasses && this.AllClasses.length > 0) {
+              this.updatePaginatedData();
+            }
+          }
+        }
       },
       error: () => {
         this.toastr.error('Error fetching curriculum plans');
@@ -128,49 +158,53 @@ export class GradesTermComponent implements OnInit {
   }
 
   selectClass(_: any): void {
-
-    this.getAllMonthlyGrades(
-      this.form.get('selectedTerm')?.value,
-      this.yearID,
-      this.form.get('selectedClass')?.value,
-      this.form.get('selectedSubject')?.value
-    );
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
+    
+    // Update component property
+    this.selectedClass = classId;
+    
+    // Send yearID from localStorage (backend will ignore it and use active year)
+    this.getAllMonthlyGrades(termId, this.yearID, classId, subjectId);
     this.updatePaginatedData();
-
   }
 
   selectTerm(_: any): void {
-
-    this.getAllMonthlyGrades(
-      this.form.get('selectedTerm')?.value,
-      this.yearID,
-      this.form.get('selectedClass')?.value,
-      this.form.get('selectedSubject')?.value
-    );
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
+    
+    // Update component property
+    this.selectedTerm = termId;
+    
+    // Send yearID from localStorage (backend will ignore it and use active year)
+    this.getAllMonthlyGrades(termId, this.yearID, classId, subjectId);
     this.updatePaginatedData();
-
   }
 
   selectSubject(_: any): void {
-    this.getAllMonthlyGrades(
-      this.form.get('selectedTerm')?.value,
-      this.yearID,
-      this.form.get('selectedClass')?.value,
-      this.form.get('selectedSubject')?.value
-    );
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
+    
+    // Update component property
+    this.selectedSubject = subjectId;
+    
+    // Send yearID from localStorage (backend will ignore it and use active year)
+    this.getAllMonthlyGrades(termId, this.yearID, classId, subjectId);
     this.updatePaginatedData();
-
   }
 
   selectMonth(_: any): void {
-    this.getAllMonthlyGrades(
-      this.form.get('selectedTerm')?.value,
-      this.yearID,
-      this.form.get('selectedClass')?.value,
-      this.form.get('selectedSubject')?.value
-    );
+    // This method is not used for term grades, but keeping for consistency
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
+    
+    // Send yearID from localStorage (backend will ignore it and use active year)
+    this.getAllMonthlyGrades(termId, this.yearID, classId, subjectId);
     this.updatePaginatedData();
-
   }
 
   yearID: number = Number(localStorage.getItem('yearID') || '1');
@@ -218,7 +252,20 @@ export class GradesTermComponent implements OnInit {
 
   paginates!: Paginates;
   getAllMonthlyGrades(TermId: number, yearId: number, ClassId: number, SubjectId: number): void {
-    this.termlyGradeService.getTermlyGradesReport(TermId, yearId, ClassId, SubjectId, this.first / this.rows + 1, this.rows).subscribe((res) => {
+    // Ensure we have valid values
+    const termId = TermId ?? this.selectedTerm;
+    const classId = ClassId ?? this.selectedClass;
+    const subjectId = SubjectId ?? this.selectedSubject ?? 0;
+    const yearIdToSend = yearId ?? this.yearID;
+    
+    // Don't make API call if required values are missing
+    if (!termId || !classId) {
+      console.warn('Missing required values for getAllMonthlyGrades:', { termId, classId, subjectId });
+      return;
+    }
+    
+    // Send yearID from parameter or localStorage (backend will ignore it and use active year)
+    this.termlyGradeService.getTermlyGradesReport(termId, yearIdToSend, classId, subjectId, this.first / this.rows + 1, this.rows).subscribe((res) => {
       this.paginates = res; // تأكد أن res يحتوي totalCount
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
@@ -234,9 +281,20 @@ export class GradesTermComponent implements OnInit {
   }
 
   updatePaginatedData(): void {
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject ?? 0;
+    
+    // Don't make API call if required values are missing
+    if (!termId || !classId) {
+      console.warn('Missing required values for updatePaginatedData:', { termId, classId, subjectId });
+      return;
+    }
+    
     this.visible = true;
     this.isLoading = true;
-    this.termlyGradeService.getTermlyGradesReport(this.form.get('selectedTerm')?.value, this.yearID, this.form.get('selectedClass')?.value, this.form.get('selectedSubject')?.value, this.first / this.rows + 1, this.rows).subscribe(res => {
+    // Send yearID from localStorage (backend will ignore it and use active year)
+    this.termlyGradeService.getTermlyGradesReport(termId, this.yearID, classId, subjectId, this.first / this.rows + 1, this.rows).subscribe(res => {
       this.paginates = res;
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;

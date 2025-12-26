@@ -22,8 +22,10 @@ public class TermlyGradeController : ControllerBase
     [HttpGet("{termId:int}/{yearId:int}/{classId:int}/{subjectId:int}")]
     public async Task<IActionResult> GetTermlyGrades(int termId, int yearId, int classId, int subjectId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
+        // yearId parameter is ignored - repository uses active year automatically
         var termlyGrades = await _unitOfWork.TermlyGrades.GetAllAsync(termId, yearId, classId, subjectId, pageNumber, pageSize);
 
+        // yearId parameter is ignored - repository uses active year automatically
         var totalCount = await _unitOfWork.TermlyGrades.GetTotalMonthlyGradesCountAsync(termId, yearId, classId, subjectId);
 
         var paginatedResult = new
