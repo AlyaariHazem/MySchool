@@ -288,7 +288,16 @@ export class GradesTermComponent implements OnInit {
       this.displayedStudents = res.data;
       this.isLoading = false;
       this.visible = false;
-      if (this.monthlyGrades.length == 0) {
+      
+      // Set CurrentStudent when data loads
+      if (this.monthlyGrades.length > 0) {
+        // Reset index if it's out of bounds
+        if (this.currentStudentIndex >= this.monthlyGrades.length) {
+          this.currentStudentIndex = 0;
+        }
+        this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
+      } else {
+        this.CurrentStudent = null!;
         this.toastr.info('No students found for the selected criteria.');
       }
     });
@@ -298,6 +307,7 @@ export class GradesTermComponent implements OnInit {
   onPageChange(event: PaginatorState): void {
     this.first = event.first || 0; // Update first index based on page
     this.rows = event.rows || 5; // Update rows per page
+    this.currentStudentIndex = 0; // Reset to first student when page changes
     this.updatePaginatedData();
   }
 
