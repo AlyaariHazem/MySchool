@@ -60,7 +60,6 @@ import { FeesComponent } from './fees/fees.component';
 import { FeeComponent } from './students/new-student/fee/fee.component';
 import { CoursesComponent } from './courses-and-plains/courses/courses.component';
 import { PlainsComponent } from './courses-and-plains/plains/plains.component';
-import { CoursesAndPlains } from './courses-and-plains/courses-and-plains.component';
 import { BooksComponent } from './courses-and-plains/books/books.component';
 import { AccountsComponent } from './accounts/accounts.component';
 import { BillsComponent } from './accounts/bills/bills.component';
@@ -121,7 +120,6 @@ const components = [
   FeeComponent,
   CoursesComponent,
   PlainsComponent,
-  CoursesAndPlains,
   BooksComponent,
   AccountsComponent,
   BillsComponent,

@@ -25,14 +25,23 @@ namespace Backend.Repository
             if (model == null)
                 throw new ArgumentNullException(nameof(model), "The model cannot be null.");
 
-            // var AddStage=_mapper.Map<Stage>(model);
+            // Get the active year - if multiple active years exist, take the first one
+            var activeYear = await context.Years
+                .Where(y => y.Active == true)
+                .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
+                .FirstOrDefaultAsync();
+
+            if (activeYear == null)
+                throw new InvalidOperationException("No active year found. Please activate a year before adding a stage.");
+
+            // Use the active year's ID instead of the one from the model
             Stage newStage = new()
             {
                 StageName = model.StageName,
                 Note = model.Note ?? string.Empty,
                 Active = model.Active,
                 HireDate = DateTime.Now,
-                YearID = model.YearID
+                YearID = activeYear.YearID
             };
 
             await context.Stages.AddAsync(newStage);
@@ -46,8 +55,19 @@ namespace Backend.Repository
             var existingStage = await context.Stages.FirstOrDefaultAsync(s => s.StageID == model.ID);
             if (existingStage != null)
             {
+                // Get the active year - if multiple active years exist, take the first one
+                var activeYear = await context.Years
+                    .Where(y => y.Active == true)
+                    .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
+                    .FirstOrDefaultAsync();
+
+                if (activeYear == null)
+                    throw new InvalidOperationException("No active year found. Please activate a year before updating a stage.");
+
                 existingStage.StageName = model.StageName;
                 existingStage.Note = model.Note ?? string.Empty;
+                existingStage.Active = model.Active;
+                existingStage.YearID = activeYear.YearID; // Update to use the active year
 
                 context.Entry(existingStage).State = EntityState.Modified; // Mark the entity as modified
                 await context.SaveChangesAsync();

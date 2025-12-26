@@ -25,6 +25,18 @@ namespace Backend.Repository.School
 
         public async Task Add(AddClassDTO obj)
         {
+            // Get the active year - if multiple active years exist, take the first one
+            var activeYear = await _db.Years
+                .Where(y => y.Active == true)
+                .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
+                .FirstOrDefaultAsync();
+
+            if (activeYear == null)
+                throw new InvalidOperationException("No active year found. Please activate a year before adding a class.");
+
+            // Override the YearID from the DTO with the active year's ID
+            obj.YearID = activeYear.YearID;
+
             var newClass = _mapper.Map<Class>(obj);
 
             try
@@ -35,6 +47,7 @@ namespace Backend.Repository.School
             catch (Exception ex)
             {
                 Console.WriteLine($"Error adding class: {ex.Message}");
+                throw;
             }
         }
         public async Task<List<AllClassesDTO>> GetAllNamesAsync()
@@ -57,11 +70,21 @@ namespace Backend.Repository.School
             var existingClass = await _db.Classes.FirstOrDefaultAsync(c => c.ClassID == model.ClassID);
             if (existingClass != null)
             {
-            // Map only the properties that need updating
-            existingClass.ClassName = model.ClassName;
-            existingClass.StageID = model.StageID;
+                // Get the active year - if multiple active years exist, take the first one
+                var activeYear = await _db.Years
+                    .Where(y => y.Active == true)
+                    .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
+                    .FirstOrDefaultAsync();
 
-            _db.Entry(existingClass).State = EntityState.Modified;
+                if (activeYear == null)
+                    throw new InvalidOperationException("No active year found. Please activate a year before updating a class.");
+
+                // Map only the properties that need updating
+                existingClass.ClassName = model.ClassName;
+                existingClass.StageID = model.StageID;
+                existingClass.YearID = activeYear.YearID; // Update to use the active year
+
+                _db.Entry(existingClass).State = EntityState.Modified;
           await  _db.SaveChangesAsync();
             }
            

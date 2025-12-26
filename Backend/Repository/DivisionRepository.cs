@@ -25,6 +25,32 @@ namespace FirstProjectWithMVC.Repository.School
         }
         public async Task<bool> Add(AddDivisionDTO obj)
         {
+            // Get the active year - if multiple active years exist, take the first one
+            var activeYear = await _db.Years
+                .Where(y => y.Active == true)
+                .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
+                .FirstOrDefaultAsync();
+
+            if (activeYear == null)
+                throw new InvalidOperationException("No active year found. Please activate a year before adding a division.");
+
+            // Verify that the Class belongs to the active year
+            var classEntity = await _db.Classes
+                .Include(c => c.Year)
+                .Include(c => c.Stage)
+                    .ThenInclude(s => s.Year)
+                .FirstOrDefaultAsync(c => c.ClassID == obj.ClassID);
+
+            if (classEntity == null)
+                throw new InvalidOperationException($"Class with ID {obj.ClassID} not found.");
+
+            // Check if the class belongs to the active year (either directly or through its stage)
+            bool belongsToActiveYear = (classEntity.Year != null && classEntity.Year.YearID == activeYear.YearID) ||
+                                      (classEntity.Stage != null && classEntity.Stage.Year != null && classEntity.Stage.Year.YearID == activeYear.YearID);
+
+            if (!belongsToActiveYear)
+                throw new InvalidOperationException($"Class with ID {obj.ClassID} does not belong to the active year. Please select a class from the active year.");
+
             Division newDivision = new Division
             {
                 DivisionName = obj.DivisionName,
@@ -40,7 +66,7 @@ namespace FirstProjectWithMVC.Repository.School
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error adding class: {ex.Message}");
+                Console.WriteLine($"Error adding division: {ex.Message}");
                 if (ex.InnerException != null)
                 {
                     Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
@@ -97,6 +123,35 @@ namespace FirstProjectWithMVC.Repository.School
             var existingDivision = await _db.Divisions.FirstOrDefaultAsync(d => d.DivisionID == model.DivisionID);
             if (existingDivision != null)
             {
+                // Get the active year - if multiple active years exist, take the first one
+                var activeYear = await _db.Years
+                    .Where(y => y.Active == true)
+                    .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
+                    .FirstOrDefaultAsync();
+
+                if (activeYear == null)
+                    throw new InvalidOperationException("No active year found. Please activate a year before updating a division.");
+
+                // Verify that the Class belongs to the active year (only if ClassID is being changed)
+                if (existingDivision.ClassID != model.ClassID)
+                {
+                    var classEntity = await _db.Classes
+                        .Include(c => c.Year)
+                        .Include(c => c.Stage)
+                            .ThenInclude(s => s.Year)
+                        .FirstOrDefaultAsync(c => c.ClassID == model.ClassID);
+
+                    if (classEntity == null)
+                        throw new InvalidOperationException($"Class with ID {model.ClassID} not found.");
+
+                    // Check if the class belongs to the active year (either directly or through its stage)
+                    bool belongsToActiveYear = (classEntity.Year != null && classEntity.Year.YearID == activeYear.YearID) ||
+                                              (classEntity.Stage != null && classEntity.Stage.Year != null && classEntity.Stage.Year.YearID == activeYear.YearID);
+
+                    if (!belongsToActiveYear)
+                        throw new InvalidOperationException($"Class with ID {model.ClassID} does not belong to the active year. Please select a class from the active year.");
+                }
+
                 existingDivision.DivisionName = model.DivisionName;
                 existingDivision.ClassID = model.ClassID;
 

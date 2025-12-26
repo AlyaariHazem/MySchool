@@ -3,6 +3,8 @@ using Backend.DTOS.School.CoursePlan;
 using Backend.Interfaces;
 using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace Backend.Controllers.School;
 
@@ -21,11 +23,38 @@ public class CoursePlansController : ControllerBase
     public async Task<ActionResult<APIResponse>> Create([FromBody] CoursePlanDTO dto)
     {
         var response = new APIResponse();
-        var created = await _unitOfWork.CoursePlans.AddAsync(dto);
-        await _unitOfWork.CompleteAsync();
-        response.Result = "CoursePlan created successfully";
-        response.statusCode = HttpStatusCode.Created;
-        return Ok(response);
+        try
+        {
+            var created = await _unitOfWork.CoursePlans.AddAsync(dto);
+            await _unitOfWork.CompleteAsync();
+            response.Result = "CoursePlan created successfully";
+            response.statusCode = HttpStatusCode.Created;
+            return Ok(response);
+        }
+        catch (DbUpdateException dbEx) when (dbEx.InnerException is SqlException sqlEx)
+        {
+            // Check for primary key constraint violation
+            if (sqlEx.Number == 2627 || sqlEx.Message.Contains("PRIMARY KEY constraint") || sqlEx.Message.Contains("duplicate key"))
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.Conflict;
+                response.ErrorMasseges.Add("A course plan with the same combination of Year, Class, Division, Subject, and Term already exists. Please use a different combination.");
+                return Conflict(response);
+            }
+            
+            // Other database errors
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.BadRequest;
+            response.ErrorMasseges.Add("An error occurred while saving the course plan. Please check your data and try again.");
+            return BadRequest(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add($"An unexpected error occurred: {ex.Message}");
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
     }
 
      [HttpGet]

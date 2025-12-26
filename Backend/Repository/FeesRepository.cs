@@ -24,32 +24,7 @@ public class FeesRepository : IFeesRepository
     {
         try
         {
-            var fees = await _db.Fees
-                .Include(f => f.FeeClasses)
-                    .ThenInclude(fc => fc.Class)
-                        .ThenInclude(c => c.Year)
-                .Include(f => f.FeeClasses)
-                    .ThenInclude(fc => fc.Class)
-                        .ThenInclude(c => c.Stage)
-                            .ThenInclude(s => s.Year)
-                .Where(f => f.FeeClasses.Any(fc => fc.Class != null && 
-                                                   ((fc.Class.Year != null && fc.Class.Year.Active == true) || 
-                                                    (fc.Class.Stage != null && fc.Class.Stage.Year != null && fc.Class.Stage.Year.Active == true))))
-                .ToListAsync();
-            
-            // Filter FeeClasses to only include those from active years
-            foreach (var fee in fees)
-            {
-                if (fee.FeeClasses != null)
-                {
-                    fee.FeeClasses = fee.FeeClasses
-                        .Where(fc => fc.Class != null && 
-                                   ((fc.Class.Year != null && fc.Class.Year.Active == true) || 
-                                    (fc.Class.Stage != null && fc.Class.Stage.Year != null && fc.Class.Stage.Year.Active == true)))
-                        .ToList();
-                }
-            }
-            
+            var fees = await _db.Fees.ToListAsync();
             var feesDTO = _mapper.Map<List<GetFeeDTO>>(fees);
             return Result<List<GetFeeDTO>>.Success(feesDTO);
         }
@@ -65,26 +40,10 @@ public class FeesRepository : IFeesRepository
         {
             var fee = await _db.Fees
                                .Include(f => f.FeeClasses)
-                                   .ThenInclude(fc => fc.Class)
-                                       .ThenInclude(c => c.Year)
-                               .Include(f => f.FeeClasses)
-                                   .ThenInclude(fc => fc.Class)
-                                       .ThenInclude(c => c.Stage)
-                                           .ThenInclude(s => s.Year)
                                .FirstOrDefaultAsync(f => f.FeeID == id);
 
             if (fee is null)
                 return Result<GetFeeDTO>.Fail("Fee not found.");
-
-            // Filter FeeClasses to only include those from active years
-            if (fee.FeeClasses != null)
-            {
-                fee.FeeClasses = fee.FeeClasses
-                    .Where(fc => fc.Class != null && 
-                               ((fc.Class.Year != null && fc.Class.Year.Active == true) || 
-                                (fc.Class.Stage != null && fc.Class.Stage.Year != null && fc.Class.Stage.Year.Active == true)))
-                    .ToList();
-            }
 
             var feeDTO = _mapper.Map<GetFeeDTO>(fee);
             return Result<GetFeeDTO>.Success(feeDTO);

@@ -215,11 +215,13 @@ export class PlainsComponent {
         }
         this.toastr.success(res.result || 'Curriculum added successfully');
         this.getAllCurriculmPlan();
+        this.form.reset();
       },
-      error: () => this.toastr.error('Server error occurred')
+      error: (err) => {
+        const errorMessage = err?.error?.errorMasseges?.[0] || err?.error?.message || 'Server error occurred';
+        this.toastr.error(errorMessage);
+      }
     });
-
-    this.form.reset();
   }
 
   editCurriculum(curriculum: Curriculms): void {
