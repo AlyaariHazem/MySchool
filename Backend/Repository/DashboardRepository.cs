@@ -111,28 +111,58 @@ public class DashboardRepository : IDashboardRepository
 
     public async Task<List<StudentEnrollmentTrendDTO>> GetStudentEnrollmentTrendAsync()
     {
-        // Get all students from tenant database
-        var students = await _tenantContext.Students
-            .Select(s => s.UserID)
+        // Get all years first to map YearID to calendar year
+        var years = await _tenantContext.Years
+            .Select(y => new { y.YearID, CalendarYear = y.YearDateStart.Year })
+            .ToListAsync();
+
+        if (!years.Any())
+            return GetEmptyTrend();
+
+        // Create a dictionary to map YearID to CalendarYear
+        var yearIdToCalendarYear = years.ToDictionary(y => y.YearID, y => y.CalendarYear);
+
+        // Get students with their current class year (Student -> Division -> Class -> Year)
+        var studentsWithClassYear = await _tenantContext.Students
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Year)
+            .Where(s => s.Division != null && s.Division.Class != null && s.Division.Class.YearID.HasValue)
+            .Select(s => new { s.StudentID, YearID = s.Division.Class.YearID!.Value })
+            .ToListAsync();
+
+        // Get distinct student-year combinations from MonthlyGrades (for historical data)
+        var monthlyGradeYears = await _tenantContext.MonthlyGrades
+            .Select(mg => new { mg.StudentID, YearID = mg.YearID })
             .Distinct()
             .ToListAsync();
 
-        if (students == null || !students.Any())
+        // Get distinct student-year combinations from TermlyGrades (for historical data)
+        var termlyGradeYears = await _tenantContext.TermlyGrades
+            .Select(tg => new { tg.StudentID, YearID = tg.YearID })
+            .Distinct()
+            .ToListAsync();
+
+        // Combine all sources: current class year + historical grade years
+        // This ensures we count students in their current year even if they don't have grades yet
+        var allStudentYearPairs = studentsWithClassYear
+            .Union(monthlyGradeYears)
+            .Union(termlyGradeYears)
+            .GroupBy(x => new { x.StudentID, x.YearID })
+            .Select(g => new { g.Key.StudentID, g.Key.YearID })
+            .ToList();
+
+        if (!allStudentYearPairs.Any())
             return GetEmptyTrend();
 
-        // Fetch user data from admin database to get HireDate
+        // Count students by calendar year (mapping YearID to CalendarYear)
         var enrollmentYears = new Dictionary<int, int>();
         
-        foreach (var userId in students)
+        foreach (var pair in allStudentYearPairs)
         {
-            if (string.IsNullOrEmpty(userId))
-                continue;
-
-            var user = await _userRepository.GetUserByIdAsync(userId);
-            if (user != null)
+            if (yearIdToCalendarYear.TryGetValue(pair.YearID, out int calendarYear))
             {
-                var year = user.HireDate.Year;
-                enrollmentYears[year] = enrollmentYears.GetValueOrDefault(year, 0) + 1;
+                enrollmentYears[calendarYear] = enrollmentYears.GetValueOrDefault(calendarYear, 0) + 1;
             }
         }
 

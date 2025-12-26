@@ -46,6 +46,7 @@ export class PlainsComponent {
   rows: number = 4;
   curriculmsPlans: CurriculmsPlans[] = [];
   editMode: boolean = false;
+  editingPlan: CurriculmsPlans | null = null;
   values = new FormControl<string[] | null>(null);
   max = 2;
 
@@ -215,6 +216,8 @@ export class PlainsComponent {
         }
         this.toastr.success(res.result || 'Curriculum added successfully');
         this.getAllCurriculmPlan();
+        this.editMode = false;
+        this.editingPlan = null;
         this.form.reset();
       },
       error: (err) => {
@@ -224,45 +227,139 @@ export class PlainsComponent {
     });
   }
 
-  editCurriculum(curriculum: Curriculms): void {
-    this.form.patchValue({
-      subjectID: curriculum.subjectID,
-      classID: curriculum.classID,
-      note: curriculum.note
+  editCurriculumPlan(plan: CurriculmsPlans): void {
+    if (!plan.subjectID || !plan.classID || !plan.divisionID || !plan.teacherID || !plan.termID || !plan.yearID) {
+      this.toastr.error('Cannot edit: Course plan data is incomplete');
+      return;
+    }
+
+    // Fetch the full plan details to ensure we have the correct composite key values
+    this.curriculmsPlanService.getCurriculmPlanById(
+      plan.yearID,
+      plan.teacherID,
+      plan.classID,
+      plan.divisionID,
+      plan.subjectID
+    ).subscribe({
+      next: (res) => {
+        if (!res.isSuccess || !res.result) {
+          this.toastr.warning(res.errorMasseges?.[0] || 'Failed to load course plan details');
+          return;
+        }
+
+        const planData = res.result;
+        this.form.patchValue({
+          subjectID: planData.subjectID,
+          classID: planData.classID,
+          divisionID: planData.divisionID,
+          teacherID: planData.teacherID,
+          termID: planData.termID
+        });
+
+        // Update filtered lists based on selected class
+        if (planData.classID) {
+          this.filteredSubjects = this.ClassSubjects.filter(c => c.classID === planData.classID);
+          this.fiteredDivisions = this.divisions.filter(d => d.classID === planData.classID);
+        }
+
+        // Store the full plan data with all IDs
+        this.editingPlan = planData;
+        this.editMode = true;
+      },
+      error: (err) => {
+        const errorMessage = err?.error?.errorMasseges?.[0] || err?.error?.message || 'Failed to load course plan details';
+        this.toastr.error(errorMessage);
+      }
     });
-    this.editMode = true;
   }
 
   updateCurriculum(): void {
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 
-    const { subjectID, classID, note } = this.form.value;
+    if (!this.editingPlan) {
+      this.toastr.error('No course plan selected for editing');
+      return;
+    }
 
-    const editCurriculms: Curriculms = {
+    // Validate that editingPlan has all required values
+    if (!this.editingPlan.yearID || !this.editingPlan.teacherID || !this.editingPlan.classID || 
+        !this.editingPlan.divisionID || !this.editingPlan.subjectID) {
+      this.toastr.error('Course plan data is incomplete. Please refresh and try again.');
+      return;
+    }
+
+    const { classID, subjectID, divisionID, teacherID, termID } = this.form.value;
+    const yearID = Number(localStorage.getItem('yearID') || '1');
+
+    const updatedPlan: CurriculmsPlan = {
       subjectID,
       classID,
-      curriculumName: '',
-      note,
-      hireDate: new Date().toISOString()
+      divisionID,
+      teacherID,
+      termID,
+      yearID: Number(yearID),
     };
-    console.log('Editing =>', editCurriculms);
-    this.editMode = false;
-    this.form.reset();
-  }
 
-  deleteCurriculm(id1: number, id2: number): void {
-    this.curriculmsService.deleteCurriculm(id1, id2).subscribe({
+    // Use the old composite key values from editingPlan (these are the actual values stored in DB)
+    // The backend will find the record using these exact values, then update it
+    this.curriculmsPlanService.updateCurriculmPlan(
+      this.editingPlan.yearID,      // Use the actual yearID from the database record
+      this.editingPlan.teacherID,
+      this.editingPlan.classID,
+      this.editingPlan.divisionID,
+      this.editingPlan.subjectID,
+      updatedPlan
+    ).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
-          this.toastr.warning(res.errorMasseges[0] || 'Failed to delete curriculum');
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to update course plan');
           return;
         }
-        this.toastr.success(res.result || 'Curriculum deleted');
-        this.getAllCurriculm();
+        this.toastr.success(res.result || 'Course plan updated successfully');
+        this.getAllCurriculmPlan();
+        this.editMode = false;
+        this.editingPlan = null;
+        this.form.reset();
       },
-      error: () => this.toastr.error('Error while deleting curriculum')
+      error: (err) => {
+        const errorMessage = err?.error?.errorMasseges?.[0] || err?.error?.message || 'Server error occurred';
+        this.toastr.error(errorMessage);
+      }
+    });
+  }
+
+  deleteCurriculmPlan(plan: CurriculmsPlans): void {
+    if (!plan.subjectID || !plan.classID || !plan.divisionID || !plan.teacherID || !plan.yearID) {
+      this.toastr.error('Cannot delete: Course plan data is incomplete');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this course plan?')) {
+      return;
+    }
+
+    this.curriculmsPlanService.deleteCurriculmPlan(
+      plan.yearID,
+      plan.teacherID,
+      plan.classID,
+      plan.divisionID,
+      plan.subjectID
+    ).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'Failed to delete course plan');
+          return;
+        }
+        this.toastr.success(res.result || 'Course plan deleted successfully');
+        this.getAllCurriculmPlan();
+      },
+      error: (err) => {
+        const errorMessage = err?.error?.errorMasseges?.[0] || err?.error?.message || 'Error while deleting course plan';
+        this.toastr.error(errorMessage);
+      }
     });
   }
 

@@ -12,4 +12,10 @@ public class CoursePlanReturnDTO
     public string? TeacherName { get; set; }
     public string? TermName { get; set; }
     public string? Year { get; set; }
+    public int SubjectID { get; set; }
+    public int ClassID { get; set; }
+    public int DivisionID { get; set; }
+    public int TeacherID { get; set; }
+    public int TermID { get; set; }
+    public int YearID { get; set; }
 }

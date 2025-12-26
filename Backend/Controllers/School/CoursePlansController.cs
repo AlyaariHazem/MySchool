@@ -87,11 +87,11 @@ public class CoursePlansController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<APIResponse>> Get(int id)
+    [HttpGet("{yearID}/{teacherID}/{classID}/{divisionID}/{subjectID}")]
+    public async Task<ActionResult<APIResponse>> Get(int yearID, int teacherID, int classID, int divisionID, int subjectID)
     {
         var response = new APIResponse();
-        var item = await _unitOfWork.CoursePlans.GetByIdAsync(id);
+        var item = await _unitOfWork.CoursePlans.GetByIdAsync(yearID, teacherID, classID, divisionID, subjectID);
         if (item == null)
         {
             response.IsSuccess = false;
@@ -105,26 +105,75 @@ public class CoursePlansController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult<APIResponse>> Update(int id, [FromBody] CoursePlanDTO dto)
+    [HttpPut("{oldYearID}/{oldTeacherID}/{oldClassID}/{oldDivisionID}/{oldSubjectID}")]
+    public async Task<ActionResult<APIResponse>> Update(int oldYearID, int oldTeacherID, int oldClassID, int oldDivisionID, int oldSubjectID, [FromBody] CoursePlanDTO dto)
     {
         var response = new APIResponse();
-        dto.CoursePlanID = id;
-        await _unitOfWork.CoursePlans.UpdateAsync(dto);
-        await _unitOfWork.CompleteAsync();
-        response.Result = "Updated successfully";
-        response.statusCode = HttpStatusCode.OK;
-        return Ok(response);
+        try
+        {
+            await _unitOfWork.CoursePlans.UpdateAsync(dto, oldYearID, oldTeacherID, oldClassID, oldDivisionID, oldSubjectID);
+            await _unitOfWork.CompleteAsync();
+            response.Result = "Updated successfully";
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.NotFound;
+            response.ErrorMasseges.Add(ex.Message);
+            return NotFound(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.BadRequest;
+            response.ErrorMasseges.Add(ex.Message);
+            return BadRequest(response);
+        }
+        catch (DbUpdateException dbEx)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.BadRequest;
+            var errorMessage = dbEx.InnerException?.Message ?? dbEx.Message;
+            response.ErrorMasseges.Add($"Database error: {errorMessage}");
+            return BadRequest(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            var errorMessage = ex.InnerException?.Message ?? ex.Message;
+            response.ErrorMasseges.Add(errorMessage);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult<APIResponse>> Delete(int id)
+    [HttpDelete("{yearID}/{teacherID}/{classID}/{divisionID}/{subjectID}")]
+    public async Task<ActionResult<APIResponse>> Delete(int yearID, int teacherID, int classID, int divisionID, int subjectID)
     {
         var response = new APIResponse();
-        await _unitOfWork.CoursePlans.DeleteAsync(id);
-        await _unitOfWork.CompleteAsync();
-        response.Result = "Deleted successfully";
-        response.statusCode = HttpStatusCode.OK;
-        return Ok(response);
+        try
+        {
+            await _unitOfWork.CoursePlans.DeleteAsync(yearID, teacherID, classID, divisionID, subjectID);
+            await _unitOfWork.CompleteAsync();
+            response.Result = "Deleted successfully";
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.NotFound;
+            response.ErrorMasseges.Add(ex.Message);
+            return NotFound(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
     }
 }

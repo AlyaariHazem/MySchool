@@ -8,7 +8,7 @@
                 <p-floatlabel class="w-full md:w-56" variant="on">
                     <p-select formControlName="selectedClass" inputId="Class" [options]="AllClasses"
                         optionLabel="className" (onChange)="selectClass($event.value)" optionValue="classID"
-                        [checkmark]="true" [editable]="true" [showClear]="true" />
+                        [checkmark]="true" [editable]="true" [showClear]="true" placeholder=" " />
                     <label for="Class">إختار الصف</label>
                 </p-floatlabel>
 
@@ -17,7 +17,7 @@
             <div class="form-control">
                 <p-floatlabel class="w-full md:w-56" variant="on">
                     <p-select [options]="terms" formControlName="selectedTerm" optionValue="id" [checkmark]="true"
-                        optionLabel="name" [editable]="true" [showClear]="true"
+                        optionLabel="name" [editable]="true" [showClear]="true" placeholder=" "
                         (onChange)="selectTerm(form.get('selectedTerm')?.value)" inputId="name" />
                     <label for="name">إختار الترم</label>
                 </p-floatlabel>
@@ -26,7 +26,7 @@
             <div class="form-control">
                 <p-floatlabel class="w-full md:w-56" variant="on">
                     <p-select [options]="curriculmsPlan" optionValue="subjectID" formControlName="selectedSubject"
-                        optionLabel="subjectName" [editable]="true" [showClear]="true"
+                        optionLabel="subjectName" [editable]="true" [showClear]="true" placeholder=" "
                         (onChange)="selectSubject(form.get('selectedSubject')?.value)" inputId="subject" />
                     <label for="subject">إختار المادة</label>
                 </p-floatlabel>
@@ -35,7 +35,7 @@
             <div class="form-control">
                 <p-floatlabel class="w-full md:w-56" variant="on">
                     <p-select [options]="filteredMonths" formControlName="selectedMonth" optionValue="id"
-                        [checkmark]="true" optionLabel="name" [editable]="true" [showClear]="true"
+                        [checkmark]="true" optionLabel="name" [editable]="true" [showClear]="true" placeholder=" "
                         (onChange)="selectMonth(form.get('selectedMonth')?.value)" inputId="month" />
                     <label for="month">إختار الشهر</label>
                 </p-floatlabel>

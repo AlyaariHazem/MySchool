@@ -19,15 +19,19 @@ export class CurriculmsPlanService {
     return this.API.getRequest<CurriculmsPlanSubject[]>("CoursePlans/subjects");
   }
 
-  getCurriculmPlanById(subID: number, classID: number): Observable<ApiResponse<CurriculmsPlans>> {
-    return this.API.getRequestByID<CurriculmsPlans>("CoursePlans", subID, classID);
+  getCurriculmPlanById(yearID: number, teacherID: number, classID: number, divisionID: number, subjectID: number): Observable<ApiResponse<CurriculmsPlans>> {
+    return this.API.getRequest<CurriculmsPlans>(`CoursePlans/${yearID}/${teacherID}/${classID}/${divisionID}/${subjectID}`);
   }
 
   addCurriculmPlan(newCurriculm: CurriculmsPlan): Observable<ApiResponse<string>> {
     return this.API.postRequest<string>("CoursePlans", newCurriculm);
   }
 
-  updateCurriculmPlan(subID: number, classID: number, updatedCurriculm: CurriculmsPlans): Observable<ApiResponse<string>> {
-    return this.API.putRequestWithToParms<string>("CoursePlans", subID, classID, updatedCurriculm);
+  updateCurriculmPlan(oldYearID: number, oldTeacherID: number, oldClassID: number, oldDivisionID: number, oldSubjectID: number, updatedCurriculm: CurriculmsPlan): Observable<ApiResponse<string>> {
+    return this.API.putRequest<string>(`CoursePlans/${oldYearID}/${oldTeacherID}/${oldClassID}/${oldDivisionID}/${oldSubjectID}`, updatedCurriculm);
+  }
+
+  deleteCurriculmPlan(yearID: number, teacherID: number, classID: number, divisionID: number, subjectID: number): Observable<ApiResponse<string>> {
+    return this.API.deleteRequest<string>(`CoursePlans/${yearID}/${teacherID}/${classID}/${divisionID}/${subjectID}`);
   }
 }

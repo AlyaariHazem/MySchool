@@ -72,20 +72,23 @@ export class GradesMonthComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getAllClasses();
-    this.getAllCurriculm();
-    // Initialize form
-    this.getAllMonthlyGrades(1, 6, 1, 0);
+    // Initialize form with null values first, will be set after data loads
     this.form = this.formBuilder.group({
-      selectedClass: [this.selectedClass],
+      selectedClass: [null],
       selectedTerm: [this.selectedTerm],
-      selectedSubject: [this.selectedSubject],
+      selectedSubject: [null],
       selectedMonth: [this.selectedMonth],
     });
     this.currentLanguage();
-    // Example data for dropdowns
-
-    this.updatePaginatedData();
+    
+    // Initialize filtered months based on selected term
+    this.filterMonthsByTerm();
+    
+    // Load classes and subjects first, then set form values
+    // The form values will be set in getAllClasses() and getAllCurriculm() callbacks
+    // and updatePaginatedData() will be called from there
+    this.getAllClasses();
+    this.getAllCurriculm();
   }
 
 
@@ -97,6 +100,19 @@ export class GradesMonthComponent implements OnInit {
           return;
         }
         this.AllClasses = res.result;
+        
+        // Set the form value after classes are loaded
+        // Find the class with ID matching selectedClass, or use first class if available
+        if (this.AllClasses && this.AllClasses.length > 0) {
+          const defaultClass = this.AllClasses.find((c: any) => c.classID === this.selectedClass) || this.AllClasses[0];
+          if (this.form && defaultClass) {
+            this.form.patchValue({ selectedClass: defaultClass.classID });
+            this.selectedClass = defaultClass.classID;
+            
+            // Reload data with the correct class value
+            this.updatePaginatedData();
+          }
+        }
       },
       error: (err) => {
         this.toastr.error('Server error occurred');
@@ -115,6 +131,21 @@ export class GradesMonthComponent implements OnInit {
         }
         // this.curriculmsPlan = res.result;
         this.curriculmsPlan = [{ subjectID: 0, subjectName: 'الكل' }, ...res.result];
+        
+        // Set the form value after subjects are loaded
+        // Find the subject with ID matching selectedSubject, or use first subject if available
+        if (this.curriculmsPlan && this.curriculmsPlan.length > 0) {
+          const defaultSubject = this.curriculmsPlan.find((s: any) => s.subjectID === this.selectedSubject) || this.curriculmsPlan[0];
+          if (this.form && defaultSubject) {
+            this.form.patchValue({ selectedSubject: defaultSubject.subjectID });
+            this.selectedSubject = defaultSubject.subjectID;
+            
+            // Reload data with the correct subject value if class is already loaded
+            if (this.AllClasses && this.AllClasses.length > 0) {
+              this.updatePaginatedData();
+            }
+          }
+        }
       },
       error: (err) => {
         this.toastr.error('Server error occurred');
@@ -137,51 +168,73 @@ export class GradesMonthComponent implements OnInit {
   }
 
   private filterMonthsByTerm(): void {
-    this.filteredMonths = this.months.filter(m => m.termId === this.form.get('selectedTerm')?.value);
+    const selectedTerm = this.form?.get('selectedTerm')?.value ?? this.selectedTerm;
+    this.filteredMonths = this.months.filter(m => m.termId === selectedTerm);
+    
+    // If current selected month is not in filtered months, reset to first available month
+    if (this.filteredMonths.length > 0) {
+      const currentMonth = this.form?.get('selectedMonth')?.value ?? this.selectedMonth;
+      const monthExists = this.filteredMonths.some(m => m.id === currentMonth);
+      if (!monthExists && this.form) {
+        this.form.patchValue({ selectedMonth: this.filteredMonths[0].id });
+        this.selectedMonth = this.filteredMonths[0].id;
+      }
+    }
   }
 
   selectClass(_: any): void {
-
-    this.getAllMonthlyGrades(
-      this.form.get('selectedTerm')?.value,
-      this.form.get('selectedMonth')?.value,
-      this.form.get('selectedClass')?.value,
-      this.form.get('selectedSubject')?.value
-    );
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const monthId = this.form.get('selectedMonth')?.value ?? this.selectedMonth;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
+    
+    // Update component properties
+    this.selectedClass = classId;
+    
+    this.getAllMonthlyGrades(termId, monthId, classId, subjectId);
     this.updatePaginatedData();
     this.filterMonthsByTerm();
   }
 
   selectTerm(_: any): void {
     this.filterMonthsByTerm();
-    this.getAllMonthlyGrades(
-      this.form.get('selectedTerm')?.value,
-      this.form.get('selectedMonth')?.value,
-      this.form.get('selectedClass')?.value,
-      this.form.get('selectedSubject')?.value
-    );
+    
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const monthId = this.form.get('selectedMonth')?.value ?? this.selectedMonth;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
+    
+    // Update component properties
+    this.selectedTerm = termId;
+    
+    this.getAllMonthlyGrades(termId, monthId, classId, subjectId);
     this.updatePaginatedData();
-    this.filterMonthsByTerm();
   }
 
   selectSubject(_: any): void {
-    this.getAllMonthlyGrades(
-      this.form.get('selectedTerm')?.value,
-      this.form.get('selectedMonth')?.value,
-      this.form.get('selectedClass')?.value,
-      this.form.get('selectedSubject')?.value
-    );
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const monthId = this.form.get('selectedMonth')?.value ?? this.selectedMonth;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
+    
+    // Update component properties
+    this.selectedSubject = subjectId;
+    
+    this.getAllMonthlyGrades(termId, monthId, classId, subjectId);
     this.updatePaginatedData();
     this.filterMonthsByTerm();
   }
 
   selectMonth(_: any): void {
-    this.getAllMonthlyGrades(
-      this.form.get('selectedTerm')?.value,
-      this.form.get('selectedMonth')?.value,
-      this.form.get('selectedClass')?.value,
-      this.form.get('selectedSubject')?.value
-    );
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const monthId = this.form.get('selectedMonth')?.value ?? this.selectedMonth;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
+    
+    // Update component properties
+    this.selectedMonth = monthId;
+    
+    this.getAllMonthlyGrades(termId, monthId, classId, subjectId);
     this.updatePaginatedData();
     this.filterMonthsByTerm();
   }
@@ -231,7 +284,19 @@ export class GradesMonthComponent implements OnInit {
 
   paginates!: Paginates;
   getAllMonthlyGrades(TermId: number, MonthId: number, ClassId: number, SubjectId: number): void {
-    this.monthlyGradesService.getAllMonthlyGrades(TermId, MonthId, ClassId, SubjectId, this.first / this.rows + 1, this.rows).subscribe((res) => {
+    // Ensure we have valid values, use 0 for SubjectId if null (means "all")
+    const termId = TermId ?? this.selectedTerm;
+    const monthId = MonthId ?? this.selectedMonth;
+    const classId = ClassId ?? this.selectedClass;
+    const subjectId = SubjectId ?? this.selectedSubject ?? 0;
+    
+    // Don't make API call if required values are missing
+    if (!termId || !monthId || !classId) {
+      console.warn('Missing required values for getAllMonthlyGrades:', { termId, monthId, classId, subjectId });
+      return;
+    }
+    
+    this.monthlyGradesService.getAllMonthlyGrades(termId, monthId, classId, subjectId, this.first / this.rows + 1, this.rows).subscribe((res) => {
       this.paginates = res; // تأكد أن res يحتوي totalCount
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
@@ -245,7 +310,18 @@ export class GradesMonthComponent implements OnInit {
   }
 
   updatePaginatedData(): void {
-    this.monthlyGradesService.getAllMonthlyGrades(this.form.get('selectedTerm')?.value, this.form.get('selectedMonth')?.value, this.form.get('selectedClass')?.value, this.form.get('selectedSubject')?.value, this.first / this.rows + 1, this.rows).subscribe(res => {
+    const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
+    const monthId = this.form.get('selectedMonth')?.value ?? this.selectedMonth;
+    const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
+    const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject ?? 0;
+    
+    // Don't make API call if required values are missing
+    if (!termId || !monthId || !classId) {
+      console.warn('Missing required values for updatePaginatedData:', { termId, monthId, classId, subjectId });
+      return;
+    }
+    
+    this.monthlyGradesService.getAllMonthlyGrades(termId, monthId, classId, subjectId, this.first / this.rows + 1, this.rows).subscribe(res => {
       this.paginates = res;
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;

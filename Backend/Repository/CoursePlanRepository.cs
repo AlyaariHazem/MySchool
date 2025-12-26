@@ -22,8 +22,21 @@ public class CoursePlanRepository : ICoursePlanRepository
         if (dto == null)
             throw new ArgumentNullException(nameof(dto), "CoursePlanDTO cannot be null.");
 
+        // Get the active year - if multiple active years exist, take the first one
+        var activeYear = await _context.Years
+            .Where(y => y.Active == true)
+            .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
+            .FirstOrDefaultAsync();
+
+        if (activeYear == null)
+            throw new InvalidOperationException("No active year found. Please activate a year before adding a course plan.");
+
+        // Override the YearID from the DTO with the active year's ID
+        dto.YearID = activeYear.YearID;
+
         // Step 1: Add the CoursePlan to the database
         var entity = _mapper.Map<CoursePlan>(dto);
+        entity.YearID = activeYear.YearID; // Ensure entity uses active year
         _context.CoursePlans.Add(entity);
         await _context.SaveChangesAsync(); // Save the CoursePlan and get the ID
 
@@ -32,11 +45,20 @@ public class CoursePlanRepository : ICoursePlanRepository
         // Step 2: Assign the subject to the students of the specified class
         var students = await _context.Students
         .Include(s => s.Division)
-        .Where(s => s.DivisionID == dto.DivisionID && s.Division.Class.Year.YearID == dto.YearID && s.Division.Class.ClassID == dto.ClassID)
+            .ThenInclude(d => d.Class)
+                .ThenInclude(c => c.Year)
+        .Include(s => s.Division)
+            .ThenInclude(d => d.Class)
+                .ThenInclude(c => c.Stage)
+                    .ThenInclude(st => st.Year)
+        .Where(s => s.DivisionID == dto.DivisionID && 
+                   s.Division.Class.ClassID == dto.ClassID &&
+                   ((s.Division.Class.Year != null && s.Division.Class.Year.YearID == activeYear.YearID) ||
+                    (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.YearID == activeYear.YearID)))
         .Select(s => new
         {
             s.StudentID,
-            dto.YearID,
+            YearID = activeYear.YearID,
             dto.ClassID,
             dto.SubjectID
         })
@@ -49,7 +71,7 @@ public class CoursePlanRepository : ICoursePlanRepository
 
         // Fetch Months and GradeTypes
         var months = await _context.YearTermMonths
-            .Where(m => m.YearID == dto.YearID && m.TermID == dto.TermID)
+            .Where(m => m.YearID == activeYear.YearID && m.TermID == dto.TermID)
             .Select(m => m.MonthID)
             .ToListAsync();
 
@@ -128,32 +150,87 @@ public class CoursePlanRepository : ICoursePlanRepository
                 DivisionName = $"{item.Division.DivisionName}",
                 TermName = $"{item.Term.Name}",
                 Year = $"{item.Year.YearDateStart.Year}-{item.Year.YearDateEnd!.Value.Year}",
+                SubjectID = item.SubjectID,
+                ClassID = item.ClassID,
+                DivisionID = item.DivisionID,
+                TeacherID = item.TeacherID,
+                TermID = item.TermID,
+                YearID = item.YearID
             })
             .ToListAsync();
         
         return list;
     }
 
-    public async Task<CoursePlanDTO?> GetByIdAsync(int id)
+    public async Task<CoursePlanDTO?> GetByIdAsync(int yearID, int teacherID, int classID, int divisionID, int subjectID)
     {
-        var entity = await _context.CoursePlans.FindAsync(id);
+        var entity = await _context.CoursePlans.FindAsync(yearID, teacherID, classID, divisionID, subjectID);
         return entity == null ? null : _mapper.Map<CoursePlanDTO>(entity);
     }
 
-    public async Task UpdateAsync(CoursePlanDTO dto)
+    public async Task UpdateAsync(CoursePlanDTO dto, int oldYearID, int oldTeacherID, int oldClassID, int oldDivisionID, int oldSubjectID)
     {
-        var entity = await _context.CoursePlans.FindAsync(dto.CoursePlanID);
+        var entity = await _context.CoursePlans.FindAsync(oldYearID, oldTeacherID, oldClassID, oldDivisionID, oldSubjectID);
         if (entity == null)
             throw new KeyNotFoundException("Course plan not found.");
 
-        _mapper.Map(dto, entity);
-        _context.CoursePlans.Update(entity);
+        // Get the active year - if multiple active years exist, take the first one
+        var activeYear = await _context.Years
+            .Where(y => y.Active == true)
+            .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
+            .FirstOrDefaultAsync();
+
+        if (activeYear == null)
+            throw new InvalidOperationException("No active year found. Please activate a year before updating a course plan.");
+
+        // Override the YearID from the DTO with the active year's ID
+        dto.YearID = activeYear.YearID;
+
+        // If the key values changed, we need to remove the old entity and add a new one
+        bool keyChanged = oldYearID != dto.YearID || oldTeacherID != dto.TeacherID || 
+                         oldClassID != dto.ClassID || oldDivisionID != dto.DivisionID || 
+                         oldSubjectID != dto.SubjectID;
+
+        if (keyChanged)
+        {
+            // Check if new key already exists
+            var existingEntity = await _context.CoursePlans.FindAsync(dto.YearID, dto.TeacherID, dto.ClassID, dto.DivisionID, dto.SubjectID);
+            if (existingEntity != null)
+                throw new InvalidOperationException("A course plan with the new key combination already exists.");
+
+            // Remove old entity
+            _context.CoursePlans.Remove(entity);
+            await _context.SaveChangesAsync();
+
+            // Create new entity with updated key
+            var newEntity = _mapper.Map<CoursePlan>(dto);
+            newEntity.YearID = activeYear.YearID; // Ensure entity uses active year
+            _context.CoursePlans.Add(newEntity);
+        }
+        else
+        {
+            // Just update the existing entity properties (except key fields)
+            // Since the entity is already tracked by FindAsync, we can modify it directly
+            entity.TermID = dto.TermID;
+            // Note: YearID, TeacherID, ClassID, DivisionID, SubjectID are part of the composite key, 
+            // so they shouldn't change when keyChanged is false
+            // But we ensure YearID matches active year (should already be the case)
+            if (entity.YearID != activeYear.YearID)
+            {
+                // This shouldn't happen, but if it does, we need to handle it as a key change
+                throw new InvalidOperationException("Cannot update YearID without changing the composite key. Please delete and recreate the course plan.");
+            }
+            
+            // Explicitly mark the entity as modified to ensure EF tracks the changes
+            _context.Entry(entity).Property(e => e.TermID).IsModified = true;
+        }
+
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(int yearID, int teacherID, int classID, int divisionID, int subjectID)
     {
-        var entity = await _context.CoursePlans.FindAsync(id);
+        var entity = await _context.CoursePlans.FindAsync(yearID, teacherID, classID, divisionID, subjectID);
         if (entity == null)
             throw new KeyNotFoundException("Course plan not found.");
 

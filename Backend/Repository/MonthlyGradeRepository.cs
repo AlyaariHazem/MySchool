@@ -93,28 +93,52 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
     /* ----------  UPDATE MANY  ---------- */
     public async Task<Result<bool>> UpdateManyAsync(IEnumerable<MonthlyGradeDTO> dtos)
     {
+        // Get the active year - if multiple active years exist, take the first one
+        var activeYear = await _context.Years
+            .Where(y => y.Active == true)
+            .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
+            .FirstOrDefaultAsync();
+
+        if (activeYear == null)
+            return Result<bool>.Fail("No active year found. Please activate a year before updating monthly grades.");
+
         var changed = false;
+        var notFound = new List<string>();
 
         foreach (var dto in dtos)
         {
+            // Use active year instead of dto.YearID
             var grade = await _context.MonthlyGrades.FirstOrDefaultAsync(g =>
                 g.StudentID == dto.StudentID &&
-                g.YearID == dto.YearID &&
+                g.YearID == activeYear.YearID &&
                 g.SubjectID == dto.SubjectID &&
                 g.MonthID == dto.MonthID &&
                 g.TermID == dto.TermID &&
                 g.ClassID == dto.ClassID &&
                 g.GradeTypeID == dto.GradeTypeID);
 
-            if (grade != null && dto.Grade != 0 && grade.Grade != dto.Grade)
+            if (grade == null)
+            {
+                notFound.Add($"StudentID: {dto.StudentID}, SubjectID: {dto.SubjectID}, MonthID: {dto.MonthID}, GradeTypeID: {dto.GradeTypeID}");
+                continue;
+            }
+
+            // Update if the grade value is different (allow updating to 0 or null)
+            if (grade.Grade != dto.Grade)
             {
                 grade.Grade = dto.Grade;
                 changed = true;
             }
         }
 
+        if (notFound.Count > 0)
+        {
+            return Result<bool>.Fail($"Some grades were not found: {string.Join("; ", notFound.Take(5))}" + 
+                (notFound.Count > 5 ? $" (and {notFound.Count - 5} more)" : ""));
+        }
+
         if (!changed)
-            return Result<bool>.Fail("Nothing to update.");
+            return Result<bool>.Fail("Nothing to update. All grades are already set to the provided values.");
 
         try
         {

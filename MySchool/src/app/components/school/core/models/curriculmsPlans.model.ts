@@ -13,6 +13,12 @@ export interface CurriculmsPlans {
     teacherName: string;
     termName: string;
     year: string;
+    subjectID: number;
+    classID: number;
+    divisionID: number;
+    teacherID: number;
+    termID: number;
+    yearID: number;
 }
 export interface CurriculmsPlanSubject {
     subjectID: number;
