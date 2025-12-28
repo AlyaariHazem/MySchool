@@ -1,5 +1,6 @@
 using System.Net;
 using System.Threading.Tasks;
+using Backend.Common;
 using Backend.DTOS.School.Attachments;
 using Backend.DTOS.School.Vouchers;
 using Backend.Interfaces;
@@ -64,16 +65,48 @@ namespace Backend.Controllers.School
         }
 
         // GET api/vouchers
+        // GET api/vouchers?pageNumber=1&pageSize=10 (for pagination)
         [HttpGet]
-        public async Task<ActionResult<APIResponse>> GetAll()
+        public async Task<ActionResult<APIResponse>> GetAll([FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
         {
             var response = new APIResponse();
             try
             {
-                var vouchers = await _unitOfWork.Vouchers.GetAllAsync();
-                response.Result = vouchers;
-                response.statusCode = HttpStatusCode.OK;
-                return Ok(response);
+                // If pagination parameters are provided, use paginated endpoint
+                if (pageNumber.HasValue && pageSize.HasValue)
+                {
+                    if (pageNumber.Value <= 0 || pageSize.Value <= 0)
+                    {
+                        response.IsSuccess = false;
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        response.ErrorMasseges.Add("Page number and page size must be greater than 0.");
+                        return BadRequest(response);
+                    }
+
+                    var vouchers = await _unitOfWork.Vouchers.GetVouchersPaginatedAsync(pageNumber.Value, pageSize.Value);
+                    var totalCount = await _unitOfWork.Vouchers.GetTotalVouchersCountAsync();
+
+                    var paginatedResult = new
+                    {
+                        data = vouchers,
+                        pageNumber = pageNumber.Value,
+                        pageSize = pageSize.Value,
+                        totalCount,
+                        totalPages = (int)Math.Ceiling(totalCount / (double)pageSize.Value)
+                    };
+
+                    response.Result = paginatedResult;
+                    response.statusCode = HttpStatusCode.OK;
+                    return Ok(response);
+                }
+                else
+                {
+                    // Return all vouchers if no pagination parameters
+                    var vouchers = await _unitOfWork.Vouchers.GetAllAsync();
+                    response.Result = vouchers;
+                    response.statusCode = HttpStatusCode.OK;
+                    return Ok(response);
+                }
             }
             catch (System.Exception ex)
             {
@@ -82,6 +115,34 @@ namespace Backend.Controllers.School
                 response.ErrorMasseges.Add(ex.Message);
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
+        }
+
+        // POST api/vouchers/page
+        [HttpPost("page")]
+        public async Task<ActionResult<PagedResult<VouchersReturnDTO>>> GetVouchersWithFilters(
+            [FromBody] FilterRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Clamp values to avoid abuse (e.g., pageSize=100000)
+            const int maxPageSize = 100;
+            if (request.PageNumber < 1) request.PageNumber = 1;
+            if (request.PageSize < 1) request.PageSize = 4;
+            if (request.PageSize > maxPageSize) request.PageSize = maxPageSize;
+
+            var vouchers = await _unitOfWork.Vouchers.GetVouchersPaginatedAsync(request.PageNumber, request.PageSize);
+            var totalCount = await _unitOfWork.Vouchers.GetTotalVouchersCountAsync();
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
+
+            return Ok(new PagedResult<VouchersReturnDTO>(
+                vouchers,
+                request.PageNumber,
+                request.PageSize,
+                totalCount,
+                totalPages
+            ));
         }
 
         // GET api/vouchers/{id}

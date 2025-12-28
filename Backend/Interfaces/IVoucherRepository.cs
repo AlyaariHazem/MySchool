@@ -10,6 +10,8 @@ namespace Backend.Interfaces;
 public interface IVoucherRepository
 {
     Task<List<VouchersReturnDTO>> GetAllAsync();
+    Task<List<VouchersReturnDTO>> GetVouchersPaginatedAsync(int pageNumber, int pageSize);
+    Task<int> GetTotalVouchersCountAsync();
     Task<VouchersDTO?> GetByIdAsync(int id);
     Task<List<VouchersGuardianDTO>> GetAllVouchersGuardian();
     Task<VouchersDTO> AddAsync(VouchersDTO voucher);

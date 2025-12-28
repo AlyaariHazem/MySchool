@@ -25,6 +25,7 @@ export class FeesComponent {
   vouchers: Voucher[] = [];
   vouchersDisplay: Voucher[] = [];
   selectedVoucher: Voucher | undefined;
+  totalRecords: number = 0;
 
   readonly dir$ = this.store.select(selectLanguage).pipe(
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
@@ -43,9 +44,7 @@ export class FeesComponent {
   }
 
   ngOnInit(): void {
-    this.getAllVouchers();
-
-    this.updateDisplayedStudents(); // Initialize the displayed students
+    this.getPaginatedVouchers(this.first / this.rows + 1, this.rows);
   }
 
   showDialog() {
@@ -55,6 +54,7 @@ export class FeesComponent {
   ngOnDestroy(): void {
   }
   getAllVouchers() {
+    // Keep this method for backward compatibility if needed
     this.voucherService.getAll().subscribe({
       next: (res) => {
         if (!res.isSuccess) {
@@ -62,7 +62,6 @@ export class FeesComponent {
           return;
         }
         this.vouchers = res.result;
-        this.updateDisplayedStudents();
       },
       error: (err) => {
         this.toastr.error('Server error occurred while loading vouchers.');
@@ -74,16 +73,25 @@ export class FeesComponent {
   max = 2;
   first: number = 0;
   rows: number = 4;
-  updateDisplayedStudents(): void {
-    const start = this.first;
-    const end = this.first + this.rows;
-    this.vouchersDisplay = this.vouchers.slice(start, end);
+
+  getPaginatedVouchers(pageNumber: number, pageSize: number, filters: Record<string, string> = {}): void {
+    this.voucherService.getPaginatedVouchers(pageNumber, pageSize, filters).subscribe({
+      next: (paginatedResult) => {
+        this.vouchersDisplay = paginatedResult.data || [];
+        this.totalRecords = paginatedResult.totalCount || 0;
+      },
+      error: (err) => {
+        this.toastr.error('Server error occurred while loading vouchers.');
+        console.error(err);
+      }
+    });
   }
 
   onPageChange(event: PaginatorState) {
-    this.first = event.first || 0; // Default to 0 if undefined
+    this.first = event.first || 0;
     this.rows = event.rows!;
-    this.updateDisplayedStudents();
+    const pageNumber = Math.floor(this.first / this.rows) + 1;
+    this.getPaginatedVouchers(pageNumber, this.rows);
   }
 
   // Handle the "Print" button
@@ -106,6 +114,10 @@ export class FeesComponent {
 
   onDialogVisibilityChange(visible: boolean) {
     this.visible = visible; // Update the visible state
+    // Refresh data when dialog closes (after add/update)
+    if (!visible) {
+      this.getPaginatedVouchers(Math.floor(this.first / this.rows) + 1, this.rows);
+    }
   }
 
   Delete(id: number) {
@@ -116,7 +128,7 @@ export class FeesComponent {
           return;
         }
         this.toastr.success(res.result || 'Voucher deleted successfully.');
-        this.getAllVouchers();
+        this.getPaginatedVouchers(Math.floor(this.first / this.rows) + 1, this.rows);
       },
       error: err => {
         this.toastr.error('Server error occurred while deleting voucher.');
