@@ -255,12 +255,12 @@ namespace Backend.Controllers.School
         }
         // GET api/vouchers/guardian
         [HttpGet("vouchersGuardian")]
-        public async Task<ActionResult<APIResponse>> GetVouchersGuardian()
+        public async Task<ActionResult<APIResponse>> GetVouchersGuardian([FromQuery] int? guardianID = null)
         {
             var response = new APIResponse();
             try
             {
-                var vouchers = await _unitOfWork.Vouchers.GetAllVouchersGuardian();
+                var vouchers = await _unitOfWork.Vouchers.GetAllVouchersGuardian(guardianID);
                 response.Result = vouchers;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);

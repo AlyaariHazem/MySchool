@@ -14,6 +14,8 @@ import { FileService } from '../../../../core/services/file.service';
 import { VouchersGuardian } from '../../core/models/vouchers-guardian.model';
 import { IpaymentMethods } from '../../core/models/paymentMethods.model';
 import { PAYMENTMETHODS } from '../../core/data/paymentMethods';
+import { VouchersGuardianStoreService } from '../../core/services/vouchers-guardian-store.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -26,12 +28,16 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   @Input() voucherData: Voucher | undefined;
   @Input() visible: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>(); // Emit visibility change
+  @Output() voucherUpdated = new EventEmitter<Voucher>(); // Emit updated voucher
 
   formGroup: FormGroup;
 
   private accountService = inject(AccountService);
   private voucherService = inject(VoucherService);
   private fileService = inject(FileService);
+  private vouchersGuardianStore = inject(VouchersGuardianStoreService);
+  
+  private vouchersSubscription?: Subscription;
 
   accounts: StudentAccounts[] = [];
   filteredAccounts:StudentAccounts[]=[];
@@ -47,6 +53,8 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
 
   voucherAdded = false; // New flag for success
   formSubmitted = false; // Track if form is submitted
+  formPopulated = false; // Flag to prevent duplicate form population calls
+  isSettingAccountProgrammatically = false; // Flag to prevent ngModelChange trigger during programmatic updates
 
   paymentMethods:IpaymentMethods[]=PAYMENTMETHODS;
 
@@ -89,6 +97,14 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
       this.voucherAdded = true; // Set the flag to true on success
       this.formSubmitted = true; // Mark the form as submitted
 
+      // Clear cache for this guardian to refresh data
+      if (this.accountStudentGuardianID) {
+        const guardianID = this.accounts.find(a => a.accountStudentGuardianID === this.accountStudentGuardianID)?.guardianID;
+        if (guardianID) {
+          this.vouchersGuardianStore.clearVouchersForGuardian(guardianID);
+        }
+      }
+
       this.uploadFiles(this.voucherID!);
     });
     console.log('Voucher Data:', voucherData);
@@ -126,19 +142,55 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   }
   
 
-  setAccountStudentGuardianID(value: any): void {
+  setAccountStudentGuardianID(value: any, skipVouchersCall: boolean = false): void {
+    // If this is called from ngModelChange during programmatic update, skip it
+    if (this.isSettingAccountProgrammatically) {
+      return;
+    }
+
     if (!value) {
-      
       this.filteredAccounts = this.accounts;
       this.accountStudentGuardianID = 0;
+      this.filteredVouchers = [];
+      // Unsubscribe from previous guardian's vouchers
+      if (this.vouchersSubscription) {
+        this.vouchersSubscription.unsubscribe();
+        this.vouchersSubscription = undefined;
+      }
+      this.vouchersGuardianStore.clearAllVouchers();
       return;
     }
   
-    this.filteredVouchers = this.vouchersGuardian.filter(v => v.guardianID == value.guardianID);
+    // Filter accounts on frontend
     this.filteredAccounts = this.accounts.filter(a => a.guardianID == value.guardianID);
-  
     this.accountStudentGuardianID = value.accountStudentGuardianID;
+    
+    // Fetch vouchers filtered by guardianID from store (will use cache if available)
+    if (!skipVouchersCall) {
+      this.loadVouchersForGuardian(value.guardianID);
+    }
     this.cdr.detectChanges();  // Trigger change detection
+  }
+
+  private loadVouchersForGuardian(guardianID: number): void {
+    // Unsubscribe from previous subscription
+    if (this.vouchersSubscription) {
+      this.vouchersSubscription.unsubscribe();
+    }
+
+    // Subscribe to vouchers from store (will use cache or fetch if needed)
+    this.vouchersSubscription = this.vouchersGuardianStore.getVouchersGuardian(guardianID).subscribe({
+      next: (vouchers) => {
+        this.vouchersGuardian = vouchers;
+        this.filteredVouchers = vouchers;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading vouchers:', err);
+        this.vouchersGuardian = [];
+        this.filteredVouchers = [];
+      }
+    });
   }
   
 
@@ -198,6 +250,11 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
         this.accounts = res.result;
         this.filteredAccounts=this.accounts;
         
+        // If editing and form not yet populated, populate form after accounts are loaded
+        // Only populate if ngOnChanges hasn't already done it (check formPopulated flag)
+        if (this.voucherData && !this.selectedAccount && !this.formPopulated) {
+          this.populateFormForEdit();
+        }
       },
       error: err => {
         this.toastr.error('Server error occurred while fetching accounts.');
@@ -208,35 +265,122 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   }
   ngOnInit() {
     this.getAccounts();
-    this.ngOnChanges();
-    this.getAllVouchersGuardian();
     const today = new Date().toISOString().split('T')[0];
     this.formGroup.patchValue({ hireDate: today });
   }
 
-  ngOnChanges() {
-    if (this.voucherData) {
-      this.formGroup.patchValue({
-        voucherID: this.voucherData.voucherID,
-        receipt: this.voucherData.receipt,
-        hireDate: this.voucherData.hireDate,
-        note: this.voucherData.note,
-        payBy: this.voucherData.payBy,
-        studentID: this.voucherData.accountName
-      });
+  private populateFormForEdit() {
+    if (!this.voucherData || !this.accounts || this.accounts.length === 0 || this.formPopulated) {
+      return;
     }
     
-    if (this.voucherData == undefined)
+    this.formPopulated = true; // Mark as populated to prevent duplicate calls
+
+    // Find the matching account from accounts array
+    const matchingAccount = this.accounts.find(
+      acc => acc.accountStudentGuardianID === this.voucherData!.accountStudentGuardianID
+    );
+    
+    // Find the matching student account
+    const matchingStudentAccount = this.accounts.find(
+      acc => acc.studentID === this.voucherData!.studentID && 
+             acc.accountStudentGuardianID === this.voucherData!.accountStudentGuardianID
+    );
+
+    // Set account and student if found
+    if (matchingAccount) {
+      // Set flag to prevent ngModelChange from triggering getAllVouchersGuardian
+      this.isSettingAccountProgrammatically = true;
+      
+      // Set selectedAccount - this will trigger ngModelChange, but we'll handle it
+      this.selectedAccount = matchingAccount;
+      
+      // Manually set the filtered accounts and accountStudentGuardianID
+      this.filteredAccounts = this.accounts.filter(a => a.guardianID == matchingAccount.guardianID);
+      this.accountStudentGuardianID = matchingAccount.accountStudentGuardianID;
+      
+      // Clear the flag
+      this.isSettingAccountProgrammatically = false;
+      
+      // Load vouchers for this guardian from store (will use cache if available)
+      this.loadVouchersForGuardian(matchingAccount.guardianID);
+    }
+    
+    if (matchingStudentAccount) {
+      this.setStudentID(matchingStudentAccount);
+    }
+
+    // Find matching payment method
+    const matchingPaymentMethod = this.paymentMethods.find(
+      pm => pm.value === this.voucherData!.payBy
+    );
+    if (matchingPaymentMethod) {
+      this.payBy = matchingPaymentMethod;
+      this.value = matchingPaymentMethod.value;
+    }
+
+    // Set form values
+    let hireDateValue: string;
+    if (this.voucherData.hireDate) {
+      const dateValue = this.voucherData.hireDate as any;
+      if (typeof dateValue === 'string') {
+        hireDateValue = dateValue.split('T')[0];
+      } else {
+        hireDateValue = new Date(dateValue).toISOString().split('T')[0];
+      }
+    } else {
+      hireDateValue = new Date().toISOString().split('T')[0];
+    }
+    console.log('populateFormForEdit', this.voucherData);
+    this.formGroup.patchValue({
+      voucherID: this.voucherData.voucherID,
+      receipt: this.voucherData.receipt,
+      hireDate: hireDateValue,
+      note: this.voucherData.note || '',
+      payBy: this.voucherData.payBy,
+      accountStudentGuardianID: this.voucherData.accountName,
+      studentID: this.voucherData.studentID
+    });
+
+    // Set the accountStudentGuardianID and studentID properties
+    this.accountStudentGuardianID = this.voucherData.accountStudentGuardianID;
+    this.studentID = this.voucherData.studentID;
+  }
+
+  ngOnChanges() {
+    // Only populate if accounts are already loaded, otherwise getAccounts() will handle it
+    if (this.voucherData && this.accounts && this.accounts.length > 0) {
+      this.populateFormForEdit();
+    }
+    
+    if (this.voucherData == undefined) {
+      this.formPopulated = false; // Reset flag when clearing
+      this.isSettingAccountProgrammatically = false; // Reset programmatic flag
+      // Unsubscribe from vouchers
+      if (this.vouchersSubscription) {
+        this.vouchersSubscription.unsubscribe();
+        this.vouchersSubscription = undefined;
+      }
       this.formGroup.reset({
         hireDate: new Date().toISOString().split('T')[0]
       });
-      
+      this.selectedAccount = undefined as any;
+      this.payBy = undefined as any;
+      this.accountStudentGuardianID = 0;
+      this.studentID = 0;
+      this.value = '';
+      this.filteredAccounts = this.accounts || [];
+      this.filteredVouchers = [];
+      this.vouchersGuardian = [];
+    }
   }
 
   ngOnDestroy() {
+    // Unsubscribe from vouchers subscription
+    if (this.vouchersSubscription) {
+      this.vouchersSubscription.unsubscribe();
+    }
     this.voucherData = undefined;
-    this.voucherData = undefined;
-
   }
   updateAttachments(event: any): void {
     const input = event.target as HTMLInputElement;
@@ -269,24 +413,36 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     this.voucherService.Update(this.voucherData?.voucherID, updatedVoucher).subscribe(res => {
-      this.toastr.success('Voucher updated successfully!');
-      this.visibleChange.emit(false);  // Close dialog by emitting false
-    });
-  }
-  getAllVouchersGuardian(): void {
-    this.voucherService.getAllVouchersGuardian().subscribe({
-      next: res => {
-        if (!res.isSuccess) {
-          this.toastr.warning(res.errorMasseges[0] || 'Failed to load vouchers.');
-          this.vouchersGuardian = [];
-          return;
+      if (res.isSuccess) {
+        this.toastr.success('Voucher updated successfully!');
+        
+        // Find the account name for the updated account
+        const updatedAccount = this.accounts.find(
+          acc => acc.accountStudentGuardianID === updatedVoucher.accountStudentGuardianID
+        );
+        
+        // Clear cache for the guardian to refresh data
+        if (updatedAccount?.guardianID) {
+          this.vouchersGuardianStore.clearVouchersForGuardian(updatedAccount.guardianID);
         }
-        this.vouchersGuardian = res.result;
-      },
-      error: err => {
-        this.toastr.error('Server error occurred while fetching vouchers.');
-        console.error(err);
-        this.vouchersGuardian = [];
+        
+        // Create updated voucher object with new values
+        const updatedVoucherData: Voucher = {
+          ...this.voucherData!,
+          receipt: updatedVoucher.receipt,
+          hireDate: updatedVoucher.hireDate,
+          note: updatedVoucher.note || '',
+          payBy: updatedVoucher.payBy,
+          accountStudentGuardianID: updatedVoucher.accountStudentGuardianID,
+          studentID: updatedVoucher.studentID,
+          accountName: updatedAccount?.accountName || this.voucherData!.accountName
+        };
+        
+        // Emit the updated voucher to parent
+        this.voucherUpdated.emit(updatedVoucherData);
+        this.visibleChange.emit(false);  // Close dialog by emitting false
+      } else {
+        this.toastr.error(res.errorMasseges[0] || 'Failed to update voucher.');
       }
     });
   }

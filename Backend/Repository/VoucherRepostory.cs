@@ -61,6 +61,9 @@ public class VoucherRepository : IVoucherRepository
             PayBy = v.PayBy,
             HireDate = v.HireDate,
             AccountName = v.AccountStudentGuardians?.Accounts?.AccountName ?? string.Empty,
+            StudentName = v.AccountStudentGuardians?.Student?.FullName != null
+                ? $"{v.AccountStudentGuardians.Student.FullName.FirstName} {v.AccountStudentGuardians.Student.FullName.MiddleName} {v.AccountStudentGuardians.Student.FullName.LastName}".Trim()
+                : string.Empty,
             AccountAttachments = v.Attachments?.Count ?? 0,
             AccountStudentGuardianID = v.AccountStudentGuardianID,
             StudentID = v.AccountStudentGuardians?.StudentID ?? 0,
@@ -111,6 +114,9 @@ public class VoucherRepository : IVoucherRepository
             PayBy = v.PayBy,
             HireDate = v.HireDate,
             AccountName = v.AccountStudentGuardians?.Accounts?.AccountName ?? string.Empty,
+            StudentName = v.AccountStudentGuardians?.Student?.FullName != null
+                ? $"{v.AccountStudentGuardians.Student.FullName.FirstName} {v.AccountStudentGuardians.Student.FullName.MiddleName} {v.AccountStudentGuardians.Student.FullName.LastName}".Trim()
+                : string.Empty,
             AccountAttachments = v.Attachments?.Count ?? 0,
             AccountStudentGuardianID = v.AccountStudentGuardianID,
             StudentID = v.AccountStudentGuardians?.StudentID ?? 0,
@@ -193,9 +199,9 @@ public class VoucherRepository : IVoucherRepository
         return true;
     }
 
-    public async Task<List<VouchersGuardianDTO>> GetAllVouchersGuardian()
+    public async Task<List<VouchersGuardianDTO>> GetAllVouchersGuardian(int? guardianID = null)
     {
-        var students = await _context.Students
+        var query = _context.Students
             .Include(s => s.AccountStudentGuardians)
                 .ThenInclude(a => a.Vouchers)
             .Include(s => s.Division)
@@ -209,8 +215,15 @@ public class VoucherRepository : IVoucherRepository
             .Where(s => s.Division != null && 
                        s.Division.Class != null && 
                        ((s.Division.Class.Year != null && s.Division.Class.Year.Active == true) || 
-                        (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.Active == true)))
-            .ToListAsync();
+                        (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.Active == true)));
+
+        // Filter by guardianID if provided
+        if (guardianID.HasValue && guardianID.Value > 0)
+        {
+            query = query.Where(s => s.GuardianID == guardianID.Value);
+        }
+
+        var students = await query.ToListAsync();
 
         return students.Select(vg => new VouchersGuardianDTO()
         {

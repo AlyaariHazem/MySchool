@@ -43,7 +43,7 @@
           <div class="form-control">
             <label for="payBy" class="label2">الدفع بواسطة<span style="color:red;"> *</span></label>
 
-            <p-dropdown [options]="paymentMethods" [(ngModel)]="payBy" (ngModelChange)="setPayBy($event)"
+            <p-dropdown [options]="paymentMethods" (ngModelChange)="setPayBy($event)"
               formControlName="payBy" optionLabel="label" placeholder="الدفع بواسطة">
             </p-dropdown>
 

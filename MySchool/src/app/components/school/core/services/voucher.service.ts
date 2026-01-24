@@ -53,8 +53,11 @@ export class VoucherService {
     );
   }
 
-  getAllVouchersGuardian(): Observable<ApiResponse<VouchersGuardian[]>> {
-    return this.API.getRequest<VouchersGuardian[]>('Vouchers/vouchersGuardian');
+  getAllVouchersGuardian(guardianID?: number): Observable<ApiResponse<VouchersGuardian[]>> {
+    const url = guardianID && guardianID > 0 
+      ? `Vouchers/vouchersGuardian?guardianID=${guardianID}`
+      : 'Vouchers/vouchersGuardian';
+    return this.API.getRequest<VouchersGuardian[]>(url);
   }
 
   Add(voucher: VoucherAddUpdate): Observable<ApiResponse<string>> {

@@ -114,10 +114,25 @@ export class FeesComponent {
 
   onDialogVisibilityChange(visible: boolean) {
     this.visible = visible; // Update the visible state
-    // Refresh data when dialog closes (after add/update)
-    if (!visible) {
+    // Refresh data when dialog closes (only after add, not update)
+    if (!visible && !this.selectedVoucher) {
       this.getPaginatedVouchers(Math.floor(this.first / this.rows) + 1, this.rows);
     }
+    // Clear selected voucher when dialog closes
+    if (!visible) {
+      this.selectedVoucher = undefined;
+    }
+  }
+
+  onVoucherUpdated(updatedVoucher: Voucher) {
+    // Update the voucher in the local array without calling backend
+    const index = this.vouchersDisplay.findIndex(v => v.voucherID === updatedVoucher.voucherID);
+    if (index !== -1) {
+      this.vouchersDisplay[index] = updatedVoucher;
+      // Create a new array reference to trigger change detection
+      this.vouchersDisplay = [...this.vouchersDisplay];
+    }
+    this.selectedVoucher = undefined;
   }
 
   Delete(id: number) {
@@ -138,3 +153,4 @@ export class FeesComponent {
     )
   }
 }
+

@@ -1,6 +1,7 @@
 export interface Voucher {
     voucherID: number;
     accountName: string;
+    studentName?: string;
     receipt: number;
     hireDate: Date;
     payBy: string;

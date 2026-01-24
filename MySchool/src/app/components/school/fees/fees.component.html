@@ -40,7 +40,8 @@
   <p-dialog id="voucherContent" [(visible)]="visible" (visibleChange)="onDialogVisibilityChange($event)" [modal]="true"
     [style]="{ width: '75%' }" [draggable]="false" [resizable]="false">
     <app-new-capture [voucherData]="selectedVoucher" [visible]="visible"
-      (visibleChange)="onDialogVisibilityChange($event)">
+      (visibleChange)="onDialogVisibilityChange($event)"
+      (voucherUpdated)="onVoucherUpdated($event)">
     </app-new-capture>
   </p-dialog>
 

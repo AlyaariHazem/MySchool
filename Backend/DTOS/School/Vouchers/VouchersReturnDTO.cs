@@ -9,6 +9,7 @@ public class VouchersReturnDTO
 {
     public int? VoucherID { get; set; }
     public string? AccountName { get; set; }
+    public string? StudentName { get; set; }
     public decimal Receipt { get; set; } = decimal.Zero;
     public DateTime HireDate { get; set; } = DateTime.Now;
     public string? Note { get; set; }
