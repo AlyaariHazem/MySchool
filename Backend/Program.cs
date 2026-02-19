@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Backend.Middleware;
+using Backend.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -154,39 +155,9 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod()
         .AllowCredentials());                   // ★ allow cookies
 });
-builder.Services.AddScoped<StudentManagementService>();
-builder.Services.AddScoped<mangeFilesService>();
-builder.Services.AddScoped<StudentClassFeesRepository>();
-builder.Services.AddScoped<TenantProvisioningService>();
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IGuardianRepository, GuardianRepository>();
-builder.Services.AddScoped<ISubjectsRepository, SubjectRepository>();
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IClassesRepository, ClassesRepository>();
-builder.Services.AddScoped<IDivisionRepository, DivisionRepository>();
-builder.Services.AddScoped<IUserRepository, UsersRepository>();
-builder.Services.AddScoped<IStagesRepository, StagesRepository>();
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-builder.Services.AddScoped<IFeeClassRepository, FeeClassRepository>();
-builder.Services.AddScoped<IFeesRepository, FeesRepository>();
-builder.Services.AddScoped<IManagerRepository, ManagerRepository>();
-builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
-builder.Services.AddScoped<IStudentClassFeeRepository, StudentClassFeeRepository>();
-builder.Services.AddScoped<ITenantRepository, TenantRepository>();
-builder.Services.AddScoped<IYearRepository, YearRepository>();
-builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
-builder.Services.AddScoped<IAttachmentRepository, AttachmentsRepository>();
-builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
-builder.Services.AddScoped<ICoursePlanRepository, CoursePlanRepository>();
-builder.Services.AddScoped<IGradeTypesRepository, GradeTypesRepository>();
-builder.Services.AddScoped<IMonthlyGradeRepository, MonthlyGradeRepository>();
-builder.Services.AddScoped<ITermlyGradeRepository, TermlyGradeRepository>();
-builder.Services.AddScoped<ITermRepository, TermRepository>();
-builder.Services.AddScoped<IMonthRepository, MonthRepository>();
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IAccountStudentGuardianRepository, AccountStudentGuardianRepository>();
-builder.Services.AddScoped<IReportRepository, ReportRepository>();
+// Register Application Services and Repositories
+builder.Services.AddApplicationServices();
 
 
 var app = builder.Build();

@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "E:\\Github\\MySchool\\Backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{D8F910E7-E575-4566-97D8-CB37EB0C811A}|Backend.csproj|e:\\github\\myschool\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D8F910E7-E575-4566-97D8-CB37EB0C811A}|Backend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{D8F910E7-E575-4566-97D8-CB37EB0C811A}|Backend.csproj|e:\\github\\myschool\\backend\\controllers\\school\\monthlygradescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D8F910E7-E575-4566-97D8-CB37EB0C811A}|Backend.csproj|solutionrelative:controllers\\school\\monthlygradescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -21,10 +25,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{D8F910E7-E575-4566-97D8-CB37EB0C811A}|Backend.csproj|e:\\github\\myschool\\backend\\repository\\accountrepository .cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D8F910E7-E575-4566-97D8-CB37EB0C811A}|Backend.csproj|solutionrelative:repository\\accountrepository .cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{D8F910E7-E575-4566-97D8-CB37EB0C811A}|Backend.csproj|e:\\github\\myschool\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D8F910E7-E575-4566-97D8-CB37EB0C811A}|Backend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,7 +34,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Bookmark",
@@ -46,7 +46,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "TermlyGradeRepository.cs",
               "DocumentMoniker": "E:\\Github\\MySchool\\Backend\\Repository\\TermlyGradeRepository.cs",
               "RelativeDocumentMoniker": "Repository\\TermlyGradeRepository.cs",
@@ -59,7 +59,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "IMonthlyGradeRepository.cs",
               "DocumentMoniker": "E:\\Github\\MySchool\\Backend\\Interfaces\\IMonthlyGradeRepository.cs",
               "RelativeDocumentMoniker": "Interfaces\\IMonthlyGradeRepository.cs",
@@ -71,33 +71,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "MonthlyGradesController.cs",
               "DocumentMoniker": "E:\\Github\\MySchool\\Backend\\Controllers\\School\\MonthlyGradesController.cs",
               "RelativeDocumentMoniker": "Controllers\\School\\MonthlyGradesController.cs",
               "ToolTip": "E:\\Github\\MySchool\\Backend\\Controllers\\School\\MonthlyGradesController.cs",
               "RelativeToolTip": "Controllers\\School\\MonthlyGradesController.cs",
-              "ViewState": "AgIAACwAAAAAAAAAAAAwwCkAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAABwAAAAAAAAAAAAAAC8AAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-19T20:14:02.881Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "MonthlyGradeRepository.cs",
               "DocumentMoniker": "E:\\Github\\MySchool\\Backend\\Repository\\MonthlyGradeRepository.cs",
               "RelativeDocumentMoniker": "Repository\\MonthlyGradeRepository.cs",
               "ToolTip": "E:\\Github\\MySchool\\Backend\\Repository\\MonthlyGradeRepository.cs",
               "RelativeToolTip": "Repository\\MonthlyGradeRepository.cs",
-              "ViewState": "AgIAACYAAAAAAAAAAAAhwDgAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAALYAAAAAAAAAAAAAAMMAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-19T20:11:41.6Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "AccountRepository .cs",
               "DocumentMoniker": "E:\\Github\\MySchool\\Backend\\Repository\\AccountRepository .cs",
               "RelativeDocumentMoniker": "Repository\\AccountRepository .cs",
@@ -109,15 +109,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "E:\\Github\\MySchool\\Backend\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "E:\\Github\\MySchool\\Backend\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAIEAAAAAAAAAAAAAAI8AAABTAAAAAAAAAA==",
+              "ViewState": "AgIAABAAAAAAAAAAAAApwBoAAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-19T20:00:13.81Z"
+              "WhenOpened": "2026-02-19T20:00:13.81Z",
+              "EditorCaption": ""
             }
           ]
         }

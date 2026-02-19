@@ -54,8 +54,7 @@
               "RelativeToolTip": "Repository\\TermlyGradeRepository.cs",
               "ViewState": "AgIAAIkAAAAAAAAAAAAAAJYAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-19T20:14:46.77Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-19T20:14:46.77Z"
             },
             {
               "$type": "Document",
@@ -79,8 +78,7 @@
               "RelativeToolTip": "Controllers\\School\\MonthlyGradesController.cs",
               "ViewState": "AgIAABwAAAAAAAAAAAAAAC8AAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-19T20:14:02.881Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-19T20:14:02.881Z"
             },
             {
               "$type": "Document",
@@ -92,8 +90,7 @@
               "RelativeToolTip": "Repository\\MonthlyGradeRepository.cs",
               "ViewState": "AgIAALYAAAAAAAAAAAAAAMMAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-19T20:11:41.6Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-19T20:11:41.6Z"
             },
             {
               "$type": "Document",
@@ -115,7 +112,7 @@
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "E:\\Github\\MySchool\\Backend\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAApwBoAAAArAAAAAAAAAA==",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAACoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-19T20:00:13.81Z",
               "EditorCaption": ""
