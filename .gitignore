@@ -50,3 +50,5 @@ dist/
 bin/
 
 .env*.bak
+.vscode
+.vs
