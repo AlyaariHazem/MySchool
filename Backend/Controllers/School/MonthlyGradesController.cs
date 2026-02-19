@@ -39,21 +39,22 @@ public class MonthlyGradesController : ControllerBase
     {
         var result = await _repo.GetAllAsync(term, monthId, classId, subjectId, pageNumber, pageSize);
 
+        if (!result.Ok)
+            return NotFound(APIResponse.Fail(result.Error!));
+
         // استخدم الفلاتر لحساب العدد الصحيح
         var totalCount = await _repo.GetTotalMonthlyGradesCountAsync(term, monthId, classId, subjectId);
 
         var paginatedResult = new
         {
-            data = result.Value,
+            data = result.Value ?? new List<MonthlyGradesReternDTO>(), // Ensure data is never null
             pageNumber,
             pageSize,
             totalCount,
             totalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
         };
 
-        return result.Ok
-            ? Ok(APIResponse.Success(paginatedResult))
-            : NotFound(APIResponse.Fail(result.Error!));
+        return Ok(APIResponse.Success(paginatedResult));
     }
 
     /* ----------  PUT MANY  ---------- */

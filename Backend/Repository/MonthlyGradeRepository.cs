@@ -68,30 +68,34 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
             .Include(g => g.Student).ThenInclude(s => s.FullName)
             .Include(g => g.Subject)
             .Include(g => g.GradeType)
+            .Where(g => g.Student != null && g.Subject != null) // Filter out records with null navigation properties
             .ToListAsync();
 
-        // Now group in memory
+        // Now group in memory by StudentID and SubjectID only
         var grouped = grades
             .GroupBy(g => new
             {
                 g.StudentID,
-                g.Student.FullName,
-                g.SubjectID,
-                g.Subject.SubjectName,
-                g.Student.ImageURL
+                g.SubjectID
             })
             .Select(grp => new MonthlyGradesReternDTO
             {
                 StudentID = grp.Key.StudentID,
-                StudentName = $"{grp.Key.FullName.FirstName} {grp.Key.FullName.MiddleName} {grp.Key.FullName.LastName}",
-                StudentURL =  $"https://localhost:7258/uploads/StudentPhotos/{grp.Key.ImageURL}",
+                StudentName = grp.First().Student?.FullName != null
+                    ? $"{grp.First().Student.FullName.FirstName} {grp.First().Student.FullName.MiddleName} {grp.First().Student.FullName.LastName}".Trim()
+                    : "Unknown Student",
+                StudentURL = grp.First().Student?.ImageURL != null
+                    ? $"https://localhost:7258/uploads/StudentPhotos/{grp.First().Student.ImageURL}"
+                    : null,
                 SubjectID = grp.Key.SubjectID,
-                SubjectName = grp.Key.SubjectName,
+                SubjectName = grp.First().Subject?.SubjectName ?? "Unknown Subject",
                 Grades = grp.Select(g => new GradeTypeMonthDTO
                 {
                     GradeTypeID = g.GradeTypeID,
                     MaxGrade = g.Grade
-                }).ToList() 
+                })
+                .OrderBy(g => g.GradeTypeID)
+                .ToList() 
             })
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
