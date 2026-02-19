@@ -79,12 +79,29 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
     console.log('formGroup', formGroup.value);
+    
+    // Get payBy value - check form control first, then fallback to this.value
+    let payByValue = this.value;
+    if (formGroup.value.payBy) {
+      // If form control has a payment method object, extract its value
+      if (typeof formGroup.value.payBy === 'object' && formGroup.value.payBy.value) {
+        payByValue = formGroup.value.payBy.value;
+      } else if (typeof formGroup.value.payBy === 'string') {
+        payByValue = formGroup.value.payBy;
+      }
+    }
+    
+    // Fallback: if still empty, try to get from this.payBy
+    if (!payByValue && this.payBy && this.payBy.value) {
+      payByValue = this.payBy.value;
+    }
+    
     // Create the voucher data object
     const voucherData: VoucherAddUpdate = {
       receipt: formGroup.value.receipt,
       hireDate: formGroup.value.hireDate,
       note: formGroup.value.note,
-      payBy: this.value,
+      payBy: payByValue || '',
       accountStudentGuardianID: this.accountStudentGuardianID,
       attachments: this.attachments, // Or update this dynamically if needed
       studentID: this.studentID,
@@ -124,7 +141,8 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
 
   setPayBy(value: any): void {
     if (value) {
-      this.value = this.payBy.value;
+      this.payBy = value;
+      this.value = value.value;
       console.log('Selected Pay By:', this.payBy);
     }
     this.cdr.detectChanges();  // Trigger change detection
@@ -287,39 +305,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
              acc.accountStudentGuardianID === this.voucherData!.accountStudentGuardianID
     );
 
-    // Set account and student if found
-    if (matchingAccount) {
-      // Set flag to prevent ngModelChange from triggering getAllVouchersGuardian
-      this.isSettingAccountProgrammatically = true;
-      
-      // Set selectedAccount - this will trigger ngModelChange, but we'll handle it
-      this.selectedAccount = matchingAccount;
-      
-      // Manually set the filtered accounts and accountStudentGuardianID
-      this.filteredAccounts = this.accounts.filter(a => a.guardianID == matchingAccount.guardianID);
-      this.accountStudentGuardianID = matchingAccount.accountStudentGuardianID;
-      
-      // Clear the flag
-      this.isSettingAccountProgrammatically = false;
-      
-      // Load vouchers for this guardian from store (will use cache if available)
-      this.loadVouchersForGuardian(matchingAccount.guardianID);
-    }
-    
-    if (matchingStudentAccount) {
-      this.setStudentID(matchingStudentAccount);
-    }
-
-    // Find matching payment method
-    const matchingPaymentMethod = this.paymentMethods.find(
-      pm => pm.value === this.voucherData!.payBy
-    );
-    if (matchingPaymentMethod) {
-      this.payBy = matchingPaymentMethod;
-      this.value = matchingPaymentMethod.value;
-    }
-
-    // Set form values
+    // Prepare date value
     let hireDateValue: string;
     if (this.voucherData.hireDate) {
       const dateValue = this.voucherData.hireDate as any;
@@ -331,16 +317,63 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       hireDateValue = new Date().toISOString().split('T')[0];
     }
+
+    // Set account and student if found
+    if (matchingAccount) {
+      // Set flag to prevent ngModelChange from triggering getAllVouchersGuardian
+      this.isSettingAccountProgrammatically = true;
+      
+      // Manually set the filtered accounts and accountStudentGuardianID
+      this.filteredAccounts = this.accounts.filter(a => a.guardianID == matchingAccount.guardianID);
+      this.accountStudentGuardianID = matchingAccount.accountStudentGuardianID;
+      
+      // Load vouchers for this guardian from store (will use cache if available)
+      this.loadVouchersForGuardian(matchingAccount.guardianID);
+      
+      // Clear the flag
+      this.isSettingAccountProgrammatically = false;
+    }
+    
+    // Set selectedAccount to the student account (since both dropdowns use this variable)
+    // This ensures both dropdowns display correctly
+    if (matchingStudentAccount) {
+      this.selectedAccount = matchingStudentAccount;
+      this.setStudentID(matchingStudentAccount);
+    } else if (matchingAccount) {
+      // If no matching student account found, set to guardian account
+      this.selectedAccount = matchingAccount;
+    }
+
+    // Find matching payment method
+    const matchingPaymentMethod = this.paymentMethods.find(
+      pm => pm.value === this.voucherData!.payBy
+    );
+    if (matchingPaymentMethod) {
+      this.payBy = matchingPaymentMethod;
+      this.value = matchingPaymentMethod.value;
+    }
+
+    // Set all form values at once with proper objects
     console.log('populateFormForEdit', this.voucherData);
-    this.formGroup.patchValue({
+    const formValues: any = {
       voucherID: this.voucherData.voucherID,
       receipt: this.voucherData.receipt,
       hireDate: hireDateValue,
-      note: this.voucherData.note || '',
-      payBy: this.voucherData.payBy,
-      accountStudentGuardianID: this.voucherData.accountName,
-      studentID: this.voucherData.studentID
-    });
+      note: this.voucherData.note || ''
+    };
+
+    // Set form controls with the account objects (not IDs or strings)
+    if (matchingAccount) {
+      formValues.accountStudentGuardianID = matchingAccount;
+    }
+    if (matchingStudentAccount) {
+      formValues.studentID = matchingStudentAccount;
+    }
+    if (matchingPaymentMethod) {
+      formValues.payBy = matchingPaymentMethod;
+    }
+
+    this.formGroup.patchValue(formValues);
 
     // Set the accountStudentGuardianID and studentID properties
     this.accountStudentGuardianID = this.voucherData.accountStudentGuardianID;
@@ -402,11 +435,28 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
       this.toastr.error('Please fill in all fields.');
       return;
     }
+    
+    // Get payBy value - check form control first, then fallback to this.value
+    let payByValue = this.value;
+    if (this.formGroup.value.payBy) {
+      // If form control has a payment method object, extract its value
+      if (typeof this.formGroup.value.payBy === 'object' && this.formGroup.value.payBy.value) {
+        payByValue = this.formGroup.value.payBy.value;
+      } else if (typeof this.formGroup.value.payBy === 'string') {
+        payByValue = this.formGroup.value.payBy;
+      }
+    }
+    
+    // Fallback: if still empty, try to get from this.payBy
+    if (!payByValue && this.payBy && this.payBy.value) {
+      payByValue = this.payBy.value;
+    }
+    
     const updatedVoucher: VoucherAddUpdate = {
       receipt: this.formGroup.value.receipt,
       hireDate: this.formGroup.value.hireDate,
       note: this.formGroup.value.note,
-      payBy: this.value,
+      payBy: payByValue || '',
       accountStudentGuardianID: this.accountStudentGuardianID,
       attachments: this.attachments,
       studentID: this.studentID,
