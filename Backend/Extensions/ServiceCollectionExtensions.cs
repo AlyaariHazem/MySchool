@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<mangeFilesService>();
         services.AddScoped<StudentClassFeesRepository>();
         services.AddScoped<TenantProvisioningService>();
+        services.AddScoped<HtmlSanitizationService>();
 
         // Register Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();

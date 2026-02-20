@@ -64,5 +64,114 @@
     ul {
       padding-left: 0rem !important;
     }
+
+    // Ensure Quill editor renders HTML properly, not as source code
+    .ql-editor {
+      // Make sure HTML content is rendered, not shown as text
+      white-space: normal !important;
+      
+      // Ensure headings render properly with their styles
+      h1, h2, h3, h4, h5, h6 {
+        display: block !important;
+        font-weight: bold !important;
+        margin: 1em 0 !important;
+      }
+      
+      h2 {
+        font-size: 1.5em !important;
+      }
+      
+      // Ensure strong/bold text renders
+      strong {
+        font-weight: bold !important;
+      }
+      
+      // Ensure divs render properly
+      div {
+        display: block !important;
+      }
+      
+      // Handle flexbox layouts - Quill doesn't support flex, so we need CSS
+      // Match divs with display:flex in their style attribute
+      div[style*="display:flex"],
+      div[style*="display: flex"] {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+      }
+      
+      // Handle justify-content
+      div[style*="justify-content:space-between"],
+      div[style*="justify-content: space-between"] {
+        justify-content: space-between !important;
+      }
+      
+      // Handle margin-top
+      div[style*="margin-top:60px"],
+      div[style*="margin-top: 60px"] {
+        margin-top: 60px !important;
+      }
+      
+      div[style*="margin-top:20px"],
+      div[style*="margin-top: 20px"] {
+        margin-top: 20px !important;
+      }
+      
+      div[style*="margin-bottom:10px"],
+      div[style*="margin-bottom: 10px"] {
+        margin-bottom: 10px !important;
+      }
+      
+      // Handle padding
+      div[style*="padding:20px"],
+      div[style*="padding: 20px"] {
+        padding: 20px !important;
+      }
+      
+      // Handle line-height
+      div[style*="line-height:1.8"],
+      div[style*="line-height: 1.8"] {
+        line-height: 1.8 !important;
+      }
+      
+      // Preserve inline styles for text alignment
+      [style*="text-align:center"] {
+        text-align: center !important;
+      }
+      
+      [style*="text-align:right"] {
+        text-align: right !important;
+      }
+      
+      [style*="text-align:left"] {
+        text-align: left !important;
+      }
+      
+      // Ensure horizontal rules render
+      hr {
+        display: block !important;
+        border: none !important;
+        border-top: 1px solid #ccc !important;
+        margin: 1em 0 !important;
+      }
+      
+      // Ensure tables are displayed properly
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1em 0;
+        display: table !important;
+        
+        td, th {
+          border: 1px solid #ddd;
+          padding: 8px;
+          display: table-cell !important;
+        }
+        
+        tr {
+          display: table-row !important;
+        }
+      }
+    }
   }
 }

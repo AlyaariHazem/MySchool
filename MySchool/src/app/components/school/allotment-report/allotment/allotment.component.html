@@ -1,13 +1,23 @@
 <div id="id01" class="container">
     <h2 class="title">تخصيص التقارير</h2>
     <div class="select">
-        <p-select [options]="reportOptions" optionLabel="label" optionValue="value" [ngModel]="selectedReportType"
+        <p-select 
+            [options]="reportOptions" 
+            optionLabel="label" 
+            [(ngModel)]="selectedReportOption"
+            (ngModelChange)="onReportTypeChange()"
             placeholder="Select a report" />
-
     </div>
 
     <div class="flex flex-wrap gap-3 save">
-        <button class="w-3" pButton type="button" label="حفظ التغيرات" icon="pi pi-save">
+        <button 
+            class="w-3" 
+            pButton 
+            type="button" 
+            label="حفظ التغييرات" 
+            icon="pi pi-save"
+            (click)="saveTemplate()"
+            [disabled]="isSaving || isLoading">
         </button>
     </div>
 
@@ -15,7 +25,14 @@
 
     <div #editorPreview dir="rtl">
         <form [formGroup]="formGroup">
-            <p-editor formControlName="text" [style]="{ height: '320px' }"></p-editor>
+            <p-editor 
+                #editor
+                formControlName="text" 
+                [style]="{ height: '320px' }"
+                [readonly]="isLoading"
+                (onTextChange)="onEditorTextChange($event)"
+                (onInit)="onEditorInit($event)">
+            </p-editor>
         </form>
     </div>
 </div>

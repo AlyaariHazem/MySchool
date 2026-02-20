@@ -49,6 +49,7 @@ namespace Backend.Data
         public DbSet<StudentClassFees> StudentClassFees { get; set; }
         public DbSet<TermlyGrade> TermlyGrades { get; set; }
         public DbSet<AccountStudentGuardian> AccountStudentGuardians { get; set; }
+        public DbSet<ReportTemplate> ReportTemplates { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -380,6 +381,28 @@ namespace Backend.Data
             
             modelBuilder.Entity<Salary>()
                 .HasKey(s => s.SalaryID);
+
+            modelBuilder.Entity<ReportTemplate>()
+                .HasKey(rt => rt.Id);
+
+            // Configure unique index on Code + SchoolId (allows same code for different schools, but unique per school)
+            modelBuilder.Entity<ReportTemplate>()
+                .HasIndex(rt => new { rt.Code, rt.SchoolId })
+                .IsUnique()
+                .HasFilter("[SchoolId] IS NOT NULL");
+
+            // Configure unique index on Code when SchoolId is null (global templates)
+            modelBuilder.Entity<ReportTemplate>()
+                .HasIndex(rt => rt.Code)
+                .IsUnique()
+                .HasFilter("[SchoolId] IS NULL");
+
+            // Configure relationship with School (optional)
+            modelBuilder.Entity<ReportTemplate>()
+                .HasOne(rt => rt.School)
+                .WithMany()
+                .HasForeignKey(rt => rt.SchoolId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Configure owned entities (composite types)
             modelBuilder.Entity<Student>()

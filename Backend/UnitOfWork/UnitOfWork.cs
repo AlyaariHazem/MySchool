@@ -24,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILogger<StudentRepository> _studentRepositoryLogger;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly HtmlSanitizationService _htmlSanitizer;
 
     public UnitOfWork(
         TenantDbContext tenantContext,
@@ -32,7 +33,8 @@ public class UnitOfWork : IUnitOfWork
         mangeFilesService mangeFilesService,
         UserManager<ApplicationUser> userManager,
         ILogger<StudentRepository> studentRepositoryLogger,
-        IHttpContextAccessor httpContextAccessor
+        IHttpContextAccessor httpContextAccessor,
+        HtmlSanitizationService htmlSanitizer
     )
     {
         _tenantContext = tenantContext;
@@ -42,6 +44,7 @@ public class UnitOfWork : IUnitOfWork
         _userManager = userManager;
         _studentRepositoryLogger = studentRepositoryLogger;
         _httpContextAccessor = httpContextAccessor;
+        _htmlSanitizer = htmlSanitizer;
 
         // Tenant-specific repositories use TenantDbContext
         // Initialize Users first since it's needed by Students, Teachers, and Employees
@@ -68,7 +71,7 @@ public class UnitOfWork : IUnitOfWork
         Months = new MonthRepository(_tenantContext, _mapper);
         Employees = new EmployeeRepository(_tenantContext, Users);
         AccountStudentGuardians = new AccountStudentGuardianRepository(_tenantContext, _mapper);
-        Reports = new ReportRepository(_tenantContext);
+        Reports = new ReportRepository(_tenantContext, _htmlSanitizer);
         MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper);
         TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper);
         Dashboard = new DashboardRepository(_tenantContext, Users);
