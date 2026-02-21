@@ -28,11 +28,6 @@
   </div>
 
   <div #printArea class="report bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo">
-    <!-- Show loading state -->
-    <div *ngIf="isLoading" class="text-center p-4">
-      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-      <p>جاري تحميل التقرير...</p>
-    </div>
     
     <!-- Render processed template HTML -->
     <div *ngIf="!isLoading && processedHtml" [innerHTML]="processedHtml"></div>

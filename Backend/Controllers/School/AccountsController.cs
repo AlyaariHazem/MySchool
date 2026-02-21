@@ -195,9 +195,18 @@ public class AccountsController : ControllerBase
         catch (Exception ex)
         {
             response.IsSuccess = false;
-            response.statusCode = HttpStatusCode.InternalServerError;
-            response.ErrorMasseges.Add(ex.Message);
-            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            // Check if it's a "not found" error
+            if (ex.Message.Contains("not found") || ex.Message.Contains("لم يتم العثور"))
+            {
+                response.statusCode = HttpStatusCode.NotFound;
+                response.ErrorMasseges.Add($"Account with ID {id} not found.");
+            }
+            else
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+            }
+            return StatusCode((int)response.statusCode, response);
         }
     }
 

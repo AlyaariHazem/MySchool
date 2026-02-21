@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild, OnInit, inject } from '@angular/core'
 import { ReportTemplateService } from '../../core/services/report-template.service';
 import { AccountService } from '../../core/services/account.service';
 import { ActivatedRoute } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-account-report',
@@ -17,6 +18,7 @@ export class AccountReportComponent implements OnInit {
   private reportTemplateService = inject(ReportTemplateService);
   private accountService = inject(AccountService);
   private route = inject(ActivatedRoute);
+  private toastr = inject(ToastrService);
 
   // School data will be loaded from database
   logo: string = '';
@@ -64,7 +66,7 @@ export class AccountReportComponent implements OnInit {
   loadAccountByNumber(): void {
     const accountId = parseInt(this.accountNumberInput);
     if (isNaN(accountId) || accountId <= 0) {
-      alert('يرجى إدخال رقم حساب صحيح');
+      this.toastr.warning('يرجى إدخال رقم حساب صحيح', 'تحذير');
       return;
     }
     this.loadAccountData(accountId);
@@ -129,13 +131,31 @@ export class AccountReportComponent implements OnInit {
           this.loadTemplate();
         } else {
           this.isLoading = false;
-          alert('لم يتم العثور على الحساب');
+          const errorMessage = (response as any).errorMasseges && (response as any).errorMasseges.length > 0 
+            ? (response as any).errorMasseges[0] 
+            : 'لم يتم العثور على الحساب';
+          this.toastr.error(errorMessage, 'خطأ');
         }
       },
       error: (error: any) => {
         console.error('Error loading account report:', error);
         this.isLoading = false;
-        alert('حدث خطأ أثناء تحميل بيانات الحساب');
+        
+        // Extract error message from response
+        let errorMessage = 'حدث خطأ أثناء تحميل بيانات الحساب';
+        if (error?.error) {
+          if (error.error.errorMasseges && Array.isArray(error.error.errorMasseges) && error.error.errorMasseges.length > 0) {
+            errorMessage = error.error.errorMasseges[0];
+          } else if (error.error.message) {
+            errorMessage = error.error.message;
+          } else if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          }
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+        
+        this.toastr.error(errorMessage, 'خطأ');
       }
     });
   }
@@ -143,20 +163,20 @@ export class AccountReportComponent implements OnInit {
   loadDefaultData(): void {
     // Default data for demo
     this.header = {
-      accountNo: '123456789',
-      guardian: 'ولي الأمر: أحمد محمد',
-      createdDate: '2024‑09‑01',
-      totalDebit: 300_000,
-      totalCredit: 120_000,
-      balance: -180_000
-    };
+    accountNo: '123456789',
+    guardian: 'ولي الأمر: أحمد محمد',
+    createdDate: '2024‑09‑01',
+    totalDebit: 300_000,
+    totalCredit: 120_000,
+    balance: -180_000
+  };
 
     this.rows = [
-      { id: 1, desc: 'رسوم دراسية', type: 'Debit', date: '2024‑09‑05', amount: 200_000, discount: 0, required: 200_000 },
-      { id: 2, desc: 'خصم أخوة', type: 'Credit', date: '2024‑09‑10', amount: 40_000, discount: 40_000, required: 0 },
-      { id: 3, desc: 'رسوم مواصلات', type: 'Debit', date: '2024‑09‑12', amount: 100_000, discount: 0, required: 100_000 },
-    ];
-
+    { id: 1, desc: 'رسوم دراسية', type: 'Debit', date: '2024‑09‑05', amount: 200_000, discount: 0, required: 200_000 },
+    { id: 2, desc: 'خصم أخوة', type: 'Credit', date: '2024‑09‑10', amount: 40_000, discount: 40_000, required: 0 },
+    { id: 3, desc: 'رسوم مواصلات', type: 'Debit', date: '2024‑09‑12', amount: 100_000, discount: 0, required: 100_000 },
+  ];
+  
     // Default savings/deposits data
     this.savings = [
       { id: 1, amount: 50_000, date: '2024‑09‑28', type: 'true', description: 'قسط اول' },
@@ -354,8 +374,17 @@ export class AccountReportComponent implements OnInit {
   }
 
   nativePrint(): void {
+    // Check if we have data to print
+    if (!this.header.accountNo && !this.processedHtml) {
+      this.toastr.warning('لا توجد بيانات للطباعة. يرجى تحميل بيانات الحساب أولاً.', 'تحذير');
+      return;
+    }
+
     const page = document.getElementById('page');
-    if (!page) { return; }
+    if (!page) { 
+      this.toastr.error('لم يتم العثور على محتوى الطباعة', 'خطأ');
+      return; 
+    }
 
     /* ️نسخ كل ملفات الأنماط الموجودة */
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
@@ -363,10 +392,32 @@ export class AccountReportComponent implements OnInit {
       .map(el => el.outerHTML)
       .join('');
  
-      const base = `<base href="${document.baseURI}">`;
+    const base = `<base href="${document.baseURI}">`;
 
     const popup = window.open('', '', 'width=1000px,height=auto');
-    if (!popup) { return; }
+    if (!popup) { 
+      this.toastr.error('تم منع النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة للمتصفح.', 'خطأ');
+      return; 
+    }
+
+    // Get the print area content (either processedHtml or the fallback template)
+    let printContent = '';
+    if (this.processedHtml) {
+      // Use processed template HTML
+      printContent = `
+        <div dir="rtl" style="padding:20px; line-height:1.8; font-family:Arial;">
+          ${this.processedHtml}
+        </div>
+      `;
+    } else {
+      // Use the fallback template from the page
+      const printArea = this.printArea?.nativeElement;
+      if (printArea) {
+        printContent = printArea.innerHTML;
+      } else {
+        printContent = page.innerHTML;
+      }
+    }
 
     popup.document.write(`
       <html><head>
@@ -374,18 +425,48 @@ export class AccountReportComponent implements OnInit {
         ${base}
         ${links}
         <style>
-        
           @media print {
-            body{margin:0;direction:rtl;font-family:"Cairo","Tahoma",sans-serif}
-            .report,*{letter-spacing:0!important}   /* إبقاء العربية متصلة */
+            body {
+              margin: 0;
+              direction: rtl;
+              font-family: "Cairo", "Tahoma", sans-serif;
+            }
+            .report, * {
+              letter-spacing: 0 !important;
+            }
+            .print\\:hidden {
+              display: none !important;
+            }
+            table {
+              border-collapse: collapse;
+              width: 100%;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+            }
+            .bg-gray-50 {
+              background-color: #f9fafb !important;
+            }
+            .bg-yellow-50 {
+              background-color: #fef3c7 !important;
+            }
+            .bg-blue-50 {
+              background-color: #dbeafe !important;
+            }
           }
         </style>
       </head><body dir="rtl">
-        ${page.outerHTML}
+        ${printContent}
       </body></html>
     `);
 
     popup.document.close();
-    popup.onload = () => popup.print();
+    
+    // Wait for content to load, then print
+    setTimeout(() => {
+      popup.focus();
+      popup.print();
+    }, 250);
   }
 }

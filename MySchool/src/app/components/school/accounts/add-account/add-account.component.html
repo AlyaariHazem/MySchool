@@ -1,4 +1,18 @@
 <form [formGroup]="form" class="account-form">
+    <!-- Buttons in header -->
+    <div class="form-actions-header">
+        <button class="save" pButton type="button" label="حفظ" (click)="save()" title="حفظ الحساب"></button>
+        <button 
+            pButton 
+            type="button"
+            label="طباعة" 
+            icon="pi pi-print" 
+            (click)="printAccountReport()" 
+            class="p-button-sm print-btn"
+            [disabled]="!currentAccountId"
+            title="طباعة تقرير الحساب">
+        </button>
+    </div>
     <div class="schoolInfo">
         <div class="contant">
             <div class="group">
@@ -68,5 +82,4 @@
             </div>
         </div>
     </div>
-    <button class="save" pButton type="button" label="حفظ" (click)="save()"></button>
 </form>

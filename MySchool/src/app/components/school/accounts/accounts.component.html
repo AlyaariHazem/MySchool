@@ -36,7 +36,6 @@
 
   <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '75%' }" [draggable]="false" [resizable]="false">
     <h2 class="Title">حساب جديد</h2>
-    <button class="button typing">طباعة</button>
     @if(visible) {
     <app-add-account [account]="EditAccount"></app-add-account>
     }

@@ -18,11 +18,23 @@ form {
   position: static !important;
   margin-top: 0rem;
 }
-.save {
+.form-actions-header {
+  display: flex;
+  gap: 0.5rem;
   position: absolute;
   left: 9rem;
   top: 1rem;
+  z-index: 10;
+}
+
+.save {
   background-color: #12a212;
+}
+
+.print-btn {
+  background-color: #fdfdfd;
+  color: #000000;
+  border: 1px solid #000000;
 }
 .schoolInfo {
   background-color: white;
