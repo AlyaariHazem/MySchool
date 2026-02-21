@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import Quill from 'quill';
 
 import { StudentMonthResultComponent } from '../../report/student-month-result/student-month-result.component';
+import { AccountReportComponent } from '../../report/account-report/account-report.component';
 import { ReportTemplateService, ReportTemplateGetDTO } from '../../core/services/report-template.service';
 
 interface ReportOption { 
@@ -43,7 +44,8 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
   reportOptions: ReportOption[] = [
     { label: 'Student Month Result', value: StudentMonthResultComponent, code: 'STUDENT_MONTH_RESULT' },
     { label: 'Receipt Voucher', value: StudentMonthResultComponent, code: 'RECEIPT_VOUCHER' },
-    { label: 'Registration Form', value: StudentMonthResultComponent, code: 'REGISTRATION_FORM' }
+    { label: 'Registration Form', value: StudentMonthResultComponent, code: 'REGISTRATION_FORM' },
+    { label: 'Account Report', value: AccountReportComponent, code: 'ACCOUNT_REPORT' }
   ];
 
   // Services

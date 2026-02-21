@@ -15,5 +15,6 @@ public interface IAccountRepository
     Task<AccountsDTO> GetAccountByIdAsync(int id);
     Task UpdateAccountAsync(AccountsDTO account);
     Task DeleteAccountAsync(int id);
-
+    Task<AccountReportDTO> GetAccountReportAsync(int accountId);
+    Task<int> GetAccountIdByAccountStudentGuardianIdAsync(int accountStudentGuardianId);
 }

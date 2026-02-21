@@ -1,7 +1,7 @@
 <div class="container" id="voucherContent">
   <div class="button-container">
     <button pButton [icon]="changeView ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"
-      class="p-button-rounded p-button-text" (click)="toggleDiv()">
+      class="p-button-rounded p-button-text" (click)="toggleDiv()" title="تبديل العرض">
     </button>
     <h4 class="Title">سند قبض جديد</h4>
     <!-- Add button, disable after submission -->
@@ -9,7 +9,8 @@
       {{voucherData?"تعديل":"إضافة"}}
     </button>
 
-    <button class="button1 typing" (click)="printVoucher()">طباعة</button> <!-- Print button -->
+    <button class="button1 typing" (click)="printAccountReport()">طباعة</button> <!-- Print voucher button -->
+    <button class="button1 typing" (click)="printAccountReport()" *ngIf="selectedAccount">طباعة تقرير الحساب</button> <!-- Print account report button -->
     <img class="image-header" src="assets/img/user.png" alt="photo">
   </div>
 
@@ -74,7 +75,7 @@
     </p-panel>
 
     <p-panel header="فواتير ولي الأمر" *ngIf="showDiv2">
-      <button pButton icon="pi pi-print" class="p-button-rounded p-button-text print" (click)="print()"> طباعة </button>
+      <button pButton icon="pi pi-print" class="p-button-rounded p-button-text print" (click)="printAccountReport()"> طباعة </button>
       <div id="report">
         @for (voucher of filteredVouchers; track $index) {
           <app-header-report id="header"></app-header-report>

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 
 
@@ -36,6 +37,7 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   private voucherService = inject(VoucherService);
   private fileService = inject(FileService);
   private vouchersGuardianStore = inject(VouchersGuardianStoreService);
+  private router = inject(Router);
   
   private vouchersSubscription?: Subscription;
 
@@ -250,7 +252,38 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   
     popup.document.close();
     popup.onload = () => popup.print();
-  
+
+  }
+
+  /**
+   * Print account report for the selected account
+   */
+  printAccountReport(): void {
+    // Get account ID from selected account
+    if (!this.selectedAccount) {
+      this.toastr.warning('يرجى اختيار حساب أولاً', 'تحذير');
+      return;
+    }
+
+    // Get account ID from accountStudentGuardianID
+    this.accountService.getAccountIdByAccountStudentGuardianId(this.selectedAccount.accountStudentGuardianID).subscribe({
+      next: (response) => {
+        if (response.isSuccess && response.result) {
+          const accountId = response.result;
+          // Open account report page in new tab with account ID
+          const url = this.router.createUrlTree(['/school/reports/account'], { 
+            queryParams: { accountId: accountId } 
+          });
+          window.open(url.toString(), '_blank');
+        } else {
+          this.toastr.error('لم يتم العثور على الحساب', 'خطأ');
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching account ID:', error);
+        this.toastr.error('حدث خطأ أثناء جلب بيانات الحساب', 'خطأ');
+      }
+    });
   }
 
   toggleDiv() {

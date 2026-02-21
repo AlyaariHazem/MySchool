@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
-import { Account, StudentAccounts } from '../models/accounts.model';
+import { Account, StudentAccounts, AccountReport } from '../models/accounts.model';
 import { ApiResponse } from '../../../../core/models/response.model';
 
 @Injectable({
@@ -32,5 +32,17 @@ export class AccountService {
 
   DeleteAccount(id: number): Observable<ApiResponse<any>> {
     return this.API.deleteRequest<any>(`Accounts/${id}`);
+  }
+
+  getAccountById(id: number): Observable<ApiResponse<Account>> {
+    return this.API.getRequest<Account>(`Accounts/${id}`);
+  }
+
+  getAccountReport(accountId: number): Observable<ApiResponse<AccountReport>> {
+    return this.API.getRequest<AccountReport>(`Accounts/${accountId}/report`);
+  }
+
+  getAccountIdByAccountStudentGuardianId(accountStudentGuardianId: number): Observable<ApiResponse<number>> {
+    return this.API.getRequest<number>(`Accounts/accountStudentGuardian/${accountStudentGuardianId}/accountId`);
   }
 }

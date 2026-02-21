@@ -179,4 +179,46 @@ public class AccountsController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, response);
         }
     }
+
+    // ✅ GET: api/accounts/{id}/report
+    [HttpGet("{id:int}/report")]
+    public async Task<ActionResult<APIResponse>> GetAccountReport(int id)
+    {
+        var response = new APIResponse();
+        try
+        {
+            var report = await _unitOfWork.Accounts.GetAccountReportAsync(id);
+            response.Result = report;
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
+    // ✅ GET: api/accounts/accountStudentGuardian/{accountStudentGuardianId}/accountId
+    [HttpGet("accountStudentGuardian/{accountStudentGuardianId:int}/accountId")]
+    public async Task<ActionResult<APIResponse>> GetAccountIdByAccountStudentGuardianId(int accountStudentGuardianId)
+    {
+        var response = new APIResponse();
+        try
+        {
+            var accountId = await _unitOfWork.Accounts.GetAccountIdByAccountStudentGuardianIdAsync(accountStudentGuardianId);
+            response.Result = accountId;
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
 }

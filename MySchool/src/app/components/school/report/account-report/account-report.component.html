@@ -1,12 +1,44 @@
 <div id="page" class="p-4 md:p-6 bg-white rounded-lg shadow-sm">
 
-  <div class="toolbar flex flex-wrap gap-2 justify-end mb-4 print:hidden">
-    <button pButton label="طباعة" icon="pi pi-print" (click)="nativePrint()" class="p-button-sm"></button>
-      <button pButton label="PDF" icon="pi pi-file-pdf" severity="danger" class="p-button-sm"></button>
-      <button pButton label="CSV" icon="pi pi-file-excel" severity="success" class="p-button-sm"></button>
+  <div class="toolbar flex flex-wrap gap-2 justify-between mb-4 print:hidden">
+    <div class="flex gap-2 items-center">
+      <label for="accountNumber" class="font-semibold">رقم الحساب:</label>
+      <input 
+        id="accountNumber"
+        type="number" 
+        [(ngModel)]="accountNumberInput" 
+        placeholder="أدخل رقم الحساب"
+        class="p-inputtext p-component p-inputnumber-input"
+        style="width: 150px;"
+        (keyup.enter)="loadAccountByNumber()" />
+      <button 
+        pButton 
+        label="تحميل" 
+        icon="pi pi-search" 
+        (click)="loadAccountByNumber()" 
+        class="p-button-sm"
+        [disabled]="isLoading"
+        title="تحميل بيانات الحساب"></button>
+    </div>
+    <div class="flex gap-2">
+      <button pButton label="طباعة" icon="pi pi-print" (click)="nativePrint()" class="p-button-sm" title="طباعة"></button>
+      <!-- <button pButton label="PDF" icon="pi pi-file-pdf" severity="danger" class="p-button-sm" title="تصدير إلى PDF"></button>
+      <button pButton label="CSV" icon="pi pi-file-excel" severity="success" class="p-button-sm" title="تصدير إلى CSV"></button> -->
+    </div>
   </div>
 
   <div #printArea class="report bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo">
+    <!-- Show loading state -->
+    <div *ngIf="isLoading" class="text-center p-4">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <p>جاري تحميل التقرير...</p>
+    </div>
+    
+    <!-- Render processed template HTML -->
+    <div *ngIf="!isLoading && processedHtml" [innerHTML]="processedHtml"></div>
+    
+    <!-- Fallback to original template if no template loaded -->
+    <div>
     <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 border-b pb-4 mb-4">
       <div class="flex-1 text-end md:text-end md:self-start">
         <h2 class="text-xl md:text-2xl font-bold text-primary mb-1">
@@ -33,11 +65,11 @@
       </div>
 
       <div class="min-w-max text-left md:text-end">
-        <img [src]="logo" alt="شعار المدرسة" class="h-12 mx-auto md:mx-0 mb-2" />
-        <div class="font-bold text-lg">{{ schoolName }}</div>
-        <div class="text-gray-600">شملان | مديرية معين | صنعاء</div>
-        <div class="text-gray-600">Tel: 01‑xxxxxxx</div>
-        <div class="text-sm mt-1 text-gray-500">2021‑2022</div>
+        <img [src]="logo" alt="شعار المدرسة" class="h-12 mx-auto md:mx-0 mb-2" *ngIf="logo" />
+        <div class="font-bold text-lg">{{ schoolName || 'اسم المدرسة' }}</div>
+        <div class="text-gray-600">{{ schoolAddress || 'شملان | مديرية معين | صنعاء' }}</div>
+        <div class="text-gray-600">Tel: {{ schoolPhone || '01‑xxxxxxx' }}</div>
+        <div class="text-sm mt-1 text-gray-500" *ngIf="academicYear">{{ academicYear }}</div>
       </div>
     </div>
 
@@ -79,6 +111,41 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- ✅ جدول المدخرات -->
+      <div class="mt-6">
+        <h3 class="text-lg font-bold mb-3">المدخرات:</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-center border-collapse">
+            <thead class="bg-gray-100 text-gray-800 text-sm">
+              <tr>
+                <th class="p-2 border">#</th>
+                <th class="p-2 border">الوصف</th>
+                <th class="p-2 border">النوع</th>
+                <th class="p-2 border">المبلغ</th>
+                <th class="p-2 border">تاريخ الإنشاء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of savings; let i = index" [ngClass]="i % 2 === 0 ? 'bg-gray-50' : ''">
+                <td class="p-2 border">{{ i + 1 }}</td>
+                <td class="p-2 border">{{ s.description || '' }}</td>
+                <td class="p-2 border" [ngClass]="(s.type === 'true' || s.type === true) ? 'text-green-600' : 'text-red-600'">
+                  {{ (s.type === 'true' || s.type === true) ? 'مدخر' : 'سحب' }}
+                </td>
+                <td class="p-2 border">YR {{ s.amount | number:'1.0-2' }}</td>
+                <td class="p-2 border">{{ s.date }}</td>
+              </tr>
+
+              <!-- ✅ إجمالي المدخرات -->
+              <tr class="font-bold bg-blue-50">
+                <td colspan="4" class="text-end p-2 border">إجمالي المدخرات:</td>
+                <td class="p-2 border">YR {{ getTotalSavings() | number:'1.0-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

@@ -92,4 +92,168 @@ public class AccountRepository : IAccountRepository
             throw new Exception("No data found");
         return studentAndAccountNames;
     }
+
+    public async Task<AccountReportDTO> GetAccountReportAsync(int accountId)
+    {
+        // Get account info
+        var account = await _dbContext.Accounts
+            .FirstOrDefaultAsync(a => a.AccountID == accountId);
+
+        if (account == null)
+            throw new Exception($"Account with ID {accountId} not found");
+
+        // Get school info (first school or based on context)
+        var school = await _dbContext.Schools
+            .Include(s => s.Years)
+            .FirstOrDefaultAsync();
+
+        // Get current academic year (active year)
+        var currentYear = await _dbContext.Years
+            .Where(y => y.Active == true)
+            .OrderByDescending(y => y.YearID)
+            .FirstOrDefaultAsync();
+
+        var schoolInfo = new SchoolInfoDTO();
+        if (school != null)
+        {
+            schoolInfo.SchoolName = school.SchoolName ?? string.Empty;
+            schoolInfo.SchoolAddress = school.Address ?? string.Empty;
+            schoolInfo.SchoolPhone = school.SchoolPhone > 0 ? school.SchoolPhone.ToString() : (school.Mobile ?? string.Empty);
+            schoolInfo.SchoolLogo = school.ImageURL ?? string.Empty;
+            
+            // Get academic year from current year dates
+            if (currentYear != null)
+            {
+                var startYear = currentYear.YearDateStart.Year;
+                var endYear = currentYear.YearDateEnd?.Year ?? currentYear.YearDateStart.Year + 1;
+                schoolInfo.AcademicYear = $"{startYear}-{endYear}";
+            }
+            else
+            {
+                // Fallback to current year
+                var currentYearNum = DateTime.Now.Year;
+                schoolInfo.AcademicYear = $"{currentYearNum}-{currentYearNum + 1}";
+            }
+        }
+
+        var report = new AccountReportDTO
+        {
+            AccountID = account.AccountID,
+            AccountName = account.AccountName ?? string.Empty,
+            HireDate = account.HireDate,
+            OpenBalance = account.OpenBalance,
+            TypeOpenBalance = account.TypeOpenBalance,
+            SchoolInfo = schoolInfo
+        };
+
+        // Get AccountStudentGuardian IDs for this account
+        var accountStudentGuardianIds = await _dbContext.AccountStudentGuardians
+            .Where(ag => ag.AccountID == accountId)
+            .Select(ag => ag.AccountStudentGuardianID)
+            .ToListAsync();
+
+        // Get transactions from StudentClassFees (Debits - fees assigned to students)
+        var studentClassFees = await _dbContext.StudentClassFees
+            .Include(scf => scf.FeeClass)
+            .ThenInclude(fc => fc.Fee)
+            .Include(scf => scf.Student)
+            .ThenInclude(s => s.AccountStudentGuardians)
+            .Where(scf => scf.Student.AccountStudentGuardians.Any(ag => accountStudentGuardianIds.Contains(ag.AccountStudentGuardianID)))
+            .ToListAsync();
+
+        var transactions = new List<AccountTransactionDTO>();
+        decimal totalDebit = 0;
+
+        foreach (var fee in studentClassFees)
+        {
+            // Amount is in FeeClass, not Fee
+            var feeAmount = (decimal)(fee.FeeClass?.Amount ?? 0);
+            var discount = fee.AmountDiscount ?? 0;
+            var netAmount = feeAmount - discount;
+
+            if (netAmount > 0)
+            {
+                // Use Fee HireDate for transaction date
+                var transactionDate = fee.FeeClass?.Fee?.HireDate ?? DateTime.Now;
+
+                transactions.Add(new AccountTransactionDTO
+                {
+                    Id = fee.StudentClassFeesID,
+                    Description = fee.FeeClass?.Fee?.FeeName ?? "رسوم دراسية",
+                    Type = "Debit",
+                    Amount = netAmount,
+                    Date = transactionDate
+                });
+                totalDebit += netAmount;
+            }
+        }
+
+        // Get payments/credits from Vouchers (Credits - payments made)
+        var vouchers = await _dbContext.Vouchers
+            .Where(v => accountStudentGuardianIds.Contains(v.AccountStudentGuardianID))
+            .OrderBy(v => v.HireDate)
+            .ToListAsync();
+
+        decimal totalCredit = 0;
+        var savings = new List<AccountSavingsDTO>();
+
+        foreach (var voucher in vouchers)
+        {
+            if (voucher.Receipt > 0)
+            {
+                // Payment/credit transaction
+                transactions.Add(new AccountTransactionDTO
+                {
+                    Id = voucher.VoucherID,
+                    Description = voucher.Note ?? "دفعة",
+                    Type = "Credit",
+                    Amount = voucher.Receipt,
+                    Date = voucher.HireDate
+                });
+                totalCredit += voucher.Receipt;
+
+                // Also add to savings (deposits)
+                savings.Add(new AccountSavingsDTO
+                {
+                    Id = voucher.VoucherID,
+                    Description = voucher.Note ?? "قسط",
+                    Type = true, // Savings/deposit
+                    Amount = voucher.Receipt,
+                    Date = voucher.HireDate
+                });
+            }
+        }
+
+        // Calculate balance
+        var initialBalance = account.OpenBalance ?? 0;
+        if (account.TypeOpenBalance)
+        {
+            // If TypeOpenBalance is true, it's a debit (owed)
+            totalDebit += initialBalance;
+        }
+        else
+        {
+            // If false, it's a credit (paid in advance)
+            totalCredit += initialBalance;
+        }
+
+        report.Transactions = transactions.OrderBy(t => t.Date).ToList();
+        report.Savings = savings.OrderBy(s => s.Date).ToList();
+        report.TotalDebit = totalDebit;
+        report.TotalCredit = totalCredit;
+        report.Balance = totalDebit - totalCredit;
+
+        return report;
+    }
+
+    public async Task<int> GetAccountIdByAccountStudentGuardianIdAsync(int accountStudentGuardianId)
+    {
+        var accountStudentGuardian = await _dbContext.AccountStudentGuardians
+            .FirstOrDefaultAsync(ag => ag.AccountStudentGuardianID == accountStudentGuardianId);
+
+        if (accountStudentGuardian == null)
+            throw new Exception($"AccountStudentGuardian with ID {accountStudentGuardianId} not found");
+
+        return accountStudentGuardian.AccountID;
+    }
 }
