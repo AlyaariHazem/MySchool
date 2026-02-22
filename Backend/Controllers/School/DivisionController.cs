@@ -87,13 +87,21 @@ namespace Backend.Controllers.School
 
         // GET api/divisions
         [HttpGet]
-        public async Task<ActionResult<APIResponse>> GetDivisions()
+        public async Task<ActionResult<APIResponse>> GetDivisions([FromQuery] int? yearID = null)
         {
             var response = new APIResponse();
 
             try
             {
-                var divisions = await _unitOfWork.Divisions.GetAll();
+                List<DivisionDTO> divisions;
+                if (yearID.HasValue)
+                {
+                    divisions = await _unitOfWork.Divisions.GetAllByYearID(yearID.Value);
+                }
+                else
+                {
+                    divisions = await _unitOfWork.Divisions.GetAll();
+                }
                 response.Result = divisions;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);

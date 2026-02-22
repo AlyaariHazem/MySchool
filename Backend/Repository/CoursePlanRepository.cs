@@ -195,6 +195,17 @@ public class CoursePlanRepository : ICoursePlanRepository
 
     public async Task<List<CoursePlanReturnDTO>> GetAllAsync()
     {
+        // Get active year
+        var activeYear = await _context.Years
+            .Where(y => y.Active)
+            .FirstOrDefaultAsync();
+
+        if (activeYear == null)
+        {
+            // If no active year, return empty list
+            return new List<CoursePlanReturnDTO>();
+        }
+
         var list = await _context.CoursePlans
             .Include(p => p.Subject)
             .Include(p => p.Teacher)
@@ -202,6 +213,7 @@ public class CoursePlanRepository : ICoursePlanRepository
             .Include(p => p.Division)
             .Include(p => p.Term)
             .Include(p => p.Year)
+            .Where(p => p.YearID == activeYear.YearID)
             .Select(item => new CoursePlanReturnDTO
             {
                 CoursePlanName = $"{item.Subject.SubjectName}-{item.Class.ClassName}",

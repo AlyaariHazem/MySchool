@@ -111,6 +111,87 @@ namespace FirstProjectWithMVC.Repository.School
             return divisions;
         }
 
+        public async Task<List<DivisionDTO>> GetAllByYearID(int? yearID = null)
+        {
+            var query = _db.Divisions
+                .Include(d => d.Class)
+                    .ThenInclude(c => c.Year)
+                .Include(d => d.Class)
+                    .ThenInclude(c => c.Stage)
+                        .ThenInclude(s => s.Year)
+                .Where(d => d.Class != null);
+
+            // If yearID is provided, filter by that year; otherwise, use active year
+            if (yearID.HasValue)
+            {
+                query = query.Where(d => 
+                    (d.Class.Year != null && d.Class.Year.YearID == yearID.Value) ||
+                    (d.Class.Stage != null && d.Class.Stage.Year != null && d.Class.Stage.Year.YearID == yearID.Value));
+                
+                // If no divisions found for target year, fallback to active year divisions
+                var divisionsForTargetYear = await query
+                    .Select(d => new DivisionDTO
+                    {
+                        DivisionID = d.DivisionID,
+                        DivisionName = string.IsNullOrWhiteSpace(d.DivisionName) ? $"قسم {d.DivisionID}" : d.DivisionName, // Use ID as fallback if name is empty
+                        ClassID = d.ClassID,
+                        ClassesName = d.Class != null ? d.Class.ClassName : string.Empty,
+                        StageName = d.Class != null && d.Class.Stage != null ? d.Class.Stage.StageName : string.Empty,
+                        StudentCount = d.Students != null ? d.Students.Count() : 0,
+                        State = d.State,
+                    }).ToListAsync();
+
+                // If no divisions found for target year, return active year divisions as fallback
+                if (divisionsForTargetYear.Count == 0)
+                {
+                    var activeYearQuery = _db.Divisions
+                        .Include(d => d.Class)
+                            .ThenInclude(c => c.Year)
+                        .Include(d => d.Class)
+                            .ThenInclude(c => c.Stage)
+                                .ThenInclude(s => s.Year)
+                        .Where(d => d.Class != null &&
+                                   ((d.Class.Year != null && d.Class.Year.Active == true) ||
+                                    (d.Class.Stage != null && d.Class.Stage.Year != null && d.Class.Stage.Year.Active == true)));
+
+                    return await activeYearQuery
+                        .Select(d => new DivisionDTO
+                        {
+                            DivisionID = d.DivisionID,
+                            DivisionName = string.IsNullOrWhiteSpace(d.DivisionName) ? $"قسم {d.DivisionID}" : d.DivisionName, // Use ID as fallback if name is empty
+                            ClassID = d.ClassID,
+                            ClassesName = d.Class != null ? d.Class.ClassName : string.Empty,
+                            StageName = d.Class != null && d.Class.Stage != null ? d.Class.Stage.StageName : string.Empty,
+                            StudentCount = d.Students != null ? d.Students.Count() : 0,
+                            State = d.State,
+                        }).ToListAsync();
+                }
+
+                return divisionsForTargetYear;
+            }
+            else
+            {
+                // Default to active year (same as GetAll())
+                query = query.Where(d => 
+                    (d.Class.Year != null && d.Class.Year.Active == true) ||
+                    (d.Class.Stage != null && d.Class.Stage.Year != null && d.Class.Stage.Year.Active == true));
+            }
+
+            var divisions = await query
+                .Select(d => new DivisionDTO
+                {
+                    DivisionID = d.DivisionID,
+                    DivisionName = d.DivisionName,
+                    ClassID = d.ClassID,
+                    ClassesName = d.Class != null ? d.Class.ClassName : string.Empty,
+                    StageName = d.Class != null && d.Class.Stage != null ? d.Class.Stage.StageName : string.Empty,
+                    StudentCount = d.Students != null ? d.Students.Count() : 0,
+                    State = d.State,
+                }).ToListAsync();
+
+            return divisions;
+        }
+
 
 
         public async Task<Division> GetByIdAsync(int id)

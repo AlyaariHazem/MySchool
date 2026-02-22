@@ -9,6 +9,8 @@ import { map } from 'rxjs';
 import { PaginatorState } from 'primeng/paginator';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { PromoteStudentDialogComponent } from './promote-student-dialog/promote-student-dialog.component';
+import { YearService } from '../../../../core/services/year.service';
+import { Year } from '../../../../core/models/year.model';
 
 @Component({
   selector: 'app-student-promotion',
@@ -19,6 +21,7 @@ export class StudentPromotionComponent implements OnInit {
   studentService = inject(StudentService);
   toastr = inject(ToastrService);
   dialogService = inject(DialogService);
+  yearService = inject(YearService);
   private fb = inject(FormBuilder);
   
   readonly dir$ = this.store.select(selectLanguage).pipe(
@@ -50,7 +53,53 @@ export class StudentPromotionComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadUnregisteredStudents();
+    this.determineTargetYear();
+  }
+
+  private determineTargetYear(): void {
+    // Get all years to find the target year (next year after active year)
+    this.yearService.getAllYears().subscribe({
+      next: (years: Year[]) => {
+        if (years && years.length > 0) {
+          // Find active year
+          const activeYear = years.find(y => y.active);
+          
+          if (activeYear) {
+            // Find next year (inactive year with YearID > activeYear.YearID, or any year with YearID > activeYear.YearID)
+            let targetYear = years
+              .filter(y => !y.active && y.yearID > activeYear.yearID)
+              .sort((a, b) => a.yearID - b.yearID)[0];
+            
+            // If no inactive year found, try any year with YearID > activeYear.YearID
+            if (!targetYear) {
+              targetYear = years
+                .filter(y => y.yearID > activeYear.yearID)
+                .sort((a, b) => a.yearID - b.yearID)[0];
+            }
+            
+            if (targetYear) {
+              this.targetYearID = targetYear.yearID;
+              console.log(`✅ Target year determined: YearID ${targetYear.yearID} (Active year: YearID ${activeYear.yearID})`);
+              this.toastr.info(`السنة المستهدفة: YearID ${targetYear.yearID}`, 'معلومات', { timeOut: 3000 });
+            } else {
+              console.warn('⚠️ No target year found. Using null (backend will determine automatically).');
+              this.toastr.warning('لم يتم العثور على سنة مستهدفة. سيتم التحديد تلقائياً من الخادم', 'تحذير', { timeOut: 4000 });
+            }
+          } else {
+            console.warn('No active year found. Using null (backend will determine automatically).');
+          }
+        }
+        
+        // Load students after determining target year
+        this.loadUnregisteredStudents();
+      },
+      error: (error) => {
+        console.error('Error loading years:', error);
+        this.toastr.warning('فشل في تحديد السنة المستهدفة. سيتم التحديد تلقائياً من الخادم', 'تحذير');
+        // Continue with null targetYearID - backend will determine it
+        this.loadUnregisteredStudents();
+      }
+    });
   }
 
   loadUnregisteredStudents(): void {
@@ -136,11 +185,17 @@ export class StudentPromotionComponent implements OnInit {
       return;
     }
 
+    console.log('Opening promotion dialog with:', {
+      studentsCount: this.selectedStudents.length,
+      targetYearID: this.targetYearID
+    });
+
     const ref: DynamicDialogRef = this.dialogService.open(PromoteStudentDialogComponent, {
       header: 'ترقية الطلاب',
       width: '80%',
       data: {
-        students: this.selectedStudents
+        students: this.selectedStudents,
+        targetYearID: this.targetYearID
       }
     });
 

@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { Division, divisions } from '../models/division.model';
 import { ApiResponse } from '../../../../core/models/response.model';
@@ -12,8 +13,14 @@ export class DivisionService {
 
   constructor() { }
 
-  GetAll(): Observable<ApiResponse<divisions[]>> {
-    return this.API.getRequest<divisions[]>('Divisions');
+  GetAll(yearID?: number): Observable<ApiResponse<divisions[]>> {
+    const url = yearID ? `Divisions?yearID=${yearID}` : 'Divisions';
+    return this.API.http.get<ApiResponse<divisions[]>>(`${this.API.baseUrl}/${url}`).pipe(
+      catchError(error => {
+        console.error('Error loading divisions:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   Add(division: Division): Observable<ApiResponse<Division>> {

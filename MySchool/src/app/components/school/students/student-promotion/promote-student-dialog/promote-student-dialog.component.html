@@ -2,6 +2,12 @@
   <div class="dialog-header">
     <h3>ترقية الطلاب</h3>
     <p class="subtitle">اختر القسم الجديد لكل طالب</p>
+    <div class="target-year-info" *ngIf="targetYearID">
+      <small style="color: #666;">السنة المستهدفة: YearID {{ targetYearID }}</small>
+    </div>
+    <div class="target-year-info" *ngIf="!targetYearID">
+      <small style="color: #f59e0b;">⚠ السنة المستهدفة: سيتم التحديد تلقائياً من الخادم</small>
+    </div>
     <div class="auto-promote-option">
       <label>
         <input 
@@ -26,31 +32,31 @@
         </div>
         <div class="division-select">
           <label>القسم الجديد:</label>
-          <p-dropdown
-            [formGroup]="getFormGroup(i)"
-            formControlName="newDivisionID"
-            [options]="getFilteredDivisions(student)"
-            optionLabel="divisionName"
-            appendTo="body"
-            optionValue="divisionID"
-            [placeholder]="autoPromote ? 'جاري التحديد...' : 'اختر القسم'"
-            [showClear]="!autoPromote"
-            [disabled]="autoPromote"
-            styleClass="w-full"
-            [style]="{'width': '100%'}">
+          <div [formGroup]="getFormGroup(i)">
+            <p-dropdown
+              formControlName="newDivisionID"
+              [options]="getFilteredDivisions(student)"
+              optionLabel="divisionName"
+              appendTo="body"
+              optionValue="divisionID"
+              [placeholder]="autoPromote ? 'جاري التحديد...' : 'اختر القسم'"
+              [showClear]="!autoPromote"
+              styleClass="w-full"
+              [style]="{'width': '100%'}">
             <ng-template let-division pTemplate="item">
               <div class="division-option">
-                <span>{{ division.divisionName }}</span>
+                <span>{{ division.divisionName || ('قسم ' + division.divisionID) }}</span>
                 <small class="division-class">{{ division.classesName }}</small>
               </div>
             </ng-template>
             <ng-template let-division pTemplate="selectedItem">
               <div class="division-option">
-                <span>{{ division.divisionName }}</span>
+                <span>{{ division.divisionName || ('قسم ' + division.divisionID) }}</span>
                 <small class="division-class">{{ division.classesName }}</small>
               </div>
             </ng-template>
-          </p-dropdown>
+            </p-dropdown>
+          </div>
           <small class="auto-assigned-info" *ngIf="autoPromote && getFormGroup(i).get('newDivisionID')?.value">
             ✓ تم التحديد تلقائياً: الصف التالي
           </small>

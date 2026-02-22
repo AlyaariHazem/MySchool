@@ -21,12 +21,30 @@ namespace Backend.Repository.School
             _mapper = mapper;
         }
 
-        // Get all curricula
+        // Get all curricula for active year only
         public async Task<List<CurriculumReturnDTO>> GetAllAsync()
         {
+            // Get active year
+            var activeYear = await _context.Years
+                .Where(y => y.Active)
+                .FirstOrDefaultAsync();
+
+            if (activeYear == null)
+            {
+                // If no active year, return empty list
+                return new List<CurriculumReturnDTO>();
+            }
+
             var list = await _context.Curriculums
                 .Include(c => c.Subject)
                 .Include(c => c.Class)
+                    .ThenInclude(cl => cl.Year)
+                .Include(c => c.Class)
+                    .ThenInclude(cl => cl.Stage)
+                        .ThenInclude(s => s.Year)
+                .Where(c => c.Class != null &&
+                           ((c.Class.Year != null && c.Class.Year.YearID == activeYear.YearID) ||
+                            (c.Class.Stage != null && c.Class.Stage.Year != null && c.Class.Stage.Year.YearID == activeYear.YearID)))
                 .ToListAsync();
 
             return _mapper.Map<List<CurriculumReturnDTO>>(list);

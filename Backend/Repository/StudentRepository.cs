@@ -151,27 +151,113 @@ public class StudentRepository : IStudentRepository
             }
         }
 
-        // Add student to manthly and termly grades
+        // Add student to monthly and termly grades
         student = await _context.Students
-        .Include(s => s.Division)
-            .ThenInclude(d => d.Class)
-        .FirstOrDefaultAsync(s => s.StudentID == student.StudentID) ?? student;
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Year)
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Stage)
+                        .ThenInclude(s => s.Year)
+            .FirstOrDefaultAsync(s => s.StudentID == student.StudentID) ?? student;
+
+        if (student.Division == null || student.Division.Class == null)
+        {
+            _logger.LogWarning("Student {StudentID} has no division or class. Cannot create grades.", student.StudentID);
+            return student;
+        }
+
+        // Get the year ID (either from Class.YearID or Class.Stage.YearID)
+        var yearID = student.Division.Class.YearID ?? 
+                    (student.Division.Class.Stage?.YearID);
+
+        if (!yearID.HasValue)
+        {
+            _logger.LogWarning("Student {StudentID} has no associated year. Cannot create grades.", student.StudentID);
+            return student;
+        }
+
+        var classID = student.Division.ClassID;
+
+        _logger.LogInformation("Creating grades for new student {StudentID} in DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}",
+            student.StudentID, student.DivisionID, classID, yearID.Value);
 
         var plans = await _context.CoursePlans
             .Where(p => p.DivisionID == student.DivisionID &&
-                        p.YearID == student.Division.Class.YearID &&
-                        p.ClassID == student.Division.ClassID)
+                        p.YearID == yearID.Value &&
+                        p.ClassID == classID)
             .ToListAsync();
 
-        // 3) بيانات مشتركة
+        _logger.LogInformation("Found {Count} course plans for new student {StudentID}", plans.Count, student.StudentID);
+
+        if (plans.Count == 0)
+        {
+            _logger.LogWarning("No course plans found for new student {StudentID} in DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}. Grades will not be created.",
+                student.StudentID, student.DivisionID, classID, yearID.Value);
+            return student;
+        }
+
+        // Get months for the year
         var months = await _context.YearTermMonths
-            .Where(m => m.YearID == student.Division.Class.YearID)
+            .Where(m => m.YearID == yearID.Value)
             .Select(m => new { m.MonthID, m.TermID })
             .ToListAsync();
+
+        // If no months found, try to create default months
+        if (months.Count == 0)
+        {
+            _logger.LogWarning("No YearTermMonths found for YearID: {YearID}. Creating default months.", yearID.Value);
+            
+            var defaultMonths = new List<YearTermMonth>
+            {
+                new YearTermMonth { YearID = yearID.Value, TermID = 1, MonthID = 5 },
+                new YearTermMonth { YearID = yearID.Value, TermID = 1, MonthID = 6 },
+                new YearTermMonth { YearID = yearID.Value, TermID = 1, MonthID = 7 },
+                new YearTermMonth { YearID = yearID.Value, TermID = 1, MonthID = 8 },
+                new YearTermMonth { YearID = yearID.Value, TermID = 2, MonthID = 9 },
+                new YearTermMonth { YearID = yearID.Value, TermID = 2, MonthID = 10 },
+                new YearTermMonth { YearID = yearID.Value, TermID = 2, MonthID = 11 },
+                new YearTermMonth { YearID = yearID.Value, TermID = 2, MonthID = 12 }
+            };
+
+            await _context.YearTermMonths.AddRangeAsync(defaultMonths);
+            await _context.SaveChangesAsync();
+
+            months = await _context.YearTermMonths
+                .Where(m => m.YearID == yearID.Value)
+                .Select(m => new { m.MonthID, m.TermID })
+                .ToListAsync();
+        }
 
         var gradeTypes = await _context.GradeTypes
             .Where(g => g.IsActive)
             .Select(g => g.GradeTypeID)
+            .ToListAsync();
+
+        _logger.LogInformation("Found {MonthCount} months and {GradeTypeCount} grade types for YearID: {YearID}",
+            months.Count, gradeTypes.Count, yearID.Value);
+
+        if (months.Count == 0 || gradeTypes.Count == 0)
+        {
+            _logger.LogWarning("Cannot create grades for student {StudentID}. Months: {MonthCount}, GradeTypes: {GradeTypeCount}",
+                student.StudentID, months.Count, gradeTypes.Count);
+            return student;
+        }
+
+        // Bulk fetch existing grades to avoid duplicates
+        var existingTermlyGrades = await _context.TermlyGrades
+            .Where(tg => tg.StudentID == student.StudentID &&
+                        tg.YearID == yearID.Value &&
+                        tg.ClassID == classID)
+            .Select(tg => new { tg.StudentID, tg.YearID, tg.TermID, tg.ClassID, tg.SubjectID })
+            .ToListAsync();
+
+        var existingMonthlyGrades = await _context.MonthlyGrades
+            .Where(mg => mg.StudentID == student.StudentID &&
+                        mg.YearID == yearID.Value &&
+                        mg.ClassID == classID)
+            .Select(mg => new { mg.StudentID, mg.YearID, mg.TermID, mg.ClassID, mg.SubjectID, mg.MonthID, mg.GradeTypeID })
             .ToListAsync();
 
         var monthly = new List<MonthlyGrade>();
@@ -179,34 +265,100 @@ public class StudentRepository : IStudentRepository
 
         foreach (var plan in plans)
         {
-            // Termly
-            termly.Add(new TermlyGrade
-            {
-                StudentID = student.StudentID,
-                YearID = plan.YearID,
-                TermID = plan.TermID,
-                ClassID = plan.ClassID,
-                SubjectID = plan.SubjectID
-            });
+            // Check if TermlyGrade already exists
+            var termlyExists = existingTermlyGrades.Any(tg => 
+                tg.StudentID == student.StudentID &&
+                tg.YearID == yearID.Value &&
+                tg.TermID == plan.TermID &&
+                tg.ClassID == classID &&
+                tg.SubjectID == plan.SubjectID);
 
-            // Monthly
+            if (!termlyExists)
+            {
+                termly.Add(new TermlyGrade
+                {
+                    StudentID = student.StudentID,
+                    YearID = yearID.Value,
+                    TermID = plan.TermID,
+                    ClassID = classID,
+                    SubjectID = plan.SubjectID,
+                    Grade = null,
+                    Note = null
+                });
+            }
+
+            // Create MonthlyGrade for each month and grade type
             foreach (var m in months.Where(m => m.TermID == plan.TermID))
+            {
                 foreach (var gt in gradeTypes)
-                    monthly.Add(new MonthlyGrade
+                {
+                    var monthlyExists = existingMonthlyGrades.Any(mg => 
+                        mg.StudentID == student.StudentID &&
+                        mg.YearID == yearID.Value &&
+                        mg.TermID == plan.TermID &&
+                        mg.ClassID == classID &&
+                        mg.SubjectID == plan.SubjectID &&
+                        mg.MonthID == m.MonthID &&
+                        mg.GradeTypeID == gt);
+
+                    if (!monthlyExists)
                     {
-                        StudentID = student.StudentID,
-                        YearID = plan.YearID,
-                        TermID = plan.TermID,
-                        ClassID = plan.ClassID,
-                        SubjectID = plan.SubjectID,
-                        MonthID = m.MonthID,
-                        GradeTypeID = gt
-                    });
+                        monthly.Add(new MonthlyGrade
+                        {
+                            StudentID = student.StudentID,
+                            YearID = yearID.Value,
+                            TermID = plan.TermID,
+                            ClassID = classID,
+                            SubjectID = plan.SubjectID,
+                            MonthID = m.MonthID,
+                            GradeTypeID = gt,
+                            Grade = null
+                        });
+                    }
+                }
+            }
         }
 
-        if (monthly.Count > 0) _context.MonthlyGrades.AddRange(monthly);
-        if (termly.Count > 0) _context.TermlyGrades.AddRange(termly);
-        await _context.SaveChangesAsync();
+        _logger.LogInformation("Prepared {TermlyCount} TermlyGrades and {MonthlyCount} MonthlyGrades for new student {StudentID}",
+            termly.Count, monthly.Count, student.StudentID);
+
+        if (monthly.Count > 0)
+        {
+            await _context.MonthlyGrades.AddRangeAsync(monthly);
+            _logger.LogInformation("Added {Count} MonthlyGrades to context for student {StudentID}", monthly.Count, student.StudentID);
+        }
+
+        if (termly.Count > 0)
+        {
+            await _context.TermlyGrades.AddRangeAsync(termly);
+            _logger.LogInformation("Added {Count} TermlyGrades to context for student {StudentID}", termly.Count, student.StudentID);
+        }
+
+        if (monthly.Count > 0 || termly.Count > 0)
+        {
+            var savedCount = await _context.SaveChangesAsync();
+            _logger.LogInformation("✅ Successfully saved {SavedCount} grade records for new student {StudentID}. TermlyGrades: {TermlyCount}, MonthlyGrades: {MonthlyCount}",
+                savedCount, student.StudentID, termly.Count, monthly.Count);
+
+            // Verify the grades were actually saved
+            var savedTermlyCount = await _context.TermlyGrades
+                .CountAsync(tg => tg.StudentID == student.StudentID && 
+                                 tg.YearID == yearID.Value && 
+                                 tg.ClassID == classID);
+            
+            var savedMonthlyCount = await _context.MonthlyGrades
+                .CountAsync(mg => mg.StudentID == student.StudentID && 
+                                mg.YearID == yearID.Value && 
+                                mg.ClassID == classID);
+            
+            _logger.LogInformation("Verified saved grades for new student {StudentID}: {TermlyCount} TermlyGrades, {MonthlyCount} MonthlyGrades in database",
+                student.StudentID, savedTermlyCount, savedMonthlyCount);
+        }
+        else
+        {
+            _logger.LogWarning("⚠️ No grades to save for new student {StudentID}. All grades may already exist.",
+                student.StudentID);
+        }
 
         return student;
     }
@@ -926,11 +1078,140 @@ public class StudentRepository : IStudentRepository
                 _logger.LogInformation("Found {Count} course plans for DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}", 
                     coursePlans.Count, newDivision.DivisionID, newClassID, targetYear.YearID);
 
+                // If no course plans found for target year, try to copy from active year
                 if (coursePlans.Count == 0)
                 {
-                    _logger.LogWarning("No course plans found for promoted student {StudentID} in DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}. Grades will not be created.", 
+                    _logger.LogWarning("No course plans found for promoted student {StudentID} in DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}. Attempting to copy from active year.", 
                         student.StudentID, newDivision.DivisionID, newClassID, targetYear.YearID);
-                    result.ErrorMessage = "تمت الترقية بنجاح، لكن لا توجد خطة دراسية للقسم الجديد";
+
+                    // Get active year
+                    var activeYear = await _context.Years
+                        .Where(y => y.Active)
+                        .FirstOrDefaultAsync();
+
+                    if (activeYear != null && activeYear.YearID != targetYear.YearID)
+                    {
+                        // Try to find course plans from active year for the same division and class
+                        var activeYearCoursePlans = await _context.CoursePlans
+                            .Where(cp => cp.DivisionID == newDivision.DivisionID &&
+                                        cp.ClassID == newClassID &&
+                                        cp.YearID == activeYear.YearID)
+                            .ToListAsync();
+
+                        if (activeYearCoursePlans.Count > 0)
+                        {
+                            _logger.LogInformation("Found {Count} course plans in active year {ActiveYearID}. Copying to target year {TargetYearID}.",
+                                activeYearCoursePlans.Count, activeYear.YearID, targetYear.YearID);
+
+                            // Copy course plans to target year
+                            var newCoursePlans = activeYearCoursePlans.Select(cp => new CoursePlan
+                            {
+                                YearID = targetYear.YearID,
+                                TermID = cp.TermID,
+                                SubjectID = cp.SubjectID,
+                                TeacherID = cp.TeacherID,
+                                ClassID = cp.ClassID,
+                                DivisionID = cp.DivisionID
+                            }).ToList();
+
+                            // Check for duplicates before adding
+                            var existingCoursePlans = await _context.CoursePlans
+                                .Where(cp => cp.DivisionID == newDivision.DivisionID &&
+                                            cp.ClassID == newClassID &&
+                                            cp.YearID == targetYear.YearID)
+                                .Select(cp => new { cp.TermID, cp.SubjectID, cp.TeacherID })
+                                .ToListAsync();
+
+                            var plansToAdd = newCoursePlans
+                                .Where(ncp => !existingCoursePlans.Any(ecp => 
+                                    ecp.TermID == ncp.TermID &&
+                                    ecp.SubjectID == ncp.SubjectID &&
+                                    ecp.TeacherID == ncp.TeacherID))
+                                .ToList();
+
+                            if (plansToAdd.Count > 0)
+                            {
+                                await _context.CoursePlans.AddRangeAsync(plansToAdd);
+                                await _context.SaveChangesAsync();
+                                _logger.LogInformation("Copied {Count} course plans from active year {ActiveYearID} to target year {TargetYearID}.",
+                                    plansToAdd.Count, activeYear?.YearID ?? 0, targetYear.YearID);
+                            }
+
+                            // Reload course plans for target year
+                            coursePlans = await _context.CoursePlans
+                                .Where(cp => cp.DivisionID == newDivision.DivisionID &&
+                                            cp.ClassID == newClassID &&
+                                            cp.YearID == targetYear.YearID)
+                                .ToListAsync();
+                        }
+                        else
+                        {
+                            // Try to find course plans from the same class but different division in active year
+                            var allSameClassPlans = await _context.CoursePlans
+                                .Where(cp => cp.ClassID == newClassID &&
+                                            cp.YearID == activeYear.YearID)
+                                .ToListAsync();
+                            
+                            // Group by TermID, SubjectID, TeacherID and take first of each group
+                            var sameClassCoursePlans = allSameClassPlans
+                                .GroupBy(cp => new { cp.TermID, cp.SubjectID, cp.TeacherID })
+                                .Select(g => g.First())
+                                .ToList();
+
+                            if (sameClassCoursePlans.Count > 0)
+                            {
+                                _logger.LogInformation("Found {Count} course plans for same class in active year. Copying to target year with new division.",
+                                    sameClassCoursePlans.Count);
+
+                                var newCoursePlans = sameClassCoursePlans.Select(cp => new CoursePlan
+                                {
+                                    YearID = targetYear.YearID,
+                                    TermID = cp.TermID,
+                                    SubjectID = cp.SubjectID,
+                                    TeacherID = cp.TeacherID,
+                                    ClassID = cp.ClassID,
+                                    DivisionID = newDivision.DivisionID
+                                }).ToList();
+
+                                // Check for duplicates
+                                var existingCoursePlans = await _context.CoursePlans
+                                    .Where(cp => cp.DivisionID == newDivision.DivisionID &&
+                                                cp.ClassID == newClassID &&
+                                                cp.YearID == targetYear.YearID)
+                                    .Select(cp => new { cp.TermID, cp.SubjectID, cp.TeacherID })
+                                    .ToListAsync();
+
+                                var plansToAdd = newCoursePlans
+                                    .Where(ncp => !existingCoursePlans.Any(ecp => 
+                                        ecp.TermID == ncp.TermID &&
+                                        ecp.SubjectID == ncp.SubjectID &&
+                                        ecp.TeacherID == ncp.TeacherID))
+                                    .ToList();
+
+                                if (plansToAdd.Count > 0)
+                                {
+                                    await _context.CoursePlans.AddRangeAsync(plansToAdd);
+                                    await _context.SaveChangesAsync();
+                                    _logger.LogInformation("Copied {Count} course plans from same class in active year to target year with new division.",
+                                        plansToAdd.Count);
+                                }
+
+                                // Reload course plans
+                                coursePlans = await _context.CoursePlans
+                                    .Where(cp => cp.DivisionID == newDivision.DivisionID &&
+                                                cp.ClassID == newClassID &&
+                                                cp.YearID == targetYear.YearID)
+                                    .ToListAsync();
+                            }
+                        }
+                    }
+
+                    if (coursePlans.Count == 0)
+                    {
+                        _logger.LogWarning("No course plans found or copied for promoted student {StudentID} in DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}. Grades will not be created.", 
+                            student.StudentID, newDivision.DivisionID, newClassID, targetYear.YearID);
+                        result.ErrorMessage = "تمت الترقية بنجاح، لكن لا توجد خطة دراسية للقسم الجديد";
+                    }
                 }
                 else
                 {
@@ -1024,18 +1305,36 @@ public class StudentRepository : IStudentRepository
                     var monthlyGrades = new List<MonthlyGrade>();
                     var termlyGrades = new List<TermlyGrade>();
 
+                    // Bulk fetch existing grades to avoid multiple database queries
+                    var existingTermlyGrades = await _context.TermlyGrades
+                        .Where(tg => tg.StudentID == student.StudentID &&
+                                    tg.YearID == targetYear.YearID &&
+                                    tg.ClassID == newClassID)
+                        .Select(tg => new { tg.StudentID, tg.YearID, tg.TermID, tg.ClassID, tg.SubjectID })
+                        .ToListAsync();
+
+                    var existingMonthlyGrades = await _context.MonthlyGrades
+                        .Where(mg => mg.StudentID == student.StudentID &&
+                                    mg.YearID == targetYear.YearID &&
+                                    mg.ClassID == newClassID)
+                        .Select(mg => new { mg.StudentID, mg.YearID, mg.TermID, mg.ClassID, mg.SubjectID, mg.MonthID, mg.GradeTypeID })
+                        .ToListAsync();
+
+                    _logger.LogInformation("Found {ExistingTermlyCount} existing TermlyGrades and {ExistingMonthlyCount} existing MonthlyGrades for student {StudentID} in YearID {YearID}, ClassID {ClassID}",
+                        existingTermlyGrades.Count, existingMonthlyGrades.Count, student.StudentID, targetYear.YearID, newClassID);
+
                     foreach (var plan in coursePlans)
                     {
                         // Create NEW TermlyGrade for this subject in the new year/class
                         // Only create if it doesn't exist - never update existing grades
-                        var existingTermlyGrade = await _context.TermlyGrades
-                            .FirstOrDefaultAsync(tg => tg.StudentID == student.StudentID &&
-                                                      tg.YearID == targetYear.YearID &&
-                                                      tg.TermID == plan.TermID &&
-                                                      tg.ClassID == newClassID &&
-                                                      tg.SubjectID == plan.SubjectID);
+                        var termlyExists = existingTermlyGrades.Any(tg => 
+                            tg.StudentID == student.StudentID &&
+                            tg.YearID == targetYear.YearID &&
+                            tg.TermID == plan.TermID &&
+                            tg.ClassID == newClassID &&
+                            tg.SubjectID == plan.SubjectID);
 
-                        if (existingTermlyGrade == null)
+                        if (!termlyExists)
                         {
                             // Create new TermlyGrade record (never update existing)
                             termlyGrades.Add(new TermlyGrade
@@ -1048,25 +1347,31 @@ public class StudentRepository : IStudentRepository
                                 Grade = null,
                                 Note = null
                             });
+                            _logger.LogDebug("Added TermlyGrade for StudentID: {StudentID}, YearID: {YearID}, TermID: {TermID}, ClassID: {ClassID}, SubjectID: {SubjectID}",
+                                student.StudentID, targetYear.YearID, plan.TermID, newClassID, plan.SubjectID);
                         }
 
                         // Create NEW MonthlyGrade for each month and grade type
                         // Only create if it doesn't exist - never update existing grades
-                        foreach (var month in months.Where(m => m.TermID == plan.TermID))
+                        var monthsForTerm = months.Where(m => m.TermID == plan.TermID).ToList();
+                        _logger.LogDebug("Processing {MonthCount} months for TermID: {TermID}, SubjectID: {SubjectID}",
+                            monthsForTerm.Count, plan.TermID, plan.SubjectID);
+
+                        foreach (var month in monthsForTerm)
                         {
                             foreach (var gradeType in gradeTypes)
                             {
                                 // Check composite key to ensure we don't create duplicates
-                                var existingMonthlyGrade = await _context.MonthlyGrades
-                                    .FirstOrDefaultAsync(mg => mg.StudentID == student.StudentID &&
-                                                              mg.YearID == targetYear.YearID &&
-                                                              mg.TermID == plan.TermID &&
-                                                              mg.ClassID == newClassID &&
-                                                              mg.SubjectID == plan.SubjectID &&
-                                                              mg.MonthID == month.MonthID &&
-                                                              mg.GradeTypeID == gradeType);
+                                var monthlyExists = existingMonthlyGrades.Any(mg => 
+                                    mg.StudentID == student.StudentID &&
+                                    mg.YearID == targetYear.YearID &&
+                                    mg.TermID == plan.TermID &&
+                                    mg.ClassID == newClassID &&
+                                    mg.SubjectID == plan.SubjectID &&
+                                    mg.MonthID == month.MonthID &&
+                                    mg.GradeTypeID == gradeType);
 
-                                if (existingMonthlyGrade == null)
+                                if (!monthlyExists)
                                 {
                                     // Create new MonthlyGrade record (never update existing)
                                     monthlyGrades.Add(new MonthlyGrade
@@ -1085,18 +1390,22 @@ public class StudentRepository : IStudentRepository
                         }
                     }
 
-                    _logger.LogInformation("Created {TermlyCount} TermlyGrades and {MonthlyCount} MonthlyGrades for student {StudentID}", 
+                    _logger.LogInformation("Prepared {TermlyCount} TermlyGrades and {MonthlyCount} MonthlyGrades for student {StudentID} (before saving)", 
                         termlyGrades.Count, monthlyGrades.Count, student.StudentID);
 
                     // Add all grades to context first, then save once
                     if (termlyGrades.Count > 0)
                     {
                         await _context.TermlyGrades.AddRangeAsync(termlyGrades);
+                        _logger.LogInformation("Added {Count} TermlyGrades to context for student {StudentID}", 
+                            termlyGrades.Count, student.StudentID);
                     }
 
                     if (monthlyGrades.Count > 0)
                     {
                         await _context.MonthlyGrades.AddRangeAsync(monthlyGrades);
+                        _logger.LogInformation("Added {Count} MonthlyGrades to context for student {StudentID}", 
+                            monthlyGrades.Count, student.StudentID);
                     }
 
                     // Save all changes in a single transaction
@@ -1105,21 +1414,43 @@ public class StudentRepository : IStudentRepository
                         try
                         {
                             var savedCount = await _context.SaveChangesAsync();
-                            _logger.LogInformation("Successfully saved {SavedCount} changes for student {StudentID}. TermlyGrades: {TermlyCount}, MonthlyGrades: {MonthlyCount}", 
+                            _logger.LogInformation("✅ Successfully saved {SavedCount} changes for student {StudentID}. TermlyGrades: {TermlyCount}, MonthlyGrades: {MonthlyCount}", 
                                 savedCount, student.StudentID, termlyGrades.Count, monthlyGrades.Count);
+                            
+                            // Verify the grades were actually saved
+                            var savedTermlyCount = await _context.TermlyGrades
+                                .CountAsync(tg => tg.StudentID == student.StudentID && 
+                                                 tg.YearID == targetYear.YearID && 
+                                                 tg.ClassID == newClassID);
+                            
+                            var savedMonthlyCount = await _context.MonthlyGrades
+                                .CountAsync(mg => mg.StudentID == student.StudentID && 
+                                                mg.YearID == targetYear.YearID && 
+                                                mg.ClassID == newClassID);
+                            
+                            _logger.LogInformation("Verified saved grades for student {StudentID}: {TermlyCount} TermlyGrades, {MonthlyCount} MonthlyGrades in database", 
+                                student.StudentID, savedTermlyCount, savedMonthlyCount);
                         }
                         catch (DbUpdateException ex)
                         {
                             // Log the error but don't fail the entire promotion
-                            _logger.LogError(ex, "Error saving grades for student {StudentID}. TermlyGrades: {TermlyCount}, MonthlyGrades: {MonthlyCount}. Error: {ErrorMessage}", 
+                            _logger.LogError(ex, "❌ Error saving grades for student {StudentID}. TermlyGrades: {TermlyCount}, MonthlyGrades: {MonthlyCount}. Error: {ErrorMessage}", 
                                 student.StudentID, termlyGrades.Count, monthlyGrades.Count, ex.Message);
+                            
+                            // Log inner exception if available
+                            if (ex.InnerException != null)
+                            {
+                                _logger.LogError("Inner exception: {InnerException}", ex.InnerException.Message);
+                            }
+                            
                             result.ErrorMessage = $"تمت الترقية بنجاح، لكن حدث خطأ في حفظ الدرجات: {ex.Message}";
                             // Continue with promotion even if grades fail to save
                         }
                     }
                     else
                     {
-                        _logger.LogWarning("No grades to save for student {StudentID}. All grades may already exist.", student.StudentID);
+                        _logger.LogWarning("⚠️ No grades to save for student {StudentID}. All grades may already exist. TermlyGrades: {TermlyCount}, MonthlyGrades: {MonthlyCount}", 
+                            student.StudentID, termlyGrades.Count, monthlyGrades.Count);
                     }
                 }
 

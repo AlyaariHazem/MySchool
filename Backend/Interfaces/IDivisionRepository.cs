@@ -12,6 +12,7 @@ namespace Backend.Repository.School
     public interface IDivisionRepository : IgenericRepository<Division>
     {
        public Task<List<DivisionDTO>> GetAll();
+       public Task<List<DivisionDTO>> GetAllByYearID(int? yearID = null);
        public Task<bool> Add(AddDivisionDTO model);
        public Task<bool> Update(DivisionDTO model);
        Task<bool> UpdatePartial(int id, JsonPatchDocument<UpdateDivisionDTO> partialClass);

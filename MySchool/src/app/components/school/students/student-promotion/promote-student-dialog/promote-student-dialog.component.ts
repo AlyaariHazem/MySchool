@@ -21,12 +21,19 @@ export class PromoteStudentDialogComponent implements OnInit {
   studentForms: FormGroup[] = [];
   isLoading = false;
   autoPromote: boolean = false; // Auto-increment class option
+  targetYearID: number | null = null; // Target year for promotion
 
   constructor(
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig
   ) {
     this.students = config.data?.students || [];
+    this.targetYearID = config.data?.targetYearID || null;
+    console.log('PromoteStudentDialog initialized with:', {
+      studentsCount: this.students.length,
+      targetYearID: this.targetYearID,
+      configData: config.data
+    });
   }
 
   ngOnInit(): void {
@@ -35,9 +42,25 @@ export class PromoteStudentDialogComponent implements OnInit {
   }
 
   loadDivisions(): void {
-    this.divisionService.GetAll().subscribe({
+    console.log('Loading divisions with targetYearID:', this.targetYearID);
+    
+    // Load divisions filtered by target year if provided
+    this.divisionService.GetAll(this.targetYearID || undefined).subscribe({
       next: (response) => {
         this.divisions = response.result || [];
+        console.log(`Loaded ${this.divisions.length} divisions for targetYearID: ${this.targetYearID || 'null (active year)'}`);
+        
+        if (this.divisions.length === 0) {
+          const message = this.targetYearID 
+            ? `لا توجد أقسام في السنة المستهدفة (YearID: ${this.targetYearID}). سيتم عرض أقسام السنة النشطة كبديل.`
+            : 'لا توجد أقسام في السنة النشطة. يرجى التأكد من وجود أقسام.';
+          console.warn(message);
+          this.toastr.warning(message, 'تحذير', { timeOut: 5000 });
+        } else if (this.targetYearID) {
+          // Log if we're showing divisions from active year as fallback
+          console.log(`Showing ${this.divisions.length} divisions (may include active year divisions as fallback for target year ${this.targetYearID})`);
+        }
+        
         // If auto-promote is enabled, assign next class after divisions are loaded
         if (this.autoPromote && this.divisions.length > 0) {
           // Use setTimeout to ensure forms are initialized
@@ -54,16 +77,28 @@ export class PromoteStudentDialogComponent implements OnInit {
   }
 
   initializeForms(): void {
-    this.studentForms = this.students.map(student => 
-      this.fb.group({
+    this.studentForms = this.students.map(student => {
+      const form = this.fb.group({
         studentID: [student.studentID, Validators.required],
         newDivisionID: [null]
-      })
-    );
+      });
+      
+      // Handle disabled state for reactive forms
+      if (this.autoPromote) {
+        form.get('newDivisionID')?.disable();
+      }
+      
+      return form;
+    });
   }
 
   onAutoPromoteChange(): void {
     if (this.autoPromote) {
+      // Disable all division dropdowns
+      this.studentForms.forEach(form => {
+        form.get('newDivisionID')?.disable();
+      });
+      
       // Wait a bit to ensure divisions are loaded
       if (this.divisions.length === 0) {
         // If divisions not loaded yet, wait for them
@@ -76,8 +111,9 @@ export class PromoteStudentDialogComponent implements OnInit {
         this.autoAssignNextClass();
       }
     } else {
-      // Clear all selections
+      // Enable all division dropdowns
       this.studentForms.forEach(form => {
+        form.get('newDivisionID')?.enable();
         form.patchValue({ newDivisionID: null });
         form.get('newDivisionID')?.setValidators(Validators.required);
         form.get('newDivisionID')?.updateValueAndValidity();
@@ -103,9 +139,16 @@ export class PromoteStudentDialogComponent implements OnInit {
       const nextDivision = this.findNextClassDivision(student);
       if (nextDivision) {
         const form = this.studentForms[index];
+        // Enable control temporarily to set value, then disable if auto-promote is active
+        form.get('newDivisionID')?.enable();
         form.patchValue({ newDivisionID: nextDivision.divisionID });
         form.get('newDivisionID')?.clearValidators();
         form.get('newDivisionID')?.updateValueAndValidity();
+        
+        // Disable again if auto-promote is active
+        if (this.autoPromote) {
+          form.get('newDivisionID')?.disable();
+        }
         
         // Force form to mark as touched and dirty to ensure value is recognized
         form.get('newDivisionID')?.markAsTouched();
@@ -216,13 +259,30 @@ export class PromoteStudentDialogComponent implements OnInit {
   }
 
   getFilteredDivisions(student: UnregisteredStudent): divisions[] {
-    // Filter divisions by stage if student has stage info
+    // All divisions are already filtered by targetYearID when loaded
+    // Filter out divisions with empty names and filter by stage if student has stage info
+    let filtered = this.divisions.filter(d => 
+      d.divisionName && d.divisionName.trim() !== ''
+    );
+    
     if (student.currentStageName) {
-      return this.divisions.filter(d => 
-        d.stageName && d.stageName.trim() === student.currentStageName?.trim()
+      filtered = filtered.filter(d => 
+        d.stageName && d.stageName.trim().toLowerCase() === student.currentStageName?.trim().toLowerCase()
+      );
+      
+      if (filtered.length === 0) {
+        console.warn(`No divisions found in stage ${student.currentStageName} (after filtering empty names)`);
+      }
+    }
+    
+    // If still no divisions, show all divisions with names (even if from different stage)
+    if (filtered.length === 0) {
+      filtered = this.divisions.filter(d => 
+        d.divisionName && d.divisionName.trim() !== ''
       );
     }
-    return this.divisions;
+    
+    return filtered;
   }
 
   onPromote(): void {
