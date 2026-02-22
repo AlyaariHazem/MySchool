@@ -1,87 +1,242 @@
 .promote-dialog {
-  padding: 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 90vh;
 
   .dialog-header {
-    margin-bottom: 20px;
+    margin-bottom: 0;
     border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 15px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px 8px 0 0;
 
-    h3 {
-      margin: 0 0 5px 0;
-      font-size: 20px;
-      color: #333;
-    }
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 15px;
 
-    .subtitle {
-      margin: 0;
-      color: #666;
-      font-size: 14px;
-    }
+      .header-title-section {
+        flex: 1;
 
-    .auto-promote-option {
-      margin-top: 15px;
-      padding: 10px;
-      background: #fff3cd;
-      border-radius: 4px;
-      border: 1px solid #ffc107;
+        h3 {
+          margin: 0 0 8px 0;
+          font-size: 22px;
+          font-weight: 600;
+          color: #333;
+          display: flex;
+          align-items: center;
+          gap: 10px;
 
-      label {
+          i {
+            font-size: 24px;
+            color: #2fdf84;
+          }
+        }
+
+        .subtitle {
+          margin: 0;
+          color: #666;
+          font-size: 14px;
+        }
+      }
+
+      .close-btn {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: #666;
+        padding: 0;
+        flex-shrink: 0;
+
+        i {
+          font-size: 18px;
+        }
+
+        &:hover {
+          background: #e9e9e9;
+          border-color: #bbb;
+          color: #333;
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+    }
+
+    .target-year-info {
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+
+      &.warning {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+      }
+
+      .year-info-text {
+        color: #666;
+        font-size: 13px;
+        font-weight: 500;
+
+        &.warning-text {
+          color: #856404;
+        }
+      }
+    }
+
+    .auto-promote-option,
+    .copy-course-plans-option {
+      margin-top: 15px;
+      padding: 12px 15px;
+      background: #fff3cd;
+      border-radius: 8px;
+      border: 1px solid #ffc107;
+
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         cursor: pointer;
         font-size: 14px;
         font-weight: 500;
         color: #856404;
+        position: relative;
+        padding-right: 8px;
 
         input[type="checkbox"] {
-          width: 18px;
-          height: 18px;
+          width: 20px;
+          height: 20px;
           cursor: pointer;
+          accent-color: #2fdf84;
+          margin: 0;
+          flex-shrink: 0;
         }
+
+        .label-text {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex: 1;
+
+          i {
+            font-size: 16px;
+            color: #856404;
+          }
+        }
+      }
+
+      .option-hint {
+        color: #856404;
+        display: block;
+        margin-top: 8px;
+        margin-right: 32px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+    }
+
+    .copy-course-plans-option {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+
+      .checkbox-label {
+        color: #333;
+
+        .label-text i {
+          color: #666;
+        }
+      }
+
+      .option-hint {
+        color: #666;
       }
     }
   }
 
   .dialog-content {
-    max-height: 500px;
+    flex: 1;
     overflow-y: auto;
-    margin-bottom: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
 
     .students-list {
       .student-item {
-        padding: 15px;
+        padding: 18px;
         margin-bottom: 15px;
-        background: #f9fafb;
+        background: white;
         border-radius: 8px;
         border: 1px solid #e0e0e0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+
+        &:hover {
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
 
         .student-info {
           display: flex;
           flex-direction: column;
-          gap: 5px;
+          gap: 8px;
           margin-bottom: 15px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f0f0f0;
 
           strong {
-            font-size: 16px;
+            font-size: 17px;
             color: #333;
+            font-weight: 600;
           }
 
           .current-info {
             font-size: 13px;
             color: #666;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
           }
         }
 
         .division-select {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 10px;
 
           label {
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             color: #333;
+            margin-bottom: 5px;
           }
 
           .division-option {
@@ -100,7 +255,10 @@
             font-size: 12px;
             font-style: italic;
             margin-top: 5px;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
           }
 
           .error-info {
@@ -108,11 +266,27 @@
             font-size: 12px;
             font-style: italic;
             margin-top: 5px;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
           }
 
-          p-dropdown[ng-reflect-disabled="true"] {
-            opacity: 0.7;
+          ::ng-deep p-dropdown {
+            .p-dropdown {
+              width: 100%;
+              border-radius: 6px;
+              border: 1px solid #ddd;
+
+              &:hover {
+                border-color: #2fdf84;
+              }
+
+              &.p-disabled {
+                opacity: 0.6;
+                background-color: #f5f5f5;
+              }
+            }
           }
         }
       }
@@ -122,38 +296,45 @@
   .dialog-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    padding-top: 15px;
-    border-top: 1px solid #e0e0e0;
+    gap: 12px;
+    padding: 20px;
+    border-top: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 0 0 8px 8px;
 
     .btn-cancel {
-      padding: 10px 20px;
+      padding: 12px 24px;
       border: 1px solid #ddd;
       background: white;
       color: #333;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
+      font-weight: 500;
       transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
 
       &:hover {
         background: #f5f5f5;
+        border-color: #bbb;
       }
     }
 
     .btn-promote {
-      padding: 10px 20px;
+      padding: 12px 24px;
       border: none;
       background: #ff9800;
       color: white;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
-      font-weight: bold;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: background 0.3s;
+      transition: all 0.3s;
 
       &:hover:not(:disabled) {
         background: #f57c00;
@@ -163,6 +344,34 @@
         opacity: 0.6;
         cursor: not-allowed;
       }
+
+      i {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Global styles for PrimeNG dialog
+::ng-deep .promote-students-dialog {
+  .p-dialog {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+    .p-dialog-header {
+      padding: 0;
+      border: none;
+      background: transparent;
+    }
+
+    .p-dialog-content {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .p-dialog-header-icon {
+      display: none; // Hide default close button since we have custom one
     }
   }
 }

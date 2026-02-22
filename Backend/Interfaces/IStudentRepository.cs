@@ -21,6 +21,6 @@ public interface IStudentRepository
     Task<int> MaxValue();
     Task<bool> DeleteStudentAsync(int id);
     Task<GetStudentForUpdateDTO?> GetUpdateStudentWithGuardianRequestData(int studentData);
-    Task<(List<UnregisteredStudentDTO> Items, int TotalCount)> GetUnregisteredStudentsAsync(int? targetYearID, int pageNumber, int pageSize, string? studentName, int? stageID, CancellationToken cancellationToken = default);
+    Task<(List<UnregisteredStudentDTO> Items, int TotalCount)> GetUnregisteredStudentsAsync(int? targetYearID, int pageNumber, int pageSize, string? studentName, int? stageID, int? classID, CancellationToken cancellationToken = default);
         Task<PromoteStudentsResponseDTO> PromoteStudentsAsync(List<PromoteStudentRequestDTO> students, int? targetYearID = null, bool copyCoursePlansFromCurrentYear = false);
 }

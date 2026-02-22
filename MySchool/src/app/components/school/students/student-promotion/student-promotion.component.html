@@ -28,12 +28,33 @@
 
         <div class="filter-group">
           <label for="stageFilter">المرحلة:</label>
-          <input 
+          <p-select
             id="stageFilter"
-            type="number" 
             formControlName="stageID"
-            class="form-control"
-            placeholder="المرحلة" />
+            [options]="stages"
+            optionLabel="stageName"
+            optionValue="stageID"
+            [showClear]="true"
+            placeholder="اختر المرحلة"
+            styleClass="w-full"
+            [style]="{'width': '100%'}">
+          </p-select>
+        </div>
+
+        <div class="filter-group">
+          <label for="classFilter">الصف:</label>
+          <p-select
+            id="classFilter"
+            formControlName="classID"
+            [options]="filteredClasses"
+            optionLabel="className"
+            optionValue="classID"
+            [showClear]="true"
+            placeholder="اختر الصف"
+            [disabled]="!searchForm.get('stageID')?.value"
+            styleClass="w-full"
+            [style]="{'width': '100%'}">
+          </p-select>
         </div>
       </div>
     </form>
@@ -42,21 +63,36 @@
   <!-- Students Table -->
   <div class="table-section">
     <div class="table-container">
-      <table class="students-table" *ngIf="students.length > 0; else noDataTemplate">
+      <table class="students-table styled-table" *ngIf="students.length > 0; else noDataTemplate">
         <thead>
           <tr>
             <th class="checkbox-header">
-              <input 
-                type="checkbox" 
-                (change)="onSelectAll($event)"
-                [checked]="areAllStudentsSelected()"
-                title="تحديد الكل" />
+              <div class="header-content">
+                <input 
+                  type="checkbox" 
+                  (change)="onSelectAll($event)"
+                  [checked]="areAllStudentsSelected()"
+                  title="تحديد الكل" />
+              </div>
             </th>
-            <th>#</th>
-            <th>اسم الطالب</th>
-            <th>الصف الحالي</th>
-            <th>المرحلة الحالية</th>
-            <th>الشعبة الحالية</th>
+            <th>
+              <div class="header-content">#</div>
+            </th>
+            <th>
+              <div class="header-content">اسم الطالب</div>
+            </th>
+            <th>
+              <div class="header-content">الصف الحالي</div>
+             
+            </th>
+            <th>
+              <div class="header-content">المرحلة الحالية</div>
+              
+            </th>
+            <th>
+              <div class="header-content">الشعبة الحالية</div>
+             
+            </th>
           </tr>
         </thead>
         <tbody>

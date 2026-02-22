@@ -165,12 +165,14 @@ export class StudentService {
         pageSize: number = 5, 
         targetYearID?: number,
         studentName?: string,
-        stageID?: number
+        stageID?: number,
+        classID?: number
     ): Observable<any> {
         let url = `${this.API.baseUrl}/Students/unregistered?pageNumber=${pageNumber}&pageSize=${pageSize}`;
         if (targetYearID) url += `&targetYearID=${targetYearID}`;
         if (studentName) url += `&studentName=${encodeURIComponent(studentName)}`;
         if (stageID) url += `&stageID=${stageID}`;
+        if (classID) url += `&classID=${classID}`;
 
         return this.API.http.get<any>(url).pipe(
             map(response => {

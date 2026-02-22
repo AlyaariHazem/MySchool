@@ -787,7 +787,8 @@ public class StudentRepository : IStudentRepository
         int pageNumber, 
         int pageSize, 
         string? studentName, 
-        int? stageID, 
+        int? stageID,
+        int? classID,
         CancellationToken cancellationToken = default)
     {
         // Get current active year
@@ -837,6 +838,12 @@ public class StudentRepository : IStudentRepository
         {
             baseQuery = baseQuery.Where(s => 
                 s.Division.Class.StageID == stageID.Value);
+        }
+
+        if (classID.HasValue)
+        {
+            baseQuery = baseQuery.Where(s => 
+                s.Division.Class.ClassID == classID.Value);
         }
 
         // Get total count

@@ -106,38 +106,90 @@
       width: 100%;
       border-collapse: collapse;
       background: white;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 
       thead {
-        background: #f3f4f6;
+        background-color: #009879; // Teal/Green header like in the image
 
         th {
           padding: 12px;
-          text-align: right;
+          text-align: center;
           font-weight: bold;
-          color: #333;
-          border: 1px solid #ddd;
+          color: #ffffff;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          vertical-align: top;
+
+          .header-content {
+            margin-bottom: 8px;
+            font-size: 14px;
+          }
+
+          .filter-input-wrapper {
+            margin-top: 4px;
+          }
+
+          .column-filter-input {
+            width: 100%;
+            padding: 4px 8px;
+            margin-top: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+            color: #333;
+
+            &:focus {
+              outline: none;
+              border-color: #009879;
+              box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.2);
+            }
+
+            &:disabled {
+              background: #f5f5f5;
+              cursor: not-allowed;
+              opacity: 0.7;
+            }
+
+            &::placeholder {
+              color: #999;
+            }
+          }
 
           &.checkbox-header {
             width: 50px;
             text-align: center;
+
+            .header-content {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
           }
         }
       }
 
       tbody {
         tr {
-          &:nth-child(even) {
-            background: #f9fafb;
+          border-bottom: 1px solid #dddddd;
+          transition: background-color 0.2s;
+
+          &:nth-of-type(even) {
+            background-color: #f3f3f3;
           }
 
           &:hover {
-            background: #f0f0f0;
+            background-color: #f1f1f1;
+          }
+
+          &:last-of-type {
+            border-bottom: 2px solid #009879;
           }
 
           td {
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            text-align: right;
+            padding: 12px;
+            border: 1px solid #dddddd;
+            text-align: center;
+            vertical-align: middle;
           }
         }
       }

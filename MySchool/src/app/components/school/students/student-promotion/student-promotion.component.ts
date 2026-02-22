@@ -11,6 +11,8 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { PromoteStudentDialogComponent } from './promote-student-dialog/promote-student-dialog.component';
 import { YearService } from '../../../../core/services/year.service';
 import { Year } from '../../../../core/models/year.model';
+import { StageService } from '../../core/services/stage.service';
+import { ClassService } from '../../core/services/class.service';
 
 @Component({
   selector: 'app-student-promotion',
@@ -22,6 +24,8 @@ export class StudentPromotionComponent implements OnInit {
   toastr = inject(ToastrService);
   dialogService = inject(DialogService);
   yearService = inject(YearService);
+  stageService = inject(StageService);
+  classService = inject(ClassService);
   private fb = inject(FormBuilder);
   
   readonly dir$ = this.store.select(selectLanguage).pipe(
@@ -40,7 +44,13 @@ export class StudentPromotionComponent implements OnInit {
   // Filters
   studentNameFilter: string = '';
   stageIDFilter: number | null = null;
+  classIDFilter: number | null = null;
   targetYearID: number | null = null;
+
+  // Dropdown options
+  stages: any[] = [];
+  classes: any[] = [];
+  filteredClasses: any[] = []; // Classes filtered by selected stage
 
   isLoading: boolean = false;
   Math = Math;
@@ -48,12 +58,64 @@ export class StudentPromotionComponent implements OnInit {
   constructor(private store: Store) {
     this.searchForm = this.fb.group({
       studentName: [''],
-      stageID: [null]
+      stageID: [null],
+      classID: [null]
     });
   }
 
   ngOnInit(): void {
+    this.loadStages();
+    this.loadClasses();
     this.determineTargetYear();
+    
+    // Listen to stage changes to filter classes
+    this.searchForm.get('stageID')?.valueChanges.subscribe(stageID => {
+      this.onStageChange(stageID);
+    });
+  }
+
+  loadStages(): void {
+    this.stageService.getAllStages().subscribe({
+      next: (response: any) => {
+        this.stages = response || [];
+      },
+      error: (error: any) => {
+        console.error('Error loading stages:', error);
+        this.toastr.error('فشل في تحميل المراحل', 'خطأ');
+      }
+    });
+  }
+
+  loadClasses(): void {
+    this.classService.GetAll().subscribe({
+      next: (response: any) => {
+        if (response.isSuccess) {
+          this.classes = response.result || [];
+          this.filteredClasses = this.classes;
+        }
+      },
+      error: (error: any) => {
+        console.error('Error loading classes:', error);
+        this.toastr.error('فشل في تحميل الصفوف', 'خطأ');
+      }
+    });
+  }
+
+  onStageChange(stageID: number | null): void {
+    if (stageID) {
+      // Filter classes by selected stage
+      this.filteredClasses = this.classes.filter(c => c.stageID === stageID);
+      
+      // Clear class selection if current class is not in filtered list
+      const currentClassID = this.searchForm.get('classID')?.value;
+      if (currentClassID && !this.filteredClasses.find(c => c.classID === currentClassID)) {
+        this.searchForm.patchValue({ classID: null });
+      }
+    } else {
+      // Show all classes if no stage selected
+      this.filteredClasses = this.classes;
+      this.searchForm.patchValue({ classID: null });
+    }
   }
 
   private determineTargetYear(): void {
@@ -80,7 +142,6 @@ export class StudentPromotionComponent implements OnInit {
             if (targetYear) {
               this.targetYearID = targetYear.yearID;
               console.log(`✅ Target year determined: YearID ${targetYear.yearID} (Active year: YearID ${activeYear.yearID})`);
-              this.toastr.info(`السنة المستهدفة: YearID ${targetYear.yearID}`, 'معلومات', { timeOut: 3000 });
             } else {
               console.warn('⚠️ No target year found. Using null (backend will determine automatically).');
               this.toastr.warning('لم يتم العثور على سنة مستهدفة. سيتم التحديد تلقائياً من الخادم', 'تحذير', { timeOut: 4000 });
@@ -109,7 +170,8 @@ export class StudentPromotionComponent implements OnInit {
       this.pageSize,
       this.targetYearID || undefined,
       this.studentNameFilter || undefined,
-      this.stageIDFilter || undefined
+      this.stageIDFilter || undefined,
+      this.classIDFilter || undefined
     ).subscribe({
       next: (response) => {
         this.students = response.data || [];
@@ -133,6 +195,7 @@ export class StudentPromotionComponent implements OnInit {
   onSearch(): void {
     this.studentNameFilter = this.searchForm.get('studentName')?.value || '';
     this.stageIDFilter = this.searchForm.get('stageID')?.value || null;
+    this.classIDFilter = this.searchForm.get('classID')?.value || null;
     this.currentPage = 1;
     this.loadUnregisteredStudents();
   }
@@ -192,7 +255,12 @@ export class StudentPromotionComponent implements OnInit {
 
     const ref: DynamicDialogRef = this.dialogService.open(PromoteStudentDialogComponent, {
       header: 'ترقية الطلاب',
-      width: '80%',
+      width: '85%',
+      draggable: true,
+      resizable: true,
+      closable: true,
+      dismissableMask: true,
+      styleClass: 'promote-students-dialog',
       data: {
         students: this.selectedStudents,
         targetYearID: this.targetYearID

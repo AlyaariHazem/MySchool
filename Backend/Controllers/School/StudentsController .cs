@@ -373,6 +373,7 @@ namespace Backend.Controllers
             [FromQuery] int pageSize = 5,
             [FromQuery] string? studentName = null,
             [FromQuery] int? stageID = null,
+            [FromQuery] int? classID = null,
             CancellationToken cancellationToken = default)
         {
             const int maxPageSize = 100;
@@ -381,7 +382,7 @@ namespace Backend.Controllers
             if (pageSize > maxPageSize) pageSize = maxPageSize;
 
             var (items, totalCount) = await _unitOfWork.Students
-                .GetUnregisteredStudentsAsync(targetYearID, pageNumber, pageSize, studentName, stageID, cancellationToken);
+                .GetUnregisteredStudentsAsync(targetYearID, pageNumber, pageSize, studentName, stageID, classID, cancellationToken);
 
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 

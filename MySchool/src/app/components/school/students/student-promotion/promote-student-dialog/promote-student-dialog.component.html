@@ -1,30 +1,45 @@
 <div class="promote-dialog">
   <div class="dialog-header">
-    <h3>ترقية الطلاب</h3>
-    <p class="subtitle">اختر القسم الجديد لكل طالب</p>
-    <div class="target-year-info" *ngIf="targetYearID">
-      <small style="color: #666;">السنة المستهدفة: YearID {{ targetYearID }}</small>
+    <div class="header-content">
+      <div class="header-title-section">
+        <h3><i class="pi pi-graduation-cap"></i> ترقية الطلاب</h3>
+        <p class="subtitle">اختر القسم الجديد لكل طالب</p>
+      </div>
+      <button type="button" class="close-btn" (click)="onCancel()" aria-label="إغلاق">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
-    <div class="target-year-info" *ngIf="!targetYearID">
-      <small style="color: #f59e0b;">⚠ السنة المستهدفة: سيتم التحديد تلقائياً من الخادم</small>
+    <div class="target-year-info" *ngIf="targetYearID">
+      <small class="year-info-text">السنة المستهدفة: YearID {{ targetYearID }}</small>
+    </div>
+    <div class="target-year-info warning" *ngIf="!targetYearID">
+      <small class="year-info-text warning-text">⚠ السنة المستهدفة: سيتم التحديد تلقائياً من الخادم</small>
     </div>
     <div class="auto-promote-option">
-      <label>
+      <label class="checkbox-label">
         <input 
           type="checkbox" 
           [(ngModel)]="autoPromote"
           (change)="onAutoPromoteChange()" />
-        <span>ترقية تلقائية (زيادة صف واحد)</span>
+        <span class="checkmark"></span>
+        <span class="label-text">
+          <i class="pi pi-arrow-right"></i>
+          ترقية تلقائية (زيادة صف واحد)
+        </span>
       </label>
     </div>
     <div class="copy-course-plans-option">
-      <label>
+      <label class="checkbox-label">
         <input 
           type="checkbox" 
           [(ngModel)]="copyCoursePlansFromCurrentYear" />
-        <span>نسخ الخطط الدراسية من السنة السابقة (السنة الحالية للطالب)</span>
+        <span class="checkmark"></span>
+        <span class="label-text">
+          <i class="pi pi-copy"></i>
+          نسخ الخطط الدراسية من السنة السابقة (السنة الحالية للطالب)
+        </span>
       </label>
-      <small style="color: #666; display: block; margin-top: 5px; margin-left: 25px;">
+      <small class="option-hint">
         إذا تم تفعيله، سيتم نسخ الخطط الدراسية من السنة التي كان فيها الطالب إلى السنة المستهدفة
       </small>
     </div>

@@ -67,7 +67,7 @@ export class PromoteStudentDialogComponent implements OnInit {
           // Use setTimeout to ensure forms are initialized
           setTimeout(() => {
             this.autoAssignNextClass();
-          }, 50);
+          }, 150);
         }
       },
       error: (error) => {
@@ -106,10 +106,15 @@ export class PromoteStudentDialogComponent implements OnInit {
         setTimeout(() => {
           if (this.divisions.length > 0) {
             this.autoAssignNextClass();
+          } else {
+            this.toastr.warning('لم يتم تحميل الأقسام بعد. يرجى الانتظار...', 'تحذير', { timeOut: 3000 });
           }
-        }, 100);
+        }, 200);
       } else {
-        this.autoAssignNextClass();
+        // Use setTimeout to ensure forms are ready
+        setTimeout(() => {
+          this.autoAssignNextClass();
+        }, 100);
       }
     } else {
       // Enable all division dropdowns
@@ -182,73 +187,177 @@ export class PromoteStudentDialogComponent implements OnInit {
   }
 
   findNextClassDivision(student: UnregisteredStudent): divisions | null {
-    if (!student.currentClassName || !student.currentStageName) {
-      console.log('Missing class or stage info', student);
+    console.log('=== Finding next class division for student ===', {
+      studentName: student.studentName,
+      currentClassName: student.currentClassName,
+      currentStageName: student.currentStageName,
+      currentDivisionName: student.currentDivisionName,
+      totalDivisions: this.divisions.length
+    });
+
+    // If no divisions loaded, return null
+    if (this.divisions.length === 0) {
+      console.warn('No divisions available');
       return null;
     }
 
-    // Get all divisions in the same stage
-    const stageDivisions = this.divisions.filter(d => 
-      d.stageName && 
-      d.stageName.trim().toLowerCase() === student.currentStageName?.trim().toLowerCase()
+    // Get all available divisions (filter out empty names)
+    let availableDivisions = this.divisions.filter(d => 
+      d.divisionName && d.divisionName.trim() !== '' &&
+      d.classesName && d.classesName.trim() !== ''
     );
 
-    if (stageDivisions.length === 0) {
-      console.log('No divisions found in stage', student.currentStageName);
-      return null;
+    console.log('Available divisions:', availableDivisions.length);
+
+    // If student has stage info, try to filter by stage first
+    if (student.currentStageName) {
+      const stageDivisions = availableDivisions.filter(d => 
+        d.stageName && 
+        d.stageName.trim().toLowerCase() === student.currentStageName?.trim().toLowerCase()
+      );
+      
+      if (stageDivisions.length > 0) {
+        availableDivisions = stageDivisions;
+        console.log('Filtered by stage:', availableDivisions.length, 'divisions');
+      } else {
+        console.warn('No divisions found in stage, using all available divisions');
+      }
     }
 
-    const currentClass = student.currentClassName.trim();
-    
-    // Get unique classes in the stage, sorted by ClassID
-    const classesInStage = stageDivisions
-      .map(d => ({ classID: d.classID, className: d.classesName, division: d }))
+    // Get unique classes, sorted by ClassID
+    const uniqueClasses = availableDivisions
+      .map(d => ({ classID: d.classID, className: d.classesName?.trim() || '', division: d }))
       .filter((c, i, arr) => arr.findIndex(x => x.classID === c.classID) === i)
       .sort((a, b) => a.classID - b.classID);
 
-    console.log('Classes in stage:', classesInStage.map(c => c.className));
-    console.log('Current class:', currentClass);
+    console.log('Unique classes found:', uniqueClasses.map(c => ({ id: c.classID, name: c.className })));
 
-    // Find current class index - try exact match first, then partial match
-    let currentClassIndex = classesInStage.findIndex(c => 
-      c.className?.trim().toLowerCase() === currentClass.toLowerCase()
-    );
+    if (uniqueClasses.length === 0) {
+      console.warn('No classes found');
+      return null;
+    }
 
-    // If exact match not found, try to find by ClassID if we have it
-    if (currentClassIndex === -1) {
-      // Try to find by matching part of the name
-      currentClassIndex = classesInStage.findIndex(c => 
-        c.className?.trim().toLowerCase().includes(currentClass.toLowerCase()) ||
-        currentClass.toLowerCase().includes(c.className?.trim().toLowerCase() || '')
+    // If student has current class name, try to find it
+    let currentClassIndex = -1;
+    if (student.currentClassName) {
+      const currentClass = student.currentClassName.trim().toLowerCase();
+      
+      // Try exact match first
+      currentClassIndex = uniqueClasses.findIndex(c => 
+        c.className.toLowerCase() === currentClass
       );
+
+      // Try partial match
+      if (currentClassIndex === -1) {
+        currentClassIndex = uniqueClasses.findIndex(c => {
+          const className = c.className.toLowerCase();
+          return className.includes(currentClass) || currentClass.includes(className);
+        });
+      }
+
+      // Try matching Arabic number words (أول, ثاني, ثالث, etc.)
+      if (currentClassIndex === -1) {
+        const arabicNumbers: { [key: string]: number } = {
+          'أول': 1, 'اول': 1, 'first': 1,
+          'ثاني': 2, 'second': 2,
+          'ثالث': 3, 'third': 3,
+          'رابع': 4, 'fourth': 4,
+          'خامس': 5, 'fifth': 5,
+          'سادس': 6, 'sixth': 6
+        };
+        
+        const currentClassNum = arabicNumbers[currentClass];
+        if (currentClassNum) {
+          // Find class that contains the next number
+          const nextClassNum = currentClassNum + 1;
+          const nextNumWords = Object.keys(arabicNumbers).filter(k => arabicNumbers[k] === nextClassNum);
+          
+          currentClassIndex = uniqueClasses.findIndex(c => {
+            const className = c.className.toLowerCase();
+            return nextNumWords.some(word => className.includes(word));
+          });
+          
+          // If found next class directly, return it
+          if (currentClassIndex !== -1) {
+            const nextClass = uniqueClasses[currentClassIndex];
+            console.log('Found next class by Arabic number:', nextClass.className);
+            
+            // Find division in this class
+            let preferredDivision = availableDivisions.find(d => 
+              d.classID === nextClass.classID && 
+              d.divisionName === student.currentDivisionName
+            );
+
+            if (!preferredDivision) {
+              preferredDivision = availableDivisions.find(d => d.classID === nextClass.classID);
+            }
+
+            return preferredDivision || null;
+          }
+        }
+      }
+
+      console.log('Current class index:', currentClassIndex, 
+        currentClassIndex >= 0 ? `(${uniqueClasses[currentClassIndex].className})` : 'not found');
     }
 
-    if (currentClassIndex === -1) {
-      console.log('Current class not found in stage classes');
-      return null;
+    // If we found current class and it's not the last one, get next class
+    if (currentClassIndex >= 0 && currentClassIndex < uniqueClasses.length - 1) {
+      const nextClass = uniqueClasses[currentClassIndex + 1];
+      console.log('Next class found by index:', nextClass.className);
+      
+      // Find a division in the next class (prefer same division name if possible)
+      let preferredDivision = availableDivisions.find(d => 
+        d.classID === nextClass.classID && 
+        d.divisionName === student.currentDivisionName
+      );
+
+      if (!preferredDivision) {
+        // If same division name not found, get first division in next class
+        preferredDivision = availableDivisions.find(d => d.classID === nextClass.classID);
+      }
+
+      if (preferredDivision) {
+        console.log('Found division:', preferredDivision.divisionName, 'in class:', preferredDivision.classesName);
+        return preferredDivision;
+      }
     }
 
-    if (currentClassIndex === classesInStage.length - 1) {
-      console.log('Student is already in the last class');
-      return null;
+    // If current class not found or is last, try to find next class by ClassID increment
+    if (student.currentDivisionID) {
+      const currentDivision = availableDivisions.find(d => d.divisionID === student.currentDivisionID);
+      if (currentDivision) {
+        const currentClassID = currentDivision.classID;
+        const nextClass = uniqueClasses.find(c => c.classID > currentClassID);
+        
+        if (nextClass) {
+          console.log('Found next class by ClassID increment:', nextClass.className);
+          
+          let preferredDivision = availableDivisions.find(d => 
+            d.classID === nextClass.classID && 
+            d.divisionName === student.currentDivisionName
+          );
+
+          if (!preferredDivision) {
+            preferredDivision = availableDivisions.find(d => d.classID === nextClass.classID);
+          }
+
+          return preferredDivision || null;
+        }
+      }
     }
 
-    // Get next class
-    const nextClass = classesInStage[currentClassIndex + 1];
-    console.log('Next class found:', nextClass.className);
-    
-    // Find a division in the next class (prefer same division name if possible)
-    let preferredDivision = stageDivisions.find(d => 
-      d.classID === nextClass.classID && 
-      d.divisionName === student.currentDivisionName
-    );
-
-    if (!preferredDivision) {
-      // If same division name not found, get first division in next class
-      preferredDivision = stageDivisions.find(d => d.classID === nextClass.classID);
+    // Last resort: if we have multiple classes, try to get the second class (assuming first is current)
+    if (uniqueClasses.length > 1) {
+      const nextClass = uniqueClasses[1];
+      console.log('Using second class as fallback:', nextClass.className);
+      
+      const preferredDivision = availableDivisions.find(d => d.classID === nextClass.classID);
+      return preferredDivision || null;
     }
 
-    return preferredDivision || null;
+    console.warn('Could not find next class division');
+    return null;
   }
 
   getFormGroup(index: number): FormGroup {
