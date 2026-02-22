@@ -22,27 +22,25 @@ public class CoursePlanRepository : ICoursePlanRepository
         if (dto == null)
             throw new ArgumentNullException(nameof(dto), "CoursePlanDTO cannot be null.");
 
-        // Get the active year - if multiple active years exist, take the first one
-        var activeYear = await _context.Years
-            .Where(y => y.Active == true)
-            .OrderBy(y => y.YearID) // Order by YearID to ensure consistent selection
-            .FirstOrDefaultAsync();
+        // Validate that YearID is provided and exists
+        if (dto.YearID <= 0)
+            throw new ArgumentException("YearID must be provided and greater than 0.", nameof(dto));
 
-        if (activeYear == null)
-            throw new InvalidOperationException("No active year found. Please activate a year before adding a course plan.");
+        // Verify the year exists
+        var year = await _context.Years.FirstOrDefaultAsync(y => y.YearID == dto.YearID);
+        if (year == null)
+            throw new InvalidOperationException($"Year with ID {dto.YearID} not found. Please select a valid year.");
 
-        // Override the YearID from the DTO with the active year's ID
-        dto.YearID = activeYear.YearID;
-
-        // Step 1: Add the CoursePlan to the database
+        // Step 1: Add the CoursePlan to the database using the YearID from DTO
         var entity = _mapper.Map<CoursePlan>(dto);
-        entity.YearID = activeYear.YearID; // Ensure entity uses active year
+        entity.YearID = dto.YearID; // Use YearID from DTO (user-selected year)
         _context.CoursePlans.Add(entity);
         await _context.SaveChangesAsync(); // Save the CoursePlan and get the ID
 
         // dto.CoursePlanID = entity.CoursePlanID; // Set the CoursePlanID back to DTO
 
         // Step 2: Assign the subject to the students of the specified class
+        // Use the YearID from DTO (user-selected year) instead of active year
         var students = await _context.Students
         .Include(s => s.Division)
             .ThenInclude(d => d.Class)
@@ -53,12 +51,12 @@ public class CoursePlanRepository : ICoursePlanRepository
                     .ThenInclude(st => st.Year)
         .Where(s => s.DivisionID == dto.DivisionID && 
                    s.Division.Class.ClassID == dto.ClassID &&
-                   ((s.Division.Class.Year != null && s.Division.Class.Year.YearID == activeYear.YearID) ||
-                    (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.YearID == activeYear.YearID)))
+                   ((s.Division.Class.Year != null && s.Division.Class.Year.YearID == dto.YearID) ||
+                    (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.YearID == dto.YearID)))
         .Select(s => new
         {
             s.StudentID,
-            YearID = activeYear.YearID,
+            YearID = dto.YearID,
             dto.ClassID,
             dto.SubjectID
         })
@@ -69,9 +67,9 @@ public class CoursePlanRepository : ICoursePlanRepository
         var subjectAssignments = new List<MonthlyGrade>(); // Assuming MonthlyGrade holds the subject assignments for students
         var TermlyGradesData = new List<TermlyGrade>(); // Assuming MonthlyGrade holds the subject assignments for students
 
-        // Fetch Months and GradeTypes
+        // Fetch Months and GradeTypes for the selected year
         var months = await _context.YearTermMonths
-            .Where(m => m.YearID == activeYear.YearID && m.TermID == dto.TermID)
+            .Where(m => m.YearID == dto.YearID && m.TermID == dto.TermID)
             .Select(m => m.MonthID)
             .ToListAsync();
 
@@ -80,54 +78,115 @@ public class CoursePlanRepository : ICoursePlanRepository
             .Select(g => g.GradeTypeID)
             .ToListAsync();
 
+        // First, get all existing grades in bulk to avoid multiple database queries
+        var studentIDs = students.Select(s => s.StudentID).ToList();
+        
+        var existingTermlyGrades = await _context.TermlyGrades
+            .Where(tg => studentIDs.Contains(tg.StudentID) &&
+                        tg.SubjectID == dto.SubjectID &&
+                        tg.ClassID == dto.ClassID &&
+                        tg.TermID == dto.TermID &&
+                        tg.YearID == dto.YearID)
+            .Select(tg => new { tg.StudentID, tg.SubjectID, tg.ClassID, tg.TermID, tg.YearID })
+            .ToListAsync();
+
+        var existingMonthlyGrades = await _context.MonthlyGrades
+            .Where(mg => studentIDs.Contains(mg.StudentID) &&
+                        mg.SubjectID == dto.SubjectID &&
+                        mg.ClassID == dto.ClassID &&
+                        mg.TermID == dto.TermID &&
+                        mg.YearID == dto.YearID &&
+                        months.Contains(mg.MonthID) &&
+                        gradeTypes.Contains(mg.GradeTypeID))
+            .Select(mg => new { mg.StudentID, mg.SubjectID, mg.ClassID, mg.TermID, mg.YearID, mg.MonthID, mg.GradeTypeID })
+            .ToListAsync();
+
         foreach (var student in students)
         {
-            var newTermlyGrade = new TermlyGrade
+            // Check if TermlyGrade already exists for this student
+            var termlyExists = existingTermlyGrades.Any(tg => 
+                tg.StudentID == student.StudentID &&
+                tg.SubjectID == dto.SubjectID &&
+                tg.ClassID == dto.ClassID &&
+                tg.TermID == dto.TermID &&
+                tg.YearID == dto.YearID);
+
+            if (!termlyExists)
             {
-                StudentID = student.StudentID,
-                SubjectID = dto.SubjectID,  // The subject associated with the course plan
-                ClassID = dto.ClassID,
-                YearID = student.YearID,
-                TermID = dto.TermID,
-                Grade = null, // Default grade (0 or null, depending on your requirement)
-                Note = null // Default note (null or empty string, depending on your requirement)
-            };
-            TermlyGradesData.Add(newTermlyGrade);
+                var newTermlyGrade = new TermlyGrade
+                {
+                    StudentID = student.StudentID,
+                    SubjectID = dto.SubjectID,  // The subject associated with the course plan
+                    ClassID = dto.ClassID,
+                    YearID = dto.YearID,  // Use YearID from DTO (user-selected year)
+                    TermID = dto.TermID,
+                    Grade = null, // Default grade (0 or null, depending on your requirement)
+                    Note = null // Default note (null or empty string, depending on your requirement)
+                };
+                TermlyGradesData.Add(newTermlyGrade);
+            }
 
             // Step 4: For each student, loop through all months and grade types to create new grades
             foreach (var month in months)
             {
                 foreach (var gradeType in gradeTypes)
                 {
-                    var newGrade = new MonthlyGrade
+                    // Check if MonthlyGrade already exists (composite key check)
+                    var monthlyExists = existingMonthlyGrades.Any(mg => 
+                        mg.StudentID == student.StudentID &&
+                        mg.YearID == dto.YearID &&
+                        mg.SubjectID == dto.SubjectID &&
+                        mg.ClassID == dto.ClassID &&
+                        mg.TermID == dto.TermID &&
+                        mg.MonthID == month &&
+                        mg.GradeTypeID == gradeType);
+
+                    if (!monthlyExists)
                     {
-                        StudentID = student.StudentID,
-                        YearID = student.YearID,
-                        SubjectID = dto.SubjectID,  // The subject associated with the course plan
-                        ClassID = dto.ClassID,
-                        TermID = dto.TermID,
-                        MonthID = month,  // MonthID from the Months list
-                        GradeTypeID = gradeType, // GradeTypeID from the GradeTypes list
-                        Grade = null // Default grade (null, depending on your requirement)
-                    };
+                        var newGrade = new MonthlyGrade
+                        {
+                            StudentID = student.StudentID,
+                            YearID = dto.YearID,  // Use YearID from DTO (user-selected year)
+                            SubjectID = dto.SubjectID,  // The subject associated with the course plan
+                            ClassID = dto.ClassID,
+                            TermID = dto.TermID,
+                            MonthID = month,  // MonthID from the Months list
+                            GradeTypeID = gradeType, // GradeTypeID from the GradeTypes list
+                            Grade = null // Default grade (null, depending on your requirement)
+                        };
 
-                    subjectAssignments.Add(newGrade);
+                        subjectAssignments.Add(newGrade);
+                    }
                 }
-
             }
         }
 
-        // Step 5: Save all the subject assignments (i.e., MonthlyGrades)
+        // Step 5: Save all the NEW subject assignments (i.e., MonthlyGrades and TermlyGrades)
+        // Only create new records, never update existing ones
+        // Save both in a single transaction to ensure consistency
         if (subjectAssignments.Count > 0)
         {
             _context.MonthlyGrades.AddRange(subjectAssignments);
-            await _context.SaveChangesAsync();
         }
 
         if (TermlyGradesData.Count > 0)
         {
             _context.TermlyGrades.AddRange(TermlyGradesData);
-            await _context.SaveChangesAsync();
+        }
+
+        // Save all changes in a single transaction
+        if (subjectAssignments.Count > 0 || TermlyGradesData.Count > 0)
+        {
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // If there's a duplicate key error, it means some grades already exist
+                // This shouldn't happen due to our checks, but handle it gracefully
+                throw new InvalidOperationException($"Error saving grades: {ex.Message}. Some grades may already exist.", ex);
+            }
         }
 
         return dto;

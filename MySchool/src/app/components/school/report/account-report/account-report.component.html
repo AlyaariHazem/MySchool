@@ -78,34 +78,50 @@
           <div class="text-start">الحالة</div>
       </div>
 
-      <!-- ✅ جدول التفاصيل -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-center border-collapse">
-          <thead class="bg-gray-100 text-gray-800 text-sm">
-            <tr>
-              <th class="p-2 border">#</th>
-              <th class="p-2 border">البند</th>
-              <th class="p-2 border">النوع</th>
-              <th class="p-2 border">المبلغ</th>
-              <th class="p-2 border">التاريخ</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of rows; let i = index" [ngClass]="i % 2 === 0 ? 'bg-gray-50' : ''">
-              <td class="p-2 border">{{ i + 1 }}</td>
-              <td class="p-2 border">{{ r.desc }}</td>
-              <td class="p-2 border">{{ r.type === 'Debit' ? '—' : 'خصم' }}</td>
-              <td class="p-2 border">YR {{ r.amount | number:'1.0-2' }}</td>
-              <td class="p-2 border">{{ r.date }}</td>
-            </tr>
+      <!-- ✅ عرض كل طالب مع جدول معاملاته -->
+      <div *ngFor="let student of students" class="mb-6">
+        <div class="mb-3">
+          <h4 class="text-lg font-semibold mb-1">{{ student.studentName }}</h4>
+          <p class="text-gray-600 text-sm" *ngIf="student.className || student.stageName">
+            الصف: {{ student.className }}{{ student.className && student.stageName ? ' / ' : '' }}{{ student.stageName }}
+          </p>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full text-center border-collapse">
+            <thead class="bg-gray-100 text-gray-800 text-sm">
+              <tr>
+                <th class="p-2 border">#</th>
+                <th class="p-2 border">البند</th>
+                <th class="p-2 border">النوع</th>
+                <th class="p-2 border">المبلغ</th>
+                <th class="p-2 border">التاريخ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngIf="getTransactionsForStudent(student.studentID).length > 0; else noTransactions">
+                <tr *ngFor="let r of getTransactionsForStudent(student.studentID); let i = index" [ngClass]="i % 2 === 0 ? 'bg-gray-50' : ''">
+                  <td class="p-2 border">{{ i + 1 }}</td>
+                  <td class="p-2 border">{{ r.desc }}</td>
+                  <td class="p-2 border">{{ r.type === 'Debit' ? '—' : 'خصم' }}</td>
+                  <td class="p-2 border">YR {{ r.amount | number:'1.0-2' }}</td>
+                  <td class="p-2 border">{{ r.date }}</td>
+                </tr>
 
-            <!-- ✅ الإجمالي -->
-            <tr class="font-bold bg-yellow-50">
-              <td colspan="4" class="text-end p-2 border">إجمالي المديونية:</td>
-              <td class="p-2 border">YR {{ header.totalDebit | number:'1.0-2' }}</td>
-            </tr>
-          </tbody>
-        </table>
+                <!-- ✅ إجمالي المديونية للطالب -->
+                <tr class="font-bold bg-yellow-50" *ngIf="getStudentTotalDebit(student.studentID) > 0">
+                  <td colspan="4" class="text-end p-2 border">إجمالي المديونية:</td>
+                  <td class="p-2 border">YR {{ getStudentTotalDebit(student.studentID) | number:'1.0-2' }}</td>
+                </tr>
+              </ng-container>
+              <ng-template #noTransactions>
+                <tr>
+                  <td colspan="5" class="text-center p-2 border text-gray-500">لا توجد معاملات</td>
+                </tr>
+              </ng-template>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- ✅ جدول المدخرات -->

@@ -20,6 +20,8 @@ import { DivisionService } from '../../core/services/division.service';
 import { Terms } from '../../core/models/term.model';
 import { TermService } from '../../core/services/term.service';
 import { TeacherService } from '../../core/services/teacher.service';
+import { YearService } from '../../../../core/services/year.service';
+import { Year } from '../../../../core/models/year.model';
 import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
 @Component({
@@ -39,6 +41,7 @@ export class PlainsComponent {
   fiteredDivisions: divisions[] | undefined;
   teachers: Teachers[] | undefined;
   terms: Terms[] = [];
+  years: (Year & { displayLabel?: string })[] = [];
   ClassSubjects: Curriculms[] = [];
   filteredSubjects: Curriculms[] | undefined;
   curriculmsPlan: CurriculmsPlans[] = [];
@@ -65,14 +68,16 @@ export class PlainsComponent {
     private classService: ClassService,
     private termService: TermService,
     private store:Store,
-    private teacherService: TeacherService
+    private teacherService: TeacherService,
+    private yearService: YearService
   ) {
     this.form = this.formBuilder.group({
       classID: [null, Validators.required],
       subjectID: [null, Validators.required],
       divisionID: [null, Validators.required],
       teacherID: [null, Validators.required],
-      termID: [null, Validators.required]
+      termID: [null, Validators.required],
+      yearID: [null, Validators.required]
     });
   }
 
@@ -84,6 +89,7 @@ export class PlainsComponent {
     this.getAllDivision();
     this.getAllTerms();
     this.getAllTeachers();
+    this.getAllYears();
 
     this.form.get('classID')?.valueChanges.subscribe((selectedClassID: number) => {
       this.filteredSubjects = this.ClassSubjects.filter(c => c.classID === selectedClassID);
@@ -91,8 +97,11 @@ export class PlainsComponent {
       this.form.patchValue({ subjectID: null });
     });
 
-    const yearFromLocal = localStorage.getItem('yearID') || '1';
-    this.form.patchValue({ yearID: Number(yearFromLocal) });
+    // Set default year from localStorage if available
+    const yearFromLocal = localStorage.getItem('yearID');
+    if (yearFromLocal) {
+      this.form.patchValue({ yearID: Number(yearFromLocal) });
+    }
 
     this.form.reset();
   }
@@ -190,14 +199,40 @@ export class PlainsComponent {
     });
   }
 
+  getAllYears(): void {
+    this.yearService.getAllYears().subscribe({
+      next: (years: Year[]) => {
+        // Add display property to each year for better dropdown display
+        this.years = years.map((year: Year) => ({
+          ...year,
+          displayLabel: this.getYearDisplay(year)
+        }));
+        // Set default to active year if no year is selected
+        if (!this.form.get('yearID')?.value && years.length > 0) {
+          const activeYear = years.find((y: Year) => y.active);
+          if (activeYear) {
+            this.form.patchValue({ yearID: activeYear.yearID });
+          } else {
+            this.form.patchValue({ yearID: years[0].yearID });
+          }
+        }
+      },
+      error: () => this.toastr.error('Error fetching years')
+    });
+  }
+
   Add(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const { classID, subjectID, divisionID, teacherID, termID } = this.form.value;
-    const yearID = Number(localStorage.getItem('yearID') || '1');
+    const { classID, subjectID, divisionID, teacherID, termID, yearID } = this.form.value;
+
+    if (!yearID) {
+      this.toastr.warning('يرجى اختيار سنة دراسية');
+      return;
+    }
 
     const localCurriculm: CurriculmsPlan = {
       subjectID,
@@ -253,7 +288,8 @@ export class PlainsComponent {
           classID: planData.classID,
           divisionID: planData.divisionID,
           teacherID: planData.teacherID,
-          termID: planData.termID
+          termID: planData.termID,
+          yearID: planData.yearID
         });
 
         // Update filtered lists based on selected class
@@ -291,8 +327,12 @@ export class PlainsComponent {
       return;
     }
 
-    const { classID, subjectID, divisionID, teacherID, termID } = this.form.value;
-    const yearID = Number(localStorage.getItem('yearID') || '1');
+    const { classID, subjectID, divisionID, teacherID, termID, yearID } = this.form.value;
+
+    if (!yearID) {
+      this.toastr.warning('يرجى اختيار سنة دراسية');
+      return;
+    }
 
     const updatedPlan: CurriculmsPlan = {
       subjectID,
@@ -373,5 +413,14 @@ export class PlainsComponent {
     this.first = event.first || 0;
     this.rows = event.rows || 4;
     this.updatePaginatedData();
+  }
+
+  getYearDisplay(year: Year): string {
+    if (!year || !year.yearDateStart || !year.yearDateEnd) {
+      return '';
+    }
+    const startYear = new Date(year.yearDateStart).getFullYear();
+    const endYear = new Date(year.yearDateEnd).getFullYear();
+    return `${startYear} - ${endYear}`;
   }
 }

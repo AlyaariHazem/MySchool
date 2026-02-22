@@ -83,6 +83,8 @@ import { HeaderReportComponent } from './report/header-report/header-report.comp
 import { AllStudentsComponent } from './students/all-students/all-students.component';
 import { DatePicker } from 'primeng/datepicker';
 import { CustomTableComponent } from '../../shared/components/custom-table/custom-table.component';
+import { StudentPromotionComponent } from './students/student-promotion/student-promotion.component';
+import { PromoteStudentDialogComponent } from './students/student-promotion/promote-student-dialog/promote-student-dialog.component';
 
 
 
@@ -128,6 +130,8 @@ const components = [
   GradesMangeComponent,
   AllotmentComponent,
   TermResultComponent,
+  StudentPromotionComponent,
+  PromoteStudentDialogComponent,
   GradesTermComponent,
   HeaderReportComponent,
   AccountReportComponent

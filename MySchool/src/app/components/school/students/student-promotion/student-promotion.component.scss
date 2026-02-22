@@ -1,0 +1,262 @@
+.student-promotion-container {
+  padding: 20px;
+  background: white;
+  min-height: 100vh;
+
+  .header-section {
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 15px;
+
+    .page-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .breadcrumb {
+      font-size: 14px;
+      color: #666;
+      
+      span {
+        margin: 0 5px;
+        
+        &:last-child {
+          color: #1976d2;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+
+  .search-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+
+    .search-form {
+      .search-controls {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+
+        .btn-search {
+          background: #4caf50;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          transition: background 0.3s;
+
+          &:hover:not(:disabled) {
+            background: #45a049;
+          }
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+        }
+
+        .filter-group {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          flex: 1;
+          min-width: 200px;
+
+          label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+          }
+
+          .form-control {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+
+            &:focus {
+              outline: none;
+              border-color: #1976d2;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .table-section {
+    margin-bottom: 20px;
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .students-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+
+      thead {
+        background: #f3f4f6;
+
+        th {
+          padding: 12px;
+          text-align: right;
+          font-weight: bold;
+          color: #333;
+          border: 1px solid #ddd;
+
+          &.checkbox-header {
+            width: 50px;
+            text-align: center;
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          &:nth-child(even) {
+            background: #f9fafb;
+          }
+
+          &:hover {
+            background: #f0f0f0;
+          }
+
+          td {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            text-align: right;
+          }
+        }
+      }
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+
+      p {
+        font-size: 16px;
+      }
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #1976d2;
+
+      i {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      p {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .pagination-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+
+    .pagination-info {
+      font-size: 14px;
+      color: #666;
+    }
+  }
+
+  .action-section {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px;
+    background: #fff3cd;
+    border-radius: 8px;
+    border: 1px solid #ffc107;
+    margin-top: 20px;
+
+    .btn-promote {
+      background: #ff9800;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+      &:hover:not(:disabled) {
+        background: #f57c00;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+// RTL Support
+[dir="rtl"] {
+  .student-promotion-container {
+    .search-controls {
+      .filter-group {
+        label {
+          text-align: right;
+        }
+      }
+    }
+
+    .students-table {
+      thead th,
+      tbody td {
+        text-align: right;
+      }
+    }
+  }
+}
+
+// LTR Support
+[dir="ltr"] {
+  .student-promotion-container {
+    .search-controls {
+      .filter-group {
+        label {
+          text-align: left;
+        }
+      }
+    }
+
+    .students-table {
+      thead th,
+      tbody td {
+        text-align: left;
+      }
+    }
+  }
+}

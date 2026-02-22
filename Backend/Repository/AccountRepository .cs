@@ -146,11 +146,36 @@ public class AccountRepository : IAccountRepository
             SchoolInfo = schoolInfo
         };
 
-        // Get AccountStudentGuardian IDs for this account
-        var accountStudentGuardianIds = await _dbContext.AccountStudentGuardians
+        // Get AccountStudentGuardian records for this account with student information
+        var accountStudentGuardians = await _dbContext.AccountStudentGuardians
             .Where(ag => ag.AccountID == accountId)
-            .Select(ag => ag.AccountStudentGuardianID)
+            .Include(ag => ag.Student)
+                .ThenInclude(s => s.FullName)
+            .Include(ag => ag.Student)
+                .ThenInclude(s => s.Division)
+                    .ThenInclude(d => d.Class)
+                        .ThenInclude(c => c.Stage)
             .ToListAsync();
+
+        var accountStudentGuardianIds = accountStudentGuardians
+            .Select(ag => ag.AccountStudentGuardianID)
+            .ToList();
+
+        // Map students to StudentInfoDTO
+        var students = accountStudentGuardians
+            .Select(ag => ag.Student)
+            .Distinct()
+            .Select(s => new StudentInfoDTO
+            {
+                StudentID = s.StudentID,
+                StudentName = (s.FullName?.FirstName ?? "") + " " + 
+                             (s.FullName?.MiddleName ?? "") + " " + 
+                             (s.FullName?.LastName ?? ""),
+                DivisionName = s.Division?.DivisionName,
+                ClassName = s.Division?.Class?.ClassName,
+                StageName = s.Division?.Class?.Stage?.StageName
+            })
+            .ToList();
 
         // Get transactions from StudentClassFees (Debits - fees assigned to students)
         var studentClassFees = await _dbContext.StudentClassFees
@@ -182,7 +207,8 @@ public class AccountRepository : IAccountRepository
                     Description = fee.FeeClass?.Fee?.FeeName ?? "رسوم دراسية",
                     Type = "Debit",
                     Amount = netAmount,
-                    Date = transactionDate
+                    Date = transactionDate,
+                    StudentID = fee.StudentID
                 });
                 totalDebit += netAmount;
             }
@@ -190,6 +216,7 @@ public class AccountRepository : IAccountRepository
 
         // Get payments/credits from Vouchers (Credits - payments made)
         var vouchers = await _dbContext.Vouchers
+            .Include(v => v.AccountStudentGuardians)
             .Where(v => accountStudentGuardianIds.Contains(v.AccountStudentGuardianID))
             .OrderBy(v => v.HireDate)
             .ToListAsync();
@@ -208,7 +235,8 @@ public class AccountRepository : IAccountRepository
                     Description = voucher.Note ?? "دفعة",
                     Type = "Credit",
                     Amount = voucher.Receipt,
-                    Date = voucher.HireDate
+                    Date = voucher.HireDate,
+                    StudentID = voucher.AccountStudentGuardians?.StudentID
                 });
                 totalCredit += voucher.Receipt;
 
@@ -239,6 +267,7 @@ public class AccountRepository : IAccountRepository
 
         report.Transactions = transactions.OrderBy(t => t.Date).ToList();
         report.Savings = savings.OrderBy(s => s.Date).ToList();
+        report.Students = students;
         report.TotalDebit = totalDebit;
         report.TotalCredit = totalCredit;
         report.Balance = totalDebit - totalCredit;

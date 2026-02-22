@@ -1,0 +1,74 @@
+<div class="promote-dialog">
+  <div class="dialog-header">
+    <h3>ترقية الطلاب</h3>
+    <p class="subtitle">اختر القسم الجديد لكل طالب</p>
+    <div class="auto-promote-option">
+      <label>
+        <input 
+          type="checkbox" 
+          [(ngModel)]="autoPromote"
+          (change)="onAutoPromoteChange()" />
+        <span>ترقية تلقائية (زيادة صف واحد)</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="dialog-content">
+    <div class="students-list">
+      <div *ngFor="let student of students; let i = index" class="student-item">
+        <div class="student-info">
+          <strong>{{ student.studentName }}</strong>
+          <span class="current-info">
+            الصف الحالي: {{ student.currentClassName || '-' }} | 
+            المرحلة: {{ student.currentStageName || '-' }} | 
+            الشعبة: {{ student.currentDivisionName || '-' }}
+          </span>
+        </div>
+        <div class="division-select">
+          <label>القسم الجديد:</label>
+          <p-dropdown
+            [formGroup]="getFormGroup(i)"
+            formControlName="newDivisionID"
+            [options]="getFilteredDivisions(student)"
+            optionLabel="divisionName"
+            appendTo="body"
+            optionValue="divisionID"
+            [placeholder]="autoPromote ? 'جاري التحديد...' : 'اختر القسم'"
+            [showClear]="!autoPromote"
+            [disabled]="autoPromote"
+            styleClass="w-full"
+            [style]="{'width': '100%'}">
+            <ng-template let-division pTemplate="item">
+              <div class="division-option">
+                <span>{{ division.divisionName }}</span>
+                <small class="division-class">{{ division.classesName }}</small>
+              </div>
+            </ng-template>
+            <ng-template let-division pTemplate="selectedItem">
+              <div class="division-option">
+                <span>{{ division.divisionName }}</span>
+                <small class="division-class">{{ division.classesName }}</small>
+              </div>
+            </ng-template>
+          </p-dropdown>
+          <small class="auto-assigned-info" *ngIf="autoPromote && getFormGroup(i).get('newDivisionID')?.value">
+            ✓ تم التحديد تلقائياً: الصف التالي
+          </small>
+          <small class="error-info" *ngIf="autoPromote && !getFormGroup(i).get('newDivisionID')?.value">
+            ⚠ لم يتم العثور على صف تالي - يرجى الاختيار يدوياً
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <button type="button" class="btn-cancel" (click)="onCancel()">
+      إلغاء
+    </button>
+    <button type="button" class="btn-promote" (click)="onPromote()" [disabled]="isLoading">
+      <i class="pi pi-check"></i>
+      ترقية الطلاب
+    </button>
+  </div>
+</div>

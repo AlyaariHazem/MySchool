@@ -52,6 +52,16 @@
                 </p-floatLabel>
             </div>
 
+            <!-- السنة الدراسية -->
+            <div class="form-control">
+                <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
+                    <p-select class="w-full h-3rem inputError" [options]="years" formControlName="yearID"
+                        optionLabel="displayLabel" optionValue="yearID" [editable]="true" [showClear]="true">
+                    </p-select>
+                    <label for="yearID">اختر السنة الدراسية</label>
+                </p-floatLabel>
+            </div>
+
         </div>
 
         <!-- زر الحفظ -->

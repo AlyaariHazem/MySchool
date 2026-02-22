@@ -158,4 +158,59 @@ export class StudentService {
             })
         );
     }
+
+    // Get unregistered students (students not registered in new year)
+    getUnregisteredStudents(
+        pageNumber: number = 1, 
+        pageSize: number = 5, 
+        targetYearID?: number,
+        studentName?: string,
+        stageID?: number
+    ): Observable<any> {
+        let url = `${this.API.baseUrl}/Students/unregistered?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+        if (targetYearID) url += `&targetYearID=${targetYearID}`;
+        if (studentName) url += `&studentName=${encodeURIComponent(studentName)}`;
+        if (stageID) url += `&stageID=${stageID}`;
+
+        return this.API.http.get<any>(url).pipe(
+            map(response => {
+                const data = response.result || response;
+                return {
+                    data: data.Data || data.data || [],
+                    pageNumber: data.PageNumber ?? data.pageNumber ?? pageNumber,
+                    pageSize: data.PageSize ?? data.pageSize ?? pageSize,
+                    totalCount: data.TotalCount ?? data.totalCount ?? 0,
+                    totalPages: data.TotalPages ?? data.totalPages ?? 0
+                };
+            }),
+            catchError(error => {
+                console.error("Error fetching unregistered students:", error);
+                throw error;
+            })
+        );
+    }
+
+    // Promote students to new year/division
+    promoteStudents(students: Array<{ studentID: number; newDivisionID: number }>, targetYearID?: number): Observable<any> {
+        const requestBody = {
+            students: students,
+            targetYearID: targetYearID
+        };
+
+        return this.API.http.post<any>(`${this.API.baseUrl}/Students/promote`, requestBody).pipe(
+            map(response => {
+                // Handle both wrapped (APIResponse) and unwrapped responses
+                const data = response.result || response;
+                return {
+                    success: data.success || false,
+                    message: data.message || '',
+                    result: data.result || data
+                };
+            }),
+            catchError(error => {
+                console.error("Error promoting students:", error);
+                return throwError(() => error);
+            })
+        );
+    }
 }

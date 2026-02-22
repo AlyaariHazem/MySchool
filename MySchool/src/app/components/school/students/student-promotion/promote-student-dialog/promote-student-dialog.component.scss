@@ -1,0 +1,168 @@
+.promote-dialog {
+  padding: 20px;
+
+  .dialog-header {
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 15px;
+
+    h3 {
+      margin: 0 0 5px 0;
+      font-size: 20px;
+      color: #333;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .auto-promote-option {
+      margin-top: 15px;
+      padding: 10px;
+      background: #fff3cd;
+      border-radius: 4px;
+      border: 1px solid #ffc107;
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #856404;
+
+        input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  .dialog-content {
+    max-height: 500px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+
+    .students-list {
+      .student-item {
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+
+        .student-info {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          margin-bottom: 15px;
+
+          strong {
+            font-size: 16px;
+            color: #333;
+          }
+
+          .current-info {
+            font-size: 13px;
+            color: #666;
+          }
+        }
+
+        .division-select {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+
+          label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+          }
+
+          .division-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .division-class {
+              color: #999;
+              font-size: 12px;
+            }
+          }
+
+          .auto-assigned-info {
+            color: #28a745;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 5px;
+            display: block;
+          }
+
+          .error-info {
+            color: #dc3545;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 5px;
+            display: block;
+          }
+
+          p-dropdown[ng-reflect-disabled="true"] {
+            opacity: 0.7;
+          }
+        }
+      }
+    }
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+
+    .btn-cancel {
+      padding: 10px 20px;
+      border: 1px solid #ddd;
+      background: white;
+      color: #333;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+
+      &:hover {
+        background: #f5f5f5;
+      }
+    }
+
+    .btn-promote {
+      padding: 10px 20px;
+      border: none;
+      background: #ff9800;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s;
+
+      &:hover:not(:disabled) {
+        background: #f57c00;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

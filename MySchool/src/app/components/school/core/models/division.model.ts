@@ -4,6 +4,7 @@ export interface divisions{
     state:boolean;
     classID:number;
     classesName:string;
+    stageName?:string;
     studentCount:number;
 }
 

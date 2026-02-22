@@ -2,6 +2,41 @@ import { Discount } from "./discount.model";
 import { Guardian } from "./guardian.model";
 import { NameAlisDTO, NameDTO } from "./name.model";
 
+export interface UnregisteredStudent {
+  studentID: number;
+  studentName: string;
+  currentClassName?: string;
+  currentStageName?: string;
+  currentDivisionName?: string;
+  currentDivisionID: number;
+  currentYearID?: number;
+}
+
+export interface PromoteStudentRequest {
+  studentID: number;
+  newDivisionID: number;
+}
+
+export interface PromoteStudentsRequest {
+  students: PromoteStudentRequest[];
+  targetYearID?: number;
+}
+
+export interface PromoteStudentResult {
+  studentID: number;
+  studentName: string;
+  success: boolean;
+  errorMessage?: string;
+  newDivisionID?: number;
+}
+
+export interface PromoteStudentsResponse {
+  results: PromoteStudentResult[];
+  totalCount: number;
+  successCount: number;
+  failedCount: number;
+}
+
 export interface AddStudent {
   existingGuardianId?: number;
   studentID: number;

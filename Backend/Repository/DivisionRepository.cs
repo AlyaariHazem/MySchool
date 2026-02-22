@@ -103,6 +103,7 @@ namespace FirstProjectWithMVC.Repository.School
                     DivisionName = d.DivisionName,
                     ClassID = d.ClassID,
                     ClassesName = d.Class != null ? d.Class.ClassName : string.Empty,  // Access the class name
+                    StageName = d.Class != null && d.Class.Stage != null ? d.Class.Stage.StageName : string.Empty,  // Access the stage name
                     StudentCount = d.Students != null ? d.Students.Count() : 0,
                     State = d.State,
                 }).ToListAsync();

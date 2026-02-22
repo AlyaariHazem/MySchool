@@ -629,4 +629,519 @@ public class StudentRepository : IStudentRepository
         var maxValue = await _context.Students.MaxAsync(s => (int?)s.StudentID) ?? 0;
         return maxValue;
     }
+
+    public async Task<(List<UnregisteredStudentDTO> Items, int TotalCount)> GetUnregisteredStudentsAsync(
+        int? targetYearID, 
+        int pageNumber, 
+        int pageSize, 
+        string? studentName, 
+        int? stageID, 
+        CancellationToken cancellationToken = default)
+    {
+        // Get current active year
+        var currentYear = await _context.Years
+            .Where(y => y.Active == true)
+            .OrderByDescending(y => y.YearID)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (currentYear == null)
+            return (new List<UnregisteredStudentDTO>(), 0);
+
+        // If targetYearID is not provided, get the next year (or create logic to determine target year)
+        int? targetYear = targetYearID;
+        if (!targetYear.HasValue)
+        {
+            // Get next year or most recent inactive year
+            targetYear = await _context.Years
+                .Where(y => !y.Active && y.YearID > currentYear.YearID)
+                .OrderBy(y => y.YearID)
+                .Select(y => (int?)y.YearID)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        // Base query: Get students in current active year
+        var baseQuery = _context.Students
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Year)
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Stage)
+                        .ThenInclude(s => s.Year)
+            .Where(s => s.Division != null && 
+                       s.Division.Class != null && 
+                       ((s.Division.Class.Year != null && s.Division.Class.Year.YearID == currentYear.YearID) ||
+                        (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.YearID == currentYear.YearID)));
+
+        // Apply filters
+        if (!string.IsNullOrWhiteSpace(studentName))
+        {
+            baseQuery = baseQuery.Where(s => 
+                (s.FullName.FirstName + " " + s.FullName.MiddleName + " " + s.FullName.LastName)
+                .Contains(studentName));
+        }
+
+        if (stageID.HasValue)
+        {
+            baseQuery = baseQuery.Where(s => 
+                s.Division.Class.StageID == stageID.Value);
+        }
+
+        // Get total count
+        var totalCount = await baseQuery.CountAsync(cancellationToken);
+
+        // Get paginated results
+        var students = await baseQuery
+            .OrderBy(s => s.FullName.FirstName)
+            .ThenBy(s => s.FullName.MiddleName)
+            .ThenBy(s => s.FullName.LastName)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        // Map to DTOs
+        var items = students.Select(s => new UnregisteredStudentDTO
+        {
+            StudentID = s.StudentID,
+            StudentName = (s.FullName?.FirstName ?? "") + " " + 
+                        (s.FullName?.MiddleName ?? "") + " " + 
+                        (s.FullName?.LastName ?? ""),
+            CurrentClassName = s.Division?.Class?.ClassName,
+            CurrentStageName = s.Division?.Class?.Stage?.StageName,
+            CurrentDivisionName = s.Division?.DivisionName,
+            CurrentDivisionID = s.DivisionID,
+            CurrentYearID = s.Division?.Class?.YearID ?? 
+                          (s.Division?.Class?.Stage?.YearID)
+        }).ToList();
+
+        return (items, totalCount);
+    }
+
+    public async Task<PromoteStudentsResponseDTO> PromoteStudentsAsync(List<PromoteStudentRequestDTO> students, int? targetYearID = null)
+    {
+        var response = new PromoteStudentsResponseDTO
+        {
+            TotalCount = students.Count,
+            Results = new List<PromoteStudentResultDTO>()
+        };
+
+        // Get target year (use provided year, or next year after current active year)
+        Year? targetYear = null;
+        if (targetYearID.HasValue)
+        {
+            targetYear = await _context.Years.FirstOrDefaultAsync(y => y.YearID == targetYearID.Value);
+        }
+        else
+        {
+            // Get current active year first
+            var currentYear = await _context.Years.FirstOrDefaultAsync(y => y.Active);
+            
+            if (currentYear != null)
+            {
+                // Get the next year (year after current year)
+                // First try to find an inactive year with YearID greater than current year
+                targetYear = await _context.Years
+                    .Where(y => !y.Active && y.YearID > currentYear.YearID)
+                    .OrderBy(y => y.YearID)
+                    .FirstOrDefaultAsync();
+                
+                // If no inactive year found, try to find any year with YearID greater than current year
+                if (targetYear == null)
+                {
+                    targetYear = await _context.Years
+                        .Where(y => y.YearID > currentYear.YearID)
+                        .OrderBy(y => y.YearID)
+                        .FirstOrDefaultAsync();
+                }
+                
+                _logger.LogInformation("Current active year: {CurrentYearID}, Target year (next year): {TargetYearID}", 
+                    currentYear.YearID, targetYear?.YearID);
+            }
+            else
+            {
+                // If no active year, use active year as fallback
+                targetYear = await _context.Years.FirstOrDefaultAsync(y => y.Active);
+            }
+        }
+
+        if (targetYear == null)
+        {
+            // If no target year found, return error for all students
+            foreach (var studentRequest in students)
+            {
+                var result = new PromoteStudentResultDTO
+                {
+                    StudentID = studentRequest.StudentID,
+                    NewDivisionID = studentRequest.NewDivisionID,
+                    Success = false,
+                    ErrorMessage = "لم يتم العثور على سنة دراسية للترقية. يرجى التأكد من وجود سنة دراسية بعد السنة الحالية"
+                };
+                response.Results.Add(result);
+                response.FailedCount++;
+            }
+            return response;
+        }
+
+        // Process each student individually to allow partial success
+        foreach (var studentRequest in students)
+        {
+            var result = new PromoteStudentResultDTO
+            {
+                StudentID = studentRequest.StudentID,
+                NewDivisionID = studentRequest.NewDivisionID
+            };
+
+            try
+            {
+                // Get student with related data
+                var student = await _context.Students
+                    .Include(s => s.FullName)
+                    .Include(s => s.Division)
+                        .ThenInclude(d => d.Class)
+                            .ThenInclude(c => c.Year)
+                    .Include(s => s.Division)
+                        .ThenInclude(d => d.Class)
+                            .ThenInclude(c => c.Stage)
+                                .ThenInclude(st => st.Year)
+                    .FirstOrDefaultAsync(s => s.StudentID == studentRequest.StudentID);
+
+                if (student == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = "الطالب غير موجود";
+                    result.StudentName = $"طالب #{studentRequest.StudentID}";
+                    response.Results.Add(result);
+                    response.FailedCount++;
+                    continue;
+                }
+
+                result.StudentName = (student.FullName?.FirstName ?? "") + " " +
+                                   (student.FullName?.MiddleName ?? "") + " " +
+                                   (student.FullName?.LastName ?? "");
+
+                // Verify the new division exists and belongs to target year
+                var newDivision = await _context.Divisions
+                    .Include(d => d.Class)
+                        .ThenInclude(c => c.Year)
+                    .Include(d => d.Class)
+                        .ThenInclude(c => c.Stage)
+                            .ThenInclude(st => st.Year)
+                    .FirstOrDefaultAsync(d => d.DivisionID == studentRequest.NewDivisionID);
+
+                if (newDivision == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = "القسم المحدد غير موجود";
+                    response.Results.Add(result);
+                    response.FailedCount++;
+                    continue;
+                }
+
+                // Verify new division belongs to target year
+                bool belongsToTargetYear = (newDivision.Class.Year != null && newDivision.Class.Year.YearID == targetYear.YearID) ||
+                                         (newDivision.Class.Stage != null && newDivision.Class.Stage.Year != null && 
+                                          newDivision.Class.Stage.Year.YearID == targetYear.YearID);
+
+                if (!belongsToTargetYear)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = "القسم المحدد لا ينتمي للسنة الدراسية المستهدفة";
+                    response.Results.Add(result);
+                    response.FailedCount++;
+                    continue;
+                }
+
+                // Check if student passed (optional - check TermlyGrade for current year)
+                var currentYearID = student.Division?.Class?.YearID ?? 
+                                   (student.Division?.Class?.Stage?.YearID);
+                
+                if (currentYearID.HasValue)
+                {
+                    // Get student's termly grades for current year to check if passed
+                    var termlyGrades = await _context.TermlyGrades
+                        .Where(tg => tg.StudentID == student.StudentID && tg.YearID == currentYearID.Value)
+                        .ToListAsync();
+
+                    // Optional: Add logic to check if student passed based on grades
+                    // For now, we'll allow promotion regardless (you can add minimum grade requirements here)
+                }
+
+                // Store original division ID for reference (not for rollback - we're creating new data)
+                var originalDivisionID = student.DivisionID;
+                var originalClassID = student.Division?.Class?.ClassID;
+
+                // Update student's division to the new division (this is the only update we make)
+                // All other data (fees, grades) will be created as new records
+                student.DivisionID = studentRequest.NewDivisionID;
+                _context.Entry(student).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+
+                // Save student division change first
+                await _context.SaveChangesAsync();
+
+                // Create new fees for student in new class (only create, never update)
+                var newClassID = newDivision.Class.ClassID;
+                var feeClasses = await _context.FeeClass
+                    .Where(fc => fc.ClassID == newClassID)
+                    .ToListAsync();
+
+                var studentClassFees = new List<StudentClassFees>();
+                foreach (var feeClass in feeClasses)
+                {
+                    // Check if student already has this fee for this class/year combination
+                    // We only create new fees, never update existing ones
+                    var existingFee = await _context.StudentClassFees
+                        .Include(scf => scf.FeeClass)
+                            .ThenInclude(fc => fc.Class)
+                        .FirstOrDefaultAsync(scf => scf.StudentID == student.StudentID && 
+                                                   scf.FeeClassID == feeClass.FeeClassID);
+
+                    // Only create if it doesn't exist
+                    if (existingFee == null)
+                    {
+                        studentClassFees.Add(new StudentClassFees
+                        {
+                            StudentID = student.StudentID,
+                            FeeClassID = feeClass.FeeClassID,
+                            Mandatory = feeClass.Mandatory,
+                            AmountDiscount = null,
+                            NoteDiscount = null
+                        });
+                    }
+                }
+
+                // Only add new fees (never update existing ones)
+                if (studentClassFees.Count > 0)
+                {
+                    await _context.StudentClassFees.AddRangeAsync(studentClassFees);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Copy course plan and create grades for new class
+                var coursePlans = await _context.CoursePlans
+                    .Where(cp => cp.DivisionID == newDivision.DivisionID &&
+                                cp.ClassID == newClassID &&
+                                cp.YearID == targetYear.YearID)
+                    .ToListAsync();
+
+                _logger.LogInformation("Found {Count} course plans for DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}", 
+                    coursePlans.Count, newDivision.DivisionID, newClassID, targetYear.YearID);
+
+                if (coursePlans.Count == 0)
+                {
+                    _logger.LogWarning("No course plans found for promoted student {StudentID} in DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}. Grades will not be created.", 
+                        student.StudentID, newDivision.DivisionID, newClassID, targetYear.YearID);
+                    result.ErrorMessage = "تمت الترقية بنجاح، لكن لا توجد خطة دراسية للقسم الجديد";
+                }
+                else
+                {
+                    // Get months and grade types for target year
+                    var months = await _context.YearTermMonths
+                        .Where(m => m.YearID == targetYear.YearID)
+                        .Select(m => new { m.MonthID, m.TermID })
+                        .ToListAsync();
+
+                    // If no months found for target year, try to copy from active year or create default
+                    if (months.Count == 0)
+                    {
+                        _logger.LogWarning("No YearTermMonths found for target YearID: {YearID}. Attempting to copy from active year or create default.", targetYear.YearID);
+                        
+                        var activeYear = await _context.Years
+                            .Where(y => y.Active)
+                            .FirstOrDefaultAsync();
+
+                        List<YearTermMonth> monthsToAdd = new List<YearTermMonth>();
+
+                        // Try to copy from active year if it's different
+                        if (activeYear != null && activeYear.YearID != targetYear.YearID)
+                        {
+                            var activeYearMonths = await _context.YearTermMonths
+                                .Where(m => m.YearID == activeYear.YearID)
+                                .ToListAsync();
+
+                            if (activeYearMonths.Count > 0)
+                            {
+                                monthsToAdd = activeYearMonths.Select(aym => new YearTermMonth
+                                {
+                                    YearID = targetYear.YearID,
+                                    TermID = aym.TermID,
+                                    MonthID = aym.MonthID
+                                }).ToList();
+
+                                _logger.LogInformation("Will copy {Count} YearTermMonths from active year {ActiveYearID} to target year {TargetYearID}", 
+                                    monthsToAdd.Count, activeYear.YearID, targetYear.YearID);
+                            }
+                        }
+
+                        // If no months found to copy, create default YearTermMonths
+                        if (monthsToAdd.Count == 0)
+                        {
+                            _logger.LogInformation("Creating default YearTermMonths for target YearID: {YearID}", targetYear.YearID);
+                            // Default: Term 1 (months 5-8), Term 2 (months 9-12)
+                            monthsToAdd = new List<YearTermMonth>
+                            {
+                                new YearTermMonth { YearID = targetYear.YearID, TermID = 1, MonthID = 5 },
+                                new YearTermMonth { YearID = targetYear.YearID, TermID = 1, MonthID = 6 },
+                                new YearTermMonth { YearID = targetYear.YearID, TermID = 1, MonthID = 7 },
+                                new YearTermMonth { YearID = targetYear.YearID, TermID = 1, MonthID = 8 },
+                                new YearTermMonth { YearID = targetYear.YearID, TermID = 2, MonthID = 9 },
+                                new YearTermMonth { YearID = targetYear.YearID, TermID = 2, MonthID = 10 },
+                                new YearTermMonth { YearID = targetYear.YearID, TermID = 2, MonthID = 11 },
+                                new YearTermMonth { YearID = targetYear.YearID, TermID = 2, MonthID = 12 }
+                            };
+                        }
+
+                        if (monthsToAdd.Count > 0)
+                        {
+                            await _context.YearTermMonths.AddRangeAsync(monthsToAdd);
+                            await _context.SaveChangesAsync();
+                            
+                            _logger.LogInformation("Created {Count} YearTermMonths for target year {TargetYearID}", 
+                                monthsToAdd.Count, targetYear.YearID);
+
+                            // Reload months for target year
+                            months = await _context.YearTermMonths
+                                .Where(m => m.YearID == targetYear.YearID)
+                                .Select(m => new { m.MonthID, m.TermID })
+                                .ToListAsync();
+                        }
+                    }
+
+                    var gradeTypes = await _context.GradeTypes
+                        .Where(g => g.IsActive)
+                        .Select(g => g.GradeTypeID)
+                        .ToListAsync();
+
+                    _logger.LogInformation("Found {MonthCount} months and {GradeTypeCount} grade types for YearID: {YearID}", 
+                        months.Count, gradeTypes.Count, targetYear.YearID);
+
+                    if (months.Count == 0 || gradeTypes.Count == 0)
+                    {
+                        _logger.LogWarning("No months or grade types found for YearID: {YearID}. Months: {MonthCount}, GradeTypes: {GradeTypeCount}", 
+                            targetYear.YearID, months.Count, gradeTypes.Count);
+                        result.ErrorMessage = $"تمت الترقية بنجاح، لكن لا توجد أشهر دراسية للسنة المستهدفة (YearID: {targetYear.YearID})";
+                    }
+
+                    var monthlyGrades = new List<MonthlyGrade>();
+                    var termlyGrades = new List<TermlyGrade>();
+
+                    foreach (var plan in coursePlans)
+                    {
+                        // Create NEW TermlyGrade for this subject in the new year/class
+                        // Only create if it doesn't exist - never update existing grades
+                        var existingTermlyGrade = await _context.TermlyGrades
+                            .FirstOrDefaultAsync(tg => tg.StudentID == student.StudentID &&
+                                                      tg.YearID == targetYear.YearID &&
+                                                      tg.TermID == plan.TermID &&
+                                                      tg.ClassID == newClassID &&
+                                                      tg.SubjectID == plan.SubjectID);
+
+                        if (existingTermlyGrade == null)
+                        {
+                            // Create new TermlyGrade record (never update existing)
+                            termlyGrades.Add(new TermlyGrade
+                            {
+                                StudentID = student.StudentID,
+                                YearID = targetYear.YearID,
+                                TermID = plan.TermID,
+                                ClassID = newClassID,
+                                SubjectID = plan.SubjectID,
+                                Grade = null,
+                                Note = null
+                            });
+                        }
+
+                        // Create NEW MonthlyGrade for each month and grade type
+                        // Only create if it doesn't exist - never update existing grades
+                        foreach (var month in months.Where(m => m.TermID == plan.TermID))
+                        {
+                            foreach (var gradeType in gradeTypes)
+                            {
+                                // Check composite key to ensure we don't create duplicates
+                                var existingMonthlyGrade = await _context.MonthlyGrades
+                                    .FirstOrDefaultAsync(mg => mg.StudentID == student.StudentID &&
+                                                              mg.YearID == targetYear.YearID &&
+                                                              mg.TermID == plan.TermID &&
+                                                              mg.ClassID == newClassID &&
+                                                              mg.SubjectID == plan.SubjectID &&
+                                                              mg.MonthID == month.MonthID &&
+                                                              mg.GradeTypeID == gradeType);
+
+                                if (existingMonthlyGrade == null)
+                                {
+                                    // Create new MonthlyGrade record (never update existing)
+                                    monthlyGrades.Add(new MonthlyGrade
+                                    {
+                                        StudentID = student.StudentID,
+                                        YearID = targetYear.YearID,
+                                        TermID = plan.TermID,
+                                        ClassID = newClassID,
+                                        SubjectID = plan.SubjectID,
+                                        MonthID = month.MonthID,
+                                        GradeTypeID = gradeType,
+                                        Grade = null
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    _logger.LogInformation("Created {TermlyCount} TermlyGrades and {MonthlyCount} MonthlyGrades for student {StudentID}", 
+                        termlyGrades.Count, monthlyGrades.Count, student.StudentID);
+
+                    // Add all grades to context first, then save once
+                    if (termlyGrades.Count > 0)
+                    {
+                        await _context.TermlyGrades.AddRangeAsync(termlyGrades);
+                    }
+
+                    if (monthlyGrades.Count > 0)
+                    {
+                        await _context.MonthlyGrades.AddRangeAsync(monthlyGrades);
+                    }
+
+                    // Save all changes in a single transaction
+                    if (termlyGrades.Count > 0 || monthlyGrades.Count > 0)
+                    {
+                        try
+                        {
+                            var savedCount = await _context.SaveChangesAsync();
+                            _logger.LogInformation("Successfully saved {SavedCount} changes for student {StudentID}. TermlyGrades: {TermlyCount}, MonthlyGrades: {MonthlyCount}", 
+                                savedCount, student.StudentID, termlyGrades.Count, monthlyGrades.Count);
+                        }
+                        catch (DbUpdateException ex)
+                        {
+                            // Log the error but don't fail the entire promotion
+                            _logger.LogError(ex, "Error saving grades for student {StudentID}. TermlyGrades: {TermlyCount}, MonthlyGrades: {MonthlyCount}. Error: {ErrorMessage}", 
+                                student.StudentID, termlyGrades.Count, monthlyGrades.Count, ex.Message);
+                            result.ErrorMessage = $"تمت الترقية بنجاح، لكن حدث خطأ في حفظ الدرجات: {ex.Message}";
+                            // Continue with promotion even if grades fail to save
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("No grades to save for student {StudentID}. All grades may already exist.", student.StudentID);
+                    }
+                }
+
+                result.Success = true;
+                response.Results.Add(result);
+                response.SuccessCount++;
+            }
+            catch (Exception ex)
+            {
+                // If this student fails, mark as failed but continue with others
+                result.Success = false;
+                result.ErrorMessage = $"خطأ: {ex.Message}";
+                if (string.IsNullOrEmpty(result.StudentName))
+                {
+                    result.StudentName = $"طالب #{studentRequest.StudentID}";
+                }
+                response.Results.Add(result);
+                response.FailedCount++;
+                _logger.LogError(ex, "Error promoting student {StudentID}", studentRequest.StudentID);
+            }
+        }
+
+        return response;
+    }
 }

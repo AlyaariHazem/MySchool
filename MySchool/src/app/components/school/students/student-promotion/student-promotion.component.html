@@ -1,0 +1,113 @@
+<div [attr.dir]="dir$ | async" class="student-promotion-container">
+    <div class="header-section">
+        <h2 class="page-title">ترقية الطلاب للعام الجديد</h2>
+      </div>
+    
+  <!-- Search Section -->
+  <div class="search-section">
+    <form [formGroup]="searchForm" class="search-form" (ngSubmit)="onSearch()" role="search" aria-label="بحث عن الطلاب">
+      <div class="search-controls">
+        <button 
+          type="submit" 
+          class="btn-search" 
+          [disabled]="isLoading">
+          <i class="pi pi-search"></i>
+          ابحث
+        </button>
+        
+        <div class="filter-group">
+          <label for="studentNameFilter">اسم الطالب:</label>
+          <input 
+            id="studentNameFilter"
+            type="text" 
+            formControlName="studentName"
+            class="form-control"
+            placeholder="اسم الطالب"
+            (keyup.enter)="onSearch()" />
+        </div>
+
+        <div class="filter-group">
+          <label for="stageFilter">المرحلة:</label>
+          <input 
+            id="stageFilter"
+            type="number" 
+            formControlName="stageID"
+            class="form-control"
+            placeholder="المرحلة" />
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Students Table -->
+  <div class="table-section">
+    <div class="table-container">
+      <table class="students-table" *ngIf="students.length > 0; else noDataTemplate">
+        <thead>
+          <tr>
+            <th class="checkbox-header">
+              <input 
+                type="checkbox" 
+                (change)="onSelectAll($event)"
+                [checked]="areAllStudentsSelected()"
+                title="تحديد الكل" />
+            </th>
+            <th>#</th>
+            <th>اسم الطالب</th>
+            <th>الصف الحالي</th>
+            <th>المرحلة الحالية</th>
+            <th>الشعبة الحالية</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of students; let i = index">
+            <td>
+              <input 
+                type="checkbox" 
+                [checked]="isStudentSelected(student.studentID)"
+                (change)="onStudentSelect(student, $event)"
+                [title]="'تحديد ' + student.studentName" />
+            </td>
+            <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+            <td>{{ student.studentName }}</td>
+            <td>{{ student.currentClassName || '-' }}</td>
+            <td>{{ student.currentStageName || '-' }}</td>
+            <td>{{ student.currentDivisionName || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ng-template #noDataTemplate>
+        <div class="no-data">
+          <p>لا توجد بيانات للعرض</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-section" *ngIf="totalRecords > 0">
+    <p class="pagination-info">
+      عرض {{ (currentPage - 1) * pageSize + 1 }} إلى {{ Math.min(currentPage * pageSize, totalRecords) }} من {{ totalRecords }} سجلات
+    </p>
+    <p-paginator
+      [first]="(currentPage - 1) * pageSize"
+      [rows]="pageSize"
+      [totalRecords]="totalRecords"
+      [rowsPerPageOptions]="[5, 10, 20, 50]"
+      (onPageChange)="onPageChange($event)"
+      [showFirstLastIcon]="true">
+    </p-paginator>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-section" *ngIf="selectedStudents.length > 0">
+    <button 
+      class="btn-promote" 
+      (click)="promoteSelectedStudents()"
+      [disabled]="isLoading">
+      <i class="pi pi-arrow-up"></i>
+      ترقية الطلاب المحددين ({{ selectedStudents.length }})
+    </button>
+  </div>
+</div>

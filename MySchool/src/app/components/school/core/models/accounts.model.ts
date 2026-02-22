@@ -26,6 +26,7 @@ export interface AccountTransaction {
     type: string; // "Debit" or "Credit"
     amount: number;
     date: Date | string;
+    studentID?: number; // Student ID for grouping transactions
 }
 
 export interface AccountSavings {
@@ -44,6 +45,14 @@ export interface SchoolInfo {
     academicYear: string;
 }
 
+export interface StudentInfo {
+    studentID: number;
+    studentName: string;
+    divisionName?: string;
+    className?: string;
+    stageName?: string;
+}
+
 export interface AccountReport {
     accountID: number;
     accountName: string;
@@ -55,5 +64,6 @@ export interface AccountReport {
     balance: number;
     transactions: AccountTransaction[];
     savings: AccountSavings[];
+    students: StudentInfo[];
     schoolInfo: SchoolInfo;
 }

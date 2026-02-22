@@ -3,7 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { NavigateComponent } from './navigate/navigate.component';
-import { AllStudentsComponent } from './students/all-students/all-students.component';
 import { TeachersComponent } from './teachers/teachers.component';
 import { StudyYearComponent } from './sittings/study-year/study-year.component';
 import { SchoolInfoComponent } from './sittings/school-info/school-info.component';
@@ -27,6 +26,7 @@ import { StudentMonthResultComponent } from './report/student-month-result/stude
 import { TermResultComponent } from './report/termly-result/term-result.component';
 import { GradesTermComponent } from './grades-mange/grades-term/grades-term.component';
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
+import { StudentPromotionComponent } from './students/student-promotion/student-promotion.component';
 
 const routes: Routes = [
   {
@@ -51,7 +51,7 @@ const routes: Routes = [
           { path: 'all-students', component: StudentsComponent, data: { breadcrumb: 'جميع الطلاب' } },
           { path: 'about-students', component: StudentsComponent, data: { breadcrumb: 'عن الطلاب' } },
           { path: 'add-student/:id', component: StudentsComponent, data: { breadcrumb: 'إضافة طالب' } },
-          { path: 'un-reg-students', component: AllStudentsComponent, data: { breadcrumb: 'الطلاب غير المسجلين' } },
+          { path: 'un-reg-students', component: StudentPromotionComponent, data: { breadcrumb: 'الطلاب غير المسجلين' } },
           { path: '', redirectTo: 'all-students', pathMatch: 'full' },
           { path: 'not-found', component: PageNotFoundComponent },
           { path: '**', redirectTo: 'not-found', pathMatch: 'full' }

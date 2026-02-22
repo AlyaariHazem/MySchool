@@ -43,7 +43,9 @@ export class AccountReportComponent implements OnInit {
   };
 
   rows: any[] = [];
+  transactions: any[] = []; // All transactions with studentID
   savings: any[] = []; // Savings/Deposits data
+  students: any[] = []; // Students data
   accountNumberInput: string = ''; // Input field for account number
 
   ngOnInit(): void {
@@ -107,16 +109,20 @@ export class AccountReportComponent implements OnInit {
             balance: report.balance || 0
           };
           
-          // Convert transactions to rows format
-          this.rows = report.transactions.map((t: any) => ({
+          // Store all transactions with studentID
+          this.transactions = report.transactions.map((t: any) => ({
             id: t.id,
             desc: t.description,
             type: t.type,
             date: this.formatDate(t.date.toString()),
             amount: t.amount,
+            studentID: t.studentID,
             discount: t.type === 'Credit' ? t.amount : 0,
             required: t.type === 'Debit' ? t.amount : 0
           }));
+          
+          // Keep rows for backward compatibility (all transactions)
+          this.rows = this.transactions;
           
           // Convert savings to savings format
           this.savings = report.savings.map((s: any) => ({
@@ -126,6 +132,15 @@ export class AccountReportComponent implements OnInit {
             amount: s.amount,
             date: this.formatDate(s.date.toString())
           }));
+          
+          // Convert students to students format
+          this.students = report.students?.map((s: any) => ({
+            studentID: s.studentID,
+            studentName: s.studentName,
+            divisionName: s.divisionName || '',
+            className: s.className || '',
+            stageName: s.stageName || ''
+          })) || [];
           
           // Load template and process it
           this.loadTemplate();
@@ -182,6 +197,11 @@ export class AccountReportComponent implements OnInit {
       { id: 1, amount: 50_000, date: '2024‑09‑28', type: 'true', description: 'قسط اول' },
     ];
     
+    // Default students data
+    this.students = [
+      { studentID: 1, studentName: 'أحمد محمد علي', className: 'أول', stageName: 'اساسي' },
+    ];
+    
     this.loadTemplate();
   }
 
@@ -225,6 +245,10 @@ export class AccountReportComponent implements OnInit {
     processed = processed.replace(/#SchoolPhone#/g, this.schoolPhone);
     processed = processed.replace(/#SchoolLogo#/g, this.logo || '');
     processed = processed.replace(/#SchoolYear#/g, this.academicYear || '');
+    
+    // Process students information
+    const studentsHtml = this.generateStudentsHtml();
+    processed = processed.replace(/#StudentsInfo#/g, studentsHtml);
     
     // Process rows/transactions - generate table rows
     const rowsHtml = this.generateRowsHtml();
@@ -287,6 +311,86 @@ export class AccountReportComponent implements OnInit {
     return this.savings.reduce((sum, s) => sum + (s.amount || 0), 0);
   }
 
+  generateStudentsHtml(): string {
+    if (!this.students || this.students.length === 0) {
+      return '';
+    }
+
+    return this.students.map((student) => {
+      const gradeInfo = [];
+      if (student.className) gradeInfo.push(student.className);
+      if (student.stageName) gradeInfo.push(student.stageName);
+      const gradeText = gradeInfo.length > 0 ? gradeInfo.join(' / ') : '';
+      
+      // Get transactions for this student
+      const studentTransactions = this.getTransactionsForStudent(student.studentID);
+      const transactionsHtml = this.generateStudentTransactionsHtml(studentTransactions);
+      
+      return `
+        <div style="margin-top: 10px;">
+          <h4 style="font-size: 1.1em; margin-bottom: 5px; font-weight: bold;">${student.studentName}</h4>
+          ${gradeText ? `<p style="color: #666; margin: 0;">الصف: ${gradeText}</p>` : ''}
+          ${transactionsHtml}
+        </div>
+      `;
+    }).join('');
+  }
+
+  getTransactionsForStudent(studentID: number): any[] {
+    return this.transactions.filter(t => t.studentID === studentID);
+  }
+
+  getStudentTotalDebit(studentID: number): number {
+    return this.getTransactionsForStudent(studentID)
+      .filter(t => t.type === 'Debit')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
+  }
+
+  generateStudentTransactionsHtml(transactions: any[]): string {
+    if (!transactions || transactions.length === 0) {
+      return '';
+    }
+
+    const rowsHtml = transactions.map((row, index) => `
+      <tr class="${index % 2 === 0 ? 'bg-gray-50' : ''}">
+        <td class="p-2 border">${index + 1}</td>
+        <td class="p-2 border">${row.desc}</td>
+        <td class="p-2 border">${row.type === 'Debit' ? '—' : 'خصم'}</td>
+        <td class="p-2 border">YR ${this.formatNumber(row.amount)}</td>
+        <td class="p-2 border">${row.date}</td>
+      </tr>
+    `).join('');
+
+    const totalDebit = transactions
+      .filter(t => t.type === 'Debit')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
+
+    return `
+      <div style="margin-top: 10px; margin-bottom: 20px;">
+        <table style="width:100%; border-collapse:collapse; margin-top:10px;" border="1">
+          <thead style="background-color:#f3f4f6;">
+            <tr>
+              <th style="padding:8px; border:1px solid #ddd; text-align:center;">#</th>
+              <th style="padding:8px; border:1px solid #ddd; text-align:center;">البند</th>
+              <th style="padding:8px; border:1px solid #ddd; text-align:center;">النوع</th>
+              <th style="padding:8px; border:1px solid #ddd; text-align:center;">المبلغ</th>
+              <th style="padding:8px; border:1px solid #ddd; text-align:center;">التاريخ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+            ${totalDebit > 0 ? `
+              <tr style="font-weight:bold; background-color:#fef3c7;">
+                <td colspan="4" style="text-align:right; padding:8px; border:1px solid #ddd;">إجمالي المديونية:</td>
+                <td style="padding:8px; border:1px solid #ddd;">YR ${this.formatNumber(totalDebit)}</td>
+              </tr>
+            ` : ''}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
   getDefaultTemplate(): string {
     return `
       <div dir="rtl" style="padding:20px; line-height:1.8; font-family:Arial;">
@@ -294,6 +398,7 @@ export class AccountReportComponent implements OnInit {
           <div style="flex:1; text-align:right;">
             <h2 style="font-size:1.5em; margin-bottom:10px;">رقم الحساب: #AccountNo#</h2>
             <h3 style="font-size:1.2em; margin-bottom:5px;">#Guardian#</h3>
+            #StudentsInfo#
             <p style="color:#666; margin-bottom:10px;">تاريخ الإنشاء: <strong>#CreatedDate#</strong></p>
             
             <div style="margin-top:15px;">

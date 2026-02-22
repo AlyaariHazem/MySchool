@@ -366,6 +366,61 @@ namespace Backend.Controllers
             return Ok(requestData);
         }
 
+        [HttpGet("unregistered")]
+        public async Task<ActionResult<PagedResult<UnregisteredStudentDTO>>> GetUnregisteredStudents(
+            [FromQuery] int? targetYearID = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 5,
+            [FromQuery] string? studentName = null,
+            [FromQuery] int? stageID = null,
+            CancellationToken cancellationToken = default)
+        {
+            const int maxPageSize = 100;
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 5;
+            if (pageSize > maxPageSize) pageSize = maxPageSize;
+
+            var (items, totalCount) = await _unitOfWork.Students
+                .GetUnregisteredStudentsAsync(targetYearID, pageNumber, pageSize, studentName, stageID, cancellationToken);
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return Ok(new PagedResult<UnregisteredStudentDTO>(
+                items,
+                pageNumber,
+                pageSize,
+                totalCount,
+                totalPages
+            ));
+        }
+
+        [HttpPost("promote")]
+        public async Task<IActionResult> PromoteStudents([FromBody] PromoteStudentsRequestDTO request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (request.Students == null || !request.Students.Any())
+                return BadRequest(new { message = "No students provided for promotion." });
+
+            try
+            {
+                var result = await _unitOfWork.Students.PromoteStudentsAsync(request.Students, request.TargetYearID);
+                
+                return Ok(new 
+                { 
+                    success = result.SuccessCount > 0,
+                    message = $"تم ترقية {result.SuccessCount} طالب بنجاح" + 
+                              (result.FailedCount > 0 ? $" وفشل {result.FailedCount} طالب" : ""),
+                    result = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpPost("uploadFiles")]
         public async Task<IActionResult> UploadAttachments([FromForm] List<IFormFile> files, [FromForm] int studentId)
         {
