@@ -13,10 +13,12 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
 import { TableColumn } from '../../../shared/components/custom-table/custom-table.component';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-teachers',
   templateUrl: './teachers.component.html',
+  providers: [ConfirmationService],
   styleUrls: ['./teachers.component.scss', './../../../shared/styles/style-table.scss'],
 })
 export class TeachersComponent implements OnInit {
@@ -24,6 +26,7 @@ export class TeachersComponent implements OnInit {
 
   employeeService = inject(EmployeeService);
   paginatorService = inject(PaginatorService);
+  confirmationService = inject(ConfirmationService);
 
   Employees: Employee[] = []
   paginated: Employee[] = []; // Paginated data
@@ -195,7 +198,7 @@ export class TeachersComponent implements OnInit {
   openDialog(): void {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.panelClass = 'custom-dialog-container';
-    dialogConfig.height = '50%';
+    dialogConfig.height = '60%';
 
     const dialogRef = this.dialog.open(EmployeeComponent, dialogConfig);
 
@@ -213,7 +216,7 @@ export class TeachersComponent implements OnInit {
     // Pass the teacher data and a 'mode' flag to the dialog
     const dialogConfig = new MatDialogConfig();
     dialogConfig.panelClass = 'custom-dialog-container';
-    dialogConfig.height = '80%';
+    dialogConfig.height = '60%';
     // IMPORTANT: Pass data to the dialog using 'data' property
     dialogConfig.data = {
       mode: 'edit',
@@ -230,17 +233,31 @@ export class TeachersComponent implements OnInit {
       }
     });
   }
+  //show confirm dialog before deleting
   deleteEmployee(id: number, jobType: string): void {
-    this.employeeService.deleteEmployee(id, jobType).subscribe({
-      next: (res) => {
-        console.log('Employee deleted successfully', res);
-        this.toastr.success('تم حذف الموظف بنجاح');
-        // Reload employees to get updated list from server
-        this.getAllEmployees();
-      },
-      error: (err) => {
-        console.error('Error deleting employee:', err);
-        this.toastr.error('فشل في حذف الموظف', 'خطأ');
+    this.confirmationService.confirm({
+      message: 'هل أنت متأكد من حذف الموظف؟',
+      header: 'تأكيد الحذف',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'نعم',
+      rejectLabel: 'لا',
+      acceptIcon: 'pi pi-check',
+      rejectIcon: 'pi pi-times',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-secondary',
+      accept: () => {
+        this.employeeService.deleteEmployee(id, jobType).subscribe({
+          next: (res) => {
+            console.log('Employee deleted successfully', res);
+            this.toastr.success('تم حذف الموظف بنجاح');
+            // Reload employees to get updated list from server
+            this.getAllEmployees();
+          },
+          error: (err) => {
+            console.error('Error deleting employee:', err);
+            this.toastr.error('فشل في حذف الموظف', 'خطأ');
+          }
+        });
       }
     });
   }

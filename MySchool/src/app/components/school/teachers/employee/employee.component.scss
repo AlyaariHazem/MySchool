@@ -1,42 +1,105 @@
 .employee-form-container {
   direction: rtl;
-  background: var(--p-surface-card, #fff);
+  background: #ffffff;
   border-radius: 16px;
-  padding: 20px 24px 26px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+  padding: 0;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  gap: 14px;
   max-width: 1100px;
   margin: 0 auto;
+  overflow: hidden;
+  min-height: 500px;
 }
 
 .employee-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  gap: 16px;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, #009879 0%, #007a63 100%);
+  color: white;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.2);
 
-  h2 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #0f172a;
-    letter-spacing: 0.2px;
+  .header-title-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .header-icon {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
   }
-}
 
-.employee-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  .employee-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-  .btn-save {
-    border-radius: 999px;
-    font-weight: 700;
-    padding-inline: 18px;
+    .btn-save {
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 10px 24px;
+      background: #ffffff;
+      color: #009879;
+      border: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+      &:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      ::ng-deep .p-button-label {
+        font-weight: 600;
+      }
+    }
+
+    .btn-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      transition: all 0.3s ease;
+      padding: 0;
+
+      i {
+        font-size: 1.1rem;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: rotate(90deg);
+      }
+
+      &:active {
+        transform: rotate(90deg) scale(0.95);
+      }
+    }
   }
 }
 
@@ -44,7 +107,11 @@
 .form-shell {
   max-width: 720px;
   margin-inline: auto;
-  padding-top: 6px;
+  padding: 24px 20px;
+  background: #fafbfc;
+  border-radius: 12px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 /* Better spacing between fields */
@@ -54,34 +121,41 @@
 
 /* Tabs look like a modern pill/segmented control */
 :host ::ng-deep .employee-tabs {
+  padding: 0 28px;
+  padding-top: 20px;
+
   .p-tablist {
     justify-content: flex-end;
-    gap: 6px;
-    padding: 6px;
-    border-radius: 14px;
-    background: rgba(15, 23, 42, 0.04);
+    gap: 8px;
+    padding: 8px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
   }
 
   .p-tab {
-    border-radius: 12px;
-    padding: 10px 14px;
-    font-weight: 700;
-    color: #334155;
-    transition: transform 0.12s ease, background 0.12s ease;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+
+    &:hover:not(.p-tab-active) {
+      background: rgba(0, 152, 121, 0.08);
+      color: #009879;
+    }
   }
 
   .p-tab.p-tab-active {
-    background: var(--p-primary-50, rgba(16, 185, 129, 0.12));
-    color: var(--p-primary-700, #065f46);
-  }
-
-  .p-tab:not(.p-tab-active):hover {
-    background: rgba(15, 23, 42, 0.06);
-    transform: translateY(-1px);
+    background: #009879;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 152, 121, 0.3);
   }
 
   .p-tabpanels {
-    padding-top: 14px;
+    padding: 24px 0;
+    min-height: 400px;
   }
 }
 
@@ -91,59 +165,139 @@
   .p-select,
   .p-calendar .p-inputtext {
     width: 100%;
-    border-radius: 12px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.2s ease;
   }
 
   .p-inputtext,
   .p-calendar .p-inputtext {
-    height: 44px;
-    padding-inline: 12px;
+    height: 48px;
+    padding-inline: 14px;
+    font-size: 0.95rem;
+    background: #ffffff;
+
+    &:hover {
+      border-color: #cbd5e1;
+    }
   }
 
   .p-select {
-    height: 44px;
+    height: 48px;
 
     .p-select-label {
       display: flex;
       align-items: center;
-      height: 44px;
-      padding-inline: 12px;
+      height: 48px;
+      padding-inline: 14px;
+      font-size: 0.95rem;
+    }
+
+    .p-select-trigger {
+      border-radius: 10px;
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: #cbd5e1;
+      }
     }
   }
 
   .p-inputtext:focus,
   .p-select.p-focus,
   .p-calendar.p-focus .p-inputtext {
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.14);
-    border-color: rgba(16, 185, 129, 0.55);
+    box-shadow: 0 0 0 4px rgba(0, 152, 121, 0.15);
+    border-color: #009879;
+    outline: none;
+  }
+
+  .p-calendar.p-focus .p-inputtext {
+    border-color: #009879;
   }
 
   /* FloatLabel readability */
   .p-floatlabel > label {
     font-weight: 600;
-    color: #64748b;
+    color: #475569;
+    font-size: 0.9rem;
+  }
+
+  .p-floatlabel.p-floatlabel-active > label {
+    color: #009879;
+  }
+}
+
+/* Scrollbar styling */
+.employee-form-container {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+
+    &:hover {
+      background: #94a3b8;
+    }
   }
 }
 
 /* Mobile */
 @media (max-width: 768px) {
   .employee-form-container {
-    padding: 14px 14px 18px;
-    border-radius: 14px;
+    border-radius: 12px;
   }
 
   .employee-header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 16px 20px;
+    gap: 12px;
 
-    .btn-save {
+    .header-title-section {
       width: 100%;
-      justify-content: center;
+
+      h2 {
+        font-size: 1.25rem;
+      }
+    }
+
+    .employee-actions {
+      width: 100%;
+      justify-content: space-between;
+
+      .btn-save {
+        flex: 1;
+        justify-content: center;
+      }
     }
   }
 
   .form-shell {
     max-width: 100%;
+    padding: 16px;
+    margin: 16px;
   }
-  
+
+  :host ::ng-deep .employee-tabs {
+    padding: 0 16px;
+    padding-top: 16px;
+
+    .p-tablist {
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .p-tab {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 }

@@ -11,6 +11,8 @@
               [class.active]="showCulomn"
               (click)="showteacherCulomn()"
               pTooltip="عرض كجدول" 
+              title="عرض كجدول"
+              aria-label="عرض كجدول"
               showDelay="200" 
               hideDelay="300">
               <i class="pi pi-bars"></i>
@@ -21,6 +23,8 @@
               [class.active]="showGrid"
               (click)="showteacherGrid()"
               pTooltip="عرض كبطاقات" 
+              title="عرض كبطاقات"
+              aria-label="عرض كبطاقات"
               showDelay="200" 
               hideDelay="300">
               <i class="pi pi-th-large"></i>
@@ -41,29 +45,60 @@
         <div class="group group2">
           @for (teacher of paginated; track $index) {
           <div class="form-control">
-            <p-card class="responsive-card">
+            <p-card class="responsive-card employee-card">
               <ng-template pTemplate="header">
-                <img alt="Card" src="assets/img/user.png" />
+                <div class="card-header-image">
+                  <img alt="Employee" src="assets/img/user.png" />
+                  <div class="employee-badge">
+                    <i class="pi pi-user"></i>
+                  </div>
+                </div>
               </ng-template>
-              <div>
-                الاسم:{{teacher.firstName +" "+ teacher.middleName+" "+ teacher.lastName}}
-                <hr>
-                asdf:32302930
-                النوع:{{teacher.gender=="Male"?"ذكر":"إنثى"}}
-                <hr>
-
+              <div class="card-content">
+                <div class="employee-name">
+                  <i class="pi pi-user"></i>
+                  <span class="name-label">الاسم:</span>
+                  <span class="name-value">{{teacher.firstName +" "+ teacher.middleName+" "+ teacher.lastName}}</span>
+                </div>
+                <div class="employee-info">
+                  <div class="info-item">
+                    <i class="pi pi-id-card"></i>
+                    <span class="info-label">رقم الموظف:</span>
+                    <span class="info-value">{{teacher.employeeID || 'N/A'}}</span>
+                  </div>
+                  <div class="info-item">
+                    <i class="pi" [ngClass]="teacher.gender=='Male'?'pi-mars':'pi-venus'"></i>
+                    <span class="info-label">النوع:</span>
+                    <span class="info-value">{{teacher.gender=="Male"?"ذكر":"إنثى"}}</span>
+                  </div>
+                  <div class="info-item" *ngIf="teacher.jopName">
+                    <i class="pi pi-briefcase"></i>
+                    <span class="info-label">الوظيفة:</span>
+                    <span class="info-value">{{teacher.jopName == 'Teacher' ? 'معلم' : 'مدير'}}</span>
+                  </div>
+                </div>
               </div>
               <ng-template pTemplate="footer">
-                <div class="flex gap-3 mt-1">
-                  <p-button label="الرسوم" class="w-full" styleClass="custom-button" />
-                  <p-button label="ولي أمر" class="w-full" styleClass="custom-button guardain" />
-
+                <div class="card-footer-actions">
+                  <p-button 
+                    label="تعديل" 
+                    icon="pi pi-pencil" 
+                    class="btn-edit" 
+                    (click)="EditDialog(teacher)" 
+                    styleClass="p-button-outlined p-button-success" />
+                  <p-button 
+                    label="حذف" 
+                    icon="pi pi-trash" 
+                    class="btn-delete" 
+                    (click)="deleteEmployee(teacher.employeeID!, teacher.jopName)" 
+                    styleClass="p-button-outlined p-button-danger" />
                 </div>
               </ng-template>
             </p-card>
           </div>
           }@empty {
             <div class="empty-message">
+              <i class="pi pi-users"></i>
               <p>لا يوجد موظفين</p>
             </div>
           }

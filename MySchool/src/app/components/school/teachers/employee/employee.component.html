@@ -1,16 +1,25 @@
 <div class="employee-form-container">
     <div class="employee-header">
-      <h2>بيانات الموظف</h2>
+      <div class="header-title-section">
+        <i class="pi pi-user header-icon"></i>
+        <h2>بيانات الموظف</h2>
+      </div>
   
       <div class="employee-actions">
         <p-button
           class="btn-save"
           severity="success"
-          variant="outlined"
-          icon="pi pi-save"
           [label]="mode === 'add' ? 'حفظ الموظف' : 'تعديل الموظف'"
+          icon="pi pi-save"
           (onClick)="mode === 'add' ? AddEmployee() : UpdateEmployee()">
         </p-button>
+        <button 
+          class="btn-close"
+          (click)="dialogRef.close()"
+          type="button"
+          aria-label="إغلاق">
+          <i class="pi pi-times"></i>
+        </button>
       </div>
     </div>
   
