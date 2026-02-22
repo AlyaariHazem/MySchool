@@ -199,16 +199,16 @@ export class StudentPromotionComponent implements OnInit {
       }
     });
 
-    ref.onClose.subscribe((result: { students: PromoteStudentRequest[] } | null) => {
+    ref.onClose.subscribe((result: { students: PromoteStudentRequest[], copyCoursePlansFromCurrentYear?: boolean } | null) => {
       if (result && result.students && result.students.length > 0) {
-        this.performPromotion(result.students);
+        this.performPromotion(result.students, result.copyCoursePlansFromCurrentYear || false);
       }
     });
   }
 
-  private performPromotion(students: PromoteStudentRequest[]): void {
+  private performPromotion(students: PromoteStudentRequest[], copyCoursePlansFromCurrentYear: boolean = false): void {
     this.isLoading = true;
-    this.studentService.promoteStudents(students, this.targetYearID || undefined).subscribe({
+    this.studentService.promoteStudents(students, this.targetYearID || undefined, copyCoursePlansFromCurrentYear).subscribe({
       next: (response) => {
         const result: PromoteStudentsResponse = response.result;
         if (result) {

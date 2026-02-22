@@ -869,7 +869,7 @@ public class StudentRepository : IStudentRepository
         return (items, totalCount);
     }
 
-    public async Task<PromoteStudentsResponseDTO> PromoteStudentsAsync(List<PromoteStudentRequestDTO> students, int? targetYearID = null)
+    public async Task<PromoteStudentsResponseDTO> PromoteStudentsAsync(List<PromoteStudentRequestDTO> students, int? targetYearID = null, bool copyCoursePlansFromCurrentYear = false)
     {
         var response = new PromoteStudentsResponseDTO
         {
@@ -1078,33 +1078,58 @@ public class StudentRepository : IStudentRepository
                 _logger.LogInformation("Found {Count} course plans for DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}", 
                     coursePlans.Count, newDivision.DivisionID, newClassID, targetYear.YearID);
 
-                // If no course plans found for target year, try to copy from active year
+                // If no course plans found for target year, try to copy from current year or active year
                 if (coursePlans.Count == 0)
                 {
-                    _logger.LogWarning("No course plans found for promoted student {StudentID} in DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}. Attempting to copy from active year.", 
-                        student.StudentID, newDivision.DivisionID, newClassID, targetYear.YearID);
+                    _logger.LogWarning("No course plans found for promoted student {StudentID} in DivisionID: {DivisionID}, ClassID: {ClassID}, YearID: {YearID}. Attempting to copy from {SourceYear}.", 
+                        student.StudentID, newDivision.DivisionID, newClassID, targetYear.YearID, 
+                        copyCoursePlansFromCurrentYear ? "student's current year" : "active year");
 
-                    // Get active year
-                    var activeYear = await _context.Years
-                        .Where(y => y.Active)
-                        .FirstOrDefaultAsync();
-
-                    if (activeYear != null && activeYear.YearID != targetYear.YearID)
+                    // Determine source year: student's current year or active year
+                    Year? sourceYear = null;
+                    if (copyCoursePlansFromCurrentYear)
                     {
-                        // Try to find course plans from active year for the same division and class
-                        var activeYearCoursePlans = await _context.CoursePlans
+                        // Get student's current year (from their current division's class)
+                        var currentClassYearID = student.Division?.Class?.YearID;
+                        var currentStageYearID = student.Division?.Class?.Stage?.YearID;
+                        
+                        if (currentClassYearID.HasValue)
+                        {
+                            sourceYear = await _context.Years.FirstOrDefaultAsync(y => y.YearID == currentClassYearID.Value);
+                        }
+                        else if (currentStageYearID.HasValue)
+                        {
+                            sourceYear = await _context.Years.FirstOrDefaultAsync(y => y.YearID == currentStageYearID.Value);
+                        }
+                        
+                        _logger.LogInformation("Copying from student's current year: {CurrentYearID}", sourceYear?.YearID);
+                    }
+                    
+                    // If not copying from current year, or if current year not found, use active year
+                    if (sourceYear == null)
+                    {
+                        sourceYear = await _context.Years
+                            .Where(y => y.Active)
+                            .FirstOrDefaultAsync();
+                        _logger.LogInformation("Using active year as source: {ActiveYearID}", sourceYear?.YearID);
+                    }
+
+                    if (sourceYear != null && sourceYear.YearID != targetYear.YearID)
+                    {
+                        // Try to find course plans from source year for the same division and class
+                        var sourceYearCoursePlans = await _context.CoursePlans
                             .Where(cp => cp.DivisionID == newDivision.DivisionID &&
                                         cp.ClassID == newClassID &&
-                                        cp.YearID == activeYear.YearID)
+                                        cp.YearID == sourceYear.YearID)
                             .ToListAsync();
 
-                        if (activeYearCoursePlans.Count > 0)
+                        if (sourceYearCoursePlans.Count > 0)
                         {
-                            _logger.LogInformation("Found {Count} course plans in active year {ActiveYearID}. Copying to target year {TargetYearID}.",
-                                activeYearCoursePlans.Count, activeYear.YearID, targetYear.YearID);
+                            _logger.LogInformation("Found {Count} course plans in source year {SourceYearID}. Copying to target year {TargetYearID}.",
+                                sourceYearCoursePlans.Count, sourceYear.YearID, targetYear.YearID);
 
                             // Copy course plans to target year
-                            var newCoursePlans = activeYearCoursePlans.Select(cp => new CoursePlan
+                            var newCoursePlans = sourceYearCoursePlans.Select(cp => new CoursePlan
                             {
                                 YearID = targetYear.YearID,
                                 TermID = cp.TermID,
@@ -1133,8 +1158,8 @@ public class StudentRepository : IStudentRepository
                             {
                                 await _context.CoursePlans.AddRangeAsync(plansToAdd);
                                 await _context.SaveChangesAsync();
-                                _logger.LogInformation("Copied {Count} course plans from active year {ActiveYearID} to target year {TargetYearID}.",
-                                    plansToAdd.Count, activeYear?.YearID ?? 0, targetYear.YearID);
+                                _logger.LogInformation("Copied {Count} course plans from source year {SourceYearID} to target year {TargetYearID}.",
+                                    plansToAdd.Count, sourceYear?.YearID ?? 0, targetYear.YearID);
                             }
 
                             // Reload course plans for target year
@@ -1146,10 +1171,10 @@ public class StudentRepository : IStudentRepository
                         }
                         else
                         {
-                            // Try to find course plans from the same class but different division in active year
+                            // Try to find course plans from the same class but different division in source year
                             var allSameClassPlans = await _context.CoursePlans
                                 .Where(cp => cp.ClassID == newClassID &&
-                                            cp.YearID == activeYear.YearID)
+                                            cp.YearID == sourceYear.YearID)
                                 .ToListAsync();
                             
                             // Group by TermID, SubjectID, TeacherID and take first of each group
@@ -1160,7 +1185,7 @@ public class StudentRepository : IStudentRepository
 
                             if (sameClassCoursePlans.Count > 0)
                             {
-                                _logger.LogInformation("Found {Count} course plans for same class in active year. Copying to target year with new division.",
+                                _logger.LogInformation("Found {Count} course plans for same class in source year. Copying to target year with new division.",
                                     sameClassCoursePlans.Count);
 
                                 var newCoursePlans = sameClassCoursePlans.Select(cp => new CoursePlan
@@ -1192,8 +1217,8 @@ public class StudentRepository : IStudentRepository
                                 {
                                     await _context.CoursePlans.AddRangeAsync(plansToAdd);
                                     await _context.SaveChangesAsync();
-                                    _logger.LogInformation("Copied {Count} course plans from same class in active year to target year with new division.",
-                                        plansToAdd.Count);
+                                _logger.LogInformation("Copied {Count} course plans from same class in source year to target year with new division.",
+                                    plansToAdd.Count);
                                 }
 
                                 // Reload course plans

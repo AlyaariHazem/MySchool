@@ -20,6 +20,7 @@ export interface PromoteStudentRequest {
 export interface PromoteStudentsRequest {
   students: PromoteStudentRequest[];
   targetYearID?: number;
+  copyCoursePlansFromCurrentYear?: boolean; // If true, copy course plans from student's current year instead of active year
 }
 
 export interface PromoteStudentResult {

@@ -21,6 +21,7 @@ export class PromoteStudentDialogComponent implements OnInit {
   studentForms: FormGroup[] = [];
   isLoading = false;
   autoPromote: boolean = false; // Auto-increment class option
+  copyCoursePlansFromCurrentYear: boolean = false; // Copy course plans from student's current year
   targetYearID: number | null = null; // Target year for promotion
 
   constructor(
@@ -343,6 +344,9 @@ export class PromoteStudentDialogComponent implements OnInit {
       // Proceed with partial promotion
     }
 
-    this.ref.close({ students: promoteRequests });
+    this.ref.close({ 
+      students: promoteRequests,
+      copyCoursePlansFromCurrentYear: this.copyCoursePlansFromCurrentYear
+    });
   }
 }

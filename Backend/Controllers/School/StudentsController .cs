@@ -405,7 +405,7 @@ namespace Backend.Controllers
 
             try
             {
-                var result = await _unitOfWork.Students.PromoteStudentsAsync(request.Students, request.TargetYearID);
+                var result = await _unitOfWork.Students.PromoteStudentsAsync(request.Students, request.TargetYearID, request.CopyCoursePlansFromCurrentYear);
                 
                 return Ok(new 
                 { 

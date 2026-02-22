@@ -191,10 +191,11 @@ export class StudentService {
     }
 
     // Promote students to new year/division
-    promoteStudents(students: Array<{ studentID: number; newDivisionID: number }>, targetYearID?: number): Observable<any> {
+    promoteStudents(students: Array<{ studentID: number; newDivisionID: number }>, targetYearID?: number, copyCoursePlansFromCurrentYear: boolean = false): Observable<any> {
         const requestBody = {
             students: students,
-            targetYearID: targetYearID
+            targetYearID: targetYearID,
+            copyCoursePlansFromCurrentYear: copyCoursePlansFromCurrentYear
         };
 
         return this.API.http.post<any>(`${this.API.baseUrl}/Students/promote`, requestBody).pipe(

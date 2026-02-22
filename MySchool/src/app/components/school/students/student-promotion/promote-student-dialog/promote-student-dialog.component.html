@@ -17,6 +17,17 @@
         <span>ترقية تلقائية (زيادة صف واحد)</span>
       </label>
     </div>
+    <div class="copy-course-plans-option">
+      <label>
+        <input 
+          type="checkbox" 
+          [(ngModel)]="copyCoursePlansFromCurrentYear" />
+        <span>نسخ الخطط الدراسية من السنة السابقة (السنة الحالية للطالب)</span>
+      </label>
+      <small style="color: #666; display: block; margin-top: 5px; margin-left: 25px;">
+        إذا تم تفعيله، سيتم نسخ الخطط الدراسية من السنة التي كان فيها الطالب إلى السنة المستهدفة
+      </small>
+    </div>
   </div>
 
   <div class="dialog-content">

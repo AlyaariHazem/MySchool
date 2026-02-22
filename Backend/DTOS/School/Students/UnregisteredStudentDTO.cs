@@ -23,6 +23,7 @@ public class PromoteStudentsRequestDTO
 {
     public List<PromoteStudentRequestDTO> Students { get; set; } = new List<PromoteStudentRequestDTO>();
     public int? TargetYearID { get; set; } // Optional: target year for promotion
+    public bool CopyCoursePlansFromCurrentYear { get; set; } = false; // If true, copy course plans from student's current year instead of active year
 }
 
 public class PromoteStudentResultDTO
