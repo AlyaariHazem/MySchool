@@ -73,6 +73,14 @@
 
         <!-- Schedule Grid -->
         <div class="schedule-container" *ngIf="selectedClassId && selectedTermId" (click)="closeAllMenus()">
+          <!-- Print Header (only visible when printing) -->
+          <div class="print-header">
+            <div class="print-title">
+              جدول الحصص الأسبوعي للصف {{ getSelectedClassName() }}
+              <span *ngIf="getSelectedDivisionName()"> - الشعبة {{ getSelectedDivisionName() }}</span>
+            </div>
+          </div>
+          
           <div class="schedule-grid" [style.--period-count]="periods.length">
             <!-- Header Row -->
             <div class="grid-header">

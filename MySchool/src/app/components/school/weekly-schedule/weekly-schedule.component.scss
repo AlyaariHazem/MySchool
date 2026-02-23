@@ -34,6 +34,10 @@ h2.school {
   justify-content: flex-end;
 }
 
+.print-header {
+  display: none;
+}
+
 .schedule-container {
   overflow-x: auto;
   margin-top: 1rem;
@@ -385,11 +389,24 @@ h2.school {
     display: none !important;
   }
   h2.school {
-    margin: 0.25rem 0 !important;
-    padding: 0.25rem 0 !important;
-    font-size: 1.2rem !important;
-    page-break-after: avoid !important;
+    display: none !important;
+  }
+
+  ::ng-deep  .print-header {
+    display: block !important;
     text-align: center !important;
+    margin-bottom: 0.75rem !important;
+    padding: 0.5rem 0 !important;
+    page-break-after: avoid !important;
+    width: 100% !important;
+
+    .print-title {
+      font-size: 1.1rem !important;
+      font-weight: 700 !important;
+      color: #000 !important;
+      display: block !important;
+      visibility: visible !important;
+    }
   }
 
   .schedule-container {
@@ -397,6 +414,9 @@ h2.school {
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
@@ -413,6 +433,7 @@ h2.school {
     break-inside: avoid !important;
     table-layout: fixed !important;
     font-size: 0.75rem !important;
+    margin: 0 auto !important;
   }
 
   .grid-header {
@@ -434,7 +455,7 @@ h2.school {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     word-wrap: break-word !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 
     &.header-cell {
       background-color: #f5f5f5 !important;
@@ -485,6 +506,8 @@ h2.school {
     display: block !important;
     width: 100% !important;
     height: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .cell-actions,
@@ -568,7 +591,36 @@ h2.school {
   .schedule-grid,
   .grid-header,
   .grid-row,
-  .grid-cell {
+  .grid-cell,
+  .cell-content,
+  .cell-assigned,
+  .cell-empty,
+  .print-header,
+  .period-info,
+  .day-name,
+  .print-title,
+  span,
+  div {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  // Ensure text content is displayed
+  .cell-assigned span,
+  .cell-empty .empty-text,
+  .period-name,
+  .period-time,
+  .day-name,
+  .print-title {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #000 !important;
+  }
+
+  // Ensure icons are visible
+  i {
+    display: inline-block !important;
     visibility: visible !important;
     opacity: 1 !important;
   }

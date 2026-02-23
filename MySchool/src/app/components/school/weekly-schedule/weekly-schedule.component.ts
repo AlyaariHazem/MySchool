@@ -586,10 +586,15 @@ export class WeeklyScheduleComponent implements OnInit {
       return;
     }
 
-    // Small delay to ensure DOM is ready
+    // Ensure data is loaded and DOM is updated
     setTimeout(() => {
+      // Force change detection to ensure bindings are updated
+      if (this.classes.length === 0) {
+        this.toastr.warning('جاري تحميل البيانات، يرجى المحاولة مرة أخرى', 'تحذير');
+        return;
+      }
       window.print();
-    }, 100);
+    }, 200);
   }
 
   getSubjectOptions(): Subjects[] {
@@ -609,13 +614,22 @@ export class WeeklyScheduleComponent implements OnInit {
   }
 
   getSelectedClassName(): string {
-    if (!this.selectedClassId) return '';
-    const selectedClass = this.classes.find(c => c.classID === this.selectedClassId);
-    return selectedClass?.className || '';
+    if (!this.selectedClassId || this.classes.length === 0) return '';
+    const selectedClass = this.classes.find((c: any) => c.classID === this.selectedClassId);
+    if (selectedClass) {
+      return selectedClass.className || '';
+    }
+    // Fallback: try to find by any property that might exist
+    const fallbackClass = this.classes.find((c: any) => 
+      (c.classID === this.selectedClassId) || 
+      (c.ClassID === this.selectedClassId) ||
+      (c.id === this.selectedClassId)
+    );
+    return (fallbackClass as any)?.className || '';
   }
 
   getSelectedDivisionName(): string {
-    if (!this.selectedDivisionId) return '';
+    if (!this.selectedDivisionId || this.filteredDivisions.length === 0) return '';
     const selectedDivision = this.filteredDivisions.find(d => d.divisionID === this.selectedDivisionId);
     return selectedDivision?.divisionName || '';
   }
