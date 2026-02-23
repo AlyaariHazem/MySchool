@@ -50,6 +50,7 @@ namespace Backend.Data
         public DbSet<TermlyGrade> TermlyGrades { get; set; }
         public DbSet<AccountStudentGuardian> AccountStudentGuardians { get; set; }
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
+        public DbSet<WeeklySchedule> WeeklySchedules { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -384,6 +385,9 @@ namespace Backend.Data
 
             modelBuilder.Entity<ReportTemplate>()
                 .HasKey(rt => rt.Id);
+            
+            modelBuilder.Entity<WeeklySchedule>()
+                .HasKey(ws => ws.WeeklyScheduleID);
 
             // Configure unique index on Code + SchoolId (allows same code for different schools, but unique per school)
             modelBuilder.Entity<ReportTemplate>()

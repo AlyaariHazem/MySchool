@@ -40,5 +40,6 @@ public interface IUnitOfWork : IDisposable
     ITermlyGradeRepository TermlyGrades { get; }
     IMonthlyGradeRepository MonthlyGrades { get; }
     IDashboardRepository Dashboard { get; }
+    IWeeklyScheduleRepository WeeklySchedules { get; }
     Task<int> CompleteAsync();
 }

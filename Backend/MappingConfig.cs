@@ -24,6 +24,7 @@ using Backend.DTOS.School.Tenant;
 using Backend.DTOS.School.TermlyGrade;
 using Backend.DTOS.School.Terms;
 using Backend.DTOS.School.Vouchers;
+using Backend.DTOS.School.WeeklySchedule;
 using Backend.DTOS.School.Years;
 using Backend.Models;
 
@@ -104,6 +105,10 @@ public class MappingConfig : Profile
         CreateMap<AccountStudentGuardian, AccountStudentGuardianDTO>().ReverseMap();
         CreateMap<FeeClass, ChangeStateFeeClassDTO>().ReverseMap();
         CreateMap<Fee, ChangeStateFeeDTO>().ReverseMap();
+        
+        // WeeklySchedule mappings
+        CreateMap<WeeklySchedule, AddWeeklyScheduleDTO>().ReverseMap();
+        CreateMap<WeeklySchedule, UpdateWeeklyScheduleDTO>().ReverseMap();
 
     }
 }

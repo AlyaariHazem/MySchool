@@ -85,6 +85,7 @@ import { DatePicker } from 'primeng/datepicker';
 import { CustomTableComponent } from '../../shared/components/custom-table/custom-table.component';
 import { StudentPromotionComponent } from './students/student-promotion/student-promotion.component';
 import { PromoteStudentDialogComponent } from './students/student-promotion/promote-student-dialog/promote-student-dialog.component';
+import { WeeklyScheduleComponent } from './weekly-schedule/weekly-schedule.component';
 
 
 
@@ -134,7 +135,8 @@ const components = [
   PromoteStudentDialogComponent,
   GradesTermComponent,
   HeaderReportComponent,
-  AccountReportComponent
+  AccountReportComponent,
+  WeeklyScheduleComponent
 
 ];
 

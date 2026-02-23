@@ -1,0 +1,161 @@
+<div id="id01" [attr.dir]="(dir$ | async)" class="modal-container">
+  <div class="modal-content">
+    <h2 class="school">جدول الحصص الأسبوعي</h2>
+    
+    <div class="container">
+      <div class="tabcontent">
+        <!-- Filters -->
+        <form [formGroup]="filterForm" class="filters-container">
+          <div class="filter-group">
+            <p-floatLabel class="w-full" variant="on">
+              <p-select 
+                class="w-full" 
+                [options]="classes" 
+                formControlName="classId"
+                optionLabel="className" 
+                optionValue="classID" 
+                [editable]="true" 
+                [showClear]="true"
+                placeholder=" " />
+              <label>اختر الصف</label>
+            </p-floatLabel>
+          </div>
+
+          <div class="filter-group">
+            <p-floatLabel class="w-full" variant="on">
+              <p-select 
+                class="w-full" 
+                [options]="terms" 
+                formControlName="termId"
+                optionLabel="name" 
+                optionValue="termID" 
+                [editable]="true" 
+                [showClear]="true"
+                placeholder=" " />
+              <label>اختر الفصل الدراسي</label>
+            </p-floatLabel>
+          </div>
+
+          <div class="filter-group">
+            <p-floatLabel class="w-full" variant="on">
+              <p-select 
+                class="w-full" 
+                [options]="filteredDivisions" 
+                formControlName="divisionId"
+                optionLabel="divisionName" 
+                optionValue="divisionID" 
+                [editable]="true" 
+                [showClear]="true"
+                [disabled]="!filterForm.get('classId')?.value || filteredDivisions.length === 0"
+                placeholder=" " />
+              <label>اختر القسم</label>
+            </p-floatLabel>
+          </div>
+        </form>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <p-button 
+            label="حفظ التغيرات" 
+            icon="pi pi-check" 
+            severity="success"
+            [disabled]="!hasChanges || isLoading"
+            (click)="saveChanges()"
+            [loading]="isLoading">
+          </p-button>
+          <p-button 
+            label="طباعة" 
+            icon="pi pi-print" 
+            severity="secondary"
+            (click)="printSchedule()">
+          </p-button>
+        </div>
+
+        <!-- Schedule Grid -->
+        <div class="schedule-container" *ngIf="selectedClassId && selectedTermId" (click)="closeAllMenus()">
+          <div class="schedule-grid" [style.--period-count]="periods.length">
+            <!-- Header Row -->
+            <div class="grid-header">
+              <div class="grid-cell header-cell day-header">اليوم</div>
+              <div class="grid-cell header-cell period-header" *ngFor="let period of periods">
+                <div class="period-info">
+                  <div class="period-name">{{ period.periodName }} | {{ period.periodNumber }}</div>
+                  <div class="period-time">{{ period.startTime }} - {{ period.endTime }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Data Rows -->
+            <div class="grid-row" *ngFor="let day of daysOfWeek">
+              <div class="grid-cell day-cell">
+                <span class="day-name">{{ day.name }}</span>
+              </div>
+              <div class="grid-cell schedule-cell" *ngFor="let period of periods">
+                <div class="cell-content">
+                  <!-- Display teacher and subject if assigned -->
+                  <div *ngIf="getCell(day.value, period.periodNumber)?.teacherID" class="cell-assigned">
+                    <div class="assigned-teacher">
+                      <i class="pi pi-user"></i>
+                      <span>{{ getCell(day.value, period.periodNumber)?.teacherName }}</span>
+                    </div>
+                    <div class="assigned-subject">
+                      <i class="pi pi-book"></i>
+                      <span>{{ getCell(day.value, period.periodNumber)?.subjectName }}</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Show empty state if no assignment -->
+                  <div *ngIf="!getCell(day.value, period.periodNumber)?.teacherID" class="cell-empty">
+                    <div class="empty-text">لا يوجد حصة</div>
+                    <div class="empty-text">لا يوجد معلم</div>
+                  </div>
+                  
+                  <!-- Three dots menu -->
+                  <div class="cell-actions" (click)="$event.stopPropagation(); toggleMenu(day.value, period.periodNumber)">
+                    <i class="pi pi-ellipsis-v"></i>
+                    
+                    <!-- Dropdown Menu -->
+                    <div class="cell-menu" *ngIf="isMenuOpen(day.value, period.periodNumber)" 
+                         (click)="$event.stopPropagation()">
+                      <div class="menu-header">اختر المعلم</div>
+                      <div class="menu-items">
+                        <div *ngFor="let teacher of getAvailableTeachersForPeriod(day.value, period.periodNumber)" 
+                             class="menu-item"
+                             (click)="selectTeacherFromMenu(day.value, period.periodNumber, teacher)">
+                          <div class="menu-item-name">{{ teacher.teacherName }}</div>
+                          <div class="menu-item-subject">{{ teacher.subjectName }}</div>
+                        </div>
+                        <div *ngIf="getAvailableTeachersForPeriod(day.value, period.periodNumber).length === 0" 
+                             class="menu-item-empty">
+                          لا يوجد معلمين متاحين
+                        </div>
+                        <div *ngIf="getCell(day.value, period.periodNumber)?.teacherID" 
+                             class="menu-item menu-item-clear"
+                             (click)="clearCell(day.value, period.periodNumber)">
+                          <i class="pi pi-times"></i>
+                          <span>حذف</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-container">
+          <p-progressSpinner></p-progressSpinner>
+          <p>جاري التحميل...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!selectedClassId || !selectedTermId" class="empty-state">
+          <i class="pi pi-calendar-times"></i>
+          <p>يرجى اختيار الصف والفصل الدراسي لعرض الجدول</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

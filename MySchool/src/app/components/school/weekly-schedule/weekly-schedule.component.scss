@@ -1,0 +1,595 @@
+.modal-container {
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+h2.school {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.filters-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+
+  .filter-group {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: flex-end;
+}
+
+.schedule-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 150px repeat(var(--period-count, 5), 1fr);
+  gap: 1px;
+  background-color: #e0e0e0;
+  border: 1px solid #e0e0e0;
+  min-width: 1000px;
+}
+
+.grid-header {
+  display: contents;
+
+  .header-cell {
+    background-color: #f5f5f5;
+    padding: 1rem;
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid #ddd;
+
+    &.day-header {
+      background-color: #e3f2fd;
+    }
+
+    &.period-header {
+      background-color: #fff3e0;
+    }
+  }
+}
+
+.grid-row {
+  display: contents;
+}
+
+.grid-cell {
+  background-color: white;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  min-height: 120px;
+
+  &.day-cell {
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+  }
+
+  &.schedule-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.day-name {
+  font-size: 1rem;
+  color: #333;
+}
+
+.period-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  .period-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .period-time {
+    font-size: 0.75rem;
+    color: #666;
+  }
+}
+
+.cell-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  position: relative;
+}
+
+.cell-dropdown {
+  width: 100%;
+
+  ::ng-deep .p-select {
+    width: 100%;
+    font-size: 0.85rem;
+  }
+}
+
+.cell-assigned {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  
+  .assigned-teacher,
+  .assigned-subject {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    
+    i {
+      color: #666;
+      font-size: 0.75rem;
+    }
+    
+    span {
+      color: #333;
+      font-weight: 500;
+    }
+  }
+  
+  .assigned-teacher {
+    color: #1976d2;
+    
+    i {
+      color: #1976d2;
+    }
+  }
+  
+  .assigned-subject {
+    color: #388e3c;
+    
+    i {
+      color: #388e3c;
+    }
+  }
+}
+
+.cell-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  justify-content: center;
+  pointer-events: none;
+  
+  .empty-text {
+    font-size: 0.8rem;
+    color: #999;
+    font-style: italic;
+  }
+}
+
+.cell-actions {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  cursor: pointer;
+  color: #666;
+  z-index: 10;
+  pointer-events: auto;
+  min-height: 24px;
+
+  &:hover {
+    color: #333;
+  }
+  
+  i {
+    font-size: 1rem;
+    pointer-events: none;
+  }
+}
+
+.cell-menu {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  max-width: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-bottom: 0.5rem;
+  
+  .menu-header {
+    padding: 0.75rem;
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+    background-color: #f5f5f5;
+    font-size: 0.9rem;
+  }
+  
+  .menu-items {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+  
+  .menu-item {
+    padding: 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #f5f5f5;
+    }
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .menu-item-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+    
+    .menu-item-subject {
+      font-size: 0.8rem;
+      color: #666;
+      font-style: italic;
+    }
+    
+    &.menu-item-clear {
+      color: #d32f2f;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      &:hover {
+        background-color: #ffebee;
+      }
+    }
+  }
+  
+  .menu-item-empty {
+    padding: 1rem;
+    text-align: center;
+    color: #999;
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+
+  p {
+    color: #666;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+  color: #999;
+
+  i {
+    font-size: 3rem;
+  }
+
+  p {
+    font-size: 1.1rem;
+  }
+}
+
+// Print styles
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0.5cm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .modal-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    transform: scale(1) !important;
+  }
+
+  .modal-content {
+    padding: 0.25rem !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .container,
+  .tabcontent {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .filters-container,
+  .action-buttons,
+  .loading-container,
+  .empty-state {
+    display: none !important;
+  }
+ ::ng-deep .page-wrapper{
+    right: 0px !important;
+    margin-left: 0px !important;
+  }
+  ::ng-deep .schedule-container{
+    position: absolute !important;
+    top: 0px !important;
+    width: 100% !important;
+  }
+  ::ng-deep .action-buttons{
+    display: none !important;
+  }
+  ::ng-deep .filters-container{
+    display: none !important;
+  }
+  h2.school {
+    margin: 0.25rem 0 !important;
+    padding: 0.25rem 0 !important;
+    font-size: 1.2rem !important;
+    page-break-after: avoid !important;
+    text-align: center !important;
+  }
+
+  .schedule-container {
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .schedule-grid {
+    min-width: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: table !important;
+    border-collapse: collapse !important;
+    border: 1px solid #000 !important;
+    background-color: #e0e0e0 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    table-layout: fixed !important;
+    font-size: 0.75rem !important;
+  }
+
+  .grid-header {
+    display: table-row !important;
+  }
+
+  .grid-row {
+    display: table-row !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .grid-cell {
+    display: table-cell !important;
+    background-color: white !important;
+    border: 1px solid #000 !important;
+    padding: 0.25rem !important;
+    vertical-align: top !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    word-wrap: break-word !important;
+    overflow: hidden !important;
+
+    &.header-cell {
+      background-color: #f5f5f5 !important;
+      font-weight: bold !important;
+      border: 1px solid #000 !important;
+      text-align: center !important;
+      padding: 0.4rem 0.25rem !important;
+      font-size: 0.7rem !important;
+
+      &.day-header {
+        background-color: #e3f2fd !important;
+        width: 8% !important;
+        min-width: 0 !important;
+        max-width: 8% !important;
+      }
+
+      &.period-header {
+        background-color: #fff3e0 !important;
+        width: calc(92% / 6) !important;
+        min-width: 0 !important;
+        max-width: calc(92% / 6) !important;
+      }
+    }
+
+    &.day-cell {
+      background-color: #f9f9f9 !important;
+      font-weight: 600 !important;
+      border: 1px solid #000 !important;
+      position: static !important;
+      width: 8% !important;
+      min-width: 0 !important;
+      max-width: 8% !important;
+      text-align: center !important;
+      vertical-align: middle !important;
+      font-size: 0.75rem !important;
+    }
+
+    &.schedule-cell {
+      border: 1px solid #000 !important;
+      min-height: 60px !important;
+      width: calc(92% / 6) !important;
+      min-width: 0 !important;
+      max-width: calc(92% / 6) !important;
+    }
+  }
+
+  .cell-content {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .cell-actions,
+  .cell-menu {
+    display: none !important;
+  }
+
+  .cell-assigned {
+    display: block !important;
+    width: 100% !important;
+
+    .assigned-teacher,
+    .assigned-subject {
+      display: block !important;
+      margin-bottom: 0.2rem !important;
+      font-size: 0.65rem !important;
+      color: #000 !important;
+      line-height: 1.2 !important;
+
+      i {
+        display: inline-block !important;
+        margin-left: 0.15rem !important;
+        font-size: 0.6rem !important;
+      }
+
+      span {
+        display: inline !important;
+      }
+    }
+
+    .assigned-teacher {
+      color: #1976d2 !important;
+      font-weight: 500 !important;
+    }
+
+    .assigned-subject {
+      color: #388e3c !important;
+      font-weight: 500 !important;
+    }
+  }
+
+  .cell-empty {
+    display: block !important;
+    width: 100% !important;
+
+    .empty-text {
+      font-size: 0.6rem !important;
+      color: #666 !important;
+      font-style: italic !important;
+      margin-bottom: 0.15rem !important;
+      line-height: 1.2 !important;
+    }
+  }
+
+  .period-info {
+    display: block !important;
+    text-align: center !important;
+
+    .period-name {
+      display: block !important;
+      font-weight: 600 !important;
+      font-size: 0.7rem !important;
+      margin-bottom: 0.15rem !important;
+    }
+
+    .period-time {
+      display: block !important;
+      font-size: 0.6rem !important;
+      color: #666 !important;
+    }
+  }
+
+  .day-name {
+    font-size: 0.75rem !important;
+    color: #000 !important;
+    font-weight: 600 !important;
+  }
+
+  // Ensure all content is visible
+  .schedule-container,
+  .schedule-grid,
+  .grid-header,
+  .grid-row,
+  .grid-cell {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 1200px) {
+  .schedule-grid {
+    grid-template-columns: 120px repeat(5, 1fr);
+  }
+}
+
+// RTL support
+[dir="rtl"] {
+  .schedule-grid {
+    direction: rtl;
+  }
+}
+
+[dir="ltr"] {
+  .schedule-grid {
+    direction: ltr;
+  }
+}
