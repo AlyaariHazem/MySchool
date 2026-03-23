@@ -4,7 +4,6 @@ WORKDIR /app
 
 # Copy the .csproj and other project files
 COPY *.csproj .
-COPY *.config ./
 
 # Restore the .NET project
 RUN dotnet restore

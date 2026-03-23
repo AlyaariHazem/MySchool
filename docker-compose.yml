@@ -11,8 +11,8 @@ services:
     volumes:
       - sql_data:/var/opt/mssql
     healthcheck:
-      # English: try tools18 first then legacy tools, fail if neither exists
-      test: ["CMD-SHELL", "grep -q \"SQL Server is now ready for client connections\" /var/opt/mssql/log/errorlog || exit 1"]
+      # Use sqlcmd for reliability (log text/paths can vary by image/version).
+      test: ["CMD-SHELL", "if [ -x /opt/mssql-tools18/bin/sqlcmd ]; then /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; elif [ -x /opt/mssql-tools/bin/sqlcmd ]; then /opt/mssql-tools/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; else exit 1; fi"]
       interval: 10s
       timeout: 5s
       retries: 30
@@ -20,8 +20,9 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: Backend/Dockerfile
+      # Build from the Backend/ folder so Dockerfile can copy Backend/*.csproj correctly.
+      context: ./Backend
+      dockerfile: Dockerfile
     depends_on:
       sqlserver:
         condition: service_healthy

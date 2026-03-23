@@ -196,19 +196,43 @@ graph TB
 
 2. **Set up environment variables**
    ```bash
-   cp .env.example .env
-   # Edit .env and set a strong MSSQL_SA_PASSWORD
+   # Create a .env file in the repo root and set:
+   # MSSQL_SA_PASSWORD=Str0ng!Passw0rd12345
+   #
+   # Example (PowerShell):
+   # echo MSSQL_SA_PASSWORD=Str0ng!Passw0rd12345 > .env
    ```
 
 3. **Start the application**
    ```bash
-   docker-compose up -d
+   # Build and start containers
+   docker compose up -d --build
    ```
 
 4. **Access the application**
-   - Backend API: http://localhost:8080
-   - Swagger UI: http://localhost:8080/swagger
-   - SQL Server: localhost:1433
+   - Backend API: `http://localhost:8080`
+   - Swagger UI: `http://localhost:8080/swagger`
+   - SQL Server: `localhost:1433`
+
+5. **Useful commands**
+   ```bash
+   # View logs
+   docker compose logs -f
+
+   # Stop containers (keeps SQL data volume)
+   docker compose down
+
+   # Stop containers and remove volumes (data will be lost)
+   docker compose down -v
+
+   # Rebuild only the backend image
+   docker compose build --no-cache backend
+   ```
+
+   If you want Swagger + Angular to open automatically in your browser, you can run:
+   ```powershell
+   ./run-docker-open-ui.ps1
+   ```
 
 ### Option 2: Local Development Setup
 

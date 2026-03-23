@@ -17,10 +17,22 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Backend.Middleware;
 using Backend.Extensions;
+using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers().AddNewtonsoftJson(options =>
+builder.Services.AddControllers(options =>
+{
+    // Require authentication by default for all API controllers.
+    // Use [AllowAnonymous] on specific controllers/actions that must be public.
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+})
+.AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 });
@@ -89,6 +101,9 @@ builder.Services.AddSwaggerGen(swagger =>
             Array.Empty<string>()
         }
     });
+
+    // Force Swagger UI to call the same host you opened it from (prevents localhost:5000 issues).
+    swagger.DocumentFilter<SwaggerServerDocumentFilter>();
 });
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -106,7 +121,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Events.OnRedirectToLogin = context =>
     {
-        context.Response.StatusCode = 401;
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
+
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
         return Task.CompletedTask;
     };
 });
@@ -140,9 +161,28 @@ builder.Services
             OnChallenge = context =>
             {
                 context.HandleResponse();
-                context.Response.StatusCode = 401;
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 context.Response.ContentType = "application/json";
-                return context.Response.WriteAsync("{\"error\":\"Unauthorized\"}");
+                return context.Response.WriteAsync(
+                    JsonSerializer.Serialize(new
+                    {
+                        error = "Forbidden",
+                        message = "You are not authenticated or your token is invalid."
+                    })
+                );
+            }
+            ,
+            OnForbidden = context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync(
+                    JsonSerializer.Serialize(new
+                    {
+                        error = "Forbidden",
+                        message = "You do not have permission to access this resource."
+                    })
+                );
             }
         };
     });
@@ -164,6 +204,10 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    // Ensure the admin database exists and all migrations are applied before seeding roles.
+    var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+    db.Database.Migrate();
+
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var roles = new[] { "ADMIN","GUARDIAN", "STUDENT", "TEACHER", "MANAGER" };
     foreach (var role in roles)

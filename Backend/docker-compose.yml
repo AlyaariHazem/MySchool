@@ -5,13 +5,13 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
-      SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345}"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345}"
     ports:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $$SA_PASSWORD -Q 'SELECT 1' || exit 1"]
+      test: ["CMD-SHELL", "if [ -x /opt/mssql-tools18/bin/sqlcmd ]; then /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; elif [ -x /opt/mssql-tools/bin/sqlcmd ]; then /opt/mssql-tools/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; else exit 1; fi"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -20,7 +20,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Backend/Dockerfile
+      dockerfile: Dockerfile
     container_name: myschool-api
     depends_on:
       sqlserver:
