@@ -30,6 +30,19 @@ namespace Backend.Repository.School
 
         public async Task Add(AddWeeklyScheduleDTO obj)
         {
+            if (obj.TeacherID.HasValue)
+            {
+                var hasConflict = await _db.WeeklySchedules.AnyAsync(s =>
+                    s.TeacherID == obj.TeacherID.Value &&
+                    s.DayOfWeek == obj.DayOfWeek &&
+                    s.PeriodNumber == obj.PeriodNumber &&
+                    s.Year.Active == true &&
+                    (s.ClassID != obj.ClassID || s.TermID != obj.TermID || s.DivisionID != obj.DivisionID));
+                
+                if (hasConflict)
+                    throw new InvalidOperationException($"Teacher ID {obj.TeacherID.Value} is already scheduled in another class for the same day and period.");
+            }
+
             var schedule = _mapper.Map<WeeklySchedule>(obj);
             schedule.CreatedDate = DateTime.Now;
             
@@ -44,6 +57,20 @@ namespace Backend.Repository.School
 
             if (existing == null)
                 throw new InvalidOperationException($"WeeklySchedule with ID {obj.WeeklyScheduleID} not found.");
+
+            if (obj.TeacherID.HasValue)
+            {
+                var hasConflict = await _db.WeeklySchedules.AnyAsync(s =>
+                    s.TeacherID == obj.TeacherID.Value &&
+                    s.DayOfWeek == obj.DayOfWeek &&
+                    s.PeriodNumber == obj.PeriodNumber &&
+                    s.Year.Active == true &&
+                    s.WeeklyScheduleID != obj.WeeklyScheduleID &&
+                    (s.ClassID != obj.ClassID || s.TermID != obj.TermID || s.DivisionID != obj.DivisionID));
+                
+                if (hasConflict)
+                    throw new InvalidOperationException($"Teacher ID {obj.TeacherID.Value} is already scheduled in another class for the same day and period.");
+            }
 
             existing.DayOfWeek = obj.DayOfWeek;
             existing.PeriodNumber = obj.PeriodNumber;
@@ -188,6 +215,32 @@ namespace Backend.Repository.School
             var existingSchedules = await query.ToListAsync();
 
             _db.WeeklySchedules.RemoveRange(existingSchedules);
+
+            // Validate no teacher conflicts
+            // var teacherIds = schedules.Where(s => s.TeacherID.HasValue).Select(s => s.TeacherID.Value).Distinct().ToList();
+            // if (teacherIds.Any())
+            // {
+            //     var existingTeacherSchedules = await _db.WeeklySchedules
+            //         .Where(s => s.TeacherID.HasValue && teacherIds.Contains(s.TeacherID.Value) && s.Year.Active == true)
+            //         .Where(s => s.ClassID != classId || s.TermID != termId || s.DivisionID != divisionId)
+            //         .ToListAsync();
+
+            //     foreach (var schedule in schedules)
+            //     {
+            //         if (schedule.TeacherID.HasValue)
+            //         {
+            //             var conflict = existingTeacherSchedules.FirstOrDefault(s => 
+            //                 s.TeacherID == schedule.TeacherID.Value && 
+            //                 s.DayOfWeek == schedule.DayOfWeek && 
+            //                 s.PeriodNumber == schedule.PeriodNumber);
+
+            //             if (conflict != null)
+            //             {
+            //                 throw new InvalidOperationException($"Teacher ID {schedule.TeacherID.Value} is already scheduled in another class for the same day and period.");
+            //             }
+            //         }
+            //     }
+            // }
 
             // Add new schedules
             var newSchedules = schedules.Select(s => 

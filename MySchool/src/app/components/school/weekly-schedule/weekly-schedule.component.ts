@@ -62,6 +62,7 @@ export class WeeklyScheduleComponent implements OnInit {
   allDivisions: divisions[] = [];
   filteredDivisions: divisions[] = [];
   scheduleGrid: WeeklyScheduleGrid | null = null;
+  allSystemSchedules: any[] = [];
   
   // Days of week (0 = Saturday, 1 = Sunday, etc.)
   daysOfWeek = [
@@ -150,6 +151,16 @@ export class WeeklyScheduleComponent implements OnInit {
   }
 
   loadInitialData(): void {
+    // Load all system schedules for conflict checking
+    this.scheduleService.GetAll().subscribe({
+      next: (res) => {
+        if (res.result) {
+          this.allSystemSchedules = res.result;
+        }
+      },
+      error: (err) => console.error('Error loading all schedules:', err)
+    });
+
     // Load classes
     this.classService.GetAllNames().subscribe({
       next: (res) => {
@@ -422,20 +433,36 @@ export class WeeklyScheduleComponent implements OnInit {
     this.showMenu.clear();
   }
 
-  // Get available teachers with subjects for a specific period (excluding already selected teachers for the same day)
-  getAvailableTeachersForPeriod(day: number, period: number): any[] {
-    // Get currently selected teacher IDs for this specific day (all periods)
-    const selectedTeacherIds = new Set<number>();
-    this.periods.forEach(p => {
-      const cell = this.getCell(day, p.periodNumber);
-      if (cell?.teacherID) {
-        selectedTeacherIds.add(cell.teacherID);
-      }
-    });
+  // Check if a teacher is already scheduled in another class at the same time
+  checkTeacherConflict(day: number, period: number, teacherID: number): boolean {
+    if (!teacherID || !this.selectedClassId || !this.selectedTermId) return false;
 
-    // Get teachers with subjects from CoursePlans, excluding already selected ones for this day
+    // Look for any schedule in the system for this teacher on the same day and period
+    const conflict = this.allSystemSchedules.find(s => 
+      s.teacherID === teacherID && 
+      s.dayOfWeek === day && 
+      s.periodNumber === period &&
+      // Check if it's a different class or term (or division if applicable)
+      (s.classID !== this.selectedClassId || s.termID !== this.selectedTermId || (this.selectedDivisionId && s.divisionID && s.divisionID !== this.selectedDivisionId))
+    );
+
+    if (conflict) {
+      // Find teacher name for message
+      const teacherInfo = this.teachers.find(t => t.employeeID === teacherID);
+      const teacherName = teacherInfo ? `${teacherInfo.firstName} ${teacherInfo.lastName}`.trim() : 'هذا المعلم';
+      const className = conflict.className ? ` (${conflict.className})` : '';
+      this.toastr.warning(`تحذير: لا يمكنك اختيار ${teacherName} لأن لديه جدول في صف آخر${className} في نفس هذا الوقت`, 'تعارض في الجدول', {
+        timeOut: 5000
+      });
+      return true;
+    }
+    return false;
+  }
+
+  // Get available teachers with subjects for a specific period
+  getAvailableTeachersForPeriod(day: number, period: number): any[] {
+    // Get teachers with subjects from CoursePlans
     const availableTeachers = this.coursePlans
-      .filter((plan: any) => !selectedTeacherIds.has(plan.teacherID))
       .map((plan: any) => {
         // Extract subject name from coursePlanName (format: "SubjectName-ClassName")
         const subjectName = plan.coursePlanName?.split('-')[0]?.trim() || '';
@@ -464,6 +491,12 @@ export class WeeklyScheduleComponent implements OnInit {
     if (!cell) {
       cell = { dayOfWeek: day, periodNumber: period };
       this.scheduleCells.set(key, cell);
+    }
+
+    // Check for conflicts before assigning
+    if (this.checkTeacherConflict(day, period, teacher.teacherID)) {
+      this.closeAllMenus();
+      return;
     }
 
     // Set teacher and auto-populate subject
@@ -503,8 +536,21 @@ export class WeeklyScheduleComponent implements OnInit {
         cell.subjectName = undefined;
       }
     } else if (field === 'teacherID') {
-      cell.teacherID = value || undefined;
       if (value) {
+        // Check for conflicts before assigning
+        if (this.checkTeacherConflict(day, period, value)) {
+          setTimeout(() => {
+            if (cell) {
+              cell.teacherID = undefined;
+              cell.teacherName = undefined;
+              cell.subjectID = undefined;
+              cell.subjectName = undefined;
+            }
+          });
+          return;
+        }
+
+        cell.teacherID = value;
         const teacher = this.teachers.find(t => t.employeeID === value);
         cell.teacherName = teacher ? `${teacher.firstName} ${teacher.lastName}`.trim() : undefined;
         
@@ -573,7 +619,8 @@ export class WeeklyScheduleComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error saving schedule:', err);
-        this.toastr.error('فشل في حفظ الجدول', 'خطأ');
+        const errorMessage = err.error?.errorMasseges?.[0] || 'فشل في حفظ الجدول';
+        this.toastr.error(errorMessage, 'خطأ');
         this.isLoading = false;
       }
     });
