@@ -16,7 +16,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 30
-      start_period: 30s
+      start_period: 60s
 
   backend:
     build:
@@ -29,6 +29,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       ConnectionStrings__SqlAdminConnection: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
+      ConnectionStrings__TenantDesignTime: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
       ASPNETCORE_URLS: "http://+:8080"
     ports:
       - "8080:8080"

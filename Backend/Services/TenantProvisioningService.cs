@@ -8,6 +8,7 @@ using Backend.DTOS.School;
 using Backend.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Backend.Services;
 
@@ -15,12 +16,13 @@ public class TenantProvisioningService
 {
     private readonly DatabaseContext _masterDb; // Points to the main DB with the Tenants table
     private readonly string _sqlAdminConnectionString; // Connection to your SQL Server for raw CREATE DATABASE
+    private readonly IConfiguration _configuration;
 
-    public TenantProvisioningService(DatabaseContext masterDb, IConfiguration config)
+    public TenantProvisioningService(DatabaseContext masterDb, IConfiguration configuration)
     {
         _masterDb = masterDb;
-        _sqlAdminConnectionString = config.GetConnectionString("SqlAdminConnection");
-
+        _configuration = configuration;
+        _sqlAdminConnectionString = configuration.GetConnectionString("SqlAdminConnection");
     }
 
     public async Task<Tenant> CreateSchoolDatabaseAsync(string schoolName, SchoolDTO schoolDTO)
@@ -70,23 +72,23 @@ public class TenantProvisioningService
         {
             await _masterDb.Years.AddAsync(adminYear);
             await _masterDb.SaveChangesAsync();
-            
+
             // Verify the YearID was assigned (it should be > 0 after SaveChangesAsync)
             if (adminYear.YearID == 0)
             {
                 // Reload the entity to get the YearID if it wasn't assigned
                 await _masterDb.Entry(adminYear).ReloadAsync();
             }
-            
+
             // Verify the Year was actually saved by querying it back
             var savedYear = await _masterDb.Years
                 .FirstOrDefaultAsync(y => y.SchoolID == adminSchoolID && y.Active == true);
-            
+
             if (savedYear == null)
             {
-                throw new InvalidOperationException($"Failed to create Year in admin database. Year was not found after SaveChangesAsync.");
+                throw new InvalidOperationException("Failed to create Year in admin database. Year was not found after SaveChangesAsync.");
             }
-            
+
             // Use the saved Year's ID to ensure we have the correct YearID
             adminYear.YearID = savedYear.YearID;
         }
@@ -108,14 +110,20 @@ public class TenantProvisioningService
             await cmd.ExecuteNonQueryAsync();
         }
 
-        // 4) Build the connection string for the new database
-        var newDbConnString = $"Server=localhost\\SQLEXPRESS;Database={newDbName};Trusted_Connection=True;TrustServerCertificate=True";
+        var baseConnectionString = _configuration.GetConnectionString("SqlAdminConnection");
 
-        // 5) Migrate the new DB
-        var builder = new DbContextOptionsBuilder<DatabaseContext>();
-        builder.UseSqlServer(newDbConnString);
+        var sqlBuilder = new SqlConnectionStringBuilder(baseConnectionString)
+        {
+            InitialCatalog = newDbName
+        };
+
+        var newDbConnString = sqlBuilder.ConnectionString;
+
+        var dbOptionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
+        dbOptionsBuilder.UseSqlServer(newDbConnString);
+
         School newSchool;
-        using (var newDbContext = new DatabaseContext(builder.Options))
+        using (var newDbContext = new DatabaseContext(dbOptionsBuilder.Options))
         {
             newDbContext.Database.Migrate(); // Apply migrations
 
@@ -224,6 +232,4 @@ public class TenantProvisioningService
 
         return tenant;
     }
-
 }
-
