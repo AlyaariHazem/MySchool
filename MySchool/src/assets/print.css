@@ -1,5 +1,15 @@
 
 @media print {
+  /* Dialogs (e.g. new-student) use transform: scale on .mdc-dialog__surface — Chrome often prints a blank
+     page unless transforms are cleared for print. */
+  html,
+  body {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  body.cdk-global-scrollblock {
+    overflow: visible !important;
+  }
   /* Avoid breaking tables/images inside the report; scoped overrides below */
   * {
     width: auto !important;
@@ -21,9 +31,11 @@
   .report-title {
     display: none;
   }
-  /* Container + descendants: must be explicit or some engines print a blank page */
+  /* Printable islands: everything else stays visibility:hidden */
   #report,
-  #report * {
+  #report *,
+  #student-registration-form,
+  #student-registration-form * {
     visibility: visible !important;
   }
   .page-wrapper{
@@ -43,6 +55,66 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+  /* إستمارة التسجيل (new-student dialog) — fixed to viewport avoids clipped composited layers under dialog transform */
+  #student-registration-form {
+    display: block !important;
+    position: fixed !important;
+    right: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    z-index: 2147483647 !important;
+    overflow: visible !important;
+    transform: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+  #student-registration-form .reg-print-inner {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+  /* Dialog overlay: don’t cover/clobber print */
+  .cdk-overlay-backdrop {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  .cdk-overlay-pane {
+    position: static !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    visibility: visible !important;
+  }
+  /* Chrome print: descendants can stay unpainted if intermediate overlay nodes keep visibility:hidden */
+  .cdk-overlay-pane * {
+    visibility: visible !important;
+  }
+  .mat-mdc-dialog-container,
+  .mat-mdc-dialog-surface,
+  .mdc-dialog__surface,
+  .custom-dialog-container .mdc-dialog__surface {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    box-shadow: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  .cdk-overlay-container {
+    visibility: visible !important;
+    position: static !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
   /* Global * { width:auto } breaks table layout and logos in Chrome print */
   #report table {
     display: table !important;
@@ -61,13 +133,46 @@
     display: table-row !important;
   }
   #report th,
-  #report td {
+  #report td,
+  #student-registration-form th,
+  #student-registration-form td {
     display: table-cell !important;
     width: auto !important;
     max-width: none !important;
     vertical-align: middle !important;
     word-wrap: break-word !important;
     overflow: visible !important;
+  }
+  #student-registration-form table {
+    display: table !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+  }
+  #student-registration-form thead {
+    display: table-header-group !important;
+  }
+  #student-registration-form tbody {
+    display: table-row-group !important;
+  }
+  #student-registration-form tr {
+    display: table-row !important;
+  }
+  #student-registration-form .reg-summary-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+  #student-registration-form .reg-summary-box {
+    display: block !important;
+    width: auto !important;
+    max-width: 100% !important;
+  }
+  /* Fee grid may span pages; thead repeats via table-header-group above */
+  #student-registration-form .reg-fees-table {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
   }
   #report .account-report-print-intro {
     visibility: visible !important;

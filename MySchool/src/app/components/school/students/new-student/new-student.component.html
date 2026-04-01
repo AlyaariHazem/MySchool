@@ -1,97 +1,209 @@
 <form class="group5" [formGroup]="formGroup">
-  <button class="close-btn" (click)="closeModal()">×</button>
-  <!-- <app-head></app-head> -->
-  <div class="student-header rtl-direction">
-    <div class="student-photo-section">
-      <h2 class="school">{{isEditMode ? 'تعديل بيانات الطالب' : 'إضافة طالب جديد'}}</h2>
-      <div class="student-photo">
-        <label for="fileInput">
-          <img [src]="studentImageURL ? studentImageURL : 'assets/img/user.jpg'" alt="Student Photo" />
-        </label>
-        <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)" style="display: none" />
-      </div>
-    </div>
-
-    <div class="student-info-section">
-      <div class="student-name-id">
-        <div class="student-name">
-          <div class="form-group StudentName">
-            <label for="studentName">اسم الطالب:</label>
-            <input [disabled]="true" class="w-16rem pr-2" [value]="studentName$ | async" type="text" id="studentName" [readonly]="true" />
-          </div>
-        </div>
-        <div class="student-id">
-          <div class="form-group">
-            <label for="studentID">رقم الطالب:</label>
-            <input class="pr-3" [disabled]="true" type="text" id="studentID" formControlName="studentID" [readonly]="true" />
-          </div>
-          <!-- <span>{{ student?.id }}</span> -->
+  <div class="new-student-no-print">
+    <button type="button" class="close-btn" (click)="closeModal()">×</button>
+    <!-- <app-head></app-head> -->
+    <div class="student-header rtl-direction">
+      <div class="student-photo-section">
+        <h2 class="school">{{isEditMode ? 'تعديل بيانات الطالب' : 'إضافة طالب جديد'}}</h2>
+        <div class="student-photo">
+          <label for="fileInput">
+            <img [src]="studentImageURL ? studentImageURL : 'assets/img/user.jpg'" alt="Student Photo" />
+          </label>
+          <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)" style="display: none" />
         </div>
       </div>
 
-      <div class="buttons">
-        <button class="btn btn-success" type="submit" [disabled]="!formGroup.valid"
-          (click)="isEditMode?onUpdate():onSubmit()">{{isEditMode? 'تعديل' : 'إضافة'}}</button>
-        <button class="btn btn-info" (click)="resetForm()">جديد</button>
-        <button class="btn btn-warning">الشهادة</button>
+      <div class="student-info-section">
+        <div class="student-name-id">
+          <div class="student-name">
+            <div class="form-group StudentName">
+              <label for="studentName">اسم الطالب:</label>
+              <input [disabled]="true" class="w-16rem pr-2" [value]="studentName$ | async" type="text" id="studentName" [readonly]="true" />
+            </div>
+          </div>
+          <div class="student-id">
+            <div class="form-group">
+              <label for="studentID">رقم الطالب:</label>
+              <input class="pr-3" [disabled]="true" type="text" id="studentID" formControlName="studentID" [readonly]="true" />
+            </div>
+          </div>
+        </div>
 
-        <button type="button" class="btn btn-primary" (click)="showCameraFun()">📷التقاط من الكاميرا</button>
+        <div class="buttons">
+          <button class="btn btn-success" type="submit" [disabled]="!formGroup.valid"
+            (click)="isEditMode?onUpdate():onSubmit()">{{isEditMode? 'تعديل' : 'إضافة'}}</button>
+          <button type="button" class="btn btn-info" (click)="resetForm()">جديد</button>
+          <button type="button" class="btn btn-warning">الشهادة</button>
+          <button type="button" class="btn btn-outline-registration-print" (click)="printRegistrationForm()"
+            title="طباعة إستمارة التسجيل" aria-label="طباعة إستمارة التسجيل">
+            <i class="fas fa-print" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="btn btn-primary" (click)="showCameraFun()">📷التقاط من الكاميرا</button>
+        </div>
       </div>
+      @if (showCamera) {
+      <p-dialog [(visible)]="showCamera" header="📸التقاط صورة" [modal]="true">
+        <app-camera (imageCaptured)="handleCapturedImage($event)" (cancel)="showCamera = false">
+        </app-camera>
+      </p-dialog>
+      }
     </div>
-    @if (showCamera) {
-    <p-dialog [(visible)]="showCamera" header="📸التقاط صورة" [modal]="true">
-      <app-camera (imageCaptured)="handleCapturedImage($event)" (cancel)="showCamera = false">
-      </app-camera>
-    </p-dialog>
-    }
+
+    <div id="id01" class="" dir="rtl">
+      <div class="modal-content" style="background-color: #ffffff !important">
+        <div class="container">
+          <button [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }" [id]="isEditMode?'':'defaultOpen'"
+            (click)="openPage('DataStudent', $event.target)">
+            <span>بيانات الطالب</span>
+          </button>
+          <button [ngClass]="{ tablink: true, active: activeTab === 'OptionData' }"
+            (click)="openPage('OptionData', $event.target)">
+            <span>بيانات إختيارية</span>
+          </button>
+          <button [ngClass]="{ tablink: true, active: activeTab === 'guardian' }"
+            (click)="openPage('guardian', $event.target)">
+            <span>ولي الأمر</span>
+          </button>
+          <button [ngClass]="{ tablink: true, active: activeTab === 'fees' }" [id]="isEditMode?'defaultOpen':''" (click)="openPage('fees', $event.target)">
+            <span>رسوم الطالب</span>
+          </button>
+          <button [ngClass]="{ tablink: true, active: activeTab === 'document' }"
+            (click)="openPage('document', $event.target)">
+            <span>الوثائق</span>
+          </button>
+          <p class="line"></p>
+        </div>
+      </div>
+
+      @if (activeTab === 'DataStudent') {
+      <div class="tabcontent">
+        <app-primary-data></app-primary-data>
+      </div>
+      } @if (activeTab === 'OptionData') {
+      <div class="tabcontent">
+        <app-option-data></app-option-data>
+      </div>
+      } @if (activeTab === 'guardian') {
+      <div class="tabcontent">
+        <app-guardian></app-guardian>
+      </div>
+      } @if (activeTab === 'fees') {
+      <div class="tabcontent">
+        <app-fee></app-fee>
+      </div>
+      } @if (activeTab === 'document') {
+      <div class="tabcontent">
+        <app-document></app-document>
+      </div>
+      }
+    </div>
   </div>
 
-  <div id="id01" class="" dir="rtl">
-    <div class="modal-content" style="background-color: #ffffff !important">
-      <div class="container">
-        <button [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }" [id]="isEditMode?'':'defaultOpen'"
-          (click)="openPage('DataStudent', $event.target)">
-          <span>بيانات الطالب</span>
-        </button>
-        <button [ngClass]="{ tablink: true, active: activeTab === 'OptionData' }"
-          (click)="openPage('OptionData', $event.target)">
-          <span>بيانات إختيارية</span>
-        </button>
-        <button [ngClass]="{ tablink: true, active: activeTab === 'guardian' }"
-          (click)="openPage('guardian', $event.target)">
-          <span>ولي الأمر</span>
-        </button>
-        <button [ngClass]="{ tablink: true, active: activeTab === 'fees' }" [id]="isEditMode?'defaultOpen':''" (click)="openPage('fees', $event.target)">
-          <span>رسوم الطالب</span>
-        </button>
-        <button [ngClass]="{ tablink: true, active: activeTab === 'document' }"
-          (click)="openPage('document', $event.target)">
-          <span>الوثائق</span>
-        </button>
-        <p class="line"></p>
-      </div>
-    </div>
+  <!-- إستمارة التسجيل — تُعرض عند الطباعة فقط -->
+  <div id="student-registration-form" class="student-registration-print" dir="rtl" aria-hidden="true">
+    <div class="reg-print-inner">
+      <p class="reg-bism">بسم الله الرحمن الرحيم</p>
+      <h1 class="reg-main-title">
+        إستمارة تسجيل الطالب للعام الدراسي
+        <span class="reg-year">{{ registrationAcademicYearLabel() || '…………' }}</span>
+      </h1>
+      <p class="reg-school" *ngIf="registrationSchoolName()">{{ registrationSchoolName() }}</p>
 
-    @if (activeTab === 'DataStudent') {
-    <div class="tabcontent">
-      <app-primary-data></app-primary-data>
+      <section class="reg-section">
+        <h2 class="reg-section-title">بيانات الطالب</h2>
+        <table class="reg-kv">
+          <tr>
+            <th>رقم الطالب</th>
+            <td>{{ formGroup.get('studentID')?.value }}</td>
+          </tr>
+          <tr>
+            <th>اسم الطالب</th>
+            <td>{{ (studentName$ | async) || '—' }}</td>
+          </tr>
+          <tr>
+            <th>تاريخ الميلاد</th>
+            <td>{{ formatDateForPrint(primaryDataValue['studentDOB']) }}</td>
+          </tr>
+          <tr>
+            <th>العمر</th>
+            <td>{{ studentAgeYears() != null ? (studentAgeYears() + ' سنة') : '—' }}</td>
+          </tr>
+          <tr>
+            <th>النوع</th>
+            <td>{{ studentGenderAr() }}</td>
+          </tr>
+          <tr>
+            <th>محل الميلاد / العنوان</th>
+            <td>{{ (optionDataValue['placeBirth'] || primaryDataValue['studentAddress'] || '—') }}</td>
+          </tr>
+          <tr>
+            <th>الصف</th>
+            <td>{{ feeRowsForPrint[0]?.className || '—' }}</td>
+          </tr>
+          <tr>
+            <th>ولي الأمر</th>
+            <td>{{ (guardianValue['guardianFullName'] || '—') }}</td>
+          </tr>
+        </table>
+      </section>
+
+      <section class="reg-section">
+        <h2 class="reg-section-title">بنود اتفاقية التحاق الطالب بالمدرسة</h2>
+        <ul class="reg-terms">
+          <li>يلتزم الطالب وأولياء أموره بالحضور في المواعيد المحددة من قبل المدرسة.</li>
+          <li>احترام أعضاء هيئة التدريس والإدارة والطلبة والمحافظة على نظافة المدرسة والمرافق.</li>
+          <li>الالتزام بسداد الرسوم المدرسية والمستحقات في المواعيد المحددة.</li>
+          <li>الالتزام باللوائح والأنظمة الداخلية للمدرسة الصادرة عن الإدارة.</li>
+        </ul>
+      </section>
+
+      <section class="reg-section reg-fees">
+        <h2 class="reg-section-title">الرسوم والخصومات</h2>
+        <div class="reg-summary-row">
+          <div class="reg-summary-box">
+            <span class="lbl">إجمالي الرسوم</span>
+            <span class="val">{{ printTotalFees | number:'1.2-2' }}</span>
+          </div>
+          <div class="reg-summary-box">
+            <span class="lbl">إجمالي الخصومات</span>
+            <span class="val">{{ printTotalDiscounts | number:'1.2-2' }}</span>
+          </div>
+          <div class="reg-summary-box reg-summary-net">
+            <span class="lbl">الصافي</span>
+            <span class="val">{{ printRequiredFees | number:'1.2-2' }}</span>
+          </div>
+        </div>
+        <p class="reg-amount-words">
+          المبلغ المتوجب دفعه كتابة:
+          <strong>{{ printRequiredFeesForWords | numberToArabicText }}</strong>
+        </p>
+
+        <table class="reg-fees-table" *ngIf="feeRowsForPrint.length">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>بند الرسوم</th>
+              <th>المبلغ</th>
+              <th>إدراج خصم بالمبلغ</th>
+              <th>ملاحظة الخصم</th>
+              <th>الصف</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of feeRowsForPrint; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ row.feeName }}</td>
+              <td>{{ row.amount | number:'1.2-2' }}</td>
+              <td>{{ row.amountDiscount | number:'1.2-2' }}</td>
+              <td>{{ row.noteDiscount || '—' }}</td>
+              <td>{{ row.className || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p *ngIf="!feeRowsForPrint.length" class="reg-no-fees">لا توجد بنود رسوم مضافة — افتح تبويب «رسوم الطالب» واختر الصف.</p>
+      </section>
+
+      <p class="reg-footer-note">وأقر أنا ولي الأمر باطلاعي على البنود أعلاه والالتزام بها.</p>
     </div>
-    } @if (activeTab === 'OptionData') {
-    <div class="tabcontent">
-      <app-option-data></app-option-data>
-    </div>
-    } @if (activeTab === 'guardian') {
-    <div class="tabcontent">
-      <app-guardian></app-guardian>
-    </div>
-    } @if (activeTab === 'fees') {
-    <div class="tabcontent">
-      <app-fee></app-fee>
-    </div>
-    } @if (activeTab === 'document') {
-    <div class="tabcontent">
-      <app-document></app-document>
-    </div>
-    }
   </div>
 </form>

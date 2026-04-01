@@ -158,6 +158,104 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
     return totalFees - totalDiscounts;
   }
 
+  /** إستمارة التسجيل — fee summary (same rules as Fee tab) */
+  get printTotalFees(): number {
+    return this.discountsArray.controls
+      .filter((ctrl) => ctrl.get('mandatory')?.value)
+      .reduce((sum, ctrl) => sum + (+ctrl.get('amount')?.value || 0), 0);
+  }
+
+  get printTotalDiscounts(): number {
+    return this.discountsArray.controls.reduce(
+      (sum, ctrl) => sum + (+ctrl.get('amountDiscount')?.value || 0),
+      0
+    );
+  }
+
+  get printRequiredFees(): number {
+    return this.printTotalFees - this.printTotalDiscounts;
+  }
+
+  /** Rounded for «المبلغ كتابة» */
+  get printRequiredFeesForWords(): number {
+    return Math.max(0, Math.round(this.printRequiredFees));
+  }
+
+  get feeRowsForPrint(): any[] {
+    return this.discountsArray.controls.map((c) => c.getRawValue());
+  }
+
+  get primaryDataValue(): Record<string, unknown> {
+    return (this.formGroup.get('primaryData')?.value ?? {}) as Record<string, unknown>;
+  }
+
+  get optionDataValue(): Record<string, unknown> {
+    return (this.formGroup.get('optionData')?.value ?? {}) as Record<string, unknown>;
+  }
+
+  get guardianValue(): Record<string, unknown> {
+    return (this.formGroup.get('guardian')?.value ?? {}) as Record<string, unknown>;
+  }
+
+  registrationSchoolName(): string {
+    return localStorage.getItem('schoolName')?.trim() || '';
+  }
+
+  registrationAcademicYearLabel(): string {
+    return (
+      localStorage.getItem('academicYear')?.trim() ||
+      localStorage.getItem('studyYearName')?.trim() ||
+      ''
+    );
+  }
+
+  studentGenderAr(): string {
+    const raw = String(this.primaryDataValue['studentGender'] ?? '').trim();
+    const g = raw.toLowerCase();
+    if (g === 'female' || g === 'f' || raw === 'أنثى') {
+      return 'أنثى';
+    }
+    return 'ذكر';
+  }
+
+  studentAgeYears(): number | null {
+    const raw = this.primaryDataValue['studentDOB'];
+    if (!raw) {
+      return null;
+    }
+    const d = new Date(raw as string);
+    if (isNaN(d.getTime())) {
+      return null;
+    }
+    const diff = Date.now() - d.getTime();
+    return Math.max(0, Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000)));
+  }
+
+  formatDateForPrint(value: unknown): string {
+    if (!value) {
+      return '—';
+    }
+    const d = new Date(value as string);
+    if (isNaN(d.getTime())) {
+      return String(value);
+    }
+    return d.toLocaleDateString('ar-YE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  }
+
+  printRegistrationForm(): void {
+    if (!document.getElementById('student-registration-form')) {
+      this.toastr.error('لم يتم العثور على محتوى إستمارة التسجيل', 'خطأ');
+      return;
+    }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => window.print());
+    });
+  }
+
   private uploadImageAndFiles(): void {
     if (this.StudentImage)
       this.studentService.uploadStudentImage(this.StudentImage, this.studentID).subscribe();
@@ -228,6 +326,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
     discounts.forEach(f =>
       arr.push(this.fb.group({
         feeClassID: [f.feeClassID],
+        amount: [f.amount ?? 0],
         amountDiscount: [f.amountDiscount],
         noteDiscount: [f.noteDiscount],
         className: [f.className],

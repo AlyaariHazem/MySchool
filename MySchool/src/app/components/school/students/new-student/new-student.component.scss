@@ -552,3 +552,232 @@ select:focus {
       justify-content: center; /* Center buttons */
   }
 }
+
+/* طباعة إستمارة التسجيل */
+.btn-outline-registration-print {
+  background: #fff;
+  border: 1px solid #6c757d;
+  color: #495057;
+  padding: 0.35rem 0.65rem;
+  min-width: 2.25rem;
+
+  &:hover {
+    background: #f8f9fa;
+    border-color: #5a6268;
+  }
+
+  .fa-print {
+    font-size: 1rem;
+  }
+}
+
+.student-registration-print {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 12mm;
+    size: portrait;
+  }
+
+  :host {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .new-student-no-print {
+    display: none !important;
+  }
+
+  .student-registration-print {
+    display: block !important;
+    visibility: visible !important;
+    position: relative;
+    width: 100%;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #111;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .group5 {
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .reg-print-inner {
+    max-width: 100%;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .reg-bism {
+    text-align: center;
+    font-size: 12pt;
+    margin: 0 0 0.5rem;
+  }
+
+  .reg-main-title {
+    text-align: center;
+    font-size: 14pt;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+    line-height: 1.4;
+  }
+
+  .reg-year {
+    white-space: nowrap;
+  }
+
+  .reg-school {
+    text-align: center;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    color: #333;
+  }
+
+  .reg-section {
+    margin-bottom: 1.25rem;
+  }
+
+  /* Keep short blocks together; fees + table may run onto page 2, 3, … */
+  .reg-section:not(.reg-fees) {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .reg-section.reg-fees {
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+
+  .reg-section-title {
+    font-size: 12pt;
+    font-weight: 700;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.25rem;
+    margin: 0 0 0.5rem;
+  }
+
+  .reg-kv {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      text-align: right;
+    }
+
+    th {
+      width: 28%;
+      background: #f5f5f5;
+      font-weight: 600;
+    }
+  }
+
+  .reg-terms {
+    margin: 0;
+    padding-right: 1.25rem;
+
+    li {
+      margin-bottom: 0.35rem;
+    }
+  }
+
+  .reg-summary-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .reg-summary-box {
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 8px 14px;
+    min-width: 120px;
+    text-align: center;
+    background: #fafafa;
+
+    .lbl {
+      display: block;
+      font-size: 9pt;
+      color: #555;
+    }
+
+    .val {
+      display: block;
+      font-size: 12pt;
+      font-weight: 700;
+    }
+  }
+
+  .reg-summary-net .val {
+    color: #0d6efd;
+  }
+
+  .reg-amount-words {
+    text-align: center;
+    font-size: 10.5pt;
+    margin: 0 0 0.75rem;
+    line-height: 1.6;
+  }
+
+  .reg-fees-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+    page-break-inside: auto;
+    break-inside: auto;
+
+    th,
+    td {
+      border: 1px solid #333;
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    tbody tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    thead th {
+      background: #e9ecef;
+      font-weight: 700;
+    }
+  }
+
+  .reg-no-fees {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+  }
+
+  .reg-footer-note {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 10pt;
+  }
+}
