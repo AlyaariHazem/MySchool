@@ -36,6 +36,13 @@ namespace Backend.Middleware
                 return;
             }
 
+            // Raw SQL restore uses SqlAdminConnection only; no tenant DB. Avoid failing MANAGER requests here before [Authorize(Roles = "ADMIN")] returns 403.
+            if (path.StartsWith("/api/databaserestore"))
+            {
+                await _next(context);
+                return;
+            }
+
             // Check if user is ADMIN
             var userType = context.User.FindFirstValue("UserType");
             bool isAdmin = context.User.IsInRole("ADMIN") || (userType != null && userType.Equals("ADMIN", StringComparison.OrdinalIgnoreCase));
@@ -82,7 +89,11 @@ namespace Backend.Middleware
                     .FirstOrDefaultAsync();
 
                 if (string.IsNullOrWhiteSpace(cs))
-                    throw new InvalidOperationException($"Tenant {tenantId} not found or connection string is missing.");
+                {
+                    throw new InvalidOperationException(
+                        $"Tenant {tenantId} not found or connection string is missing in the admin database. " +
+                        "If you restored or reset the database, repopulate the Tenants table (and ConnectionString) or log in again after fixing data.");
+                }
 
                 cache.Set(cacheKey, cs, TimeSpan.FromMinutes(30));
             }

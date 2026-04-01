@@ -19,9 +19,22 @@ using Backend.Middleware;
 using Backend.Extensions;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Backend.Configuration;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 2L * 1024 * 1024 * 1024;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 2L * 1024 * 1024 * 1024;
+});
 
 builder.Services.AddControllers(options =>
 {
@@ -49,6 +62,9 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 builder.Services.AddScoped<TenantInfo>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.Configure<SqlRestoreOptions>(builder.Configuration.GetSection(SqlRestoreOptions.SectionName));
+builder.Services.AddScoped<SqlRestoreService>();
 
 // Register TenantDbContext - connection string will be set dynamically from TenantInfo
 // The configuration will be evaluated when the DbContext is resolved (after middleware runs)
@@ -186,6 +202,29 @@ builder.Services
             }
         };
     });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("DatabaseRestore", policy =>
+    {
+        policy.RequireAssertion(context =>
+        {
+            if (context.User?.Identity?.IsAuthenticated != true)
+            {
+                return false;
+            }
+
+            if (context.User.IsInRole("ADMIN") || context.User.IsInRole("MANAGER"))
+            {
+                return true;
+            }
+
+            var userType = context.User.FindFirst("UserType")?.Value;
+            return string.Equals(userType, "ADMIN", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(userType, "MANAGER", StringComparison.OrdinalIgnoreCase);
+        });
+    });
+});
 
 builder.Services.AddCors(options =>
 {

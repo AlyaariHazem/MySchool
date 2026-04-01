@@ -1,6 +1,6 @@
 services:
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:2025-latest
     container_name: myschool-sql
     environment:
       ACCEPT_EULA: "Y"
@@ -10,6 +10,7 @@ services:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
+      - sql_backups:/var/opt/mssql/backup
     healthcheck:
       test: ["CMD-SHELL", "if [ -x /opt/mssql-tools18/bin/sqlcmd ]; then /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; elif [ -x /opt/mssql-tools/bin/sqlcmd ]; then /opt/mssql-tools/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; else exit 1; fi"]
       interval: 10s
@@ -29,9 +30,17 @@ services:
       ASPNETCORE_ENVIRONMENT: "Development"
       # English: this maps to Configuration.GetConnectionString("SqlAdminConnection")
       ConnectionStrings__SqlAdminConnection: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345};TrustServerCertificate=True;Encrypt=False"
+      # Override design-time string so appsettings.Development.json (SQLEXPRESS) is not used inside the container
+      ConnectionStrings__TenantDesignTime: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Str0ng!Passw0rd12345};TrustServerCertificate=True;Encrypt=False"
       ASPNETCORE_URLS: "http://+:8080"
+      SqlRestore__HostBackupRoot: "/var/opt/mssql/backup"
+      SqlRestore__UseContainerPathForRestoreDisk: "false"
+      SqlRestore__SqlServerDataPath: "/var/opt/mssql/data/"
+    volumes:
+      - sql_backups:/var/opt/mssql/backup
     ports:
       - "8080:8080"
 
 volumes:
   sql_data:
+  sql_backups:

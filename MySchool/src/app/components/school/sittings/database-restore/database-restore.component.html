@@ -1,0 +1,137 @@
+<div class="database-restore-page modal-container" [attr.dir]="dir$ | async">
+  <div class="page-card">
+    <header class="page-header">
+      <h2 class="page-title">{{ 'databaseRestore.title' | translate }}</h2>
+      <p class="page-sub">{{ 'databaseRestore.subtitle' | translate }}</p>
+    </header>
+
+    <section class="upload-section">
+      <label class="field-label">{{ 'databaseRestore.backupFile' | translate }}</label>
+      <div class="file-row">
+        <input
+          #fileInput
+          type="file"
+          accept=".bak,application/octet-stream"
+          class="visually-hidden"
+          (change)="onFileSelected($event)"
+        />
+        <button type="button" class="btn-outline" (click)="pickFile()">
+          {{ 'databaseRestore.chooseFile' | translate }}
+        </button>
+        <span class="file-name" *ngIf="selectedFile; else noFile">{{ selectedFile.name }}</span>
+        <ng-template #noFile>
+          <span class="file-placeholder">{{ 'databaseRestore.noFile' | translate }}</span>
+        </ng-template>
+        <button
+          type="button"
+          class="btn-text"
+          *ngIf="selectedFile"
+          (click)="clearFile()"
+        >
+          {{ 'databaseRestore.clear' | translate }}
+        </button>
+      </div>
+
+      <label class="field-label" for="dbName">{{ 'databaseRestore.databaseNameHint' | translate }}</label>
+      <input
+        id="dbName"
+        type="text"
+        class="text-input"
+        [(ngModel)]="databaseNameBase"
+        [placeholder]="'databaseRestore.databaseNamePlaceholder' | translate"
+        autocomplete="off"
+      />
+
+      <div class="actions">
+        <button
+          type="button"
+          class="btn-restore"
+          [disabled]="!selectedFile || submitting"
+          (click)="submit()"
+        >
+          <span *ngIf="!submitting">{{ 'databaseRestore.restore' | translate }}</span>
+          <span *ngIf="submitting">{{ 'databaseRestore.restoring' | translate }}</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="result-section" *ngIf="lastResult as r">
+      <h3 class="section-title">{{ 'databaseRestore.lastSuccess' | translate }}</h3>
+      <div class="result-grid">
+        <div class="result-item">
+          <span class="k">{{ 'databaseRestore.restoredDb' | translate }}</span>
+          <span class="v">{{ r.databaseName }}</span>
+        </div>
+        <div class="result-item full">
+          <span class="k">{{ 'databaseRestore.backupPath' | translate }}</span>
+          <span class="v mono">{{ r.backupPathOnServer }}</span>
+        </div>
+      </div>
+
+      <h4 class="table-title">{{ 'databaseRestore.fileMappings' | translate }}</h4>
+      <p-table
+        [value]="r.fileMappings"
+        styleClass="p-datatable-sm mappings-table"
+        [tableStyle]="{ 'min-width': '100%' }"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'databaseRestore.colLogical' | translate }}</th>
+            <th>{{ 'databaseRestore.colType' | translate }}</th>
+            <th>{{ 'databaseRestore.colPath' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.logicalName }}</td>
+            <td>{{ row.fileType }}</td>
+            <td class="mono">{{ row.newPhysicalPath }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="3">{{ 'databaseRestore.noMappings' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+
+    <section class="history-section" *ngIf="history.length">
+      <h3 class="section-title">{{ 'databaseRestore.history' | translate }}</h3>
+      <p-table [value]="history" styleClass="p-datatable-sm history-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'databaseRestore.colTime' | translate }}</th>
+            <th>{{ 'databaseRestore.colStatus' | translate }}</th>
+            <th>{{ 'databaseRestore.colFile' | translate }}</th>
+            <th>{{ 'databaseRestore.colDb' | translate }}</th>
+            <th>{{ 'databaseRestore.colDetail' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.at | date : 'medium' }}</td>
+            <td>
+              <span class="status-dot" [class.ok]="row.success" [class.fail]="!row.success"></span>
+              {{
+                row.success
+                  ? ('databaseRestore.statusOk' | translate)
+                  : ('databaseRestore.statusFail' | translate)
+              }}
+            </td>
+            <td>{{ row.fileName }}</td>
+            <td>{{ row.databaseName || '—' }}</td>
+            <td class="detail-cell">
+              <ng-container *ngIf="row.success && row.result; else errCell">
+                {{ row.result.databaseName }}
+              </ng-container>
+              <ng-template #errCell>
+                {{ row.errorMessages?.[0] || '—' }}
+              </ng-template>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  </div>
+</div>

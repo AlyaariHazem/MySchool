@@ -28,6 +28,7 @@ import { GradesTermComponent } from './grades-mange/grades-term/grades-term.comp
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 import { StudentPromotionComponent } from './students/student-promotion/student-promotion.component';
 import { WeeklyScheduleComponent } from './weekly-schedule/weekly-schedule.component';
+import { DatabaseRestoreComponent } from './sittings/database-restore/database-restore.component';
 
 const routes: Routes = [
   {
@@ -64,6 +65,7 @@ const routes: Routes = [
           { path: 'schoolInfo', component: SchoolInfoComponent, data: { breadcrumb: 'معلومات المدرسة' } },
           { path: 'stages', component: StagesGradesComponent, data: { breadcrumb: 'المراحل والفصول' } },
           { path: 'feeClass', component: FeeClassComponent, data: { breadcrumb: 'رسوم الصـفوف' } },
+          { path: 'databaseRestore', component: DatabaseRestoreComponent, data: { breadcrumb: 'استعادة قاعدة البيانات' } },
           { path: '', redirectTo: 'years', pathMatch: 'full' },
           { path: 'not-found', component: PageNotFoundComponent },
           { path: '**', redirectTo: 'not-found', pathMatch: 'full' }

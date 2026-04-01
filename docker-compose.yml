@@ -1,6 +1,7 @@
 services:
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    # Match the SQL Server version used to produce .bak files (e.g. SSMS / SQL 2025 on the host). 2022 cannot restore 2025 backups.
+    image: mcr.microsoft.com/mssql/server:2025-latest
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
@@ -10,6 +11,8 @@ services:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
+      # Same files must be visible to sqlserver (RESTORE) and backend (upload). Nested mount overrides this path inside sql_data.
+      - sql_backups:/var/opt/mssql/backup
     healthcheck:
       # Use sqlcmd for reliability (log text/paths can vary by image/version).
       test: ["CMD-SHELL", "if [ -x /opt/mssql-tools18/bin/sqlcmd ]; then /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; elif [ -x /opt/mssql-tools/bin/sqlcmd ]; then /opt/mssql-tools/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; else exit 1; fi"]
@@ -31,6 +34,12 @@ services:
       ConnectionStrings__SqlAdminConnection: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
       ConnectionStrings__TenantDesignTime: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
       ASPNETCORE_URLS: "http://+:8080"
+      # Shared with sqlserver volume sql_backups — RESTORE must read the same path inside the SQL container.
+      SqlRestore__HostBackupRoot: "/var/opt/mssql/backup"
+      SqlRestore__UseContainerPathForRestoreDisk: "false"
+      SqlRestore__SqlServerDataPath: "/var/opt/mssql/data/"
+    volumes:
+      - sql_backups:/var/opt/mssql/backup
     ports:
       - "8080:8080"
 
@@ -50,4 +59,5 @@ services:
 
 volumes:
   sql_data:
+  sql_backups:
   frontend_node_modules:

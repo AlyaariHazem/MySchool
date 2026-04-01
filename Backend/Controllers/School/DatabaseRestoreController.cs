@@ -1,0 +1,101 @@
+using Backend.Models;
+using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System.Net;
+
+namespace Backend.Controllers.School;
+
+/// <summary>Upload a .bak: restore to a temporary database, copy dbo data into the existing SqlAdminConnection database, then drop the temp DB.</summary>
+[Route("api/[controller]")]
+[ApiController]
+[Authorize(Policy = "DatabaseRestore")]
+public class DatabaseRestoreController : ControllerBase
+{
+    private readonly SqlRestoreService _sqlRestoreService;
+    private readonly ILogger<DatabaseRestoreController> _logger;
+
+    public DatabaseRestoreController(SqlRestoreService sqlRestoreService, ILogger<DatabaseRestoreController> logger)
+    {
+        _sqlRestoreService = sqlRestoreService;
+        _logger = logger;
+    }
+
+    /// <param name="file">.bak backup file (schema should match the target database).</param>
+    [HttpPost("restore")]
+    [RequestFormLimits(MultipartBodyLengthLimit = 2_147_483_648)]
+    [RequestSizeLimit(2_147_483_648)]
+    [ProducesResponseType(typeof(APIResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(APIResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(APIResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<APIResponse>> RestoreFromBackup(
+        [FromForm] IFormFile? file,
+        CancellationToken cancellationToken)
+    {
+        var response = new APIResponse();
+
+        if (file == null || file.Length == 0)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.BadRequest;
+            response.ErrorMasseges.Add("No .bak file was uploaded.");
+            return BadRequest(response);
+        }
+
+        if (!file.FileName.EndsWith(".bak", StringComparison.OrdinalIgnoreCase))
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.BadRequest;
+            response.ErrorMasseges.Add("Only .bak backup files are accepted.");
+            return BadRequest(response);
+        }
+
+        try
+        {
+            await using var stream = file.OpenReadStream();
+            var result = await _sqlRestoreService.ImportBackupIntoExistingDatabaseAsync(stream, file.FileName, cancellationToken)
+                .ConfigureAwait(false);
+
+            response.Result = result;
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Database restore failed.");
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(FormatRestoreError(ex));
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
+    private static string FormatRestoreError(Exception ex)
+    {
+        for (var e = ex; e != null; e = e.InnerException)
+        {
+            if (e is SqlException sql)
+            {
+                var text = $"SQL error {sql.Number} (state {sql.State}, class {sql.Class}): {sql.Message}";
+                if (sql.Number == 3169)
+                {
+                    text += " The .bak was produced by a newer SQL Server than the instance you are restoring to. "
+                        + "Upgrade the restore target (e.g. Docker image mcr.microsoft.com/mssql/server:2025-latest if backups come from SQL Server 2025), "
+                        + "or take a new backup from a server whose version is the same or older than the instance you restore on. "
+                        + "If you use Docker, ensure ConnectionStrings point at the compose sqlserver service, not an older local SQL instance.";
+                }
+
+                return text;
+            }
+        }
+
+        var parts = new List<string>();
+        for (var e = ex; e != null; e = e.InnerException)
+        {
+            parts.Add(e.Message);
+        }
+
+        return string.Join(" — ", parts);
+    }
+}
