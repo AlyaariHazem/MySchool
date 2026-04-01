@@ -1,7 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
-import { AddStudent, StudentDetailsDTO, StudentPayload } from '../models/students.model';
+import {
+    AddStudent,
+    PagedResultDto,
+    StudentDetailsDTO,
+    StudentNameIdDTO,
+    StudentNameIdSearchRequest,
+    StudentPayload
+} from '../models/students.model';
 import { BackendAspService } from '../../ASP.NET/backend-asp.service';
 
 @Injectable({
@@ -19,6 +26,49 @@ export class StudentService {
             })
         );
     }
+    /**
+     * POST api/Students/names-ids — paged search.
+     * Send { studentID } for id lookup, { fullName } for name (partial) search, or only paging for first page.
+     */
+    searchStudentNamesAndIds(
+        request: StudentNameIdSearchRequest
+    ): Observable<PagedResultDto<StudentNameIdDTO>> {
+        const body: StudentNameIdSearchRequest = {
+            pageNumber: request.pageNumber ?? 1,
+            pageSize: request.pageSize ?? 5,
+            ...(request.studentID != null && request.studentID > 0 ? { studentID: request.studentID } : {}),
+            ...(request.fullName != null && String(request.fullName).trim() !== ''
+                ? { fullName: String(request.fullName).trim() }
+                : {})
+        };
+
+        return this.API.http
+            .post<any>(`${this.API.baseUrl}/Students/names-ids`, body)
+            .pipe(
+                map((res) => {
+                    const page = res as Record<string, unknown>;
+                    const rawList = (page['data'] ?? page['Data'] ?? []) as any[];
+                    const items: StudentNameIdDTO[] = Array.isArray(rawList)
+                        ? rawList.map((x: any) => ({
+                              studentID: Number(x.studentID ?? x.StudentID),
+                              fullName: String(x.fullName ?? x.FullName ?? '').trim()
+                          }))
+                        : [];
+                    return {
+                        data: items,
+                        pageNumber: Number(page['pageNumber'] ?? page['PageNumber'] ?? 1),
+                        pageSize: Number(page['pageSize'] ?? page['PageSize'] ?? body.pageSize ?? 5),
+                        totalCount: Number(page['totalCount'] ?? page['TotalCount'] ?? items.length),
+                        totalPages: Number(page['totalPages'] ?? page['TotalPages'] ?? 1)
+                    };
+                }),
+                catchError((error) => {
+                    console.error('Error searching student names/ids:', error);
+                    return throwError(() => error);
+                })
+            );
+    }
+
     getAllStudents(): Observable<StudentDetailsDTO[]> {
         return this.API.http.get<StudentDetailsDTO[]>(`${this.API.baseUrl}/Students`).pipe(
             catchError(error => {

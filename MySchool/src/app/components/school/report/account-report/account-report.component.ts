@@ -1,9 +1,13 @@
 import { Component, ElementRef, ViewChild, OnInit, inject } from '@angular/core';
 import { ReportTemplateService } from '../../core/services/report-template.service';
 import { AccountService } from '../../core/services/account.service';
+import { StudentService } from '../../../../core/services/student.service';
+import { StudentNameIdDTO, StudentNameIdSearchRequest } from '../../../../core/models/students.model';
+import { StudentAccounts } from '../../core/models/accounts.model';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../../environments/environment';
+import { AutoCompleteCompleteEvent, AutoCompleteSelectEvent } from 'primeng/autocomplete';
 
 @Component({
   selector: 'app-account-report',
@@ -18,6 +22,7 @@ export class AccountReportComponent implements OnInit {
   // Services
   private reportTemplateService = inject(ReportTemplateService);
   private accountService = inject(AccountService);
+  private studentService = inject(StudentService);
   private route = inject(ActivatedRoute);
   private toastr = inject(ToastrService);
 
@@ -48,6 +53,11 @@ export class AccountReportComponent implements OnInit {
   savings: any[] = []; // Savings/Deposits data
   students: any[] = []; // Students data
   accountNumberInput: string = ''; // Input field for account number
+
+  /** POST Students/names-ids (paged) — suggestions from server */
+  filteredStudentsForPicker: StudentNameIdDTO[] = [];
+  selectedStudentForSearch: StudentNameIdDTO | null = null;
+  private readonly studentPickerPageSize = 5;
 
   /** Shown under the report header (from API school/report or editable in DB template via #HeaderMessage#) */
   headerMessage = '';
@@ -80,7 +90,81 @@ export class AccountReportComponent implements OnInit {
       this.toastr.warning('يرجى إدخال رقم حساب صحيح', 'تحذير');
       return;
     }
+    this.selectedStudentForSearch = null;
     this.loadAccountData(accountId);
+  }
+
+  onStudentPickerSearch(event: AutoCompleteCompleteEvent): void {
+    const raw = (event.query || '').trim();
+    const req: StudentNameIdSearchRequest = {
+      pageNumber: 1,
+      pageSize: this.studentPickerPageSize
+    };
+    if (/^\d+$/.test(raw)) {
+      req.studentID = parseInt(raw, 10);
+    } else if (raw.length > 0) {
+      req.fullName = raw;
+    }
+
+    this.studentService.searchStudentNamesAndIds(req).subscribe({
+      next: (page) => {
+        this.filteredStudentsForPicker = page.data;
+      },
+      error: () => {
+        this.filteredStudentsForPicker = [];
+        this.toastr.error('تعذّر البحث عن الطلاب', 'خطأ');
+      }
+    });
+  }
+
+  onStudentPickerSelect(event: AutoCompleteSelectEvent): void {
+    const row = event.value as StudentNameIdDTO;
+    if (!row?.studentID) {
+      return;
+    }
+    this.loadAccountByStudentId(row.studentID);
+  }
+
+  /** Resolve guardian account from student via Accounts/studentAndAccountNames + accountStudentGuardianId */
+  private loadAccountByStudentId(studentId: number): void {
+    this.accountService.getAccountAndStudentNames().subscribe({
+      next: (res) => {
+        if (!res.isSuccess || !res.result) {
+          this.toastr.warning('تعذّر ربط الطالب بحساب', 'تحذير');
+          return;
+        }
+        const links = res.result as StudentAccounts[];
+        const matches = links.filter((l) => l.studentID === studentId);
+        if (!matches.length) {
+          this.toastr.warning('لا يوجد حساب مرتبط بهذا الطالب', 'تحذير');
+          return;
+        }
+        const asgId = matches[0].accountStudentGuardianID;
+        if (asgId == null) {
+          this.toastr.warning('بيانات ربط الحساب غير مكتملة', 'تحذير');
+          return;
+        }
+        this.accountService.getAccountIdByAccountStudentGuardianId(asgId).subscribe({
+          next: (r2) => {
+            if (!r2.isSuccess || r2.result == null) {
+              const msg =
+                (r2.errorMasseges && r2.errorMasseges[0]) || 'تعذّر تحديد رقم الحساب';
+              this.toastr.error(msg, 'خطأ');
+              return;
+            }
+            const accountId = Number(r2.result);
+            if (Number.isNaN(accountId) || accountId <= 0) {
+              this.toastr.error('رقم حساب غير صالح', 'خطأ');
+              return;
+            }
+            this.accountNumberInput = String(accountId);
+            this.loadAccountData(accountId);
+          },
+          error: () => this.toastr.error('تعذّر تحديد رقم الحساب', 'خطأ')
+        });
+      },
+      error: () => this.toastr.error('تعذّر تحميل بيانات الحسابات', 'خطأ')
+    });
   }
 
   loadAccountData(accountId: number): void {

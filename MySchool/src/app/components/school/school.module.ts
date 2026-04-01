@@ -26,6 +26,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { FloatLabel } from "primeng/floatlabel"
 import { TableModule }       from 'primeng/table';
 import { Tooltip } from 'primeng/tooltip';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { Select } from 'primeng/select';
 import { ChartModule } from 'primeng/chart';
 import { MatSelectModule } from '@angular/material/select';
@@ -187,7 +188,8 @@ const modules = [
   DatePipe,
   NumberToArabicTextPipe,
   AgePipe,
-  Tooltip
+  Tooltip,
+  AutoCompleteModule
 ];
 
 @NgModule({

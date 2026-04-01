@@ -1508,14 +1508,33 @@ public class StudentRepository : IStudentRepository
         return response;
     }
 
-    public async Task<List<StudentNameIdDTO>> GetStudentNamesAndIdsAsync()
+    public async Task<(List<StudentNameIdDTO> Items, int TotalCount)> GetStudentNamesAndIdsPagedAsync(StudentNameIdSearchRequestDTO request)
     {
-        return await _context.Students
+        var query = _context.Students.AsQueryable();
+
+        if (request.StudentID.HasValue)
+        {
+            query = query.Where(s => s.StudentID == request.StudentID.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.FullName))
+        {
+            // Search across all name parts
+            query = query.Where(s => (s.FullName.FirstName + " " + (s.FullName.MiddleName ?? "") + " " + s.FullName.LastName).Contains(request.FullName));
+        }
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .OrderBy(s => s.StudentID)
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
             .Select(s => new StudentNameIdDTO
             {
                 StudentID = s.StudentID,
-                FullName = $"{s.FullName.FirstName} {s.FullName.MiddleName} {s.FullName.LastName}".Replace("  ", " ").Trim()
+                FullName = (s.FullName.FirstName + " " + (s.FullName.MiddleName ?? "") + " " + s.FullName.LastName).Replace("  ", " ").Trim()
             })
             .ToListAsync();
+
+        return (items, totalCount);
     }
 }

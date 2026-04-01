@@ -1,24 +1,54 @@
 <div id="page" class="p-4 md:p-6 bg-white rounded-lg shadow-sm">
 
-  <div class="toolbar flex flex-wrap gap-2 justify-between mb-4 print:hidden">
-    <div class="flex gap-2 items-center">
-      <label for="accountNumber" class="font-semibold">رقم الحساب:</label>
-      <input 
-        id="accountNumber"
-        type="number" 
-        [(ngModel)]="accountNumberInput" 
-        placeholder="أدخل رقم الحساب"
-        class="p-inputtext p-component p-inputnumber-input"
-        style="width: 150px;"
-        (keyup.enter)="loadAccountByNumber()" />
-      <button 
-        pButton 
-        label="تحميل" 
-        icon="pi pi-search" 
-        (click)="loadAccountByNumber()" 
-        class="p-button-sm"
-        [disabled]="isLoading"
-        title="تحميل بيانات الحساب"></button>
+  <div class="toolbar flex flex-wrap gap-3 justify-between mb-4 print:hidden">
+    <div class="flex flex-col gap-3 w-full lg:w-auto">
+      <div class="flex flex-col gap-1 max-w-md">
+        <label for="studentAccountSearch" class="font-semibold">{{ 'accountReport.searchStudentLabel' | translate }}</label>
+        <p-autocomplete
+          inputId="studentAccountSearch"
+          [(ngModel)]="selectedStudentForSearch"
+          [suggestions]="filteredStudentsForPicker"
+          (completeMethod)="onStudentPickerSearch($event)"
+          (onSelect)="onStudentPickerSelect($event)"
+          optionLabel="fullName"
+          [dropdown]="true"
+          [forceSelection]="true"
+          [showClear]="true"
+          [minLength]="0"
+          [delay]="0"
+          [completeOnFocus]="true"
+          [style]="{ width: '100%', maxWidth: '420px' }"
+          inputStyleClass="p-inputtext p-component w-full"
+          [placeholder]="'accountReport.searchStudentPlaceholder' | translate"
+          [disabled]="isLoading">
+          <ng-template let-item pTemplate="item">
+            <span class="flex justify-between gap-3 w-full">
+              <span>{{ item.fullName }}</span>
+              <span class="text-gray-500 text-sm">#{{ item.studentID }}</span>
+            </span>
+          </ng-template>
+        </p-autocomplete>
+      </div>
+      <div class="flex flex-wrap gap-2 items-center">
+        <span class="text-gray-500 text-sm">{{ 'accountReport.orAccountNumber' | translate }}</span>
+        <label for="accountNumber" class="font-semibold">رقم الحساب:</label>
+        <input
+          id="accountNumber"
+          type="number"
+          [(ngModel)]="accountNumberInput"
+          placeholder="أدخل رقم الحساب"
+          class="p-inputtext p-component p-inputnumber-input"
+          style="width: 150px;"
+          (keyup.enter)="loadAccountByNumber()" />
+        <button
+          pButton
+          label="تحميل"
+          icon="pi pi-search"
+          (click)="loadAccountByNumber()"
+          class="p-button-sm"
+          [disabled]="isLoading"
+          title="تحميل بيانات الحساب"></button>
+      </div>
     </div>
     <div class="flex gap-2">
       <button pButton label="طباعة" icon="pi pi-print" (click)="nativePrint()" class="p-button-sm" title="طباعة"></button>
@@ -72,10 +102,6 @@
         <div class="text-gray-600">Tel: {{ schoolPhone || '01‑xxxxxxx' }}</div>
         <div class="text-sm mt-1 text-gray-500" *ngIf="academicYear">{{ academicYear }}</div>
       </div>
-    </div>
-
-    <div *ngIf="headerMessage && headerMessage.trim()" class="account-report-header-message" role="note">
-      {{ headerMessage }}
     </div>
 
     <div class="grid grid-cols-2 gap-2 text-gray-700 text-sm md:text-base mb-4">

@@ -33,11 +33,20 @@ namespace Backend.Controllers
             _mangeFilesService = mangeFilesService;
         }
 
-        [HttpGet("names-ids")]
-        public async Task<ActionResult<List<StudentNameIdDTO>>> GetStudentNamesAndIds()
+        [HttpPost("names-ids")]
+        public async Task<ActionResult<PagedResult<StudentNameIdDTO>>> GetStudentNamesAndIds([FromBody] StudentNameIdSearchRequestDTO request)
         {
-            var students = await _unitOfWork.Students.GetStudentNamesAndIdsAsync();
-            return Ok(students);
+            var (items, totalCount) = await _unitOfWork.Students.GetStudentNamesAndIdsPagedAsync(request);
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize);
+
+            return Ok(new PagedResult<StudentNameIdDTO>(
+                items,
+                request.PageNumber,
+                request.PageSize,
+                totalCount,
+                totalPages
+            ));
         }
 
         [HttpPost]

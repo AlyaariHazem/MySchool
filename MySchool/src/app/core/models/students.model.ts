@@ -2,6 +2,29 @@ import { Discount } from "./discount.model";
 import { Guardian } from "./guardian.model";
 import { NameAlisDTO, NameDTO } from "./name.model";
 
+/** Matches Backend.DTOS.School.Students.StudentNameIdDTO (camelCase in JSON) */
+export interface StudentNameIdDTO {
+  studentID: number;
+  fullName: string;
+}
+
+/** Body for POST api/Students/names-ids — Backend StudentNameIdSearchRequestDTO */
+export interface StudentNameIdSearchRequest {
+  studentID?: number;
+  fullName?: string;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+/** Backend.Common.PagedResult as JSON (default camelCase) */
+export interface PagedResultDto<T> {
+  data: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 export interface UnregisteredStudent {
   studentID: number;
   studentName: string;
