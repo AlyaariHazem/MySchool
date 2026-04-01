@@ -1,6 +1,6 @@
 namespace Backend.DTOS.School.DatabaseRestore;
 
-/// <summary>Result of import-only .bak flow: data merged into the existing SqlAdminConnection database.</summary>
+/// <summary>Result of import-only .bak flow: data merged into the target database (tenant or admin connection from request context).</summary>
 public class DatabaseImportResultDTO
 {
     public string TargetDatabaseName { get; set; } = "";

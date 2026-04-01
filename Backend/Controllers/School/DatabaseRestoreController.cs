@@ -1,3 +1,4 @@
+using Backend.Data;
 using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -7,18 +8,23 @@ using System.Net;
 
 namespace Backend.Controllers.School;
 
-/// <summary>Upload a .bak: restore to a temporary database, copy dbo data into the existing SqlAdminConnection database, then drop the temp DB.</summary>
+/// <summary>Upload a .bak: restore to a temporary database, copy dbo data into the logged-in user's tenant database, then drop the temp DB.</summary>
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(Policy = "DatabaseRestore")]
 public class DatabaseRestoreController : ControllerBase
 {
     private readonly SqlRestoreService _sqlRestoreService;
+    private readonly TenantInfo _tenantInfo;
     private readonly ILogger<DatabaseRestoreController> _logger;
 
-    public DatabaseRestoreController(SqlRestoreService sqlRestoreService, ILogger<DatabaseRestoreController> logger)
+    public DatabaseRestoreController(
+        SqlRestoreService sqlRestoreService,
+        TenantInfo tenantInfo,
+        ILogger<DatabaseRestoreController> logger)
     {
         _sqlRestoreService = sqlRestoreService;
+        _tenantInfo = tenantInfo;
         _logger = logger;
     }
 
@@ -51,10 +57,23 @@ public class DatabaseRestoreController : ControllerBase
             return BadRequest(response);
         }
 
+        if (string.IsNullOrWhiteSpace(_tenantInfo.ConnectionString))
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.BadRequest;
+            response.ErrorMasseges.Add(
+                "No database is associated with this request. Log in as a user linked to a school (tenant), or as an administrator.");
+            return BadRequest(response);
+        }
+
         try
         {
             await using var stream = file.OpenReadStream();
-            var result = await _sqlRestoreService.ImportBackupIntoExistingDatabaseAsync(stream, file.FileName, cancellationToken)
+            var result = await _sqlRestoreService.ImportBackupIntoExistingDatabaseAsync(
+                    stream,
+                    file.FileName,
+                    _tenantInfo.ConnectionString,
+                    cancellationToken)
                 .ConfigureAwait(false);
 
             response.Result = result;

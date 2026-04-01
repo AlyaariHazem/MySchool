@@ -32,4 +32,10 @@ public class SqlRestoreOptions
 
     /// <summary>Tables in dbo to skip when copying from temp into the target (keeps target migration history by default).</summary>
     public string[] ExcludeTablesFromImport { get; set; } = ["__EFMigrationsHistory"];
+
+    /// <summary>
+    /// dbo tables that are not cleared before import: existing rows stay, and rows from the backup are inserted only when
+    /// no row with the same primary key exists (e.g. <c>AspNetUsers</c> so current logins are preserved).
+    /// </summary>
+    public string[] MergeImportTables { get; set; } = ["AspNetUsers"];
 }

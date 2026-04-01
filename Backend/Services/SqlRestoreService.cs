@@ -14,42 +14,47 @@ namespace Backend.Services;
 
 public class SqlRestoreService
 {
-    private readonly IConfiguration _configuration;
     private readonly SqlRestoreOptions _options;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly ILogger<SqlRestoreService> _logger;
 
     public SqlRestoreService(
-        IConfiguration configuration,
         IOptions<SqlRestoreOptions> options,
         IHostEnvironment hostEnvironment,
         ILogger<SqlRestoreService> logger)
     {
-        _configuration = configuration;
         _options = options.Value;
         _hostEnvironment = hostEnvironment;
         _logger = logger;
     }
 
     /// <summary>
-    /// Saves the .bak, restores to a temporary database, copies dbo user-table data into the existing
-    /// database from SqlAdminConnection, drops the temp database, and deletes the uploaded file (if configured).
+    /// Saves the .bak, restores to a temporary database on the same SQL instance as
+    /// <paramref name="targetConnectionString"/>, copies dbo user-table data into that target database,
+    /// drops the temp database, and deletes the uploaded file (if configured).
     /// </summary>
+    /// <param name="targetConnectionString">Connection string for the database to import into (e.g. current tenant).</param>
     public async Task<DatabaseImportResultDTO> ImportBackupIntoExistingDatabaseAsync(
         Stream backupStream,
         string originalFileName,
+        string targetConnectionString,
         CancellationToken cancellationToken = default)
     {
         ValidateOptions();
 
-        var adminConnectionString = _configuration.GetConnectionString("SqlAdminConnection")
-            ?? throw new InvalidOperationException("ConnectionStrings:SqlAdminConnection is not configured.");
-        var targetDbName = GetDatabaseNameFromConnectionString(adminConnectionString);
+        if (string.IsNullOrWhiteSpace(targetConnectionString))
+        {
+            throw new ArgumentException("Target connection string is required.", nameof(targetConnectionString));
+        }
+
+        var targetDbName = GetDatabaseNameFromConnectionString(targetConnectionString);
         if (string.IsNullOrWhiteSpace(targetDbName))
         {
             throw new InvalidOperationException(
-                "SqlAdminConnection must specify Initial Catalog / Database so data can be imported into the active database.");
+                "The target connection string must specify Initial Catalog / Database so data can be imported.");
         }
+
+        var masterConnectionString = BuildMasterConnectionStringFrom(targetConnectionString);
 
         var hostRoot = ResolveHostBackupRoot();
         Directory.CreateDirectory(hostRoot);
@@ -71,7 +76,6 @@ public class SqlRestoreService
         var sqlBackupPath = _options.UseContainerPathForRestoreDisk
             ? BuildSqlServerPathForBackup(relativeUnderRoot, hostRoot)
             : Path.GetFullPath(hostBackupPath);
-        var masterConnectionString = BuildMasterConnectionString();
 
         var tempDbName = $"TempImport_{Guid.NewGuid():N}";
         var result = new DatabaseImportResultDTO
@@ -155,6 +159,10 @@ public class SqlRestoreService
             _options.ExcludeTablesFromImport ?? Array.Empty<string>(),
             StringComparer.OrdinalIgnoreCase);
 
+        var mergeImport = new HashSet<string>(
+            _options.MergeImportTables ?? Array.Empty<string>(),
+            StringComparer.OrdinalIgnoreCase);
+
         await using var connection = new SqlConnection(masterConnectionString);
         await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -202,13 +210,19 @@ public class SqlRestoreService
 
             foreach (var table in deleteOrder)
             {
+                if (mergeImport.Contains(table))
+                {
+                    continue;
+                }
+
                 var sql = $"DELETE FROM {QuoteSchemaTable("dbo", table)}";
                 await ExecuteNonQueryTxAsync(connection, tx, sql, cancellationToken).ConfigureAwait(false);
             }
 
             foreach (var table in insertOrder)
             {
-                await CopySingleTableAsync(connection, tx, sourceDb, table, cancellationToken)
+                var merge = mergeImport.Contains(table);
+                await CopySingleTableAsync(connection, tx, sourceDb, table, merge, cancellationToken)
                     .ConfigureAwait(false);
             }
 
@@ -423,6 +437,7 @@ public class SqlRestoreService
         SqlTransaction tx,
         string sourceDb,
         string table,
+        bool mergeInsert,
         CancellationToken cancellationToken)
     {
         var columns = await GetCommonWritableColumnsAsync(connection, tx, sourceDb, table, cancellationToken)
@@ -452,7 +467,34 @@ public class SqlRestoreService
                 await ExecuteNonQueryTxAsync(connection, tx, on, cancellationToken).ConfigureAwait(false);
             }
 
-            var insert = $"INSERT INTO {targetQualified} ({colList}) SELECT {colList} FROM {sourceQualified}";
+            string insert;
+            if (mergeInsert)
+            {
+                var pkCols = await GetPrimaryKeyColumnNamesAsync(connection, tx, table, cancellationToken)
+                    .ConfigureAwait(false);
+                if (pkCols.Count == 0)
+                {
+                    throw new InvalidOperationException(
+                        $"SqlRestore:MergeImportTables includes '{table}' but the table has no primary key; cannot merge safely.");
+                }
+
+                var selectList = string.Join(", ", columns.Select(c => $"imp.{QuoteBracket(c)}"));
+                var keyMatch = string.Join(" AND ", pkCols.Select(c => $"__ex.{QuoteBracket(c)} = imp.{QuoteBracket(c)}"));
+                insert = $"""
+                    INSERT INTO {targetQualified} ({colList})
+                    SELECT {selectList}
+                    FROM {sourceQualified} AS imp
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM {targetQualified} AS __ex
+                        WHERE {keyMatch}
+                    )
+                    """;
+            }
+            else
+            {
+                insert = $"INSERT INTO {targetQualified} ({colList}) SELECT {colList} FROM {sourceQualified}";
+            }
+
             await ExecuteNonQueryTxAsync(connection, tx, insert, cancellationToken).ConfigureAwait(false);
 
             if (hasIdentity)
@@ -466,6 +508,39 @@ public class SqlRestoreService
             var enableTriggers = $"ALTER TABLE {targetQualified} ENABLE TRIGGER ALL";
             await ExecuteNonQueryTxAsync(connection, tx, enableTriggers, cancellationToken).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>PK column names in key order (current database, dbo).</summary>
+    private static async Task<List<string>> GetPrimaryKeyColumnNamesAsync(
+        SqlConnection connection,
+        SqlTransaction tx,
+        string table,
+        CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT c.name
+            FROM sys.tables t
+            INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
+            INNER JOIN sys.indexes i ON t.object_id = i.object_id AND i.is_primary_key = 1
+            INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+            INNER JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+            WHERE s.name = N'dbo' AND t.name = @table
+            ORDER BY ic.key_ordinal
+            """;
+
+        await using var cmd = new SqlCommand(sql, connection, tx) { CommandTimeout = 0 };
+        cmd.Parameters.AddWithValue("@table", table);
+        var list = new List<string>();
+        await using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+        {
+            if (!reader.IsDBNull(0))
+            {
+                list.Add(reader.GetString(0));
+            }
+        }
+
+        return list;
     }
 
     /// <summary>Requires <paramref name="connection"/> current database to be the import target.</summary>
@@ -713,12 +788,10 @@ public class SqlRestoreService
             : path.Replace('\\', '/') + "/";
     }
 
-    private string BuildMasterConnectionString()
+    /// <summary>Same server and credentials as <paramref name="connectionString"/>, attached to <c>master</c> for RESTORE/metadata.</summary>
+    private static string BuildMasterConnectionStringFrom(string connectionString)
     {
-        var admin = _configuration.GetConnectionString("SqlAdminConnection")
-            ?? throw new InvalidOperationException("ConnectionStrings:SqlAdminConnection is not configured.");
-
-        var builder = new SqlConnectionStringBuilder(admin)
+        var builder = new SqlConnectionStringBuilder(connectionString)
         {
             InitialCatalog = "master"
         };

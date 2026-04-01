@@ -36,13 +36,6 @@ namespace Backend.Middleware
                 return;
             }
 
-            // Raw SQL restore uses SqlAdminConnection only; no tenant DB. Avoid failing MANAGER requests here before [Authorize(Roles = "ADMIN")] returns 403.
-            if (path.StartsWith("/api/databaserestore"))
-            {
-                await _next(context);
-                return;
-            }
-
             // Check if user is ADMIN
             var userType = context.User.FindFirstValue("UserType");
             bool isAdmin = context.User.IsInRole("ADMIN") || (userType != null && userType.Equals("ADMIN", StringComparison.OrdinalIgnoreCase));
