@@ -1,5 +1,6 @@
 
 @media print {
+  /* Avoid breaking tables/images inside the report; scoped overrides below */
   * {
     width: auto !important;
   }
@@ -9,17 +10,93 @@
   #sidebar {
     display: none;
   }
+  /* School shell: keep print focused on #report */
+  .header-outer,
+  app-breadcrumb {
+    display: none !important;
+  }
   .page-header {
     display: none;
   }
   .report-title {
     display: none;
   }
+  /* Container + descendants: must be explicit or some engines print a blank page */
+  #report,
   #report * {
-    visibility: visible;
+    visibility: visible !important;
+  }
+  .page-wrapper{
+    right: 0px !important;
+    margin-left: 0px !important;
   }
   #report {
-    display: block;
+    display: block !important;
+    position: absolute;
+    right: 0!important;
+    top: 0!important;
+    width: 100%;
+    z-index: 11111;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  /* Global * { width:auto } breaks table layout and logos in Chrome print */
+  #report table {
+    display: table !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+  }
+  #report thead {
+    display: table-header-group !important;
+  }
+  #report tbody {
+    display: table-row-group !important;
+  }
+  #report tr {
+    display: table-row !important;
+  }
+  #report th,
+  #report td {
+    display: table-cell !important;
+    width: auto !important;
+    max-width: none !important;
+    vertical-align: middle !important;
+    word-wrap: break-word !important;
+    overflow: visible !important;
+  }
+  #report .account-report-print-intro {
+    visibility: visible !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-inside: avoid !important;
+  }
+  #report .account-report-header-message {
+    visibility: visible !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-inside: avoid !important;
+  }
+  #report img {
+    display: inline-block !important;
+    max-width: 140px !important;
+    max-height: 72px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-inside: avoid !important;
   }
   .grades-table {
     direction: rtl;

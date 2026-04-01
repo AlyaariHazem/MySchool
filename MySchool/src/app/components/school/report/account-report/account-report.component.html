@@ -27,7 +27,13 @@
     </div>
   </div>
 
-  <div #printArea class="report bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo">
+  <!-- id="report" required: assets/print.css only reveals #report on print (see other report screens) -->
+  <div #printArea id="report" class="report bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo">
+
+    <!-- Visible only when printing: explains what this document is -->
+    <div class="account-report-print-intro" role="note">
+      <p>{{ 'accountReport.printIntro' | translate }}</p>
+    </div>
     
     <!-- Render processed template HTML -->
     <div *ngIf="!isLoading && processedHtml" [innerHTML]="processedHtml"></div>
@@ -60,12 +66,16 @@
       </div>
 
       <div class="min-w-max text-left md:text-end">
-        <img [src]="logo" alt="شعار المدرسة" class="h-12 mx-auto md:mx-0 mb-2" *ngIf="logo" />
+        <img [src]="displayLogoUrl" alt="شعار المدرسة" class="h-12 mx-auto md:mx-0 mb-2" *ngIf="displayLogoUrl" />
         <div class="font-bold text-lg">{{ schoolName || 'اسم المدرسة' }}</div>
         <div class="text-gray-600">{{ schoolAddress || 'شملان | مديرية معين | صنعاء' }}</div>
         <div class="text-gray-600">Tel: {{ schoolPhone || '01‑xxxxxxx' }}</div>
         <div class="text-sm mt-1 text-gray-500" *ngIf="academicYear">{{ academicYear }}</div>
       </div>
+    </div>
+
+    <div *ngIf="headerMessage && headerMessage.trim()" class="account-report-header-message" role="note">
+      {{ headerMessage }}
     </div>
 
     <div class="grid grid-cols-2 gap-2 text-gray-700 text-sm md:text-base mb-4">
@@ -103,7 +113,7 @@
                 <tr *ngFor="let r of getTransactionsForStudent(student.studentID); let i = index" [ngClass]="i % 2 === 0 ? 'bg-gray-50' : ''">
                   <td class="p-2 border">{{ i + 1 }}</td>
                   <td class="p-2 border">{{ r.desc }}</td>
-                  <td class="p-2 border">{{ r.type === 'Debit' ? '—' : 'خصم' }}</td>
+                  <td class="p-2 border">{{ transactionTypeLabel(r.type) }}</td>
                   <td class="p-2 border">YR {{ r.amount | number:'1.0-2' }}</td>
                   <td class="p-2 border">{{ r.date }}</td>
                 </tr>
@@ -160,3 +170,4 @@
       </div>
     </div>
   </div>
+</div>

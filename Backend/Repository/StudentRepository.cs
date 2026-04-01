@@ -1507,4 +1507,15 @@ public class StudentRepository : IStudentRepository
 
         return response;
     }
+
+    public async Task<List<StudentNameIdDTO>> GetStudentNamesAndIdsAsync()
+    {
+        return await _context.Students
+            .Select(s => new StudentNameIdDTO
+            {
+                StudentID = s.StudentID,
+                FullName = $"{s.FullName.FirstName} {s.FullName.MiddleName} {s.FullName.LastName}".Replace("  ", " ").Trim()
+            })
+            .ToListAsync();
+    }
 }

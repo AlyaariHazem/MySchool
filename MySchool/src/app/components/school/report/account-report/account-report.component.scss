@@ -5,6 +5,48 @@
 #page{
     background-color: white;
 }
+
+/* Shown only in print preview / PDF — hidden on screen */
+.account-report-print-intro {
+  display: none !important;
+}
+
+@media print {
+  .account-report-print-intro {
+    display: block !important;
+    visibility: visible !important;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    text-align: center;
+    font-size: 11pt;
+    line-height: 1.55;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f1f5f9;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-inside: avoid;
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.account-report-header-message {
+  width: 100%;
+  text-align: center;
+  margin: 12px 0 16px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 0.95em;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
 .page {
   border: 1px solid #e5e7eb;
   max-width: 800px;
@@ -60,26 +102,22 @@ table.fees {
   }
 }
 
-/* إخفاء جميع العناصر غير التقرير أثناء الطباعة */
+/* الطباعة من النافذة الحالية: assets/print.css يظهر #report فقط */
 @media print {
-  /* اجعل كل شيء مخفيًا أولًا */
-  body * {
-    visibility: hidden;
+  :host .toolbar {
+    display: none !important;
+    visibility: hidden !important;
   }
 
-  /* العناصر المسموح بطباعتها فقط */
-  app-account-statement,
-  .report,
-  .report * {
-    visibility: visible !important;
-    word-spacing:   normal !important;
-
-  }
-  /* الخط الأساسي للطباعة */
   .report {
-    position: absolute;
-    inset: 0;
-    margin: 0;
-    width: 100%;
+    position: absolute !important;
+    right: 0!important;
+    top: 0!important;
+    inset: auto !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
   }
 }

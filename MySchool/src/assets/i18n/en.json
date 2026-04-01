@@ -233,5 +233,8 @@
     "actions": "Action",
     "messages": "Messages",
     "seeAllMessages": "See all messages"
+  },
+  "accountReport": {
+    "printIntro": "This printed document is a financial account statement for the guardian. It shows charges (amounts owed), payments and discounts, transactions listed by student, savings entries, and the current balance. Use it to review the account, reconcile payments, and plan settlements."
   }
 }

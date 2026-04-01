@@ -43,6 +43,8 @@ export interface SchoolInfo {
     schoolPhone: string;
     schoolLogo: string;
     academicYear: string;
+    /** Optional notice shown under the report header (print + screen) */
+    reportHeaderMessage?: string;
 }
 
 export interface StudentInfo {
@@ -66,4 +68,7 @@ export interface AccountReport {
     savings: AccountSavings[];
     students: StudentInfo[];
     schoolInfo: SchoolInfo;
+    /** Optional notice on the account report header */
+    reportHeaderMessage?: string;
+    reportMessage?: string;
 }

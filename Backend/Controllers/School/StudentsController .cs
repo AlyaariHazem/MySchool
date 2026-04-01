@@ -33,6 +33,13 @@ namespace Backend.Controllers
             _mangeFilesService = mangeFilesService;
         }
 
+        [HttpGet("names-ids")]
+        public async Task<ActionResult<List<StudentNameIdDTO>>> GetStudentNamesAndIds()
+        {
+            var students = await _unitOfWork.Students.GetStudentNamesAndIdsAsync();
+            return Ok(students);
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddStudentWithGuardian([FromBody] AddStudentWithGuardianRequest request)
         {

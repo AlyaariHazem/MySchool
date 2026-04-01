@@ -3,6 +3,7 @@ import { ReportTemplateService } from '../../core/services/report-template.servi
 import { AccountService } from '../../core/services/account.service';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-account-report',
@@ -48,6 +49,14 @@ export class AccountReportComponent implements OnInit {
   students: any[] = []; // Students data
   accountNumberInput: string = ''; // Input field for account number
 
+  /** Shown under the report header (from API school/report or editable in DB template via #HeaderMessage#) */
+  headerMessage = '';
+
+  /** Resolved logo for [src] when API returns a path relative to the API host */
+  get displayLogoUrl(): string {
+    return this.resolveSchoolLogoUrl(this.logo);
+  }
+
   ngOnInit(): void {
     // Get account ID from route params or query params
     this.route.params.subscribe(params => {
@@ -90,6 +99,7 @@ export class AccountReportComponent implements OnInit {
             this.schoolPhone = report.schoolInfo.schoolPhone || '01‑xxxxxxx';
             this.logo = report.schoolInfo.schoolLogo || '';
             this.academicYear = report.schoolInfo.academicYear || '';
+            this.headerMessage = this.extractReportHeaderMessage(report, report.schoolInfo);
           } else {
             // Fallback to localStorage if schoolInfo not available
             this.logo = localStorage.getItem('SchoolImageURL') || '';
@@ -97,8 +107,9 @@ export class AccountReportComponent implements OnInit {
             this.schoolAddress = localStorage.getItem('schoolAddress') || 'شملان | مديرية معين | صنعاء';
             this.schoolPhone = localStorage.getItem('schoolPhone') || '01‑xxxxxxx';
             this.academicYear = '';
+            this.headerMessage = this.extractReportHeaderMessage(report, null);
           }
-          
+
           // Populate header data
           this.header = {
             accountNo: report.accountID?.toString() || '',
@@ -109,17 +120,20 @@ export class AccountReportComponent implements OnInit {
             balance: report.balance || 0
           };
           
-          // Store all transactions with studentID
-          this.transactions = report.transactions.map((t: any) => ({
-            id: t.id,
-            desc: t.description,
-            type: t.type,
-            date: this.formatDate(t.date.toString()),
-            amount: t.amount,
-            studentID: t.studentID,
-            discount: t.type === 'Credit' ? t.amount : 0,
-            required: t.type === 'Debit' ? t.amount : 0
-          }));
+          // Store all transactions with studentID (normalize type for API casing / numeric enums)
+          this.transactions = report.transactions.map((t: any) => {
+            const type = this.normalizeTransactionType(t.type);
+            return {
+              id: t.id,
+              desc: t.description,
+              type,
+              date: this.formatDate(t.date.toString()),
+              amount: t.amount,
+              studentID: t.studentID,
+              discount: this.isCreditType(type) ? t.amount : 0,
+              required: this.isDebitType(type) ? t.amount : 0
+            };
+          });
           
           // Keep rows for backward compatibility (all transactions)
           this.rows = this.transactions;
@@ -201,6 +215,8 @@ export class AccountReportComponent implements OnInit {
     this.students = [
       { studentID: 1, studentName: 'أحمد محمد علي', className: 'أول', stageName: 'اساسي' },
     ];
+
+    this.headerMessage = 'ملاحظة: يرجى مراجعة الرصيد. (نص تجريبي — يُستبدل من الخادم عند ربط الحقل reportHeaderMessage)';
     
     this.loadTemplate();
   }
@@ -226,13 +242,13 @@ export class AccountReportComponent implements OnInit {
   }
 
   processTemplate(): void {
-    if (!this.templateHtml) {
-      this.processedHtml = this.getDefaultTemplate();
-      return;
-    }
+    const source =
+      this.templateHtml && this.templateHtml.trim().length > 0
+        ? this.templateHtml
+        : this.getDefaultTemplate();
 
-    let processed = this.templateHtml;
-    
+    let processed = source;
+
     // Replace placeholders with actual data
     processed = processed.replace(/#AccountNo#/g, this.header.accountNo);
     processed = processed.replace(/#Guardian#/g, this.header.guardian);
@@ -243,9 +259,13 @@ export class AccountReportComponent implements OnInit {
     processed = processed.replace(/#SchoolName#/g, this.schoolName || '');
     processed = processed.replace(/#SchoolAddress#/g, this.schoolAddress);
     processed = processed.replace(/#SchoolPhone#/g, this.schoolPhone);
-    processed = processed.replace(/#SchoolLogo#/g, this.logo || '');
+    const logoUrl = this.resolveSchoolLogoUrl(this.logo);
+    processed = processed.replace(/#SchoolLogo#/g, logoUrl ? this.escapeHtmlAttr(logoUrl) : '');
+    processed = processed.replace(/<img\b[^>]*\ssrc=""[^>]*>/gi, '');
     processed = processed.replace(/#SchoolYear#/g, this.academicYear || '');
-    
+    processed = processed.replace(/#HeaderMessage#/g, this.formatHeaderMessagePlain());
+    processed = processed.replace(/#HeaderMessageBlock#/g, this.buildHeaderMessageBlockHtml());
+
     // Process students information
     const studentsHtml = this.generateStudentsHtml();
     processed = processed.replace(/#StudentsInfo#/g, studentsHtml);
@@ -274,7 +294,7 @@ export class AccountReportComponent implements OnInit {
       <tr class="${index % 2 === 0 ? 'bg-gray-50' : ''}">
         <td class="p-2 border">${index + 1}</td>
         <td class="p-2 border">${row.desc}</td>
-        <td class="p-2 border">${row.type === 'Debit' ? '—' : 'خصم'}</td>
+        <td class="p-2 border">${this.transactionTypeLabel(row.type)}</td>
         <td class="p-2 border">YR ${this.formatNumber(row.amount)}</td>
         <td class="p-2 border">${row.date}</td>
       </tr>
@@ -305,6 +325,77 @@ export class AccountReportComponent implements OnInit {
     if (!date) return '';
     const d = new Date(date);
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  /** Arabic column "النوع": debit = charge, credit = discount/payment */
+  transactionTypeLabel(type: unknown): string {
+    if (this.isDebitType(type)) return 'مديونية';
+    if (this.isCreditType(type)) return 'خصم';
+    const raw = String(type ?? '').trim();
+    return raw || '—';
+  }
+
+  private normalizeTransactionType(type: unknown): string {
+    const raw = String(type ?? '').trim();
+    const t = raw.toLowerCase();
+    if (t === 'debit' || t === 'd' || t === '0' || raw === 'مدين') return 'Debit';
+    if (t === 'credit' || t === 'c' || t === '1' || raw === 'دائن') return 'Credit';
+    return raw;
+  }
+
+  private isDebitType(type: unknown): boolean {
+    return this.normalizeTransactionType(type) === 'Debit';
+  }
+
+  private isCreditType(type: unknown): boolean {
+    return this.normalizeTransactionType(type) === 'Credit';
+  }
+
+  private escapeHtmlAttr(value: string): string {
+    return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  private escapeHtmlText(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /** API: report.reportHeaderMessage | report.reportMessage | schoolInfo.reportHeaderMessage */
+  private extractReportHeaderMessage(report: any, schoolInfo: any): string {
+    const raw =
+      report?.reportHeaderMessage ??
+      report?.reportMessage ??
+      schoolInfo?.reportHeaderMessage ??
+      '';
+    return String(raw).trim();
+  }
+
+  /** Plain escaped text for custom templates (#HeaderMessage#) */
+  private formatHeaderMessagePlain(): string {
+    const t = this.headerMessage.trim();
+    return t ? this.escapeHtmlText(t) : '';
+  }
+
+  /** Box under header for default template (#HeaderMessageBlock#); empty if no message */
+  private buildHeaderMessageBlockHtml(): string {
+    const t = this.headerMessage.trim();
+    if (!t) return '';
+    const inner = this.escapeHtmlText(t).replace(/\r\n|\r|\n/g, '<br/>');
+    return `<div class="account-report-header-message" role="note" style="width:100%;text-align:center;margin:12px 0 16px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;color:#334155;font-size:0.95em;line-height:1.55;">${inner}</div>`;
+  }
+
+  /** Build absolute URL for logos stored as API-relative paths */
+  private resolveSchoolLogoUrl(src: string | null | undefined): string {
+    const s = (src ?? '').trim();
+    if (!s) return '';
+    if (/^(https?:\/\/|data:|blob:)/i.test(s)) return s;
+    if (s.startsWith('//')) return `${window.location.protocol}${s}`;
+    const apiRoot = environment.baseUrl.replace(/\/api\/?$/i, '');
+    if (s.startsWith('/')) return `${apiRoot}${s}`;
+    return `${apiRoot}/${s.replace(/^\/+/, '')}`;
   }
 
   getTotalSavings(): number {
@@ -342,7 +433,7 @@ export class AccountReportComponent implements OnInit {
 
   getStudentTotalDebit(studentID: number): number {
     return this.getTransactionsForStudent(studentID)
-      .filter(t => t.type === 'Debit')
+      .filter(t => this.isDebitType(t.type))
       .reduce((sum, t) => sum + (t.amount || 0), 0);
   }
 
@@ -355,14 +446,14 @@ export class AccountReportComponent implements OnInit {
       <tr class="${index % 2 === 0 ? 'bg-gray-50' : ''}">
         <td class="p-2 border">${index + 1}</td>
         <td class="p-2 border">${row.desc}</td>
-        <td class="p-2 border">${row.type === 'Debit' ? '—' : 'خصم'}</td>
+        <td class="p-2 border">${this.transactionTypeLabel(row.type)}</td>
         <td class="p-2 border">YR ${this.formatNumber(row.amount)}</td>
         <td class="p-2 border">${row.date}</td>
       </tr>
     `).join('');
 
     const totalDebit = transactions
-      .filter(t => t.type === 'Debit')
+      .filter(t => this.isDebitType(t.type))
       .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     return `
@@ -424,6 +515,7 @@ export class AccountReportComponent implements OnInit {
             <div style="color:#666;">Tel: #SchoolPhone#</div>
           </div>
         </div>
+        #HeaderMessageBlock#
         
         <div style="margin-top:20px;">
           <table style="width:100%; border-collapse:collapse; margin-top:20px;" border="1">
@@ -485,93 +577,17 @@ export class AccountReportComponent implements OnInit {
       return;
     }
 
-    const page = document.getElementById('page');
-    if (!page) { 
+    if (!document.getElementById('report')) {
       this.toastr.error('لم يتم العثور على محتوى الطباعة', 'خطأ');
-      return; 
+      return;
     }
 
-    /* ️نسخ كل ملفات الأنماط الموجودة */
-    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-      .filter((el: Element) => el.getAttribute('href') !== 'assets/print.css')
-      .map(el => el.outerHTML)
-      .join('');
- 
-    const base = `<base href="${document.baseURI}">`;
-
-    const popup = window.open('', '', 'width=1000px,height=auto');
-    if (!popup) { 
-      this.toastr.error('تم منع النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة للمتصفح.', 'خطأ');
-      return; 
-    }
-
-    // Get the print area content (either processedHtml or the fallback template)
-    let printContent = '';
-    if (this.processedHtml) {
-      // Use processed template HTML
-      printContent = `
-        <div dir="rtl" style="padding:20px; line-height:1.8; font-family:Arial;">
-          ${this.processedHtml}
-        </div>
-      `;
-    } else {
-      // Use the fallback template from the page
-      const printArea = this.printArea?.nativeElement;
-      if (printArea) {
-        printContent = printArea.innerHTML;
-      } else {
-        printContent = page.innerHTML;
-      }
-    }
-
-    popup.document.write(`
-      <html><head>
-      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-        ${base}
-        ${links}
-        <style>
-          @media print {
-            body {
-              margin: 0;
-              direction: rtl;
-              font-family: "Cairo", "Tahoma", sans-serif;
-            }
-            .report, * {
-              letter-spacing: 0 !important;
-            }
-            .print\\:hidden {
-              display: none !important;
-            }
-            table {
-              border-collapse: collapse;
-              width: 100%;
-            }
-            th, td {
-              border: 1px solid #ddd;
-              padding: 8px;
-            }
-            .bg-gray-50 {
-              background-color: #f9fafb !important;
-            }
-            .bg-yellow-50 {
-              background-color: #fef3c7 !important;
-            }
-            .bg-blue-50 {
-              background-color: #dbeafe !important;
-            }
-          }
-        </style>
-      </head><body dir="rtl">
-        ${printContent}
-      </body></html>
-    `);
-
-    popup.document.close();
-    
-    // Wait for content to load, then print
-    setTimeout(() => {
-      popup.focus();
-      popup.print();
-    }, 250);
+    // Print the current document (not a popup). Popup + document.write often stays blank in Chrome
+    // ("about:blank") because stylesheets load async or cloned <style> breaks the document.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+      });
+    });
   }
 }
