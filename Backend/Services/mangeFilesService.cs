@@ -155,7 +155,7 @@ public class mangeFilesService
                     {
                         File.Delete(file);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         allDeleted = false;
                     }
@@ -163,7 +163,7 @@ public class mangeFilesService
 
                 return allDeleted;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

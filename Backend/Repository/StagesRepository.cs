@@ -85,7 +85,7 @@ namespace Backend.Repository
             }
         }
 
-        public async Task<Stage> GetByIdAsync(int id)
+        public async Task<Stage?> GetByIdAsync(int id)
         {
             return await context.Stages.FirstOrDefaultAsync(S => S.StageID == id);
         }

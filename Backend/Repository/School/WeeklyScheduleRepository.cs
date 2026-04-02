@@ -98,7 +98,7 @@ namespace Backend.Repository.School
             }
         }
 
-        public async Task<WeeklySchedule> GetByIdAsync(int id)
+        public async Task<WeeklySchedule?> GetByIdAsync(int id)
         {
             return await _db.WeeklySchedules
                 .Include(s => s.Class)
@@ -107,7 +107,7 @@ namespace Backend.Repository.School
                 .Include(s => s.Teacher)
                 .Include(s => s.Year)
                 .Include(s => s.Division)
-                .FirstOrDefaultAsync(s => s.WeeklyScheduleID == id) ?? null!;
+                .FirstOrDefaultAsync(s => s.WeeklyScheduleID == id);
         }
 
         public async Task<List<WeeklyScheduleDTO>> GetAllAsync()

@@ -100,9 +100,9 @@ namespace Backend.Repository.School
             }
         }
 
-        public async Task<Class> GetByIdAsync(int id)
+        public async Task<Class?> GetByIdAsync(int id)
         {
-            return await _db.Classes.FirstOrDefaultAsync(c => c.ClassID == id)?? null!;
+            return await _db.Classes.FirstOrDefaultAsync(c => c.ClassID == id);
         }
 
 

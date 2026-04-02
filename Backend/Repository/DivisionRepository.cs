@@ -194,10 +194,9 @@ namespace FirstProjectWithMVC.Repository.School
 
 
 
-        public async Task<Division> GetByIdAsync(int id)
+        public async Task<Division?> GetByIdAsync(int id)
         {
-
-            return await _db.Divisions.FirstOrDefaultAsync(d => d.DivisionID == id)!;
+            return await _db.Divisions.FirstOrDefaultAsync(d => d.DivisionID == id);
         }
 
         public async Task<bool> Update(DivisionDTO model)

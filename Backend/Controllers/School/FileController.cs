@@ -89,17 +89,17 @@ namespace Backend.Controllers.School
                     return BadRequest(response);
                 }
 
-                var filePath = _mangeFilesService.RemoveFile(folderName, itemId);
+                var deleted = _mangeFilesService.RemoveFile(folderName, itemId);
 
-                if (filePath == null)
+                if (!deleted)
                 {
                     response.IsSuccess = false;
                     response.statusCode = HttpStatusCode.NotFound;
-                    response.ErrorMasseges.Add("File not found.");
+                    response.ErrorMasseges.Add("File not found or could not be deleted.");
                     return NotFound(response);
                 }
 
-                response.Result = filePath;
+                response.Result = true;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
             }

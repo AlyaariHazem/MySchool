@@ -31,7 +31,7 @@
       <div class="dash-widget dash-widget5">
         <div class="dash-widget-info d-inline-block text-left">
           <span>{{'dashboard.totalMoney'| translate}}</span>
-          <h3>${{dashboardSummary?.totalMoney || 0 | number:'1.0-0'}}</h3>
+          <h3>${{ (dashboardSummary?.totalMoney ?? 0) | number:'1.0-0' }}</h3>
         </div>
         <span class="float-right"><img src="assets/img/dash/dash-4.png" alt="" width="80" /></span>
       </div>
@@ -63,10 +63,7 @@
           </div>
         </div>
         <div class="card-body">
-          <div class="card">
-            <p-chart type="bar" [data]="basicData" [options]="basicOptions" />
-        </div>
-          <div id="chart4"></div>
+          <p-chart type="bar" [data]="basicData" [options]="basicOptions" />
         </div>
       </div>
     </div>

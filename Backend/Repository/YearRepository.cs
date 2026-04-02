@@ -104,18 +104,16 @@ public class YearRepository : IYearRepository
         return yearList;
     }
 
-    public async Task<YearDTO> GetByIdAsync(int id)
+    public async Task<YearDTO?> GetByIdAsync(int id)
     {
         if (id == 0)
             throw new ArgumentNullException(nameof(id), "The id cannot be null.");
 
         var year = await _context.Years.FirstOrDefaultAsync(x => x.YearID == id);
-        var yearDTO = _mapper.Map<YearDTO>(year);
-
         if (year == null)
-            throw new ArgumentNullException(nameof(year), "The year cannot be null.");
+            return null;
 
-        return yearDTO;
+        return _mapper.Map<YearDTO>(year);
     }
 
     public async Task Update(YearDTO obj)

@@ -37,7 +37,7 @@ public class Repository<T> : IRepository<T> where T : class
     }
     
 
-    public async Task<T> GetAsync(Expression<Func<T, bool>> filter = null, bool tracked = true)
+    public async Task<T?> GetAsync(Expression<Func<T, bool>>? filter = null, bool tracked = true)
     {
         IQueryable<T> query = dbset;
         if (!tracked)
