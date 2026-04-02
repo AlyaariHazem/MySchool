@@ -21,6 +21,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<TenantProvisioningService>();
         services.AddScoped<HtmlSanitizationService>();
 
+        // Register Generic CRUD Repository (open generic)
+        services.AddScoped(typeof(IGenericCrudRepository<,>), typeof(Repository.GenericCrudRepository<,>));
+
         // Register Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IGuardianRepository, GuardianRepository>();
