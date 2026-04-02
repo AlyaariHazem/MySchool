@@ -77,7 +77,7 @@ export class DashboardComponent implements OnInit {
     // Load paginated students for table
     combineLatest([
       this.yearService.getAllYears(),
-      this.studentService.getAllStudentsPaginated(1, 10),
+      this.studentService.getStudentsPage(this.currentPage, this.pageSize),
     ]).subscribe({
       next: ([years, paginatedResult]) => {
         this.years = years;
@@ -93,7 +93,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadPaginatedStudents(): void {
-    this.studentService.getAllStudentsPaginated(this.currentPage, this.pageSize).subscribe({
+    this.studentService.getStudentsPage(this.currentPage, this.pageSize).subscribe({
       next: (res) => {
         this.paginatedStudents = res.data || [];
         this.totalRecords = res.totalCount || 0;

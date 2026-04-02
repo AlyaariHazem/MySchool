@@ -1,10 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { HttpParams } from '@angular/common/http';
+
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { Employee } from '../models/employee.model';
 import { ApiResponse } from '../../../../core/models/response.model';
-import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -21,13 +22,25 @@ export class EmployeeService {
     return this.API.postRequest<Employee>('Employee', newEmployee);
   }
 
-  updateEmployee(id: number, employee: Employee): Observable<ApiResponse<Employee>> {
-    return this.API.putRequest<Employee>(`Employee/${id}`, employee);
+  /**
+   * PUT must be exactly /api/Employee (no path id). Identity is in the JSON body as employeeID.
+   */
+  updateEmployee(payload: Record<string, unknown>): Observable<ApiResponse<Employee>> {
+    const url = `${this.API.baseUrl}/Employee`;
+    return this.API.http.put<ApiResponse<Employee>>(url, payload).pipe(
+      catchError((error) => {
+        console.error('PUT Employee (no id in URL):', url, error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  deleteEmployee(id: number, jobType: string): Observable<ApiResponse<any>> {
+  /** DELETE /api/Employee/{id}?jobType=... — 204 No Content; use text to avoid empty JSON parse issues. */
+  deleteEmployee(id: number, jobType: string): Observable<void> {
     const params = new HttpParams().set('jobType', jobType);
-    return this.API.http.delete<ApiResponse<any>>(`${this.API.baseUrl}/Employee/${id}`, { params });
+    return this.API.http
+      .delete(`${this.API.baseUrl}/Employee/${id}`, { params, responseType: 'text' })
+      .pipe(map(() => undefined));
   }
 
   getEmployeesPage(pageNumber: number = 1, pageSize: number = 10, filters: Record<string, string> = {}): Observable<any> {

@@ -20,7 +20,7 @@ public class EmployeeRepository : IEmployeeRepository
         _context = context;
         _userRepository = userRepository;
     }
-    public async Task<string> AddEmployeeAsync(EmployeeDTO employee)
+    public async Task<EmployeeDTO> AddEmployeeAsync(EmployeeDTO employee)
     {
         if (employee.JopName == "Teacher")
         {
@@ -52,7 +52,7 @@ public class EmployeeRepository : IEmployeeRepository
             };
             _context.Teachers.Add(teacher);
             await _context.SaveChangesAsync();
-            return "Teacher added successfully";
+            return MapTeacherToDto(teacher, createdUser);
         }
         else if (employee.JopName == "Manager")
         {
@@ -82,7 +82,7 @@ public class EmployeeRepository : IEmployeeRepository
             };
             _context.Managers.Add(manager);
             await _context.SaveChangesAsync();
-            return "Manager added successfully";
+            return MapManagerToDto(manager, createdUser);
         }
         else
         {
@@ -92,23 +92,26 @@ public class EmployeeRepository : IEmployeeRepository
 
     public async Task DeleteEmployeeAsync(int employeeId, string jopName)
     {
-        if (jopName == "Teacher")
+        var kind = NormalizeJobKind(jopName);
+        if (kind == null)
+            return;
+
+        if (kind == "Teacher")
         {
-            var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherID == employeeId);
+            var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.TeacherID == employeeId);
             if (teacher != null)
             {
-                // Use IUserRepository to delete user (works with DatabaseContext)
+                await RemoveTeacherDependenciesAsync(employeeId);
                 await _userRepository.DeleteAsync(teacher.UserID);
                 _context.Teachers.Remove(teacher);
                 await _context.SaveChangesAsync();
             }
         }
-        else if (jopName == "Manager")
+        else if (kind == "Manager")
         {
-            var manager = _context.Managers.FirstOrDefault(m => m.ManagerID == employeeId);
+            var manager = await _context.Managers.FirstOrDefaultAsync(m => m.ManagerID == employeeId);
             if (manager != null)
             {
-                // Use IUserRepository to delete user (works with DatabaseContext)
                 await _userRepository.DeleteAsync(manager.UserID);
                 _context.Managers.Remove(manager);
                 await _context.SaveChangesAsync();
@@ -116,72 +119,116 @@ public class EmployeeRepository : IEmployeeRepository
         }
     }
 
+    /// <summary>
+    /// Tenant DB FKs to teachers often use NO ACTION in SQL even when the EF model suggests cascade.
+    /// Remove or detach dependents so the teacher row can be deleted.
+    /// </summary>
+    private async Task RemoveTeacherDependenciesAsync(int teacherId)
+    {
+        var coursePlans = await _context.CoursePlans.Where(c => c.TeacherID == teacherId).ToListAsync();
+        if (coursePlans.Count > 0)
+            _context.CoursePlans.RemoveRange(coursePlans);
+
+        var salaries = await _context.Salarys.Where(s => s.TeacherID == teacherId).ToListAsync();
+        if (salaries.Count > 0)
+            _context.Salarys.RemoveRange(salaries);
+
+        var schedules = await _context.WeeklySchedules.Where(w => w.TeacherID == teacherId).ToListAsync();
+        foreach (var s in schedules)
+            s.TeacherID = null;
+
+        var classes = await _context.Classes.Where(c => c.TeacherID == teacherId).ToListAsync();
+        foreach (var c in classes)
+            c.TeacherID = null;
+    }
+
     public async Task<List<EmployeeDTO>> GetAllEmployeesAsync()
     {
         try
         {
-            var employees = await _context.Teachers
-           .Include(u => u.ApplicationUser)
-           .Select(u => new EmployeeDTO()
-           {
-               EmployeeID = u.TeacherID,
-               FirstName = u.FullName.FirstName,
-               MiddleName = u.FullName.MiddleName,
-               LastName = u.FullName.LastName,
-               JopName = "Teacher",
-               Address = u.ApplicationUser.Address,
-               Gender = u.ApplicationUser.Gender,
-               Mobile = u.ApplicationUser.PhoneNumber,
-               HireDate = u.ApplicationUser.HireDate,
-               DOB = u.DOB,
-               Email = u.ApplicationUser.Email,
-               ImageURL = u.ImageURL,
-               ManagerID = u.ManagerID,
-           }).ToListAsync();
+            // ApplicationUser is Ignored() on Teacher/Manager in TenantDbContext — load users via IUserRepository.
+            var teachers = await _context.Teachers.AsNoTracking().ToListAsync();
+            var managers = await _context.Managers.AsNoTracking().ToListAsync();
 
-            var employees2 = await _context.Managers
-            .Include(u => u.ApplicationUser)
-            .Select(u => new EmployeeDTO()
+            var userIds = teachers.Select(t => t.UserID)
+                .Concat(managers.Select(m => m.UserID))
+                .Where(uid => !string.IsNullOrEmpty(uid))
+                .Distinct()
+                .ToList();
+
+            var userById = new Dictionary<string, ApplicationUser?>(StringComparer.Ordinal);
+            foreach (var uid in userIds)
+                userById[uid] = await _userRepository.GetUserByIdAsync(uid);
+
+            var result = new List<EmployeeDTO>(teachers.Count + managers.Count);
+            foreach (var t in teachers)
             {
-                EmployeeID = u.ManagerID,
-                FirstName = u.FullName.FirstName,
-                MiddleName = u.FullName.MiddleName,
-                LastName = u.FullName.LastName,
-                JopName = "Manager",
-                Address = u.ApplicationUser.Address,
-                Gender = u.ApplicationUser.Gender,
-                Mobile = u.ApplicationUser.PhoneNumber,
-                HireDate = u.ApplicationUser.HireDate,
-                DOB = u.DOB,
-                Email = u.ApplicationUser.Email,
-                ImageURL = u.ImageURL,
-                ManagerID = u.ManagerID,
-            }).ToListAsync();
-            employees.AddRange(employees2);
-            return employees;
+                userById.TryGetValue(t.UserID ?? "", out var user);
+                result.Add(MapTeacherToDto(t, user));
+            }
+
+            foreach (var m in managers)
+            {
+                userById.TryGetValue(m.UserID ?? "", out var user);
+                result.Add(MapManagerToDto(m, user));
+            }
+
+            return result;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error getting all employees: {ex.Message}");
             return new List<EmployeeDTO>();
         }
-
     }
 
-    public Task<EmployeeDTO> GetEmployeeByIdAsync(int employeeId)
+    public async Task<EmployeeDTO?> GetEmployeeByIdAsync(int employeeId)
     {
-        throw new NotImplementedException();
+        var teacher = await _context.Teachers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.TeacherID == employeeId);
+        if (teacher != null)
+        {
+            var user = string.IsNullOrEmpty(teacher.UserID)
+                ? null
+                : await _userRepository.GetUserByIdAsync(teacher.UserID);
+            return MapTeacherToDto(teacher, user);
+        }
+
+        var manager = await _context.Managers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.ManagerID == employeeId);
+        if (manager != null)
+        {
+            var user = string.IsNullOrEmpty(manager.UserID)
+                ? null
+                : await _userRepository.GetUserByIdAsync(manager.UserID);
+            return MapManagerToDto(manager, user);
+        }
+
+        return null;
     }
 
-    public async Task<string> UpdateEmployeeAsync(int id, EmployeeDTO dto)
+    public async Task<EmployeeDTO?> UpdateEmployeeAsync(int id, EmployeeDTO dto)
     {
-        if (dto.JopName == "Teacher")
+        var kind = NormalizeJobKind(dto.JopName);
+        if (kind == null)
+        {
+            if (await _context.Teachers.AnyAsync(t => t.TeacherID == id))
+                kind = "Teacher";
+            else if (await _context.Managers.AnyAsync(m => m.ManagerID == id))
+                kind = "Manager";
+            else
+                return null;
+        }
+
+        if (kind == "Teacher")
         {
             // Note: FullName is an owned entity, so it's automatically included - no need to .Include() it
             var teacher = await _context.Teachers
                 .FirstOrDefaultAsync(t => t.TeacherID == id);
 
-            if (teacher == null) return "Teacher not found";
+            if (teacher == null) return null;
 
             // Update Teacher entity in tenant database
             if (teacher.FullName == null)
@@ -212,16 +259,16 @@ public class EmployeeRepository : IEmployeeRepository
                 }
             }
 
-            return "Teacher updated successfully";
+            return await GetEmployeeByIdAsync(id);
         }
 
-        if (dto.JopName == "Manager")
+        if (kind == "Manager")
         {
             // Note: FullName is an owned entity, so it's automatically included - no need to .Include() it
             var manager = await _context.Managers
                 .FirstOrDefaultAsync(m => m.ManagerID == id);
 
-            if (manager == null) return "Manager not found";
+            if (manager == null) return null;
 
             // Update Manager entity in tenant database
             if (manager.FullName == null)
@@ -251,9 +298,60 @@ public class EmployeeRepository : IEmployeeRepository
                 }
             }
 
-            return "Manager updated successfully";
+            return await GetEmployeeByIdAsync(id);
         }
 
-        return "Unknown JopName value";
+        return null;
+    }
+
+    private static string? NormalizeJobKind(string? jopName)
+    {
+        if (string.IsNullOrWhiteSpace(jopName))
+            return null;
+        if (string.Equals(jopName, "Teacher", StringComparison.OrdinalIgnoreCase))
+            return "Teacher";
+        if (string.Equals(jopName, "Manager", StringComparison.OrdinalIgnoreCase))
+            return "Manager";
+        return null;
+    }
+
+    private static EmployeeDTO MapTeacherToDto(Teacher u, ApplicationUser? user = null)
+    {
+        return new EmployeeDTO
+        {
+            EmployeeID = u.TeacherID,
+            FirstName = u.FullName.FirstName,
+            MiddleName = u.FullName.MiddleName,
+            LastName = u.FullName.LastName,
+            JopName = "Teacher",
+            Address = user?.Address,
+            Gender = user?.Gender,
+            Mobile = user?.PhoneNumber,
+            HireDate = user?.HireDate,
+            DOB = u.DOB,
+            Email = user?.Email,
+            ImageURL = u.ImageURL,
+            ManagerID = u.ManagerID,
+        };
+    }
+
+    private static EmployeeDTO MapManagerToDto(Manager u, ApplicationUser? user = null)
+    {
+        return new EmployeeDTO
+        {
+            EmployeeID = u.ManagerID,
+            FirstName = u.FullName.FirstName,
+            MiddleName = u.FullName.MiddleName,
+            LastName = u.FullName.LastName,
+            JopName = "Manager",
+            Address = user?.Address,
+            Gender = user?.Gender,
+            Mobile = user?.PhoneNumber,
+            HireDate = user?.HireDate,
+            DOB = u.DOB,
+            Email = user?.Email,
+            ImageURL = u.ImageURL,
+            ManagerID = u.ManagerID,
+        };
     }
 }

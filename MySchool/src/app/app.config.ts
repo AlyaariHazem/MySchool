@@ -16,10 +16,12 @@ import { LanguageEffects } from './core/store/language/language.effect';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { AppTranslateModule } from './shared/modules/app-translate.module';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';;
+import Aura from '@primeng/themes/aura';
+import { ConfirmationService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
     providers: [
+        ConfirmationService,
         provideRouter(routes, withComponentInputBinding()),
         importProvidersFrom(AppTranslateModule.forRoot()),
         provideAnimationsAsync(),

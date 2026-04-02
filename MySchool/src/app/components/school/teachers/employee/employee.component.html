@@ -7,11 +7,12 @@
   
       <div class="employee-actions">
         <p-button
+          type="button"
           class="btn-save"
           severity="success"
           [label]="mode === 'add' ? 'حفظ الموظف' : 'تعديل الموظف'"
           icon="pi pi-save"
-          (onClick)="mode === 'add' ? AddEmployee() : UpdateEmployee()">
+          (onClick)="onSaveClick()">
         </p-button>
         <button 
           class="btn-close"

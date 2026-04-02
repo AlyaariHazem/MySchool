@@ -67,6 +67,14 @@ export class EmployeeComponent implements OnInit {
       this.mode = 'add';
     }
   }
+  onSaveClick(): void {
+    if (this.mode === 'add') {
+      this.AddEmployee();
+    } else {
+      this.UpdateEmployee();
+    }
+  }
+
   AddEmployee() {
     if (this.form.valid) {
       console.log('the form data are', this.form.value);
@@ -94,7 +102,14 @@ export class EmployeeComponent implements OnInit {
       console.log('Updating employee with ID:', employeeID);
       console.log('Form data:', this.form.value);
       
-      this.employeeService.updateEmployee(Number(employeeID), this.form.value).subscribe({
+      const payload = {
+        ...this.form.value,
+        employeeID: Number(employeeID),
+        dob: this.form.value.dob instanceof Date
+          ? this.toIsoDate(this.form.value.dob)
+          : this.form.value.dob,
+      };
+      this.employeeService.updateEmployee(payload).subscribe({
         next: (res) => {
           console.log('Employee updated successfully', res);
           this.dialogRef.close(this.form.value);

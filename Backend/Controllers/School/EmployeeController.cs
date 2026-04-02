@@ -1,118 +1,53 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
+using Backend.Controllers;
 using Backend.DTOS.School.Employee;
 using Backend.Interfaces;
-using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.School;
 
-[ApiController]
+/// <summary>
+/// Employee CRUD via <see cref="GenericCrudController{TEntity,TKey}"/> (teachers and managers as <see cref="EmployeeDTO"/>).
+/// DELETE requires <c>?jobType=Teacher</c> or <c>?jobType=Manager</c>.
+/// </summary>
 [Route("api/[controller]")]
-public class EmployeeController : ControllerBase
+public class EmployeeController : GenericCrudController<EmployeeDTO, int>
 {
-    private readonly IUnitOfWork _unitOfWork;
-    public EmployeeController(IUnitOfWork unitOfWork)
+    private readonly IEmployeeRepository _employeeRepository;
+
+    public EmployeeController(
+        IGenericCrudRepository<EmployeeDTO, int> repository,
+        IEmployeeRepository employeeRepository)
+        : base(repository)
     {
-        _unitOfWork = unitOfWork;
+        _employeeRepository = employeeRepository;
     }
-    [HttpGet]
-    public async Task<ActionResult<APIResponse>> GetAllEmployees()
+
+    /// <summary>DELETE /{id}?jobType=Teacher|Manager — disambiguates teacher vs manager identity.</summary>
+    [HttpDelete("{id}")]
+    public override async Task<IActionResult> Delete(int id)
     {
-        var response = new APIResponse();
-        try
+        var jobType = Request.Query["jobType"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(jobType))
         {
-            var employees = await _unitOfWork.Employees.GetAllEmployeesAsync();
-            response.Result = employees;
-            response.statusCode = HttpStatusCode.OK;
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            response.IsSuccess = false;
-            response.statusCode = HttpStatusCode.InternalServerError;
-            response.ErrorMasseges.Add(ex.Message);
-            return StatusCode((int)HttpStatusCode.InternalServerError, response);
-        }
-    }
-    [HttpPost]
-    public async Task<ActionResult<APIResponse>> AddEmployee([FromBody] EmployeeDTO employee)
-    {
-        var response = new APIResponse();
-        try
-        {
-            if (employee == null)
+            return BadRequest(new
             {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.BadRequest;
-                response.ErrorMasseges.Add("Employee data is null");
-                return BadRequest(response);
-            }
-            var result = await _unitOfWork.Employees.AddEmployeeAsync(employee);
-            response.Result = result;
-            response.statusCode = HttpStatusCode.Created;
-            return CreatedAtAction(nameof(GetAllEmployees), new { id = result }, response);
+                message = "Query parameter jobType is required (Teacher or Manager)."
+            });
         }
-        catch (Exception ex)
+
+        var existing = await _employeeRepository.GetEmployeeByIdAsync(id);
+        if (existing == null)
+            return NotFound(new { message = $"Employee with ID {id} not found." });
+
+        if (!string.Equals(existing.JopName, jobType, StringComparison.OrdinalIgnoreCase))
         {
-            response.IsSuccess = false;
-            response.statusCode = HttpStatusCode.InternalServerError;
-            response.ErrorMasseges.Add(ex.Message);
-            return StatusCode((int)HttpStatusCode.InternalServerError, response);
-        }
-    }
-    [HttpPut("{id}")]
-    public async Task<ActionResult<APIResponse>> UpdateEmployee(int id, [FromBody] EmployeeDTO employee)
-    {
-        var response = new APIResponse();
-        try
-        {
-            if (employee == null)
+            return BadRequest(new
             {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.BadRequest;
-                response.ErrorMasseges.Add("Employee data is null");
-                return BadRequest(response);
-            }
-            var result = await _unitOfWork.Employees.UpdateEmployeeAsync(id, employee);
-            response.Result = result;
-            response.statusCode = HttpStatusCode.OK;
-            return Ok(response);
+                message = $"Employee {id} is recorded as {existing.JopName}; jobType must match."
+            });
         }
-        catch (Exception ex)
-        {
-            response.IsSuccess = false;
-            response.statusCode = HttpStatusCode.InternalServerError;
-            response.ErrorMasseges.Add(ex.Message);
-            return StatusCode((int)HttpStatusCode.InternalServerError, response);
-        }
+
+        await _employeeRepository.DeleteEmployeeAsync(id, jobType);
+        return NoContent();
     }
-    //  api/employees/42?jobType=Teacher
-    [HttpDelete("{id:int}")]
-    public async Task<ActionResult<APIResponse>> DeleteEmployee(int id, [FromQuery] string jobType)
-    {
-        var response = new APIResponse();
-
-        try
-        {
-            await _unitOfWork.Employees.DeleteEmployeeAsync(id, jobType);
-
-            response.IsSuccess = false;
-            response.statusCode = HttpStatusCode.NotFound;
-            response.ErrorMasseges.Add("Employee not found");
-            return NotFound(response);
-            // 204, no body
-        }
-        catch (Exception ex)
-        {
-            response.IsSuccess = false;
-            response.statusCode = HttpStatusCode.InternalServerError;
-            response.ErrorMasseges.Add(ex.Message);
-            return StatusCode((int)HttpStatusCode.InternalServerError, response);
-        }
-    }
-
 }

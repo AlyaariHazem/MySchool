@@ -18,7 +18,6 @@ import { ConfirmationService } from 'primeng/api';
 @Component({
   selector: 'app-teachers',
   templateUrl: './teachers.component.html',
-  providers: [ConfirmationService],
   styleUrls: ['./teachers.component.scss', './../../../shared/styles/style-table.scss'],
 })
 export class TeachersComponent implements OnInit {
@@ -110,9 +109,11 @@ export class TeachersComponent implements OnInit {
   
   // Handle row delete
   onRowDelete(employee: Employee): void {
-    if (employee.employeeID && employee.jopName) {
-      this.deleteEmployee(employee.employeeID, employee.jopName);
+    const id = employee.employeeID;
+    if (id == null) {
+      return;
     }
+    this.deleteEmployee(id, employee.jopName || 'Teacher');
   }
   constructor(
     private formBuilder: FormBuilder,

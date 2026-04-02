@@ -8,9 +8,9 @@ namespace Backend.Interfaces;
 
 public interface IEmployeeRepository
 {
-    Task<string> AddEmployeeAsync(EmployeeDTO employee);
-    Task<string> UpdateEmployeeAsync(int id,EmployeeDTO employee);
-    Task DeleteEmployeeAsync(int employeeId,string jobType);
+    Task<EmployeeDTO> AddEmployeeAsync(EmployeeDTO employee);
+    Task<EmployeeDTO?> UpdateEmployeeAsync(int id, EmployeeDTO employee);
+    Task DeleteEmployeeAsync(int employeeId, string jobType);
     Task<List<EmployeeDTO>> GetAllEmployeesAsync();
-    Task<EmployeeDTO> GetEmployeeByIdAsync(int employeeId);
+    Task<EmployeeDTO?> GetEmployeeByIdAsync(int employeeId);
 }
