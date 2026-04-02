@@ -1,45 +1,101 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { PaginatorState } from 'primeng/paginator';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
+import { map } from 'rxjs';
+import { Store } from '@ngrx/store';
 
 import { AddManagerComponent } from './add-manager/add-manager.component';
 import { managerInfo } from '../core/models/managerInfo.model';
 import { ManagerService } from '../../../core/services/manager.service';
-import { map } from 'rxjs';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
-import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-users',
   templateUrl: './users.component.html',
-  styleUrl: './users.component.scss'
+  styleUrl: './users.component.scss',
 })
-export class UsersComponent {
-  constructor(
-    private toastr: ToastrService,
-    private store: Store,
-    public dialog: MatDialog) {
+export class UsersComponent implements OnInit {
+  private readonly toastr = inject(ToastrService);
+  private readonly store = inject(Store);
+  readonly dialog = inject(MatDialog);
+  readonly managerService = inject(ManagerService);
 
-  }
-  managerInfo: managerInfo[] = [];
-  managerService = inject(ManagerService);
   readonly dir$ = this.store.select(selectLanguage).pipe(
-    map(l => (l === 'ar' ? 'rtl' : 'ltr')),
+    map((l) => (l === 'ar' ? 'rtl' : 'ltr')),
   );
 
+  /** Current page from POST api/Manager/page */
+  managerPage: managerInfo[] = [];
+  totalRecords = 0;
+  first = 0;
+  rows = 10;
+
   ngOnInit(): void {
-    this.getAllManagers();
-  }
-  getAllManagers(): void {
-    this.managerService.getAllManagers().subscribe(res => this.managerInfo = res);
+    this.loadManagersPage();
   }
 
-  first: number = 0;
-  rows: number = 4;
-  onPageChange(event: PaginatorState) {
-    this.first = event.first || 0; // Default to 0 if undefined
-    this.rows = event.rows!;
+  loadManagersPage(): void {
+    const pageIndex = Math.floor(this.first / this.rows);
+    this.managerService.getManagersPage({ pageIndex, pageSize: this.rows }).subscribe({
+      next: (page) => {
+        if (
+          page.totalCount > 0 &&
+          page.data.length === 0 &&
+          page.totalPages > 0 &&
+          pageIndex >= page.totalPages
+        ) {
+          const lastPageIndex = page.totalPages - 1;
+          this.first = lastPageIndex * this.rows;
+          this.loadManagersPage();
+          return;
+        }
+        this.managerPage = (page.data ?? []) as managerInfo[];
+        this.totalRecords = page.totalCount;
+        if (page.totalCount === 0) {
+          this.first = 0;
+        }
+      },
+      error: (err) => {
+        this.toastr.error(this.formatHttpError(err), 'تعذر تحميل المستخدمين');
+      },
+    });
+  }
+
+  private formatHttpError(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      const body = err.error;
+      if (typeof body === 'string' && body.trim().length > 0 && body.length < 600) {
+        return body.trim();
+      }
+      if (body && typeof body === 'object') {
+        const o = body as {
+          errorMasseges?: string[];
+          message?: string;
+          title?: string;
+        };
+        if (o.errorMasseges?.length) {
+          return o.errorMasseges.join(' ');
+        }
+        if (o.message) {
+          return o.message;
+        }
+        if (o.title) {
+          return o.title;
+        }
+      }
+      if (err.message) {
+        return err.message;
+      }
+    }
+    return 'حدث خطأ غير متوقع';
+  }
+
+  onPageChange(event: PaginatorState): void {
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? 10;
+    this.loadManagersPage();
   }
 
   openDialog(): void {
@@ -52,8 +108,8 @@ export class UsersComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.toastr.success('تم إضافة الطالب بنجاح');
-        this.getAllManagers(); // Refresh the list
       }
+      this.loadManagersPage();
     });
   }
 
@@ -61,27 +117,30 @@ export class UsersComponent {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.width = '95%';
     dialogConfig.panelClass = 'custom-dialog-container';
-    dialogConfig.data = { manager: manager, isEditMode: true };
+    dialogConfig.data = { manager, isEditMode: true };
 
     const dialogRef = this.dialog.open(AddManagerComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.toastr.success('تم تحديث الطالب بنجاح');
-        this.getAllManagers(); // Refresh the list
       }
+      this.loadManagersPage();
     });
   }
-  deleteUser(userID: number) {
-    if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
-      this.managerService.deleteManager(userID).subscribe({
-        next: () => {
-          this.managerInfo = this.managerInfo.filter(s => s.managerID !== userID);
-        },
-        error: (err) => {
-          console.error('Error deleting student:', err);
-        }
-      });
+
+  deleteUser(userID: number): void {
+    if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
+      return;
     }
+    this.managerService.deleteManager(userID).subscribe({
+      next: () => {
+        this.toastr.success('تم حذف المستخدم');
+        this.loadManagersPage();
+      },
+      error: (err) => {
+        this.toastr.error(this.formatHttpError(err), 'فشل الحذف');
+      },
+    });
   }
 }

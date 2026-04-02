@@ -4,11 +4,11 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { manager } from '../../core/models/manager.model';
 import { managerInfo } from '../../core/models/managerInfo.model';
-import { ManagerService } from '../../../../core/services/manager.service';
-import { TenantService } from '../../../../core/services/tenant.service';
+import { ManagerDto, ManagerService } from 'app/core/services/manager.service';
+import { TenantService } from 'app/core/services/tenant.service';
 import { Tenant } from '../../core/models/tenant.model';
-import { SchoolService } from '../../../../core/services/school.service';
-import { School } from '../../../../core/models/school.modul';
+import { SchoolService } from 'app/core/services/school.service';
+import { School } from 'app/core/models/school.modul';
 
 @Component({
   selector: 'app-add-manager',
@@ -85,6 +85,19 @@ export class AddManagerComponent implements OnInit {
     }
   }
 
+  private toIsoHireDate(value: unknown): string {
+    if (value == null || value === '') {
+      return new Date().toISOString();
+    }
+    if (typeof value === 'string') {
+      return new Date(value).toISOString();
+    }
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+    return new Date().toISOString();
+  }
+
   populateForm(manager: managerInfo): void {
     // Find schoolID by matching schoolName
     const school = this.schools.find(s => s.schoolName === manager.schoolName);
@@ -131,16 +144,27 @@ export class AddManagerComponent implements OnInit {
         phoneNumber: this.managerForm.value.phoneNumber
       };
       
-      if (this.isEditMode && this.managerID) {
-        // Update existing manager
-        this.managerService.updateManager(this.managerID, formData).subscribe({
-          next: (res) => {
-            console.log("Manager updated:", res);
+      if (this.isEditMode && this.managerID && this.data.manager) {
+        const m = this.data.manager;
+        const dto: ManagerDto = {
+          managerID: this.managerID,
+          fullName: formData.fullName,
+          hireDate: this.toIsoHireDate(m.hireDate),
+          schoolName: m.schoolName ?? '',
+          tenantID: m.tenantID,
+          tenantName: m.tenantName,
+          userName: formData.userName,
+          email: formData.email,
+          userType: formData.userType ?? 'MANAGER',
+          phoneNumber: formData.phoneNumber,
+        };
+        this.managerService.updateManager(dto).subscribe({
+          next: () => {
             this.dialogRef.close(true);
           },
           error: (err) => {
-            console.error("Error updating manager:", err);
-          }
+            console.error('Error updating manager:', err);
+          },
         });
       } else {
         // Add new manager

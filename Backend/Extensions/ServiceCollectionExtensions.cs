@@ -1,5 +1,6 @@
 using Backend.DTOS.School;
 using Backend.DTOS.School.Employee;
+using Backend.DTOS.School.Manager;
 using Backend.Interfaces;
 using Backend.Repository;
 using Backend.Repository.School;
@@ -27,6 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IGenericCrudRepository<,>), typeof(Repository.GenericCrudRepository<,>));
         services.AddScoped<IGenericCrudRepository<EmployeeDTO, int>, EmployeeGenericCrudRepository>();
         services.AddScoped<IGenericCrudRepository<SchoolDTO, int>, SchoolGenericCrudRepository>();
+        services.AddScoped<IGenericCrudRepository<GetManagerDTO, int>, ManagerGenericCrudRepository>();
 
         // Register Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();

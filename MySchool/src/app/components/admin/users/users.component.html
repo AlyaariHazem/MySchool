@@ -48,9 +48,9 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (manager of managerInfo; track $index) {
+                    @for (manager of managerPage; track manager.managerID) {
                     <tr>
-                      <td>{{ $index+1 }}</td>
+                      <td>{{ first + $index + 1 }}</td>
                       <td>
                         <h2>
                       <a href="#">{{
@@ -94,7 +94,7 @@
             </div>
           </div>
           <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-            [totalRecords]="120" [rowsPerPageOptions]="[10, 20, 30]" />
+            [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 20, 30]" />
         </div>
       </div>
     </div>
