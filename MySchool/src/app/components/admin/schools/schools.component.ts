@@ -1,5 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
 
 import { SchoolInfoComponent } from '../school-info/school-info.component';
 import { SchoolService } from '../../../core/services/school.service';
@@ -10,65 +12,141 @@ import { PaginatorState } from 'primeng/paginator';
 @Component({
   selector: 'app-schools',
   templateUrl: './schools.component.html',
-  styleUrls: ['./schools.component.scss']
+  styleUrls: ['./schools.component.scss'],
 })
 export class SchoolsComponent implements OnInit {
+  private readonly schoolService = inject(SchoolService);
+  private readonly dialog = inject(MatDialog);
+  private readonly toastr = inject(ToastrService);
 
   paginatorService = inject(PaginatorService);
-  schools: School[] = [];
+  /** Current page rows from POST api/School/page */
   paginatedSchools: School[] = [];
-  constructor(private schoolService: SchoolService, public dialog: MatDialog) { }
+  /** Total rows across all pages (server) */
+  totalRecords = 0;
+
+  displayedColumns: string[] = [
+    'schoolName',
+    'schoolNameEn',
+    'schoolCreaDate',
+    'schoolType',
+    'city',
+    'schoolPhone',
+    'email',
+    'actions',
+  ];
 
   ngOnInit(): void {
-    this.getAllSchools();
-
+    this.loadSchoolsPage();
   }
 
-  getAllSchools(): void {
-    this.schoolService.getAllSchools().subscribe(
-      res => {
-        this.schools = res;
-        this.paginatedSchools = this.paginatorService.pageSlice(this.schools);
-      },
-    );
+  loadSchoolsPage(): void {
+    const rows = this.paginatorService.rows();
+    const first = this.paginatorService.first();
+    const pageIndex = Math.floor(first / rows);
+
+    this.schoolService
+      .getSchoolsPage({ pageIndex, pageSize: rows })
+      .subscribe({
+        next: (page) => {
+          if (
+            page.totalCount > 0 &&
+            page.data.length === 0 &&
+            page.totalPages > 0 &&
+            pageIndex >= page.totalPages
+          ) {
+            const lastPageIndex = page.totalPages - 1;
+            this.paginatorService.first.set(lastPageIndex * rows);
+            this.loadSchoolsPage();
+            return;
+          }
+
+          this.paginatedSchools = page.data ?? [];
+          this.totalRecords = page.totalCount;
+          if (page.totalCount === 0) {
+            this.paginatorService.first.set(0);
+          }
+        },
+        error: (err) => {
+          this.toastr.error(this.formatHttpError(err), 'تعذر تحميل المدارس');
+        },
+      });
+  }
+
+  private formatHttpError(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      const body = err.error;
+      if (typeof body === 'string' && body.trim().length > 0 && body.length < 600) {
+        return body.trim();
+      }
+      if (body && typeof body === 'object') {
+        const o = body as {
+          errorMasseges?: string[];
+          message?: string;
+          title?: string;
+        };
+        if (o.errorMasseges?.length) {
+          return o.errorMasseges.join(' ');
+        }
+        if (o.message) {
+          return o.message;
+        }
+        if (o.title) {
+          return o.title;
+        }
+      }
+      if (err.message) {
+        return err.message;
+      }
+    }
+    return 'حدث خطأ غير متوقع';
   }
 
   handlePageChange(event: PaginatorState): void {
-      this.paginatorService.onPageChange(event);
-      this.paginatedSchools = this.paginatorService.pageSlice(this.schools);
+    this.paginatorService.onPageChange(event);
+    this.loadSchoolsPage();
+  }
+
+  openAddSchoolForm(): void {
+    this.dialog
+      .open(SchoolInfoComponent, {
+        width: '80%',
+        height: '80%',
+        data: { isEditMode: false },
+      })
+      .afterClosed()
+      .subscribe(() => this.loadSchoolsPage());
+  }
+
+  openEditSchoolForm(school: School): void {
+    this.dialog
+      .open(SchoolInfoComponent, {
+        width: '80%',
+        height: '80%',
+        data: { isEditMode: true, schoolData: school },
+      })
+      .afterClosed()
+      .subscribe(() => this.loadSchoolsPage());
+  }
+
+  deleteSchool(school: School): void {
+    const id = school.schoolID;
+    if (id == null) {
+      this.toastr.warning('معرف المدرسة غير صالح');
+      return;
     }
-  displayedColumns: string[] = ['schoolName', 'schoolNameEn', 'schoolCreaDate', 'schoolType', 'city', 'schoolPhone', 'email', 'actions'];
-  //how can I fix this to wrok fine?
-  openAddSchoolForm() {
-    // Opens the form dialog in "Add" mode
-    this.dialog.open(SchoolInfoComponent, {
-      width: '80%',
-      height: '80%',
-      data: { isEditMode: false } // optional
+    if (!confirm('هل أنت متأكد من حذف هذه المدرسة؟')) {
+      return;
+    }
+
+    this.schoolService.deleteSchool(id).subscribe({
+      next: () => {
+        this.toastr.success('تم حذف المدرسة');
+        this.loadSchoolsPage();
+      },
+      error: (err) => {
+        this.toastr.error(this.formatHttpError(err), 'فشل الحذف');
+      },
     });
   }
-
-  openEditSchoolForm(school: School) {
-    // Opens the form dialog in "Edit" mode, passing the school data
-    this.dialog.open(SchoolInfoComponent, {
-      width: '80%',
-      height: '80%',
-      data: { isEditMode: true, schoolData: school }
-    });
-  }
-
-  deleteSchool(school: School) {
-    if (confirm('هل أنت متأكد من حذف هذه المدرسة؟')) {
-      this.schoolService.deleteSchool(school.schoolID!).subscribe({
-        next: () => {
-          // Remove it from the local array if needed
-          this.schools = this.schools.filter(s => s.schoolID !== school.schoolID);
-        },
-        error: (err) => {
-          console.error('Error deleting school:', err);
-        }
-      });
-    }
-  }
-
 }

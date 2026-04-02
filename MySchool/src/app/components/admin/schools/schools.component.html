@@ -64,5 +64,5 @@
     </div>
   </mat-card-content>
   <p-paginator dir="ltr" (onPageChange)="handlePageChange($event)" [first]="paginatorService.first()" [rows]="paginatorService.rows()"
-            [totalRecords]="schools.length" [rowsPerPageOptions]="[4, 10, 20]"  />
+            [totalRecords]="totalRecords" [rowsPerPageOptions]="[4, 10, 20]"  />
 </mat-card>

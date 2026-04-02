@@ -1,3 +1,4 @@
+using Backend.DTOS.School;
 using Backend.DTOS.School.Employee;
 using Backend.Interfaces;
 using Backend.Repository;
@@ -25,6 +26,7 @@ public static class ServiceCollectionExtensions
         // Register Generic CRUD Repository (open generic)
         services.AddScoped(typeof(IGenericCrudRepository<,>), typeof(Repository.GenericCrudRepository<,>));
         services.AddScoped<IGenericCrudRepository<EmployeeDTO, int>, EmployeeGenericCrudRepository>();
+        services.AddScoped<IGenericCrudRepository<SchoolDTO, int>, SchoolGenericCrudRepository>();
 
         // Register Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
