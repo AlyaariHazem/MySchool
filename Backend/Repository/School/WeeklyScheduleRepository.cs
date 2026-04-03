@@ -202,6 +202,26 @@ namespace Backend.Repository.School
             var termId = firstSchedule.TermID;
             var divisionId = firstSchedule.DivisionID;
 
+            var classEntity = await _db.Classes.AsNoTracking().FirstOrDefaultAsync(c => c.ClassID == classId);
+            if (classEntity == null)
+                throw new InvalidOperationException("Class not found.");
+
+            // Never trust client YearID alone: wrong year makes rows invisible after reload (queries use Year.Active)
+            int resolvedYearId;
+            if (classEntity.YearID.HasValue && classEntity.YearID.Value > 0)
+                resolvedYearId = classEntity.YearID.Value;
+            else
+            {
+                var activeYear = await _db.Years
+                    .AsNoTracking()
+                    .Where(y => y.Active)
+                    .OrderBy(y => y.YearID)
+                    .FirstOrDefaultAsync();
+                if (activeYear == null)
+                    throw new InvalidOperationException("No active academic year found. Activate a year or assign one to the class.");
+                resolvedYearId = activeYear.YearID;
+            }
+
             // Delete existing schedules for this class, term, and division
             var query = _db.WeeklySchedules
                 .Where(s => s.ClassID == classId && s.TermID == termId);
@@ -247,6 +267,7 @@ namespace Backend.Repository.School
             {
                 var schedule = _mapper.Map<WeeklySchedule>(s);
                 schedule.CreatedDate = DateTime.Now;
+                schedule.YearID = resolvedYearId;
                 return schedule;
             }).ToList();
 

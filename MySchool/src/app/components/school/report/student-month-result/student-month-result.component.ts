@@ -164,9 +164,41 @@ export class StudentMonthResultComponent implements OnInit {
         
   
         <style>
+          /* Override app global html,body{height:100%} — otherwise print layout reserves a full viewport and Chrome adds a blank second page. */
+          html,
+          body {
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
           @media print {
-            body { margin: 0; direction: rtl; font-family: "Tajawal", "Arial", sans-serif; }
-            .report, * { letter-spacing: 0 !important; }
+            html,
+            body {
+              height: auto !important;
+              min-height: 0 !important;
+              max-height: none !important;
+              overflow: visible !important;
+            }
+            body {
+              margin: 0;
+              direction: rtl;
+              font-family: "Tajawal", "Arial", sans-serif;
+            }
+            .report {
+              margin: 0 !important;
+              margin-top: 0 !important;
+              page-break-after: avoid !important;
+              break-after: avoid !important;
+            }
+            .d-print-none {
+              display: none !important;
+            }
+            .report,
+            * {
+              letter-spacing: 0 !important;
+            }
           }
         </style>
       </head>

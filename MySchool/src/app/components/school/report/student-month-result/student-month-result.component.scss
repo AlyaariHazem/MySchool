@@ -90,9 +90,17 @@ table td {
   :host {
     background: #fff;
     padding: 0;
+    height: auto !important;
+    min-height: 0 !important;
   }
   .d-print-none {
     display: none !important;
+  }
+  .report {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
   .report-card {
     box-shadow: none;

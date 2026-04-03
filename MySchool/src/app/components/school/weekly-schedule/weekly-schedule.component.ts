@@ -582,9 +582,11 @@ export class WeeklyScheduleComponent implements OnInit {
       return;
     }
 
-    // Get active year (assuming first active year)
-    // In a real scenario, you'd get this from a service
-    const yearId = 1; // This should come from your year service
+    // Use year from loaded grid (class year). Server BulkUpdate also sets YearID from the class / active year.
+    const yearId =
+      this.scheduleGrid?.yearID && this.scheduleGrid.yearID > 0
+        ? this.scheduleGrid.yearID
+        : 1;
 
     // Build schedule items from cells
     const schedules: AddWeeklySchedule[] = [];
