@@ -97,7 +97,34 @@ export class AttendanceComponent implements OnInit {
       this.rows = [];
       this.totalRecords = 0;
       this.first = 0;
+      this.attendanceByStudent.clear();
     });
+
+    this.filterForm.get('divisionId')?.valueChanges.subscribe(divisionId => {
+      if (divisionId == null || divisionId === '') {
+        this.rows = [];
+        this.totalRecords = 0;
+        this.first = 0;
+        this.attendanceByStudent.clear();
+        return;
+      }
+      this.tryAutoLoadRoster();
+    });
+
+    this.filterForm.get('date')?.valueChanges.subscribe(() => {
+      this.tryAutoLoadRoster();
+    });
+  }
+
+  /** Loads roster when الصف + التاريخ + الشعبة are all set (no button). */
+  private tryAutoLoadRoster(): void {
+    const classId = this.filterForm.get('classId')?.value as number | null;
+    const dateVal = this.filterForm.get('date')?.value as Date | null;
+    const div = this.divisionFilterValue();
+    if (classId == null || !dateVal || div == null) {
+      return;
+    }
+    this.loadRoster({ quiet: true });
   }
 
   private updateDivisionsByClass(classId: number | null): void {
@@ -126,7 +153,7 @@ export class AttendanceComponent implements OnInit {
 
   private divisionFilterValue(): number | null {
     const divisionId = this.filterForm.get('divisionId')?.value as number | null;
-    if (divisionId == null || divisionId === ('' as unknown)) return null;
+    if (divisionId == null) return null;
     const n = Number(divisionId);
     return Number.isNaN(n) ? null : n;
   }
@@ -158,13 +185,18 @@ export class AttendanceComponent implements OnInit {
     });
   }
 
-  /** Initial load: refresh attendance map + first page of students from POST /Students/page (server filters). */
-  loadRoster(): void {
+  /**
+   * Refresh attendance map + first page of students (POST /Students/page).
+   * @param options.quiet — fewer toasts when triggered automatically after choosing الشعبة.
+   */
+  loadRoster(options?: { quiet?: boolean }): void {
     const classId = this.filterForm.get('classId')?.value as number | null;
     const dateVal = this.filterForm.get('date')?.value as Date | null;
 
     if (classId == null || !dateVal) {
-      this.toastr.warning('اختر الصف والتاريخ', 'تنبيه');
+      if (!options?.quiet) {
+        this.toastr.warning(this.translate.instant('attendance.needClassDate'), this.translate.instant('attendance.toastTitleHint'));
+      }
       return;
     }
 
@@ -206,8 +238,11 @@ export class AttendanceComponent implements OnInit {
         this.totalRecords = studentsPage.totalCount;
         this.rows = this.studentsToRows(studentsPage.data);
         this.isLoading = false;
-        if (this.totalRecords === 0) {
-          this.toastr.info('لا يوجد طلاب مطابقين لهذا الصف والشعبة', 'معلومة');
+        if (this.totalRecords === 0 && !options?.quiet) {
+          this.toastr.info(
+            this.translate.instant('attendance.noStudentsMatch'),
+            this.translate.instant('attendance.toastTitleInfo')
+          );
         }
       },
       error: () => {

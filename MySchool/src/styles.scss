@@ -51,3 +51,9 @@ body {
 .p-datepicker-panel {
   z-index: 4000 !important;
 }
+
+/* Attendance page: p-select overlay is often attached to body — keep option row height compact */
+.p-select-overlay.attendance-select-panel .p-select-option {
+  padding-block: 0.4rem;
+  min-height: 2rem;
+}

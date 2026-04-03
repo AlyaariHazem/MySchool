@@ -1,52 +1,71 @@
-<div id="attendance-page" [attr.dir]="(dir$ | async)" class="modal-container">
-  <div class="modal-content">
-    <h2 class="school">{{ 'attendance.pageTitle' | translate }}</h2>
+<div id="attendance-page" [attr.dir]="(dir$ | async)" class="attendance-page">
+  <div class="attendance-card">
+    <h2 class="attendance-title">{{ 'attendance.pageTitle' | translate }}</h2>
 
-    <div class="container">
-      <form [formGroup]="filterForm" class="filters-container">
-        <div class="filter-group">
-          <p-floatLabel class="w-full" variant="on">
-            <p-select
-              class="w-full"
-              [options]="classes"
-              formControlName="classId"
-              optionLabel="className"
-              optionValue="classID"
-              [showClear]="true"
-              placeholder=" " />
-            <label>{{ 'attendance.class' | translate }}</label>
-          </p-floatLabel>
-        </div>
 
-        <div class="filter-group">
-          <p-floatLabel class="w-full" variant="on">
-            <p-select
-              class="w-full"
-              [options]="filteredDivisions"
-              formControlName="divisionId"
-              optionLabel="divisionName"
-              optionValue="divisionID"
-              [showClear]="true"
-              placeholder=" " />
-            <label>{{ 'attendance.division' | translate }}</label>
-          </p-floatLabel>
-        </div>
+    <form [formGroup]="filterForm" class="filters-grid" novalidate>
+      <div class="filter-field">
+        <p-floatLabel class="w-full block" variant="on">
+          <p-select
+            inputId="attendance-class"
+            class="w-full"
+            styleClass="w-full attendance-filter-control"
+            size="small"
+            [options]="classes"
+            formControlName="classId"
+            optionLabel="className"
+            optionValue="classID"
+            [showClear]="true"
+            panelStyleClass="attendance-select-panel"
+            placeholder=" " />
+          <label for="attendance-class">{{ 'attendance.class' | translate }}</label>
+        </p-floatLabel>
+      </div>
 
-        <div class="filter-group">
-          <p-floatLabel class="w-full" variant="on">
-            <p-datepicker formControlName="date" dateFormat="yy-mm-dd" [showIcon]="true" styleClass="w-full" />
-            <label>{{ 'attendance.date' | translate }}</label>
-          </p-floatLabel>
-        </div>
-      </form>
+      <div class="filter-field">
+        <p-floatLabel class="w-full block" variant="on">
+          <p-select
+            inputId="attendance-division"
+            class="w-full"
+            styleClass="w-full attendance-filter-control"
+            size="small"
+            [options]="filteredDivisions"
+            formControlName="divisionId"
+            optionLabel="divisionName"
+            optionValue="divisionID"
+            [showClear]="true"
+            panelStyleClass="attendance-select-panel"
+            placeholder=" " />
+          <label for="attendance-division">{{ 'attendance.division' | translate }}</label>
+        </p-floatLabel>
+      </div>
 
-      <div class="action-buttons">
+      <div class="filter-field filter-field--date">
+        <p-floatLabel class="w-full block" variant="on">
+          <p-datepicker
+            inputId="attendance-date"
+            formControlName="date"
+            dateFormat="yy-mm-dd"
+            [showIcon]="true"
+            size="small"
+            styleClass="w-full attendance-filter-control"
+            appendTo="body" />
+          <label for="attendance-date">{{ 'attendance.date' | translate }}</label>
+        </p-floatLabel>
+      </div>
+    </form>
+
+    <div class="toolbar">
+      <div class="toolbar-actions">
         <p-button
+          type="button"
           [label]="'attendance.loadRoster' | translate"
           icon="pi pi-refresh"
+          [outlined]="true"
           [loading]="isLoading"
           (onClick)="loadRoster()" />
         <p-button
+          type="button"
           [label]="'attendance.save' | translate"
           icon="pi pi-save"
           severity="success"
@@ -54,46 +73,55 @@
           [disabled]="rows.length === 0"
           (onClick)="saveBulk()" />
       </div>
-      <p-table [value]="rows" [loading]="isLoading" styleClass="p-datatable-sm attendance-table">
+    </div>
+
+    <div class="table-wrap">
+      <p-table
+        [value]="rows"
+        [loading]="isLoading"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="p-datatable-sm p-datatable-striped attendance-table">
         <ng-template pTemplate="header">
           <tr>
-            <th>{{ 'attendance.col.student' | translate }}</th>
-            <th style="width: 12rem">{{ 'attendance.col.status' | translate }}</th>
-            <th>{{ 'attendance.col.remarks' | translate }}</th>
+            <th class="col-student">{{ 'attendance.col.student' | translate }}</th>
+            <th class="col-status">{{ 'attendance.col.status' | translate }}</th>
+            <th class="col-remarks">{{ 'attendance.col.remarks' | translate }}</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-row>
           <tr>
-            <td>{{ row.studentName }}</td>
-            <td>
+            <td class="col-student">{{ row.studentName }}</td>
+            <td class="col-status">
               <p-select
+                size="small"
                 [options]="statusOptions"
                 [(ngModel)]="row.status"
                 optionLabel="label"
                 optionValue="value"
                 styleClass="w-full" />
             </td>
-            <td>
+            <td class="col-remarks">
               <input pInputText class="w-full" [(ngModel)]="row.remarks" />
             </td>
           </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="3" class="text-center">{{ 'attendance.empty' | translate }}</td>
+            <td colspan="3" class="empty-cell">{{ 'attendance.empty' | translate }}</td>
           </tr>
         </ng-template>
       </p-table>
-
-      <p-paginator
-        *ngIf="totalRecords > 0"
-        [rows]="pageSize"
-        [totalRecords]="totalRecords"
-        [first]="first"
-        [rowsPerPageOptions]="[10, 25, 50, 100]"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="{first} - {last} / {totalRecords}"
-        (onPageChange)="onStudentsPageChange($event)" />
     </div>
+
+    <p-paginator
+      *ngIf="totalRecords > 0"
+      class="attendance-paginator"
+      [rows]="pageSize"
+      [totalRecords]="totalRecords"
+      [first]="first"
+      [rowsPerPageOptions]="[10, 25, 50, 100]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} - {last} / {totalRecords}"
+      (onPageChange)="onStudentsPageChange($event)" />
   </div>
 </div>
