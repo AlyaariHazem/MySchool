@@ -42,7 +42,6 @@ export class StudentMonthResultComponent implements OnInit {
   ngOnInit(): void {
     this.getAllClasses();
     this.getAllDivision();
-    this.getAllMonthlyGradesReport();
     this.form = new FormBuilder().group({
       termId: [1, Validators.required],
       classId: [1, Validators.required],
@@ -65,14 +64,17 @@ export class StudentMonthResultComponent implements OnInit {
         if (!res.isSuccess) {
           this.toastr.warning(res.errorMasseges[0] || 'Unexpected error');
           this.monthlyResults = [];
+          this.first = 0;
           return;
         }
         this.monthlyResults = res.result;
+        this.first = 0;
       },
       error: (err) => {
         this.toastr.warning('لا يوجد طلاب في هذا!');
         console.error(err);
         this.monthlyResults = [];
+        this.first = 0;
       }
     });
   }
@@ -109,9 +111,35 @@ export class StudentMonthResultComponent implements OnInit {
     const selectedClass = this.form.get('classId')?.value;
     const selectedTerm = this.form.get('termId')?.value;
     const selectedMonth = this.form.get('monthId')?.value;
-    const selectedStudent = this.form.get('studentId')?.value || 0;
-    this.getAllMonthlyGradesReport(selectedTerm, selectedMonth, selectedClass, selectedDivision, selectedStudent);
+    const selectedStudent = this.form.get('studentId')?.value ?? 0;
 
+    const ready =
+      selectedTerm != null &&
+      selectedTerm !== '' &&
+      selectedMonth != null &&
+      selectedMonth !== '' &&
+      selectedClass != null &&
+      selectedClass !== '' &&
+      selectedDivision != null &&
+      selectedDivision !== '';
+
+    if (!ready) {
+      this.monthlyResults = [];
+      this.first = 0;
+      return;
+    }
+
+    this.getAllMonthlyGradesReport(
+      selectedTerm,
+      selectedMonth,
+      selectedClass,
+      selectedDivision,
+      selectedStudent
+    );
+  }
+
+  get pagedMonthlyResults(): MonthlyResult[] {
+    return this.monthlyResults.slice(this.first, this.first + this.rows);
   }
   printReport(subj: MonthlyResult): void {
     console.log('Printing report for:', subj);

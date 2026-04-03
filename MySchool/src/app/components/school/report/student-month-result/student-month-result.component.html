@@ -10,8 +10,8 @@
             placeholder="إختار الشهر" />
 
         <p-select [options]="AllClasses" class="w-2 mr-1 h-3" optionValue="classID" [checkmark]="true"
-            optionLabel="className" [editable]="true" [showClear]="true" formControlName="classId"
-            placeholder="إختار الصف" />
+            optionLabel="className" [editable]="true" [showClear]="true" (onChange)="getAllGrades()"
+            formControlName="classId" placeholder="إختار الصف" />
 
         <p-select [options]="fiteredDivisions" (onChange)="getAllGrades()" class="w-2 mr-1 h-3" optionValue="divisionID"
             [checkmark]="true" optionLabel="divisionName" [editable]="true" [showClear]="true"
@@ -22,7 +22,7 @@
             placeholder="إختار طالب" />
     </div>
 </form>
-@for (subj of monthlyResults; track $index; let i = $index) {
+@for (subj of pagedMonthlyResults; track subj.studentID) {
 <div dir="rtl" class="report" [id]="'report-' + subj.studentID"
     style="font-family:Tajawal, sans-serif; line-height:1.7">
 
@@ -93,8 +93,6 @@
             <span>الختم: ...</span>
             <span>التوقيع: ...</span>
         </div>
-        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="5"
-            [totalRecords]="monthlyResults.length" [rowsPerPageOptions]="[5, 10, 15]" />
     </section>
 
     <div class="text-center mt-4 d-print-none">
@@ -163,13 +161,18 @@
             <span>الختم: ...</span>
             <span>التوقيع: ...</span>
         </div>
-        <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="5"
-            [totalRecords]="monthlyResults.length" [rowsPerPageOptions]="[5, 10, 15]" />
     </section>
 
     <div class="text-center mt-4 d-print-none">
         <button class="btn btn-outline-primary add px-5">طباعة</button>
     </div>
 
+</div>
+}
+
+@if (monthlyResults.length > 0) {
+<div class="d-print-none report-paginator-bar" dir="ltr">
+    <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
+        [totalRecords]="monthlyResults.length" [rowsPerPageOptions]="[5, 10, 15]" />
 </div>
 }
