@@ -284,6 +284,15 @@
       "fixForm": "راجع الحقول المطلوبة",
       "sendError": "تعذر إرسال الإشعار",
       "sendOk": "تم الإرسال إلى {{count}} مستلم (داخل التطبيق)"
+    },
+    "headerTitle": "الإشعارات",
+    "headerEmpty": "لا توجد إشعارات",
+    "viewAll": "عرض جميع الإشعارات",
+    "time": {
+      "justNow": "الآن",
+      "minutesAgo": "منذ {{n}} دقيقة",
+      "hoursAgo": "منذ {{n}} ساعة",
+      "daysAgo": "منذ {{n}} يوم"
     }
   },
   "attendance": {

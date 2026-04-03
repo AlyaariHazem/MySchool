@@ -230,6 +230,7 @@ export class NotificationsComponent implements OnInit {
         const row = this.inboxRows.find(r => r.deliveryId === this.selected!.deliveryId);
         if (row) row.isRead = true;
         this.loadUnreadCount();
+        this.notifications.notifyInboxChanged();
         this.toastr.success(this.translate.instant('notifications.toast.markReadOk'));
       },
       error: () => this.toastr.error(this.translate.instant('notifications.toast.markReadError'))

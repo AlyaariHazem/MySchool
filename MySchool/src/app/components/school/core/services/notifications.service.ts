@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { ApiResponse } from '../../../../core/models/response.model';
@@ -15,6 +15,14 @@ import {
 })
 export class NotificationsService {
   private readonly API = inject(BackendAspService);
+
+  /** Emits when inbox/unread state may have changed (header listens). */
+  private readonly inboxChanged = new Subject<void>();
+  readonly inboxChanged$ = this.inboxChanged.asObservable();
+
+  notifyInboxChanged(): void {
+    this.inboxChanged.next();
+  }
 
   send(body: SendNotificationRequest): Observable<ApiResponse<NotificationSendResultDto>> {
     return this.API.postRequest<NotificationSendResultDto>('Notifications/send', body);

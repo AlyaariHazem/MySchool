@@ -283,6 +283,15 @@
       "fixForm": "Please fix the required fields",
       "sendError": "Could not send notification",
       "sendOk": "Sent to {{count}} in-app recipient(s)"
+    },
+    "headerTitle": "Notifications",
+    "headerEmpty": "No notifications",
+    "viewAll": "View all notifications",
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{n}} min ago",
+      "hoursAgo": "{{n}} h ago",
+      "daysAgo": "{{n}} d ago"
     }
   },
   "attendance": {

@@ -39,7 +39,7 @@ import { AllParentsComponent } from './parents/all-parents/all-parents.component
 import { EditParentsComponent } from './parents/edit-parents/edit-parents.component';
 import { TeachersComponent } from './teachers/teachers.component';
 import { NavigateComponent } from './navigate/navigate.component';
-import { RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { StudyYearComponent } from './sittings/study-year/study-year.component';
 import { StagesGradesComponent } from './sittings/stages-grades/stages-grades.component';
 import { SchoolInfoComponent } from './sittings/school-info/school-info.component';
@@ -178,6 +178,7 @@ const modules = [
   MatDialogModule,
   MatDialogClose,
   RouterOutlet,
+  RouterLink,
   RouterLinkActive,
   DialogModule,
   ButtonModule,

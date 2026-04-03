@@ -30,78 +30,33 @@
         </ul>
         <ul class="nav float-left user-menu" [ngClass]="{'user-menu-Ar': dir === 'rtl','user-menu-En': dir === 'ltr'}">
             <li class="nav-item dropdown d-none d-sm-block">
-                <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+                <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown"
+                    [class.hasnotifications]="unreadCount > 0"
+                    (click)="onNotificationsBellClick()">
                     <img src="assets/img/sidebar/icon-22.png" alt="">
                 </a>
                 <div class="dropdown-menu notifications">
                     <div class="topnav-dropdown-header">
-                        <span>Notifications</span>
+                        <span>{{ 'notifications.headerTitle' | translate }}</span>
+                        <span *ngIf="notifLoading" class="notif-loading text-muted small">…</span>
                     </div>
                     <div class="drop-scroll">
                         <ul class="notification-list">
-                            <li class="notification-message">
-                                <a href="#">
-                                    <div class="media">
-                                        <span class="avatar">
-                                            <img alt="John Doe" src="assets/img/user-06.jpg"
-                                                class="img-fluid rounded-circle">
-                                        </span>
-                                        <div class="media-body">
-                                            <p class="noti-details"><span class="noti-title">المدرسة</span> إشعار مهم
-                                            </p>
-                                            <p class="noti-time"><span class="notification-time">مند ساعتين</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
+                            <li *ngIf="!notifLoading && headerNotifications.length === 0" class="notification-message notification-empty">
+                                <span class="text-muted px-3 py-2 d-block">{{ 'notifications.headerEmpty' | translate }}</span>
                             </li>
-                            <li class="notification-message">
-                                <a href="#">
+                            <li *ngFor="let n of headerNotifications" class="notification-message"
+                                [class.notification-unread]="!n.isRead">
+                                <a [routerLink]="['/school/notifications']" class="notification-item-link">
                                     <div class="media">
-                                        <span class="avatar">T</span>
+                                        <span class="avatar avatar-letter">{{ avatarLetter(n.title) }}</span>
                                         <div class="media-body">
-                                            <p class="noti-details"><span class="noti-title">حازم اليعري</span>
-                                                اعجب بصورة ملفك الشخصي.</p>
-                                            <p class="noti-time"><span class="notification-time">منذ يومين</span>
+                                            <p class="noti-details">
+                                                <span class="noti-title">{{ n.title }}</span>
+                                                <span class="noti-preview">{{ previewBody(n.body) }}</span>
                                             </p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="notification-message">
-                                <a href="#">
-                                    <div class="media">
-                                        <span class="avatar">T</span>
-                                        <div class="media-body">
-                                            <p class="noti-details"><span class="noti-title">Tarah Shropshire</span>
-                                                sent you a message.</p>
-                                            <p class="noti-time"><span class="notification-time">6 mins ago</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="notification-message">
-                                <a href="#">
-                                    <div class="media">
-                                        <span class="avatar">L</span>
-                                        <div class="media-body">
-                                            <p class="noti-details"><span class="noti-title">Misty Tison</span> like
-                                                your photo.</p>
-                                            <p class="noti-time"><span class="notification-time">8 mins ago</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="notification-message">
-                                <a href="#">
-                                    <div class="media">
-                                        <span class="avatar">G</span>
-                                        <div class="media-body">
-                                            <p class="noti-details"><span class="noti-title">Rolland Webber</span>
-                                                booking appoinment for meeting.</p>
-                                            <p class="noti-time"><span class="notification-time">12 mins ago</span>
+                                            <p class="noti-time">
+                                                <span class="notification-time">{{ relativeTime(n.sentAtUtc) }}</span>
                                             </p>
                                         </div>
                                     </div>
@@ -110,12 +65,12 @@
                         </ul>
                     </div>
                     <div class="topnav-dropdown-footer">
-                        <a href="#">عرض جميع الاشعارات</a>
+                        <a [routerLink]="['/school/notifications']">{{ 'notifications.viewAll' | translate }}</a>
                     </div>
                 </div>
             </li>
             <li class="nav-item dropdown d-none d-sm-block">
-                <a href="javascript:void(0);" id="open_msg_box" class="hasnotifications nav-link"><img
+                <a href="javascript:void(0);" id="open_msg_box" class="nav-link"><img
                         src="assets/img/sidebar/icon-23.png" alt=""> </a>
             </li>
             <li class="nav-item dropdown has-arrow">
