@@ -24,6 +24,17 @@ namespace Backend.Repository
             _userRepository = userRepository;
         }
 
+        public async Task<int?> GetTeacherIdByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return null;
+
+            return await _context.Teachers.AsNoTracking()
+                .Where(t => t.UserID == userId)
+                .Select(t => (int?)t.TeacherID)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
         // Add a new Teacher
         public async Task<TeacherDTO> AddTeacherAsync(TeacherDTO teacher)
         {

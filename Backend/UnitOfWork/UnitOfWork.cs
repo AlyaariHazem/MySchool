@@ -77,6 +77,7 @@ public class UnitOfWork : IUnitOfWork
         Dashboard = new DashboardRepository(_tenantContext, Users);
         WeeklySchedules = new WeeklyScheduleRepository(_tenantContext, _mapper);
         Attendance = new AttendanceRepository(_tenantContext);
+        Notifications = new NotificationRepository(_tenantContext, _htmlSanitizer);
         
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
@@ -114,6 +115,7 @@ public class UnitOfWork : IUnitOfWork
     public IDashboardRepository Dashboard { get; private set; }
     public IWeeklyScheduleRepository WeeklySchedules { get; private set; }
     public IAttendanceRepository Attendance { get; private set; }
+    public INotificationRepository Notifications { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

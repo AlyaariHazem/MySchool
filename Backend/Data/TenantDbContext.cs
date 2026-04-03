@@ -52,6 +52,8 @@ namespace Backend.Data
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
         public DbSet<WeeklySchedule> WeeklySchedules { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<NotificationMessage> NotificationMessages { get; set; }
+        public DbSet<NotificationDelivery> NotificationDeliveries { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -408,6 +410,54 @@ namespace Backend.Data
             modelBuilder.Entity<Attendance>()
                 .HasIndex(a => new { a.StudentID, a.ClassID, a.AttendanceDate })
                 .IsUnique();
+
+            modelBuilder.Entity<NotificationMessage>()
+                .HasKey(n => n.Id);
+
+            modelBuilder.Entity<NotificationMessage>()
+                .Property(n => n.Title)
+                .HasMaxLength(500)
+                .IsRequired();
+
+            modelBuilder.Entity<NotificationMessage>()
+                .Property(n => n.Body)
+                .IsRequired();
+
+            modelBuilder.Entity<NotificationMessage>()
+                .Property(n => n.SentByUserId)
+                .IsRequired();
+
+            modelBuilder.Entity<NotificationMessage>()
+                .Property(n => n.TargetKind)
+                .HasConversion<byte>();
+
+            modelBuilder.Entity<NotificationMessage>()
+                .Property(n => n.RequestedChannels)
+                .HasConversion<int>();
+
+            modelBuilder.Entity<NotificationDelivery>()
+                .HasKey(d => d.Id);
+
+            modelBuilder.Entity<NotificationDelivery>()
+                .Property(d => d.RecipientUserId)
+                .HasMaxLength(450)
+                .IsRequired();
+
+            modelBuilder.Entity<NotificationDelivery>()
+                .Property(d => d.Channel)
+                .HasConversion<byte>();
+
+            modelBuilder.Entity<NotificationDelivery>()
+                .HasOne(d => d.NotificationMessage)
+                .WithMany(m => m.Deliveries)
+                .HasForeignKey(d => d.NotificationMessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NotificationDelivery>()
+                .HasIndex(d => d.RecipientUserId);
+
+            modelBuilder.Entity<NotificationDelivery>()
+                .HasIndex(d => new { d.RecipientUserId, d.ReadAtUtc });
 
             // Configure unique index on Code + SchoolId (allows same code for different schools, but unique per school)
             modelBuilder.Entity<ReportTemplate>()

@@ -10,6 +10,8 @@ namespace Backend.Interfaces;
 
 public interface ITeacherRepository
 {
+    Task<int?> GetTeacherIdByUserIdAsync(string userId, CancellationToken cancellationToken = default);
+
     Task<TeacherDTO> AddTeacherAsync(TeacherDTO teacher);
     Task<List<TeacherDTO>> GetAllTeachersAsync();
     Task<(List<TeacherDTO> Items, int TotalCount)> GetTeachersPageAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);

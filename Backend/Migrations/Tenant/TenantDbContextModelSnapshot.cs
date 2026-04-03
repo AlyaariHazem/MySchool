@@ -1080,6 +1080,74 @@ namespace Backend.Migrations.Tenant
                     b.ToTable("Attendances");
                 });
 
+            modelBuilder.Entity("Backend.Models.NotificationDelivery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte>("Channel")
+                        .HasColumnType("tinyint");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("NotificationMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ReadAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RecipientUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NotificationMessageId");
+
+                    b.HasIndex("RecipientUserId");
+
+                    b.HasIndex("RecipientUserId", "ReadAtUtc");
+
+                    b.ToTable("NotificationDeliveries");
+                });
+
+            modelBuilder.Entity("Backend.Models.NotificationMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RequestedChannels")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SentByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("TargetKind")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NotificationMessages");
+                });
+
             modelBuilder.Entity("Backend.Models.Year", b =>
                 {
                     b.Property<int>("YearID")
@@ -1687,6 +1755,22 @@ namespace Backend.Migrations.Tenant
                     b.Navigation("Class");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Backend.Models.NotificationDelivery", b =>
+                {
+                    b.HasOne("Backend.Models.NotificationMessage", "NotificationMessage")
+                        .WithMany("Deliveries")
+                        .HasForeignKey("NotificationMessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NotificationMessage");
+                });
+
+            modelBuilder.Entity("Backend.Models.NotificationMessage", b =>
+                {
+                    b.Navigation("Deliveries");
                 });
 
             modelBuilder.Entity("Backend.Models.Year", b =>
