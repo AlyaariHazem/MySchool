@@ -1,0 +1,203 @@
+<div id="notifications-page" [attr.dir]="(dir$ | async) ?? 'rtl'" class="notifications-page">
+  <div class="notifications-card">
+    <h2 class="notifications-title">{{ 'notifications.pageTitle' | translate }}</h2>
+    <p class="unread-line" *ngIf="unreadCount > 0">
+      {{ 'notifications.unreadLine' | translate: { count: unreadCount } }}
+    </p>
+
+    <p-tabs [(value)]="activeTab" class="notifications-tabs">
+      <p-tablist>
+        <p-tab value="0">{{ 'notifications.tabInbox' | translate }}</p-tab>
+        <p-tab *ngIf="canSend" value="1">{{ 'notifications.tabSend' | translate }}</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div class="inbox-wrap">
+            <p-table
+              [value]="inboxRows"
+              [loading]="inboxLoading"
+              styleClass="p-datatable-sm notifications-table"
+              [tableStyle]="{ 'min-width': '100%' }">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>{{ 'notifications.col.title' | translate }}</th>
+                  <th>{{ 'notifications.col.date' | translate }}</th>
+                  <th>{{ 'notifications.col.status' | translate }}</th>
+                  <th class="col-actions"></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row>
+                <tr [class.row-unread]="!row.isRead">
+                  <td>{{ row.title }}</td>
+                  <td>{{ row.sentAtUtc | date: 'medium' }}</td>
+                  <td>
+                    <span class="status-pill" [class.is-unread]="!row.isRead">
+                      {{ row.isRead ? ('notifications.read' | translate) : ('notifications.unread' | translate) }}
+                    </span>
+                  </td>
+                  <td class="col-actions">
+                    <p-button
+                      type="button"
+                      size="small"
+                      [outlined]="true"
+                      icon="pi pi-eye"
+                      [label]="'notifications.view' | translate"
+                      (onClick)="openDetail(row)" />
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="4" class="empty-cell">{{ 'notifications.inboxEmpty' | translate }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+            <p-paginator
+              *ngIf="totalRecords > 0"
+              class="notifications-paginator"
+              [rows]="pageSize"
+              [totalRecords]="totalRecords"
+              [first]="first"
+              [rowsPerPageOptions]="[10, 15, 25, 50]"
+              [showCurrentPageReport]="true"
+              currentPageReportTemplate="{first} - {last} / {totalRecords}"
+              (onPageChange)="onInboxPageChange($event)" />
+          </div>
+        </p-tabpanel>
+
+        <p-tabpanel *ngIf="canSend" value="1">
+          <form [formGroup]="sendForm" class="send-form" (ngSubmit)="submitSend()" novalidate>
+            <div class="field">
+              <p-floatLabel class="w-full block" variant="on">
+                <input pInputText id="nt-title" class="w-full" formControlName="title" maxlength="500" />
+                <label for="nt-title">{{ 'notifications.sendTitle' | translate }}</label>
+              </p-floatLabel>
+            </div>
+
+            <div class="field">
+              <label class="block mb-2 text-sm" for="nt-body">{{ 'notifications.sendBody' | translate }}</label>
+              <textarea
+                pTextarea
+                id="nt-body"
+                formControlName="body"
+                class="w-full"
+                rows="8"
+                [autoResize]="true"></textarea>
+            </div>
+
+            <div class="field">
+              <p-floatLabel class="w-full block" variant="on">
+                <p-select
+                  inputId="nt-target"
+                  class="w-full"
+                  styleClass="w-full"
+                  size="small"
+                  [options]="targetOptions"
+                  formControlName="targetKind"
+                  optionLabel="label"
+                  optionValue="value"
+                  [showClear]="false"
+                  appendTo="body"
+                  panelStyleClass="notifications-select-panel" />
+                <label for="nt-target">{{ 'notifications.targetLabel' | translate }}</label>
+              </p-floatLabel>
+            </div>
+
+            <div class="field" *ngIf="needsClass()">
+              <p-floatLabel class="w-full block" variant="on">
+                <p-select
+                  inputId="nt-class"
+                  class="w-full"
+                  styleClass="w-full"
+                  size="small"
+                  [options]="classes"
+                  formControlName="classId"
+                  optionLabel="className"
+                  optionValue="classID"
+                  [showClear]="true"
+                  appendTo="body"
+                  panelStyleClass="notifications-select-panel" />
+                <label for="nt-class">{{ 'notifications.class' | translate }}</label>
+              </p-floatLabel>
+            </div>
+
+            <div class="field" *ngIf="needsDirectIds()">
+              <label class="block mb-2 text-sm" for="nt-ids">{{ 'notifications.directIds' | translate }}</label>
+              <textarea
+                pTextarea
+                id="nt-ids"
+                formControlName="directUserIdsText"
+                class="w-full"
+                rows="4"
+                [placeholder]="'notifications.directIdsHint' | translate"></textarea>
+            </div>
+
+            <fieldset class="channels-fieldset">
+              <legend>{{ 'notifications.channelsLegend' | translate }}</legend>
+              <div class="channels-grid">
+                <label class="ch-item">
+                  <input type="checkbox" formControlName="chInApp" />
+                  <span>{{ 'notifications.channel.inApp' | translate }}</span>
+                </label>
+                <label class="ch-item">
+                  <input type="checkbox" formControlName="chEmail" />
+                  <span>{{ 'notifications.channel.email' | translate }}</span>
+                </label>
+                <label class="ch-item">
+                  <input type="checkbox" formControlName="chSms" />
+                  <span>{{ 'notifications.channel.sms' | translate }}</span>
+                </label>
+                <label class="ch-item">
+                  <input type="checkbox" formControlName="chPush" />
+                  <span>{{ 'notifications.channel.push' | translate }}</span>
+                </label>
+              </div>
+              <p class="channels-note">{{ 'notifications.channelsNote' | translate }}</p>
+            </fieldset>
+
+            <div class="send-actions">
+              <p-button
+                type="submit"
+                severity="success"
+                icon="pi pi-send"
+                [loading]="sendLoading"
+                [label]="'notifications.sendButton' | translate" />
+            </div>
+          </form>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+
+<p-dialog
+  [(visible)]="detailVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(560px, 92vw)' }"
+  [header]="selected?.title || ''"
+  (onHide)="closeDetail()">
+  <ng-container *ngIf="selected">
+    <div class="detail-meta text-sm opacity-80 mb-2">
+      {{ selected.sentAtUtc | date: 'medium' }}
+    </div>
+    <div class="detail-body" [innerHTML]="safeBody(selected.body)"></div>
+    <div class="detail-actions">
+      <p-button
+        *ngIf="!selected.isRead"
+        type="button"
+        severity="success"
+        icon="pi pi-check"
+        [label]="'notifications.markRead' | translate"
+        (onClick)="markSelectedRead()" />
+      <p-button
+        type="button"
+        [outlined]="true"
+        [label]="'notifications.close' | translate"
+        (onClick)="closeDetail()" />
+    </div>
+  </ng-container>
+</p-dialog>

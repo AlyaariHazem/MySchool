@@ -38,6 +38,9 @@ export class AuthAPIService {
         if (response.schoolId) {
           localStorage.setItem('schoolId', response.schoolId);
         }
+        if (user.userType) {
+          localStorage.setItem('userType', user.userType);
+        }
       })
     );
   }
@@ -54,7 +57,7 @@ export class AuthAPIService {
       { withCredentials: true })               // what this will do?
       .pipe(
         tap(() => {
-          ['token', 'managerName', 'yearId', 'schoolName', 'userName', 'schoolId'].forEach(item => localStorage.removeItem(item));
+          ['token', 'managerName', 'yearId', 'schoolName', 'userName', 'schoolId', 'userType'].forEach(item => localStorage.removeItem(item));
           this.router.navigate(['/']);
         })
       );

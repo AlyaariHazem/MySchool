@@ -1,0 +1,141 @@
+.notifications-page {
+  padding: 1rem 1.25rem 2rem;
+}
+
+.notifications-card {
+  max-width: 960px;
+  margin: 0 auto;
+  background: var(--surface-card, #fff);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem 1.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.notifications-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.unread-line {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--primary-color, #2563eb);
+}
+
+.notifications-tabs {
+  margin-top: 0.5rem;
+}
+
+.inbox-wrap {
+  margin-top: 0.75rem;
+}
+
+.notifications-table {
+  .col-actions {
+    width: 1%;
+    white-space: nowrap;
+    text-align: end;
+  }
+
+  .row-unread td:first-child {
+    font-weight: 600;
+  }
+
+  .empty-cell {
+    text-align: center;
+    padding: 2rem 1rem !important;
+    color: var(--text-color-secondary, #64748b);
+  }
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--surface-100, #f1f5f9);
+  color: var(--text-color-secondary, #64748b);
+
+  &.is-unread {
+    background: color-mix(in srgb, var(--primary-color, #3b82f6) 12%, transparent);
+    color: var(--primary-color, #1d4ed8);
+  }
+}
+
+.notifications-paginator {
+  margin-top: 0.75rem;
+}
+
+.send-form {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 640px;
+}
+
+.channels-fieldset {
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 8px;
+  padding: 0.75rem 1rem 1rem;
+  margin: 0;
+
+  legend {
+    padding: 0 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+}
+
+.channels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.ch-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.channels-note {
+  margin: 0.65rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-color-secondary, #64748b);
+}
+
+.send-actions {
+  margin-top: 0.25rem;
+}
+
+.detail-body {
+  min-height: 3rem;
+  max-height: 50vh;
+  overflow: auto;
+  line-height: 1.55;
+  font-size: 0.95rem;
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--surface-border, #e2e8f0);
+}
+
+html[dir='rtl'] .detail-actions,
+:host-context([dir='rtl']) .detail-actions {
+  justify-content: flex-start;
+}

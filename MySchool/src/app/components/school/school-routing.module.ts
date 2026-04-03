@@ -30,6 +30,7 @@ import { StudentPromotionComponent } from './students/student-promotion/student-
 import { WeeklyScheduleComponent } from './weekly-schedule/weekly-schedule.component';
 import { AttendanceComponent } from './attendance/attendance.component';
 import { DatabaseRestoreComponent } from './sittings/database-restore/database-restore.component';
+import { NotificationsComponent } from './notifications/notifications.component';
 
 const routes: Routes = [
   {
@@ -113,6 +114,7 @@ const routes: Routes = [
       },
       { path: 'schedule', component: WeeklyScheduleComponent, data: { breadcrumb: 'جدول الحصص الأسبوعي' } },
       { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
+      { path: 'notifications', component: NotificationsComponent, data: { breadcrumb: 'الإشعارات' } },
       {
         path: 'course', data: { breadcrumb: 'المقررات والخطط' }, children: [
           { path: '', component: BooksComponent, data: { breadcrumb: 'الكتب' } },

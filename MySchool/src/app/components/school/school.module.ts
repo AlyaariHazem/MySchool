@@ -89,6 +89,7 @@ import { PromoteStudentDialogComponent } from './students/student-promotion/prom
 import { WeeklyScheduleComponent } from './weekly-schedule/weekly-schedule.component';
 import { AttendanceComponent } from './attendance/attendance.component';
 import { DatabaseRestoreComponent } from './sittings/database-restore/database-restore.component';
+import { NotificationsComponent } from './notifications/notifications.component';
 
 
 
@@ -141,7 +142,8 @@ const components = [
   AccountReportComponent,
   WeeklyScheduleComponent,
   AttendanceComponent,
-  DatabaseRestoreComponent
+  DatabaseRestoreComponent,
+  NotificationsComponent
 
 ];
 
