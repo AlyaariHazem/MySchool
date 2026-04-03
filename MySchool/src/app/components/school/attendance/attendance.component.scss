@@ -1,0 +1,53 @@
+.modal-container {
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+h2.school {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.filters-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+
+  .filter-group {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hint.muted {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0 0 1rem;
+}
+
+::ng-deep .p-paginator {
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+::ng-deep .attendance-table {
+  .p-select {
+    width: 100%;
+  }
+}

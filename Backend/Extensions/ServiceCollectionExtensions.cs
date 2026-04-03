@@ -60,6 +60,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAccountStudentGuardianRepository, AccountStudentGuardianRepository>();
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IWeeklyScheduleRepository, WeeklyScheduleRepository>();
+        services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 
         return services;
     }

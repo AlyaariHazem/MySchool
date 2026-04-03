@@ -76,6 +76,7 @@ public class UnitOfWork : IUnitOfWork
         TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper);
         Dashboard = new DashboardRepository(_tenantContext, Users);
         WeeklySchedules = new WeeklyScheduleRepository(_tenantContext, _mapper);
+        Attendance = new AttendanceRepository(_tenantContext);
         
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
@@ -112,6 +113,7 @@ public class UnitOfWork : IUnitOfWork
     public ITermlyGradeRepository TermlyGrades { get; private set; }
     public IDashboardRepository Dashboard { get; private set; }
     public IWeeklyScheduleRepository WeeklySchedules { get; private set; }
+    public IAttendanceRepository Attendance { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

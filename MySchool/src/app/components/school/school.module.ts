@@ -87,6 +87,7 @@ import { CustomTableComponent } from '../../shared/components/custom-table/custo
 import { StudentPromotionComponent } from './students/student-promotion/student-promotion.component';
 import { PromoteStudentDialogComponent } from './students/student-promotion/promote-student-dialog/promote-student-dialog.component';
 import { WeeklyScheduleComponent } from './weekly-schedule/weekly-schedule.component';
+import { AttendanceComponent } from './attendance/attendance.component';
 import { DatabaseRestoreComponent } from './sittings/database-restore/database-restore.component';
 
 
@@ -139,6 +140,7 @@ const components = [
   HeaderReportComponent,
   AccountReportComponent,
   WeeklyScheduleComponent,
+  AttendanceComponent,
   DatabaseRestoreComponent
 
 ];

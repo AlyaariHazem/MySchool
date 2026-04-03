@@ -169,6 +169,8 @@
       "term": "Term Grades"
     },
     "calendar": "Calendar",
+    "schedule": "Weekly class schedule",
+    "studentAttendance": "Attendance",
     "tests": "Tests",
     "holidays": "Holidays",
     "events": "Events",
@@ -233,6 +235,21 @@
     "actions": "Action",
     "messages": "Messages",
     "seeAllMessages": "See all messages"
+  },
+  "attendance": {
+    "pageTitle": "Daily attendance",
+    "class": "Class",
+    "division": "Division (optional)",
+    "date": "Date",
+    "loadRoster": "Load roster",
+    "save": "Save attendance",
+    "col.student": "Student",
+    "col.status": "Status",
+    "col.remarks": "Remarks",
+    "empty": "Choose class and date, then load the roster",
+    "savePageHint": "Students are loaded from the server with pagination. Save applies only to the students on the current page.",
+    "saveSuccessPage": "Attendance saved for the current page",
+    "saveSuccessTitle": "Done"
   },
   "accountReport": {
     "printIntro": "This printed document is a financial account statement for the guardian. It shows charges (amounts owed), payments and discounts, transactions listed by student, savings entries, and the current balance. Use it to review the account, reconcile payments, and plan settlements.",

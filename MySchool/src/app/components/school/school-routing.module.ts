@@ -28,6 +28,7 @@ import { GradesTermComponent } from './grades-mange/grades-term/grades-term.comp
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 import { StudentPromotionComponent } from './students/student-promotion/student-promotion.component';
 import { WeeklyScheduleComponent } from './weekly-schedule/weekly-schedule.component';
+import { AttendanceComponent } from './attendance/attendance.component';
 import { DatabaseRestoreComponent } from './sittings/database-restore/database-restore.component';
 
 const routes: Routes = [
@@ -111,6 +112,7 @@ const routes: Routes = [
         path: 'allotment', component: AllotmentComponent, data: { breadcrumb: 'تخصيص' }
       },
       { path: 'schedule', component: WeeklyScheduleComponent, data: { breadcrumb: 'جدول الحصص الأسبوعي' } },
+      { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       {
         path: 'course', data: { breadcrumb: 'المقررات والخطط' }, children: [
           { path: '', component: BooksComponent, data: { breadcrumb: 'الكتب' } },

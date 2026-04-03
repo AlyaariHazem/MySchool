@@ -78,6 +78,54 @@ export class StudentService {
         )
     }
 
+    /** Normalize student JSON from API (camelCase or PascalCase). */
+    normalizeStudentDetailsDto(raw: unknown): StudentDetailsDTO {
+        const r = raw as Record<string, unknown>;
+        const fnRaw = (r['fullName'] ?? r['FullName'] ?? {}) as Record<string, unknown>;
+        return {
+            ...(r as object),
+            studentID: Number(r['studentID'] ?? r['StudentID']),
+            divisionID: Number(r['divisionID'] ?? r['DivisionID']),
+            fullName: {
+                firstName: String(fnRaw['firstName'] ?? fnRaw['FirstName'] ?? ''),
+                middleName: String(fnRaw['middleName'] ?? fnRaw['MiddleName'] ?? ''),
+                lastName: String(fnRaw['lastName'] ?? fnRaw['LastName'] ?? ''),
+            },
+        } as StudentDetailsDTO;
+    }
+
+    /**
+     * POST api/Students/page — filters are applied on the server ({@link FilterRequest}).
+     * Use classId (required) and optional divisionId for attendance rosters.
+     */
+    getStudentsPageForAttendance(
+        pageNumber: number,
+        pageSize: number,
+        filter: { classId: number; divisionId?: number | null }
+    ): Observable<{
+        data: StudentDetailsDTO[];
+        totalCount: number;
+        totalPages: number;
+        pageNumber: number;
+        pageSize: number;
+    }> {
+        const filters: Record<string, string> = { classId: String(filter.classId) };
+        if (filter.divisionId != null && !Number.isNaN(Number(filter.divisionId))) {
+            filters['divisionId'] = String(filter.divisionId);
+        }
+        return this.getStudentsPage(pageNumber, pageSize, filters).pipe(
+            map((page) => ({
+                data: (Array.isArray(page.data) ? page.data : []).map((row: unknown) =>
+                    this.normalizeStudentDetailsDto(row)
+                ),
+                totalCount: Number(page.totalCount ?? 0),
+                totalPages: Number(page.totalPages ?? 0),
+                pageNumber: Number(page.pageNumber ?? pageNumber),
+                pageSize: Number(page.pageSize ?? pageSize),
+            }))
+        );
+    }
+
     getAllStudentsPaginated(pageNumber: number = 1, pageSize: number = 8): Observable<any> {
         return this.API.http.get<any>(`${this.API.baseUrl}/Students?pageNumber=${pageNumber}&pageSize=${pageSize}`).pipe(
             map(response => {

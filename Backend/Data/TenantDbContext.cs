@@ -51,6 +51,7 @@ namespace Backend.Data
         public DbSet<AccountStudentGuardian> AccountStudentGuardians { get; set; }
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
         public DbSet<WeeklySchedule> WeeklySchedules { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -388,6 +389,25 @@ namespace Backend.Data
             
             modelBuilder.Entity<WeeklySchedule>()
                 .HasKey(ws => ws.WeeklyScheduleID);
+
+            modelBuilder.Entity<Attendance>()
+                .HasKey(a => a.AttendanceId);
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.Student)
+                .WithMany()
+                .HasForeignKey(a => a.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.Class)
+                .WithMany()
+                .HasForeignKey(a => a.ClassID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Attendance>()
+                .HasIndex(a => new { a.StudentID, a.ClassID, a.AttendanceDate })
+                .IsUnique();
 
             // Configure unique index on Code + SchoolId (allows same code for different schools, but unique per school)
             modelBuilder.Entity<ReportTemplate>()

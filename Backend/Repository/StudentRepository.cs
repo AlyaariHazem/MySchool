@@ -590,6 +590,9 @@ public class StudentRepository : IStudentRepository
                 "divisionid" or "divisionId" => filterValue.IntValue.HasValue
                     ? query.Where(s => s.DivisionID == filterValue.IntValue.Value)
                     : query,
+                "classid" or "classId" => filterValue.IntValue.HasValue
+                    ? query.Where(s => s.Division != null && s.Division.ClassID == filterValue.IntValue.Value)
+                    : query,
                 "guardianid" or "guardianId" => filterValue.IntValue.HasValue
                     ? query.Where(s => s.GuardianID == filterValue.IntValue.Value)
                     : query,
