@@ -1,29 +1,49 @@
 <div id="id01" [attr.dir]="dir$ | async" class="modal-container">
   <h2 class="school">بنود الدرجات</h2>
   <form [formGroup]="form">
+    @if (apiErrorMessages.length > 0) {
+    <div class="grade-type-api-errors" role="alert">
+      @for (msg of apiErrorMessages; track $index) {
+      <p>{{ msg }}</p>
+      }
+    </div>
+    }
     <div class="group group2">
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
           <mat-label>اسم البند</mat-label>
           <input class="inputError" formControlName="name" type="text" matInput />
+          @if (form.get('name')?.invalid && (form.get('name')?.dirty || form.get('name')?.touched)) {
+          <mat-error>اسم البند مطلوب</mat-error>
+          }
         </mat-form-field>
       </div>
       <div class="form-control">
         <mat-form-field appearance="outline" class="inputText">
           <mat-label>الدرجة العظمى</mat-label>
-          <input class="inputError" formControlName="maxGrade" type="number" matInput />
+          <input class="inputError" formControlName="maxGrade" type="number" matInput min="0" />
+          @if (form.get('maxGrade')?.hasError('required') && (form.get('maxGrade')?.dirty || form.get('maxGrade')?.touched)) {
+          <mat-error>الدرجة العظمى مطلوبة</mat-error>
+          }
+          @if (form.get('maxGrade')?.hasError('min') && (form.get('maxGrade')?.dirty || form.get('maxGrade')?.touched)) {
+          <mat-error>القيمة يجب أن تكون 0 أو أكبر</mat-error>
+          }
         </mat-form-field>
       </div>
       <div class="form-control">
-        <button class="active">
-          <i class="bi bi-record-circle" [ngStyle]="{'color': isActive ? 'red' : '#2fdf85'}"></i>
-          نشط
-          <span class="bi bi-caret-down-fill"></span>
-        </button>
-
+        <mat-form-field appearance="outline" class="inputText">
+          <mat-label>الحالة</mat-label>
+          <mat-select formControlName="isActive">
+            <mat-option [value]="true">نشط</mat-option>
+            <mat-option [value]="false">غير نشط</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
     </div>
-    <p-button variant="outlined" severity="success" class="showFee" (onClick)="Add()" label="إضافة+" />
+    <p-button variant="outlined" severity="success" class="showFee" (onClick)="submit()" [label]="editingGradeTypeId != null ? 'تحديث' : 'إضافة+'" />
+    @if (editingGradeTypeId != null) {
+    <p-button variant="outlined" severity="secondary" class="showFee cancel-edit-btn" (onClick)="cancelEdit()" label="إلغاء التعديل" />
+    }
     <p-chips [ngClass]="{'chipsOne':(dir$ | async)==='rtl','chipsOneEn':(dir$ | async)==='ltr'}"
       [max]="search" placeholder="ابحث هنا..." />
   </form>
@@ -68,7 +88,7 @@
                       <div class="dropdown-menu dropdown-menu-left">
                         <a class="dropdown-item" (click)="edit(gradeType)"><i class="bi bi-pencil-square IconEdit"></i>تعديل</a>
                         <div role="separator" class="dropdown-divider"></div>
-                        <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                        <a class="dropdown-item" (click)="deleteGradeType(gradeType)"><i class="bi bi-trash IconDelete"></i>حذف</a>
                       </div>
                     </div>
                   </div>

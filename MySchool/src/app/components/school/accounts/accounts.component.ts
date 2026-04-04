@@ -10,6 +10,7 @@ import { AccountService } from '../core/services/account.service';
 import { Account } from '../core/models/accounts.model';
 import { PaginatorService } from '../../../core/services/paginator.service';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
+import { ConfirmationService } from 'primeng/api';
 
 interface AccountType {
   name: string;
@@ -27,6 +28,7 @@ export class AccountsComponent implements OnInit {
 
   accountService = inject(AccountService);
   paginatorService = inject(PaginatorService);
+  confirmationService = inject(ConfirmationService);
 
   accounts: Account[] = [];
   EditAccount: Account | undefined;
@@ -94,5 +96,31 @@ export class AccountsComponent implements OnInit {
     this.EditAccount = account;
     this.visible = true;
     console.log('Editing =>', account);
+  }
+  deleteAccount(id: number) {
+    //confirm dialog
+    this.confirmationService.confirm({
+      message: 'هل أنت متأكد من حذف هذا الحساب؟',
+      header: 'تأكيد الحذف',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'نعم',
+      rejectLabel: 'لا',
+      accept: () => {
+      this.accountService.DeleteAccount(id).subscribe({
+        next: (res) => {
+          if (!res.isSuccess) {
+            this.toastr.error(res.errorMasseges[0] || 'Failed to delete account.');
+            return;
+          }
+            this.toastr.success('تم حذف الحساب');
+            this.getAllAccounts();
+          },
+          error: (err) => {
+            this.toastr.error('Failed to delete account.');
+            console.error(err);
+          }
+        });
+      }
+    });
   }
 }

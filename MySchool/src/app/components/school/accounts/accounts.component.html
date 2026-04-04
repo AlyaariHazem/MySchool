@@ -89,10 +89,10 @@
                       <i class="fas fa-ellipsis-h"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-left">
-                      <a class="dropdown-item"><i class="bi bi-pencil-square IconEdit"
-                          (click)="editAccount(account)"></i>تعديل</a>
+                      <a class="dropdown-item" (click)="editAccount(account)"><i class="bi bi-pencil-square IconEdit"
+                          ></i>تعديل</a>
                       <div role="separator" class="dropdown-divider"></div>
-                      <a class="dropdown-item"><i class="bi bi-trash IconDelete"></i>حذف</a>
+                      <a class="dropdown-item" (click)="deleteAccount(account.accountID)"><i class="bi bi-trash IconDelete"></i>حذف</a>
                     </div>
                   </div>
                 </div>

@@ -43,6 +43,22 @@
   margin-top: 0rem;
 }
 
+.grade-type-api-errors {
+  color: #b00020;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+.grade-type-api-errors p {
+  margin: 0.25rem 0;
+}
+
+:host ::ng-deep .cancel-edit-btn.p-button {
+  margin-inline-start: 0.5rem;
+}
+
 // this for form
 
 .group {

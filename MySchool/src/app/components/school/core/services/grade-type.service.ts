@@ -14,4 +14,16 @@ export class GradeTypeService {
   getAllGradeType(): Observable<ApiResponse<GradeType[]>> {
     return this.API.getRequest<GradeType[]>('GradeTypes');
   }
+
+  createGradeType(payload: Partial<GradeType>): Observable<ApiResponse<GradeType>> {
+    return this.API.postRequest<GradeType>('GradeTypes', payload);
+  }
+
+  updateGradeType(id: number, payload: Partial<GradeType>): Observable<ApiResponse<unknown>> {
+    return this.API.putRequest<unknown>(`GradeTypes/${id}`, payload);
+  }
+
+  deleteGradeType(id: number): Observable<ApiResponse<unknown>> {
+    return this.API.deleteRequest<unknown>(`GradeTypes/${id}`);
+  }
 }

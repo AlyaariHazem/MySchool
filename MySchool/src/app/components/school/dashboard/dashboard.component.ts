@@ -340,16 +340,29 @@ export class DashboardComponent implements OnInit {
       this.translate.instant('dashboard.exportColAdmission'),
       this.translate.instant('dashboard.exportColFee'),
     ];
-    const head = [isRtl ? [...headLtr].reverse() : headLtr];
+    /** LTR indices: 0 name, 1 student no, … 6 fee. For Arabic PDF, draw LTR as fee→…→father→name→studentNo so RTL reading has name beside student no on the right. */
+    const headRtlPdf = [
+      headLtr[6],
+      headLtr[5],
+      headLtr[4],
+      headLtr[3],
+      headLtr[2],
+      headLtr[0],
+      headLtr[1],
+    ];
+    const head = [isRtl ? headRtlPdf : headLtr];
     const body = rows.map((st) => {
       const cells = this.exportRowValues(st);
-      return isRtl ? [...cells].reverse() : cells;
+      if (!isRtl) {
+        return cells;
+      }
+      return [cells[6], cells[5], cells[4], cells[3], cells[2], cells[0], cells[1]];
     });
 
     /** #009879 */
     const headerGreen: [number, number, number] = [0, 152, 121];
-    /** Repeat “name” column on horizontal page breaks: index 0 in LTR, last after reverse in RTL */
-    const repeatCol = isRtl ? headLtr.length - 1 : 0;
+    /** Repeat “name” on horizontal page breaks: col 0 in LTR; in RTL PDF order, name is index 5 */
+    const repeatCol = isRtl ? 5 : 0;
 
     autoTable(doc, {
       startY: 14,
