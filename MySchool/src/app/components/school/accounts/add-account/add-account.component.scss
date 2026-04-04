@@ -72,6 +72,37 @@ select {
   color: red;
   font-size: 0.9rem;
 }
+
+.field-msg {
+  display: block;
+  margin-top: 4px;
+}
+
+.account-api-errors {
+  color: #b00020;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0 0 0.5rem;
+}
+.account-api-errors p {
+  margin: 0.25rem 0;
+}
+
+:host ::ng-deep .form-control.is-invalid .p-inputtext,
+:host ::ng-deep .form-control1.is-invalid .p-inputtext {
+  border-color: #b00020 !important;
+}
+
+:host ::ng-deep .form-control.is-invalid .p-select .p-select-label,
+:host ::ng-deep .form-control1.is-invalid .p-select .p-select-label {
+  border-color: #b00020 !important;
+}
+
+.form-control.is-invalid input[type="date"] {
+  border-color: #b00020;
+}
 button:disabled {
   background-color: #ccc;
   cursor: not-allowed;

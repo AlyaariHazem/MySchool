@@ -1,5 +1,7 @@
 .custom-table-wrapper {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 
   .table-filters {
     padding: 1rem;
@@ -14,6 +16,113 @@
   .column-filter-input {
     font-size: 12px;
   }
+}
+
+.custom-table-outer {
+  max-width: 100%;
+}
+
+.custom-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+}
+
+.custom-table-scroll .styled-table {
+  width: max-content;
+  min-width: 100%;
+}
+
+:host ::ng-deep .custom-table-outer mat-card {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.ct-debit-badge {
+  margin: 0;
+  background-color: #c2d50b36;
+  border-radius: 5rem;
+  color: #ff7373;
+}
+
+.ct-status-pill {
+  border: 1px solid #aca6a6;
+  width: 9rem;
+  border-radius: 18px;
+  height: 2.5rem;
+  color: black;
+  margin-top: 0.5rem;
+  background-color: white;
+  cursor: pointer;
+}
+
+.ct-caret {
+  color: #6b7280;
+}
+
+.ct-actions-cell {
+  position: relative;
+  vertical-align: middle;
+}
+
+.ct-actions-cell-inner {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 2.5rem;
+}
+
+.ct-actions-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem 0.6rem;
+  line-height: 1;
+  color: #374151;
+}
+
+.ct-action-menu-panel {
+  position: fixed;
+  z-index: 5000;
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.375rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  list-style: none;
+}
+
+.ct-action-menu-item {
+  cursor: pointer;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #212529;
+  text-decoration: none;
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: inherit;
+}
+
+.ct-action-menu-item:hover {
+  background-color: #f3f4f6;
+}
+
+.ct-action-menu-divider {
+  height: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
 }
 
 // Keep existing table styles - preserve green header

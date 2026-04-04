@@ -1,4 +1,11 @@
 <form [formGroup]="form" class="account-form">
+    @if (apiErrorMessages.length > 0) {
+    <div class="account-api-errors" role="alert">
+      @for (msg of apiErrorMessages; track $index) {
+      <p>{{ msg }}</p>
+      }
+    </div>
+    }
     <!-- Buttons in header -->
     <div class="form-actions-header">
         <button class="save" pButton type="button" label="حفظ" (click)="save()" title="حفظ الحساب"></button>
@@ -17,21 +24,26 @@
         <div class="contant">
             <div class="group">
 
-                <div class="form-control mt-2">
+                <div class="form-control mt-2" [class.is-invalid]="fieldInvalid('accountName')">
                     <p-floatlabel class="w-full h-3rem" variant="on">
                         <input class="w-full h-3rem" name="accountName" formControlName="accountName" pInputText
-                            id="amount" type="text" autocomplete="off" required />
+                            id="amount" type="text" autocomplete="off" />
                         <label for="amount">اسم الحساب<span style="color:red;"> *</span></label>
                     </p-floatlabel>
+                    @if (fieldInvalid('accountName')) {
+                    <span class="error field-msg">{{ fieldError('accountName') }}</span>
+                    }
                 </div>
-                <div class="form-control1 mt-3">
+                <div class="form-control1 mt-3" [class.is-invalid]="fieldInvalid('parentAccount')">
                     <p-floatlabel class="w-full h-3rem" variant="on">
                         <p-select class="w-full h-3rem" [options]="accountType" optionLabel="name" inputId="classID"
                             formControlName="parentAccount" optionValue="name" [checkmark]="true" [editable]="true"
-                            [showClear]="true" required />
+                            [showClear]="true" />
                         <label for="Class">إختار الصف</label>
                     </p-floatlabel>
-
+                    @if (fieldInvalid('parentAccount')) {
+                    <span class="error field-msg">{{ fieldError('parentAccount') }}</span>
+                    }
                 </div>
 
             </div>
@@ -44,10 +56,10 @@
                 </div>
                 <div class="form-control1 mt-3">
                     <p-floatlabel class="w-full" variant="on">
-                        <p-select class="w-full h-3rem" [options]="paymentMethods" optionLabel="label" inputId="label"
+                        <p-select class="w-full h-3rem" [options]="paymentMethods" optionLabel="label" inputId="accountTypePay"
                             formControlName="accountType" optionValue="label" [checkmark]="true" [editable]="true"
-                            [showClear]="true" required />
-                        <label for="label">نوع الحساب</label>
+                            [showClear]="true" />
+                        <label for="accountTypePay">نوع الحساب</label>
                     </p-floatlabel>
 
                 </div>
@@ -55,16 +67,19 @@
 
             <div class="group">
 
-                <div class="form-control">
+                <div class="form-control" [class.is-invalid]="fieldInvalid('openingBalance')">
                     <label class="label2">الرصيد الإفتتاحي</label>
                     <input pInputText type="number" pSize="large" formControlName="openingBalance" />
+                    @if (fieldInvalid('openingBalance')) {
+                    <span class="error field-msg">{{ fieldError('openingBalance') }}</span>
+                    }
                 </div>
                 <div class="form-control1 mt-4">
                     <p-floatlabel class="w-full" variant="on">
-                        <p-select class="w-full h-3rem" [options]="" optionLabel="name" inputId="label"
+                        <p-select class="w-full h-3rem" [options]="openingBalanceTypeOptions" optionLabel="label" inputId="openingBalType"
                             formControlName="openingBalanceType" optionValue="label" [checkmark]="true"
-                            [editable]="true" [showClear]="true" required />
-                        <label for="label">نوع الرصيد الإفتتاحي</label>
+                            [editable]="true" [showClear]="true" />
+                        <label for="openingBalType">نوع الرصيد الإفتتاحي</label>
                     </p-floatlabel>
                 </div>
 
@@ -75,9 +90,12 @@
                     <label class="label2">البيان</label>
                     <textarea pTextarea pSize="small" rows="3" formControlName="description"></textarea>
                 </div>
-                <div class="form-control">
+                <div class="form-control" [class.is-invalid]="fieldInvalid('createdDate')">
                     <label class="label2">تاريخ الإنشاء</label>
                     <input type="date" formControlName="createdDate" />
+                    @if (fieldInvalid('createdDate')) {
+                    <span class="error field-msg">{{ fieldError('createdDate') }}</span>
+                    }
                 </div>
             </div>
         </div>

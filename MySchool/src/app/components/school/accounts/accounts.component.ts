@@ -12,6 +12,8 @@ import { PaginatorService } from '../../../core/services/paginator.service';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
 import { ConfirmationService } from 'primeng/api';
 
+import { TableColumn } from '../../../shared/components/custom-table/custom-table.component';
+
 interface AccountType {
   name: string;
   code: number;
@@ -35,6 +37,7 @@ export class AccountsComponent implements OnInit {
   isLoading: boolean = true;
 
   showDialog() {
+    this.EditAccount = undefined;
     this.visible = true;
   }
   form: FormGroup;
@@ -44,6 +47,36 @@ export class AccountsComponent implements OnInit {
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
   );
   displayedaccounts: Account[] = []; // Students for the current page
+
+  accountTableColumns: TableColumn[] = [
+    { field: '__index', header: '#', template: 'rowIndex' },
+    { field: 'accountName', header: 'الحساب' },
+    { field: '__debit', header: 'النوع', template: 'debitBadge' },
+    {
+      field: 'typeAccountID',
+      header: 'حساب الأب',
+      formatter: (v) => (v === 1 ? 'Guardian' : String(v ?? '-')),
+    },
+    {
+      field: 'openBalance',
+      header: 'الرصيد الإفتتاحي',
+      formatter: (v) => (v == null || v === '' ? '-' : String(v)),
+    },
+    { field: 'typeOpenBalance', header: 'نوع الرصيد الإفتتاحي', formatter: (v) => String(v) },
+    { field: 'state', header: 'الحالة', template: 'statusToggle' },
+    { field: 'note', header: 'البيان', formatter: (v) => (v ? String(v) : '-') },
+    {
+      field: 'hireDate',
+      header: 'تاريخ الإنشاء',
+      formatter: (v) => {
+        if (!v) {
+          return '-';
+        }
+        const d = new Date(v as string);
+        return Number.isNaN(d.getTime()) ? String(v) : d.toISOString().slice(0, 10);
+      },
+    },
+  ];
 
   constructor(
     private formBuilder: FormBuilder,
@@ -93,12 +126,26 @@ export class AccountsComponent implements OnInit {
     student.state = !student.state;
   }
   editAccount(account: Account) {
-    this.EditAccount = account;
+    this.EditAccount = { ...account };
     this.visible = true;
-    console.log('Editing =>', account);
   }
-  deleteAccount(id: number) {
-    //confirm dialog
+
+  onAccountSaved(): void {
+    this.visible = false;
+    this.EditAccount = undefined;
+    this.getAllAccounts();
+  }
+  private resolveAccountId(row: Account): number | undefined {
+    const r = row as unknown as Record<string, unknown>;
+    return row.accountID ?? (r['accountId'] as number) ?? (r['AccountID'] as number);
+  }
+
+  deleteAccount(row: Account) {
+    const id = this.resolveAccountId(row);
+    if (id == null) {
+      this.toastr.error('تعذر تحديد رقم الحساب.');
+      return;
+    }
     this.confirmationService.confirm({
       message: 'هل أنت متأكد من حذف هذا الحساب؟',
       header: 'تأكيد الحذف',

@@ -81,7 +81,7 @@ public class AccountsController : ControllerBase
             var createdAccount = await _unitOfWork.Accounts.AddAccountAsync(account);
             response.Result = createdAccount;
             response.statusCode = HttpStatusCode.Created;
-            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            return StatusCode((int)HttpStatusCode.Created, response);
         }
         catch (Exception ex)
         {

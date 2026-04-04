@@ -35,78 +35,29 @@
   </form>
 
   <p-dialog [(visible)]="visible" [modal]="true" [style]="{ width: '75%' }" [draggable]="false" [resizable]="false">
-    <h2 class="Title">حساب جديد</h2>
+    <h2 class="Title">{{ EditAccount ? 'تعديل حساب' : 'حساب جديد' }}</h2>
     @if(visible) {
-    <app-add-account [account]="EditAccount"></app-add-account>
+    <app-add-account [account]="EditAccount" (saved)="onAccountSaved()"></app-add-account>
     }
   </p-dialog>
 
-  <!-- Responsive Table -->
-  <div class="table-container">
-    <div class="table-container">
-      <mat-card>
-        <table class="styled-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>الحساب</th>
-              <th>النوع</th>
-              <th>حساب الأب</th>
-              <th>الرصيد الإفتتاحي</th>
-              <th>نوع الرصيد الإفتتاحي</th>
-              <th>الحالة</th>
-              <th>البيان</th>
-              <th>تاريخ الإنشاء</th>
-              <th>العملية</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (account of displayedaccounts; track $index) {
-            <tr>
-              <td>{{ $index+1 }}</td>
-              <td>{{account.accountName}}</td>
-              <td>
-                <p class="dain">مدين</p>
-              </td>
-              <td>{{account.typeAccountID==1?'Guardian':account.typeAccountID}}</td>
-              <td>{{account.openBalance}}</td>
-              <td>{{account.typeOpenBalance}}</td>
-              <td>
-                <button class="active" (click)="changeState(account)">
-                  <i class="bi bi-record-circle" [ngStyle]="{'color': account.state ? '#2fdf85':'red'}">
-                  </i>
-                  {{ account.state ? 'نشط' : 'غير نشط' }}
-                  <span class="bi bi-caret-down-fill"></span>
-                </button>
-              </td>
-              <td>{{account.note}}</td>
-              <td>{{account.hireDate | date:'yyyy-mm-dd'}}</td>
-              <td>
-                <div class="col text-left">
-                  <div class="mt-sm-0 mt-2">
-                    <button class="btn btn-left update" type="button" data-toggle="dropdown" aria-haspopup="true"
-                      aria-expanded="false">
-                      <i class="fas fa-ellipsis-h"></i>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-left">
-                      <a class="dropdown-item" (click)="editAccount(account)"><i class="bi bi-pencil-square IconEdit"
-                          ></i>تعديل</a>
-                      <div role="separator" class="dropdown-divider"></div>
-                      <a class="dropdown-item" (click)="deleteAccount(account.accountID)"><i class="bi bi-trash IconDelete"></i>حذف</a>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
-        <p-paginator class="relative" dir="ltr" (onPageChange)="handlePageChange($event)" [first]="paginatorService.first()"
-          [rows]="paginatorService.rows()" [totalRecords]="accounts.length" [rowsPerPageOptions]="[4, 10, 20]" >
-        </p-paginator>
-      </mat-card>
-    </div>
-
-  </div>
+  <app-custom-table
+    [data]="displayedaccounts"
+    [columns]="accountTableColumns"
+    [loading]="isLoading"
+    [totalRecords]="accounts.length"
+    [rows]="paginatorService.rows()"
+    [first]="paginatorService.first()"
+    [rowsPerPageOptions]="[4, 10, 20]"
+    [showGlobalFilter]="false"
+    [showHeaderFilters]="false"
+    [tableDir]="(dir$ | async) === 'rtl' ? 'rtl' : 'ltr'"
+    [rowClickable]="false"
+    [trackByField]="'accountID'"
+    (pageChange)="handlePageChange($event)"
+    (rowEdit)="editAccount($event)"
+    (rowDelete)="deleteAccount($event)"
+    (statusToggle)="changeState($event)">
+  </app-custom-table>
 
 </div>
