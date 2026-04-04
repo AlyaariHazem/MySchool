@@ -1,8 +1,17 @@
-import {Component,ChangeDetectorRef,OnInit,PLATFORM_ID,inject,effect,} from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  OnInit,
+  PLATFORM_ID,
+  inject,
+  effect,
+  DestroyRef,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { isPlatformBrowser } from '@angular/common';
 import { PaginatorState } from 'primeng/paginator';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, debounceTime, distinctUntilChanged, map, Subject } from 'rxjs';
 
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { Year } from '../../../core/models/year.model';
@@ -22,8 +31,23 @@ export class DashboardComponent implements OnInit {
   private yearService = inject(YearService);
   private dashboardService = inject(DashboardService);
   private platformId = inject(PLATFORM_ID);
+  private destroyRef = inject(DestroyRef);
 
-  constructor(private cd: ChangeDetectorRef,private store:Store) { }
+  private readonly studentSearchInput$ = new Subject<string>();
+
+  constructor(private cd: ChangeDetectorRef, private store: Store) {
+    this.studentSearchInput$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.first = 0;
+        this.loadPaginatedStudents();
+      });
+  }
 
   readonly dir$ = this.store.select(selectLanguage).pipe(
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
@@ -44,7 +68,10 @@ export class DashboardComponent implements OnInit {
   currentPage = 1;
   pageSize = 10;
   totalRecords = 0;
-  
+
+  /** Live filter for “كل الطلاب” — debounced → POST /Students/page with `search` */
+  studentTableSearchText = '';
+
   onPageChange(event: PaginatorState): void {
     this.first = event.first ?? 0;
     this.rows = event.rows ?? this.pageSize;
@@ -92,8 +119,30 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  onStudentSearchChange(value: string): void {
+    this.studentSearchInput$.next((value ?? '').trim());
+  }
+
+  /** First + middle + last for hover tooltip */
+  studentFullNameTooltip(student: StudentDetailsDTO): string {
+    const fn = student?.fullName;
+    if (!fn) {
+      return '';
+    }
+    const parts = [fn.firstName, fn.middleName, fn.lastName].filter(
+      (p) => p != null && String(p).trim() !== '',
+    );
+    return parts.join(' ').trim();
+  }
+
   private loadPaginatedStudents(): void {
-    this.studentService.getStudentsPage(this.currentPage, this.pageSize).subscribe({
+    const filters: Record<string, string> = {};
+    const q = this.studentTableSearchText.trim();
+    if (q.length > 0) {
+      filters['search'] = q;
+    }
+
+    this.studentService.getStudentsPage(this.currentPage, this.pageSize, filters).subscribe({
       next: (res) => {
         this.paginatedStudents = res.data || [];
         this.totalRecords = res.totalCount || 0;

@@ -611,6 +611,13 @@ public class StudentRepository : IStudentRepository
                 "middlename" or "middleName" => !string.IsNullOrEmpty(filterValue.Value)
                     ? query.Where(s => s.FullName.MiddleName != null && s.FullName.MiddleName.Contains(filterValue.Value))
                     : query,
+                "search" => !string.IsNullOrWhiteSpace(filterValue.Value)
+                    ? query.Where(s =>
+                        (s.FullName.FirstName != null && s.FullName.FirstName.Contains(filterValue.Value!))
+                        || s.FullName.LastName.Contains(filterValue.Value!)
+                        || (s.FullName.MiddleName != null && s.FullName.MiddleName.Contains(filterValue.Value!))
+                        || (filterValue.IntValue.HasValue && s.StudentID == filterValue.IntValue.Value))
+                    : query,
                 _ => query // Unknown filter, ignore it
             };
         }

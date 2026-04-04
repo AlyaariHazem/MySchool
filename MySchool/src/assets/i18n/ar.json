@@ -236,7 +236,9 @@
     "pdf": "PDF",
     "actions": "الحدث",
     "messages": "الرسائل",
-    "seeAllMessages": "عرض جميع الرسائل"
+    "seeAllMessages": "عرض جميع الرسائل",
+    "filterStudentLabel": "تصفية حسب اسم او رقم الطالب",
+    "filterStudentPlaceholder": "اكتب لتصفية الجدول (الاسم أو رقم الطالب)…"
   },
   "notifications": {
     "pageTitle": "الإشعارات",

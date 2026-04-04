@@ -235,7 +235,9 @@
     "pdf": "PDF",
     "actions": "Action",
     "messages": "Messages",
-    "seeAllMessages": "See all messages"
+    "seeAllMessages": "See all messages",
+    "filterStudentLabel": "Filter by student",
+    "filterStudentPlaceholder": "Type to filter the table (name or student #)…"
   },
   "notifications": {
     "pageTitle": "Notifications",

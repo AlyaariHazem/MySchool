@@ -281,6 +281,22 @@
               </div>
             </div>
           </div>
+          <div class="row align-items-end mt-2 pt-2 border-top">
+            <div class="col-12 col-md-8 col-lg-6">
+              <label for="dashboardStudentFilter" class="d-block small text-muted mb-1">
+                {{ 'dashboard.filterStudentLabel' | translate }}
+              </label>
+              <input
+                pInputText
+                type="text"
+                id="dashboardStudentFilter"
+                class="p-inputtext p-component w-100"
+                style="max-width: 28rem"
+                [(ngModel)]="studentTableSearchText"
+                (ngModelChange)="onStudentSearchChange($event)"
+                [placeholder]="'dashboard.filterStudentPlaceholder' | translate" />
+            </div>
+          </div>
         </div>
         <div class="card-body">
 
@@ -305,14 +321,22 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (student of paginatedStudents; track $index) {
+                    @for (student of paginatedStudents; track student.studentID) {
+                    @let nameTooltip = studentFullNameTooltip(student);
                     <tr>
                       <td>
                         <h2>
-                          <a href="#" class="avatar text-white"><img [src]="student.photoUrl" alt="" /></a><a
-                            href="#">{{
-                            (student.fullName.firstName || '') + " " + (student.fullName.lastName || '')
-                            }}<span></span></a>
+                          <span
+                            [pTooltip]="nameTooltip"
+                            [tooltipDisabled]="!nameTooltip"
+                            tooltipPosition="top"
+                            [showDelay]="200"
+                            appendTo="body">
+                            <a href="#" class="avatar text-white"><img [src]="student.photoUrl" alt="" /></a><a
+                              href="#">{{
+                              (student.fullName.firstName || '') + " " + (student.fullName.lastName || '')
+                              }}<span></span></a>
+                          </span>
                         </h2>
                       </td>
                       <td>{{ student.studentPhone || '' }}</td>
