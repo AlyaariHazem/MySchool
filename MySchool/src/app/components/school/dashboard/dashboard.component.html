@@ -261,11 +261,13 @@
             </div>
             <div class="col-sm-6 text-sm-left">
               <div class="mt-sm-0 mt-2">
-                <button class="btn btn-outline-primary mr-2">
-                  <img src="assets/img/excel.png" alt="" /><span class="ml-2">Excel</span>
+                <button type="button" class="btn btn-outline-primary mr-2" (click)="exportStudentsExcel()"
+                  [disabled]="studentsExporting" [title]="'dashboard.excel' | translate">
+                  <img src="assets/img/excel.png" alt="" /><span class="ml-2">{{ 'dashboard.excel' | translate }}</span>
                 </button>
-                <button class="btn btn-outline-danger mr-2">
-                  <img src="assets/img/pdf.png" alt="" height="18" /><span class="ml-2">PDF</span>
+                <button type="button" class="btn btn-outline-danger mr-2" (click)="exportStudentsPdf()"
+                  [disabled]="studentsExporting" [title]="'dashboard.pdf' | translate">
+                  <img src="assets/img/pdf.png" alt="" height="18" /><span class="ml-2">{{ 'dashboard.pdf' | translate }}</span>
                 </button>
                 <button class="btn btn-light" type="button" data-toggle="dropdown" aria-haspopup="true"
                   aria-expanded="false">

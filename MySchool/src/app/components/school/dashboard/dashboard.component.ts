@@ -8,10 +8,22 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe, isPlatformBrowser } from '@angular/common';
+import type { jsPDF } from 'jspdf';
 import { Store } from '@ngrx/store';
-import { isPlatformBrowser } from '@angular/common';
 import { PaginatorState } from 'primeng/paginator';
-import { combineLatest, debounceTime, distinctUntilChanged, map, Subject } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
+import { ToastrService } from 'ngx-toastr';
+import {
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  forkJoin,
+  map,
+  of,
+  Subject,
+  switchMap,
+} from 'rxjs';
 
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { Year } from '../../../core/models/year.model';
@@ -32,6 +44,9 @@ export class DashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
+  private translate = inject(TranslateService);
+  private toastr = inject(ToastrService);
+  private datePipe = inject(DatePipe);
 
   private readonly studentSearchInput$ = new Subject<string>();
 
@@ -71,6 +86,11 @@ export class DashboardComponent implements OnInit {
 
   /** Live filter for “كل الطلاب” — debounced → POST /Students/page with `search` */
   studentTableSearchText = '';
+
+  /** Excel / PDF export in progress */
+  studentsExporting = false;
+
+  private static readonly exportPageSize = 100;
 
   onPageChange(event: PaginatorState): void {
     this.first = event.first ?? 0;
@@ -135,14 +155,274 @@ export class DashboardComponent implements OnInit {
     return parts.join(' ').trim();
   }
 
-  private loadPaginatedStudents(): void {
+  exportStudentsExcel(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    this.studentsExporting = true;
+    this.fetchAllStudentsForExport().subscribe({
+      next: async (rows) => {
+        if (rows.length === 0) {
+          this.studentsExporting = false;
+          this.toastr.warning(this.translate.instant('dashboard.exportEmpty'));
+          this.cd.markForCheck();
+          return;
+        }
+        try {
+          await this.downloadStudentsXlsx(rows);
+          this.toastr.success(this.translate.instant('dashboard.exportSuccess'));
+        } catch {
+          this.toastr.error(this.translate.instant('dashboard.exportError'));
+        } finally {
+          this.studentsExporting = false;
+          this.cd.markForCheck();
+        }
+      },
+      error: () => {
+        this.studentsExporting = false;
+        this.toastr.error(this.translate.instant('dashboard.exportError'));
+        this.cd.markForCheck();
+      },
+    });
+  }
+
+  exportStudentsPdf(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    this.studentsExporting = true;
+    this.fetchAllStudentsForExport().subscribe({
+      next: async (rows) => {
+        if (rows.length === 0) {
+          this.studentsExporting = false;
+          this.toastr.warning(this.translate.instant('dashboard.exportEmpty'));
+          this.cd.markForCheck();
+          return;
+        }
+        try {
+          await this.downloadStudentsPdfAutoTable(rows);
+          this.toastr.success(this.translate.instant('dashboard.exportSuccess'));
+        } catch {
+          this.toastr.error(this.translate.instant('dashboard.exportError'));
+        } finally {
+          this.studentsExporting = false;
+          this.cd.markForCheck();
+        }
+      },
+      error: () => {
+        this.studentsExporting = false;
+        this.toastr.error(this.translate.instant('dashboard.exportError'));
+        this.cd.markForCheck();
+      },
+    });
+  }
+
+  private buildStudentTableFilters(): Record<string, string> {
     const filters: Record<string, string> = {};
     const q = this.studentTableSearchText.trim();
     if (q.length > 0) {
       filters['search'] = q;
     }
+    return filters;
+  }
 
-    this.studentService.getStudentsPage(this.currentPage, this.pageSize, filters).subscribe({
+  private fetchAllStudentsForExport() {
+    const filters = this.buildStudentTableFilters();
+    const pageSize = DashboardComponent.exportPageSize;
+    return this.studentService.getStudentsPage(1, pageSize, filters).pipe(
+      switchMap((first) => {
+        const totalCount = Number(first.totalCount ?? 0);
+        if (totalCount === 0) {
+          return of([] as StudentDetailsDTO[]);
+        }
+        const normalizedFirst = (first.data || []).map((row: unknown) =>
+          this.studentService.normalizeStudentDetailsDto(row),
+        );
+        const totalPages = Math.max(
+          1,
+          Number(first.totalPages ?? Math.ceil(totalCount / pageSize)),
+        );
+        if (totalPages <= 1) {
+          return of(normalizedFirst);
+        }
+        const rest$ = Array.from({ length: totalPages - 1 }, (_, i) =>
+          this.studentService.getStudentsPage(i + 2, pageSize, filters),
+        );
+        return forkJoin(rest$).pipe(
+          map((pages) => {
+            const rest = pages.flatMap((p) =>
+              (p.data || []).map((row: unknown) => this.studentService.normalizeStudentDetailsDto(row)),
+            );
+            return [...normalizedFirst, ...rest];
+          }),
+        );
+      }),
+    );
+  }
+
+  private exportFileStamp(): string {
+    const d = new Date();
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
+  }
+
+  private exportRowValues(student: StudentDetailsDTO): string[] {
+    const g = student.guardians;
+    return [
+      this.studentFullNameTooltip(student),
+      student.studentPhone ?? '',
+      g?.guardianFullName ?? '',
+      g?.guardianPhone ?? '',
+      student.placeBirth ?? '',
+      this.formatHireDate(student.hireDate),
+      student.fee != null ? String(student.fee) : '',
+    ];
+  }
+
+  private formatHireDate(d: Date | string | undefined): string {
+    if (!d) {
+      return '';
+    }
+    return this.datePipe.transform(d, 'dd-MM-yyyy') ?? '';
+  }
+
+  /** Real Excel workbook (.xlsx) so the file opens in the spreadsheet grid with columns. */
+  private async downloadStudentsXlsx(rows: StudentDetailsDTO[]): Promise<void> {
+    const XLSX = await import('xlsx');
+    const headers = [
+      this.translate.instant('dashboard.exportColName'),
+      this.translate.instant('dashboard.exportColStudentNo'),
+      this.translate.instant('dashboard.exportColFather'),
+      this.translate.instant('dashboard.exportColPhone'),
+      this.translate.instant('dashboard.exportColAddress'),
+      this.translate.instant('dashboard.exportColAdmission'),
+      this.translate.instant('dashboard.exportColFee'),
+    ];
+    const aoa: (string | number)[][] = [
+      headers,
+      ...rows.map((st) => {
+        const text = this.exportRowValues(st);
+        const feeNum = st.fee != null && !Number.isNaN(Number(st.fee)) ? Number(st.fee) : '';
+        return [...text.slice(0, 6), feeNum];
+      }),
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{ wch: 28 }, { wch: 14 }, { wch: 22 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 12 }];
+    const wb = XLSX.utils.book_new();
+    const sheetName = this.translate.instant('dashboard.exportSheetName').slice(0, 31) || 'Students';
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    XLSX.writeFile(wb, `students-${this.exportFileStamp()}.xlsx`);
+  }
+
+  /** jsPDF + autotable (vector PDF). html2canvas/html2pdf was producing empty ~3KB files here. */
+  private async downloadStudentsPdfAutoTable(rows: StudentDetailsDTO[]): Promise<void> {
+    const { jsPDF } = await import('jspdf');
+    const autoTable = (await import('jspdf-autotable')).default;
+
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const isRtl = (this.translate.currentLang || '').toLowerCase().startsWith('ar');
+    const fontFamily = isRtl ? await this.tryEmbedNotoSansArabic(doc) : 'helvetica';
+
+    const title = this.translate.instant('dashboard.exportTitle');
+    doc.setFont(fontFamily, 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(20, 20, 20);
+    const titleX = isRtl ? pageW - 14 : 14;
+    doc.text(title, titleX, 10, { align: isRtl ? 'right' : 'left', maxWidth: pageW - 28 });
+
+    const headLtr = [
+      this.translate.instant('dashboard.exportColName'),
+      this.translate.instant('dashboard.exportColStudentNo'),
+      this.translate.instant('dashboard.exportColFather'),
+      this.translate.instant('dashboard.exportColPhone'),
+      this.translate.instant('dashboard.exportColAddress'),
+      this.translate.instant('dashboard.exportColAdmission'),
+      this.translate.instant('dashboard.exportColFee'),
+    ];
+    const head = [isRtl ? [...headLtr].reverse() : headLtr];
+    const body = rows.map((st) => {
+      const cells = this.exportRowValues(st);
+      return isRtl ? [...cells].reverse() : cells;
+    });
+
+    /** #009879 */
+    const headerGreen: [number, number, number] = [0, 152, 121];
+    /** Repeat “name” column on horizontal page breaks: index 0 in LTR, last after reverse in RTL */
+    const repeatCol = isRtl ? headLtr.length - 1 : 0;
+
+    autoTable(doc, {
+      startY: 14,
+      head,
+      body,
+      theme: 'grid',
+      styles: {
+        font: fontFamily,
+        fontSize: 7,
+        cellPadding: 1.5,
+        halign: isRtl ? 'right' : 'left',
+        valign: 'middle',
+        textColor: [20, 20, 20],
+      },
+      headStyles: {
+        font: fontFamily,
+        fillColor: headerGreen,
+        textColor: 255,
+        fontStyle: fontFamily === 'helvetica' ? 'bold' : 'normal',
+        halign: isRtl ? 'right' : 'left',
+      },
+      alternateRowStyles: { fillColor: [248, 248, 248] },
+      margin: { top: 14, left: 10, right: 10, bottom: 12 },
+      tableWidth: 'auto',
+      horizontalPageBreak: true,
+      showHead: 'everyPage',
+      horizontalPageBreakRepeat: repeatCol,
+    });
+
+    doc.save(`students-${this.exportFileStamp()}.pdf`);
+  }
+
+  /** Returns jsPDF font name: embedded Arabic-capable font or helvetica fallback. */
+  private async tryEmbedNotoSansArabic(doc: jsPDF): Promise<string> {
+    const urls = [
+      'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosansarabic/NotoSansArabic%5Bwdth%2Cwght%5D.ttf',
+      'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/NotoSansArabic%5Bwdth%2Cwght%5D.ttf',
+    ];
+    const vfsName = 'NotoSansArabic.ttf';
+    const fontName = 'NotoSansArabic';
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { mode: 'cors' });
+        if (!res.ok) {
+          continue;
+        }
+        const buf = await res.arrayBuffer();
+        if (buf.byteLength < 10_000) {
+          continue;
+        }
+        const b64 = this.arrayBufferToBase64(buf);
+        doc.addFileToVFS(vfsName, b64);
+        doc.addFont(vfsName, fontName, 'normal');
+        return fontName;
+      } catch {
+        /* network, CORS, or unsupported font file */
+      }
+    }
+    return 'helvetica';
+  }
+
+  private arrayBufferToBase64(buffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    const chunk = 0x8000;
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += chunk) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk) as unknown as number[]);
+    }
+    return btoa(binary);
+  }
+
+  private loadPaginatedStudents(): void {
+    this.studentService.getStudentsPage(this.currentPage, this.pageSize, this.buildStudentTableFilters()).subscribe({
       next: (res) => {
         this.paginatedStudents = res.data || [];
         this.totalRecords = res.totalCount || 0;

@@ -238,7 +238,19 @@
     "messages": "الرسائل",
     "seeAllMessages": "عرض جميع الرسائل",
     "filterStudentLabel": "تصفية حسب اسم او رقم الطالب",
-    "filterStudentPlaceholder": "اكتب لتصفية الجدول (الاسم أو رقم الطالب)…"
+    "filterStudentPlaceholder": "اكتب لتصفية الجدول (الاسم أو رقم الطالب)…",
+    "exportEmpty": "لا يوجد طلاب للتصدير مع التصفية الحالية.",
+    "exportSuccess": "تم تنزيل الملف.",
+    "exportError": "فشل التصدير. حاول مرة أخرى.",
+    "exportTitle": "كل الطلاب",
+    "exportColName": "الاسم",
+    "exportColStudentNo": "رقم الطالب",
+    "exportColFather": "اسم الأب",
+    "exportColPhone": "رقم الهاتف",
+    "exportColAddress": "العنوان",
+    "exportColAdmission": "تاريخ القبول",
+    "exportColFee": "المبلغ المدفوع",
+    "exportSheetName": "الطلاب"
   },
   "notifications": {
     "pageTitle": "الإشعارات",

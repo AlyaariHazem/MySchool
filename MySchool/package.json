@@ -31,7 +31,8 @@
     "@popperjs/core": "2.11.8",
     "@primeng/themes": "18.0.2",
     "chart.js": "^4.4.9",
-    "html2pdf.js": "0.10.3",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "ngx-toastr": "18.0.0",
     "ngx-translate-messageformat-compiler": "7.1.0",
     "ngx-webcam": "^0.4.1",
@@ -43,6 +44,7 @@
     "quill-table-ui": "^1.0.7",
     "rxjs": "7.8.1",
     "tslib": "2.3.0",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.14.10"
   },
   "devDependencies": {

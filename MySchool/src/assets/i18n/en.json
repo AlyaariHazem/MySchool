@@ -237,7 +237,19 @@
     "messages": "Messages",
     "seeAllMessages": "See all messages",
     "filterStudentLabel": "Filter by student",
-    "filterStudentPlaceholder": "Type to filter the table (name or student #)…"
+    "filterStudentPlaceholder": "Type to filter the table (name or student #)…",
+    "exportEmpty": "No students to export for the current filter.",
+    "exportSuccess": "File downloaded.",
+    "exportError": "Export failed. Please try again.",
+    "exportTitle": "All students",
+    "exportColName": "Name",
+    "exportColStudentNo": "Student phone",
+    "exportColFather": "Father's name",
+    "exportColPhone": "Phone",
+    "exportColAddress": "Address",
+    "exportColAdmission": "Admission date",
+    "exportColFee": "Amount paid",
+    "exportSheetName": "Students"
   },
   "notifications": {
     "pageTitle": "Notifications",

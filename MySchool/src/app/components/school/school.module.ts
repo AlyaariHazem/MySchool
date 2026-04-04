@@ -206,7 +206,9 @@ const modules = [
   ],
   exports: [
     ...components, ...modules
-  ]
+  ],
+  /** DatePipe is standalone; required for inject(DatePipe) in declared components (e.g. dashboard export). */
+  providers: [DatePipe],
 })
 export class SchoolModule {
 
