@@ -229,46 +229,138 @@
   color: #16a34a;
 }
 
-/* Shown only in print preview / PDF — hidden on screen */
+/* Guardian notice card — screen + print (fee-system style) */
 .account-report-print-intro {
-  display: none !important;
+  display: block;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid #c7d7e8;
+  background: linear-gradient(145deg, #f0f7ff 0%, #e8f4fc 48%, #eef6f3 100%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.85) inset,
+    0 6px 20px rgb(15 118 110 / 0.07);
+  overflow: hidden;
+  page-break-inside: avoid;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.account-report-print-intro__layout {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.15rem 1.1rem;
+  border-inline-start: 4px solid #0d9488;
+}
+
+.account-report-print-intro__mark {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #0d9488 0%, #0f766e 100%);
+  color: #fff;
+  font-size: 1.35rem;
+  box-shadow: 0 4px 12px rgb(13 148 136 / 0.35);
+}
+
+.account-report-print-intro__mark .pi {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.account-report-print-intro__body {
+  flex: 1;
+  min-width: 0;
+  text-align: start;
+}
+
+.account-report-print-intro__eyebrow {
+  display: block;
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f766e;
+}
+
+.account-report-print-intro__title {
+  display: block;
+  margin: 0 0 0.55rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.account-report-print-intro__text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #334155;
 }
 
 @media print {
   .account-report-print-intro {
-    display: block !important;
-    visibility: visible !important;
     margin: 0 0 14px;
-    padding: 10px 12px;
-    text-align: center;
-    font-size: 11pt;
-    line-height: 1.55;
-    color: #1e293b;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background: #f1f5f9;
+    border-radius: 10px;
+    box-shadow: none;
+    border-color: #94a3b8;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    page-break-inside: avoid;
+  }
 
-    p {
-      margin: 0;
-    }
+  .account-report-print-intro__layout {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .account-report-print-intro__mark {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 10px;
+    font-size: 11pt;
+  }
+
+  .account-report-print-intro__eyebrow {
+    font-size: 7.5pt;
+  }
+
+  .account-report-print-intro__title {
+    font-size: 10.5pt;
+  }
+
+  .account-report-print-intro__text {
+    font-size: 9.5pt;
+    line-height: 1.55;
   }
 }
 
+/* Dynamic header message from API — same visual language */
 .account-report-header-message {
   width: 100%;
-  text-align: center;
-  margin: 12px 0 16px;
-  padding: 10px 14px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.15rem;
+  text-align: start;
+  border-radius: 12px;
+  border: 1px solid #c7d7e8;
+  border-inline-start: 4px solid #0d9488;
+  background: linear-gradient(145deg, #f0f7ff 0%, #e8f4fc 48%, #eef6f3 100%);
   color: #334155;
-  font-size: 0.95em;
-  line-height: 1.55;
+  font-size: 0.9rem;
+  line-height: 1.65;
   white-space: pre-wrap;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.85) inset;
+  page-break-inside: avoid;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 .page {
   border: 1px solid #e5e7eb;

@@ -88,16 +88,11 @@
   <!-- id="report" required: assets/print.css only reveals #report on print (see other report screens) -->
   <div #printArea id="report" class="report bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo">
 
-    <!-- Visible only when printing: explains what this document is -->
-    <div class="account-report-print-intro" role="note">
-      <p>{{ 'accountReport.printIntro' | translate }}</p>
-    </div>
-    
+
     <!-- Render processed template HTML -->
     <div *ngIf="!isLoading && processedHtml" [innerHTML]="processedHtml"></div>
     
     <!-- Fallback to original template if no template loaded -->
-    <div>
     <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 border-b pb-4 mb-4">
       <div class="flex-1 text-end md:text-end md:self-start">
         <h2 class="text-xl md:text-2xl font-bold text-primary mb-1">
@@ -223,5 +218,4 @@
         </div>
       </div>
     </div>
-  </div>
 </div>

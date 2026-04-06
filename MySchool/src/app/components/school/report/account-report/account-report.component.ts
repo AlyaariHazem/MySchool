@@ -523,8 +523,26 @@ export class AccountReportComponent implements OnInit {
     // Calculate total savings
     const totalSavings = this.savings.reduce((sum, s) => sum + (s.amount || 0), 0);
     processed = processed.replace(/#TotalSavings#/g, this.formatNumber(totalSavings));
-    
+
+    processed = this.stripEmptyQuillHeadings(processed);
+
     this.processedHtml = processed;
+  }
+
+  /**
+   * Removes empty Quill headings (e.g. `<h2 class="ql-direction-rtl ql-align-center"> </h2><br>`)
+   * that reserve vertical space in DB-stored report templates.
+   */
+  private stripEmptyQuillHeadings(html: string): string {
+    const emptyHeadingWithOptionalBr =
+      /<h([1-6])\b[^>]*>(?:(?:\s|\u00A0|&nbsp;|<br\s*\/?>|<\/?span\b[^>]*>)*)<\/h\1>\s*(?:<br\s*\/?>)?/gi;
+    let out = html;
+    let prev = '';
+    while (out !== prev) {
+      prev = out;
+      out = out.replace(emptyHeadingWithOptionalBr, '');
+    }
+    return out.replace(/(?:<br\s*\/?>\s*){2,}/gi, '<br>');
   }
 
   generateRowsHtml(): string {
@@ -626,7 +644,7 @@ export class AccountReportComponent implements OnInit {
     const t = this.headerMessage.trim();
     if (!t) return '';
     const inner = this.escapeHtmlText(t).replace(/\r\n|\r|\n/g, '<br/>');
-    return `<div class="account-report-header-message" role="note" style="width:100%;text-align:center;margin:12px 0 16px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;color:#334155;font-size:0.95em;line-height:1.55;">${inner}</div>`;
+    return `<div class="account-report-header-message" role="note">${inner}</div>`;
   }
 
   /** Build absolute URL for logos stored as API-relative paths */

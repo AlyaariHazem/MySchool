@@ -329,6 +329,9 @@
     "saveSuccessTitle": "Done"
   },
   "accountReport": {
+    "printIntroAria": "About this guardian financial account statement",
+    "printIntroEyebrow": "Official financial document",
+    "printIntroTitle": "Guardian account statement — fees & payments reference",
     "printIntro": "This printed document is a financial account statement for the guardian. It shows charges (amounts owed), payments and discounts, transactions listed by student, savings entries, and the current balance. Use it to review the account, reconcile payments, and plan settlements.",
     "searchStudentLabel": "Student",
     "searchStudentPlaceholder": "Search by name or student #…",
