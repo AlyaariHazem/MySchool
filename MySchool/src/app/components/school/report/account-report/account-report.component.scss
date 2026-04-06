@@ -2,8 +2,231 @@
   direction: rtl;
   font-size: 13px;
 }
-#page{
-    background-color: white;
+
+#page {
+  background-color: white;
+}
+
+/* —— Filter toolbar (screen only) —— */
+.account-report-toolbar {
+  margin-bottom: 1.25rem;
+}
+
+.account-report-toolbar__surface {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.125rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(165deg, #f8fafc 0%, #f1f5f9 100%);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 14px rgb(15 23 42 / 0.06);
+}
+
+@media (min-width: 1024px) {
+  .account-report-toolbar__surface {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1.125rem 1.35rem;
+  }
+}
+
+.account-report-toolbar__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+  flex: 1;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .account-report-toolbar__main {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 1.25rem;
+  }
+}
+
+.account-report-toolbar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 26rem;
+  min-width: 0;
+}
+
+.account-report-toolbar__label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.01em;
+}
+
+.account-report-toolbar__label--compact {
+  flex-shrink: 0;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.account-report-toolbar__hint {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+@media (min-width: 1024px) {
+  .account-report-toolbar__hint {
+    margin-bottom: 0.25rem;
+  }
+}
+
+.account-report-toolbar__divider {
+  display: none;
+  width: 1px;
+  align-self: stretch;
+  min-height: 3.25rem;
+  background: linear-gradient(180deg, transparent, #cbd5e1 12%, #cbd5e1 88%, transparent);
+}
+
+@media (min-width: 1024px) {
+  .account-report-toolbar__divider {
+    display: block;
+  }
+}
+
+.account-report-toolbar__account-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-report-toolbar__account-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+}
+
+.account-report-toolbar__input {
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.account-report-toolbar__input:hover {
+  border-color: #94a3b8;
+}
+
+.account-report-toolbar__input:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgb(34 197 94 / 0.2);
+}
+
+.account-report-toolbar__input--account {
+  width: 7.5rem;
+  min-width: 6rem;
+}
+
+.account-report-toolbar__input--account::-webkit-outer-spin-button,
+.account-report-toolbar__input--account::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.account-report-toolbar__input--account {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.account-report-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .account-report-toolbar__actions {
+    flex-shrink: 0;
+    padding-bottom: 0.125rem;
+  }
+}
+
+:host ::ng-deep .account-report-toolbar__btn.p-button {
+  height: 2.5rem;
+  padding-inline: 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  gap: 0.45rem;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+:host ::ng-deep .account-report-toolbar__btn.p-button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(34 197 94 / 0.28);
+}
+
+:host ::ng-deep .account-report-toolbar__btn.p-button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+:host ::ng-deep .account-report-toolbar__btn--ghost.p-button.p-button-outlined {
+  border-width: 1.5px;
+}
+
+:host ::ng-deep .account-report-toolbar__autocomplete {
+  width: 100%;
+  max-width: 26rem;
+}
+
+:host ::ng-deep .account-report-toolbar__autocomplete .p-autocomplete-input-multiple,
+:host ::ng-deep .account-report-toolbar__autocomplete .p-inputtext {
+  width: 100%;
+}
+
+:host ::ng-deep .account-report-toolbar__autocomplete .p-inputtext {
+  height: 2.5rem;
+  padding-inline: 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 0.875rem;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+:host ::ng-deep .account-report-toolbar__autocomplete .p-inputtext:hover {
+  border-color: #94a3b8;
+}
+
+:host ::ng-deep .account-report-toolbar__autocomplete .p-inputtext:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgb(34 197 94 / 0.2);
+}
+
+:host ::ng-deep .account-report-toolbar__autocomplete .p-autocomplete-clear-icon {
+  color: #64748b;
+}
+
+:host ::ng-deep .account-report-toolbar__autocomplete.p-autocomplete-loading .p-autocomplete-loader {
+  color: #16a34a;
 }
 
 /* Shown only in print preview / PDF — hidden on screen */
@@ -104,7 +327,7 @@ table.fees {
 
 /* الطباعة من النافذة الحالية: assets/print.css يظهر #report فقط */
 @media print {
-  :host .toolbar {
+  :host .account-report-toolbar {
     display: none !important;
     visibility: hidden !important;
   }

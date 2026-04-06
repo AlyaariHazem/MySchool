@@ -1,69 +1,89 @@
 <div id="page" class="p-4 md:p-6 bg-white rounded-lg shadow-sm">
 
-  <div class="toolbar flex flex-wrap gap-3 justify-between mb-4 print:hidden">
-    <div class="flex flex-col gap-3 w-full lg:w-auto">
-      <div class="flex flex-col gap-1 max-w-md">
-        <label for="studentAccountSearch" class="font-semibold">{{ 'accountReport.searchStudentLabel' | translate }}</label>
-        <p-autocomplete
-          #studentAccountAutocomplete
-          inputId="studentAccountSearch"
-          [(ngModel)]="selectedStudentForSearch"
-          [suggestions]="filteredStudentsForPicker"
-          (completeMethod)="onStudentPickerSearch($event)"
-          (onSelect)="onStudentPickerSelect($event)"
-          (onClear)="onStudentPickerClear()"
-          (onKeyUp)="onStudentSearchKeyUp($event)"
-          optionLabel="fullName"
-          [dropdown]="false"
-          [forceSelection]="true"
-          [showClear]="true"
-          [minLength]="1"
-          [delay]="studentPickerSearchDelayMs"
-          [completeOnFocus]="false"
-          [virtualScroll]="true"
-          [lazy]="true"
-          [scrollHeight]="'240px'"
-          [virtualScrollItemSize]="48"
-          (onLazyLoad)="onStudentPickerLazyLoad($event)"
-          [style]="{ width: '100%', maxWidth: '420px' }"
-          inputStyleClass="p-inputtext p-component w-full"
-          [placeholder]="'accountReport.searchStudentPlaceholder' | translate"
-          [disabled]="isLoading">
-          <ng-template let-item pTemplate="item">
-            <span class="flex justify-between gap-3 w-full">
-              <span>{{ item.fullName }}</span>
-              <span class="text-gray-500 text-sm">#{{ item.studentID }}</span>
-            </span>
-          </ng-template>
-        </p-autocomplete>
+  <section class="account-report-toolbar print:hidden" aria-label="تصفية التقرير">
+    <div class="account-report-toolbar__surface">
+      <div class="account-report-toolbar__main">
+        <div class="account-report-toolbar__field">
+          <label for="studentAccountSearch" class="account-report-toolbar__label">
+            {{ 'accountReport.searchStudentLabel' | translate }}
+          </label>
+          <p-autocomplete
+            #studentAccountAutocomplete
+            class="account-report-toolbar__autocomplete"
+            inputId="studentAccountSearch"
+            [(ngModel)]="selectedStudentForSearch"
+            [suggestions]="filteredStudentsForPicker"
+            (completeMethod)="onStudentPickerSearch($event)"
+            (onSelect)="onStudentPickerSelect($event)"
+            (onClear)="onStudentPickerClear()"
+            (onKeyUp)="onStudentSearchKeyUp($event)"
+            optionLabel="fullName"
+            [dropdown]="false"
+            [forceSelection]="true"
+            [showClear]="true"
+            [minLength]="1"
+            [delay]="studentPickerSearchDelayMs"
+            [completeOnFocus]="false"
+            [virtualScroll]="true"
+            [lazy]="true"
+            [scrollHeight]="'240px'"
+            [virtualScrollItemSize]="48"
+            (onLazyLoad)="onStudentPickerLazyLoad($event)"
+            inputStyleClass="account-report-toolbar__autocomplete-input p-inputtext p-component w-full"
+            [placeholder]="'accountReport.searchStudentPlaceholder' | translate"
+            [disabled]="isLoading">
+            <ng-template let-item pTemplate="item">
+              <span class="flex justify-between gap-3 w-full">
+                <span>{{ item.fullName }}</span>
+                <span class="text-gray-500 text-sm">#{{ item.studentID }}</span>
+              </span>
+            </ng-template>
+          </p-autocomplete>
+        </div>
+
+        <div class="account-report-toolbar__divider" aria-hidden="true"></div>
+
+        <div class="account-report-toolbar__account-block">
+          <p class="account-report-toolbar__hint">{{ 'accountReport.orAccountNumber' | translate }}</p>
+          <div class="account-report-toolbar__account-row">
+            <label for="accountNumber" class="account-report-toolbar__label account-report-toolbar__label--compact">
+              رقم الحساب
+            </label>
+            <input
+              id="accountNumber"
+              type="number"
+              [(ngModel)]="accountNumberInput"
+              placeholder="رقم الحساب"
+              class="account-report-toolbar__input account-report-toolbar__input--account"
+              (keyup.enter)="loadAccountByNumber()" />
+            <button
+              pButton
+              type="button"
+              label="تحميل"
+              icon="pi pi-search"
+              severity="success"
+              (click)="loadAccountByNumber()"
+              class="account-report-toolbar__btn account-report-toolbar__btn--primary"
+              [disabled]="isLoading"
+              title="تحميل بيانات الحساب"></button>
+          </div>
+        </div>
       </div>
-      <div class="flex flex-wrap gap-2 items-center">
-        <span class="text-gray-500 text-sm">{{ 'accountReport.orAccountNumber' | translate }}</span>
-        <label for="accountNumber" class="font-semibold">رقم الحساب:</label>
-        <input
-          id="accountNumber"
-          type="number"
-          [(ngModel)]="accountNumberInput"
-          placeholder="أدخل رقم الحساب"
-          class="p-inputtext p-component p-inputnumber-input"
-          style="width: 150px;"
-          (keyup.enter)="loadAccountByNumber()" />
+
+      <div class="account-report-toolbar__actions">
         <button
           pButton
-          label="تحميل"
-          icon="pi pi-search"
-          (click)="loadAccountByNumber()"
-          class="p-button-sm"
-          [disabled]="isLoading"
-          title="تحميل بيانات الحساب"></button>
+          type="button"
+          label="طباعة"
+          icon="pi pi-print"
+          severity="success"
+          [outlined]="true"
+          (click)="nativePrint()"
+          class="account-report-toolbar__btn account-report-toolbar__btn--ghost"
+          title="طباعة"></button>
       </div>
     </div>
-    <div class="flex gap-2">
-      <button pButton label="طباعة" icon="pi pi-print" (click)="nativePrint()" class="p-button-sm" title="طباعة"></button>
-      <!-- <button pButton label="PDF" icon="pi pi-file-pdf" severity="danger" class="p-button-sm" title="تصدير إلى PDF"></button>
-      <button pButton label="CSV" icon="pi pi-file-excel" severity="success" class="p-button-sm" title="تصدير إلى CSV"></button> -->
-    </div>
-  </div>
+  </section>
 
   <!-- id="report" required: assets/print.css only reveals #report on print (see other report screens) -->
   <div #printArea id="report" class="report bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo">
