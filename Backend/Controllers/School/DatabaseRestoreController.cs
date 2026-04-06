@@ -1,10 +1,13 @@
 using Backend.Data;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Net;
+using System.Security.Claims;
 
 namespace Backend.Controllers.School;
 
@@ -16,15 +19,18 @@ public class DatabaseRestoreController : ControllerBase
 {
     private readonly SqlRestoreService _sqlRestoreService;
     private readonly TenantInfo _tenantInfo;
+    private readonly IAuditTrailService _auditTrail;
     private readonly ILogger<DatabaseRestoreController> _logger;
 
     public DatabaseRestoreController(
         SqlRestoreService sqlRestoreService,
         TenantInfo tenantInfo,
+        IAuditTrailService auditTrail,
         ILogger<DatabaseRestoreController> logger)
     {
         _sqlRestoreService = sqlRestoreService;
         _tenantInfo = tenantInfo;
+        _auditTrail = auditTrail;
         _logger = logger;
     }
 
@@ -76,13 +82,33 @@ public class DatabaseRestoreController : ControllerBase
                     cancellationToken)
                 .ConfigureAwait(false);
 
+            await _auditTrail.RecordAsync(
+                "Database",
+                "Database.RestoreFromBackup",
+                new
+                {
+                    BackupFileName = file.FileName,
+                    result.TargetDatabaseName,
+                    result.TemporaryDatabaseName,
+                    result.TablesImported,
+                    result.ImportedTableNames
+                },
+                cancellationToken);
+
             response.Result = result;
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database restore failed.");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            _logger.LogError(
+                ex,
+                "AUDIT Database Database.RestoreFromBackup.Failed at {TimestampUtc:o} ActorUserId={ActorUserId} TenantId={TenantId} File={FileName}",
+                DateTime.UtcNow,
+                userId ?? "",
+                _tenantInfo.TenantId,
+                file?.FileName ?? "");
             response.IsSuccess = false;
             response.statusCode = HttpStatusCode.InternalServerError;
             response.ErrorMasseges.Add(FormatRestoreError(ex));

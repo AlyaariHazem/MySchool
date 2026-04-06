@@ -28,6 +28,7 @@ public class StudentManagementService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IAuditTrailService _auditTrail;
 
     public StudentManagementService(
         TenantDbContext tenantContext,
@@ -35,7 +36,8 @@ public class StudentManagementService
         IMapper mapper,
         mangeFilesService mangeFilesService,
         IUnitOfWork unitOfWork,
-        UserManager<ApplicationUser> userManager) // Inject UserManager
+        UserManager<ApplicationUser> userManager,
+        IAuditTrailService auditTrail)
 
     {
         _tenantContext = tenantContext;
@@ -44,6 +46,7 @@ public class StudentManagementService
         _mangeFilesService = mangeFilesService;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _auditTrail = auditTrail;
     }
 
     public async Task<Student> AddStudentWithGuardianAsync(
@@ -113,6 +116,24 @@ public class StudentManagementService
 
             // Commit the transaction
             await transaction.CommitAsync();
+
+            if (studentClassFees != null && studentClassFees.Any())
+            {
+                await _auditTrail.RecordAsync(
+                    "Fees",
+                    "StudentClassFee.BulkCreateOnEnroll",
+                    new
+                    {
+                        addedStudent.StudentID,
+                        Lines = studentClassFees.Select(f => new
+                        {
+                            f.FeeClassID,
+                            f.AmountDiscount,
+                            f.Mandatory,
+                            f.NoteDiscount
+                        }).ToList()
+                    });
+            }
 
             return addedStudent;
         }
@@ -211,6 +232,21 @@ public class StudentManagementService
                     studentClassFee.StudentID = addedStudent.StudentID; // Ensure StudentID is set
                     await _unitOfWork.StudentClassFees.AddAsync(studentClassFee);
                 }
+
+                await _auditTrail.RecordAsync(
+                    "Fees",
+                    "StudentClassFee.BulkCreateOnEnroll",
+                    new
+                    {
+                        addedStudent.StudentID,
+                        Lines = studentClassFees.Select(f => new
+                        {
+                            f.FeeClassID,
+                            f.AmountDiscount,
+                            f.Mandatory,
+                            f.NoteDiscount
+                        }).ToList()
+                    });
             }
 
             return addedStudent;
@@ -225,6 +261,7 @@ public class StudentManagementService
     {
         using var transaction = await _tenantContext.Database.BeginTransactionAsync();
 
+        var feeAssignmentsReplaced = false;
         try
         {
             // **Update Student Entity** - Get student first to get UserID
@@ -383,6 +420,7 @@ public class StudentManagementService
             // **Update Discounts**
             if (request.UpdateDiscounts != null && request.UpdateDiscounts.Any())
             {
+                feeAssignmentsReplaced = true;
                 var existingDiscounts = request.UpdateDiscounts;
                 var studentsClassFees = await _tenantContext.StudentClassFees
                     .Where(s => s.StudentID == request.StudentID)
@@ -486,6 +524,24 @@ public class StudentManagementService
             // **Save Changes and Commit Transaction**
             await _tenantContext.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            if (feeAssignmentsReplaced && request.UpdateDiscounts != null)
+            {
+                await _auditTrail.RecordAsync(
+                    "Fees",
+                    "Student.FeeAssignments.Replace",
+                    new
+                    {
+                        request.StudentID,
+                        Lines = request.UpdateDiscounts.Select(d => new
+                        {
+                            d.FeeClassID,
+                            d.AmountDiscount,
+                            d.Mandatory,
+                            d.NoteDiscount
+                        }).ToList()
+                    });
+            }
 
             // Return updated student details
             var updatedStudent = await _unitOfWork.Students.GetStudentByIdAsync(studentId);

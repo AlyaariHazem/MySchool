@@ -11,11 +11,13 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
 {
     private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IAuditTrailService _auditTrail;
 
-    public MonthlyGradeRepository(TenantDbContext context, IMapper mapper)
+    public MonthlyGradeRepository(TenantDbContext context, IMapper mapper, IAuditTrailService auditTrail)
     {
         _context = context;
         _mapper = mapper;
+        _auditTrail = auditTrail;
     }
 
     /* ----------  CREATE  ---------- */
@@ -118,6 +120,7 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
 
         var changed = false;
         var notFound = new List<string>();
+        var changeLog = new List<object>();
 
         foreach (var dto in dtos)
         {
@@ -140,6 +143,18 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
             // Update if the grade value is different (allow updating to 0 or null)
             if (grade.Grade != dto.Grade)
             {
+                changeLog.Add(new
+                {
+                    grade.StudentID,
+                    grade.YearID,
+                    grade.ClassID,
+                    grade.SubjectID,
+                    grade.MonthID,
+                    grade.TermID,
+                    grade.GradeTypeID,
+                    OldGrade = grade.Grade,
+                    NewGrade = dto.Grade
+                });
                 grade.Grade = dto.Grade;
                 changed = true;
             }
@@ -157,6 +172,15 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
         try
         {
             await _context.SaveChangesAsync();
+            await _auditTrail.RecordAsync(
+                "Grades",
+                "MonthlyGrade.BulkUpdate",
+                new
+                {
+                    activeYear.YearID,
+                    ChangeCount = changeLog.Count,
+                    Changes = changeLog
+                });
             return Result<bool>.Success(true);
         }
         catch (DbUpdateException ex)

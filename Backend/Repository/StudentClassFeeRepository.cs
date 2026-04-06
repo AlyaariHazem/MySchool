@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Backend.Data;
 using Backend.DTOS.School.StudentClassFee;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.EntityFrameworkCore;
@@ -15,10 +16,13 @@ public class StudentClassFeeRepository : IStudentClassFeeRepository
 {
     private readonly TenantDbContext _db;
     private readonly IMapper _mapper;
-    public StudentClassFeeRepository(TenantDbContext db, IMapper mapper)
+    private readonly IAuditTrailService _auditTrail;
+
+    public StudentClassFeeRepository(TenantDbContext db, IMapper mapper, IAuditTrailService auditTrail)
     {
         _db = db;
         _mapper = mapper;
+        _auditTrail = auditTrail;
     }
 
     public async Task AddAsync(StudentClassFeeDTO studentClassFee)
@@ -45,21 +49,40 @@ public class StudentClassFeeRepository : IStudentClassFeeRepository
 
         var existingStudentClassFee = await _db.StudentClassFees.FirstOrDefaultAsync(fee => fee.StudentID == studentClassFee.StudentID && fee.FeeClassID == studentClassFee.FeeClassID);
         if (existingStudentClassFee == null)
-            await AddAsync(studentClassFee);
-
-        else
         {
-            existingStudentClassFee.StudentID = studentClassFee.StudentID;
-            existingStudentClassFee.FeeClassID = studentClassFee.FeeClassID;
-            existingStudentClassFee.AmountDiscount = studentClassFee.AmountDiscount;
-            existingStudentClassFee.NoteDiscount = studentClassFee.NoteDiscount;
-            existingStudentClassFee.Mandatory = studentClassFee.Mandatory;
-
-            _db.Entry(existingStudentClassFee).State = EntityState.Modified;
-            await _db.SaveChangesAsync();
+            await AddAsync(studentClassFee);
+            return;
         }
 
+        var before = new
+        {
+            existingStudentClassFee.AmountDiscount,
+            existingStudentClassFee.NoteDiscount,
+            existingStudentClassFee.Mandatory
+        };
+        existingStudentClassFee.StudentID = studentClassFee.StudentID;
+        existingStudentClassFee.FeeClassID = studentClassFee.FeeClassID;
+        existingStudentClassFee.AmountDiscount = studentClassFee.AmountDiscount;
+        existingStudentClassFee.NoteDiscount = studentClassFee.NoteDiscount;
+        existingStudentClassFee.Mandatory = studentClassFee.Mandatory;
 
+        _db.Entry(existingStudentClassFee).State = EntityState.Modified;
+        await _db.SaveChangesAsync();
+        await _auditTrail.RecordAsync(
+            "Fees",
+            "StudentClassFee.Update",
+            new
+            {
+                studentClassFee.StudentID,
+                studentClassFee.FeeClassID,
+                Before = before,
+                After = new
+                {
+                    studentClassFee.AmountDiscount,
+                    studentClassFee.NoteDiscount,
+                    studentClassFee.Mandatory
+                }
+            });
     }
 
     public async Task<IEnumerable<StudentClassFees>> GetFeesByStudentIdAsync(int studentId)

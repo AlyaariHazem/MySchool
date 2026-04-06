@@ -54,6 +54,7 @@ namespace Backend.Data
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<NotificationMessage> NotificationMessages { get; set; }
         public DbSet<NotificationDelivery> NotificationDeliveries { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -458,6 +459,37 @@ namespace Backend.Data
 
             modelBuilder.Entity<NotificationDelivery>()
                 .HasIndex(d => new { d.RecipientUserId, d.ReadAtUtc });
+
+            modelBuilder.Entity<AuditLog>()
+                .HasKey(a => a.AuditLogId);
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(a => a.Category)
+                .HasMaxLength(128)
+                .IsRequired();
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(a => a.Action)
+                .HasMaxLength(256)
+                .IsRequired();
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(a => a.ActorUserId)
+                .HasMaxLength(450);
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(a => a.ActorDisplayName)
+                .HasMaxLength(512);
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(a => a.CorrelationId)
+                .HasMaxLength(128);
+
+            modelBuilder.Entity<AuditLog>()
+                .HasIndex(a => a.CreatedAtUtc);
+
+            modelBuilder.Entity<AuditLog>()
+                .HasIndex(a => new { a.Category, a.CreatedAtUtc });
 
             // Configure unique index on Code + SchoolId (allows same code for different schools, but unique per school)
             modelBuilder.Entity<ReportTemplate>()

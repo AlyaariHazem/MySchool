@@ -17,11 +17,13 @@ namespace Backend.Repository
     {
         private readonly TenantDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IAuditTrailService _auditTrail;
 
-        public TermlyGradeRepository(TenantDbContext context, IMapper mapper)
+        public TermlyGradeRepository(TenantDbContext context, IMapper mapper, IAuditTrailService auditTrail)
         {
             _context = context;
             _mapper = mapper;
+            _auditTrail = auditTrail;
         }
 
         // Add a new TermlyGrade
@@ -54,24 +56,65 @@ namespace Backend.Repository
         public async Task<Result<bool>> UpdateAsync(IEnumerable<TermlyGradeDTO> termlyGradeDTO)
         {
             var changed = false;
+            var changeLog = new List<object>();
             foreach (var grade in termlyGradeDTO)
             {
                 var existing = await _context.TermlyGrades.FirstOrDefaultAsync(g => g.TermlyGradeID == grade.TermlyGradeID);
                 if (existing == null)
                     return Result<bool>.Fail("TermlyGrade not found.");
+
+                var rowChanged =
+                    existing.Grade != grade.Grade
+                    || existing.Note != grade.Note
+                    || existing.TermID != grade.TermID
+                    || existing.ClassID != grade.ClassID
+                    || existing.SubjectID != grade.SubjectID
+                    || existing.StudentID != grade.StudentID;
+
+                if (rowChanged)
+                {
+                    changeLog.Add(new
+                    {
+                        grade.TermlyGradeID,
+                        Before = new
+                        {
+                            existing.StudentID,
+                            existing.SubjectID,
+                            existing.TermID,
+                            existing.ClassID,
+                            existing.Grade,
+                            existing.Note
+                        },
+                        After = new
+                        {
+                            grade.StudentID,
+                            grade.SubjectID,
+                            grade.TermID,
+                            grade.ClassID,
+                            grade.Grade,
+                            grade.Note
+                        }
+                    });
+                }
+
                 existing.Grade = grade.Grade;
                 existing.Note = grade.Note;
                 existing.TermID = grade.TermID;
                 existing.ClassID = grade.ClassID;
                 existing.SubjectID = grade.SubjectID;
                 existing.StudentID = grade.StudentID;
-                changed = true;
+                if (rowChanged)
+                    changed = true;
             }
             if (!changed)
                 return Result<bool>.Fail("Nothing to update.");
             try
             {
                 await _context.SaveChangesAsync();
+                await _auditTrail.RecordAsync(
+                    "Grades",
+                    "TermlyGrade.Update",
+                    new { ChangeCount = changeLog.Count, Changes = changeLog });
                 return Result<bool>.Success(true);
             }
             catch (DbUpdateException ex)

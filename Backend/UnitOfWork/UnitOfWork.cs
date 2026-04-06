@@ -25,6 +25,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly ILogger<StudentRepository> _studentRepositoryLogger;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly HtmlSanitizationService _htmlSanitizer;
+    private readonly IAuditTrailService _auditTrail;
 
     public UnitOfWork(
         TenantDbContext tenantContext,
@@ -34,8 +35,8 @@ public class UnitOfWork : IUnitOfWork
         UserManager<ApplicationUser> userManager,
         ILogger<StudentRepository> studentRepositoryLogger,
         IHttpContextAccessor httpContextAccessor,
-        HtmlSanitizationService htmlSanitizer
-    )
+        HtmlSanitizationService htmlSanitizer,
+        IAuditTrailService auditTrail)
     {
         _tenantContext = tenantContext;
         _adminContext = adminContext;
@@ -45,6 +46,7 @@ public class UnitOfWork : IUnitOfWork
         _studentRepositoryLogger = studentRepositoryLogger;
         _httpContextAccessor = httpContextAccessor;
         _htmlSanitizer = htmlSanitizer;
+        _auditTrail = auditTrail;
 
         // Tenant-specific repositories use TenantDbContext
         // Initialize Users first since it's needed by Students, Teachers, and Employees
@@ -60,7 +62,7 @@ public class UnitOfWork : IUnitOfWork
         Fees = new FeesRepository(_tenantContext, _mapper);
         Years = new YearRepository(_tenantContext, _mapper);
         Schools = new SchoolRepository(_tenantContext, Years, _mapper);
-        StudentClassFees = new StudentClassFeeRepository(_tenantContext, _mapper);
+        StudentClassFees = new StudentClassFeeRepository(_tenantContext, _mapper, _auditTrail);
         Vouchers = new VoucherRepository(_tenantContext, _mapper, _mangeFilesService);
         Attachments = new AttachmentsRepository(_tenantContext);
         Curriculums = new CurriculumRepository(_tenantContext, _mapper);
@@ -72,8 +74,8 @@ public class UnitOfWork : IUnitOfWork
         Employees = new EmployeeRepository(_tenantContext, Users);
         AccountStudentGuardians = new AccountStudentGuardianRepository(_tenantContext, _mapper);
         Reports = new ReportRepository(_tenantContext, _htmlSanitizer);
-        MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper);
-        TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper);
+        MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper, _auditTrail);
+        TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper, _auditTrail);
         Dashboard = new DashboardRepository(_tenantContext, Users);
         WeeklySchedules = new WeeklyScheduleRepository(_tenantContext, _mapper);
         Attendance = new AttendanceRepository(_tenantContext);
