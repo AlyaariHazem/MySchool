@@ -7,7 +7,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { PrimeNG } from 'primeng/config';
 import { ShardModule } from './shared/shard.module';
-
 @Component({
     selector: 'app-root',
     standalone: true,
@@ -18,9 +17,9 @@ import { ShardModule } from './shared/shard.module';
 export class AppComponent {
   title = 'MySchool';
 
-  lang$:Observable<string>
-  constructor(private store:Store<{language:string}>,private primeng: PrimeNG) {
-    this.lang$=this.store.select("language");
+  lang$: Observable<string>;
+  constructor(private store: Store<{ language: string }>, private primeng: PrimeNG) {
+    this.lang$ = this.store.select('language');
   }
 
   ngOnInit(): void {

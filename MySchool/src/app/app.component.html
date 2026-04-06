@@ -1,9 +1,8 @@
 <ngx-loading-bar
-  ref="router"
+  ref="http"
   [includeSpinner]="false"
   height="3px"
   color="#0969da"
   style="position: fixed; top: 0; left: 0; right: 0; z-index: 10020">
-</ngx-loading-bar>
-<app-progress-spinner></app-progress-spinner><p-confirmdialog [appendTo]="'body'" />
+</ngx-loading-bar><app-progress-spinner></app-progress-spinner><p-confirmdialog [appendTo]="'body'" />
 <router-outlet></router-outlet>
