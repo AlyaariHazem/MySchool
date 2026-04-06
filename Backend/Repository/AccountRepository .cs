@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -119,7 +120,7 @@ public class AccountRepository : IAccountRepository
             schoolInfo.SchoolName = school.SchoolName ?? string.Empty;
             schoolInfo.SchoolAddress = school.Address ?? string.Empty;
             schoolInfo.SchoolPhone = school.SchoolPhone > 0 ? school.SchoolPhone.ToString() : (school.Mobile ?? string.Empty);
-            schoolInfo.SchoolLogo = school.ImageURL ?? string.Empty;
+            schoolInfo.SchoolLogo = BuildSchoolLogoPathForReport(school);
             
             // Get academic year from current year dates
             if (currentYear != null)
@@ -284,5 +285,61 @@ public class AccountRepository : IAccountRepository
             throw new Exception($"AccountStudentGuardian with ID {accountStudentGuardianId} not found");
 
         return accountStudentGuardian.AccountID;
+    }
+
+    /// <summary>
+    /// Static files live under wwwroot/uploads/School/School_{id}_{fileName}.
+    /// DB may store only a file name, a wrong absolute URL at site root, or a full path — normalize and URL-encode path segments (spaces, parentheses).
+    /// </summary>
+    private static string BuildSchoolLogoPathForReport(Backend.Models.School school)
+    {
+        var raw = school.ImageURL?.Trim();
+        if (string.IsNullOrEmpty(raw)) return string.Empty;
+
+        string pathRelative;
+
+        if (Uri.TryCreate(raw, UriKind.Absolute, out var absolute))
+        {
+            var p = absolute.AbsolutePath;
+            if (p.Contains("/uploads/", StringComparison.OrdinalIgnoreCase))
+                pathRelative = p;
+            else
+            {
+                var fileName = Path.GetFileName(p);
+                if (string.IsNullOrEmpty(fileName)) return string.Empty;
+                pathRelative = "/uploads/School/" + EnsureSchoolLogoFileName(school.SchoolID, fileName);
+            }
+        }
+        else if (raw.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+        {
+            pathRelative = raw;
+        }
+        else
+        {
+            pathRelative = "/uploads/School/" + EnsureSchoolLogoFileName(school.SchoolID, raw.TrimStart('/'));
+        }
+
+        if (pathRelative.StartsWith("/uploads/School/", StringComparison.OrdinalIgnoreCase))
+        {
+            var fn = pathRelative.Substring("/uploads/School/".Length);
+            fn = EnsureSchoolLogoFileName(school.SchoolID, fn);
+            pathRelative = "/uploads/School/" + fn;
+        }
+
+        return EncodeUrlPathSegments(pathRelative);
+    }
+
+    private static string EnsureSchoolLogoFileName(int schoolId, string fileName)
+    {
+        var f = fileName.TrimStart('/');
+        if (f.StartsWith($"School_{schoolId}_", StringComparison.OrdinalIgnoreCase))
+            return f;
+        return $"School_{schoolId}_{f}";
+    }
+
+    private static string EncodeUrlPathSegments(string absolutePathStartingWithSlash)
+    {
+        var segments = absolutePathStartingWithSlash.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        return "/" + string.Join("/", segments.Select(Uri.EscapeDataString));
     }
 }

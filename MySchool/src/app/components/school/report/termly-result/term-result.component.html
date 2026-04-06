@@ -9,7 +9,8 @@
     </div>
     <div class="studentResult" id="report">
         <p class="text-center mb-3">نتيجة الطالب الفصلية</p>
-        <p-table #table [value]="monthlyReports" [scrollable]="true" scrollHeight="400px" [paginator]="true" [rows]="10"
+        <p-table #table [value]="monthlyReports" [scrollable]="!printing" [scrollHeight]="printing ? undefined : '400px'"
+            [paginator]="!printing" [rows]="printing ? monthlyReports.length : 10"
             dataKey="studentID" styleClass="p-datatable-striped">
 
             <ng-template pTemplate="header">

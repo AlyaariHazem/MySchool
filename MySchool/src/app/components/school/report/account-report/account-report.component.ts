@@ -647,15 +647,34 @@ export class AccountReportComponent implements OnInit {
     return `<div class="account-report-header-message" role="note">${inner}</div>`;
   }
 
-  /** Build absolute URL for logos stored as API-relative paths */
+  /** Build absolute URL for logos; encodes path segments so spaces/parentheses in file names work in <img src>. */
   private resolveSchoolLogoUrl(src: string | null | undefined): string {
     const s = (src ?? '').trim();
     if (!s) return '';
-    if (/^(https?:\/\/|data:|blob:)/i.test(s)) return s;
-    if (s.startsWith('//')) return `${window.location.protocol}${s}`;
+    if (/^data:|^blob:/i.test(s)) return s;
+    if (/^https?:\/\//i.test(s)) return this.encodeUrlPathSegments(s);
+    if (s.startsWith('//')) return this.encodeUrlPathSegments(`${window.location.protocol}${s}`);
     const apiRoot = environment.baseUrl.replace(/\/api\/?$/i, '');
-    if (s.startsWith('/')) return `${apiRoot}${s}`;
-    return `${apiRoot}/${s.replace(/^\/+/, '')}`;
+    const pathPart = s.startsWith('/') ? s : `/${s.replace(/^\/+/, '')}`;
+    return this.encodeUrlPathSegments(`${apiRoot}${pathPart}`);
+  }
+
+  private encodeUrlPathSegments(href: string): string {
+    try {
+      const url = new URL(href);
+      const segments = url.pathname.split('/').map((segment) => {
+        if (!segment) return segment;
+        try {
+          return encodeURIComponent(decodeURIComponent(segment));
+        } catch {
+          return encodeURIComponent(segment);
+        }
+      });
+      url.pathname = segments.join('/');
+      return url.href;
+    } catch {
+      return href;
+    }
   }
 
   getTotalSavings(): number {
@@ -769,7 +788,7 @@ export class AccountReportComponent implements OnInit {
           </div>
           
           <div style="min-width:200px; text-align:left;">
-            <img src="#SchoolLogo#" alt="شعار المدرسة" style="height:48px; margin-bottom:10px;" />
+            <img src="#SchoolLogo#" alt="شعار المدرسة" style="max-width:120px;max-height:48px;width:auto;height:auto;object-fit:contain;display:block;margin-bottom:10px;" />
             <div style="font-weight:bold; font-size:1.1em; margin-bottom:5px;">#SchoolName#</div>
             <div style="color:#666;">#SchoolAddress#</div>
             <div style="color:#666;">Tel: #SchoolPhone#</div>

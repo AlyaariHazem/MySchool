@@ -270,6 +270,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+// Serves wwwroot (e.g. wwwroot/uploads/School/...) at /uploads/... — school logos must live under uploads, not site root.
 app.UseStaticFiles();
 app.UseCors("MyPolicy");
 app.UseAuthentication();

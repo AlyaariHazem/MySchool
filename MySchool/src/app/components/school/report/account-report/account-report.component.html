@@ -119,7 +119,11 @@
       </div>
 
       <div class="min-w-max text-left md:text-end">
-        <img [src]="displayLogoUrl" alt="شعار المدرسة" class="h-12 mx-auto md:mx-0 mb-2" *ngIf="displayLogoUrl" />
+        <img
+          [src]="displayLogoUrl"
+          alt="شعار المدرسة"
+          class="account-report-school-logo mx-auto md:mx-0 mb-2"
+          *ngIf="displayLogoUrl" />
         <div class="font-bold text-lg">{{ schoolName || 'اسم المدرسة' }}</div>
         <div class="text-gray-600">{{ schoolAddress || 'شملان | مديرية معين | صنعاء' }}</div>
         <div class="text-gray-600">Tel: {{ schoolPhone || '01‑xxxxxxx' }}</div>

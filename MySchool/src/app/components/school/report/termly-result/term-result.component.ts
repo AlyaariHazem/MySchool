@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 
 
 @Component({
@@ -9,13 +9,40 @@ import { Component, OnInit } from '@angular/core';
 export class TermResultComponent implements OnInit {
 
   monthlyReports: MonthlyResult[] = [];
-  constructor() { }
+  /** Expands the table and drops the paginator for a full-data print. */
+  printing = false;
+
+  constructor(private readonly cdr: ChangeDetectorRef) { }
   private allReports: MonthlyResult[] = [];
 
   subjectNames: string[] = [];
   gradeTypes: string[] = [];
-  print() {
-    window.print();
+
+  print(): void {
+    const styleId = 'term-result-print-page';
+    let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent =
+      '@media print { @page { size: A4 landscape; margin: 5mm; } }';
+
+    this.printing = true;
+    this.cdr.detectChanges();
+
+    const cleanup = (): void => {
+      this.printing = false;
+      this.cdr.detectChanges();
+      styleEl?.remove();
+      window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
+
+    requestAnimationFrame(() => {
+      window.print();
+    });
   }
   months = [
     { label: 'يناير', value: 'January' },

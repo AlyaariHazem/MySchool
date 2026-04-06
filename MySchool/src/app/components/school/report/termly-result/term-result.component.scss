@@ -55,5 +55,29 @@
     border-radius: 4px;
   }
 
-  
+@media print {
+  :host {
+    display: block;
+  }
+
+  .toolbar {
+    display: none !important;
+  }
+
+  .sticky-col,
+  .sticky-col-right {
+    position: static !important;
+  }
+
+  ::ng-deep .p-datatable-scrollable-header {
+    position: static !important;
+  }
+
+  ::ng-deep #report .p-datatable-table td,
+  ::ng-deep #report .p-datatable-table th {
+    border-width: 0.5px !important;
+    padding: 0 1px !important;
+  }
+}
+
    

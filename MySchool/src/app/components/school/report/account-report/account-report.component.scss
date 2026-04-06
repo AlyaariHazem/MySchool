@@ -5,6 +5,9 @@
 
 #page {
   background-color: white;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* —— Filter toolbar (screen only) —— */
@@ -232,6 +235,9 @@
 /* Guardian notice card — screen + print (fee-system style) */
 .account-report-print-intro {
   display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   margin: 0 0 1.25rem;
   padding: 0;
   border-radius: 12px;
@@ -298,6 +304,8 @@
   line-height: 1.35;
   color: #0f172a;
   letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 .account-report-print-intro__text {
@@ -305,6 +313,8 @@
   font-size: 0.9rem;
   line-height: 1.65;
   color: #334155;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 @media print {
@@ -367,6 +377,32 @@
   max-width: 800px;
   margin: 0 auto;
 }
+/* School logo — cap size (wide/tall sources were blowing up the header) */
+.account-report-school-logo,
+:host ::ng-deep #report img[alt='شعار المدرسة'] {
+  max-width: 7.5rem;
+  max-height: 3rem;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+@media screen and (min-width: 768px) {
+  .md\:mx-0 {
+      margin-left: 0rem !important;
+      margin-right: 4.5rem !important;
+  }
+}
+@media print {
+  .account-report-school-logo,
+  :host ::ng-deep #report img[alt='شعار المدرسة'] {
+    max-width: 6.5rem;
+    max-height: 2.5rem;
+  }
+}
+
 .logo {
   width: 80px;
   height: 80px;

@@ -1,6 +1,26 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .page-header {
     border-radius: 9px;
     margin-bottom: 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .page-header .row {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .page-header nav {
+    width: 100%;
+    max-width: 100%;
   }
   .english {
     .page-header {
@@ -16,9 +36,29 @@
     }
   }
   :host ::ng-deep {
+    p-breadcrumb,
+    .p-breadcrumb {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+    }
+
     .p-breadcrumb {
       background-color: #eceff6 !important;
       border: 1px solid #c0c0c0 !important;
+    }
+
+    .p-breadcrumb-list {
+      flex-wrap: wrap;
+      row-gap: 0.35rem;
+      max-width: 100%;
+    }
+
+    .p-breadcrumb .p-menuitem-link,
+    .p-breadcrumb .p-menuitem-text {
+      white-space: normal;
+      word-break: break-word;
+      max-width: 100%;
     }
   }
   :host ::ng-deep .p-breadcrumb-separator .p-icon:dir(rtl) {
