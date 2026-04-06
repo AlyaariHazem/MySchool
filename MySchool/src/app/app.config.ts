@@ -18,6 +18,7 @@ import { AppTranslateModule } from './shared/modules/app-translate.module';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { ConfirmationService } from 'primeng/api';
+import { provideLoadingBarRouter } from '@ngx-loading-bar/router';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -53,6 +54,7 @@ export const appConfig: ApplicationConfig = {
             useClass: TokenInterceptor,
             multi: true,
         },
+        provideLoadingBarRouter(),
         // {provide: HTTP_INTERCEPTORS, useClass: IntercepterService, multi: true},
         provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })
     ]

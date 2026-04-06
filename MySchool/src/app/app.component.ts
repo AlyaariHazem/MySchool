@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NgxLoadingBar } from '@ngx-loading-bar/core';
 
 import { AdminModule } from "./components/admin/admin.module";
 import { Store } from '@ngrx/store';
@@ -12,7 +13,7 @@ import { ShardModule } from './shared/shard.module';
     standalone: true,
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
-    imports: [RouterOutlet, AdminModule,ShardModule]
+    imports: [NgxLoadingBar, RouterOutlet, AdminModule, ShardModule]
 })
 export class AppComponent {
   title = 'MySchool';
