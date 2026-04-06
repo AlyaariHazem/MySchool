@@ -4,10 +4,12 @@ import {
   EventEmitter,
   HostListener,
   Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
   Renderer2,
+  SimpleChanges,
   ViewChild,
   inject,
 } from '@angular/core';
@@ -18,6 +20,9 @@ import { PaginatorModule } from 'primeng/paginator';
 import { DatePipe } from '@angular/common';
 import { StudentsDataService } from '../../../core/services/students-data.service';
 import { AgePipe } from '../../../Pipes/age.pipe';
+
+/** Internal key for the actions column width map (not a data field). */
+export const CUSTOM_TABLE_ACTIONS_FIELD = '__ct_actions__';
 
 export interface TableColumn {
   field: string;
@@ -36,7 +41,7 @@ export interface TableColumn {
   templateUrl: './custom-table.component.html',
   styleUrls: ['./custom-table.component.scss'],
 })
-export class CustomTableComponent implements OnInit, OnDestroy {
+export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input() data: any[] = [];
   @Input() columns: TableColumn[] = [];
   @Input() loading: boolean = false;
@@ -54,6 +59,8 @@ export class CustomTableComponent implements OnInit, OnDestroy {
   @Input() tableDir: 'rtl' | 'ltr' = 'rtl';
   /** When false, rows are not clickable and do not use pointer cursor. */
   @Input() rowClickable: boolean = true;
+  /** Drag the trailing edge of a header cell to resize; first drag snapshots all column widths. */
+  @Input() resizableColumns: boolean = true;
 
   @Output() pageChange = new EventEmitter<any>();
   @Output() rowEdit = new EventEmitter<any>();
@@ -66,6 +73,7 @@ export class CustomTableComponent implements OnInit, OnDestroy {
   private renderer = inject(Renderer2);
 
   @ViewChild('tableScrollHost', { read: ElementRef }) tableScrollHost?: ElementRef<HTMLElement>;
+  @ViewChild('dataTable', { read: ElementRef }) dataTableRef?: ElementRef<HTMLTableElement>;
 
   globalFilterValue: string = '';
   columnFilters: Record<string, string> = {};
@@ -77,10 +85,34 @@ export class CustomTableComponent implements OnInit, OnDestroy {
   private readonly menuMinWidthPx = 170;
   private readonly menuHeightEstimatePx = 120;
 
+  /** Pixel widths after first resize snapshot; drives <colgroup> and fixed layout. */
+  columnWidthsPx: Partial<Record<string, number>> = {};
+  actionColumnWidthPx: number | null = null;
+
+  private resizeField: string | null = null;
+  private resizeStartX = 0;
+  private resizeStartW = 0;
+  private resizeUnlistenMove?: () => void;
+  private resizeUnlistenUp?: () => void;
+  private readonly colResizeMinPx = 48;
+
+  readonly actionsFieldKey = CUSTOM_TABLE_ACTIONS_FIELD;
+
   ngOnInit() {
     if (!this.columns || this.columns.length === 0) {
       console.warn('CustomTableComponent: No columns provided');
     }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['columns'] && !changes['columns'].firstChange) {
+      this.columnWidthsPx = {};
+      this.actionColumnWidthPx = null;
+    }
+  }
+
+  get useFixedColumnLayout(): boolean {
+    return Object.keys(this.columnWidthsPx).length > 0;
   }
 
   onPageChange(event: any) {
@@ -199,6 +231,89 @@ export class CustomTableComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.closeDropdown();
+    this.endColumnResize();
+  }
+
+  onColResizePointerDown(field: string, event: PointerEvent): void {
+    if (!this.resizableColumns || event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    this.snapshotColumnWidthsFromDom();
+    this.resizeField = field;
+    this.resizeStartX = event.clientX;
+    if (field === CUSTOM_TABLE_ACTIONS_FIELD) {
+      this.resizeStartW = this.actionColumnWidthPx ?? this.colResizeMinPx;
+    } else {
+      this.resizeStartW = this.columnWidthsPx[field] ?? this.colResizeMinPx;
+    }
+    this.resizeUnlistenMove = this.renderer.listen('document', 'pointermove', (e: Event) =>
+      this.onColResizePointerMove(e as PointerEvent),
+    );
+    this.resizeUnlistenUp = this.renderer.listen('document', 'pointerup', (e: Event) =>
+      this.onColResizePointerUp(e as PointerEvent),
+    );
+  }
+
+  private snapshotColumnWidthsFromDom(): void {
+    if (Object.keys(this.columnWidthsPx).length > 0) {
+      return;
+    }
+    const table = this.dataTableRef?.nativeElement;
+    if (!table || !this.columns?.length) {
+      return;
+    }
+    const ths = table.querySelectorAll<HTMLElement>('thead tr th');
+    let i = 0;
+    for (const col of this.columns) {
+      const th = ths[i++];
+      if (th) {
+        this.columnWidthsPx[col.field] = Math.max(
+          this.colResizeMinPx,
+          Math.round(th.getBoundingClientRect().width),
+        );
+      }
+    }
+    if (this.showActions) {
+      const th = ths[i];
+      if (th) {
+        this.actionColumnWidthPx = Math.max(
+          this.colResizeMinPx,
+          Math.round(th.getBoundingClientRect().width),
+        );
+      }
+    }
+  }
+
+  private onColResizePointerMove(event: PointerEvent): void {
+    if (this.resizeField === null) {
+      return;
+    }
+    const delta =
+      this.tableDir === 'rtl' ? this.resizeStartX - event.clientX : event.clientX - this.resizeStartX;
+    const w = Math.max(this.colResizeMinPx, Math.round(this.resizeStartW + delta));
+    if (this.resizeField === CUSTOM_TABLE_ACTIONS_FIELD) {
+      this.actionColumnWidthPx = w;
+    } else {
+      this.columnWidthsPx = { ...this.columnWidthsPx, [this.resizeField]: w };
+    }
+  }
+
+  private onColResizePointerUp(_event: PointerEvent): void {
+    this.endColumnResize();
+  }
+
+  private endColumnResize(): void {
+    this.resizeField = null;
+    if (this.resizeUnlistenMove) {
+      this.resizeUnlistenMove();
+      this.resizeUnlistenMove = undefined;
+    }
+    if (this.resizeUnlistenUp) {
+      this.resizeUnlistenUp();
+      this.resizeUnlistenUp = undefined;
+    }
   }
 
   getFieldValue(row: any, field: string): any {

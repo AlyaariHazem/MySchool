@@ -28,9 +28,11 @@
   overscroll-behavior-x: contain;
 }
 
+/* Intrinsic table width so columns size from cell content (not stretched to fill the card). */
 .custom-table-scroll .styled-table {
   width: max-content;
-  min-width: 100%;
+  min-width: unset;
+  max-width: none;
 }
 
 :host ::ng-deep .custom-table-outer mat-card {
@@ -127,14 +129,39 @@
 
 // Keep existing table styles - preserve green header
 .styled-table {
-  width: 100%;
+  width: max-content;
   border-collapse: collapse;
   margin: 0;
   font-size: 0.9em;
   font-family: sans-serif;
-  min-width: 400px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-  table-layout: auto; // Auto width for columns
+  table-layout: auto;
+}
+
+.styled-table.ct-table-fixed {
+  table-layout: fixed;
+}
+
+.ct-th-resizable {
+  position: relative;
+  vertical-align: top;
+}
+
+.ct-col-resize-handle {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  margin-inline-end: -3px;
+  cursor: col-resize;
+  z-index: 3;
+  touch-action: none;
+  user-select: none;
+}
+
+.ct-col-resize-handle:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .styled-table thead tr {
@@ -148,13 +175,13 @@
 .styled-table td {
   padding: 12px 1rem;
   border: 1px solid #dddddd;
-  white-space: nowrap; // Prevent text wrapping
+  white-space: nowrap;
 }
 td{
   text-align: center;
 }
 .styled-table th {
-  width: auto; // Auto width
+  width: auto;
 }
 
 .styled-table tbody tr {
