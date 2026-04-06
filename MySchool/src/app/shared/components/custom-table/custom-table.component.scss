@@ -1,3 +1,15 @@
+/* Isolate from global `.styled-table { width: 99%; min-width: 900px }` and similar. */
+:host {
+  display: block;
+}
+
+:host .custom-table-scroll table.styled-table:not(.ct-table-fixed) {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: none !important;
+  table-layout: auto !important;
+}
+
 .custom-table-wrapper {
   width: 100%;
   max-width: 100%;
@@ -14,31 +26,50 @@
   }
 
   .column-filter-input {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 4px;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     font-size: 12px;
   }
 }
 
 .custom-table-outer {
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
 }
 
 .custom-table-scroll {
   overflow-x: auto;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   overscroll-behavior-x: contain;
 }
 
-/* Intrinsic table width so columns size from cell content (not stretched to fill the card). */
-.custom-table-scroll .styled-table {
-  width: max-content;
-  min-width: unset;
+.custom-table-scroll .styled-table.ct-table-fixed {
+  width: 100%;
+  min-width: 100%;
+  max-width: none;
+}
+
+.custom-table-scroll .styled-table:not(.ct-table-fixed) {
+  width: 100%;
+  min-width: 100%;
   max-width: none;
 }
 
 :host ::ng-deep .custom-table-outer mat-card {
   display: flex;
   flex-direction: column;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
@@ -129,7 +160,8 @@
 
 // Keep existing table styles - preserve green header
 .styled-table {
-  width: max-content;
+  width: 100%;
+  min-width: 100%;
   border-collapse: collapse;
   margin: 0;
   font-size: 0.9em;
@@ -139,7 +171,9 @@
 }
 
 .styled-table.ct-table-fixed {
-  table-layout: fixed;
+  table-layout: fixed !important;
+  width: 100% !important;
+  min-width: 100% !important;
 }
 
 .ct-th-resizable {

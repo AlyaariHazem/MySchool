@@ -6,14 +6,16 @@
         #dataTable
         class="styled-table"
         [class.ct-table-fixed]="useFixedColumnLayout">
-        <colgroup>
-          @for (col of columns; track col.field) {
-            <col [style.width.px]="columnWidthsPx[col.field] ?? null" />
-          }
-          @if (showActions) {
-            <col [style.width.px]="actionColumnWidthPx ?? null" />
-          }
-        </colgroup>
+        @if (useFixedColumnLayout) {
+          <colgroup>
+            @for (col of columns; track col.field) {
+              <col [style.width.px]="columnWidthsPx[col.field] ?? null" />
+            }
+            @if (showActions) {
+              <col [style.width.px]="actionColumnWidthPx ?? null" />
+            }
+          </colgroup>
+        }
         <thead>
           <tr>
             @for (col of columns; track col.field) {
@@ -26,8 +28,7 @@
                       class="column-filter-input"
                       [value]="columnFilters[col.field] || ''"
                       (input)="onColumnFilter(col.field, $any($event.target).value)"
-                      [placeholder]="'فلترة ' + col.header"
-                      style="width: 100%; padding: 4px 8px; margin-top: 4px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;" />
+                      [placeholder]="'فلترة ' + col.header" />
                   </div>
                 }
                 @if (resizableColumns) {

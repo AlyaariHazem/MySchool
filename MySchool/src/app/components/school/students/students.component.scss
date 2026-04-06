@@ -29,13 +29,6 @@ p-paginator {
   }
 }
 
-.styled-table th:nth-child(3),
-.styled-table td:nth-child(3) {
-  width: 400px; /* Adjust the width as needed */
-}
-.student-name-column {
-  width: 280px; /* Set your desired width */
-}
 .col-4 {
   position: absolute;
   left: 0rem;
@@ -254,10 +247,6 @@ p-select {
 @media (max-width: 1600px) {
   .add {
     width: 19%;
-  }
-  .styled-table th:nth-child(3),
-  .styled-table td:nth-child(3) {
-    width: 400px; /* Adjust the width as needed */
   }
 }
 @media (max-width: 900px) {
