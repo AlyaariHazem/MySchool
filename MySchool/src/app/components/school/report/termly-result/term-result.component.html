@@ -9,6 +9,7 @@
     </div>
     <div class="studentResult" id="report">
         <p class="text-center mb-3">نتيجة الطالب الفصلية</p>
+        <div class="term-result-print-fit">
         <p-table #table [value]="monthlyReports" [scrollable]="!printing" [scrollHeight]="printing ? undefined : '400px'"
             [paginator]="!printing" [rows]="printing ? monthlyReports.length : 10"
             dataKey="studentID" styleClass="p-datatable-striped">
@@ -53,5 +54,6 @@
             </ng-template>
 
         </p-table>
+        </div>
     </div>
 </div>

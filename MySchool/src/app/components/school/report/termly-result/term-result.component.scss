@@ -73,10 +73,33 @@
     position: static !important;
   }
 
+  .term-result-print-fit {
+    display: block;
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  ::ng-deep .term-result-print-fit .p-datatable,
+  ::ng-deep .term-result-print-fit .p-datatable-table-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .grades-table.card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
   ::ng-deep #report .p-datatable-table td,
   ::ng-deep #report .p-datatable-table th {
     border-width: 0.5px !important;
-    padding: 0 1px !important;
   }
 }
 
