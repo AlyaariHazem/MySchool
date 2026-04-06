@@ -66,6 +66,8 @@ export class AccountReportComponent implements OnInit {
   filteredStudentsForPicker: StudentNameIdDTO[] = [];
   selectedStudentForSearch: StudentNameIdDTO | null = null;
   private readonly studentPickerPageSize = 5;
+  /** Wait this many ms after typing stops before calling the search API (PrimeNG AutoComplete `delay`). */
+  readonly studentPickerSearchDelayMs = 400;
   /** Skip one Enter keyup after list selection (PrimeNG handles selection on keydown). */
   private skipStudentSearchKeyUpAfterSelect = false;
 
