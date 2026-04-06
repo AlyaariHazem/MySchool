@@ -1,4 +1,5 @@
 import { Component, ElementRef, ViewChild, OnInit, inject } from '@angular/core';
+import { AutoComplete } from 'primeng/autocomplete';
 import { ReportTemplateService } from '../../core/services/report-template.service';
 import { AccountService } from '../../core/services/account.service';
 import { StudentService } from '../../../../core/services/student.service';
@@ -7,7 +8,11 @@ import { StudentAccounts } from '../../core/models/accounts.model';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../../environments/environment';
-import { AutoCompleteCompleteEvent, AutoCompleteSelectEvent } from 'primeng/autocomplete';
+import {
+  AutoCompleteCompleteEvent,
+  AutoCompleteLazyLoadEvent,
+  AutoCompleteSelectEvent
+} from 'primeng/autocomplete';
 
 @Component({
   selector: 'app-account-report',
@@ -18,6 +23,9 @@ export class AccountReportComponent implements OnInit {
   /* يرتبط بالقسم الذى نريد طباعته فقط */
   @ViewChild('printArea', { static: true })
   printArea!: ElementRef<HTMLDivElement>;
+
+  @ViewChild('studentAccountAutocomplete')
+  studentAccountAutocomplete?: AutoComplete;
 
   // Services
   private reportTemplateService = inject(ReportTemplateService);
@@ -58,6 +66,17 @@ export class AccountReportComponent implements OnInit {
   filteredStudentsForPicker: StudentNameIdDTO[] = [];
   selectedStudentForSearch: StudentNameIdDTO | null = null;
   private readonly studentPickerPageSize = 5;
+  /** Skip one Enter keyup after list selection (PrimeNG handles selection on keydown). */
+  private skipStudentSearchKeyUpAfterSelect = false;
+
+  /** Pagination for student picker (same filters as last search). */
+  private studentPickerLastQuery: Pick<StudentNameIdSearchRequest, 'studentID' | 'fullName'> | null = null;
+  private studentPickerLoadedPage = 0;
+  private studentPickerTotalPages = 0;
+  private studentPickerLoadingMore = false;
+  private studentPickerRequestSeq = 0;
+  /** One auto "page 2" when the first page fills the panel and nothing scrolls yet (first stays 0). */
+  private studentPickerNoScrollAppendDone = false;
 
   /** Shown under the report header (from API school/report or editable in DB template via #HeaderMessage#) */
   headerMessage = '';
@@ -106,15 +125,151 @@ export class AccountReportComponent implements OnInit {
       req.fullName = raw;
     }
 
+    const seq = ++this.studentPickerRequestSeq;
+    this.studentPickerLoadingMore = false;
+    this.studentPickerLoadedPage = 0;
+    this.studentPickerTotalPages = 0;
+    this.studentPickerLastQuery = null;
+    this.studentPickerNoScrollAppendDone = false;
+
     this.studentService.searchStudentNamesAndIds(req).subscribe({
       next: (page) => {
+        if (seq !== this.studentPickerRequestSeq) {
+          return;
+        }
         this.filteredStudentsForPicker = page.data;
+        this.studentPickerLoadedPage = page.pageNumber;
+        this.studentPickerTotalPages = Math.max(1, page.totalPages);
+        this.studentPickerLastQuery =
+          req.studentID != null && req.studentID > 0
+            ? { studentID: req.studentID }
+            : req.fullName != null && String(req.fullName).trim() !== ''
+              ? { fullName: String(req.fullName).trim() }
+              : null;
       },
       error: () => {
+        if (seq !== this.studentPickerRequestSeq) {
+          return;
+        }
         this.filteredStudentsForPicker = [];
+        this.studentPickerLastQuery = null;
         this.toastr.error('تعذّر البحث عن الطلاب', 'خطأ');
       }
     });
+  }
+
+  onStudentPickerLazyLoad(event: AutoCompleteLazyLoadEvent): void {
+    const len = this.filteredStudentsForPicker.length;
+    if (len === 0 || this.studentPickerLoadingMore || !this.studentPickerLastQuery) {
+      return;
+    }
+    if (this.studentPickerLoadedPage >= this.studentPickerTotalPages) {
+      return;
+    }
+
+    const first = Number(event.first);
+    const last = Number(event.last);
+    if (!Number.isFinite(first) || !Number.isFinite(last)) {
+      return;
+    }
+
+    const nearEndOfLoaded = last >= len - 1;
+    if (!nearEndOfLoaded) {
+      return;
+    }
+
+    const scrolledAwayFromTop = first > 0;
+    const canAppendWithoutScroll =
+      first === 0 &&
+      len === this.studentPickerPageSize &&
+      this.studentPickerLoadedPage < this.studentPickerTotalPages &&
+      !this.studentPickerNoScrollAppendDone;
+
+    if (!scrolledAwayFromTop && !canAppendWithoutScroll) {
+      return;
+    }
+
+    if (canAppendWithoutScroll && !scrolledAwayFromTop) {
+      this.studentPickerNoScrollAppendDone = true;
+    }
+
+    this.loadStudentPickerNextPage();
+  }
+
+  private loadStudentPickerNextPage(): void {
+    if (
+      !this.studentPickerLastQuery ||
+      this.studentPickerLoadingMore ||
+      this.studentPickerLoadedPage >= this.studentPickerTotalPages
+    ) {
+      return;
+    }
+
+    const seq = this.studentPickerRequestSeq;
+    const nextPage = this.studentPickerLoadedPage + 1;
+    this.studentPickerLoadingMore = true;
+
+    const req: StudentNameIdSearchRequest = {
+      ...this.studentPickerLastQuery,
+      pageNumber: nextPage,
+      pageSize: this.studentPickerPageSize
+    };
+
+    this.studentService.searchStudentNamesAndIds(req).subscribe({
+      next: (page) => {
+        this.studentPickerLoadingMore = false;
+        if (seq !== this.studentPickerRequestSeq) {
+          return;
+        }
+        const existing = new Set(this.filteredStudentsForPicker.map((s) => s.studentID));
+        const merged = [...this.filteredStudentsForPicker];
+        for (const row of page.data) {
+          if (!existing.has(row.studentID)) {
+            merged.push(row);
+            existing.add(row.studentID);
+          }
+        }
+        this.filteredStudentsForPicker = merged;
+        this.studentPickerLoadedPage = page.pageNumber;
+        this.studentPickerTotalPages = Math.max(this.studentPickerTotalPages, Math.max(1, page.totalPages));
+      },
+      error: () => {
+        this.studentPickerLoadingMore = false;
+        if (seq === this.studentPickerRequestSeq) {
+          this.toastr.error('تعذّر تحميل المزيد من الطلاب', 'خطأ');
+        }
+      }
+    });
+  }
+
+  onStudentPickerClear(): void {
+    this.filteredStudentsForPicker = [];
+    this.studentPickerLastQuery = null;
+    this.studentPickerLoadedPage = 0;
+    this.studentPickerTotalPages = 0;
+    this.studentPickerLoadingMore = false;
+    this.studentPickerNoScrollAppendDone = false;
+    this.studentPickerRequestSeq++;
+  }
+
+  onStudentSearchKeyUp(event: KeyboardEvent): void {
+    if (event.key !== 'Enter' && event.key !== 'NumpadEnter') {
+      return;
+    }
+    if (this.skipStudentSearchKeyUpAfterSelect) {
+      this.skipStudentSearchKeyUpAfterSelect = false;
+      return;
+    }
+    const ac = this.studentAccountAutocomplete;
+    if (!ac) {
+      return;
+    }
+    const raw = ((event.target as HTMLInputElement)?.value ?? '').trim();
+    if (!raw.length) {
+      this.filteredStudentsForPicker = [];
+      return;
+    }
+    ac.search(event, raw, 'input');
   }
 
   onStudentPickerSelect(event: AutoCompleteSelectEvent): void {
@@ -122,6 +277,7 @@ export class AccountReportComponent implements OnInit {
     if (!row?.studentID) {
       return;
     }
+    this.skipStudentSearchKeyUpAfterSelect = true;
     this.loadAccountByStudentId(row.studentID);
   }
 
