@@ -7,6 +7,21 @@ import { finalize } from 'rxjs/operators';
 import { LoaderService } from '../services/loader.service';
 import { Router } from '@angular/router';
 
+/** Paths that should not toggle the global progress spinner (background polling, etc.). */
+function shouldSkipGlobalLoader(url: string): boolean {
+  const withoutQuery = url.split('?')[0];
+  let path: string;
+  try {
+    path = new URL(withoutQuery, 'http://localhost').pathname;
+  } catch {
+    path = withoutQuery;
+  }
+  return (
+    /\/api\/Notifications\/unread-count\/?$/.test(path) ||
+    /\/api\/Notifications\/inbox\/?$/.test(path)
+  );
+}
+
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
   constructor(private loaderService: LoaderService, private router: Router) { }
@@ -22,11 +37,16 @@ export class TokenInterceptor implements HttpInterceptor {
       this.router.navigateByUrl('#');
     }
 
-    this.loaderService.show();
-    
+    const skipLoader = shouldSkipGlobalLoader(req.url);
+    if (!skipLoader) {
+      this.loaderService.show();
+    }
+
     return next.handle(req).pipe(
       finalize(() => {
-        this.loaderService.hide();
+        if (!skipLoader) {
+          this.loaderService.hide();
+        }
       })
     );
   }
