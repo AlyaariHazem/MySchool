@@ -25,6 +25,35 @@ input[readonly]{
   background: none;
   border: none;
   cursor: pointer;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.photo-label--disabled {
+  pointer-events: none;
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.new-student-submit-spinner {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-inline-end: 0.35em;
+  vertical-align: -0.1em;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: new-student-spin 0.65s linear infinite;
+}
+
+@keyframes new-student-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .container {
@@ -104,6 +133,11 @@ select:focus {
 .tablink.active {
   border-bottom: 3px solid #2fdf84;
   z-index: 4;
+}
+
+.tablink:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .tabcontent {

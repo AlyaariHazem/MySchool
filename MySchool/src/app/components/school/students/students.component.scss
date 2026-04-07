@@ -73,6 +73,12 @@ p-paginator {
   transition: all 0.3s ease;
   color: #6c757d;
   font-size: 1.1rem;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
   
   i {
     transition: all 0.3s ease;
@@ -442,6 +448,11 @@ li:hover {
 // Students Grid Container
 .students-grid-container {
   padding: 1rem 0;
+}
+
+.students-paginator-wrap--disabled {
+  pointer-events: none;
+  opacity: 0.55;
 }
 
 .header-section {

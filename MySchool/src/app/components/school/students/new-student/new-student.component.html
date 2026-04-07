@@ -1,15 +1,16 @@
-<form class="group5" [formGroup]="formGroup">
+<form class="group5" [formGroup]="formGroup" (ngSubmit)="onSubmit()" [attr.aria-busy]="isSubmitting">
   <div class="new-student-no-print">
-    <button type="button" class="close-btn" (click)="closeModal()">×</button>
+    <button type="button" class="close-btn" [disabled]="isSubmitting" (click)="closeModal()">×</button>
     <!-- <app-head></app-head> -->
     <div class="student-header rtl-direction">
       <div class="student-photo-section">
         <h2 class="school">{{isEditMode ? 'تعديل بيانات الطالب' : 'إضافة طالب جديد'}}</h2>
         <div class="student-photo">
-          <label for="fileInput">
+          <label for="fileInput" [class.photo-label--disabled]="isSubmitting">
             <img [src]="studentImageURL ? studentImageURL : 'assets/img/user.jpg'" alt="Student Photo" />
           </label>
-          <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)" style="display: none" />
+          <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)" style="display: none"
+            [disabled]="isSubmitting" />
         </div>
       </div>
 
@@ -30,15 +31,19 @@
         </div>
 
         <div class="buttons">
-          <button class="btn btn-success" type="submit" [disabled]="!formGroup.valid"
-            (click)="isEditMode?onUpdate():onSubmit()">{{isEditMode? 'تعديل' : 'إضافة'}}</button>
-          <button type="button" class="btn btn-info" (click)="resetForm()">جديد</button>
-          <button type="button" class="btn btn-warning">الشهادة</button>
-          <button type="button" class="btn btn-outline-registration-print" (click)="printRegistrationForm()"
+          <button class="btn btn-success" type="submit" [disabled]="!formGroup.valid || isSubmitting">
+            @if (isSubmitting) {
+              <span class="new-student-submit-spinner" aria-hidden="true"></span>
+            }
+            {{isEditMode? 'تعديل' : 'إضافة'}}
+          </button>
+          <button type="button" class="btn btn-info" [disabled]="isSubmitting" (click)="resetForm()">جديد</button>
+          <button type="button" class="btn btn-warning" [disabled]="isSubmitting">الشهادة</button>
+          <button type="button" class="btn btn-outline-registration-print" [disabled]="isSubmitting" (click)="printRegistrationForm()"
             title="طباعة إستمارة التسجيل" aria-label="طباعة إستمارة التسجيل">
             <i class="fas fa-print" aria-hidden="true"></i>
           </button>
-          <button type="button" class="btn btn-primary" (click)="showCameraFun()">📷التقاط من الكاميرا</button>
+          <button type="button" class="btn btn-primary" [disabled]="isSubmitting" (click)="showCameraFun()">📷التقاط من الكاميرا</button>
         </div>
       </div>
       @if (showCamera) {
@@ -52,22 +57,26 @@
     <div id="id01" class="" dir="rtl">
       <div class="modal-content" style="background-color: #ffffff !important">
         <div class="container">
-          <button [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }" [id]="isEditMode?'':'defaultOpen'"
+          <button type="button" [ngClass]="{ tablink: true, active: activeTab === 'DataStudent' }" [id]="isEditMode?'':'defaultOpen'"
+            [disabled]="isSubmitting"
             (click)="openPage('DataStudent', $event.target)">
             <span>بيانات الطالب</span>
           </button>
-          <button [ngClass]="{ tablink: true, active: activeTab === 'OptionData' }"
+          <button type="button" [ngClass]="{ tablink: true, active: activeTab === 'OptionData' }"
+            [disabled]="isSubmitting"
             (click)="openPage('OptionData', $event.target)">
             <span>بيانات إختيارية</span>
           </button>
-          <button [ngClass]="{ tablink: true, active: activeTab === 'guardian' }"
+          <button type="button" [ngClass]="{ tablink: true, active: activeTab === 'guardian' }"
+            [disabled]="isSubmitting"
             (click)="openPage('guardian', $event.target)">
             <span>ولي الأمر</span>
           </button>
-          <button [ngClass]="{ tablink: true, active: activeTab === 'fees' }" [id]="isEditMode?'defaultOpen':''" (click)="openPage('fees', $event.target)">
+          <button type="button" [ngClass]="{ tablink: true, active: activeTab === 'fees' }" [id]="isEditMode?'defaultOpen':''" [disabled]="isSubmitting" (click)="openPage('fees', $event.target)">
             <span>رسوم الطالب</span>
           </button>
-          <button [ngClass]="{ tablink: true, active: activeTab === 'document' }"
+          <button type="button" [ngClass]="{ tablink: true, active: activeTab === 'document' }"
+            [disabled]="isSubmitting"
             (click)="openPage('document', $event.target)">
             <span>الوثائق</span>
           </button>

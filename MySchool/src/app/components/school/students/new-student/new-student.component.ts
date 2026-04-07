@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, Inject, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
+import { finalize } from 'rxjs';
 import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -33,6 +34,8 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
   /* ---------- UI state ---------- */
   activeTab = 'DataStudent';
   isEditMode = false;
+  /** True while add/update HTTP request is in flight (prevents double submit / duplicate toasts). */
+  isSubmitting = false;
   studentID = 0;
   studentImageURL = '';
   studentImageURL2 = '';
@@ -67,11 +70,22 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /* ---------- submit ---------- */
-  onSubmit(): void { this.isEditMode ? this.onUpdate() : this.onAdd(); }
+  onSubmit(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+    if (this.formGroup.invalid) {
+      return;
+    }
+    this.isEditMode ? this.onUpdate() : this.onAdd();
+  }
 
   /* ---------- add ---------- */
   private onAdd(): void {
-    if (this.formGroup.invalid) return;
+    if (this.formGroup.invalid || this.isSubmitting) {
+      return;
+    }
+    this.isSubmitting = true;
     this.attachments = this.formGroup.get('documents.attachments')?.value || [];
 
     // Calculate the required fees amount (total fees - total discounts)
@@ -90,19 +104,28 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
       attachments: this.attachments,
       studentImageURL: this.studentImageURL2
     };
-
-    this.studentService.addStudent(formData).subscribe({
+    this.studentService.addStudent(formData).pipe(
+      finalize(() => {
+        this.isSubmitting = false;
+      }),
+    ).subscribe({
       next: r => {
         this.toastr.success('Student Added Successfully! ', r.message);
         this.uploadImageAndFiles();
         this.generateStudentID();
-      }
-
+      },
+      error: () => {
+        this.toastr.error('فشل إضافة الطالب', 'خطأ');
+      },
     });
   }
 
   /* ---------- update ---------- */
   onUpdate(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+    this.isSubmitting = true;
     this.attachments = this.formGroup.get('documents.attachments')?.value || [];
     
     // Calculate the required fees amount (total fees - total discounts)
@@ -130,13 +153,20 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
       updateDiscounts
     };
 
-    this.studentService.updateStudent(payload).subscribe({
+    this.studentService.updateStudent(payload).pipe(
+      finalize(() => {
+        this.isSubmitting = false;
+      }),
+    ).subscribe({
       next: (res) => {
         this.toastr.success('Student updated successfully', res.message);
         this.uploadImageAndFiles();
         this.formStore.resetForm();
         this.dialogRef.close(payload);
-      }
+      },
+      error: () => {
+        this.toastr.error('فشل تحديث بيانات الطالب', 'خطأ');
+      },
     });
   }
 
@@ -247,6 +277,9 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   printRegistrationForm(): void {
+    if (this.isSubmitting) {
+      return;
+    }
     if (!document.getElementById('student-registration-form')) {
       this.toastr.error('لم يتم العثور على محتوى إستمارة التسجيل', 'خطأ');
       return;
@@ -352,13 +385,21 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /* ---------- UI ---------- */
   openPage(tab: string, btn: EventTarget | null): void {
+    if (this.isSubmitting) {
+      return;
+    }
     this.activeTab = tab;
     Array.from(document.getElementsByClassName('tablink')).forEach(b => b.classList.remove('active'));
     (btn as HTMLElement)?.classList.add('active');
     this.cd.detectChanges();
   }
 
-  closeModal(): void { this.dialogRef.close(); }
+  closeModal(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+    this.dialogRef.close();
+  }
 
   /* ---------- photo / camera ---------- */
   StudentImage!: File;
@@ -366,6 +407,9 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
   webcamImage: WebcamImage | null = null;
 
   onFileSelected(e: Event): void {
+    if (this.isSubmitting) {
+      return;
+    }
     const f = (e.target as HTMLInputElement).files?.[0];
     if (!f) return;
     this.StudentImage = f;
@@ -376,7 +420,12 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
     reader.readAsDataURL(f);
   }
 
-  showCameraFun() { this.showCamera = true; }
+  showCameraFun(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+    this.showCamera = true;
+  }
 
   handleCapturedImage(payload: { file: File; previewUrl: string }): void {
     if (!payload) return;
@@ -389,7 +438,9 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public resetForm(): void {
-
+    if (this.isSubmitting) {
+      return;
+    }
     this.formStore.resetForm();
   }
 }

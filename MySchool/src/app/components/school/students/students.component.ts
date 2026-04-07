@@ -201,6 +201,9 @@ export class StudentsComponent implements OnInit, OnDestroy {
 
 
   onFilterChange(filters: Record<string, string>): void {
+    if (this.isListLoading) {
+      return;
+    }
     // Check if filters were added or removed
     const hasFilters = Object.keys(filters).length > 0;
     

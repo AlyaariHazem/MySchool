@@ -10,6 +10,7 @@
               type="button"
               class="view-toggle-btn"
               [class.active]="showCulomn"
+              [disabled]="isBusy"
               (click)="showStudentCulomn()"
               pTooltip="عرض كجدول" 
               showDelay="200" 
@@ -20,6 +21,7 @@
               type="button"
               class="view-toggle-btn"
               [class.active]="showGrid"
+              [disabled]="isBusy"
               (click)="showStudentGrid()"
               pTooltip="عرض كبطاقات" 
               showDelay="200" 
@@ -43,8 +45,9 @@
           </div>
         </form> -->
 
-        <p-button label="تصدير" variant="outlined" severity="success" (click)="openDialog()"
-          [ngClass]="{'add':(dir$ | async)==='rtl','addEn':(dir$ | async)==='ltr','index':true}" label="إضافة طالب+" />
+        <p-button label="إضافة طالب+" variant="outlined" severity="success" (click)="openDialog()"
+          [ngClass]="{'add':(dir$ | async)==='rtl','addEn':(dir$ | async)==='ltr','index':true}"
+          [disabled]="isBusy" [loading]="isListLoading" />
 
         @if (showGrid) {
         <div class="students-grid-container">
@@ -138,14 +141,16 @@
                         icon="bi bi-cash-stack" 
                         (click)="EditStudentDialog(student.studentID)" 
                         class="w-full fees-button"
-                        styleClass="custom-button" />
+                        styleClass="custom-button"
+                        [disabled]="isBusy" />
                       @if (student.guardians.guardianID) {
                       <p-button 
                         label="ولي أمر" 
                         icon="bi bi-person-heart" 
                         (click)="EditGuardianDialog(student.guardians.guardianID)" 
                         class="w-full guardian-button"
-                        styleClass="custom-button guardian" />
+                        styleClass="custom-button guardian"
+                        [disabled]="isBusy" />
                       }
                     </div>
                   </div>
@@ -163,13 +168,15 @@
             }
           </div>
           
-          <p-paginator 
-            dir="ltr" 
-            (onPageChange)="handlePageChange($event)" 
-            [first]="paginatorService.first()"
-            [rows]="paginatorService.rows()" 
-            [totalRecords]="totalRecords" 
-            [rowsPerPageOptions]="[10, 20, 30]" />
+          <div class="students-paginator-wrap" [class.students-paginator-wrap--disabled]="isBusy">
+            <p-paginator 
+              dir="ltr" 
+              (onPageChange)="handlePageChange($event)" 
+              [first]="paginatorService.first()"
+              [rows]="paginatorService.rows()" 
+              [totalRecords]="totalRecords" 
+              [rowsPerPageOptions]="[10, 20, 30]" />
+          </div>
         </div>
         }
 
@@ -177,7 +184,8 @@
           <app-custom-table
             [data]="paginatedStudents"
             [columns]="tableColumns"
-            [loading]="false"
+            [loading]="isListLoading"
+            [actionsDisabled]="isBusy"
             [totalRecords]="totalRecords"
             [rows]="pageSize"
             [first]="paginatorService.first()"
