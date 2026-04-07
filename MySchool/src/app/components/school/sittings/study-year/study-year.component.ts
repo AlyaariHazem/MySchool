@@ -1,5 +1,6 @@
 // study-year.component.ts
 import { Component, OnInit, inject } from '@angular/core';
+import { finalize } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -46,6 +47,15 @@ export class StudyYearComponent implements OnInit {
   years: Year[] = [];
   paginatedYears: Year[] = [];
   isLoading = true;
+  /** True while delete / partial-update (not including list fetch) is in flight. */
+  isMutating = false;
+  /** Set by app-new-year while add/update HTTP call runs. */
+  formBusy = false;
+
+  get isBusy(): boolean {
+    return this.isLoading || this.isMutating || this.formBusy;
+  }
+
   filtersActive: boolean = false;
   currentFilters: Record<string, string> = {};
 
@@ -143,7 +153,12 @@ export class StudyYearComponent implements OnInit {
   /* ---------- CRUD ---------- */
   deleteYear(year: any): void {
     const yearId = year.yearID || year;
-    this.yearService.deleteYear(yearId).subscribe({
+    this.isMutating = true;
+    this.yearService.deleteYear(yearId).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: () => {
         this.getAllYears();
         this.toaster.success('تم حذف العام الدراسي بنجاح');
@@ -169,7 +184,12 @@ export class StudyYearComponent implements OnInit {
 
   changeYearStatus(year: Year, isActive: boolean): void {
     const patch = [{ op: 'replace', path: '/active', value: isActive }];
-    this.yearService.partialUpdate(year.yearID, patch).subscribe({
+    this.isMutating = true;
+    this.yearService.partialUpdate(year.yearID, patch).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: (msg) => {
         this.toaster.success(msg);
         this.getAllYears();

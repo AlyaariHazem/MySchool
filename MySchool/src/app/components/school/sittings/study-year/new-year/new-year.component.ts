@@ -1,4 +1,5 @@
 import { Component, EventEmitter, inject, Input, OnInit, OnChanges, SimpleChanges, Output } from '@angular/core';
+import { finalize } from 'rxjs';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { YearService } from '../../../../../core/services/year.service';
 import { Year } from '../../../../../core/models/year.model';
@@ -12,12 +13,15 @@ import { ToastrService } from 'ngx-toastr';
 export class NewYearComponent implements OnInit, OnChanges {
   formGroup: FormGroup;
   isActive: boolean = true;
-  
+  isSubmitting = false;
+
   @Input() year: Year | null = null;
   @Input() isEditMode: boolean = false;
 
   // Emit an event to the parent when a year is added successfully.
   @Output() yearAdded = new EventEmitter<Year>();
+  /** Emits true while add/update HTTP request is in flight (parent can disable list actions). */
+  @Output() busyChange = new EventEmitter<boolean>();
 
   yearService = inject(YearService);
   tosater = inject(ToastrService);
@@ -97,18 +101,31 @@ export class NewYearComponent implements OnInit, OnChanges {
   }
 
   yearAdd() {
+    if (this.isSubmitting) {
+      return;
+    }
     // Ensure schoolID is a number
     const formValue = { ...this.formGroup.value };
     formValue.schoolID = formValue.schoolID ? Number(formValue.schoolID) : (this.currantSchool ? Number(this.currantSchool) : null);
-    
+
+    this.isSubmitting = true;
+    this.busyChange.emit(true);
+
+    const done = () => {
+      this.isSubmitting = false;
+      this.busyChange.emit(false);
+    };
+
     if (this.isEditMode && this.year) {
       // Update existing year - ensure yearID is included
       const yearData: Year = {
         ...formValue,
         yearID: this.year.yearID
       };
-      
-      this.yearService.updateYear(yearData, this.year.yearID).subscribe({
+
+      this.yearService.updateYear(yearData, this.year.yearID).pipe(
+        finalize(done),
+      ).subscribe({
         next: (response: Year) => {
           console.log('Year updated successfully', response);
           this.tosater.success("تم تحديث السنة الدراسية بنجاح");
@@ -121,7 +138,9 @@ export class NewYearComponent implements OnInit, OnChanges {
       });
     } else {
       // Add new year
-      this.yearService.addYear(formValue).subscribe({
+      this.yearService.addYear(formValue).pipe(
+        finalize(done),
+      ).subscribe({
         next: (response: any) => {
           console.log('Year added successfully', response);
           this.tosater.success("تم إضافة السنة الدراسية بنجاح");
@@ -135,5 +154,5 @@ export class NewYearComponent implements OnInit, OnChanges {
         }
       });
     }
-  }  
+  }
 }

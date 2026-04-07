@@ -113,6 +113,7 @@
                       aria-haspopup="true"
                       [attr.aria-expanded]="isDropdownOpen(i)"
                       [attr.aria-label]="actionHeader"
+                      [disabled]="actionsDisabled"
                       (click)="toggleDropdown(i, $event)">
                       <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
                     </button>

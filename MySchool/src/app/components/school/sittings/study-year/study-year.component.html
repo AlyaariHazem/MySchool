@@ -5,20 +5,22 @@
     <h2 class="text-justify">العام الدارسي</h2>
 
     <!-- + سنة جديدة button -->
-    <p-button class="showFee" variant="outlined" severity="success" (onClick)="showDialogAddYear()" label="+ سنة جديدة">
+    <p-button class="showFee" variant="outlined" severity="success" (onClick)="showDialogAddYear()" label="+ سنة جديدة"
+      [disabled]="isBusy">
     </p-button>
 
     <!-- Add dialog -->
     <p-dialog header="إضافة سنة" [(visible)]="visible" [modal]="true" styleClass="year-dialog"
       [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false">
-      <app-new-year (yearAdded)="handleYearAdded()"></app-new-year>
+      <app-new-year (yearAdded)="handleYearAdded()" (busyChange)="formBusy = $event"></app-new-year>
     </p-dialog>
 
     <!-- Edit dialog -->
     <p-dialog header="تعديل سنة" [(visible)]="visibleEdit" [modal]="true" styleClass="year-dialog"
       [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [resizable]="false"
       (onHide)="selectedYear = null">
-      <app-new-year [year]="selectedYear" [isEditMode]="true" (yearAdded)="handleYearUpdated()"></app-new-year>
+      <app-new-year [year]="selectedYear" [isEditMode]="true" (yearAdded)="handleYearUpdated()"
+        (busyChange)="formBusy = $event"></app-new-year>
     </p-dialog>
 
     <!-- custom table -->
@@ -26,6 +28,7 @@
       [data]="paginatedYears"
       [columns]="tableColumns"
       [loading]="isLoading"
+      [actionsDisabled]="isBusy"
       [totalRecords]="totalRecords"
       [rows]="pageSize"
       [first]="paginatorService.first()"

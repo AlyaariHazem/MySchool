@@ -55,6 +55,8 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input() showActions: boolean = true;
   @Input() emptyMessage: string = 'لا توجد بيانات متاحة في الجدول';
   @Input() trackByField: string = 'id'; // Field to use for tracking items
+  /** When true, row action menu triggers are disabled (e.g. while a parent request is in flight). */
+  @Input() actionsDisabled: boolean = false;
   @Input() actionHeader: string = 'العملية';
   @Input() tableDir: 'rtl' | 'ltr' = 'rtl';
   /** When false, rows are not clickable and do not use pointer cursor. */
@@ -109,6 +111,9 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
       this.columnWidthsPx = {};
       this.actionColumnWidthPx = null;
     }
+    if (changes['actionsDisabled']?.currentValue === true) {
+      this.closeDropdown();
+    }
   }
 
   get useFixedColumnLayout(): boolean {
@@ -150,6 +155,9 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
 
   toggleDropdown(index: number, event: Event) {
     event.stopPropagation();
+    if (this.actionsDisabled) {
+      return;
+    }
     if (this.openDropdownIndex === index) {
       this.closeDropdown();
       return;

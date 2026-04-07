@@ -39,7 +39,7 @@
             </div>
 
             <div class="form-control control2">
-                <button class="active" (click)="toggleIsActive()">
+                <button type="button" class="active" (click)="toggleIsActive()" [disabled]="isSubmitting">
                     <i class="bi bi-record-circle" [ngStyle]="{'color': !isActive ? 'red' : '#2fdf85'}"></i>
                     <ng-container *ngIf="isActive; then activeTrue; else activeFalse"></ng-container>
                     <ng-template #activeTrue>نشط</ng-template>
@@ -65,7 +65,7 @@
 
     <div class="form-actions">
         
-        <p-button class="button add" variant="outlined" severity="success" (onClick)="yearAdd()" 
-          [label]="isEditMode ? 'تحديث' : 'إضافة+'" />
+        <p-button class="button add" variant="outlined" severity="success" (onClick)="yearAdd()"
+          [label]="isEditMode ? 'تحديث' : 'إضافة+'" [disabled]="isSubmitting" [loading]="isSubmitting" />
     </div>
 </form>
