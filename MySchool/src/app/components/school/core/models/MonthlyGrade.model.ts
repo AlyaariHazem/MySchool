@@ -10,6 +10,7 @@ export interface MonthlyGrade{
 export interface Grades{
     gradeTypeID:number;
     maxGrade:number;
+    gradeTypeName?: string;
 }
 
 export interface updateMonthlyGrades{

@@ -41,10 +41,12 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
     }
 
     /* ----------  READ  ---------- */
-    public async Task<Result<List<MonthlyGradesReternDTO>>> GetAllAsync(
-        int term, int monthId, int classId, int subjectId, int pageNumber, int pageSize)
+    public async Task<Result<List<MonthlyGradesReternDTO>>> GetAllAsync(MonthlyGradesQueryDTO query)
     {
-        if (pageNumber < 1 || pageSize < 1)
+        if (query == null)
+            return Result<List<MonthlyGradesReternDTO>>.Fail("Query payload is null.");
+
+        if (query.PageNumber < 1 || query.PageSize < 1)
             return Result<List<MonthlyGradesReternDTO>>.Fail("Page number must be greater than 0.");
 
         // Get the active year - monthly grades should always be read from the active year
@@ -57,13 +59,14 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
             return Result<List<MonthlyGradesReternDTO>>.Fail("No active year found. Please activate a year before viewing monthly grades.");
 
         var baseQuery = _context.MonthlyGrades
-            .Where(g => g.TermID == term &&
+            .Where(g => g.TermID == query.TermId &&
                         g.YearID == activeYear.YearID &&
-                        g.MonthID == monthId &&
-                        g.ClassID == classId);
+                        g.MonthID == query.MonthId &&
+                        g.ClassID == query.ClassId &&
+                        g.GradeType.IsActive);
 
-        if (subjectId != 0)
-            baseQuery = baseQuery.Where(g => g.SubjectID == subjectId);
+        if (query.SubjectId != 0)
+            baseQuery = baseQuery.Where(g => g.SubjectID == query.SubjectId);
 
         // Bring all matching records
         var grades = await baseQuery
@@ -94,13 +97,14 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
                 Grades = grp.Select(g => new GradeTypeMonthDTO
                 {
                     GradeTypeID = g.GradeTypeID,
-                    MaxGrade = g.Grade
+                    MaxGrade = g.Grade,
+                    GradeTypeName = g.GradeType?.Name
                 })
                 .OrderBy(g => g.GradeTypeID)
                 .ToList() 
             })
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((query.PageNumber - 1) * query.PageSize)
+            .Take(query.PageSize)
             .ToList();
 
         return Result<List<MonthlyGradesReternDTO>>.Success(grouped);
@@ -209,8 +213,11 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
         }
     }
 
-    public async Task<int> GetTotalMonthlyGradesCountAsync(int term, int monthId, int classId, int subjectId)
+    public async Task<int> GetTotalMonthlyGradesCountAsync(MonthlyGradesQueryDTO query)
     {
+        if (query == null)
+            return 0;
+
         // Get the active year - keep count consistent with GetAllAsync
         var activeYear = await _context.Years
             .Where(y => y.Active == true)
@@ -220,16 +227,17 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
         if (activeYear == null)
             return 0;
 
-        var query = _context.MonthlyGrades
-            .Where(g => g.TermID == term &&
+        var q = _context.MonthlyGrades
+            .Where(g => g.TermID == query.TermId &&
                         g.YearID == activeYear.YearID &&
-                        g.MonthID == monthId &&
-                        g.ClassID == classId);
+                        g.MonthID == query.MonthId &&
+                        g.ClassID == query.ClassId &&
+                        g.GradeType.IsActive);
 
-        if (subjectId != 0)
-            query = query.Where(g => g.SubjectID == subjectId);
+        if (query.SubjectId != 0)
+            q = q.Where(g => g.SubjectID == query.SubjectId);
 
-        return await query
+        return await q
             .Select(g => g.StudentID)
             .Distinct()
             .CountAsync();

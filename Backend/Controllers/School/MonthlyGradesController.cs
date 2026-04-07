@@ -21,37 +21,36 @@ public class MonthlyGradesController : ControllerBase
         var result = await _repo.AddAsync(dto);
 
         return result.Ok
-            ? CreatedAtAction(nameof(GetAll),          // no single-item GET, so point to list
-                              new
-                              {
-                                  term = dto.TermID,
-                                  monthId = dto.MonthID,
-                                  classId = dto.ClassID,
-                                  subjectId = dto.SubjectID
-                              },
-                              APIResponse.Success(result.Value!, HttpStatusCode.Created))
+            ? StatusCode((int)HttpStatusCode.Created, APIResponse.Success(result.Value!, HttpStatusCode.Created))
             : BadRequest(APIResponse.Fail(result.Error!));
     }
 
-    //api/MonthlyGrades/1/2/3/4?pageNumber=1&pageSize=10
-    [HttpGet("{term:int}/{monthId:int}/{classId:int}/{subjectId:int}")]
-    public async Task<IActionResult> GetAll(int term, int monthId, int classId, int subjectId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    /// <summary>Filters and pagination in the JSON body (active grade types only).</summary>
+    [HttpPost("page")]
+    public async Task<IActionResult> GetAllPage([FromBody] MonthlyGradesQueryDTO query)
     {
-        var result = await _repo.GetAllAsync(term, monthId, classId, subjectId, pageNumber, pageSize);
+        if (query == null)
+            return BadRequest(APIResponse.Fail("Request body is required."));
+
+        if (query.PageNumber < 1)
+            query.PageNumber = 1;
+        if (query.PageSize < 1)
+            query.PageSize = 10;
+
+        var result = await _repo.GetAllAsync(query);
 
         if (!result.Ok)
             return NotFound(APIResponse.Fail(result.Error!));
 
-        // استخدم الفلاتر لحساب العدد الصحيح
-        var totalCount = await _repo.GetTotalMonthlyGradesCountAsync(term, monthId, classId, subjectId);
+        var totalCount = await _repo.GetTotalMonthlyGradesCountAsync(query);
 
         var paginatedResult = new
         {
-            data = result.Value ?? new List<MonthlyGradesReternDTO>(), // Ensure data is never null
-            pageNumber,
-            pageSize,
+            data = result.Value ?? new List<MonthlyGradesReternDTO>(),
+            pageNumber = query.PageNumber,
+            pageSize = query.PageSize,
             totalCount,
-            totalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            totalPages = query.PageSize > 0 ? (int)Math.Ceiling(totalCount / (double)query.PageSize) : 0
         };
 
         return Ok(APIResponse.Success(paginatedResult));

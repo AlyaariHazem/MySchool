@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
 import { map } from 'rxjs';
 
 import { updateMonthlyGrades } from '../models/MonthlyGrade.model';
@@ -15,10 +14,15 @@ export class MonthlyGradesService {
   private readonly api=`${environment.baseUrl}/MonthlyGrades`;
   
   getAllMonthlyGrades(term: number, monthId: number, classId: number, subjectId: number, pageNumber: number, pageSize: number) {
-    const params=new HttpParams()
-    .set('pageNumber', pageNumber)
-    .set('pageSize', pageSize);
-    return this.API.http.get(`${this.api}/${term}/${monthId}/${classId}/${subjectId}`, { params: params }).pipe(
+    const body = {
+      termId: term,
+      monthId,
+      classId,
+      subjectId,
+      pageNumber,
+      pageSize
+    };
+    return this.API.http.post(`${this.api}/page`, body).pipe(
       map((res: any) => res.result)
     );
   }

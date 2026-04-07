@@ -8,5 +8,6 @@ namespace Backend.DTOS.School.GradeTypes;
 public record GradeTypeMonthDTO
 {
     public int GradeTypeID { get; set; }
-    public decimal?MaxGrade { get; set; } = 0;
+    public decimal? MaxGrade { get; set; } = 0;
+    public string? GradeTypeName { get; set; }
 }
