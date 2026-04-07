@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { finalize } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
 import { ToastrService } from 'ngx-toastr';
@@ -31,6 +32,12 @@ export class BooksComponent implements OnInit {
   /* form helpers */
   editMode = false;
   subjectData: Subjects = { subjectName: '', subjectReplacement: '', note: '', hireDate: '' };
+  isListLoading = false;
+  isMutating = false;
+
+  get isBusy(): boolean {
+    return this.isListLoading || this.isMutating;
+  }
 
   readonly dir$ = this.store.select(selectLanguage).pipe(
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
@@ -45,14 +52,21 @@ export class BooksComponent implements OnInit {
 
   /* ───────── CRUD ───────── */
   addSubject(form: NgForm): void {
+    if (this.isBusy) {
+      return;
+    }
     if (!this.subjectData.subjectName?.trim()) {
       this.toastr.warning('اسم الكتاب مطلوب');
       return;
     }
   
     const dto: Subjects = { ...this.subjectData, hireDate: new Date().toISOString() };
-  
-    this.subjectService.addSubject(dto).subscribe({
+    this.isMutating = true;
+    this.subjectService.addSubject(dto).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: res => {
         if (res.isSuccess) {
           this.toastr.success('تمت إضافة الكتاب');
@@ -65,10 +79,20 @@ export class BooksComponent implements OnInit {
   }
   
 
-  updateSubject(form:NgForm): void {
-    if (!this.subjectData.subjectID) return;
+  updateSubject(form: NgForm): void {
+    if (this.isBusy) {
+      return;
+    }
+    if (!this.subjectData.subjectID) {
+      return;
+    }
 
-    this.subjectService.updateSubject(this.subjectData.subjectID, this.subjectData).subscribe({
+    this.isMutating = true;
+    this.subjectService.updateSubject(this.subjectData.subjectID, this.subjectData).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: res => {
         if (res.isSuccess) {
           this.toastr.success('تم التعديل الكتاب بنجاح');
@@ -81,7 +105,15 @@ export class BooksComponent implements OnInit {
   }
 
   deleteSubject(id: number): void {
-    this.subjectService.deleteSubject(id).subscribe({
+    if (this.isBusy) {
+      return;
+    }
+    this.isMutating = true;
+    this.subjectService.deleteSubject(id).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: res => {
         if (res.isSuccess) {
           this.toastr.success(' تم الحذف الكتاب بنجاح');
@@ -93,12 +125,18 @@ export class BooksComponent implements OnInit {
   }
 
   editSubject(row: Subjects): void {
+    if (this.isBusy) {
+      return;
+    }
     this.editMode = true;
     this.subjectData = { ...row };   // deep copy
   }
 
   /* ───────── pagination ───────── */
   handlePageChange(evt: PaginatorState): void {
+    if (this.isListLoading) {
+      return;
+    }
     this.first = evt.first ?? 0;
     this.rows = evt.rows ?? 4;
     this.loadPage();
@@ -107,8 +145,14 @@ export class BooksComponent implements OnInit {
   private loadPage(): void {
     const page = this.first / this.rows + 1;
 
+    this.isListLoading = true;
     this.subjectService
       .getPaginatedSubjects(page, this.rows)
+      .pipe(
+        finalize(() => {
+          this.isListLoading = false;
+        }),
+      )
       .subscribe({
         next: res => {
           if (res.isSuccess && res.result) {

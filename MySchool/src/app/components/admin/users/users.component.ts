@@ -4,6 +4,7 @@ import { PaginatorState } from 'primeng/paginator';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { map } from 'rxjs';
+import { finalize } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import { AddManagerComponent } from './add-manager/add-manager.component';
@@ -31,6 +32,12 @@ export class UsersComponent implements OnInit {
   totalRecords = 0;
   first = 0;
   rows = 10;
+  isListLoading = false;
+  isMutating = false;
+
+  get isBusy(): boolean {
+    return this.isListLoading || this.isMutating;
+  }
 
   ngOnInit(): void {
     this.loadManagersPage();
@@ -38,7 +45,12 @@ export class UsersComponent implements OnInit {
 
   loadManagersPage(): void {
     const pageIndex = Math.floor(this.first / this.rows);
-    this.managerService.getManagersPage({ pageIndex, pageSize: this.rows }).subscribe({
+    this.isListLoading = true;
+    this.managerService.getManagersPage({ pageIndex, pageSize: this.rows }).pipe(
+      finalize(() => {
+        this.isListLoading = false;
+      }),
+    ).subscribe({
       next: (page) => {
         if (
           page.totalCount > 0 &&
@@ -93,12 +105,18 @@ export class UsersComponent implements OnInit {
   }
 
   onPageChange(event: PaginatorState): void {
+    if (this.isListLoading) {
+      return;
+    }
     this.first = event.first ?? 0;
     this.rows = event.rows ?? 10;
     this.loadManagersPage();
   }
 
   openDialog(): void {
+    if (this.isBusy) {
+      return;
+    }
     const dialogConfig = new MatDialogConfig();
     dialogConfig.width = '95%';
     dialogConfig.panelClass = 'custom-dialog-container';
@@ -114,6 +132,9 @@ export class UsersComponent implements OnInit {
   }
 
   editUser(manager: managerInfo): void {
+    if (this.isBusy) {
+      return;
+    }
     const dialogConfig = new MatDialogConfig();
     dialogConfig.width = '95%';
     dialogConfig.panelClass = 'custom-dialog-container';
@@ -130,10 +151,18 @@ export class UsersComponent implements OnInit {
   }
 
   deleteUser(userID: number): void {
+    if (this.isBusy) {
+      return;
+    }
     if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
       return;
     }
-    this.managerService.deleteManager(userID).subscribe({
+    this.isMutating = true;
+    this.managerService.deleteManager(userID).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: () => {
         this.toastr.success('تم حذف المستخدم');
         this.loadManagersPage();

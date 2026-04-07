@@ -1,4 +1,5 @@
 import { Component, Inject, ViewChild, AfterViewInit } from '@angular/core';
+import { finalize } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -18,6 +19,7 @@ export class RegisterComponent implements AfterViewInit {
   @ViewChild('registerForm') registerForm!: NgForm; // Get the form reference
 
   registerError: string | null = null;
+  isSubmitting = false;
 
   user: User = {
     userName: '',
@@ -48,14 +50,22 @@ export class RegisterComponent implements AfterViewInit {
     this.resetForm();
   }
 
-  register(registerForm:NgForm) {
+  register(registerForm: NgForm): void {
+    if (this.isSubmitting) {
+      return;
+    }
     if (registerForm.valid) {
-      this.authService.register(this.user).subscribe({
+      this.isSubmitting = true;
+      this.authService.register(this.user).pipe(
+        finalize(() => {
+          this.isSubmitting = false;
+        }),
+      ).subscribe({
         next: () => {
           this.toastr.success('تم إنشاء الحساب بنجاح.');
-          console.log("the form register is ",registerForm.value);
-          console.log("the form user is ",this.user);
-          this.resetForm(); // Reset form on success
+          console.log("the form register is ", registerForm.value);
+          console.log("the form user is ", this.user);
+          this.resetForm();
         },
         error: (error) => {
           this.registerError = error.error?.message || 'فشل في التسجيل';
@@ -77,6 +87,9 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   closeModal(): void {
+    if (this.isSubmitting) {
+      return;
+    }
     this.dialogRef.close();
   }
 }

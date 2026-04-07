@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { finalize } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PaginatorState } from 'primeng/paginator';
@@ -22,6 +23,13 @@ export class FeesComponent {
   private voucherService = inject(VoucherService);
   
   visible: boolean = false;
+  isListLoading = false;
+  isMutating = false;
+
+  get isBusy(): boolean {
+    return this.isListLoading || this.isMutating;
+  }
+
   vouchers: Voucher[] = [];
   vouchersDisplay: Voucher[] = [];
   selectedVoucher: Voucher | undefined;
@@ -48,6 +56,9 @@ export class FeesComponent {
   }
 
   showDialog() {
+    if (this.isBusy) {
+      return;
+    }
     this.visible = true;
     this.selectedVoucher = undefined;
   }
@@ -108,8 +119,11 @@ export class FeesComponent {
   }
   // Method to handle the "Edit" button click
   onEdit(voucher: Voucher): void {
-    this.selectedVoucher = voucher; // Create a copy of the voucher for editing
-    this.visible = true; // Show the dialog
+    if (this.isBusy) {
+      return;
+    }
+    this.selectedVoucher = voucher;
+    this.visible = true;
   }
 
   onDialogVisibilityChange(visible: boolean) {
@@ -135,10 +149,18 @@ export class FeesComponent {
     this.selectedVoucher = undefined;
   }
 
-  Delete(id: number) {
-    this.voucherService.Delete(id).subscribe({
-      next: res=>{
-        if(!res.isSuccess){
+  Delete(id: number): void {
+    if (this.isBusy) {
+      return;
+    }
+    this.isMutating = true;
+    this.voucherService.Delete(id).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
+      next: res => {
+        if (!res.isSuccess) {
           this.toastr.error(res.errorMasseges[0] || 'Failed to delete voucher.');
           return;
         }
@@ -149,8 +171,7 @@ export class FeesComponent {
         this.toastr.error('Server error occurred while deleting voucher.');
         console.error(err);
       }
-    }
-    )
+    });
   }
 }
 

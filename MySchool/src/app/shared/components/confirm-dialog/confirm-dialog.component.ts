@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ToastrService } from 'ngx-toastr';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -9,6 +10,8 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class ConfirmDialogComponent {
 
+  isDeleting = false;
+
   constructor(
     private ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
@@ -16,8 +19,16 @@ export class ConfirmDialogComponent {
   ) { }
 
   accept(): void {
+    if (this.isDeleting) {
+      return;
+    }
     const { deleteFn, successMessage } = this.config.data;
-    deleteFn().subscribe({
+    this.isDeleting = true;
+    deleteFn().pipe(
+      finalize(() => {
+        this.isDeleting = false;
+      }),
+    ).subscribe({
       next: () => {
         this.toast.success(successMessage || 'Deleted successfully');
         this.ref.close(true);
@@ -27,6 +38,9 @@ export class ConfirmDialogComponent {
   }
 
   reject(): void {
+    if (this.isDeleting) {
+      return;
+    }
     this.ref.close(false);
   }
 }

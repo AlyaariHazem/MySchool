@@ -57,7 +57,7 @@
         </div>
 
         <div class="text-center mt-3">
-            <input type="submit" class="school-btn" pButton [disabled]="managerForm.invalid" [value]="isEditMode ? 'تعديل' : 'إضافة +'"/> 
+            <input type="submit" class="school-btn" pButton [disabled]="managerForm.invalid || isSubmitting" [value]="isEditMode ? 'تعديل' : 'إضافة +'"/> 
         </div>
     </form>
 </div>

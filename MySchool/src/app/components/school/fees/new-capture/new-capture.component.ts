@@ -17,6 +17,7 @@ import { IpaymentMethods } from '../../core/models/paymentMethods.model';
 import { PAYMENTMETHODS } from '../../core/data/paymentMethods';
 import { VouchersGuardianStoreService } from '../../core/services/vouchers-guardian-store.service';
 import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs';
 
 
 @Component({
@@ -55,6 +56,8 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
 
   voucherAdded = false; // New flag for success
   formSubmitted = false; // Track if form is submitted
+  /** True while Add/Update voucher HTTP request is in flight. */
+  isSubmitting = false;
   formPopulated = false; // Flag to prevent duplicate form population calls
   isSettingAccountProgrammatically = false; // Flag to prevent ngModelChange trigger during programmatic updates
 
@@ -75,6 +78,9 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   addVoucher(formGroup: FormGroup) {
+    if (this.isSubmitting) {
+      return;
+    }
     // Ensure the form is valid before proceeding
     if (formGroup.invalid) {
       console.log('Form is invalid',this.formGroup.value);
@@ -109,22 +115,31 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
       studentID: this.studentID,
     };
 
-    this.voucherService.Add(voucherData).subscribe(res => {
-      this.voucherID = +res;
-      this.toastr.success('Voucher added successfully!');
+    this.isSubmitting = true;
+    this.voucherService.Add(voucherData).pipe(
+      finalize(() => {
+        this.isSubmitting = false;
+      }),
+    ).subscribe({
+      next: (res) => {
+        this.voucherID = +res;
+        this.toastr.success('Voucher added successfully!');
 
-      this.voucherAdded = true; // Set the flag to true on success
-      this.formSubmitted = true; // Mark the form as submitted
+        this.voucherAdded = true;
+        this.formSubmitted = true;
 
-      // Clear cache for this guardian to refresh data
-      if (this.accountStudentGuardianID) {
-        const guardianID = this.accounts.find(a => a.accountStudentGuardianID === this.accountStudentGuardianID)?.guardianID;
-        if (guardianID) {
-          this.vouchersGuardianStore.clearVouchersForGuardian(guardianID);
+        if (this.accountStudentGuardianID) {
+          const guardianID = this.accounts.find(a => a.accountStudentGuardianID === this.accountStudentGuardianID)?.guardianID;
+          if (guardianID) {
+            this.vouchersGuardianStore.clearVouchersForGuardian(guardianID);
+          }
         }
-      }
 
-      this.uploadFiles(this.voucherID!);
+        this.uploadFiles(this.voucherID!);
+      },
+      error: () => {
+        this.toastr.error('فشل إضافة السند', 'خطأ');
+      },
     });
     console.log('Voucher Data:', voucherData);
     // Optionally reset the form after submission
@@ -464,6 +479,9 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   updateVoucher() {
+    if (this.isSubmitting) {
+      return;
+    }
     if (this.formGroup.invalid) {
       this.toastr.error('Please fill in all fields.');
       return;
@@ -495,38 +513,44 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
       studentID: this.studentID,
     };
 
-    this.voucherService.Update(this.voucherData?.voucherID, updatedVoucher).subscribe(res => {
-      if (res.isSuccess) {
-        this.toastr.success('Voucher updated successfully!');
-        
-        // Find the account name for the updated account
-        const updatedAccount = this.accounts.find(
-          acc => acc.accountStudentGuardianID === updatedVoucher.accountStudentGuardianID
-        );
-        
-        // Clear cache for the guardian to refresh data
-        if (updatedAccount?.guardianID) {
-          this.vouchersGuardianStore.clearVouchersForGuardian(updatedAccount.guardianID);
+    this.isSubmitting = true;
+    this.voucherService.Update(this.voucherData?.voucherID, updatedVoucher).pipe(
+      finalize(() => {
+        this.isSubmitting = false;
+      }),
+    ).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          this.toastr.success('Voucher updated successfully!');
+
+          const updatedAccount = this.accounts.find(
+            acc => acc.accountStudentGuardianID === updatedVoucher.accountStudentGuardianID
+          );
+
+          if (updatedAccount?.guardianID) {
+            this.vouchersGuardianStore.clearVouchersForGuardian(updatedAccount.guardianID);
+          }
+
+          const updatedVoucherData: Voucher = {
+            ...this.voucherData!,
+            receipt: updatedVoucher.receipt,
+            hireDate: updatedVoucher.hireDate,
+            note: updatedVoucher.note || '',
+            payBy: updatedVoucher.payBy,
+            accountStudentGuardianID: updatedVoucher.accountStudentGuardianID,
+            studentID: updatedVoucher.studentID,
+            accountName: updatedAccount?.accountName || this.voucherData!.accountName
+          };
+
+          this.voucherUpdated.emit(updatedVoucherData);
+          this.visibleChange.emit(false);
+        } else {
+          this.toastr.error(res.errorMasseges[0] || 'Failed to update voucher.');
         }
-        
-        // Create updated voucher object with new values
-        const updatedVoucherData: Voucher = {
-          ...this.voucherData!,
-          receipt: updatedVoucher.receipt,
-          hireDate: updatedVoucher.hireDate,
-          note: updatedVoucher.note || '',
-          payBy: updatedVoucher.payBy,
-          accountStudentGuardianID: updatedVoucher.accountStudentGuardianID,
-          studentID: updatedVoucher.studentID,
-          accountName: updatedAccount?.accountName || this.voucherData!.accountName
-        };
-        
-        // Emit the updated voucher to parent
-        this.voucherUpdated.emit(updatedVoucherData);
-        this.visibleChange.emit(false);  // Close dialog by emitting false
-      } else {
-        this.toastr.error(res.errorMasseges[0] || 'Failed to update voucher.');
-      }
+      },
+      error: () => {
+        this.toastr.error('فشل تحديث السند', 'خطأ');
+      },
     });
   }
   trackByIndex(index: number): number {

@@ -5,7 +5,8 @@
     </button>
     <h4 class="Title">سند قبض جديد</h4>
     <!-- Add button, disable after submission -->
-    <button class="button add" (click)="voucherData?updateVoucher():addVoucher(formGroup)">
+    <button type="button" class="button add" [disabled]="isSubmitting"
+      (click)="voucherData?updateVoucher():addVoucher(formGroup)">
       {{voucherData?"تعديل":"إضافة"}}
     </button>
 

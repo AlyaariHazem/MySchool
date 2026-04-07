@@ -1,4 +1,5 @@
 import { Component, inject, Inject, OnInit } from '@angular/core';
+import { finalize } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -23,6 +24,7 @@ import { School } from 'app/core/models/school.modul';
 export class AddManagerComponent implements OnInit {
   managerForm: FormGroup;
   submitted = false;
+  isSubmitting = false;
   tenants:Tenant[]=[];
   schools:School[]=[];
   isEditMode: boolean = false;
@@ -127,7 +129,10 @@ export class AddManagerComponent implements OnInit {
     });
   }
 
-  onSubmit(managerForm:FormGroup): void {
+  onSubmit(managerForm: FormGroup): void {
+    if (this.isSubmitting) {
+      return;
+    }
     if (this.managerForm.valid) {
       const formData: manager = {
         fullName: {
@@ -158,7 +163,12 @@ export class AddManagerComponent implements OnInit {
           userType: formData.userType ?? 'MANAGER',
           phoneNumber: formData.phoneNumber,
         };
-        this.managerService.updateManager(dto).subscribe({
+        this.isSubmitting = true;
+        this.managerService.updateManager(dto).pipe(
+          finalize(() => {
+            this.isSubmitting = false;
+          }),
+        ).subscribe({
           next: () => {
             this.dialogRef.close(true);
           },
@@ -167,8 +177,12 @@ export class AddManagerComponent implements OnInit {
           },
         });
       } else {
-        // Add new manager
-        this.managerService.addManager(formData).subscribe({
+        this.isSubmitting = true;
+        this.managerService.addManager(formData).pipe(
+          finalize(() => {
+            this.isSubmitting = false;
+          }),
+        ).subscribe({
           next: (res) => {
             console.log("Manager added:", res);
             this.dialogRef.close(true);

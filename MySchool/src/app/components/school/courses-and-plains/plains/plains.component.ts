@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { finalize } from 'rxjs';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -50,6 +51,13 @@ export class PlainsComponent {
   curriculmsPlans: CurriculmsPlans[] = [];
   editMode: boolean = false;
   editingPlan: CurriculmsPlans | null = null;
+  isFetchingPlans = false;
+  isMutating = false;
+  isLoadingEditPlan = false;
+
+  get isBusy(): boolean {
+    return this.isFetchingPlans || this.isMutating || this.isLoadingEditPlan;
+  }
   values = new FormControl<string[] | null>(null);
   max = 2;
 
@@ -119,7 +127,12 @@ export class PlainsComponent {
   }
 
   getAllCurriculmPlan(): void {
-    this.curriculmsPlanService.getAllCurriculmPlan().subscribe({
+    this.isFetchingPlans = true;
+    this.curriculmsPlanService.getAllCurriculmPlan().pipe(
+      finalize(() => {
+        this.isFetchingPlans = false;
+      }),
+    ).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculum plans');
@@ -222,6 +235,9 @@ export class PlainsComponent {
   }
 
   Add(): void {
+    if (this.isBusy) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -243,7 +259,12 @@ export class PlainsComponent {
       yearID: Number(yearID),
     };
 
-    this.curriculmsPlanService.addCurriculmPlan(localCurriculm).subscribe({
+    this.isMutating = true;
+    this.curriculmsPlanService.addCurriculmPlan(localCurriculm).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to add curriculum');
@@ -263,18 +284,26 @@ export class PlainsComponent {
   }
 
   editCurriculumPlan(plan: CurriculmsPlans): void {
+    if (this.isBusy) {
+      return;
+    }
     if (!plan.subjectID || !plan.classID || !plan.divisionID || !plan.teacherID || !plan.termID || !plan.yearID) {
       this.toastr.error('Cannot edit: Course plan data is incomplete');
       return;
     }
 
     // Fetch the full plan details to ensure we have the correct composite key values
+    this.isLoadingEditPlan = true;
     this.curriculmsPlanService.getCurriculmPlanById(
       plan.yearID,
       plan.teacherID,
       plan.classID,
       plan.divisionID,
       plan.subjectID
+    ).pipe(
+      finalize(() => {
+        this.isLoadingEditPlan = false;
+      }),
     ).subscribe({
       next: (res) => {
         if (!res.isSuccess || !res.result) {
@@ -310,6 +339,9 @@ export class PlainsComponent {
   }
 
   updateCurriculum(): void {
+    if (this.isBusy) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -345,6 +377,7 @@ export class PlainsComponent {
 
     // Use the old composite key values from editingPlan (these are the actual values stored in DB)
     // The backend will find the record using these exact values, then update it
+    this.isMutating = true;
     this.curriculmsPlanService.updateCurriculmPlan(
       this.editingPlan.yearID,      // Use the actual yearID from the database record
       this.editingPlan.teacherID,
@@ -352,6 +385,10 @@ export class PlainsComponent {
       this.editingPlan.divisionID,
       this.editingPlan.subjectID,
       updatedPlan
+    ).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
     ).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
@@ -372,6 +409,9 @@ export class PlainsComponent {
   }
 
   deleteCurriculmPlan(plan: CurriculmsPlans): void {
+    if (this.isBusy) {
+      return;
+    }
     if (!plan.subjectID || !plan.classID || !plan.divisionID || !plan.teacherID || !plan.yearID) {
       this.toastr.error('Cannot delete: Course plan data is incomplete');
       return;
@@ -381,12 +421,17 @@ export class PlainsComponent {
       return;
     }
 
+    this.isMutating = true;
     this.curriculmsPlanService.deleteCurriculmPlan(
       plan.yearID,
       plan.teacherID,
       plan.classID,
       plan.divisionID,
       plan.subjectID
+    ).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
     ).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
@@ -410,6 +455,9 @@ export class PlainsComponent {
   }
 
   onPageChange(event: PaginatorState): void {
+    if (this.isFetchingPlans || this.isMutating) {
+      return;
+    }
     this.first = event.first || 0;
     this.rows = event.rows || 4;
     this.updatePaginatedData();

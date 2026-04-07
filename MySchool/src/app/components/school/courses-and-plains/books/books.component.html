@@ -44,7 +44,8 @@
 
     </div>
 
-    <p-button variant="outlined" severity="success" class="showFee" [disabled]="!formRef.valid"
+    <p-button variant="outlined" severity="success" class="showFee" [disabled]="!formRef.valid || isBusy"
+      [loading]="isMutating"
       (onClick)="editMode ? updateSubject(formRef) : addSubject(formRef)" [label]="editMode ? 'تعديل' : 'إضافة+'" />
 
   </form>
@@ -96,9 +97,11 @@
           }
         </tbody>
       </table>
-      <p-paginator dir="ltr" [first]="first" [rows]="rows" [totalRecords]="totalRecords"
-        [rowsPerPageOptions]="[4, 10, 20]" (onPageChange)="handlePageChange($event)">
-      </p-paginator>
+      <div [style.opacity]="isListLoading ? '0.55' : null" [style.pointer-events]="isListLoading ? 'none' : null">
+        <p-paginator dir="ltr" [first]="first" [rows]="rows" [totalRecords]="totalRecords"
+          [rowsPerPageOptions]="[4, 10, 20]" (onPageChange)="handlePageChange($event)">
+        </p-paginator>
+      </div>
     </mat-card>
   </div>
 </div>

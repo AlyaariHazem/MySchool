@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { finalize } from 'rxjs';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -32,6 +33,12 @@ export class CoursesComponent implements OnInit {
 
   editMode: boolean = false; // Flag to check if in edit mode
   isLoading: boolean = true;
+  isFetchingCurriculums = false;
+  isMutating = false;
+
+  get isBusy(): boolean {
+    return this.isLoading || this.isFetchingCurriculums || this.isMutating;
+  }
 
   values = new FormControl<string[] | null>(null);
   max = 2;
@@ -65,7 +72,12 @@ export class CoursesComponent implements OnInit {
   }
 
   getAllCurriculm(): void {
-    this.curriculmsService.getAllCurriculm().subscribe({
+    this.isFetchingCurriculums = true;
+    this.curriculmsService.getAllCurriculm().pipe(
+      finalize(() => {
+        this.isFetchingCurriculums = false;
+      }),
+    ).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculums');
@@ -118,6 +130,9 @@ export class CoursesComponent implements OnInit {
   }
 
   Add(): void {
+    if (this.isBusy) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -137,7 +152,12 @@ export class CoursesComponent implements OnInit {
       hireDate: new Date().toISOString(),
     };
 
-    this.curriculmsService.addCurriculm(newCurriculm).subscribe({
+    this.isMutating = true;
+    this.curriculmsService.addCurriculm(newCurriculm).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to add curriculum');
@@ -160,6 +180,9 @@ export class CoursesComponent implements OnInit {
 
 
   editCurriculum(curriculum: Curriculms): void {
+    if (this.isBusy) {
+      return;
+    }
     this.form.patchValue({
       subjectID: curriculum.subjectID,
       classID: curriculum.classID,
@@ -168,6 +191,9 @@ export class CoursesComponent implements OnInit {
     this.editMode = true;
   }
   updateCurriculum(): void {
+    if (this.isBusy) {
+      return;
+    }
     const subjectID = this.form.get('subjectID')?.value;
     const classID = this.form.get('classID')?.value;
 
@@ -183,7 +209,12 @@ export class CoursesComponent implements OnInit {
       hireDate: new Date().toISOString(),
     };
 
-    this.curriculmsService.updateCurriculm(subjectID, classID, updated).subscribe({
+    this.isMutating = true;
+    this.curriculmsService.updateCurriculm(subjectID, classID, updated).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to update curriculum');
@@ -200,7 +231,15 @@ export class CoursesComponent implements OnInit {
   }
 
   deleteCurriculm(id1: number, id2: number): void {
-    this.curriculmsService.deleteCurriculm(id1, id2).subscribe({
+    if (this.isBusy) {
+      return;
+    }
+    this.isMutating = true;
+    this.curriculmsService.deleteCurriculm(id1, id2).pipe(
+      finalize(() => {
+        this.isMutating = false;
+      }),
+    ).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to delete curriculum');
@@ -223,8 +262,11 @@ export class CoursesComponent implements OnInit {
     this.displayCurriculums = this.curriculms.slice(start, end);
   }
   onPageChange(event: PaginatorState): void {
-    this.first = event.first || 0; // Update first index based on page
-    this.rows = event.rows || 4; // Update rows per page
+    if (this.isFetchingCurriculums || this.isMutating) {
+      return;
+    }
+    this.first = event.first || 0;
+    this.rows = event.rows || 4;
     this.updatePaginatedData();
   }
 }

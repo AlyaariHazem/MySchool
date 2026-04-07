@@ -66,6 +66,7 @@
 
         <!-- زر الحفظ -->
         <p-button variant="outlined" severity="success" class="showFee"
+            [disabled]="isBusy" [loading]="isMutating"
             (onClick)="editMode ? updateCurriculum() : Add()" [label]="editMode ? 'تعديل' : 'إضافة خطة'">
         </p-button>
     </form>
@@ -99,16 +100,16 @@
                             <div class="col text-left">
                                 <div class="mt-sm-0 mt-2">
                                     <button class="btn btn-left update" type="button" data-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false" title="Actions menu">
+                                        aria-haspopup="true" aria-expanded="false" title="Actions menu" [disabled]="isBusy">
                                         <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-left">
-                                        <a class="dropdown-item" (click)="editCurriculumPlan(curriculum)">
+                                        <a class="dropdown-item" [class.disabled]="isBusy" (click)="!isBusy && editCurriculumPlan(curriculum)">
                                             <i class="bi bi-pencil-square IconEdit"></i>
                                             تعديل
                                         </a>
                                         <div role="separator" class="dropdown-divider"></div>
-                                        <a class="dropdown-item" (click)="deleteCurriculmPlan(curriculum)">
+                                        <a class="dropdown-item" [class.disabled]="isBusy" (click)="!isBusy && deleteCurriculmPlan(curriculum)">
                                             <i class="bi bi-trash IconDelete"></i>
                                             حذف
                                         </a>
@@ -124,9 +125,11 @@
                     }
                 </tbody>
             </table>
+            <div [style.opacity]="isFetchingPlans ? '0.55' : null" [style.pointer-events]="isFetchingPlans ? 'none' : null">
             <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
                 [totalRecords]="curriculmsPlan.length" [rowsPerPageOptions]="[4, 10, 20]">
             </p-paginator>
+            </div>
         </mat-card>
     </div>
 </div>
