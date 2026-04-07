@@ -1,3 +1,15 @@
+.attendance-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .attendance-page {
   padding: 1rem;
   max-width: 1200px;
@@ -28,12 +40,29 @@
   line-height: 1.5;
 }
 
+.filters-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem 1.25rem;
+  }
+}
+
 .filters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.25rem 1rem;
   align-items: end;
-  margin-bottom: 1.25rem;
+  flex: 1;
+  min-width: min(100%, 280px);
+  margin-bottom: 0;
 }
 
 .filter-field {
@@ -90,19 +119,6 @@
   }
 }
 
-.toolbar {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1rem;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
 .toolbar-hint {
   margin: 0;
   font-size: 0.8125rem;
@@ -112,14 +128,19 @@
   min-width: 0;
 }
 
-.toolbar-actions {
+.filters-toolbar .toolbar-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: flex-end;
+  flex-shrink: 0;
+
+  @media (min-width: 768px) {
+    padding-bottom: 0.125rem;
+  }
 }
 
-.attendance-page[dir='rtl'] .toolbar-actions {
+.attendance-page[dir='rtl'] .filters-toolbar .toolbar-actions {
   justify-content: flex-start;
 }
 
@@ -149,10 +170,35 @@
   min-width: 8rem;
 }
 
-::ng-deep .attendance-table {
-  .p-select {
-    width: 100%;
-  }
+.attendance-table-status-native {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.35rem 2rem 0.35rem 0.5rem;
+  margin: 0;
+  font: inherit;
+  line-height: 1.25;
+  color: #1a1a1a;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  cursor: pointer;
+  appearance: auto;
+}
+
+.attendance-page[dir='rtl'] .attendance-table-status-native {
+  padding: 0.35rem 0.5rem 0.35rem 2rem;
+}
+
+.attendance-table-status-native:focus {
+  outline: none;
+  border-color: var(--p-primary-color, #22c55e);
+  box-shadow: 0 0 0 1px var(--p-primary-color, #22c55e);
+}
+
+.attendance-table-status-native:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .attendance-paginator {
