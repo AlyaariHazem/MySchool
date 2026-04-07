@@ -39,44 +39,47 @@ public class CoursePlanRepository : ICoursePlanRepository
 
         // dto.CoursePlanID = entity.CoursePlanID; // Set the CoursePlanID back to DTO
 
-        // Step 2: Assign the subject to the students of the specified class
-        // Use the YearID from DTO (user-selected year) instead of active year
-        var students = await _context.Students
-        .Include(s => s.Division)
-            .ThenInclude(d => d.Class)
-                .ThenInclude(c => c.Year)
-        .Include(s => s.Division)
-            .ThenInclude(d => d.Class)
-                .ThenInclude(c => c.Stage)
-                    .ThenInclude(st => st.Year)
-        .Where(s => s.DivisionID == dto.DivisionID && 
-                   s.Division.Class.ClassID == dto.ClassID &&
-                   ((s.Division.Class.Year != null && s.Division.Class.Year.YearID == dto.YearID) ||
-                    (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.YearID == dto.YearID)))
-        .Select(s => new
-        {
-            s.StudentID,
-            YearID = dto.YearID,
-            dto.ClassID,
-            dto.SubjectID
-        })
-        .ToListAsync();
+        // Same as StudentRepository: YearTermMonths rows must exist or monthly grades cannot be created.
+        await EnsureYearTermMonthsExistForYearAsync(dto.YearID);
 
-
-        // Step 3: Create the list of subjects for each student and save them to MonthlyGrades (or another related entity)
-        var subjectAssignments = new List<MonthlyGrade>(); // Assuming MonthlyGrade holds the subject assignments for students
-        var TermlyGradesData = new List<TermlyGrade>(); // Assuming MonthlyGrade holds the subject assignments for students
-
-        // Fetch Months and GradeTypes for the selected year
+        // Months for this term (after seeding YearTermMonths for the year if needed)
         var months = await _context.YearTermMonths
             .Where(m => m.YearID == dto.YearID && m.TermID == dto.TermID)
             .Select(m => m.MonthID)
+            .Distinct()
             .ToListAsync();
+
+        if (months.Count == 0)
+            months = GetFallbackMonthIdsForTerm(dto.TermID);
 
         var gradeTypes = await _context.GradeTypes
             .Where(g => g.IsActive == true)
             .Select(g => g.GradeTypeID)
             .ToListAsync();
+
+        // Step 2: Students in this division/class whose academic year matches the course plan year.
+        // Match StudentRepository: use Class.YearID ?? Stage.YearID (not Year navigation — it is often not loaded).
+        var students = await _context.Students
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Stage)
+            .Where(s => s.DivisionID == dto.DivisionID)
+            .Where(s => s.Division.ClassID == dto.ClassID)
+            .Where(s =>
+                (s.Division.Class.YearID == dto.YearID) ||
+                (s.Division.Class.Stage != null && s.Division.Class.Stage.YearID == dto.YearID))
+            .Select(s => new
+            {
+                s.StudentID,
+                YearID = dto.YearID,
+                dto.ClassID,
+                dto.SubjectID
+            })
+            .ToListAsync();
+
+        // Step 3: Create MonthlyGrades / TermlyGrades for those students (same pattern as StudentRepository)
+        var subjectAssignments = new List<MonthlyGrade>();
+        var TermlyGradesData = new List<TermlyGrade>();
 
         // First, get all existing grades in bulk to avoid multiple database queries
         var studentIDs = students.Select(s => s.StudentID).ToList();
@@ -321,5 +324,43 @@ public class CoursePlanRepository : ICoursePlanRepository
             .Distinct()
             .ToListAsync();
         return subjects;
+    }
+
+    /// <summary>
+    /// If the year has no YearTermMonths rows, seed defaults (same set as StudentRepository) so monthly grades can be created.
+    /// </summary>
+    private async Task EnsureYearTermMonthsExistForYearAsync(int yearId)
+    {
+        var hasAny = await _context.YearTermMonths.AnyAsync(m => m.YearID == yearId);
+        if (hasAny)
+            return;
+
+        var defaultMonths = new List<YearTermMonth>
+        {
+            new YearTermMonth { YearID = yearId, TermID = 1, MonthID = 5 },
+            new YearTermMonth { YearID = yearId, TermID = 1, MonthID = 6 },
+            new YearTermMonth { YearID = yearId, TermID = 1, MonthID = 7 },
+            new YearTermMonth { YearID = yearId, TermID = 1, MonthID = 8 },
+            new YearTermMonth { YearID = yearId, TermID = 2, MonthID = 9 },
+            new YearTermMonth { YearID = yearId, TermID = 2, MonthID = 10 },
+            new YearTermMonth { YearID = yearId, TermID = 2, MonthID = 11 },
+            new YearTermMonth { YearID = yearId, TermID = 2, MonthID = 12 }
+        };
+
+        await _context.YearTermMonths.AddRangeAsync(defaultMonths);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// If DB still has no months for this term (e.g. custom term IDs), use the same defaults as StudentRepository.
+    /// </summary>
+    private static List<int> GetFallbackMonthIdsForTerm(int termId)
+    {
+        return termId switch
+        {
+            1 => new List<int> { 5, 6, 7, 8 },
+            2 => new List<int> { 9, 10, 11, 12 },
+            _ => new List<int>()
+        };
     }
 }
