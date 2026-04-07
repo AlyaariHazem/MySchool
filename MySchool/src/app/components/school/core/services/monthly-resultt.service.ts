@@ -12,9 +12,16 @@ export class MonthlyResultService {
 
   private api = inject(BackendAspService);
 
-  getMonthlyGradesReport(yearId: number,termId: number,monthId: number,classId: number,divisionId: number,studentId: number)
-  :Observable<ApiResponse<MonthlyResult[]>> {
-    return this.api.getRequest<MonthlyResult[]>(`Report/${yearId}/${termId}/${monthId}/${classId}/${divisionId}/${studentId}`);
+  getMonthlyGradesReport(yearId: number, termId: number, monthId: number, classId: number, divisionId: number, studentId: number)
+  : Observable<ApiResponse<MonthlyResult[]>> {
+    return this.api.postRequest<MonthlyResult[]>('Report/monthly', {
+      yearId,
+      termId,
+      monthId,
+      classId,
+      divisionId,
+      studentId
+    });
   }
   
 }

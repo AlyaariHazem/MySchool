@@ -20,13 +20,16 @@ public class ReportController : ControllerBase
         _unitOfWork = unitOfWork;
     }
     
-    [HttpGet("{yearId:int}/{termId:int}/{monthId:int}/{classId:int}/{divisionId:int}/{studentId:int}")]
-    public async Task<IActionResult> MonthlyReports(int yearId, int termId, int monthId, int classId, int divisionId, int studentId = 0)
+    [HttpPost("monthly")]
+    public async Task<IActionResult> MonthlyReports([FromBody] MonthlyReportQueryDTO? query)
     {
-        var result = await _unitOfWork.Reports.MonthlyReportsAsync(yearId, termId, monthId, classId, divisionId, studentId);
+        if (query == null)
+            return BadRequest(APIResponse.Fail("Request body is required."));
+
+        var result = await _unitOfWork.Reports.MonthlyReportsAsync(query);
         return result.Ok
-       ? Ok(APIResponse.Success(result.Value!))
-       : NotFound(APIResponse.Fail(result.Error!));
+            ? Ok(APIResponse.Success(result.Value!))
+            : NotFound(APIResponse.Fail(result.Error!));
     }
 
     /// <summary>

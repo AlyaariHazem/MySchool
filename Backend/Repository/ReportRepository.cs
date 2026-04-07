@@ -23,14 +23,26 @@ public class ReportRepository : IReportRepository
         _sanitizer = sanitizer;
     }
 
-    public async Task<Result<List<MonthlyResult>>> MonthlyReportsAsync(int yearId, int termId, int monthId, int classId, int divisionId, int studentId)
+    public async Task<Result<List<MonthlyResult>>> MonthlyReportsAsync(MonthlyReportQueryDTO query)
     {
         try
         {
+            if (query == null)
+                return Result<List<MonthlyResult>>.Fail("Query payload is required.");
 
-            var grouped = await _context.MonthlyGrades
+            IQueryable<MonthlyGrade> q = _context.MonthlyGrades
                 .AsNoTracking()
-                .Where(g => g.YearID == yearId && g.TermID == termId && g.MonthID == monthId && g.ClassID == classId && g.Student.DivisionID == divisionId)
+                .Where(g => g.YearID == query.YearId &&
+                            g.TermID == query.TermId &&
+                            g.MonthID == query.MonthId &&
+                            g.ClassID == query.ClassId &&
+                            g.Student.DivisionID == query.DivisionId &&
+                            g.GradeType.IsActive);
+
+            if (query.StudentId != 0)
+                q = q.Where(g => g.StudentID == query.StudentId);
+
+            var grouped = await q
                 .Include(g => g.Student).ThenInclude(s => s.FullName)
                 .Include(g => g.Subject)
                 .Include(g => g.Term)
@@ -39,20 +51,6 @@ public class ReportRepository : IReportRepository
                 .Include(g => g.Class).ThenInclude(c => c.Divisions)
                 .Include(g => g.Year).ThenInclude(y => y.School)
                 .ToListAsync();
-            if (studentId != 0)
-            {
-                grouped = await _context.MonthlyGrades
-                .AsNoTracking()
-                .Where(g => g.YearID == yearId && g.TermID == termId && g.MonthID == monthId && g.ClassID == classId && g.Student.DivisionID == divisionId && g.StudentID == studentId)
-                .Include(g => g.Student).ThenInclude(s => s.FullName)
-                .Include(g => g.Subject)
-                .Include(g => g.Term)
-                .Include(g => g.Month)
-                .Include(g => g.Class).ThenInclude(c => c.Teacher)
-                .Include(g => g.Class).ThenInclude(c => c.Divisions)
-                .Include(g => g.Year).ThenInclude(y => y.School)
-                .ToListAsync();
-            }
             if (grouped == null || !grouped.Any())
             {
                 return Result<List<MonthlyResult>>.Fail("No data found for the specified criteria.");
