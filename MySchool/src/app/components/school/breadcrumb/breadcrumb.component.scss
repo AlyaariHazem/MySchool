@@ -13,9 +13,16 @@
     box-sizing: border-box;
   }
 
-  .page-header .row {
+  /* No Bootstrap `.row` here — its negative gutters pull the bar wider than `router-outlet` content (cards). */
+  .page-header-inner {
     width: 100%;
     max-width: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #eceff6;
+    align-items: center;
+    display: flex;
   }
 
   .page-header nav {

@@ -1,7 +1,8 @@
 <div id="attendance-page" [attr.dir]="(dir$ | async)" class="attendance-page">
   <div class="attendance-card">
-    <h2 class="attendance-title">{{ 'attendance.pageTitle' | translate }}</h2>
-
+    <header class="attendance-header">
+      <h2 class="attendance-title">{{ 'attendance.pageTitle' | translate }}</h2>
+    </header>
 
     <div class="filters-toolbar">
       <form [formGroup]="filterForm" class="filters-grid" novalidate>
@@ -80,7 +81,7 @@
         [value]="rows"
         [loading]="isLoading"
         [tableStyle]="{ 'min-width': '100%' }"
-        styleClass="p-datatable-sm p-datatable-striped attendance-table">
+        styleClass="p-datatable-sm attendance-table">
         <ng-template pTemplate="header">
           <tr>
             <th class="col-student">{{ 'attendance.col.student' | translate }}</th>
@@ -110,7 +111,7 @@
               }}</label>
               <input
                 pInputText
-                class="w-full"
+                class="w-full attendance-remarks-input"
                 [id]="'attendance-remarks-' + row.studentID"
                 [attr.title]="'attendance.col.remarks' | translate"
                 [attr.aria-label]="'attendance.col.remarks' | translate"

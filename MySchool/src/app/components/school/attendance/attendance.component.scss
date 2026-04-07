@@ -1,3 +1,8 @@
+/* Match notifications + students/fees “styled-table” look (#009879 headers) */
+$attendance-table-header: #009879;
+$attendance-table-border: #dddddd;
+$attendance-row-alt: #f3f3f3;
+
 .attendance-sr-only {
   position: absolute;
   width: 1px;
@@ -10,34 +15,37 @@
   border: 0;
 }
 
+/* Same width behavior as system pages (e.g. stages-grades): full router-outlet width, no centered max-width cap */
 .attendance-page {
-  padding: 1rem;
-  max-width: 1200px;
-  margin-inline: auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
   box-sizing: border-box;
 }
 
+/* Match global `assets/css/style.css` `.card` (المراحل والفصول, etc.) */
 .attendance-card {
   background: #fff;
-  border-radius: 12px;
-  padding: 1.5rem 1.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
+  margin-bottom: 30px;
+  padding: 1.25rem 1.5rem 1.75rem;
+}
+
+.attendance-header {
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border, #e2e8f0);
 }
 
 .attendance-title {
-  text-align: center;
-  margin: 0 0 0.75rem;
+  margin: 0;
   font-size: 1.35rem;
   font-weight: 600;
-  color: #1a1a1a;
-}
-
-.attendance-auto-hint {
-  text-align: center;
-  margin: 0 0 1.25rem;
-  font-size: 0.9rem;
-  color: #555;
-  line-height: 1.5;
+  color: var(--text-color, #1a1a1a);
+  text-align: start;
 }
 
 .filters-toolbar {
@@ -46,6 +54,10 @@
   align-items: stretch;
   gap: 1rem;
   margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-50, #f8fafc);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 10px;
 
   @media (min-width: 768px) {
     flex-direction: row;
@@ -57,11 +69,11 @@
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 1.25rem;
   align-items: end;
   flex: 1;
-  min-width: min(100%, 280px);
+  min-width: min(100%, 260px);
   margin-bottom: 0;
 }
 
@@ -80,7 +92,6 @@
   }
 }
 
-/* Align filter row: p-select was visually taller than p-datepicker + floatLabel */
 .filters-grid {
   ::ng-deep p-floatlabel {
     display: block;
@@ -90,12 +101,12 @@
   ::ng-deep .p-select.attendance-filter-control {
     width: 100%;
     align-items: center;
-    min-height: 2.25rem;
+    min-height: 2.75rem;
   }
 
   ::ng-deep .p-select.attendance-filter-control .p-select-label {
     line-height: 1.25;
-    padding-block: 0.35rem;
+    padding-block: 0.45rem;
     display: flex;
     align-items: center;
   }
@@ -112,9 +123,9 @@
   }
 
   .filter-field--date ::ng-deep .p-datepicker .p-inputtext {
-    min-height: 2.25rem;
+    min-height: 2.75rem;
     line-height: 1.25;
-    padding-block: 0.35rem;
+    padding-block: 0.45rem;
     box-sizing: border-box;
   }
 }
@@ -148,52 +159,68 @@
   width: 100%;
   overflow-x: auto;
   border-radius: 8px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid $attendance-table-border;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .empty-cell {
   text-align: center;
   padding: 2rem 1rem !important;
-  color: #666;
+  color: var(--text-color-secondary, #64748b);
 }
 
+/* Fixed layout: remarks column no longer stretches across ~60% of the table */
 .col-student {
   min-width: 10rem;
+  width: auto;
+  word-break: break-word;
 }
 
 .col-status {
-  width: 12rem;
-  min-width: 10rem;
+  width: 11rem;
+  min-width: 11rem;
+  max-width: 11rem;
 }
 
 .col-remarks {
-  min-width: 8rem;
+  width: 18rem;
+  min-width: 12rem;
+  max-width: 18rem;
+}
+
+.col-student,
+.col-status,
+.col-remarks {
+  text-align: start;
+  vertical-align: middle;
 }
 
 .attendance-table-status-native {
   box-sizing: border-box;
   width: 100%;
-  min-height: 2.25rem;
-  padding: 0.35rem 2rem 0.35rem 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.4rem 2rem 0.4rem 0.6rem;
   margin: 0;
   font: inherit;
   line-height: 1.25;
   color: #1a1a1a;
   background-color: #fff;
-  border: 1px solid #ced4da;
+  border: 1px solid $attendance-table-border;
   border-radius: 6px;
   cursor: pointer;
   appearance: auto;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .attendance-page[dir='rtl'] .attendance-table-status-native {
-  padding: 0.35rem 0.5rem 0.35rem 2rem;
+  padding: 0.4rem 0.6rem 0.4rem 2rem;
 }
 
 .attendance-table-status-native:focus {
   outline: none;
-  border-color: var(--p-primary-color, #22c55e);
-  box-shadow: 0 0 0 1px var(--p-primary-color, #22c55e);
+  border-color: $attendance-table-header;
+  box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.2);
 }
 
 .attendance-table-status-native:disabled {
@@ -201,13 +228,70 @@
   cursor: not-allowed;
 }
 
+.attendance-remarks-input {
+  box-sizing: border-box;
+  min-height: 2.5rem;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 6px !important;
+  border-color: $attendance-table-border !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.attendance-remarks-input:focus {
+  border-color: $attendance-table-header !important;
+  box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.15) !important;
+}
+
 .attendance-paginator {
   display: block;
   margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--surface-border, #e2e8f0);
 }
 
 ::ng-deep .attendance-paginator .p-paginator {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
+}
+
+::ng-deep .attendance-table {
+  .p-datatable-table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .p-datatable-thead > tr > th {
+    background: $attendance-table-header;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    border: 1px solid #007a63;
+  }
+
+  .p-datatable-tbody > tr > td {
+    padding: 0.65rem 1rem;
+    border: 1px solid $attendance-table-border;
+    text-align: start;
+  }
+
+  .p-datatable-tbody > tr:nth-child(even) {
+    background: $attendance-row-alt;
+  }
+
+  .p-datatable-tbody > tr:nth-child(odd) {
+    background: #fff;
+  }
+
+  .p-datatable-tbody > tr:last-child > td {
+    border-bottom: 2px solid $attendance-table-header;
+  }
+
+  .col-student {
+    font-weight: 500;
+    color: #1a1a1a;
+  }
 }

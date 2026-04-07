@@ -1,6 +1,6 @@
 <div [ngClass]="{'english': (dir$ | async) === 'ltr'}">
     <div class="page-header">
-        <div class="row">
+        <div class="page-header-inner">
             <nav aria-label="breadcrumb" [attr.dir]="dir$ | async">
                 <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
             </nav>
