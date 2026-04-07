@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { finalize } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 import { User } from '../../core/models/user.model';
@@ -18,19 +19,8 @@ export class LoginComponent {
   private authService = inject(AuthAPIService);
   private toastr = inject(ToastrService);
 
-  // Track the loading state
+  /** True while login HTTP request is in flight. */
   isLoading = false;
-  visible: boolean = false;
-
-  showDialog() {
-    this.isLoading = true;
-    this.visible = true;
-  }
-
-  hideDialog() {
-    this.visible = false;
-    this.isLoading = false;
-  }
 
   // Define user types for the dropdown
   userTypes = [
@@ -42,13 +32,20 @@ export class LoginComponent {
   ];
 
   login(user: User): void {
+    if (this.isLoading) {
+      return;
+    }
     if (!user.userType) {
       this.toastr.error('يرجى اختيار نوع المستخدم');
       return;
     }
 
-    this.showDialog();
-    this.authService.login(user).subscribe({
+    this.isLoading = true;
+    this.authService.login(user).pipe(
+      finalize(() => {
+        this.isLoading = false;
+      }),
+    ).subscribe({
       next: (response: any) => {
         if (response && response.token) {
           if (user.userType === 'ADMIN') {
@@ -63,14 +60,15 @@ export class LoginComponent {
         }
       },
       error: () => {
-        this.isLoading = false; // Stop loading on error
-        this.hideDialog();
         this.toastr.error('فشل تسجيل الدخول');
       },
     });
   }
 
   openRegisterDialog(): void {
+    if (this.isLoading) {
+      return;
+    }
     this.toastr.info('فتح نافذة التسجيل');
   }
 }

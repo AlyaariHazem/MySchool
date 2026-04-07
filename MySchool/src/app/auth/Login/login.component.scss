@@ -9,6 +9,27 @@
   .forgot-password{
     cursor: pointer;
   }
+  .forgot-password--disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .login-btn-spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-inline-end: 0.4em;
+    vertical-align: -0.125em;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: login-spin 0.7s linear infinite;
+  }
+  @keyframes login-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
   .toast-center-center {
     position: fixed;
     top: 50% !important;

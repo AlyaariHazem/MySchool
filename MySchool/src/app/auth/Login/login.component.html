@@ -2,14 +2,15 @@
 
 <!-- Login Form -->
 <div class="form">
-  <form class="form-inline" action="" dir="rtl" #loginForm="ngForm" (ngSubmit)="login(loginForm.value)">
+  <form class="form-inline" action="" dir="rtl" #loginForm="ngForm" (ngSubmit)="login(loginForm.value)"
+    [attr.aria-busy]="isLoading">
     <h2 style="margin-right:2rem;">تسجيل الدخول لنظام مدرستي</h2>
 
     <!-- Phone Input Field -->
     <mat-form-field appearance="outline" class="input2">
       <mat-label>إدخل اسم المستخدم</mat-label>
       <input matInput placeholder="اسم المستخدم" autocomplete="username" #userName="ngModel" ngModel name="userName"
-        required minlength="3" maxlength="22" />
+        required minlength="3" maxlength="22" [disabled]="isLoading" />
       @if (userName.errors?.['required']) {
       <mat-error>يجب إدخال اسم المستخدم</mat-error>
       }
@@ -21,7 +22,7 @@
     <mat-form-field appearance="outline" class="input2">
       <mat-label>كلمة السر</mat-label>
       <input matInput placeholder="كلمة السر" autocomplete="current-password" ngModel name="password" type="password"
-        required minlength="3" maxlength="22" #password="ngModel" />
+        required minlength="3" maxlength="22" #password="ngModel" [disabled]="isLoading" />
       @if (password.errors?.['required']) {
       <mat-error>كلمة السر مطلوبة</mat-error>
       }
@@ -33,7 +34,7 @@
     <!-- User Type Selection -->
     <mat-form-field appearance="outline" class="input2">
       <mat-label>نوع المستخدم</mat-label>
-      <mat-select #userType="ngModel" ngModel name="userType" required>
+      <mat-select #userType="ngModel" ngModel name="userType" required [disabled]="isLoading">
         @for (type of userTypes; track $index) {
         <mat-option [value]="type.value">
           {{ type.label }}
@@ -48,9 +49,15 @@
 
     <!-- Login and Register Buttons -->
     <br />
-    <button type="submit" class="btn btn-success btn-custom mb-2 buttonSend">تسجيل دخول</button>
+    <button type="submit" class="btn btn-success btn-custom mb-2 buttonSend" [disabled]="isLoading">
+      @if (isLoading) {
+        <span class="login-btn-spinner" aria-hidden="true"></span>
+      }
+      تسجيل دخول
+    </button>
 
-
-    <a class="forgot-password" (click)="openRegisterDialog()">هل نسيت كلمة السر؟</a>
+    <a class="forgot-password" [class.forgot-password--disabled]="isLoading"
+      [attr.tabindex]="isLoading ? -1 : null"
+      (click)="openRegisterDialog()">هل نسيت كلمة السر؟</a>
   </form>
 </div>

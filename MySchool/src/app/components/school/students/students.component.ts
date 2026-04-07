@@ -18,6 +18,7 @@ import { selectLanguage } from '../../../core/store/language/language.selectors'
 import { map } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs/operators';
 import { TableColumn } from '../../../shared/components/custom-table/custom-table.component';
 
 @Component({
@@ -53,6 +54,15 @@ export class StudentsComponent implements OnInit, OnDestroy {
 
   showGrid: boolean = false;
   showCulomn: boolean = true;
+
+  /** Mirrors StudentsDataService loading (list fetch / pagination / filters). */
+  isListLoading = false;
+  /** True while loading student/guardian for edit, or while delete confirm is open. */
+  isAuxBusy = false;
+
+  get isBusy(): boolean {
+    return this.isListLoading || this.isAuxBusy;
+  }
   
   // Table columns configuration
   tableColumns: TableColumn[] = [
@@ -76,14 +86,23 @@ export class StudentsComponent implements OnInit, OnDestroy {
   ];
   
   showStudentCulomn(): void {
+    if (this.isBusy) {
+      return;
+    }
     this.showCulomn = true;
     this.showGrid = false;
   }
   showStudentGrid(): void {
+    if (this.isBusy) {
+      return;
+    }
     this.showCulomn = false;
     this.showGrid = true;
   }
   handlePageChange(event: PaginatorState): void {
+    if (this.isListLoading) {
+      return;
+    }
     // Update paginator service state first
     this.paginatorService.first.set(event.first || 0);
     this.paginatorService.rows.set(event.rows || this.pageSize);
@@ -116,6 +135,12 @@ export class StudentsComponent implements OnInit, OnDestroy {
 
   id!: number;
   ngOnInit(): void {
+    this.studentsDataService.loading$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => {
+        this.isListLoading = loading;
+      });
+
     this.id = Number(this.route.snapshot.paramMap.get('id'));
     if (this.id) {
       //this for add student 
@@ -201,6 +226,9 @@ export class StudentsComponent implements OnInit, OnDestroy {
 
 
   openDialog(): void {
+    if (this.isBusy) {
+      return;
+    }
     const dialogConfig = new MatDialogConfig();
     dialogConfig.width = '80%';
     dialogConfig.panelClass = 'custom-dialog-container';
@@ -216,7 +244,11 @@ export class StudentsComponent implements OnInit, OnDestroy {
     });
   }
   deleteStudent(student: any): void {
+    if (this.isBusy) {
+      return;
+    }
     const studentId = student.studentID || student;
+    this.isAuxBusy = true;
     const ref = this.dialogService.open(ConfirmDialogComponent, {
       header: 'Confirm',
       width: 'auto',
@@ -229,6 +261,7 @@ export class StudentsComponent implements OnInit, OnDestroy {
     });
 
     ref.onClose.subscribe((confirmed: boolean) => {
+      this.isAuxBusy = false;
       if (confirmed) {
         this.studentsDataService.deleteStudent(studentId);
         this.getAllStudents();
@@ -237,30 +270,40 @@ export class StudentsComponent implements OnInit, OnDestroy {
   }
 
   EditStudentDialog(student: any): void {
+    if (this.isBusy) {
+      return;
+    }
     const studentId = student.studentID || student;
-    this.studentService.getStudentById(studentId).subscribe((res) => {
-      console.log("Editing student data:", res);
+    this.isAuxBusy = true;
+    this.studentService.getStudentById(studentId).pipe(
+      finalize(() => {
+        this.isAuxBusy = false;
+      }),
+    ).subscribe({
+      next: (res) => {
+        console.log("Editing student data:", res);
 
-      // Pass the student data and a 'mode' flag to the dialog
-      const dialogConfig = new MatDialogConfig();
-      dialogConfig.width = '80%';
-      dialogConfig.panelClass = 'custom-dialog-container';
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.width = '80%';
+        dialogConfig.panelClass = 'custom-dialog-container';
 
-      // IMPORTANT: Pass data to the dialog using 'data' property
-      dialogConfig.data = {
-        mode: 'edit',
-        student: res, // edit student
-      };
+        dialogConfig.data = {
+          mode: 'edit',
+          student: res,
+        };
 
-      const dialogRef = this.dialog.open(NewStudentComponent, dialogConfig);
+        const dialogRef = this.dialog.open(NewStudentComponent, dialogConfig);
 
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result && result.studentID) {
-          this.studentsDataService.updateStudent(result);
-          this.getAllStudents();
-        }
-      });
-
+        dialogRef.afterClosed().subscribe((result) => {
+          if (result && result.studentID) {
+            this.studentsDataService.updateStudent(result);
+            this.getAllStudents();
+          }
+        });
+      },
+      error: () => {
+        this.toastr.error('فشل تحميل بيانات الطالب', 'خطأ');
+      },
     });
   }
   handleImageError(event: Event): void {
@@ -271,28 +314,38 @@ export class StudentsComponent implements OnInit, OnDestroy {
   }
 
   EditGuardianDialog(id: number): void {
-    this.guardianService.getGuardianById(id).subscribe((res) => {
-      console.log("Editing guardian data:", res);
+    if (this.isBusy) {
+      return;
+    }
+    this.isAuxBusy = true;
+    this.guardianService.getGuardianById(id).pipe(
+      finalize(() => {
+        this.isAuxBusy = false;
+      }),
+    ).subscribe({
+      next: (res) => {
+        console.log("Editing guardian data:", res);
 
-      // Pass the student data and a 'mode' flag to the dialog
-      const dialogConfig = new MatDialogConfig();
-      dialogConfig.width = '80%';
-      dialogConfig.panelClass = 'custom-dialog-container';
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.width = '80%';
+        dialogConfig.panelClass = 'custom-dialog-container';
 
-      // IMPORTANT: Pass data to the dialog using 'data' property
-      dialogConfig.data = {
-        mode: 'edit',
-        student: res, // edit student
-      };
+        dialogConfig.data = {
+          mode: 'edit',
+          student: res,
+        };
 
-      const dialogRef = this.dialog.open(EditParentsComponent, dialogConfig);
+        const dialogRef = this.dialog.open(EditParentsComponent, dialogConfig);
 
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          this.getAllStudents();
-        }
-      });
-
+        dialogRef.afterClosed().subscribe((result) => {
+          if (result) {
+            this.getAllStudents();
+          }
+        });
+      },
+      error: () => {
+        this.toastr.error('فشل تحميل بيانات ولي الأمر', 'خطأ');
+      },
     });
   }
 
