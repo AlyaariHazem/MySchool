@@ -1,5 +1,5 @@
 /* header.component.ts */
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, inject, Input, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
@@ -16,6 +16,9 @@ import { NotificationInboxDto } from '../core/models/notifications.model';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  /** When true, toggles the teacher portal sidebar and notification deep-links. */
+  @Input() teacherPortal = false;
+
   /* one signal drives everything */
   isSidebarOpen = signal(false);
 
@@ -63,7 +66,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
-        if (!this.router.url.includes('/school/notifications')) {
+        if (
+          !this.router.url.includes('/school/notifications') &&
+          !this.router.url.includes('/teacher/notifications')
+        ) {
           this.refreshHeaderNotifications();
         }
       });

@@ -53,4 +53,15 @@ export class SidebarComponent {
   /* ---------- misc fields (logo, school name) ------- */
   SchoolLogo  = localStorage.getItem('SchoolImageURL');
   schoolName  = localStorage.getItem('schoolName');
+
+  get isTeacher(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return localStorage.getItem('userType') === 'TEACHER';
+  }
+
+  homePath(): string {
+    return this.isTeacher ? '/teacher/workspace' : '/school/dashboard';
+  }
 }

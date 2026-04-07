@@ -5,8 +5,18 @@
             <i class="fas fa-bars"></i>
         </a>
 
-        <!-- ✔ the sidebar is created / destroyed by *ngIf -->
-        <app-sidebar #sidebar  [open]="isSidebarOpen()" (closed)="onSidebarClosed()"></app-sidebar>
+        <app-sidebar
+          *ngIf="!teacherPortal"
+          #sidebar
+          [open]="isSidebarOpen()"
+          (closed)="onSidebarClosed()"
+        ></app-sidebar>
+        <app-teacher-sidebar
+          *ngIf="teacherPortal"
+          #sidebar
+          [open]="isSidebarOpen()"
+          (closed)="onSidebarClosed()"
+        ></app-teacher-sidebar>
         <a id="toggle_btn" [ngClass]="{'toggle_btn-Ar': dir === 'rtl','toggle_btn-En': dir === 'ltr'}"
             class="float-right" href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-21.png" alt="">
@@ -47,7 +57,7 @@
                             </li>
                             <li *ngFor="let n of headerNotifications" class="notification-message"
                                 [class.notification-unread]="!n.isRead">
-                                <a [routerLink]="['/school/notifications']" class="notification-item-link">
+                                <a [routerLink]="teacherPortal ? ['/teacher/notifications'] : ['/school/notifications']" class="notification-item-link">
                                     <div class="media">
                                         <span class="avatar avatar-letter">{{ avatarLetter(n.title) }}</span>
                                         <div class="media-body">
@@ -65,7 +75,7 @@
                         </ul>
                     </div>
                     <div class="topnav-dropdown-footer">
-                        <a [routerLink]="['/school/notifications']">{{ 'notifications.viewAll' | translate }}</a>
+                        <a [routerLink]="teacherPortal ? ['/teacher/notifications'] : ['/school/notifications']">{{ 'notifications.viewAll' | translate }}</a>
                     </div>
                 </div>
             </li>

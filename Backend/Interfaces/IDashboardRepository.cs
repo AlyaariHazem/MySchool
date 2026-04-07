@@ -10,5 +10,9 @@ public interface IDashboardRepository
     Task<List<RecentExamDTO>> GetRecentExamsAsync();
     Task<List<RecentExamDTO>> GetAllExamsAsync();
     Task<List<StudentEnrollmentTrendDTO>> GetStudentEnrollmentTrendAsync();
+    Task<TeacherWorkspaceDTO> GetTeacherWorkspaceAsync(int teacherId);
+
+    /// <summary>Tenant-wide teaching snapshot for managers/admins (no teacher row required).</summary>
+    Task<TeacherWorkspaceDTO> GetSchoolTeachingWorkspaceAsync();
 }
 

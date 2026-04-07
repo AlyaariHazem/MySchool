@@ -135,9 +135,27 @@
     "registerDate": "Registration Date",
     "action": "Action"
   },
+  "teacherWorkspace": {
+    "title": "Teacher workspace",
+    "subtitle": "Your classes, students, and quick links to attendance, schedule, grades, and messages.",
+    "loading": "Loading…",
+    "loadError": "Could not load teacher workspace.",
+    "classes": "My classes",
+    "students": "My students",
+    "subjects": "My subjects",
+    "quickLinks": "Quick links",
+    "recentPlans": "Recent teaching assignments",
+    "colSubject": "Subject",
+    "colClass": "Class",
+    "colDivision": "Division",
+    "colDate": "Date",
+    "noPlans": "No course plans assigned yet."
+  },
   "sidebar": {
     "menu": "Menu",
     "home": "Home",
+    "teacherHome": "Teacher home",
+    "teacherHub": "Teacher tools",
     "teachers": "Teachers",
     "teachers_sub": {
       "all": "All Teachers",

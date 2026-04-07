@@ -1,0 +1,15 @@
+.contant {
+  margin-top: -23rem;
+}
+
+.loading-hint {
+  padding: 2rem;
+  text-align: center;
+  color: var(--p-text-muted-color, #6c757d);
+}
+
+.quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}

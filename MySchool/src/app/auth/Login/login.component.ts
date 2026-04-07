@@ -50,6 +50,8 @@ export class LoginComponent {
         if (response && response.token) {
           if (user.userType === 'ADMIN') {
             this.authService.router.navigateByUrl('admin');
+          } else if (user.userType === 'TEACHER') {
+            this.authService.router.navigateByUrl('/teacher');
           } else {
             this.authService.router.navigateByUrl('school');
             console.log(response);

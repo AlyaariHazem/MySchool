@@ -99,7 +99,16 @@ builder.Services.AddAutoMapper(cfg => cfg.LicenseKey = "", typeof(MappingConfig)
 
 builder.Services.AddSwaggerGen(swagger =>
 {
-    swagger.SwaggerDoc("v1", new OpenApiInfo { Version = "v1", Title = "ASP.NET 8 Web API", Description = "Myschool Project" });
+    swagger.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "ASP.NET 8 Web API",
+        Description =
+            "Myschool tenant API. Teacher workflow is covered by: Attendance (daily rolls, bulk), " +
+            "WeeklySchedule (class/term grid and CRUD), MonthlyGrades and TermlyGrade (fast grade entry), " +
+            "Report (monthly reports and templates), Notifications (inbox and send), and TeacherWorkspace " +
+            "(class/student/subject summary plus recent course plans)."
+    });
     swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",

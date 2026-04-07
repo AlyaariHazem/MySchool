@@ -22,16 +22,24 @@ export class BreadcrumbComponent implements OnInit {
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
   );
 
-  constructor(private router: Router, private route: ActivatedRoute,private store:Store) {
-    // Listen to NavigationEnd events to update breadcrumbs dynamically
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      this.items = this.buildBreadCrumb(this.route.root);
+  constructor(private router: Router, private route: ActivatedRoute, private store: Store) {
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
+      this.refreshBreadcrumb();
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.refreshBreadcrumb();
+  }
+
+  private refreshBreadcrumb(): void {
+    const teacher = this.router.url.startsWith('/teacher');
+    this.home = {
+      icon: 'pi pi-home',
+      routerLink: [teacher ? '/teacher/workspace' : '/school/dashboard'],
+    };
+    this.items = this.buildBreadCrumb(this.route.root);
+  }
 
   buildBreadCrumb(route: ActivatedRoute, url: string = '', breadcrumbs: MenuItem[] = []): MenuItem[] {
     // Get the child routes of the current route

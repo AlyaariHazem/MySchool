@@ -180,6 +180,122 @@ public class DashboardRepository : IDashboardRepository
         return trend;
     }
 
+    public async Task<TeacherWorkspaceDTO> GetTeacherWorkspaceAsync(int teacherId)
+    {
+        var classIdsFromPlans = await _tenantContext.CoursePlans
+            .AsNoTracking()
+            .Where(cp => cp.TeacherID == teacherId)
+            .Select(cp => cp.ClassID)
+            .Distinct()
+            .ToListAsync();
+
+        var classIdsHomeroom = await _tenantContext.Classes
+            .AsNoTracking()
+            .Where(c => c.TeacherID == teacherId)
+            .Select(c => c.ClassID)
+            .Distinct()
+            .ToListAsync();
+
+        var classIds = classIdsFromPlans.Union(classIdsHomeroom).ToHashSet();
+
+        var subjectCount = await _tenantContext.CoursePlans
+            .AsNoTracking()
+            .Where(cp => cp.TeacherID == teacherId)
+            .Select(cp => cp.SubjectID)
+            .Distinct()
+            .CountAsync();
+
+        var studentCount = 0;
+        if (classIds.Count > 0)
+        {
+            studentCount = await (
+                from s in _tenantContext.Students.AsNoTracking()
+                join d in _tenantContext.Divisions.AsNoTracking() on s.DivisionID equals d.DivisionID
+                where classIds.Contains(d.ClassID)
+                select s.StudentID
+            ).Distinct().CountAsync();
+        }
+
+        var coursePlans = await _tenantContext.CoursePlans
+            .AsNoTracking()
+            .Where(cp => cp.TeacherID == teacherId)
+            .Include(cp => cp.Subject)
+            .Include(cp => cp.Class)
+            .Include(cp => cp.Division)
+            .Include(cp => cp.Term)
+            .Include(cp => cp.Year)
+            .OrderByDescending(cp => cp.YearID)
+            .ThenByDescending(cp => cp.TermID)
+            .Take(10)
+            .ToListAsync();
+
+        var recent = coursePlans.Select((cp, index) => new RecentExamDTO
+        {
+            ExamId = cp.YearID * 10000 + cp.TermID * 1000 + cp.ClassID * 100 + cp.SubjectID + index,
+            Date = cp.Year?.YearDateStart ?? DateTime.UtcNow.AddDays(-index),
+            Time = "10:00 AM",
+            DivisionName = cp.Division?.DivisionName ?? "",
+            ClassName = cp.Class?.ClassName ?? "",
+            SubjectName = cp.Subject?.SubjectName ?? "",
+            ExamType = "C"
+        }).ToList();
+
+        return new TeacherWorkspaceDTO
+        {
+            Summary = new TeacherWorkspaceSummaryDTO
+            {
+                ClassCount = classIds.Count,
+                StudentCount = studentCount,
+                SubjectCount = subjectCount
+            },
+            RecentCoursePlans = recent
+        };
+    }
+
+    public async Task<TeacherWorkspaceDTO> GetSchoolTeachingWorkspaceAsync()
+    {
+        var classCount = await _tenantContext.Classes.AsNoTracking().CountAsync(c => c.State);
+        var studentCount = await _tenantContext.Students.AsNoTracking().CountAsync();
+        var subjectCount = await _tenantContext.CoursePlans.AsNoTracking()
+            .Select(cp => cp.SubjectID)
+            .Distinct()
+            .CountAsync();
+
+        var coursePlans = await _tenantContext.CoursePlans
+            .AsNoTracking()
+            .Include(cp => cp.Subject)
+            .Include(cp => cp.Class)
+            .Include(cp => cp.Division)
+            .Include(cp => cp.Term)
+            .Include(cp => cp.Year)
+            .OrderByDescending(cp => cp.YearID)
+            .ThenByDescending(cp => cp.TermID)
+            .Take(10)
+            .ToListAsync();
+
+        var recent = coursePlans.Select((cp, index) => new RecentExamDTO
+        {
+            ExamId = cp.YearID * 10000 + cp.TermID * 1000 + cp.ClassID * 100 + cp.SubjectID + index,
+            Date = cp.Year?.YearDateStart ?? DateTime.UtcNow.AddDays(-index),
+            Time = "10:00 AM",
+            DivisionName = cp.Division?.DivisionName ?? "",
+            ClassName = cp.Class?.ClassName ?? "",
+            SubjectName = cp.Subject?.SubjectName ?? "",
+            ExamType = "C"
+        }).ToList();
+
+        return new TeacherWorkspaceDTO
+        {
+            Summary = new TeacherWorkspaceSummaryDTO
+            {
+                ClassCount = classCount,
+                StudentCount = studentCount,
+                SubjectCount = subjectCount
+            },
+            RecentCoursePlans = recent
+        };
+    }
+
     private List<StudentEnrollmentTrendDTO> GetEmptyTrend()
     {
         var trend = new List<StudentEnrollmentTrendDTO>();

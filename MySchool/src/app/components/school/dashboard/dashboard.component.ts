@@ -28,6 +28,7 @@ import {
 import { StudentDetailsDTO } from '../../../core/models/students.model';
 import { Year } from '../../../core/models/year.model';
 import { DashboardSummary, StudentEnrollmentTrend } from '../../../core/models/dashboard.model';
+import { Router } from '@angular/router';
 import { StudentService } from '../../../core/services/student.service';
 import { YearService } from '../../../core/services/year.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
@@ -42,6 +43,7 @@ export class DashboardComponent implements OnInit {
   private studentService = inject(StudentService);
   private yearService = inject(YearService);
   private dashboardService = inject(DashboardService);
+  private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
   private translate = inject(TranslateService);
@@ -105,6 +107,11 @@ export class DashboardComponent implements OnInit {
 
   // ────────────────────────────  INIT
   ngOnInit(): void {
+    if (typeof window !== 'undefined' && localStorage.getItem('userType') === 'TEACHER') {
+      void this.router.navigateByUrl('/teacher/workspace');
+      return;
+    }
+
     // Load dashboard data from API
     this.dashboardService.getDashboardData().subscribe({
       next: (response) => {

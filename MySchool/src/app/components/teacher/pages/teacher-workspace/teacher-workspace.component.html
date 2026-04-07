@@ -1,0 +1,108 @@
+<div class="teacher-workspace contant" [attr.dir]="dir$ | async">
+  @if (isLoading) {
+    <div class="loading-hint">{{ 'teacherWorkspace.loading' | translate }}</div>
+  } @else if (workspace) {
+    <div class="row mb-3">
+      <div class="col-12">
+        <h2 class="page-title mb-1">{{ 'teacherWorkspace.title' | translate }}</h2>
+        <p class="text-muted mb-0">{{ 'teacherWorkspace.subtitle' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 col-lg-4 col-xl-3 mb-3">
+        <div class="dash-widget dash-widget5">
+          <span class="float-right"><img src="assets/img/dash/dash-1.png" alt="" width="80" /></span>
+          <div class="dash-widget-info text-right">
+            <span>{{ 'teacherWorkspace.classes' | translate }}</span>
+            <h3>{{ workspace.summary.classCount }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4 col-xl-3 mb-3">
+        <div class="dash-widget dash-widget5">
+          <span class="float-right"><img src="assets/img/dash/dash-2.png" width="80" alt="" /></span>
+          <div class="dash-widget-info text-right">
+            <span>{{ 'teacherWorkspace.students' | translate }}</span>
+            <h3>{{ workspace.summary.studentCount }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4 col-xl-3 mb-3">
+        <div class="dash-widget dash-widget5">
+          <span class="float-right"><img src="assets/img/dash/dash-3.png" alt="" width="80" /></span>
+          <div class="dash-widget-info text-right">
+            <span>{{ 'teacherWorkspace.subjects' | translate }}</span>
+            <h3>{{ workspace.summary.subjectCount }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <span class="page-title">{{ 'teacherWorkspace.quickLinks' | translate }}</span>
+          </div>
+          <div class="card-body quick-links">
+            <button type="button" class="btn btn-outline-primary m-1" (click)="go('/teacher/attendance')">
+              {{ 'sidebar.studentAttendance' | translate }}
+            </button>
+            <button type="button" class="btn btn-outline-primary m-1" (click)="go('/teacher/schedule')">
+              {{ 'sidebar.schedule' | translate }}
+            </button>
+            <button type="button" class="btn btn-outline-primary m-1" (click)="go('/teacher/grades/month')">
+              {{ 'sidebar.grades_sub.monthly' | translate }}
+            </button>
+            <button type="button" class="btn btn-outline-primary m-1" (click)="go('/teacher/grades/term')">
+              {{ 'sidebar.grades_sub.term' | translate }}
+            </button>
+            <button type="button" class="btn btn-outline-primary m-1" (click)="go('/teacher/reports/monthly')">
+              {{ 'sidebar.report.gradesMonth' | translate }}
+            </button>
+            <button type="button" class="btn btn-outline-primary m-1" (click)="go('/teacher/notifications')">
+              {{ 'sidebar.notifications' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card flex-fill">
+          <div class="card-header">
+            <span class="page-title">{{ 'teacherWorkspace.recentPlans' | translate }}</span>
+          </div>
+          <div class="card-body table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th>{{ 'teacherWorkspace.colSubject' | translate }}</th>
+                  <th>{{ 'teacherWorkspace.colClass' | translate }}</th>
+                  <th>{{ 'teacherWorkspace.colDivision' | translate }}</th>
+                  <th>{{ 'teacherWorkspace.colDate' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of workspace.recentCoursePlans; track row.examId) {
+                  <tr>
+                    <td>{{ row.subjectName }}</td>
+                    <td>{{ row.className }}</td>
+                    <td>{{ row.divisionName }}</td>
+                    <td>{{ row.date | date: 'mediumDate' }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">{{ 'teacherWorkspace.noPlans' | translate }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

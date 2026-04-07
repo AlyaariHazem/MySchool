@@ -5,7 +5,7 @@
   <div class="sidebar-inner">
     <div id="sidebar-menu" class="sidebar-menu">
       <div class="header-left">
-        <a routerLink="/school/dashboard" class="logo">
+        <a [routerLink]="homePath()" class="logo">
           <img [src]="SchoolLogo" width="40" height="40" alt="">
           <span class="text-uppercase">{{schoolName}}</span>
         </a>
@@ -17,9 +17,9 @@
         <li>{{ 'sidebar.menu' | translate }}</li>
 
         <li class="active">
-          <a routerLink="/school/dashboard" (click)="cancel()">
+          <a [routerLink]="homePath()" (click)="cancel()">
             <img src="assets/img/sidebar/icon-1.png" alt="icon">
-            <span>{{ 'sidebar.home' | translate }}</span>
+            <span>{{ isTeacher ? ('sidebar.teacherHome' | translate) : ('sidebar.home' | translate) }}</span>
           </a>
         </li>
 
@@ -201,9 +201,9 @@
           </a>
         </li>
 
-        <!-- الإختبارات -->
+        <!-- الإختبارات / monthly grades entry -->
         <li>
-          <a routerLink="dashboard" (click)="cancel()">
+          <a routerLink="/school/grade/GradeMonth" (click)="cancel()">
             <img src="assets/img/sidebar/icon-7.png" alt="icon">
             <span>{{ 'sidebar.tests' | translate }}</span>
           </a>

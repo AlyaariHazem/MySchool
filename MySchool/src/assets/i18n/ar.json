@@ -136,9 +136,27 @@
     "registerDate": "تاريخ التسجيل",
     "action": "العملية"
   },
+  "teacherWorkspace": {
+    "title": "مساحة المعلم",
+    "subtitle": "ملخص صفوفك وطلابك واختصارات للحضور والجدول والدرجات والإشعارات.",
+    "loading": "جاري التحميل…",
+    "loadError": "تعذر تحميل مساحة المعلم.",
+    "classes": "صفوفي",
+    "students": "طلابي",
+    "subjects": "موادي",
+    "quickLinks": "اختصارات",
+    "recentPlans": "أحدث الخطط الدراسية",
+    "colSubject": "المادة",
+    "colClass": "الصف",
+    "colDivision": "الشعبة",
+    "colDate": "التاريخ",
+    "noPlans": "لا توجد خطط مقررات مسجلة بعد."
+  },
   "sidebar": {
     "menu": "القائمة",
     "home": "الصفحة الرئيسية",
+    "teacherHome": "رئيسية المعلم",
+    "teacherHub": "أدوات المعلم",
     "teachers": "المدرسين",
     "teachers_sub": {
       "all": "جميع المدرسين",

@@ -1,0 +1,80 @@
+<div
+  id="sidebar"
+  [attr.dir]="dir$ | async"
+  [ngClass]="{
+    'active fadeinright animation-duration-500': open,
+    sidebar: (dir$ | async) === 'rtl',
+    sidebarEn: (dir$ | async) === 'ltr'
+  }"
+>
+  <div class="sidebar-inner">
+    <div id="sidebar-menu" class="sidebar-menu">
+      <div class="header-left">
+        <a routerLink="/teacher/workspace" class="logo">
+          <img [src]="SchoolLogo" width="40" height="40" alt="" />
+          <span class="text-uppercase">{{ schoolName }}</span>
+        </a>
+        <span (click)="cancel()" class="cancel">X</span>
+      </div>
+
+      <ul class="sidebar-ul">
+        <li>{{ 'sidebar.teacherHub' | translate }}</li>
+
+        <li class="active">
+          <a routerLink="/teacher/workspace" routerLinkActive="active" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-1.png" alt="icon" />
+            <span>{{ 'sidebar.teacherHome' | translate }}</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/teacher/attendance" routerLinkActive="active" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-11.png" alt="icon" />
+            <span>{{ 'sidebar.studentAttendance' | translate }}</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/teacher/schedule" routerLinkActive="active" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-11.png" alt="icon" />
+            <span>{{ 'sidebar.schedule' | translate }}</span>
+          </a>
+        </li>
+
+        <li class="submenu" (click)="toggleSubmenu('grades')">
+          <a href="javascript:void(0);">
+            <img src="assets/img/sidebar/icon-3.png" alt="icon" />
+            <span>{{ 'sidebar.grades' | translate }}</span>
+            <span class="menu-arrow" [ngClass]="{ 'rotate-arrow': isSubmenuOpen['grades'] }"></span>
+          </a>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('grades')">
+            <li>
+              <a routerLink="/teacher/grades/month" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.grades_sub.monthly' | translate }}</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/teacher/grades/term" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.grades_sub.term' | translate }}</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li>
+          <a routerLink="/teacher/reports/monthly" routerLinkActive="active" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-11.png" alt="icon" />
+            <span>{{ 'sidebar.report.gradesMonth' | translate }}</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/teacher/notifications" routerLinkActive="active" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-9.png" alt="icon" />
+            <span>{{ 'sidebar.notifications' | translate }}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

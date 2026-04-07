@@ -16,6 +16,11 @@ export const routes: Routes = [
         canMatch:[adminGuardGuard]
     },
     {
+        path: 'teacher',
+        loadChildren: () => import('./components/teacher/teacher.module').then((m) => m.TeacherModule),
+        canMatch: [adminGuardGuard],
+    },
+    {
         path:'admin',
         loadChildren: ()=> import('./components/admin/admin.module').then(m=> m.AdminModule),
         canMatch:[adminGuardGuard]

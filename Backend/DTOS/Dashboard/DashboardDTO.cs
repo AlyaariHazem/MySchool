@@ -35,3 +35,17 @@ public class StudentEnrollmentTrendDTO
     public int StudentCount { get; set; }
 }
 
+/// <summary>Single-screen summary for teachers: their classes, students, subjects, and upcoming course-plan items.</summary>
+public class TeacherWorkspaceDTO
+{
+    public TeacherWorkspaceSummaryDTO Summary { get; set; } = new();
+    public List<RecentExamDTO> RecentCoursePlans { get; set; } = new();
+}
+
+public class TeacherWorkspaceSummaryDTO
+{
+    public int ClassCount { get; set; }
+    public int StudentCount { get; set; }
+    public int SubjectCount { get; set; }
+}
+
