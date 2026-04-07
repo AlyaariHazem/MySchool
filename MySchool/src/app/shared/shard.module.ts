@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule,  ReactiveFormsModule } from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import {MatInputModule} from '@angular/material/input';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
@@ -16,6 +17,7 @@ import { CameraComponent } from './components/camera/camera.component';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { WebcamModule } from 'ngx-webcam';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { DropdownCustomComponent } from './components/dropdown-custom/dropdown-custom.component';
 import { DialogService, DynamicDialog } from 'primeng/dynamicdialog';
 
 
@@ -24,7 +26,8 @@ const components=[
   PageNotFoundComponent,
   ProgressSpinnerComponent,
   CameraComponent,
-  ConfirmDialogComponent
+  ConfirmDialogComponent,
+  DropdownCustomComponent
 ];
 
 const modules=[
@@ -45,7 +48,8 @@ const modules=[
     ProgressSpinnerModule,
     ConfirmDialog,
     DynamicDialog,
-    WebcamModule 
+    WebcamModule,
+    AutoCompleteModule
 ]
 
 @NgModule({

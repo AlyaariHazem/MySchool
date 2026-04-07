@@ -1,0 +1,33 @@
+<p-autocomplete
+  #dropdownAutocomplete
+  class="dropdown-custom"
+  [inputId]="inputId"
+  [(ngModel)]="selectedStudent"
+  [suggestions]="filteredStudents"
+  (completeMethod)="onStudentSearch($event)"
+  (onFocus)="onInputFocus($event)"
+  (onSelect)="onStudentSelect($event)"
+  (onClear)="onStudentClear()"
+  (onKeyUp)="onSearchKeyUp($event)"
+  optionLabel="fullName"
+  [dropdown]="false"
+  [forceSelection]="true"
+  [showClear]="true"
+  [minLength]="1"
+  [delay]="searchDelayMs"
+  [completeOnFocus]="false"
+  [virtualScroll]="true"
+  [lazy]="true"
+  [scrollHeight]="scrollHeight"
+  [virtualScrollItemSize]="virtualScrollItemSize"
+  (onLazyLoad)="onLazyLoad($event)"
+  [inputStyleClass]="inputStyleClass"
+  [placeholder]="placeholder"
+  [disabled]="disabled">
+  <ng-template let-item pTemplate="item">
+    <span class="dropdown-custom__item flex justify-between gap-3 w-full">
+      <span>{{ item.fullName }}</span>
+      <span class="text-gray-500 text-sm">#{{ item.studentID }}</span>
+    </span>
+  </ng-template>
+</p-autocomplete>

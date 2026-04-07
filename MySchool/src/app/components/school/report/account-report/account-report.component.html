@@ -7,38 +7,12 @@
           <label for="studentAccountSearch" class="account-report-toolbar__label">
             {{ 'accountReport.searchStudentLabel' | translate }}
           </label>
-          <p-autocomplete
-            #studentAccountAutocomplete
-            class="account-report-toolbar__autocomplete"
-            inputId="studentAccountSearch"
+          <app-dropdown-custom
             [(ngModel)]="selectedStudentForSearch"
-            [suggestions]="filteredStudentsForPicker"
-            (completeMethod)="onStudentPickerSearch($event)"
-            (onSelect)="onStudentPickerSelect($event)"
-            (onClear)="onStudentPickerClear()"
-            (onKeyUp)="onStudentSearchKeyUp($event)"
-            optionLabel="fullName"
-            [dropdown]="false"
-            [forceSelection]="true"
-            [showClear]="true"
-            [minLength]="1"
-            [delay]="studentPickerSearchDelayMs"
-            [completeOnFocus]="false"
-            [virtualScroll]="true"
-            [lazy]="true"
-            [scrollHeight]="'240px'"
-            [virtualScrollItemSize]="48"
-            (onLazyLoad)="onStudentPickerLazyLoad($event)"
-            inputStyleClass="account-report-toolbar__autocomplete-input p-inputtext p-component w-full"
+            inputId="studentAccountSearch"
             [placeholder]="'accountReport.searchStudentPlaceholder' | translate"
-            [disabled]="isLoading">
-            <ng-template let-item pTemplate="item">
-              <span class="flex justify-between gap-3 w-full">
-                <span>{{ item.fullName }}</span>
-                <span class="text-gray-500 text-sm">#{{ item.studentID }}</span>
-              </span>
-            </ng-template>
-          </p-autocomplete>
+            [disabled]="isLoading"
+            (selectionChange)="onStudentSelected($event)" />
         </div>
 
         <div class="account-report-toolbar__divider" aria-hidden="true"></div>
