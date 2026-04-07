@@ -16,7 +16,6 @@ using System.Threading;
 
 namespace Backend.Controllers
 {
-    [Authorize(Roles = "ADMIN,MANAGER")]
     [Route("api/[controller]")]
     [ApiController]
     public class StudentsController : ControllerBase
@@ -33,6 +32,7 @@ namespace Backend.Controllers
             _mangeFilesService = mangeFilesService;
         }
 
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpPost("names-ids")]
         public async Task<ActionResult<PagedResult<StudentNameIdDTO>>> GetStudentNamesAndIds([FromBody] StudentNameIdSearchRequestDTO request)
         {
@@ -49,6 +49,7 @@ namespace Backend.Controllers
             ));
         }
 
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpPost]
         public async Task<IActionResult> AddStudentWithGuardian([FromBody] AddStudentWithGuardianRequest request)
         {
@@ -261,6 +262,8 @@ namespace Backend.Controllers
                 });
             }
         }
+
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpPut("updateStudentWithGuardian/{id}")]
         public async Task<IActionResult> UpdateStudentWithGuardian(int id, [FromBody] UpdateStudentWithGuardianRequestDTO request)
         {
@@ -291,6 +294,7 @@ namespace Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpGet]
         public async Task<ActionResult<PagedResult<StudentDetailsDTO>>> GetAllStudents(
             [FromQuery] int pageNumber = 1,
@@ -317,6 +321,7 @@ namespace Backend.Controllers
             ));
         }
 
+        [Authorize(Roles = "ADMIN,MANAGER,TEACHER")]
         [HttpPost("page")]
         public async Task<ActionResult<PagedResult<StudentDetailsDTO>>> GetStudentsWithFilters(
             [FromBody] FilterRequest request,
@@ -345,6 +350,7 @@ namespace Backend.Controllers
             ));
         }
 
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpGet("MaxValue")]
         public async Task<IActionResult> GetMaxValue()
         {
@@ -354,6 +360,7 @@ namespace Backend.Controllers
         }
 
         // DELETE: api/Students/{id}
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteStudent([FromRoute] int id)
         {
@@ -369,6 +376,7 @@ namespace Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentDataAsRequest(int id)
         {
@@ -382,6 +390,7 @@ namespace Backend.Controllers
             return Ok(requestData);
         }
 
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpGet("unregistered")]
         public async Task<ActionResult<PagedResult<UnregisteredStudentDTO>>> GetUnregisteredStudents(
             [FromQuery] int? targetYearID = null,
@@ -411,6 +420,7 @@ namespace Backend.Controllers
             ));
         }
 
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpPost("promote")]
         public async Task<IActionResult> PromoteStudents([FromBody] PromoteStudentsRequestDTO request)
         {
@@ -438,6 +448,7 @@ namespace Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpPost("uploadFiles")]
         public async Task<IActionResult> UploadAttachments([FromForm] List<IFormFile> files, [FromForm] int studentId)
         {
@@ -454,6 +465,8 @@ namespace Backend.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
+        [Authorize(Roles = "ADMIN,MANAGER")]
         [HttpPost("uploadImage")]
         public async Task<IActionResult> UploadStudentImage([FromForm] IFormFile file, [FromForm] int studentId)
         {

@@ -96,7 +96,8 @@ namespace Backend.Controllers
 
             if (userFromDb.UserType != "ADMIN")
             {
-                // First, resolve tenant and database name for this manager/user from admin database
+                Tenant? tenantEntity = null;
+
                 var managerWithTenant = await _context.Managers
                     .Include(m => m.Tenant)
                     .AsNoTracking()
@@ -104,27 +105,39 @@ namespace Backend.Controllers
 
                 if (managerWithTenant?.Tenant != null)
                 {
-                    tenantId = managerWithTenant.Tenant.TenantId;
+                    tenantEntity = managerWithTenant.Tenant;
+                }
+                else
+                {
+                    var resolvedTenantId = await ResolveTenantIdForTeacherStudentGuardianAsync(userFromDb.Id, userFromDb.UserType);
+                    if (resolvedTenantId.HasValue)
+                    {
+                        tenantEntity = await _context.Tenants.AsNoTracking()
+                            .FirstOrDefaultAsync(t => t.TenantId == resolvedTenantId.Value);
+                    }
+                }
+
+                if (tenantEntity != null)
+                {
+                    tenantId = tenantEntity.TenantId;
                     try
                     {
-                        var builder = new SqlConnectionStringBuilder(managerWithTenant.Tenant.ConnectionString);
-                        tenantDatabaseName = builder.InitialCatalog; // e.g., School_6b23a052
+                        var builder = new SqlConnectionStringBuilder(tenantEntity.ConnectionString);
+                        tenantDatabaseName = builder.InitialCatalog;
                     }
                     catch
                     {
-                        // Fallback: if parsing fails, just return the raw connection string
-                        tenantDatabaseName = managerWithTenant.Tenant.ConnectionString;
+                        tenantDatabaseName = tenantEntity.ConnectionString;
                     }
 
-                    // Query tenant database instead of admin database
                     var tenantInfo = new TenantInfo
                     {
                         TenantId = tenantId,
-                        ConnectionString = managerWithTenant.Tenant.ConnectionString
+                        ConnectionString = tenantEntity.ConnectionString
                     };
 
                     var tenantOptions = new DbContextOptionsBuilder<TenantDbContext>()
-                        .UseSqlServer(managerWithTenant.Tenant.ConnectionString, sql =>
+                        .UseSqlServer(tenantEntity.ConnectionString, sql =>
                         {
                             sql.CommandTimeout(180);
                         })
@@ -132,14 +145,12 @@ namespace Backend.Controllers
 
                     using var tenantContext = new TenantDbContext(tenantOptions, tenantInfo);
 
-                    // I want to connect with the tenant database and get the manager and school data
                     var manager = await tenantContext.Managers
                         .AsNoTracking()
                         .FirstOrDefaultAsync();
 
                     if (manager != null)
                     {
-                        // Query School using the Manager's SchoolID
                         var school = await tenantContext.Schools
                             .AsNoTracking()
                             .Where(s => s.SchoolID == manager.SchoolID)
@@ -147,7 +158,6 @@ namespace Backend.Controllers
 
                         if (school != null)
                         {
-                            // Query active year
                             var activeYearId = await tenantContext.Years
                                 .AsNoTracking()
                                 .Where(y => y.SchoolID == school.SchoolID && y.Active == true)
@@ -168,6 +178,24 @@ namespace Backend.Controllers
                     yearID = schoolData?.ActiveYearId ?? 1;
                     managerName = (schoolData?.ManagerFirstName + " " + schoolData?.ManagerLastName)?.Trim();
                     userName = schoolData?.ManagerFirstName;
+
+                    if (string.Equals(userFromDb.UserType, "TEACHER", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var teacher = await tenantContext.Teachers.AsNoTracking()
+                            .FirstOrDefaultAsync(t => t.UserID == userFromDb.Id);
+                        if (teacher?.FullName != null)
+                        {
+                            var fn = teacher.FullName;
+                            var parts = new[] { fn.FirstName, fn.MiddleName, fn.LastName }
+                                .Where(p => !string.IsNullOrWhiteSpace(p));
+                            var display = string.Join(" ", parts).Trim();
+                            if (display.Length > 0)
+                            {
+                                userName = fn.FirstName;
+                                managerName = display;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -200,6 +228,12 @@ namespace Backend.Controllers
             if (userFromDb.UserType == "ADMIN" && !userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "ADMIN"))
             {
                 userClaims.Add(new Claim(ClaimTypes.Role, "ADMIN"));
+            }
+
+            if (string.Equals(userFromDb.UserType, "TEACHER", StringComparison.OrdinalIgnoreCase)
+                && !userClaims.Any(c => c.Type == ClaimTypes.Role && string.Equals(c.Value, "TEACHER", StringComparison.OrdinalIgnoreCase)))
+            {
+                userClaims.Add(new Claim(ClaimTypes.Role, "TEACHER"));
             }
 
             if (tenantId.HasValue)
@@ -258,20 +292,40 @@ namespace Backend.Controllers
             });
         }
 
-        private string BuildJwt(ApplicationUser user, TimeSpan? lifetime = null)
+        /// <summary>Issue a short-lived access token (e.g. refresh) including roles and TenantId when applicable.</summary>
+        private async Task<string> BuildJwtAsync(ApplicationUser user, TimeSpan? lifetime = null)
         {
+            var userRoles = await userManager.GetRolesAsync(user);
+            if (user.UserType == "ADMIN" && !userRoles.Contains("ADMIN"))
+            {
+                await userManager.AddToRoleAsync(user, "ADMIN");
+                userRoles = await userManager.GetRolesAsync(user);
+            }
+
             var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new Claim("UserType", user.UserType ?? string.Empty)
-        };
+            {
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
+                new Claim("UserType", user.UserType ?? string.Empty)
+            };
 
-            var key = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(config["JWT:SecretKey"]!));
+            foreach (var role in userRoles)
+                claims.Add(new Claim(ClaimTypes.Role, role));
+
+            if (user.UserType == "ADMIN" && !claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "ADMIN"))
+                claims.Add(new Claim(ClaimTypes.Role, "ADMIN"));
+
+            if (string.Equals(user.UserType, "TEACHER", StringComparison.OrdinalIgnoreCase)
+                && !claims.Any(c => c.Type == ClaimTypes.Role && string.Equals(c.Value, "TEACHER", StringComparison.OrdinalIgnoreCase)))
+                claims.Add(new Claim(ClaimTypes.Role, "TEACHER"));
+
+            var tid = await ResolveTenantIdForLoginAsync(user.Id, user.UserType);
+            if (tid.HasValue)
+                claims.Add(new Claim("TenantId", tid.Value.ToString()));
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecretKey"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
             var token = new JwtSecurityToken(
                 issuer: config["JWT:IssuerIP"],
                 audience: config["JWT:AudienceIP"],
@@ -280,6 +334,66 @@ namespace Backend.Controllers
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        /// <summary>Manager row on admin DB, else teacher/student/guardian row in a tenant DB.</summary>
+        private async Task<int?> ResolveTenantIdForLoginAsync(string userId, string? userType)
+        {
+            if (string.IsNullOrEmpty(userType) || userType.Equals("ADMIN", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            var managerWithTenant = await _context.Managers
+                .Include(m => m.Tenant)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.UserID == userId);
+
+            if (managerWithTenant?.Tenant != null)
+                return managerWithTenant.Tenant.TenantId;
+
+            return await ResolveTenantIdForTeacherStudentGuardianAsync(userId, userType);
+        }
+
+        private async Task<int?> ResolveTenantIdForTeacherStudentGuardianAsync(string userId, string userType)
+        {
+            if (userType.Equals("MANAGER", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            var tenants = await _context.Tenants.AsNoTracking()
+                .Select(t => new { t.TenantId, t.ConnectionString })
+                .ToListAsync();
+
+            foreach (var row in tenants)
+            {
+                if (string.IsNullOrWhiteSpace(row.ConnectionString))
+                    continue;
+
+                try
+                {
+                    var tenantInfo = new TenantInfo { TenantId = row.TenantId, ConnectionString = row.ConnectionString };
+                    var opts = new DbContextOptionsBuilder<TenantDbContext>()
+                        .UseSqlServer(row.ConnectionString, sql => sql.CommandTimeout(180))
+                        .Options;
+
+                    await using var ctx = new TenantDbContext(opts, tenantInfo);
+
+                    var match = false;
+                    if (userType.Equals("TEACHER", StringComparison.OrdinalIgnoreCase))
+                        match = await ctx.Teachers.AsNoTracking().AnyAsync(t => t.UserID == userId);
+                    else if (userType.Equals("STUDENT", StringComparison.OrdinalIgnoreCase))
+                        match = await ctx.Students.AsNoTracking().AnyAsync(s => s.UserID == userId);
+                    else if (userType.Equals("GUARDIAN", StringComparison.OrdinalIgnoreCase))
+                        match = await ctx.Guardians.AsNoTracking().AnyAsync(g => g.UserID == userId);
+
+                    if (match)
+                        return row.TenantId;
+                }
+                catch
+                {
+                    // Ignore unreachable or misconfigured tenant DBs
+                }
+            }
+
+            return null;
         }
         private static string CreateRandomToken(int bytes = 64)
     => Convert.ToBase64String(RandomNumberGenerator.GetBytes(bytes));
@@ -326,7 +440,7 @@ namespace Backend.Controllers
 
             Response.Cookies.Append("refreshToken", newRaw, BuildCookieOptions(newToken.Expires));
 
-            var accessToken = BuildJwt(token.User);
+            var accessToken = await BuildJwtAsync(token.User, TimeSpan.FromMinutes(15));
             var accessExpiry = DateTime.UtcNow.AddMinutes(15);
             return Ok(new { token = accessToken, expiration = accessExpiry });
         }
