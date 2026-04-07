@@ -35,6 +35,8 @@ export class GradesMonthComponent implements OnInit {
 
   monthlyGrades: MonthlyGrade[] = [];
   displayedStudents: MonthlyGrade[] = [];
+  /** Column headers from API (`gradeTypeName`), ordered by `gradeTypeID`. */
+  gradeTypeColumns: { gradeTypeID: number; gradeTypeName: string }[] = [];
   filteredMonths: IMonth[] = [];
   terms: ITerm[] = TERMS;
   months: IMonth[] = MONTHS;
@@ -63,7 +65,7 @@ export class GradesMonthComponent implements OnInit {
   selectedTerm = 1;
   selectedMonth = 6;
   selectedClass = 1;
-  selectedSubject = 1;
+  selectedSubject = 0;
   private classesLoaded = false;
   private subjectsLoaded = false;
 
@@ -78,7 +80,7 @@ export class GradesMonthComponent implements OnInit {
     this.form = this.formBuilder.group({
       selectedClass: [null],
       selectedTerm: [this.selectedTerm],
-      selectedSubject: [null],
+      selectedSubject: [this.selectedSubject],
       selectedMonth: [this.selectedMonth],
     });
     this.currentLanguage();
@@ -138,10 +140,11 @@ export class GradesMonthComponent implements OnInit {
         this.curriculmsPlan = [{ subjectID: 0, subjectName: 'الكل' }, ...res.result];
         this.subjectsLoaded = true;
         
-        // Set the form value after subjects are loaded
-        // Find the subject with ID matching selectedSubject, or use first subject if available
+        // Set the form value after subjects are loaded (default: الكل, subjectID 0)
         if (this.curriculmsPlan && this.curriculmsPlan.length > 0) {
-          const defaultSubject = this.curriculmsPlan.find((s: any) => s.subjectID === this.selectedSubject) || this.curriculmsPlan[0];
+          const defaultSubject = this.curriculmsPlan.find((s: any) => s.subjectID === this.selectedSubject)
+            ?? this.curriculmsPlan.find((s: any) => s.subjectID === 0)
+            ?? this.curriculmsPlan[0];
           if (this.form && defaultSubject) {
             this.form.patchValue({ selectedSubject: defaultSubject.subjectID });
             this.selectedSubject = defaultSubject.subjectID;
@@ -294,6 +297,7 @@ export class GradesMonthComponent implements OnInit {
       this.paginates = res; // تأكد أن res يحتوي totalCount
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
+      this.syncGradeTypeColumns();
       console.log('monthly Grades are', this.monthlyGrades);
       if (this.monthlyGrades.length > 0) {
         this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
@@ -319,7 +323,8 @@ export class GradesMonthComponent implements OnInit {
       this.paginates = res;
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
-      
+      this.syncGradeTypeColumns();
+
       // Set CurrentStudent when data loads
       if (this.monthlyGrades.length > 0) {
         // Reset index if it's out of bounds
@@ -341,6 +346,22 @@ export class GradesMonthComponent implements OnInit {
     this.currentStudentIndex = 0; // Reset to first student when page changes
     this.updatePaginatedData();
   }
+  /** Builds header list from loaded rows (unique types, sorted by gradeTypeID). */
+  private syncGradeTypeColumns(): void {
+    const map = new Map<number, string>();
+    for (const row of this.monthlyGrades) {
+      for (const g of row.grades ?? []) {
+        if (!map.has(g.gradeTypeID)) {
+          const name = (g.gradeTypeName ?? '').trim();
+          map.set(g.gradeTypeID, name || `${g.gradeTypeID}`);
+        }
+      }
+    }
+    this.gradeTypeColumns = [...map.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([gradeTypeID, gradeTypeName]) => ({ gradeTypeID, gradeTypeName }));
+  }
+
   // ثابت يحتوى الحدود حسب gradeTypeID
   gradeLimits: { [typeId: number]: number } = {
     1: 20, // واجبات

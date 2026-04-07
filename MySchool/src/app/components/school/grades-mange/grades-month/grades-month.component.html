@@ -61,11 +61,9 @@
                             <th>رقم الطالب</th>
                             <th class="student-name-column">الاسم</th>
                             <th>المقرر</th>
-                            <th>واجبا20</th>
-                            <th>مواضب 20</th>
-                            <th>مشارك 10</th>
-                            <th>شفهي 10</th>
-                            <th>تحرير40</th>
+                            @for (col of gradeTypeColumns; track col.gradeTypeID) {
+                            <th>{{ col.gradeTypeName }}</th>
+                            }
                             <th>المجموع 100</th>
                             <th>النسبة 100</th>
                             <th>السابق</th>
@@ -139,11 +137,9 @@
                             <th>رقم الطالب</th>
                             <th class="student-name-column">الاسم</th>
                             <th>المقرر</th>
-                            <th>واجبا20</th>
-                            <th>مواضب 20</th>
-                            <th>مشارك 10</th>
-                            <th>شفهي 10</th>
-                            <th>تحرير40</th>
+                            @for (col of gradeTypeColumns; track col.gradeTypeID) {
+                            <th>{{ col.gradeTypeName }}</th>
+                            }
                             <th>المجموع 100</th>
                             <th>النسبة 100</th>
                             <th>العملية</th>
