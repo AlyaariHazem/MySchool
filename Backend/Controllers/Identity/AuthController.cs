@@ -8,7 +8,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Linq;
 using Backend.Models;
+using Backend.Models.Master;
 using Backend.Data;
+using Backend.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
@@ -18,21 +20,27 @@ namespace Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IConfiguration config;
         private readonly DatabaseContext _context;
+        private readonly ITenantMembershipService _tenantMembership;
 
-        public AuthController(UserManager<ApplicationUser> UserManager, IConfiguration config, DatabaseContext context)
+        public AuthController(
+            UserManager<ApplicationUser> UserManager,
+            IConfiguration config,
+            DatabaseContext context,
+            ITenantMembershipService tenantMembership)
         {
             userManager = UserManager;
             this.config = config;
             _context = context;
+            _tenantMembership = tenantMembership;
         }
 
-        [HttpPost("Register")] // POST api/auth/Register
+        [HttpPost("Register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterDto UserFromRequest)
         {
             if (ModelState.IsValid)
@@ -70,6 +78,7 @@ namespace Backend.Controllers
 
         // ✅ في Login method:
         [HttpPost("Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginDto userFromRequest)
         {
             if (!ModelState.IsValid)
@@ -93,21 +102,38 @@ namespace Backend.Controllers
             string? userName = null;
             string? tenantDatabaseName = null;
             int? tenantId = null;
+            TenantRole? membershipTenantRole = null;
+            IReadOnlyList<UserTenantSummaryDto>? tenantChoices = null;
 
             if (userFromDb.UserType != "ADMIN")
             {
-                Tenant? tenantEntity = null;
+                tenantChoices = await _tenantMembership.GetTenantSummariesAsync(userFromDb.Id);
 
-                var managerWithTenant = await _context.Managers
-                    .Include(m => m.Tenant)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(m => m.UserID == userFromDb.Id);
-
-                if (managerWithTenant?.Tenant != null)
+                if (tenantChoices.Count > 0)
                 {
-                    tenantEntity = managerWithTenant.Tenant;
+                    if (tenantChoices.Count == 1)
+                    {
+                        tenantId = tenantChoices[0].TenantId;
+                        membershipTenantRole = tenantChoices[0].TenantRole;
+                    }
+                    else if (userFromRequest.TenantId is { } requestedTid && tenantChoices.Any(t => t.TenantId == requestedTid))
+                    {
+                        var picked = tenantChoices.First(t => t.TenantId == requestedTid);
+                        tenantId = picked.TenantId;
+                        membershipTenantRole = picked.TenantRole;
+                    }
+                    // else: multiple schools and no TenantId in login → tenantId stays null (client shows selector)
                 }
-                else
+
+                Tenant? tenantEntity = null;
+                if (tenantId.HasValue)
+                {
+                    tenantEntity = await _context.Tenants.AsNoTracking()
+                        .FirstOrDefaultAsync(t => t.TenantId == tenantId.Value);
+                }
+
+                // Legacy: no UserTenant rows yet — locate user in a tenant DB by UserId scan
+                if (tenantEntity == null && tenantChoices.Count == 0)
                 {
                     var resolvedTenantId = await ResolveTenantIdForTeacherStudentGuardianAsync(userFromDb.Id, userFromDb.UserType);
                     if (resolvedTenantId.HasValue)
@@ -115,11 +141,15 @@ namespace Backend.Controllers
                         tenantEntity = await _context.Tenants.AsNoTracking()
                             .FirstOrDefaultAsync(t => t.TenantId == resolvedTenantId.Value);
                     }
+
+                    if (tenantEntity != null)
+                    {
+                        tenantId = tenantEntity.TenantId;
+                    }
                 }
 
                 if (tenantEntity != null)
                 {
-                    tenantId = tenantEntity.TenantId;
                     try
                     {
                         var builder = new SqlConnectionStringBuilder(tenantEntity.ConnectionString);
@@ -241,6 +271,11 @@ namespace Backend.Controllers
                 userClaims.Add(new Claim("TenantId", tenantId.Value.ToString()));
             }
 
+            if (membershipTenantRole.HasValue)
+            {
+                userClaims.Add(new Claim("TenantRole", ((int)membershipTenantRole.Value).ToString()));
+            }
+
             var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecretKey"]!));
             var signingCred = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
 
@@ -287,13 +322,14 @@ namespace Backend.Controllers
                 yearId = yearID,
                 tenantId,
                 tenantDatabase = tenantDatabaseName,
+                tenants = tenantChoices != null && tenantChoices.Count > 1 && !tenantId.HasValue ? tenantChoices : null,
                 token = accessToken,
                 expiration = accessExpiry
             });
         }
 
         /// <summary>Issue a short-lived access token (e.g. refresh) including roles and TenantId when applicable.</summary>
-        private async Task<string> BuildJwtAsync(ApplicationUser user, TimeSpan? lifetime = null)
+        private async Task<string> BuildJwtAsync(ApplicationUser user, TimeSpan? lifetime = null, int? forcedTenantId = null)
         {
             var userRoles = await userManager.GetRolesAsync(user);
             if (user.UserType == "ADMIN" && !userRoles.Contains("ADMIN"))
@@ -320,9 +356,14 @@ namespace Backend.Controllers
                 && !claims.Any(c => c.Type == ClaimTypes.Role && string.Equals(c.Value, "TEACHER", StringComparison.OrdinalIgnoreCase)))
                 claims.Add(new Claim(ClaimTypes.Role, "TEACHER"));
 
-            var tid = await ResolveTenantIdForLoginAsync(user.Id, user.UserType);
+            var tid = forcedTenantId ?? await ResolveTenantIdForLoginAsync(user.Id, user.UserType);
             if (tid.HasValue)
+            {
                 claims.Add(new Claim("TenantId", tid.Value.ToString()));
+                var mem = await _tenantMembership.GetMembershipAsync(user.Id, tid.Value);
+                if (mem != null)
+                    claims.Add(new Claim("TenantRole", ((int)mem.TenantRole).ToString()));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecretKey"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -342,13 +383,9 @@ namespace Backend.Controllers
             if (string.IsNullOrEmpty(userType) || userType.Equals("ADMIN", StringComparison.OrdinalIgnoreCase))
                 return null;
 
-            var managerWithTenant = await _context.Managers
-                .Include(m => m.Tenant)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.UserID == userId);
-
-            if (managerWithTenant?.Tenant != null)
-                return managerWithTenant.Tenant.TenantId;
+            var fromMembership = await _tenantMembership.ResolveTenantIdForIssuedTokenAsync(userId);
+            if (fromMembership.HasValue)
+                return fromMembership.Value;
 
             return await ResolveTenantIdForTeacherStudentGuardianAsync(userId, userType);
         }
@@ -412,6 +449,7 @@ namespace Backend.Controllers
             Expires = expires
         };
         [HttpPost("refresh")]
+        [AllowAnonymous]
         public async Task<IActionResult> Refresh()
         {
             var rawToken = Request.Cookies["refreshToken"];
@@ -447,6 +485,7 @@ namespace Backend.Controllers
         // ───────── NEW ENDPOINT ─────────
         
         [HttpPost("logout")]
+        [AllowAnonymous]
         public async Task<IActionResult> Logout()
         {
             // 2️⃣ never trust parameters – get the user ID from the JWT claims
@@ -477,5 +516,44 @@ namespace Backend.Controllers
             return Ok(new { message = "Logged out on all devices" });
         }
 
+        [HttpGet("my-tenants")]
+        [Authorize]
+        public async Task<IActionResult> MyTenants()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var list = await _tenantMembership.GetTenantSummariesAsync(userId);
+            return Ok(list);
+        }
+
+        [HttpPost("select-tenant")]
+        [Authorize]
+        public async Task<IActionResult> SelectTenant([FromBody] SelectTenantDto dto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var mem = await _tenantMembership.GetMembershipAsync(userId, dto.TenantId);
+            if (mem == null)
+                return Forbid();
+
+            var row = await _context.UserTenants
+                .FirstOrDefaultAsync(ut => ut.UserId == userId && ut.TenantId == dto.TenantId && ut.IsActive);
+            if (row != null)
+            {
+                row.LastAccessedUtc = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return Unauthorized();
+
+            var accessToken = await BuildJwtAsync(user, TimeSpan.FromMinutes(15), dto.TenantId);
+            return Ok(new { token = accessToken, tenantId = dto.TenantId, expiration = DateTime.UtcNow.AddMinutes(15) });
+        }
     }
 }

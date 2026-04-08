@@ -1,16 +1,15 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Backend.Models.Master;
 
 namespace Backend.Models;
 
 public class Tenant
 {
     public int TenantId { get; set; }
-    public string SchoolName { get; set; }
-    public string ConnectionString { get; set; }
-    public Manager Manager { get; set; }
+    public string SchoolName { get; set; } = default!;
+    public string ConnectionString { get; set; } = default!;
 
-    // Possibly more fields like Domain, Email, etc.
+    public ICollection<UserTenant> UserTenants { get; set; } = new List<UserTenant>();
+    public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
+    public ICollection<TenantSettings> TenantSettings { get; set; } = new List<TenantSettings>();
 }

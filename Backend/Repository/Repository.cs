@@ -11,9 +11,9 @@ namespace Backend.Repository;
 
 public class Repository<T> : IRepository<T> where T : class
 {
-    private readonly DatabaseContext _db;
+    private readonly TenantDbContext _db;
     internal DbSet<T> dbset;
-    public Repository(DatabaseContext db)
+    public Repository(TenantDbContext db)
     {
         _db = db;
         this.dbset = _db.Set<T>();

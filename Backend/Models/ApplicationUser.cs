@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Backend.Models.Master;
 using Microsoft.AspNetCore.Identity;
 
 namespace Backend.Models;
@@ -12,13 +11,11 @@ public class ApplicationUser : IdentityUser
     public string? Gender { get; set; } = string.Empty;
     public DateTime HireDate { get; set; } = DateTime.Now;
 
-    // Relationships with role-specific entities
-    public virtual Teacher? Teacher { get; set; }
-    public virtual Student? Student { get; set; }
-    public virtual Guardian? Guardian { get; set; }
-    public virtual Manager? Manager { get; set; }
+    /// <summary>Legacy coarse category; prefer <see cref="UserTenants"/> for per-school access.</summary>
+    public string UserType { get; set; } = string.Empty;
 
-    // UserType property to specify the role
-    public string UserType { get; set; } // "Teacher", "Student", "Guardian", "Manager"
-    public ICollection<RefreshToken> RefreshTokens { get; set; }
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
+    /// <summary>Central mapping: which schools this login may access and with which tenant role.</summary>
+    public ICollection<UserTenant> UserTenants { get; set; } = new List<UserTenant>();
 }

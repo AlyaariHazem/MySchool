@@ -2,301 +2,195 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Backend.DTOS.School.Manager;
-using Backend.Models;
 using Backend.Data;
-using Microsoft.EntityFrameworkCore;
+using Backend.DTOS.School.Manager;
+using Backend.DTOS.School.Tenant;
+using Backend.Models;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Identity;
-using Backend.DTOS.School.Tenant;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Repository.School.Classes
+namespace Backend.Repository.School.Classes;
+
+public class ManagerRepository : IManagerRepository
 {
-    public class ManagerRepository : IManagerRepository
+    private readonly TenantDbContext _tenantContext;
+    private readonly IUserRepository _userRepository;
+    private readonly ITenantRepository _tenantRepository;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly TenantInfo _tenantInfo;
+
+    public ManagerRepository(
+        TenantDbContext tenantContext,
+        IUserRepository userRepository,
+        ITenantRepository tenantRepository,
+        UserManager<ApplicationUser> userManager,
+        TenantInfo tenantInfo)
     {
-        private readonly DatabaseContext _context;
-        private readonly IUserRepository _userRepository;
-        private readonly ITenantRepository _tenantRepository;
-        private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
+        _tenantContext = tenantContext ?? throw new ArgumentNullException(nameof(tenantContext));
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _tenantInfo = tenantInfo ?? throw new ArgumentNullException(nameof(tenantInfo));
+    }
 
-
-        public ManagerRepository(DatabaseContext context, IUserRepository userRepository,
-        ITenantRepository tenantRepository, IPasswordHasher<ApplicationUser> passwordHasher)
+    public async Task<string> AddManager(AddManagerDTO managerDTO)
+    {
+        var user = new ApplicationUser
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _tenantRepository = tenantRepository;
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _passwordHasher = passwordHasher;
+            UserName = managerDTO.UserName,
+            Email = managerDTO.Email,
+            PhoneNumber = managerDTO.PhoneNumber,
+            UserType = "MANAGER",
+            HireDate = DateTime.Now,
+        };
+
+        var createdUser = await _userRepository.CreateUserAsync(user, managerDTO.Password, "MANAGER");
+
+        var tid = managerDTO.TenantID ?? _tenantInfo.TenantId
+            ?? throw new InvalidOperationException("TenantID is required to add a manager.");
+
+        var tenantRow = await _tenantRepository.GetByIdAsync(tid);
+        var tenantInfo = new TenantInfo { TenantId = tid, ConnectionString = tenantRow.ConnectionString };
+        var opts = new DbContextOptionsBuilder<TenantDbContext>()
+            .UseSqlServer(tenantRow.ConnectionString, sql => sql.CommandTimeout(180))
+            .Options;
+
+        await using var tenantDb = new TenantDbContext(opts, tenantInfo);
+        await tenantDb.Database.MigrateAsync();
+
+        var schoolExists = await tenantDb.Schools.AnyAsync(s => s.SchoolID == managerDTO.SchoolID);
+        if (!schoolExists)
+            throw new InvalidOperationException(
+                $"School with ID {managerDTO.SchoolID} does not exist in the tenant database.");
+
+        var existing = await tenantDb.Managers
+            .FirstOrDefaultAsync(m => m.UserID == createdUser.Id && m.SchoolID == managerDTO.SchoolID);
+
+        if (existing != null)
+        {
+            existing.FullName = managerDTO.FullName;
+            tenantDb.Managers.Update(existing);
         }
-
-        public async Task<string> AddManager(AddManagerDTO managerDTO)
+        else
         {
-            // Create the user in the primary database
-            var user = new ApplicationUser
-            {
-                UserName = managerDTO.UserName,
-                Email = managerDTO.Email,
-                PhoneNumber = managerDTO.PhoneNumber,
-                UserType = "MANAGER",
-                HireDate = DateTime.Now,
-            };
-
-            var createdUser = await _userRepository.CreateUserAsync(user, managerDTO.Password, "MANAGER");
-
-            var Manager = new Manager
+            tenantDb.Managers.Add(new Manager
             {
                 FullName = managerDTO.FullName,
                 UserID = createdUser.Id,
                 SchoolID = managerDTO.SchoolID,
-                TenantID = managerDTO.TenantID
-            };
-
-            try
-            {
-                _context.Managers.Add(Manager);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Failed to add manager to the tenant database.", e);
-            }
-
-            // Retrieve the tenant's connection string from the primary database.
-            var connectionString = await _tenantRepository.GetByIdAsync(managerDTO.TenantID ?? 1);
-            if (connectionString == null)
-                return null!;
-
-            // Use DatabaseContext for tenant operations (it has ApplicationUser and Manager tables)
-            var builder = new DbContextOptionsBuilder<DatabaseContext>();
-            builder.UseSqlServer(connectionString.ConnectionString);
-
-            using (var tenantContext = new DatabaseContext(builder.Options))
-            {
-                tenantContext.Database.Migrate();
-
-                // Verify the School exists in the tenant database
-                var schoolExists = await tenantContext.Schools.AnyAsync(s => s.SchoolID == managerDTO.SchoolID);
-                if (!schoolExists)
-                {
-                    throw new Exception($"School with ID {managerDTO.SchoolID} does not exist in the tenant database. Please ensure the school is properly provisioned.");
-                }
-
-                // Check if user already exists in tenant database (by username or email)
-                var tenantUserStore = tenantContext.Set<ApplicationUser>();
-                var existingUser = await tenantUserStore
-                    .FirstOrDefaultAsync(u => u.UserName == managerDTO.UserName || 
-                                             (!string.IsNullOrEmpty(managerDTO.Email) && u.Email == managerDTO.Email));
-                
-                ApplicationUser createdUserTenant;
-                
-                if (existingUser != null)
-                {
-                    // User already exists, use the existing user
-                    createdUserTenant = existingUser;
-                }
-                else
-                {
-                    // Create new user in the tenant database
-                    // Generate a unique ID for the user
-                    var userId = Guid.NewGuid().ToString();
-                    
-                    user = new ApplicationUser
-                    {
-                        Id = userId,
-                        UserName = managerDTO.UserName,
-                        Email = managerDTO.Email,
-                        PhoneNumber = managerDTO.PhoneNumber,
-                        UserType = managerDTO.UserType ?? "MANAGER",
-                        NormalizedUserName = managerDTO.UserName?.ToUpper(),
-                        NormalizedEmail = managerDTO.Email?.ToUpper(),
-                        EmailConfirmed = true,
-                        SecurityStamp = Guid.NewGuid().ToString(),
-                        ConcurrencyStamp = Guid.NewGuid().ToString(),
-                        HireDate = DateTime.UtcNow
-                    };
-                    user.PasswordHash = _passwordHasher.HashPassword(user, managerDTO.Password);
-                    
-                    try
-                    {
-                        await tenantUserStore.AddAsync(user);
-                        await tenantContext.SaveChangesAsync();
-                        
-                        // Retrieve the created user
-                        createdUserTenant = await tenantUserStore.FirstOrDefaultAsync(u => u.Id == userId);
-                        if (createdUserTenant == null)
-                            throw new Exception("Failed to retrieve created user from tenant database.");
-                    }
-                    catch (DbUpdateException dbEx)
-                    {
-                        // Check if it's a unique constraint violation
-                        if (dbEx.InnerException is SqlException sqlEx && 
-                            (sqlEx.Number == 2601 || sqlEx.Number == 2627)) // Unique constraint violation
-                        {
-                            throw new Exception($"Username '{managerDTO.UserName}' or email is already taken in the tenant database.", dbEx);
-                        }
-                        throw new Exception($"Failed to create user in tenant database. Error: {dbEx.Message}", dbEx);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new Exception($"Failed to create user in tenant database. Error: {e.Message}", e);
-                    }
-                }
-
-                // Check if Manager already exists for this user and school
-                var existingManager = await tenantContext.Managers
-                    .FirstOrDefaultAsync(m => m.UserID == createdUserTenant.Id && m.SchoolID == managerDTO.SchoolID);
-                
-                if (existingManager != null)
-                {
-                    // Manager already exists, update it instead of creating a new one
-                    existingManager.FullName = managerDTO.FullName;
-                    tenantContext.Managers.Update(existingManager);
-                    await tenantContext.SaveChangesAsync();
-                }
-                else
-                {
-                    // Create a new Manager instance to be added to the tenant database.
-                    // Use the same SchoolID from managerDTO to match the admin database
-                    // TenantID is not needed in tenant databases since we're already in that tenant's database
-                    var tenantManager = new Manager
-                    {
-                        FullName = managerDTO.FullName,
-                        UserID = createdUserTenant.Id,
-                        SchoolID = managerDTO.SchoolID, // Use the actual SchoolID from managerDTO
-                        TenantID = null // TenantID is not needed in tenant databases
-                    };
-
-                    try
-                    {
-                        tenantContext.Managers.Add(tenantManager);
-                        await tenantContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateException dbEx)
-                    {
-                        // Check if it's a unique constraint violation
-                        if (dbEx.InnerException is SqlException sqlEx && 
-                            (sqlEx.Number == 2601 || sqlEx.Number == 2627)) // Unique constraint violation
-                        {
-                            throw new Exception($"Manager already exists for this user and school in the tenant database.", dbEx);
-                        }
-                        // Include inner exception details for better debugging
-                        var errorMessage = $"Failed to add manager to the tenant database. Error: {dbEx.Message}";
-                        if (dbEx.InnerException != null)
-                        {
-                            errorMessage += $" Inner Exception: {dbEx.InnerException.Message}";
-                        }
-                        throw new Exception(errorMessage, dbEx);
-                    }
-                    catch (Exception e)
-                    {
-                        // Include inner exception details for better debugging
-                        var errorMessage = $"Failed to add manager to the tenant database. Error: {e.Message}";
-                        if (e.InnerException != null)
-                        {
-                            errorMessage += $" Inner Exception: {e.InnerException.Message}";
-                        }
-                        throw new Exception(errorMessage, e);
-                    }
-                }
-            }
-            return "Manager added successfully.";
+                TenantID = null
+            });
         }
 
-
-
-        public async Task<GetManagerDTO> GetManager(int id)
-        {
-            var manager = await _context.Managers
-                .Include(m => m.ApplicationUser)
-                .Include(m => m.School)
-                .Include(m => m.Tenant)
-                .FirstOrDefaultAsync(m => m.ManagerID == id);
-
-            if (manager == null)
-                return null;
-
-            return new GetManagerDTO
-            {
-                ManagerID = manager.ManagerID,
-                FullName = manager.FullName,
-                HireDate = manager.ApplicationUser?.HireDate ?? DateTime.Now, // Get HireDate from ApplicationUser if available
-                SchoolName = manager.School?.SchoolName!, // Assuming there's a navigation property `School` in Manager
-                TenantID = manager.TenantID,
-                TenantName = manager.Tenant?.SchoolName,
-                UserName = manager.ApplicationUser?.UserName!,
-                Email = manager.ApplicationUser?.Email,
-                UserType = "MANAGER",
-                PhoneNumber = manager.ApplicationUser?.PhoneNumber
-            };
-        }
-
-        public async Task<List<GetManagerDTO>> GetManagers()
-        {
-            var managers = await _context.Managers
-                .Include(m => m.ApplicationUser)
-                .Include(m => m.School) // Ensure the School entity is included to get SchoolName
-                .Include(m => m.Tenant)
-                .ToListAsync();
-
-            return managers.Select(m => new GetManagerDTO
-            {
-                ManagerID = m.ManagerID,
-                FullName = m.FullName,
-                HireDate = m.ApplicationUser?.HireDate ?? DateTime.Now, // Get HireDate from ApplicationUser if available
-                SchoolName = m.School?.SchoolName!, // Assuming there's a navigation property `School` in Manager
-                TenantID = m.TenantID,
-                TenantName = m.Tenant?.SchoolName,
-                UserName = m.ApplicationUser?.UserName!,
-                Email = m.ApplicationUser?.Email,
-                UserType = "MANAGER",
-                PhoneNumber = m.ApplicationUser?.PhoneNumber
-            }).ToList();
-        }
-
-
-        public async Task UpdateManager(GetManagerDTO managerDTO)
-        {
-            var manager = await _context.Managers
-                .Include(m => m.ApplicationUser)
-                .Include(m => m.School)
-                .Include(m => m.Tenant)
-                .FirstOrDefaultAsync(m => m.ManagerID == managerDTO.ManagerID);
-
-            if (manager == null)
-                throw new Exception("Manager not found.");
-
-            manager.FullName = managerDTO.FullName;
-
-            if (manager.ApplicationUser != null)
-            {
-                manager.ApplicationUser.UserName = managerDTO.UserName;
-                manager.ApplicationUser.Email = managerDTO.Email;
-            }
-
-            _context.Entry(manager).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteManager(int id)
-        {
-            var manager = await _context.Managers.FindAsync(id);
-            if (manager is null)
-                throw new Exception("Manager not found.");
-
-            try
-            {
-                // Use IUserRepository to delete user (works with DatabaseContext)
-                await _userRepository.DeleteAsync(manager.UserID);
-                _context.Managers.Remove(manager);
-                await _context.SaveChangesAsync();
-            }
-
-            catch (Exception e)
-            {
-                throw new Exception("Failed to delete manager.", e);
-            }
-        }
+        await tenantDb.SaveChangesAsync();
+        return "Manager added successfully.";
     }
 
+    public async Task<GetManagerDTO?> GetManager(int id)
+    {
+        var manager = await _tenantContext.Managers
+            .AsNoTracking()
+            .Include(m => m.School)
+            .FirstOrDefaultAsync(m => m.ManagerID == id);
+
+        if (manager == null)
+            return null;
+
+        var appUser = await _userManager.FindByIdAsync(manager.UserID);
+        TenantDTO? tenantMeta = null;
+        if (_tenantInfo.TenantId is int tId)
+        {
+            try
+            {
+                tenantMeta = await _tenantRepository.GetByIdAsync(tId);
+            }
+            catch
+            {
+                /* ignore */
+            }
+        }
+
+        return Map(manager, appUser, tenantMeta);
+    }
+
+    public async Task<List<GetManagerDTO>> GetManagers()
+    {
+        var managers = await _tenantContext.Managers
+            .AsNoTracking()
+            .Include(m => m.School)
+            .ToListAsync();
+
+        TenantDTO? tenantMeta = null;
+        if (_tenantInfo.TenantId is int tId)
+        {
+            try
+            {
+                tenantMeta = await _tenantRepository.GetByIdAsync(tId);
+            }
+            catch
+            {
+                /* ignore */
+            }
+        }
+
+        var userIds = managers.Select(m => m.UserID).Distinct().ToList();
+        var users = new Dictionary<string, ApplicationUser?>(StringComparer.Ordinal);
+        foreach (var uid in userIds)
+        {
+            users[uid] = await _userManager.FindByIdAsync(uid);
+        }
+
+        return managers.Select(m => Map(m, users.GetValueOrDefault(m.UserID), tenantMeta)).ToList();
+    }
+
+    private static GetManagerDTO Map(Manager manager, ApplicationUser? appUser, TenantDTO? tenantMeta)
+    {
+        return new GetManagerDTO
+        {
+            ManagerID = manager.ManagerID,
+            FullName = manager.FullName,
+            HireDate = appUser?.HireDate ?? DateTime.Now,
+            SchoolName = manager.School?.SchoolName ?? "",
+            TenantID = tenantMeta?.TenantID,
+            TenantName = tenantMeta?.SchoolName,
+            UserName = appUser?.UserName ?? "",
+            Email = appUser?.Email,
+            UserType = "MANAGER",
+            PhoneNumber = appUser?.PhoneNumber
+        };
+    }
+
+    public async Task UpdateManager(GetManagerDTO managerDTO)
+    {
+        var manager = await _tenantContext.Managers
+            .Include(m => m.School)
+            .FirstOrDefaultAsync(m => m.ManagerID == managerDTO.ManagerID);
+
+        if (manager == null)
+            throw new InvalidOperationException("Manager not found.");
+
+        manager.FullName = managerDTO.FullName;
+
+        var appUser = await _userManager.FindByIdAsync(manager.UserID);
+        if (appUser != null)
+        {
+            appUser.UserName = managerDTO.UserName;
+            appUser.Email = managerDTO.Email;
+            await _userManager.UpdateAsync(appUser);
+        }
+
+        await _tenantContext.SaveChangesAsync();
+    }
+
+    public async Task DeleteManager(int id)
+    {
+        var manager = await _tenantContext.Managers.FirstOrDefaultAsync(m => m.ManagerID == id);
+        if (manager == null)
+            throw new InvalidOperationException("Manager not found.");
+
+        await _userRepository.DeleteAsync(manager.UserID);
+        _tenantContext.Managers.Remove(manager);
+        await _tenantContext.SaveChangesAsync();
+    }
 }

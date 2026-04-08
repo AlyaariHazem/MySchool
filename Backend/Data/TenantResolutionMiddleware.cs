@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -36,38 +37,19 @@ namespace Backend.Middleware
                 return;
             }
 
-            // Check if user is ADMIN
-            var userType = context.User.FindFirstValue("UserType");
-            bool isAdmin = context.User.IsInRole("ADMIN") || (userType != null && userType.Equals("ADMIN", StringComparison.OrdinalIgnoreCase));
-
-            // If ADMIN user, use admin database connection for ALL endpoints
-            // This allows ADMIN to access all data from the School Database (master database)
-            if (isAdmin)
-            {
-                var adminConnectionString = _configuration.GetConnectionString("SqlAdminConnection");
-                if (!string.IsNullOrWhiteSpace(adminConnectionString))
-                {
-                    tenantInfo.ConnectionString = adminConnectionString;
-                    tenantInfo.TenantId = null; // No tenant ID for admin users accessing admin database
-                }
-                else
-                {
-                    throw new InvalidOperationException("Admin connection string (SqlAdminConnection) is not configured.");
-                }
-                await _next(context);
-                return;
-            }
-
-            // For non-admin users, resolve tenant from JWT claim
-            // Non-admin users MUST have a TenantId claim to access tenant-specific data
+            // Resolve tenant from JWT for all school data. Platform admins use master DB only on /api/tenant etc. (skipped above).
+            // Everyone else (including ADMIN role when using school APIs) must have TenantId in the token.
             var tenantIdStr = context.User.FindFirstValue("TenantId");
             if (!int.TryParse(tenantIdStr, out var tenantId))
             {
-                // If no TenantId claim exists, this is an error for non-admin users
-                // They need to have a tenant assigned to access tenant-specific endpoints
-                throw new InvalidOperationException(
-                    $"User '{context.User.Identity?.Name}' does not have a TenantId claim. " +
-                    "Non-admin users must be associated with a tenant to access tenant-specific data.");
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new
+                {
+                    error = "TenantRequired",
+                    message = "Select a school (tenant) first. Use POST /api/auth/select-tenant or login with TenantId when you belong to multiple schools."
+                }));
+                return;
             }
 
             tenantInfo.TenantId = tenantId;

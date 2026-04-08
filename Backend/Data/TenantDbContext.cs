@@ -68,6 +68,7 @@ namespace Backend.Data
                 optionsBuilder.UseSqlServer(_tenant.ConnectionString, sql =>
                 {
                     sql.CommandTimeout(180);
+                    sql.MigrationsAssembly(typeof(TenantDbContext).Assembly.FullName);
                 });
             }
         }
@@ -260,6 +261,7 @@ namespace Backend.Data
             modelBuilder.Entity<Student>().Ignore(x => x.ApplicationUser);
             modelBuilder.Entity<Guardian>().Ignore(x => x.ApplicationUser);
             modelBuilder.Entity<Manager>().Ignore(x => x.ApplicationUser);
+            modelBuilder.Entity<Manager>().Ignore(x => x.Tenant);
             
             // Explicitly configure UserID properties to have NO foreign key relationship
             // UserID is stored as a string but without FK constraint (users are in admin DB)

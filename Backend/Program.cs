@@ -74,6 +74,8 @@ builder.Services.AddScoped<SqlRestoreService>();
 
 // Register TenantDbContext - connection string will be set dynamically from TenantInfo
 // The configuration will be evaluated when the DbContext is resolved (after middleware runs)
+// IMPORTANT: Never run DatabaseContext.Migrate() against a tenant database connection string.
+// Only TenantDbContext (and Backend/Migrations/Tenant) belongs in tenant DBs.
 builder.Services.AddDbContext<TenantDbContext>((serviceProvider, optionsBuilder) =>
 {
     // Get TenantInfo from service provider (scoped, resolved per request)
@@ -89,6 +91,8 @@ builder.Services.AddDbContext<TenantDbContext>((serviceProvider, optionsBuilder)
         optionsBuilder.UseSqlServer(connectionString, sql =>
         {
             sql.CommandTimeout(180);
+            // Keep tenant migrations separate from master in the same assembly
+            sql.MigrationsAssembly(typeof(TenantDbContext).Assembly.FullName);
         });
     }
     // If ConnectionString is not set, OnConfiguring will try to configure it

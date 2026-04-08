@@ -22,8 +22,7 @@ namespace Backend.Services;
 
 public class StudentManagementService
 {
-    private readonly TenantDbContext _tenantContext; // For tenant-specific operations
-    private readonly DatabaseContext _dbContext; // For admin operations (if needed)
+    private readonly TenantDbContext _tenantContext;
     private readonly mangeFilesService _mangeFilesService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -32,7 +31,6 @@ public class StudentManagementService
 
     public StudentManagementService(
         TenantDbContext tenantContext,
-        DatabaseContext dbContext,
         IMapper mapper,
         mangeFilesService mangeFilesService,
         IUnitOfWork unitOfWork,
@@ -41,7 +39,6 @@ public class StudentManagementService
 
     {
         _tenantContext = tenantContext;
-        _dbContext = dbContext;
         _mapper = mapper;
         _mangeFilesService = mangeFilesService;
         _unitOfWork = unitOfWork;

@@ -10,9 +10,9 @@ namespace Backend.Repository.School.Classes
 {
     public class StudentClassFeesRepository : IStudentClassFeesRepository
     {
-        private readonly DatabaseContext _db;
+        private readonly TenantDbContext _db;
 
-        public StudentClassFeesRepository(DatabaseContext db)
+        public StudentClassFeesRepository(TenantDbContext db)
         {
             _db = db;
         }

@@ -26,6 +26,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly HtmlSanitizationService _htmlSanitizer;
     private readonly IAuditTrailService _auditTrail;
+    private readonly TenantInfo _tenantInfo;
 
     public UnitOfWork(
         TenantDbContext tenantContext,
@@ -36,10 +37,12 @@ public class UnitOfWork : IUnitOfWork
         ILogger<StudentRepository> studentRepositoryLogger,
         IHttpContextAccessor httpContextAccessor,
         HtmlSanitizationService htmlSanitizer,
-        IAuditTrailService auditTrail)
+        IAuditTrailService auditTrail,
+        TenantInfo tenantInfo)
     {
         _tenantContext = tenantContext;
         _adminContext = adminContext;
+        _tenantInfo = tenantInfo;
         _mapper = mapper;
         _mangeFilesService = mangeFilesService;
         _userManager = userManager;
@@ -83,7 +86,7 @@ public class UnitOfWork : IUnitOfWork
         
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
-        Managers = new ManagerRepository(_adminContext, Users, Tenants, _userManager.PasswordHasher);
+        Managers = new ManagerRepository(_tenantContext, Users, Tenants, _userManager, _tenantInfo);
     }
 
     public ISubjectsRepository Subjects { get; private set; }
