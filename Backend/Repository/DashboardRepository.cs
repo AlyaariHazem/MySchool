@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 using Backend.Data;
 using Backend.DTOS.Dashboard;
 using Backend.Interfaces;
-using Backend.Models;
-using Backend.Repository.School.Implements;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository;
@@ -14,28 +13,97 @@ namespace Backend.Repository;
 public class DashboardRepository : IDashboardRepository
 {
     private readonly TenantDbContext _tenantContext;
-    private readonly IUserRepository _userRepository;
+    private readonly DatabaseContext _masterDb;
+    private readonly TenantInfo _tenantInfo;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public DashboardRepository(TenantDbContext tenantContext, IUserRepository userRepository)
+    public DashboardRepository(
+        TenantDbContext tenantContext,
+        DatabaseContext masterDb,
+        TenantInfo tenantInfo,
+        IHttpContextAccessor httpContextAccessor)
     {
         _tenantContext = tenantContext;
-        _userRepository = userRepository;
+        _masterDb = masterDb;
+        _tenantInfo = tenantInfo;
+        _httpContextAccessor = httpContextAccessor;
     }
+
+    /// <summary>Admin with no JWT tenant: aggregate metrics across all school databases.</summary>
+    private bool UseMasterDashboard()
+    {
+        if (!string.IsNullOrEmpty(_tenantInfo.ConnectionString))
+            return false;
+
+        var user = _httpContextAccessor.HttpContext?.User;
+        if (user?.Identity?.IsAuthenticated != true)
+            return false;
+
+        if (user.IsInRole("ADMIN"))
+            return true;
+
+        var ut = user.FindFirst("UserType")?.Value;
+        return string.Equals(ut, "ADMIN", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task<TenantDbContext> CreateTenantDbForTenantIdAsync(int tenantId)
+    {
+        var row = await _masterDb.Tenants.AsNoTracking()
+            .FirstOrDefaultAsync(t => t.TenantId == tenantId);
+        if (row == null || string.IsNullOrWhiteSpace(row.ConnectionString))
+            throw new InvalidOperationException(
+                $"Tenant {tenantId} was not found or has no connection string in the master database.");
+
+        var ti = new TenantInfo { TenantId = tenantId, ConnectionString = row.ConnectionString };
+        var ob = new DbContextOptionsBuilder<TenantDbContext>();
+        ob.UseSqlServer(row.ConnectionString, sql =>
+        {
+            sql.CommandTimeout(180);
+            sql.MigrationsAssembly(typeof(TenantDbContext).Assembly.FullName);
+        });
+        return new TenantDbContext(ob.Options, ti);
+    }
+
+    private async Task<List<Models.Tenant>> GetTenantsWithConnectionsAsync() =>
+        await _masterDb.Tenants.AsNoTracking()
+            .Where(t => !string.IsNullOrWhiteSpace(t.ConnectionString))
+            .OrderBy(t => t.SchoolName)
+            .ToListAsync();
 
     public async Task<DashboardSummaryDTO> GetDashboardSummaryAsync()
     {
-        // Get total money from vouchers
-        var totalMoney = await _tenantContext.Vouchers
-            .SumAsync(v => v.Receipt);
+        if (UseMasterDashboard())
+        {
+            decimal totalMoney = 0;
+            var parents = 0;
+            var teachers = 0;
+            var students = 0;
+            foreach (var tenant in await GetTenantsWithConnectionsAsync())
+            {
+                await using var db = await CreateTenantDbForTenantIdAsync(tenant.TenantId);
+                totalMoney += await db.Vouchers.SumAsync(v => (decimal?)v.Receipt) ?? 0;
+                parents += await db.Guardians.CountAsync();
+                teachers += await db.Teachers.CountAsync();
+                students += await db.Students.CountAsync();
+            }
 
-        // Get counts directly from database
+            return new DashboardSummaryDTO
+            {
+                TotalMoney = totalMoney,
+                ParentsCount = parents,
+                TeachersCount = teachers,
+                StudentsCount = students
+            };
+        }
+
+        var totalMoneyOne = await _tenantContext.Vouchers.SumAsync(v => v.Receipt);
         var parentsCount = await _tenantContext.Guardians.CountAsync();
         var teachersCount = await _tenantContext.Teachers.CountAsync();
         var studentsCount = await _tenantContext.Students.CountAsync();
 
         return new DashboardSummaryDTO
         {
-            TotalMoney = totalMoney,
+            TotalMoney = totalMoneyOne,
             ParentsCount = parentsCount,
             TeachersCount = teachersCount,
             StudentsCount = studentsCount
@@ -44,8 +112,33 @@ public class DashboardRepository : IDashboardRepository
 
     public async Task<List<RecentExamDTO>> GetRecentExamsAsync()
     {
-        // Get recent course plans with all related data
-        var coursePlans = await _tenantContext.CoursePlans
+        if (UseMasterDashboard())
+        {
+            var all = new List<RecentExamDTO>();
+            var examId = 1;
+            foreach (var tenant in await GetTenantsWithConnectionsAsync())
+            {
+                await using var db = await CreateTenantDbForTenantIdAsync(tenant.TenantId);
+                var (batch, next) = await BuildRecentExamsFromTenantAsync(db, examId);
+                examId = next;
+                all.AddRange(batch);
+            }
+
+            return all
+                .OrderByDescending(e => e.Date)
+                .Take(7)
+                .ToList();
+        }
+
+        var (single, _) = await BuildRecentExamsFromTenantAsync(_tenantContext, 1);
+        return single;
+    }
+
+    private static async Task<(List<RecentExamDTO> Items, int NextExamId)> BuildRecentExamsFromTenantAsync(
+        TenantDbContext db,
+        int examIdStart)
+    {
+        var coursePlans = await db.CoursePlans
             .Include(cp => cp.Subject)
             .Include(cp => cp.Class)
             .Include(cp => cp.Division)
@@ -56,27 +149,53 @@ public class DashboardRepository : IDashboardRepository
             .Take(7)
             .ToListAsync();
 
-        if (coursePlans == null || !coursePlans.Any())
-            return new List<RecentExamDTO>();
+        if (coursePlans.Count == 0)
+            return (new List<RecentExamDTO>(), examIdStart);
 
+        var examIdSeq = examIdStart;
         var recentExams = coursePlans.Select((cp, index) => new RecentExamDTO
         {
-            ExamId = cp.YearID * 10000 + cp.TermID * 1000 + cp.ClassID * 100 + cp.SubjectID + index,
+            ExamId = examIdSeq++,
             Date = cp.Year?.YearDateStart ?? DateTime.Now.AddDays(-index),
-            Time = "10:00 AM", // Default time - adjust if you have exam time in your model
+            Time = "10:00 AM",
             DivisionName = cp.Division?.DivisionName ?? "",
             ClassName = cp.Class?.ClassName ?? "",
             SubjectName = cp.Subject?.SubjectName ?? "",
-            ExamType = "C" // Default exam type - adjust based on your model
+            ExamType = "C"
         }).ToList();
 
-        return recentExams;
+        return (recentExams, examIdSeq);
     }
 
     public async Task<List<RecentExamDTO>> GetAllExamsAsync()
     {
-        // Get all course plans (exams) with all related data
-        var coursePlans = await _tenantContext.CoursePlans
+        if (UseMasterDashboard())
+        {
+            var all = new List<RecentExamDTO>();
+            var examId = 1;
+            foreach (var tenant in await GetTenantsWithConnectionsAsync())
+            {
+                await using var db = await CreateTenantDbForTenantIdAsync(tenant.TenantId);
+                var (batch, next) = await BuildAllExamsFromTenantAsync(db, examId);
+                examId = next;
+                all.AddRange(batch);
+            }
+
+            return all
+                .OrderByDescending(e => e.Date)
+                .ThenByDescending(e => e.ExamId)
+                .ToList();
+        }
+
+        var (single, _) = await BuildAllExamsFromTenantAsync(_tenantContext, 1);
+        return single;
+    }
+
+    private static async Task<(List<RecentExamDTO> Items, int NextExamId)> BuildAllExamsFromTenantAsync(
+        TenantDbContext db,
+        int examIdStart)
+    {
+        var coursePlans = await db.CoursePlans
             .Include(cp => cp.Subject)
             .Include(cp => cp.Class)
             .Include(cp => cp.Division)
@@ -84,7 +203,6 @@ public class DashboardRepository : IDashboardRepository
             .Include(cp => cp.Year)
             .ToListAsync();
 
-        // Order in memory to avoid null propagating operator in expression tree
         coursePlans = coursePlans
             .OrderByDescending(cp => cp.Year?.YearDateStart ?? DateTime.MinValue)
             .ThenByDescending(cp => cp.TermID)
@@ -92,59 +210,78 @@ public class DashboardRepository : IDashboardRepository
             .ThenBy(cp => cp.SubjectID)
             .ToList();
 
-        if (coursePlans == null || !coursePlans.Any())
-            return new List<RecentExamDTO>();
+        if (coursePlans.Count == 0)
+            return (new List<RecentExamDTO>(), examIdStart);
 
-        var exams = coursePlans.Select((cp, index) => new RecentExamDTO
+        var examIdSeq = examIdStart;
+        var list = coursePlans.Select((cp, index) => new RecentExamDTO
         {
-            ExamId = cp.YearID * 10000 + cp.TermID * 1000 + cp.ClassID * 100 + cp.SubjectID + index,
+            ExamId = examIdSeq++,
             Date = cp.Year?.YearDateStart ?? DateTime.Now.AddDays(-index),
-            Time = "10:00 AM", // Default time - adjust if you have exam time in your model
+            Time = "10:00 AM",
             DivisionName = cp.Division?.DivisionName ?? "",
             ClassName = cp.Class?.ClassName ?? "",
             SubjectName = cp.Subject?.SubjectName ?? "",
-            ExamType = "C" // Default exam type - adjust based on your model
+            ExamType = "C"
         }).ToList();
 
-        return exams;
+        return (list, examIdSeq);
     }
 
     public async Task<List<StudentEnrollmentTrendDTO>> GetStudentEnrollmentTrendAsync()
     {
-        // Get all years first to map YearID to calendar year
-        var years = await _tenantContext.Years
+        if (UseMasterDashboard())
+        {
+            var merged = new Dictionary<int, int>();
+            for (var y = 2025; y <= 2028; y++)
+                merged[y] = 0;
+
+            foreach (var tenant in await GetTenantsWithConnectionsAsync())
+            {
+                await using var db = await CreateTenantDbForTenantIdAsync(tenant.TenantId);
+                var local = await BuildStudentEnrollmentTrendForTenantAsync(db);
+                foreach (var row in local)
+                    merged[row.Year] = merged.GetValueOrDefault(row.Year, 0) + row.StudentCount;
+            }
+
+            return merged.OrderBy(k => k.Key)
+                .Select(k => new StudentEnrollmentTrendDTO { Year = k.Key, StudentCount = k.Value })
+                .ToList();
+        }
+
+        return await BuildStudentEnrollmentTrendForTenantAsync(_tenantContext);
+    }
+
+    private static async Task<List<StudentEnrollmentTrendDTO>> BuildStudentEnrollmentTrendForTenantAsync(
+        TenantDbContext db)
+    {
+        var years = await db.Years
             .Select(y => new { y.YearID, CalendarYear = y.YearDateStart.Year })
             .ToListAsync();
 
-        if (!years.Any())
-            return GetEmptyTrend();
+        if (years.Count == 0)
+            return GetEmptyTrendStatic();
 
-        // Create a dictionary to map YearID to CalendarYear
         var yearIdToCalendarYear = years.ToDictionary(y => y.YearID, y => y.CalendarYear);
 
-        // Get students with their current class year (Student -> Division -> Class -> Year)
-        var studentsWithClassYear = await _tenantContext.Students
+        var studentsWithClassYear = await db.Students
             .Include(s => s.Division)
-                .ThenInclude(d => d.Class)
-                    .ThenInclude(c => c.Year)
+            .ThenInclude(d => d.Class)
+            .ThenInclude(c => c.Year)
             .Where(s => s.Division != null && s.Division.Class != null && s.Division.Class.YearID.HasValue)
             .Select(s => new { s.StudentID, YearID = s.Division.Class.YearID!.Value })
             .ToListAsync();
 
-        // Get distinct student-year combinations from MonthlyGrades (for historical data)
-        var monthlyGradeYears = await _tenantContext.MonthlyGrades
+        var monthlyGradeYears = await db.MonthlyGrades
             .Select(mg => new { mg.StudentID, YearID = mg.YearID })
             .Distinct()
             .ToListAsync();
 
-        // Get distinct student-year combinations from TermlyGrades (for historical data)
-        var termlyGradeYears = await _tenantContext.TermlyGrades
+        var termlyGradeYears = await db.TermlyGrades
             .Select(tg => new { tg.StudentID, YearID = tg.YearID })
             .Distinct()
             .ToListAsync();
 
-        // Combine all sources: current class year + historical grade years
-        // This ensures we count students in their current year even if they don't have grades yet
         var allStudentYearPairs = studentsWithClassYear
             .Union(monthlyGradeYears)
             .Union(termlyGradeYears)
@@ -152,23 +289,18 @@ public class DashboardRepository : IDashboardRepository
             .Select(g => new { g.Key.StudentID, g.Key.YearID })
             .ToList();
 
-        if (!allStudentYearPairs.Any())
-            return GetEmptyTrend();
+        if (allStudentYearPairs.Count == 0)
+            return GetEmptyTrendStatic();
 
-        // Count students by calendar year (mapping YearID to CalendarYear)
         var enrollmentYears = new Dictionary<int, int>();
-        
         foreach (var pair in allStudentYearPairs)
         {
-            if (yearIdToCalendarYear.TryGetValue(pair.YearID, out int calendarYear))
-            {
+            if (yearIdToCalendarYear.TryGetValue(pair.YearID, out var calendarYear))
                 enrollmentYears[calendarYear] = enrollmentYears.GetValueOrDefault(calendarYear, 0) + 1;
-            }
         }
 
-        // Generate trend for years 2025-2028
         var trend = new List<StudentEnrollmentTrendDTO>();
-        for (int year = 2025; year <= 2028; year++)
+        for (var year = 2025; year <= 2028; year++)
         {
             trend.Add(new StudentEnrollmentTrendDTO
             {
@@ -180,16 +312,53 @@ public class DashboardRepository : IDashboardRepository
         return trend;
     }
 
+    private static List<StudentEnrollmentTrendDTO> GetEmptyTrendStatic()
+    {
+        var trend = new List<StudentEnrollmentTrendDTO>();
+        for (var year = 2025; year <= 2028; year++)
+        {
+            trend.Add(new StudentEnrollmentTrendDTO
+            {
+                Year = year,
+                StudentCount = 0
+            });
+        }
+
+        return trend;
+    }
+
     public async Task<TeacherWorkspaceDTO> GetTeacherWorkspaceAsync(int teacherId)
     {
-        var classIdsFromPlans = await _tenantContext.CoursePlans
+        if (UseMasterDashboard())
+        {
+            foreach (var tenant in await GetTenantsWithConnectionsAsync())
+            {
+                await using var db = await CreateTenantDbForTenantIdAsync(tenant.TenantId);
+                var hasWork =
+                    await db.CoursePlans.AsNoTracking().AnyAsync(cp => cp.TeacherID == teacherId)
+                    || await db.Classes.AsNoTracking().AnyAsync(c => c.TeacherID == teacherId);
+                if (hasWork)
+                    return await BuildTeacherWorkspaceForTenantAsync(db, teacherId);
+            }
+
+            return new TeacherWorkspaceDTO();
+        }
+
+        return await BuildTeacherWorkspaceForTenantAsync(_tenantContext, teacherId);
+    }
+
+    private static async Task<TeacherWorkspaceDTO> BuildTeacherWorkspaceForTenantAsync(
+        TenantDbContext db,
+        int teacherId)
+    {
+        var classIdsFromPlans = await db.CoursePlans
             .AsNoTracking()
             .Where(cp => cp.TeacherID == teacherId)
             .Select(cp => cp.ClassID)
             .Distinct()
             .ToListAsync();
 
-        var classIdsHomeroom = await _tenantContext.Classes
+        var classIdsHomeroom = await db.Classes
             .AsNoTracking()
             .Where(c => c.TeacherID == teacherId)
             .Select(c => c.ClassID)
@@ -198,7 +367,7 @@ public class DashboardRepository : IDashboardRepository
 
         var classIds = classIdsFromPlans.Union(classIdsHomeroom).ToHashSet();
 
-        var subjectCount = await _tenantContext.CoursePlans
+        var subjectCount = await db.CoursePlans
             .AsNoTracking()
             .Where(cp => cp.TeacherID == teacherId)
             .Select(cp => cp.SubjectID)
@@ -209,14 +378,15 @@ public class DashboardRepository : IDashboardRepository
         if (classIds.Count > 0)
         {
             studentCount = await (
-                from s in _tenantContext.Students.AsNoTracking()
-                join d in _tenantContext.Divisions.AsNoTracking() on s.DivisionID equals d.DivisionID
+                from s in db.Students.AsNoTracking()
+                join d in db.Divisions.AsNoTracking() on s.DivisionID equals d.DivisionID
                 where classIds.Contains(d.ClassID)
                 select s.StudentID
             ).Distinct().CountAsync();
         }
 
-        var coursePlans = await _tenantContext.CoursePlans
+        var examId = 1;
+        var coursePlans = await db.CoursePlans
             .AsNoTracking()
             .Where(cp => cp.TeacherID == teacherId)
             .Include(cp => cp.Subject)
@@ -231,7 +401,7 @@ public class DashboardRepository : IDashboardRepository
 
         var recent = coursePlans.Select((cp, index) => new RecentExamDTO
         {
-            ExamId = cp.YearID * 10000 + cp.TermID * 1000 + cp.ClassID * 100 + cp.SubjectID + index,
+            ExamId = examId++,
             Date = cp.Year?.YearDateStart ?? DateTime.UtcNow.AddDays(-index),
             Time = "10:00 AM",
             DivisionName = cp.Division?.DivisionName ?? "",
@@ -254,14 +424,73 @@ public class DashboardRepository : IDashboardRepository
 
     public async Task<TeacherWorkspaceDTO> GetSchoolTeachingWorkspaceAsync()
     {
-        var classCount = await _tenantContext.Classes.AsNoTracking().CountAsync(c => c.State);
-        var studentCount = await _tenantContext.Students.AsNoTracking().CountAsync();
-        var subjectCount = await _tenantContext.CoursePlans.AsNoTracking()
+        if (UseMasterDashboard())
+        {
+            var classCount = 0;
+            var studentCount = 0;
+            var subjectIds = new HashSet<int>();
+            var allRecent = new List<RecentExamDTO>();
+            var examId = 1;
+
+            foreach (var tenant in await GetTenantsWithConnectionsAsync())
+            {
+                await using var db = await CreateTenantDbForTenantIdAsync(tenant.TenantId);
+                classCount += await db.Classes.AsNoTracking().CountAsync(c => c.State);
+                studentCount += await db.Students.AsNoTracking().CountAsync();
+                var subs = await db.CoursePlans.AsNoTracking()
+                    .Select(cp => cp.SubjectID)
+                    .Distinct()
+                    .ToListAsync();
+                foreach (var s in subs)
+                    subjectIds.Add(s);
+
+                var coursePlans = await db.CoursePlans
+                    .AsNoTracking()
+                    .Include(cp => cp.Subject)
+                    .Include(cp => cp.Class)
+                    .Include(cp => cp.Division)
+                    .Include(cp => cp.Term)
+                    .Include(cp => cp.Year)
+                    .OrderByDescending(cp => cp.YearID)
+                    .ThenByDescending(cp => cp.TermID)
+                    .Take(10)
+                    .ToListAsync();
+
+                allRecent.AddRange(coursePlans.Select((cp, index) => new RecentExamDTO
+                {
+                    ExamId = examId++,
+                    Date = cp.Year?.YearDateStart ?? DateTime.UtcNow.AddDays(-index),
+                    Time = "10:00 AM",
+                    DivisionName = cp.Division?.DivisionName ?? "",
+                    ClassName = cp.Class?.ClassName ?? "",
+                    SubjectName = cp.Subject?.SubjectName ?? "",
+                    ExamType = "C"
+                }));
+            }
+
+            return new TeacherWorkspaceDTO
+            {
+                Summary = new TeacherWorkspaceSummaryDTO
+                {
+                    ClassCount = classCount,
+                    StudentCount = studentCount,
+                    SubjectCount = subjectIds.Count
+                },
+                RecentCoursePlans = allRecent
+                    .OrderByDescending(r => r.Date)
+                    .Take(10)
+                    .ToList()
+            };
+        }
+
+        var classCnt = await _tenantContext.Classes.AsNoTracking().CountAsync(c => c.State);
+        var studentCnt = await _tenantContext.Students.AsNoTracking().CountAsync();
+        var subjectCnt = await _tenantContext.CoursePlans.AsNoTracking()
             .Select(cp => cp.SubjectID)
             .Distinct()
             .CountAsync();
 
-        var coursePlans = await _tenantContext.CoursePlans
+        var plans = await _tenantContext.CoursePlans
             .AsNoTracking()
             .Include(cp => cp.Subject)
             .Include(cp => cp.Class)
@@ -273,9 +502,10 @@ public class DashboardRepository : IDashboardRepository
             .Take(10)
             .ToListAsync();
 
-        var recent = coursePlans.Select((cp, index) => new RecentExamDTO
+        var idSeq = 1;
+        var recent = plans.Select((cp, index) => new RecentExamDTO
         {
-            ExamId = cp.YearID * 10000 + cp.TermID * 1000 + cp.ClassID * 100 + cp.SubjectID + index,
+            ExamId = idSeq++,
             Date = cp.Year?.YearDateStart ?? DateTime.UtcNow.AddDays(-index),
             Time = "10:00 AM",
             DivisionName = cp.Division?.DivisionName ?? "",
@@ -288,26 +518,11 @@ public class DashboardRepository : IDashboardRepository
         {
             Summary = new TeacherWorkspaceSummaryDTO
             {
-                ClassCount = classCount,
-                StudentCount = studentCount,
-                SubjectCount = subjectCount
+                ClassCount = classCnt,
+                StudentCount = studentCnt,
+                SubjectCount = subjectCnt
             },
             RecentCoursePlans = recent
         };
     }
-
-    private List<StudentEnrollmentTrendDTO> GetEmptyTrend()
-    {
-        var trend = new List<StudentEnrollmentTrendDTO>();
-        for (int year = 2025; year <= 2028; year++)
-        {
-            trend.Add(new StudentEnrollmentTrendDTO
-            {
-                Year = year,
-                StudentCount = 0
-            });
-        }
-        return trend;
-    }
 }
-

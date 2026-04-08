@@ -64,7 +64,7 @@ public class UnitOfWork : IUnitOfWork
         FeeClasses = new FeeClassRepository(_tenantContext, _mapper);
         Fees = new FeesRepository(_tenantContext, _mapper);
         Years = new YearRepository(_tenantContext, _mapper);
-        Schools = new SchoolRepository(_tenantContext, Years, _mapper);
+        Schools = new SchoolRepository(_tenantContext, _adminContext, Years, _mapper, _httpContextAccessor, _tenantInfo);
         StudentClassFees = new StudentClassFeeRepository(_tenantContext, _mapper, _auditTrail);
         Vouchers = new VoucherRepository(_tenantContext, _mapper, _mangeFilesService);
         Attachments = new AttachmentsRepository(_tenantContext);
@@ -79,14 +79,14 @@ public class UnitOfWork : IUnitOfWork
         Reports = new ReportRepository(_tenantContext, _htmlSanitizer);
         MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper, _auditTrail);
         TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper, _auditTrail);
-        Dashboard = new DashboardRepository(_tenantContext, Users);
+        Dashboard = new DashboardRepository(_tenantContext, _adminContext, _tenantInfo, _httpContextAccessor);
         WeeklySchedules = new WeeklyScheduleRepository(_tenantContext, _mapper);
         Attendance = new AttendanceRepository(_tenantContext);
         Notifications = new NotificationRepository(_tenantContext, _htmlSanitizer);
         
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
-        Managers = new ManagerRepository(_tenantContext, Users, Tenants, _userManager, _tenantInfo);
+        Managers = new ManagerRepository(_tenantContext, _adminContext, Users, Tenants, _userManager, _tenantInfo, _httpContextAccessor);
     }
 
     public ISubjectsRepository Subjects { get; private set; }
