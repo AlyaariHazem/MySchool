@@ -475,7 +475,7 @@ public class StudentManagementService
                         continue;
 
                     // Extract the actual filename from the attachment string
-                    // The frontend sends full URLs like: "https://localhost:7258/uploads/Attachments/Attachments_6_CV.pdf"
+                    // The frontend may send full URLs like: "{apiOrigin}/uploads/Attachments/Attachments_6_CV.pdf"
                     // But the database stores just: "Attachments_6_CV.pdf"
                     string attachmentURL;
                     
@@ -483,7 +483,7 @@ public class StudentManagementService
                     if (attachment.StartsWith("http://") || attachment.StartsWith("https://"))
                     {
                         // Extract just the filename from the full URL
-                        // e.g., "https://localhost:7258/uploads/Attachments/Attachments_6_CV.pdf" -> "Attachments_6_CV.pdf"
+                        // e.g., full URL ending in "/uploads/Attachments/Attachments_6_CV.pdf" -> "Attachments_6_CV.pdf"
                         attachmentURL = Path.GetFileName(attachment);
                     }
                     // Check if it already has the correct prefix format (just the filename)

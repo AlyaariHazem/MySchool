@@ -17,11 +17,13 @@ namespace Backend.Repository
     {
         private readonly TenantDbContext _context;
         private readonly IUserRepository _userRepository;
+        private readonly IApiBaseUrlProvider _apiBaseUrl;
 
-        public TeacherRepository(TenantDbContext context, IUserRepository userRepository)
+        public TeacherRepository(TenantDbContext context, IUserRepository userRepository, IApiBaseUrlProvider apiBaseUrl)
         {
             _context = context;
             _userRepository = userRepository;
+            _apiBaseUrl = apiBaseUrl;
         }
 
         public async Task<int?> GetTeacherIdByUserIdAsync(string userId, CancellationToken cancellationToken = default)
@@ -119,7 +121,7 @@ namespace Backend.Repository
                     DOB = t.DOB,
                     ImageURL = string.IsNullOrEmpty(t.ImageURL) 
                         ? null 
-                        : "https://localhost:7258/uploads/Teacher/" + t.ImageURL,
+                        : _apiBaseUrl.UploadsFile("Teacher/" + t.ImageURL),
                     Gender = user?.Gender ?? "Male",
                     Address = user?.Address,
                     Email = user?.Email ?? string.Empty,
@@ -182,7 +184,7 @@ namespace Backend.Repository
                     DOB = t.DOB,
                     ImageURL = string.IsNullOrEmpty(t.ImageURL) 
                         ? null 
-                        : "https://localhost:7258/uploads/Teacher/" + t.ImageURL,
+                        : _apiBaseUrl.UploadsFile("Teacher/" + t.ImageURL),
                     Gender = user?.Gender ?? "Male",
                     Address = user?.Address,
                     Email = user?.Email ?? string.Empty,
@@ -331,7 +333,7 @@ namespace Backend.Repository
                     DOB = t.DOB,
                     ImageURL = string.IsNullOrEmpty(t.ImageURL) 
                         ? null 
-                        : "https://localhost:7258/uploads/Teacher/" + t.ImageURL,
+                        : _apiBaseUrl.UploadsFile("Teacher/" + t.ImageURL),
                     Gender = user?.Gender ?? "Male",
                     Address = user?.Address,
                     Email = user?.Email ?? string.Empty,

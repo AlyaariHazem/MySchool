@@ -18,6 +18,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         // Register Services
+        services.AddScoped<IApiBaseUrlProvider, ApiBaseUrlProvider>();
         services.AddScoped<ITenantMembershipService, TenantMembershipService>();
         services.AddScoped<IAuditTrailService, AuditTrailService>();
         services.AddScoped<StudentManagementService>();

@@ -27,6 +27,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly HtmlSanitizationService _htmlSanitizer;
     private readonly IAuditTrailService _auditTrail;
     private readonly TenantInfo _tenantInfo;
+    private readonly IApiBaseUrlProvider _apiBaseUrl;
 
     public UnitOfWork(
         TenantDbContext tenantContext,
@@ -38,7 +39,8 @@ public class UnitOfWork : IUnitOfWork
         IHttpContextAccessor httpContextAccessor,
         HtmlSanitizationService htmlSanitizer,
         IAuditTrailService auditTrail,
-        TenantInfo tenantInfo)
+        TenantInfo tenantInfo,
+        IApiBaseUrlProvider apiBaseUrl)
     {
         _tenantContext = tenantContext;
         _adminContext = adminContext;
@@ -50,13 +52,14 @@ public class UnitOfWork : IUnitOfWork
         _httpContextAccessor = httpContextAccessor;
         _htmlSanitizer = htmlSanitizer;
         _auditTrail = auditTrail;
+        _apiBaseUrl = apiBaseUrl;
 
         // Tenant-specific repositories use TenantDbContext
         // Initialize Users first since it's needed by Students, Teachers, and Employees
         Users = new UsersRepository(_userManager);
         Guardians = new GuardianRepository(_tenantContext, _mapper, Users);
         Subjects = new SubjectRepository(_tenantContext, _mapper);
-        Students = new StudentRepository(_tenantContext, Guardians, _mangeFilesService, Users, _studentRepositoryLogger, _httpContextAccessor);
+        Students = new StudentRepository(_tenantContext, Guardians, _mangeFilesService, Users, _studentRepositoryLogger, _apiBaseUrl);
         Classes = new ClassesRepository(_tenantContext, _mapper);
         Divisions = new DivisionRepository(_tenantContext, _mapper);
         Stages = new StagesRepository(_tenantContext, _mapper);
@@ -64,21 +67,21 @@ public class UnitOfWork : IUnitOfWork
         FeeClasses = new FeeClassRepository(_tenantContext, _mapper);
         Fees = new FeesRepository(_tenantContext, _mapper);
         Years = new YearRepository(_tenantContext, _mapper);
-        Schools = new SchoolRepository(_tenantContext, _adminContext, Years, _mapper, _httpContextAccessor, _tenantInfo);
+        Schools = new SchoolRepository(_tenantContext, _adminContext, Years, _mapper, _httpContextAccessor, _tenantInfo, _apiBaseUrl);
         StudentClassFees = new StudentClassFeeRepository(_tenantContext, _mapper, _auditTrail);
         Vouchers = new VoucherRepository(_tenantContext, _mapper, _mangeFilesService);
         Attachments = new AttachmentsRepository(_tenantContext);
         Curriculums = new CurriculumRepository(_tenantContext, _mapper);
         CoursePlans = new CoursePlanRepository(_tenantContext, _mapper);
-        Teachers = new TeacherRepository(_tenantContext, Users);
+        Teachers = new TeacherRepository(_tenantContext, Users, _apiBaseUrl);
         GradeTypes = new GradeTypesRepository(_tenantContext, _mapper);
         Terms = new TermRepository(_tenantContext, _mapper);
         Months = new MonthRepository(_tenantContext, _mapper);
         Employees = new EmployeeRepository(_tenantContext, Users);
         AccountStudentGuardians = new AccountStudentGuardianRepository(_tenantContext, _mapper);
         Reports = new ReportRepository(_tenantContext, _htmlSanitizer);
-        MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper, _auditTrail);
-        TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper, _auditTrail);
+        MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper, _auditTrail, _apiBaseUrl);
+        TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper, _auditTrail, _apiBaseUrl);
         Dashboard = new DashboardRepository(_tenantContext, _adminContext, _tenantInfo, _httpContextAccessor);
         WeeklySchedules = new WeeklyScheduleRepository(_tenantContext, _mapper);
         Attendance = new AttendanceRepository(_tenantContext);

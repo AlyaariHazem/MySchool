@@ -17,12 +17,14 @@ public class TermlyGradeRepository : ITermlyGradeRepository
     private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
     private readonly IAuditTrailService _auditTrail;
+    private readonly IApiBaseUrlProvider _apiBaseUrl;
 
-    public TermlyGradeRepository(TenantDbContext context, IMapper mapper, IAuditTrailService auditTrail)
+    public TermlyGradeRepository(TenantDbContext context, IMapper mapper, IAuditTrailService auditTrail, IApiBaseUrlProvider apiBaseUrl)
     {
         _context = context;
         _mapper = mapper;
         _auditTrail = auditTrail;
+        _apiBaseUrl = apiBaseUrl;
     }
 
     public async Task<Result<TermlyGradeDTO>> AddAsync(TermlyGradeDTO termlyGradeDTO)
@@ -204,7 +206,9 @@ public class TermlyGradeRepository : ITermlyGradeRepository
                 SubjectID = grp.Key.SubjectID,
                 Note = grp.First().Note,
                 SubjectName = grp.Key.SubjectName,
-                StudentURL = $"https://localhost:7258/uploads/StudentPhotos/{grp.Key.ImageURL}",
+                StudentURL = grp.Key.ImageURL != null
+                    ? _apiBaseUrl.UploadsFile($"StudentPhotos/{grp.Key.ImageURL}")
+                    : null,
                 Grade = grp.Sum(g => g.Grade)
             })
             .ToList();

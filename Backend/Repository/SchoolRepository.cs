@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Backend.DTOS.School.Years;
 using Backend.Repository.School.Interfaces;
+using Backend.Interfaces;
 
 namespace Backend.Repository.School.Classes
 {
@@ -22,6 +23,7 @@ namespace Backend.Repository.School.Classes
         private readonly IYearRepository _yearRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly TenantInfo _tenantInfo;
+        private readonly IApiBaseUrlProvider _apiBaseUrl;
 
         public SchoolRepository(
             TenantDbContext db,
@@ -29,7 +31,8 @@ namespace Backend.Repository.School.Classes
             IYearRepository yearRepository,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            TenantInfo tenantInfo)
+            TenantInfo tenantInfo,
+            IApiBaseUrlProvider apiBaseUrl)
         {
             _db = db;
             _masterDb = masterDb;
@@ -37,6 +40,7 @@ namespace Backend.Repository.School.Classes
             _yearRepository = yearRepository;
             _httpContextAccessor = httpContextAccessor;
             _tenantInfo = tenantInfo;
+            _apiBaseUrl = apiBaseUrl;
         }
 
         /// <summary>
@@ -71,7 +75,7 @@ namespace Backend.Repository.School.Classes
                     throw new KeyNotFoundException($"School for tenant {id} not found.");
 
                 var schoolDTO = _mapper.Map<SchoolDTO>(school);
-                schoolDTO.ImageURL = $"https://localhost:7258/uploads/School/School_" + school.SchoolID + "_" + schoolDTO.ImageURL;
+                schoolDTO.ImageURL = _apiBaseUrl.UploadsFile($"School/School_{school.SchoolID}_{schoolDTO.ImageURL}");
                 return schoolDTO;
             }
 
@@ -81,7 +85,7 @@ namespace Backend.Repository.School.Classes
                 throw new KeyNotFoundException($"School with ID {id} not found.");
             }
             var dto = _mapper.Map<SchoolDTO>(schools);
-            dto.ImageURL = $"https://localhost:7258/uploads/School/School_" + id + "_" + dto.ImageURL;
+            dto.ImageURL = _apiBaseUrl.UploadsFile($"School/School_{id}_{dto.ImageURL}");
             return dto;
         }
 

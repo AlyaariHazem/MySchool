@@ -7,6 +7,7 @@ using Backend.Models;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
 using Backend.Services;
+using Backend.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -22,31 +23,16 @@ public class StudentRepository : IStudentRepository
     private readonly mangeFilesService _mangeFilesService;
     private readonly IUserRepository _userRepository;
     private readonly ILogger<StudentRepository> _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IApiBaseUrlProvider _apiBaseUrl;
 
-    public StudentRepository(TenantDbContext context, IGuardianRepository guardianRepo, mangeFilesService mangeFilesService, IUserRepository userRepository, ILogger<StudentRepository> logger, IHttpContextAccessor httpContextAccessor)
+    public StudentRepository(TenantDbContext context, IGuardianRepository guardianRepo, mangeFilesService mangeFilesService, IUserRepository userRepository, ILogger<StudentRepository> logger, IApiBaseUrlProvider apiBaseUrl)
     {
         _context = context;
         _guardianRepo = guardianRepo;
         _mangeFilesService = mangeFilesService;
         _userRepository = userRepository;
         _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
-    // Helper method to get base URL dynamically
-    private string GetBaseUrl()
-    {
-        var request = _httpContextAccessor.HttpContext?.Request;
-        if (request == null)
-        {
-            // Fallback if HttpContext is not available
-            return "https://localhost:7258";
-        }
-
-        var scheme = request.Scheme;
-        var host = request.Host.Value;
-        return $"{scheme}://{host}";
+        _apiBaseUrl = apiBaseUrl;
     }
 
     // Create: Add a new student (StudentID is SQL Server IDENTITY — do not insert explicit values)
@@ -282,7 +268,7 @@ public class StudentRepository : IStudentRepository
         // Fetch user data from admin database
         var user = await _userRepository.GetUserByIdAsync(student.UserID);
 
-        string baseUrl = $"{GetBaseUrl()}/uploads/StudentPhotos";
+        string photoFolder = _apiBaseUrl.UploadsFolder("StudentPhotos");
 
         return new StudentDetailsDTO
         {
@@ -294,8 +280,8 @@ public class StudentRepository : IStudentRepository
                 LastName = student.FullName.LastName
             },
             PhotoUrl = student.ImageURL != null
-                ? $"{baseUrl}/{student.ImageURL}"
-                : $"{baseUrl}/default-placeholder.png",
+                ? $"{photoFolder}/{student.ImageURL}"
+                : $"{photoFolder}/default-placeholder.png",
             DivisionID = student.DivisionID,
             PlaceBirth = student.PlaceBirth,
             UserID = student.UserID,
@@ -353,12 +339,12 @@ public class StudentRepository : IStudentRepository
             }
         }
 
-        string baseUrl = $"{GetBaseUrl()}/uploads/StudentPhotos";
+        string photoFolder = _apiBaseUrl.UploadsFolder("StudentPhotos");
 
-        return MapStudentsToDTOs(students, users, baseUrl);
+        return MapStudentsToDTOs(students, users, photoFolder);
     }
 
-    private List<StudentDetailsDTO> MapStudentsToDTOs(List<Student> students, Dictionary<string, ApplicationUser> users, string baseUrl)
+    private List<StudentDetailsDTO> MapStudentsToDTOs(List<Student> students, Dictionary<string, ApplicationUser> users, string photoFolderBaseUrl)
     {
         return students.Select(student =>
         {
@@ -373,8 +359,8 @@ public class StudentRepository : IStudentRepository
                     LastName = student.FullName.LastName
                 },
                 PhotoUrl = student.ImageURL != null
-                    ? $"{baseUrl}/{student.ImageURL}"
-                    : $"{baseUrl}/default-placeholder.png",
+                    ? $"{photoFolderBaseUrl}/{student.ImageURL}"
+                    : $"{photoFolderBaseUrl}/default-placeholder.png",
                 DivisionID = student.DivisionID,
                 DivisionName = student.Division?.DivisionName,
                 ClassName = student.Division?.Class?.ClassName,
@@ -454,9 +440,9 @@ public class StudentRepository : IStudentRepository
             }
         }
 
-        string baseUrl = $"{GetBaseUrl()}/uploads/StudentPhotos";
+        string photoFolder = _apiBaseUrl.UploadsFolder("StudentPhotos");
 
-        var items = MapStudentsToDTOs(students, users, baseUrl);
+        var items = MapStudentsToDTOs(students, users, photoFolder);
         return (items, totalCount);
     }
 
@@ -555,9 +541,9 @@ public class StudentRepository : IStudentRepository
             }
         }
 
-        string baseUrl = $"{GetBaseUrl()}/uploads/StudentPhotos";
+        string photoFolder = _apiBaseUrl.UploadsFolder("StudentPhotos");
 
-        var items = MapStudentsToDTOs(students, users, baseUrl);
+        var items = MapStudentsToDTOs(students, users, photoFolder);
         return (items, totalCount);
     }
 
@@ -578,9 +564,8 @@ public class StudentRepository : IStudentRepository
         // Fetch user data from admin database
         var user = await _userRepository.GetUserByIdAsync(student.UserID);
 
-        string baseUrl = GetBaseUrl();
-        string PhotoUrl = $"{baseUrl}/uploads/StudentPhotos";
-        string AttachmentUrl = $"{baseUrl}/uploads/Attachments";
+        string PhotoUrl = _apiBaseUrl.UploadsFolder("StudentPhotos");
+        string AttachmentUrl = _apiBaseUrl.UploadsFolder("Attachments");
         
         // Await the async call properly instead of using .Result
         var guardianInfo = await _guardianRepo.GetGuardianByIdForUpdateAsync(student!.GuardianID);

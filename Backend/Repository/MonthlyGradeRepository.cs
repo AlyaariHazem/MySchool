@@ -12,12 +12,14 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
     private readonly TenantDbContext _context;
     private readonly IMapper _mapper;
     private readonly IAuditTrailService _auditTrail;
+    private readonly IApiBaseUrlProvider _apiBaseUrl;
 
-    public MonthlyGradeRepository(TenantDbContext context, IMapper mapper, IAuditTrailService auditTrail)
+    public MonthlyGradeRepository(TenantDbContext context, IMapper mapper, IAuditTrailService auditTrail, IApiBaseUrlProvider apiBaseUrl)
     {
         _context = context;
         _mapper = mapper;
         _auditTrail = auditTrail;
+        _apiBaseUrl = apiBaseUrl;
     }
 
     /* ----------  CREATE  ---------- */
@@ -101,7 +103,7 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
                     ? $"{grp.First().Student.FullName.FirstName} {grp.First().Student.FullName.MiddleName} {grp.First().Student.FullName.LastName}".Trim()
                     : "Unknown Student",
                 StudentURL = grp.First().Student?.ImageURL != null
-                    ? $"https://localhost:7258/uploads/StudentPhotos/{grp.First().Student.ImageURL}"
+                    ? _apiBaseUrl.UploadsFile($"StudentPhotos/{grp.First().Student!.ImageURL}")
                     : null,
                 SubjectID = grp.Key.SubjectID,
                 SubjectName = grp.First().Subject?.SubjectName ?? "Unknown Subject",
