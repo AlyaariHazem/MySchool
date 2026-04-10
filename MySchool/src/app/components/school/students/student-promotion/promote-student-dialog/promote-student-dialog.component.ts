@@ -400,7 +400,8 @@ export class PromoteStudentDialogComponent implements OnInit {
     const studentsWithoutDivision: string[] = [];
     
     this.studentForms.forEach((form, index) => {
-      const divisionID = form.get('newDivisionID')?.value;
+      // getRawValue() includes disabled controls (e.g. auto-promote), which form.value omits
+      const divisionID = form.getRawValue().newDivisionID;
       if (!divisionID || divisionID === null) {
         studentsWithoutDivision.push(this.students[index].studentName);
       }
@@ -435,13 +436,16 @@ export class PromoteStudentDialogComponent implements OnInit {
     // Get all students with valid division IDs
     const promoteRequests: PromoteStudentRequest[] = this.studentForms
       .filter(form => {
-        const divisionID = form.get('newDivisionID')?.value;
+        const divisionID = form.getRawValue().newDivisionID;
         return divisionID && divisionID !== null;
       })
-      .map(form => ({
-        studentID: form.value.studentID,
-        newDivisionID: form.value.newDivisionID
-      }));
+      .map(form => {
+        const raw = form.getRawValue();
+        return {
+          studentID: raw.studentID,
+          newDivisionID: raw.newDivisionID
+        };
+      });
 
     if (promoteRequests.length === 0) {
       this.toastr.error('لم يتم اختيار أي قسم للترقية. يرجى اختيار قسم واحد على الأقل', 'خطأ');

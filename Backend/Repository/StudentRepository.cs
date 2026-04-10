@@ -842,6 +842,42 @@ public class StudentRepository : IStudentRepository
             return response;
         }
 
+        // When copying course plans from the student's current year, clone year structure (stages/classes/divisions/plans/grades shells) first
+        // so target-year data exists before any student is promoted.
+        var ensuredStructurePairs = new HashSet<(int SourceYearId, int TargetYearId)>();
+        if (copyCoursePlansFromCurrentYear && students.Count > 0)
+        {
+            var studentIds = students.Select(s => s.StudentID).Distinct().ToList();
+            var studentsForStructure = await _context.Students
+                .Where(s => studentIds.Contains(s.StudentID))
+                .Include(s => s.Division)
+                    .ThenInclude(d => d.Class)
+                        .ThenInclude(c => c.Year)
+                .Include(s => s.Division)
+                    .ThenInclude(d => d.Class)
+                        .ThenInclude(c => c.Stage)
+                            .ThenInclude(st => st.Year)
+                .ToListAsync();
+
+            foreach (var st in studentsForStructure)
+            {
+                var prefetchSourceYearId = st.Division?.Class?.YearID ?? st.Division?.Class?.Stage?.YearID;
+                if (!prefetchSourceYearId.HasValue || prefetchSourceYearId.Value == targetYear.YearID)
+                    continue;
+
+                var pair = (prefetchSourceYearId.Value, targetYear.YearID);
+                if (ensuredStructurePairs.Contains(pair))
+                    continue;
+
+                await EnsureYearStructureClonedFromSourceYearAsync(prefetchSourceYearId.Value, targetYear.YearID);
+                ensuredStructurePairs.Add(pair);
+            }
+
+            _logger.LogInformation(
+                "Pre-flight structure clone for copyCoursePlansFromCurrentYear: {PairCount} source→target year pair(s) processed before promotion.",
+                ensuredStructurePairs.Count);
+        }
+
         // Process each student individually to allow partial success
         foreach (var studentRequest in students)
         {
@@ -879,6 +915,36 @@ public class StudentRepository : IStudentRepository
                                    (student.FullName?.MiddleName ?? "") + " " +
                                    (student.FullName?.LastName ?? "");
 
+                var sourceYearId = student.Division?.Class?.YearID ?? student.Division?.Class?.Stage?.YearID;
+                // If copyCoursePlansFromCurrentYear, structure was already cloned in pre-flight; otherwise clone here when needed.
+                if (!copyCoursePlansFromCurrentYear && sourceYearId.HasValue && sourceYearId.Value != targetYear.YearID)
+                {
+                    var pair = (sourceYearId.Value, targetYear.YearID);
+                    if (!ensuredStructurePairs.Contains(pair))
+                    {
+                        await EnsureYearStructureClonedFromSourceYearAsync(sourceYearId.Value, targetYear.YearID);
+                        ensuredStructurePairs.Add(pair);
+                    }
+                }
+
+                var effectiveNewDivisionId = studentRequest.NewDivisionID;
+                if (effectiveNewDivisionId <= 0)
+                {
+                    var resolved = await TryResolveAutoPromotionDivisionIdAsync(student.StudentID, targetYear.YearID);
+                    effectiveNewDivisionId = resolved ?? 0;
+                }
+
+                result.NewDivisionID = effectiveNewDivisionId;
+
+                if (effectiveNewDivisionId <= 0)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = "لم يتم تحديد قسم صالح للترقية. تأكد من وجود صف تالي في السنة المستهدفة أو اختر القسم يدوياً.";
+                    response.Results.Add(result);
+                    response.FailedCount++;
+                    continue;
+                }
+
                 // Verify the new division exists and belongs to target year
                 var newDivision = await _context.Divisions
                     .Include(d => d.Class)
@@ -886,7 +952,7 @@ public class StudentRepository : IStudentRepository
                     .Include(d => d.Class)
                         .ThenInclude(c => c.Stage)
                             .ThenInclude(st => st.Year)
-                    .FirstOrDefaultAsync(d => d.DivisionID == studentRequest.NewDivisionID);
+                    .FirstOrDefaultAsync(d => d.DivisionID == effectiveNewDivisionId);
 
                 if (newDivision == null)
                 {
@@ -932,7 +998,7 @@ public class StudentRepository : IStudentRepository
 
                 // Update student's division to the new division (this is the only update we make)
                 // All other data (fees, grades) will be created as new records
-                student.DivisionID = studentRequest.NewDivisionID;
+                student.DivisionID = effectiveNewDivisionId;
                 _context.Entry(student).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 
                 // Save student division change first
@@ -1396,6 +1462,409 @@ public class StudentRepository : IStudentRepository
         }
 
         return response;
+    }
+
+    private static bool DivisionNamesEqual(string? a, string? b) =>
+        string.Equals((a ?? string.Empty).Trim(), (b ?? string.Empty).Trim(), StringComparison.Ordinal);
+
+    /// <summary>
+    /// Mirrors stages, classes, divisions, fee-class links, curricula, weekly schedules, course plans, and grade shells (termly/monthly with null grades)
+    /// from the source academic year into the target year when missing.
+    /// </summary>
+    private async Task EnsureYearStructureClonedFromSourceYearAsync(int sourceYearId, int targetYearId)
+    {
+        if (sourceYearId == targetYearId)
+            return;
+
+        var sourceStages = await _context.Stages
+            .Where(s => s.YearID == sourceYearId)
+            .Include(s => s.Classes)
+                .ThenInclude(c => c.Divisions)
+            .Include(s => s.Classes)
+                .ThenInclude(c => c.FeeClasses)
+            .Include(s => s.Classes)
+                .ThenInclude(c => c.Curriculums)
+            .OrderBy(s => s.StageID)
+            .ToListAsync();
+
+        foreach (var srcStage in sourceStages)
+        {
+            var targetStages = await _context.Stages.Where(s => s.YearID == targetYearId).ToListAsync();
+            var tgtStage = targetStages.FirstOrDefault(s => DivisionNamesEqual(s.StageName, srcStage.StageName));
+            if (tgtStage == null)
+            {
+                tgtStage = new Stage
+                {
+                    StageName = srcStage.StageName,
+                    Note = srcStage.Note,
+                    Active = srcStage.Active,
+                    HireDate = DateTime.UtcNow,
+                    YearID = targetYearId
+                };
+                await _context.Stages.AddAsync(tgtStage);
+                await _context.SaveChangesAsync();
+            }
+
+            foreach (var srcClass in srcStage.Classes.OrderBy(c => c.ClassID))
+            {
+                var classesInTargetStage = await _context.Classes.Where(c => c.StageID == tgtStage.StageID).ToListAsync();
+                var tgtClass = classesInTargetStage.FirstOrDefault(c => DivisionNamesEqual(c.ClassName, srcClass.ClassName));
+                if (tgtClass == null)
+                {
+                    tgtClass = new Class
+                    {
+                        ClassName = srcClass.ClassName,
+                        ClassYear = srcClass.ClassYear,
+                        StageID = tgtStage.StageID,
+                        State = srcClass.State,
+                        YearID = targetYearId,
+                        TeacherID = srcClass.TeacherID
+                    };
+                    await _context.Classes.AddAsync(tgtClass);
+                    await _context.SaveChangesAsync();
+                }
+
+                var srcDivisions = srcClass.Divisions?.ToList() ?? new List<Division>();
+                foreach (var srcDiv in srcDivisions.OrderBy(d => d.DivisionID))
+                {
+                    var divisionsInTarget = await _context.Divisions.Where(d => d.ClassID == tgtClass.ClassID).ToListAsync();
+                    if (divisionsInTarget.Any(d => DivisionNamesEqual(d.DivisionName, srcDiv.DivisionName)))
+                        continue;
+
+                    await _context.Divisions.AddAsync(new Division
+                    {
+                        DivisionName = srcDiv.DivisionName,
+                        State = srcDiv.State,
+                        ClassID = tgtClass.ClassID
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
+                foreach (var srcFc in srcClass.FeeClasses ?? new List<FeeClass>())
+                {
+                    var exists = await _context.FeeClass.AnyAsync(fc => fc.ClassID == tgtClass.ClassID && fc.FeeID == srcFc.FeeID);
+                    if (exists)
+                        continue;
+
+                    await _context.FeeClass.AddAsync(new FeeClass
+                    {
+                        ClassID = tgtClass.ClassID,
+                        FeeID = srcFc.FeeID,
+                        Amount = srcFc.Amount,
+                        Mandatory = srcFc.Mandatory
+                    });
+                }
+
+                var srcCurricula = srcClass.Curriculums?.ToList() ?? new List<Curriculum>();
+                foreach (var srcCur in srcCurricula)
+                {
+                    var exists = await _context.Curriculums.AnyAsync(cu => cu.ClassID == tgtClass.ClassID && cu.SubjectID == srcCur.SubjectID);
+                    if (exists)
+                        continue;
+
+                    await _context.Curriculums.AddAsync(new Curriculum
+                    {
+                        SubjectID = srcCur.SubjectID,
+                        CurriculumName = srcCur.CurriculumName,
+                        ClassID = tgtClass.ClassID,
+                        Note = srcCur.Note,
+                        HireDate = DateTime.UtcNow
+                    });
+                }
+
+                if ((srcClass.FeeClasses?.Count ?? 0) > 0 || srcCurricula.Count > 0)
+                    await _context.SaveChangesAsync();
+
+                var srcSchedules = await _context.WeeklySchedules
+                    .Where(ws => ws.YearID == sourceYearId && ws.ClassID == srcClass.ClassID)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                foreach (var srcWs in srcSchedules)
+                {
+                    int? tgtDivisionId = null;
+                    if (srcWs.DivisionID.HasValue)
+                    {
+                        var srcDiv = srcDivisions.FirstOrDefault(d => d.DivisionID == srcWs.DivisionID.Value);
+                        if (srcDiv != null)
+                        {
+                            var tgtDivisions = await _context.Divisions.Where(d => d.ClassID == tgtClass.ClassID).ToListAsync();
+                            var matched = tgtDivisions.FirstOrDefault(d => DivisionNamesEqual(d.DivisionName, srcDiv.DivisionName));
+                            tgtDivisionId = matched?.DivisionID;
+                        }
+                    }
+
+                    var duplicate = await _context.WeeklySchedules.AnyAsync(ws =>
+                        ws.YearID == targetYearId &&
+                        ws.ClassID == tgtClass.ClassID &&
+                        ws.TermID == srcWs.TermID &&
+                        ws.DayOfWeek == srcWs.DayOfWeek &&
+                        ws.PeriodNumber == srcWs.PeriodNumber &&
+                        ws.DivisionID == tgtDivisionId);
+
+                    if (duplicate)
+                        continue;
+
+                    await _context.WeeklySchedules.AddAsync(new WeeklySchedule
+                    {
+                        DayOfWeek = srcWs.DayOfWeek,
+                        PeriodNumber = srcWs.PeriodNumber,
+                        StartTime = srcWs.StartTime,
+                        EndTime = srcWs.EndTime,
+                        ClassID = tgtClass.ClassID,
+                        TermID = srcWs.TermID,
+                        SubjectID = srcWs.SubjectID,
+                        TeacherID = srcWs.TeacherID,
+                        YearID = targetYearId,
+                        DivisionID = tgtDivisionId,
+                        CreatedDate = DateTime.UtcNow
+                    });
+                }
+
+                if (srcSchedules.Count > 0)
+                    await _context.SaveChangesAsync();
+
+                var tgtDivisionsList = await _context.Divisions.Where(d => d.ClassID == tgtClass.ClassID).ToListAsync();
+
+                // --- CoursePlans (same teacher/subject/term per mapped division) ---
+                var srcCoursePlans = await _context.CoursePlans
+                    .Where(cp => cp.YearID == sourceYearId && cp.ClassID == srcClass.ClassID)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                if (srcCoursePlans.Count > 0)
+                {
+                    var existingCpFromDb = await _context.CoursePlans
+                        .Where(cp => cp.YearID == targetYearId && cp.ClassID == tgtClass.ClassID)
+                        .Select(cp => new { cp.DivisionID, cp.TermID, cp.SubjectID, cp.TeacherID })
+                        .ToListAsync();
+
+                    var cpKeySet = existingCpFromDb
+                        .Select(e => (e.DivisionID, e.TermID, e.SubjectID, e.TeacherID))
+                        .ToHashSet();
+
+                    var newPlans = new List<CoursePlan>();
+                    foreach (var cp in srcCoursePlans)
+                    {
+                        var srcDivCp = srcDivisions.FirstOrDefault(d => d.DivisionID == cp.DivisionID);
+                        var tgtDivCp = srcDivCp != null
+                            ? tgtDivisionsList.FirstOrDefault(d => DivisionNamesEqual(d.DivisionName, srcDivCp.DivisionName))
+                            : tgtDivisionsList.FirstOrDefault();
+                        if (tgtDivCp == null)
+                            continue;
+
+                        var key = (tgtDivCp.DivisionID, cp.TermID, cp.SubjectID, cp.TeacherID);
+                        if (!cpKeySet.Add(key))
+                            continue;
+
+                        newPlans.Add(new CoursePlan
+                        {
+                            YearID = targetYearId,
+                            TermID = cp.TermID,
+                            SubjectID = cp.SubjectID,
+                            TeacherID = cp.TeacherID,
+                            ClassID = tgtClass.ClassID,
+                            DivisionID = tgtDivCp.DivisionID
+                        });
+                    }
+
+                    if (newPlans.Count > 0)
+                    {
+                        await _context.CoursePlans.AddRangeAsync(newPlans);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                // --- TermlyGrade: same students/subjects/terms, new year & class; grades cleared ---
+                var srcTermly = await _context.TermlyGrades
+                    .Where(tg => tg.YearID == sourceYearId && tg.ClassID == srcClass.ClassID)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                if (srcTermly.Count > 0)
+                {
+                    var existingTermlyFromDb = await _context.TermlyGrades
+                        .Where(tg => tg.YearID == targetYearId && tg.ClassID == tgtClass.ClassID)
+                        .Select(tg => new { tg.StudentID, tg.TermID, tg.SubjectID })
+                        .ToListAsync();
+
+                    var termlyKeySet = existingTermlyFromDb
+                        .Select(x => (x.StudentID, x.TermID, x.SubjectID))
+                        .ToHashSet();
+
+                    var newTermly = new List<TermlyGrade>();
+                    foreach (var tg in srcTermly)
+                    {
+                        var key = (tg.StudentID, tg.TermID, tg.SubjectID);
+                        if (!termlyKeySet.Add(key))
+                            continue;
+
+                        newTermly.Add(new TermlyGrade
+                        {
+                            StudentID = tg.StudentID,
+                            YearID = targetYearId,
+                            TermID = tg.TermID,
+                            ClassID = tgtClass.ClassID,
+                            SubjectID = tg.SubjectID,
+                            Grade = null,
+                            Note = null
+                        });
+                    }
+
+                    if (newTermly.Count > 0)
+                    {
+                        await _context.TermlyGrades.AddRangeAsync(newTermly);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                // --- MonthlyGrade: composite key; grades cleared ---
+                var srcMonthly = await _context.MonthlyGrades
+                    .Where(mg => mg.YearID == sourceYearId && mg.ClassID == srcClass.ClassID)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                if (srcMonthly.Count > 0)
+                {
+                    var existingMonthlyFromDb = await _context.MonthlyGrades
+                        .Where(mg => mg.YearID == targetYearId && mg.ClassID == tgtClass.ClassID)
+                        .Select(mg => new { mg.StudentID, mg.TermID, mg.SubjectID, mg.MonthID, mg.GradeTypeID })
+                        .ToListAsync();
+
+                    var monthlyKeySet = existingMonthlyFromDb
+                        .Select(x => (x.StudentID, x.TermID, x.SubjectID, x.MonthID, x.GradeTypeID))
+                        .ToHashSet();
+
+                    var newMonthly = new List<MonthlyGrade>();
+                    foreach (var mg in srcMonthly)
+                    {
+                        var key = (mg.StudentID, mg.TermID, mg.SubjectID, mg.MonthID, mg.GradeTypeID);
+                        if (!monthlyKeySet.Add(key))
+                            continue;
+
+                        newMonthly.Add(new MonthlyGrade
+                        {
+                            StudentID = mg.StudentID,
+                            YearID = targetYearId,
+                            TermID = mg.TermID,
+                            SubjectID = mg.SubjectID,
+                            MonthID = mg.MonthID,
+                            GradeTypeID = mg.GradeTypeID,
+                            ClassID = tgtClass.ClassID,
+                            Grade = null
+                        });
+                    }
+
+                    if (newMonthly.Count > 0)
+                    {
+                        await _context.MonthlyGrades.AddRangeAsync(newMonthly);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+        }
+
+        _logger.LogInformation("Ensured year structure from YearID {Source} to YearID {Target} (stages processed: {Count})",
+            sourceYearId, targetYearId, sourceStages.Count);
+    }
+
+    /// <summary>
+    /// Resolves the division in the target year that corresponds to the next grade (same stage / year ordering as source).
+    /// </summary>
+    private async Task<int?> TryResolveAutoPromotionDivisionIdAsync(int studentId, int targetYearId)
+    {
+        var student = await _context.Students
+            .AsNoTracking()
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Stage)
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+                    .ThenInclude(c => c.Year)
+            .FirstOrDefaultAsync(s => s.StudentID == studentId);
+
+        if (student?.Division?.Class == null)
+            return null;
+
+        var currentClass = student.Division.Class;
+        var currentDivision = student.Division;
+        var sourceYearId = currentClass.YearID ?? currentClass.Stage?.YearID;
+        if (!sourceYearId.HasValue)
+            return null;
+
+        if (currentClass.Stage != null)
+        {
+            var sourceStage = currentClass.Stage;
+            var stageClasses = await _context.Classes
+                .Where(c => c.StageID == sourceStage.StageID)
+                .OrderBy(c => c.ClassID)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var idx = stageClasses.FindIndex(c => c.ClassID == currentClass.ClassID);
+            if (idx < 0 || idx >= stageClasses.Count - 1)
+                return null;
+
+            var nextSourceClass = stageClasses[idx + 1];
+
+            var targetStages = await _context.Stages.Where(s => s.YearID == targetYearId).ToListAsync();
+            var targetStage = targetStages.FirstOrDefault(s => DivisionNamesEqual(s.StageName, sourceStage.StageName));
+            if (targetStage == null)
+                return null;
+
+            var targetClasses = await _context.Classes
+                .Where(c => c.StageID == targetStage.StageID)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var targetClass = targetClasses.FirstOrDefault(c => DivisionNamesEqual(c.ClassName, nextSourceClass.ClassName));
+            if (targetClass == null)
+                return null;
+
+            var divisions = await _context.Divisions
+                .Where(d => d.ClassID == targetClass.ClassID)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var div = divisions.FirstOrDefault(d => DivisionNamesEqual(d.DivisionName, currentDivision.DivisionName))
+                      ?? divisions.FirstOrDefault();
+            return div?.DivisionID;
+        }
+
+        if (currentClass.YearID.HasValue)
+        {
+            var classesInYear = await _context.Classes
+                .Where(c => c.YearID == sourceYearId.Value)
+                .OrderBy(c => c.ClassID)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var idx = classesInYear.FindIndex(c => c.ClassID == currentClass.ClassID);
+            if (idx < 0 || idx >= classesInYear.Count - 1)
+                return null;
+
+            var nextSourceClass = classesInYear[idx + 1];
+
+            var targetYearClasses = await _context.Classes
+                .Where(c => c.YearID == targetYearId)
+                .AsNoTracking()
+                .ToListAsync();
+            var targetClass = targetYearClasses.FirstOrDefault(c => DivisionNamesEqual(c.ClassName, nextSourceClass.ClassName));
+            if (targetClass == null)
+                return null;
+
+            var divisions = await _context.Divisions
+                .Where(d => d.ClassID == targetClass.ClassID)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var div = divisions.FirstOrDefault(d => DivisionNamesEqual(d.DivisionName, currentDivision.DivisionName))
+                      ?? divisions.FirstOrDefault();
+            return div?.DivisionID;
+        }
+
+        return null;
     }
 
     public async Task<(List<StudentNameIdDTO> Items, int TotalCount)> GetStudentNamesAndIdsPagedAsync(StudentNameIdSearchRequestDTO request)
