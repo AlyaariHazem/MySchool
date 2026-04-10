@@ -2,13 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.Manager;
 using Backend.DTOS.School.Tenant;
+using Backend.Migrations.Tenant;
 using Backend.Models;
+using Backend.Models.Master;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository.School.Classes;
@@ -50,21 +54,9 @@ public class ManagerRepository : IManagerRepository
     /// <summary>
     /// Platform admin on /api/manager with no JWT tenant: aggregate managers from all tenant DBs.
     /// </summary>
-    private bool UseMasterManagerCatalog()
-    {
-        if (!string.IsNullOrEmpty(_tenantInfo.ConnectionString))
-            return false;
-
-        var user = _httpContextAccessor.HttpContext?.User;
-        if (user?.Identity?.IsAuthenticated != true)
-            return false;
-
-        if (user.IsInRole("ADMIN"))
-            return true;
-
-        var ut = user.FindFirst("UserType")?.Value;
-        return string.Equals(ut, "ADMIN", StringComparison.OrdinalIgnoreCase);
-    }
+    private bool UseMasterManagerCatalog() =>
+        string.IsNullOrEmpty(_tenantInfo.ConnectionString)
+        && PlatformAdminHelper.IsPlatformAdminUnrestricted(_httpContextAccessor.HttpContext?.User);
 
     private async Task<TenantDbContext> CreateTenantDbForTenantIdAsync(int tenantId)
     {
@@ -76,11 +68,7 @@ public class ManagerRepository : IManagerRepository
 
         var ti = new TenantInfo { TenantId = tenantId, ConnectionString = row.ConnectionString };
         var ob = new DbContextOptionsBuilder<TenantDbContext>();
-        ob.UseSqlServer(row.ConnectionString, sql =>
-        {
-            sql.CommandTimeout(180);
-            sql.MigrationsAssembly(typeof(TenantDbContext).Assembly.FullName);
-        });
+        ob.UseTenantSqlServer(row.ConnectionString);
         return new TenantDbContext(ob.Options, ti);
     }
 
@@ -113,19 +101,25 @@ public class ManagerRepository : IManagerRepository
         var tenantRow = await _tenantRepository.GetByIdAsync(tid);
         var tenantInfo = new TenantInfo { TenantId = tid, ConnectionString = tenantRow.ConnectionString };
         var opts = new DbContextOptionsBuilder<TenantDbContext>()
-            .UseSqlServer(tenantRow.ConnectionString, sql => sql.CommandTimeout(180))
+            .UseTenantSqlServer(tenantRow.ConnectionString)
             .Options;
+
+        await using (var bootstrapConn = new SqlConnection(tenantRow.ConnectionString))
+        {
+            await bootstrapConn.OpenAsync();
+            await using var bootstrapCmd = bootstrapConn.CreateCommand();
+            bootstrapCmd.CommandText = TenantSchoolsBootstrapSql.CreateSchoolsIfMissingSql;
+            await bootstrapCmd.ExecuteNonQueryAsync();
+        }
 
         await using var tenantDb = new TenantDbContext(opts, tenantInfo);
         await tenantDb.Database.MigrateAsync();
 
-        var schoolExists = await tenantDb.Schools.AnyAsync(s => s.SchoolID == managerDTO.SchoolID);
-        if (!schoolExists)
-            throw new InvalidOperationException(
-                $"School with ID {managerDTO.SchoolID} does not exist in the tenant database.");
+        // SchoolID must be the tenant DB's Schools.SchoolID (often 1). Admin UIs often send master TenantId as SchoolID.
+        var schoolId = await ResolveSchoolIdForManagerAsync(tenantDb, managerDTO.SchoolID, tid);
 
         var existing = await tenantDb.Managers
-            .FirstOrDefaultAsync(m => m.UserID == createdUser.Id && m.SchoolID == managerDTO.SchoolID);
+            .FirstOrDefaultAsync(m => m.UserID == createdUser.Id && m.SchoolID == schoolId);
 
         if (existing != null)
         {
@@ -138,13 +132,70 @@ public class ManagerRepository : IManagerRepository
             {
                 FullName = managerDTO.FullName,
                 UserID = createdUser.Id,
-                SchoolID = managerDTO.SchoolID,
+                SchoolID = schoolId,
                 TenantID = null
             });
         }
 
         await tenantDb.SaveChangesAsync();
+
+        // Master DB: link Identity user ↔ tenant (JWT / tenant picker); same pattern as AuthController.EnsureUserTenantIfMissingAsync.
+        await EnsureUserTenantForManagerAsync(createdUser.Id, tid);
+
         return "Manager added successfully.";
+    }
+
+    /// <summary>
+    /// Maps DTO SchoolID to the real <see cref="School.SchoolID"/> in the tenant database.
+    /// </summary>
+    private static async Task<int> ResolveSchoolIdForManagerAsync(
+        TenantDbContext tenantDb,
+        int requestedSchoolId,
+        int tenantId)
+    {
+        if (await tenantDb.Schools.AnyAsync(s => s.SchoolID == requestedSchoolId))
+            return requestedSchoolId;
+
+        var ids = await tenantDb.Schools.AsNoTracking()
+            .OrderBy(s => s.SchoolID)
+            .Select(s => s.SchoolID)
+            .ToListAsync();
+
+        if (ids.Count == 0)
+            throw new InvalidOperationException(
+                "This school database has no school row yet. Create the school (POST api/School) first, then add the manager.");
+
+        if (ids.Count == 1)
+            return ids[0];
+
+        // Multiple schools: client must send the real Schools.SchoolID (not master TenantId).
+        if (requestedSchoolId == tenantId)
+        {
+            throw new InvalidOperationException(
+                $"SchoolID {requestedSchoolId} matches TenantId but this tenant has multiple schools ({string.Join(", ", ids)}). " +
+                "Send the tenant database SchoolID from Schools.SchoolID, not the master TenantId.");
+        }
+
+        throw new InvalidOperationException(
+            $"School with ID {requestedSchoolId} does not exist in the tenant database. Valid SchoolID values: {string.Join(", ", ids)}.");
+    }
+
+    private async Task EnsureUserTenantForManagerAsync(string userId, int tenantId)
+    {
+        var exists = await _masterDb.UserTenants.AsNoTracking()
+            .AnyAsync(ut => ut.UserId == userId && ut.TenantId == tenantId);
+        if (exists)
+            return;
+
+        _masterDb.UserTenants.Add(new UserTenant
+        {
+            UserId = userId,
+            TenantId = tenantId,
+            TenantRole = TenantRole.SchoolAdmin,
+            IsActive = true,
+            LastAccessedUtc = DateTime.UtcNow
+        });
+        await _masterDb.SaveChangesAsync();
     }
 
     public async Task<GetManagerDTO?> GetManager(int id)
@@ -216,29 +267,42 @@ public class ManagerRepository : IManagerRepository
             var result = new List<GetManagerDTO>();
             foreach (var tenant in tenants)
             {
-                await using var db = await CreateTenantDbForTenantIdAsync(tenant.TenantId);
-                var managers = await db.Managers
-                    .AsNoTracking()
-                    .Include(m => m.School)
-                    .ToListAsync();
-
-                var tenantMeta = new TenantDTO
+                try
                 {
-                    TenantID = tenant.TenantId,
-                    SchoolName = tenant.SchoolName,
-                    ConnectionString = tenant.ConnectionString
-                };
+                    await using var db = await CreateTenantDbForTenantIdAsync(tenant.TenantId);
+                    var managers = await db.Managers
+                        .AsNoTracking()
+                        .Include(m => m.School)
+                        .ToListAsync();
 
-                var userIds = managers.Select(m => m.UserID).Distinct().ToList();
-                var users = new Dictionary<string, ApplicationUser?>(StringComparer.Ordinal);
-                foreach (var uid in userIds)
-                    users[uid] = await _userManager.FindByIdAsync(uid);
+                    var tenantMeta = new TenantDTO
+                    {
+                        TenantID = tenant.TenantId,
+                        SchoolName = tenant.SchoolName,
+                        ConnectionString = tenant.ConnectionString
+                    };
 
-                foreach (var m in managers)
+                    var userIds = managers.Select(m => m.UserID).Distinct().ToList();
+                    var users = new Dictionary<string, ApplicationUser?>(StringComparer.Ordinal);
+                    foreach (var uid in userIds)
+                        users[uid] = await _userManager.FindByIdAsync(uid);
+
+                    foreach (var m in managers)
+                    {
+                        var dto = Map(m, users.GetValueOrDefault(m.UserID), tenantMeta);
+                        dto.ManagerID = EncodeCrossTenantManagerId(tenant.TenantId, m.ManagerID);
+                        result.Add(dto);
+                    }
+                }
+                catch (SqlException ex)
                 {
-                    var dto = Map(m, users.GetValueOrDefault(m.UserID), tenantMeta);
-                    dto.ManagerID = EncodeCrossTenantManagerId(tenant.TenantId, m.ManagerID);
-                    result.Add(dto);
+                    System.Diagnostics.Debug.WriteLine(
+                        $"Manager list: skipping tenant {tenant.TenantId} ({tenant.SchoolName}): {ex.Message}");
+                }
+                catch (Exception ex) when (ex.InnerException is SqlException sqlEx)
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"Manager list: skipping tenant {tenant.TenantId} ({tenant.SchoolName}): {sqlEx.Message}");
                 }
             }
 

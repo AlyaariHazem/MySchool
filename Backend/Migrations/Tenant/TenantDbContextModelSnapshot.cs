@@ -1355,7 +1355,7 @@ namespace Backend.Migrations.Tenant
                     b.HasOne("Backend.Models.Division", "Division")
                         .WithMany("CoursePlans")
                         .HasForeignKey("DivisionID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Backend.Models.Subject", "Subject")
@@ -1379,7 +1379,7 @@ namespace Backend.Migrations.Tenant
                     b.HasOne("Backend.Models.Year", "Year")
                         .WithMany("CoursePlans")
                         .HasForeignKey("YearID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Class");
@@ -1493,7 +1493,7 @@ namespace Backend.Migrations.Tenant
                     b.HasOne("Backend.Models.Class", "Class")
                         .WithMany("MonthlyGrades")
                         .HasForeignKey("ClassID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Backend.Models.GradeType", "GradeType")
@@ -1529,7 +1529,7 @@ namespace Backend.Migrations.Tenant
                     b.HasOne("Backend.Models.Year", "Year")
                         .WithMany("MonthlyGrades")
                         .HasForeignKey("YearID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Class");
@@ -1655,8 +1655,7 @@ namespace Backend.Migrations.Tenant
                     b.Navigation("FullName")
                         .IsRequired();
 
-                    b.Navigation("FullNameAlis")
-                        .IsRequired();
+                    b.Navigation("FullNameAlis");
 
                     b.Navigation("Guardian");
                 });
@@ -1672,7 +1671,7 @@ namespace Backend.Migrations.Tenant
                     b.HasOne("Backend.Models.Student", "Student")
                         .WithMany("StudentClassFees")
                         .HasForeignKey("StudentID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("FeeClass");
@@ -1723,7 +1722,7 @@ namespace Backend.Migrations.Tenant
                     b.HasOne("Backend.Models.Class", "Class")
                         .WithMany("TermlyGrades")
                         .HasForeignKey("ClassID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Backend.Models.Student", "Student")
@@ -1747,7 +1746,7 @@ namespace Backend.Migrations.Tenant
                     b.HasOne("Backend.Models.Year", "Year")
                         .WithMany("TermlyGrades")
                         .HasForeignKey("YearID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Class");
@@ -1801,7 +1800,7 @@ namespace Backend.Migrations.Tenant
                     b.HasOne("Backend.Models.Year", "Year")
                         .WithMany()
                         .HasForeignKey("YearID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Class");

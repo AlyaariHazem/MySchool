@@ -299,7 +299,8 @@ export class PlainsComponent {
       plan.teacherID,
       plan.classID,
       plan.divisionID,
-      plan.subjectID
+      plan.subjectID,
+      plan.termID
     ).pipe(
       finalize(() => {
         this.isLoadingEditPlan = false;
@@ -354,7 +355,7 @@ export class PlainsComponent {
 
     // Validate that editingPlan has all required values
     if (!this.editingPlan.yearID || !this.editingPlan.teacherID || !this.editingPlan.classID || 
-        !this.editingPlan.divisionID || !this.editingPlan.subjectID) {
+        !this.editingPlan.divisionID || !this.editingPlan.subjectID || this.editingPlan.termID == null) {
       this.toastr.error('Course plan data is incomplete. Please refresh and try again.');
       return;
     }
@@ -384,6 +385,7 @@ export class PlainsComponent {
       this.editingPlan.classID,
       this.editingPlan.divisionID,
       this.editingPlan.subjectID,
+      this.editingPlan.termID,
       updatedPlan
     ).pipe(
       finalize(() => {
@@ -412,7 +414,7 @@ export class PlainsComponent {
     if (this.isBusy) {
       return;
     }
-    if (!plan.subjectID || !plan.classID || !plan.divisionID || !plan.teacherID || !plan.yearID) {
+    if (!plan.subjectID || !plan.classID || !plan.divisionID || !plan.teacherID || !plan.yearID || plan.termID == null) {
       this.toastr.error('Cannot delete: Course plan data is incomplete');
       return;
     }
@@ -427,7 +429,8 @@ export class PlainsComponent {
       plan.teacherID,
       plan.classID,
       plan.divisionID,
-      plan.subjectID
+      plan.subjectID,
+      plan.termID
     ).pipe(
       finalize(() => {
         this.isMutating = false;

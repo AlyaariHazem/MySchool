@@ -11,6 +11,8 @@ public class TermlyGradeDTO
     public int StudentID { get; set; }
     public decimal Grade { get; set; }= 0;
     public int TermID { get; set; }
+    /// <summary>Academic year; when 0 or omitted on create, the active year is used.</summary>
+    public int YearID { get; set; }
     public int ClassID { get; set; }
     public int SubjectID { get; set; }
     public string? Note { get; set; }

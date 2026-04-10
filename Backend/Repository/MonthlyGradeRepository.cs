@@ -27,6 +27,17 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
             return Result<MonthlyGradeDTO>.Fail("MonthlyGrade payload is null.");
 
         var entity = _mapper.Map<MonthlyGrade>(dto);
+        if (entity.YearID <= 0)
+        {
+            var activeYear = await _context.Years
+                .Where(y => y.Active)
+                .OrderBy(y => y.YearID)
+                .FirstOrDefaultAsync();
+            if (activeYear == null)
+                return Result<MonthlyGradeDTO>.Fail("No active year found. Activate a year before adding monthly grades.");
+            entity.YearID = activeYear.YearID;
+        }
+
         await _context.MonthlyGrades.AddAsync(entity);
 
         try
@@ -128,10 +139,11 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
 
         foreach (var dto in dtos)
         {
-            // Use active year instead of dto.YearID
+            // Prefer the year explicitly sent by the client (e.g. localStorage) when valid; otherwise active year.
+            var yearIdForRow = dto.YearID > 0 ? dto.YearID : activeYear.YearID;
             var grade = await _context.MonthlyGrades.FirstOrDefaultAsync(g =>
                 g.StudentID == dto.StudentID &&
-                g.YearID == activeYear.YearID &&
+                g.YearID == yearIdForRow &&
                 g.SubjectID == dto.SubjectID &&
                 g.MonthID == dto.MonthID &&
                 g.TermID == dto.TermID &&

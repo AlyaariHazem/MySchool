@@ -1,4 +1,5 @@
 using AutoMapper;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.CoursePlan;
 using Backend.Models;
@@ -26,10 +27,21 @@ public class CoursePlanRepository : ICoursePlanRepository
         if (dto.YearID <= 0)
             throw new ArgumentException("YearID must be provided and greater than 0.", nameof(dto));
 
+        if (dto.TermID <= 0)
+            throw new ArgumentException("TermID must be provided and greater than 0.", nameof(dto));
+
         // Verify the year exists
         var year = await _context.Years.FirstOrDefaultAsync(y => y.YearID == dto.YearID);
         if (year == null)
             throw new InvalidOperationException($"Year with ID {dto.YearID} not found. Please select a valid year.");
+
+        await ValidateCoursePlanForeignKeysAsync(dto);
+
+        var duplicate = await _context.CoursePlans.FindAsync(
+            dto.YearID, dto.TeacherID, dto.ClassID, dto.DivisionID, dto.SubjectID, dto.TermID);
+        if (duplicate != null)
+            throw new InvalidOperationException(
+                "A course plan for this year, teacher, class, division, subject, and term already exists.");
 
         // Step 1: Add the CoursePlan to the database using the YearID from DTO
         var entity = _mapper.Map<CoursePlan>(dto);
@@ -50,7 +62,7 @@ public class CoursePlanRepository : ICoursePlanRepository
             .ToListAsync();
 
         if (months.Count == 0)
-            months = GetFallbackMonthIdsForTerm(dto.TermID);
+            months = await YearTermMonthSeeding.GetDefaultMonthIdsForTermAsync(_context, dto.TermID);
 
         var gradeTypes = await _context.GradeTypes
             .Where(g => g.IsActive == true)
@@ -236,15 +248,15 @@ public class CoursePlanRepository : ICoursePlanRepository
         return list;
     }
 
-    public async Task<CoursePlanDTO?> GetByIdAsync(int yearID, int teacherID, int classID, int divisionID, int subjectID)
+    public async Task<CoursePlanDTO?> GetByIdAsync(int yearID, int teacherID, int classID, int divisionID, int subjectID, int termID)
     {
-        var entity = await _context.CoursePlans.FindAsync(yearID, teacherID, classID, divisionID, subjectID);
+        var entity = await _context.CoursePlans.FindAsync(yearID, teacherID, classID, divisionID, subjectID, termID);
         return entity == null ? null : _mapper.Map<CoursePlanDTO>(entity);
     }
 
-    public async Task UpdateAsync(CoursePlanDTO dto, int oldYearID, int oldTeacherID, int oldClassID, int oldDivisionID, int oldSubjectID)
+    public async Task UpdateAsync(CoursePlanDTO dto, int oldYearID, int oldTeacherID, int oldClassID, int oldDivisionID, int oldSubjectID, int oldTermID)
     {
-        var entity = await _context.CoursePlans.FindAsync(oldYearID, oldTeacherID, oldClassID, oldDivisionID, oldSubjectID);
+        var entity = await _context.CoursePlans.FindAsync(oldYearID, oldTeacherID, oldClassID, oldDivisionID, oldSubjectID, oldTermID);
         if (entity == null)
             throw new KeyNotFoundException("Course plan not found.");
 
@@ -263,12 +275,12 @@ public class CoursePlanRepository : ICoursePlanRepository
         // If the key values changed, we need to remove the old entity and add a new one
         bool keyChanged = oldYearID != dto.YearID || oldTeacherID != dto.TeacherID || 
                          oldClassID != dto.ClassID || oldDivisionID != dto.DivisionID || 
-                         oldSubjectID != dto.SubjectID;
+                         oldSubjectID != dto.SubjectID || oldTermID != dto.TermID;
 
         if (keyChanged)
         {
             // Check if new key already exists
-            var existingEntity = await _context.CoursePlans.FindAsync(dto.YearID, dto.TeacherID, dto.ClassID, dto.DivisionID, dto.SubjectID);
+            var existingEntity = await _context.CoursePlans.FindAsync(dto.YearID, dto.TeacherID, dto.ClassID, dto.DivisionID, dto.SubjectID, dto.TermID);
             if (existingEntity != null)
                 throw new InvalidOperationException("A course plan with the new key combination already exists.");
 
@@ -302,9 +314,9 @@ public class CoursePlanRepository : ICoursePlanRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int yearID, int teacherID, int classID, int divisionID, int subjectID)
+    public async Task DeleteAsync(int yearID, int teacherID, int classID, int divisionID, int subjectID, int termID)
     {
-        var entity = await _context.CoursePlans.FindAsync(yearID, teacherID, classID, divisionID, subjectID);
+        var entity = await _context.CoursePlans.FindAsync(yearID, teacherID, classID, divisionID, subjectID, termID);
         if (entity == null)
             throw new KeyNotFoundException("Course plan not found.");
 
@@ -335,32 +347,27 @@ public class CoursePlanRepository : ICoursePlanRepository
         if (hasAny)
             return;
 
-        var defaultMonths = new List<YearTermMonth>
-        {
-            new YearTermMonth { YearID = yearId, TermID = 1, MonthID = 5 },
-            new YearTermMonth { YearID = yearId, TermID = 1, MonthID = 6 },
-            new YearTermMonth { YearID = yearId, TermID = 1, MonthID = 7 },
-            new YearTermMonth { YearID = yearId, TermID = 1, MonthID = 8 },
-            new YearTermMonth { YearID = yearId, TermID = 2, MonthID = 9 },
-            new YearTermMonth { YearID = yearId, TermID = 2, MonthID = 10 },
-            new YearTermMonth { YearID = yearId, TermID = 2, MonthID = 11 },
-            new YearTermMonth { YearID = yearId, TermID = 2, MonthID = 12 }
-        };
-
+        var defaultMonths = await YearTermMonthSeeding.CreateDefaultYearTermMonthsAsync(_context, yearId);
         await _context.YearTermMonths.AddRangeAsync(defaultMonths);
         await _context.SaveChangesAsync();
     }
 
-    /// <summary>
-    /// If DB still has no months for this term (e.g. custom term IDs), use the same defaults as StudentRepository.
-    /// </summary>
-    private static List<int> GetFallbackMonthIdsForTerm(int termId)
+    private async Task ValidateCoursePlanForeignKeysAsync(CoursePlanDTO dto)
     {
-        return termId switch
-        {
-            1 => new List<int> { 5, 6, 7, 8 },
-            2 => new List<int> { 9, 10, 11, 12 },
-            _ => new List<int>()
-        };
+        if (!await _context.Terms.AnyAsync(t => t.TermID == dto.TermID))
+            throw new InvalidOperationException($"Term with ID {dto.TermID} not found. Run tenant seed or add terms first.");
+
+        if (!await _context.Teachers.AnyAsync(t => t.TeacherID == dto.TeacherID))
+            throw new InvalidOperationException($"Teacher with ID {dto.TeacherID} not found.");
+
+        if (!await _context.Classes.AnyAsync(c => c.ClassID == dto.ClassID))
+            throw new InvalidOperationException($"Class with ID {dto.ClassID} not found.");
+
+        if (!await _context.Divisions.AnyAsync(d => d.DivisionID == dto.DivisionID))
+            throw new InvalidOperationException($"Division (section) with ID {dto.DivisionID} not found.");
+
+        if (!await _context.Subjects.AnyAsync(s => s.SubjectID == dto.SubjectID))
+            throw new InvalidOperationException($"Subject with ID {dto.SubjectID} not found.");
     }
+
 }

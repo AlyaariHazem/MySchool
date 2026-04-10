@@ -88,12 +88,7 @@ builder.Services.AddDbContext<TenantDbContext>((serviceProvider, optionsBuilder)
     // If connection string is available (set by middleware), use it
     if (!string.IsNullOrWhiteSpace(connectionString))
     {
-        optionsBuilder.UseSqlServer(connectionString, sql =>
-        {
-            sql.CommandTimeout(180);
-            // Keep tenant migrations separate from master in the same assembly
-            sql.MigrationsAssembly(typeof(TenantDbContext).Assembly.FullName);
-        });
+        optionsBuilder.UseTenantSqlServer(connectionString);
     }
     // If ConnectionString is not set, OnConfiguring will try to configure it
     // This ensures dynamic tenant resolution works correctly
@@ -188,7 +183,10 @@ builder.Services
             ValidAudience = builder.Configuration["JWT:AudienceIP"],
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateLifetime = false
+            ValidateLifetime = false,
+            // Ensures JWT "role" / ClaimTypes.Role map correctly so IsInRole(...) works after bearer auth.
+            RoleClaimType = ClaimTypes.Role,
+            NameClaimType = ClaimTypes.Name
         };
 
         options.Events = new JwtBearerEvents

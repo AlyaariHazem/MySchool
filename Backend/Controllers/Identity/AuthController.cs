@@ -1,3 +1,4 @@
+using Backend.Common;
 using Backend.DTOS;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -132,8 +133,16 @@ namespace Backend.Controllers
                         .FirstOrDefaultAsync(t => t.TenantId == tenantId.Value);
                 }
 
-                // Legacy: no UserTenant rows yet — locate user in a tenant DB by UserId scan
-                if (tenantEntity == null && tenantChoices.Count == 0)
+                // Stale membership: UserTenant pointed at a tenant row removed from master
+                if (tenantEntity == null && tenantId.HasValue)
+                {
+                    tenantId = null;
+                    membershipTenantRole = null;
+                }
+
+                // Legacy: no usable UserTenant yet — scan tenant DBs (Managers, Teachers, …).
+                // When Count > 1 we require an explicit TenantId on login / select-tenant instead.
+                if (tenantEntity == null && !tenantId.HasValue && tenantChoices.Count <= 1)
                 {
                     var resolvedTenantId = await ResolveTenantIdForTeacherStudentGuardianAsync(userFromDb.Id, userFromDb.UserType);
                     if (resolvedTenantId.HasValue)
@@ -145,6 +154,12 @@ namespace Backend.Controllers
                     if (tenantEntity != null)
                     {
                         tenantId = tenantEntity.TenantId;
+                        var roleFromType = TenantRoleFromUserType(userFromDb.UserType);
+                        if (roleFromType.HasValue)
+                        {
+                            membershipTenantRole = roleFromType;
+                            await EnsureUserTenantIfMissingAsync(userFromDb.Id, tenantEntity.TenantId, roleFromType.Value);
+                        }
                     }
                 }
 
@@ -167,41 +182,41 @@ namespace Backend.Controllers
                     };
 
                     var tenantOptions = new DbContextOptionsBuilder<TenantDbContext>()
-                        .UseSqlServer(tenantEntity.ConnectionString, sql =>
-                        {
-                            sql.CommandTimeout(180);
-                        })
+                        .UseTenantSqlServer(tenantEntity.ConnectionString)
                         .Options;
 
                     using var tenantContext = new TenantDbContext(tenantOptions, tenantInfo);
 
-                    var manager = await tenantContext.Managers
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync();
-
-                    if (manager != null)
+                    if (string.Equals(userFromDb.UserType, "MANAGER", StringComparison.OrdinalIgnoreCase))
                     {
-                        var school = await tenantContext.Schools
+                        var manager = await tenantContext.Managers
                             .AsNoTracking()
-                            .Where(s => s.SchoolID == manager.SchoolID)
-                            .FirstOrDefaultAsync();
+                            .FirstOrDefaultAsync(m => m.UserID == userFromDb.Id);
 
-                        if (school != null)
+                        if (manager != null)
                         {
-                            var activeYearId = await tenantContext.Years
+                            var school = await tenantContext.Schools
                                 .AsNoTracking()
-                                .Where(y => y.SchoolID == school.SchoolID && y.Active == true)
-                                .Select(y => (int?)y.YearID)
+                                .Where(s => s.SchoolID == manager.SchoolID)
                                 .FirstOrDefaultAsync();
 
-                            schoolData = new
+                            if (school != null)
                             {
-                                SchoolName = school.SchoolName,
-                                SchoolId = school.SchoolID,
-                                ManagerFirstName = manager.FullName?.FirstName,
-                                ManagerLastName = manager.FullName?.LastName,
-                                ActiveYearId = activeYearId
-                            };
+                                var activeYearId = await tenantContext.Years
+                                    .AsNoTracking()
+                                    .Where(y => y.SchoolID == school.SchoolID && y.Active == true)
+                                    .Select(y => (int?)y.YearID)
+                                    .FirstOrDefaultAsync();
+
+                                schoolData = new
+                                {
+                                    SchoolName = school.SchoolName,
+                                    SchoolId = school.SchoolID,
+                                    ManagerFirstName = manager.FullName?.FirstName,
+                                    ManagerLastName = manager.FullName?.LastName,
+                                    ActiveYearId = activeYearId
+                                };
+                            }
                         }
                     }
 
@@ -246,6 +261,9 @@ namespace Backend.Controllers
                 new Claim(ClaimTypes.Name, userFromDb.UserName!),
                 new Claim("UserType", userFromDb.UserType)
             };
+
+            if (string.Equals(userFromDb.UserType, "ADMIN", StringComparison.OrdinalIgnoreCase))
+                userClaims.Add(new Claim(PlatformAdminHelper.TenantBypassClaimType, PlatformAdminHelper.TenantBypassClaimValue));
 
             // ⬅️ Add each role as a Role claim (important for [Authorize(Roles = \"...\")])
             foreach (var role in userRoles)
@@ -346,6 +364,9 @@ namespace Backend.Controllers
                 new Claim("UserType", user.UserType ?? string.Empty)
             };
 
+            if (string.Equals(user.UserType, "ADMIN", StringComparison.OrdinalIgnoreCase))
+                claims.Add(new Claim(PlatformAdminHelper.TenantBypassClaimType, PlatformAdminHelper.TenantBypassClaimValue));
+
             foreach (var role in userRoles)
                 claims.Add(new Claim(ClaimTypes.Role, role));
 
@@ -390,11 +411,12 @@ namespace Backend.Controllers
             return await ResolveTenantIdForTeacherStudentGuardianAsync(userId, userType);
         }
 
+        /// <summary>
+        /// Legacy: find which tenant DB holds this user when there is no <see cref="UserTenant"/> row yet.
+        /// Managers were previously skipped here, so school logins could issue a token without TenantId and hit TenantRequired.
+        /// </summary>
         private async Task<int?> ResolveTenantIdForTeacherStudentGuardianAsync(string userId, string userType)
         {
-            if (userType.Equals("MANAGER", StringComparison.OrdinalIgnoreCase))
-                return null;
-
             var tenants = await _context.Tenants.AsNoTracking()
                 .Select(t => new { t.TenantId, t.ConnectionString })
                 .ToListAsync();
@@ -408,13 +430,15 @@ namespace Backend.Controllers
                 {
                     var tenantInfo = new TenantInfo { TenantId = row.TenantId, ConnectionString = row.ConnectionString };
                     var opts = new DbContextOptionsBuilder<TenantDbContext>()
-                        .UseSqlServer(row.ConnectionString, sql => sql.CommandTimeout(180))
+                        .UseTenantSqlServer(row.ConnectionString)
                         .Options;
 
                     await using var ctx = new TenantDbContext(opts, tenantInfo);
 
                     var match = false;
-                    if (userType.Equals("TEACHER", StringComparison.OrdinalIgnoreCase))
+                    if (userType.Equals("MANAGER", StringComparison.OrdinalIgnoreCase))
+                        match = await ctx.Managers.AsNoTracking().AnyAsync(m => m.UserID == userId);
+                    else if (userType.Equals("TEACHER", StringComparison.OrdinalIgnoreCase))
                         match = await ctx.Teachers.AsNoTracking().AnyAsync(t => t.UserID == userId);
                     else if (userType.Equals("STUDENT", StringComparison.OrdinalIgnoreCase))
                         match = await ctx.Students.AsNoTracking().AnyAsync(s => s.UserID == userId);
@@ -432,6 +456,38 @@ namespace Backend.Controllers
 
             return null;
         }
+
+        private static TenantRole? TenantRoleFromUserType(string userType)
+        {
+            if (string.Equals(userType, "MANAGER", StringComparison.OrdinalIgnoreCase))
+                return TenantRole.SchoolAdmin;
+            if (string.Equals(userType, "TEACHER", StringComparison.OrdinalIgnoreCase))
+                return TenantRole.Teacher;
+            if (string.Equals(userType, "STUDENT", StringComparison.OrdinalIgnoreCase))
+                return TenantRole.Student;
+            if (string.Equals(userType, "GUARDIAN", StringComparison.OrdinalIgnoreCase))
+                return TenantRole.Parent;
+            return null;
+        }
+
+        /// <summary>Backfill <see cref="UserTenant"/> after legacy DB scan so the next login uses membership instead of scanning.</summary>
+        private async Task EnsureUserTenantIfMissingAsync(string userId, int tenantId, TenantRole role)
+        {
+            var exists = await _context.UserTenants.AnyAsync(ut => ut.UserId == userId && ut.TenantId == tenantId);
+            if (exists)
+                return;
+
+            _context.UserTenants.Add(new UserTenant
+            {
+                UserId = userId,
+                TenantId = tenantId,
+                TenantRole = role,
+                IsActive = true,
+                LastAccessedUtc = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+        }
+
         private static string CreateRandomToken(int bytes = 64)
     => Convert.ToBase64String(RandomNumberGenerator.GetBytes(bytes));
 

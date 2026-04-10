@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using Backend.DTOS.School.CoursePlan;
 using Backend.Interfaces;
@@ -31,21 +32,34 @@ public class CoursePlansController : ControllerBase
             response.statusCode = HttpStatusCode.Created;
             return Ok(response);
         }
-        catch (DbUpdateException dbEx) when (dbEx.InnerException is SqlException sqlEx)
+        catch (DbUpdateException dbEx) when (GetSqlException(dbEx) is { } sqlEx)
         {
-            // Check for primary key constraint violation
-            if (sqlEx.Number == 2627 || sqlEx.Message.Contains("PRIMARY KEY constraint") || sqlEx.Message.Contains("duplicate key"))
+            if (sqlEx.Number == 2627 || sqlEx.Message.Contains("PRIMARY KEY constraint", StringComparison.OrdinalIgnoreCase) || sqlEx.Message.Contains("duplicate key", StringComparison.OrdinalIgnoreCase))
             {
                 response.IsSuccess = false;
                 response.statusCode = HttpStatusCode.Conflict;
-                response.ErrorMasseges.Add("A course plan with the same combination of Year, Class, Division, Subject, and Term already exists. Please use a different combination.");
+                response.ErrorMasseges.Add(
+                    "A course plan with the same year, teacher, class, division, subject, and term already exists.");
                 return Conflict(response);
             }
-            
-            // Other database errors
+
             response.IsSuccess = false;
             response.statusCode = HttpStatusCode.BadRequest;
-            response.ErrorMasseges.Add("An error occurred while saving the course plan. Please check your data and try again.");
+            response.ErrorMasseges.Add(sqlEx.Message);
+            return BadRequest(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.BadRequest;
+            response.ErrorMasseges.Add(ex.Message);
+            return BadRequest(response);
+        }
+        catch (ArgumentException ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.BadRequest;
+            response.ErrorMasseges.Add(ex.Message);
             return BadRequest(response);
         }
         catch (Exception ex)
@@ -57,7 +71,19 @@ public class CoursePlansController : ControllerBase
         }
     }
 
-     [HttpGet]
+    private static SqlException? GetSqlException(Exception ex)
+    {
+        var cur = ex;
+        while (cur != null)
+        {
+            if (cur is SqlException sql)
+                return sql;
+            cur = cur.InnerException;
+        }
+        return null;
+    }
+
+    [HttpGet]
     public async Task<ActionResult<APIResponse>> GetAll()
     {
         var response = new APIResponse();
@@ -76,7 +102,7 @@ public class CoursePlansController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, response);
         }
     }
-    
+
     [HttpGet("subjects")]
     public async Task<ActionResult<APIResponse>> GetAllSubjects()
     {
@@ -87,11 +113,11 @@ public class CoursePlansController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("{yearID}/{teacherID}/{classID}/{divisionID}/{subjectID}")]
-    public async Task<ActionResult<APIResponse>> Get(int yearID, int teacherID, int classID, int divisionID, int subjectID)
+    [HttpGet("{yearID}/{teacherID}/{classID}/{divisionID}/{subjectID}/{termID}")]
+    public async Task<ActionResult<APIResponse>> Get(int yearID, int teacherID, int classID, int divisionID, int subjectID, int termID)
     {
         var response = new APIResponse();
-        var item = await _unitOfWork.CoursePlans.GetByIdAsync(yearID, teacherID, classID, divisionID, subjectID);
+        var item = await _unitOfWork.CoursePlans.GetByIdAsync(yearID, teacherID, classID, divisionID, subjectID, termID);
         if (item == null)
         {
             response.IsSuccess = false;
@@ -105,13 +131,13 @@ public class CoursePlansController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("{oldYearID}/{oldTeacherID}/{oldClassID}/{oldDivisionID}/{oldSubjectID}")]
-    public async Task<ActionResult<APIResponse>> Update(int oldYearID, int oldTeacherID, int oldClassID, int oldDivisionID, int oldSubjectID, [FromBody] CoursePlanDTO dto)
+    [HttpPut("{oldYearID}/{oldTeacherID}/{oldClassID}/{oldDivisionID}/{oldSubjectID}/{oldTermID}")]
+    public async Task<ActionResult<APIResponse>> Update(int oldYearID, int oldTeacherID, int oldClassID, int oldDivisionID, int oldSubjectID, int oldTermID, [FromBody] CoursePlanDTO dto)
     {
         var response = new APIResponse();
         try
         {
-            await _unitOfWork.CoursePlans.UpdateAsync(dto, oldYearID, oldTeacherID, oldClassID, oldDivisionID, oldSubjectID);
+            await _unitOfWork.CoursePlans.UpdateAsync(dto, oldYearID, oldTeacherID, oldClassID, oldDivisionID, oldSubjectID, oldTermID);
             await _unitOfWork.CompleteAsync();
             response.Result = "Updated successfully";
             response.statusCode = HttpStatusCode.OK;
@@ -149,13 +175,35 @@ public class CoursePlansController : ControllerBase
         }
     }
 
-    [HttpDelete("{yearID}/{teacherID}/{classID}/{divisionID}/{subjectID}")]
-    public async Task<ActionResult<APIResponse>> Delete(int yearID, int teacherID, int classID, int divisionID, int subjectID)
+    [HttpDelete("{yearID}/{teacherID}/{classID}/{divisionID}/{subjectID}/{termID}")]
+    public Task<ActionResult<APIResponse>> Delete(int yearID, int teacherID, int classID, int divisionID, int subjectID, int termID) =>
+        DeleteCoursePlanCoreAsync(yearID, teacherID, classID, divisionID, subjectID, termID);
+
+    /// <summary>Same delete as <see cref="Delete"/>, but uses POST + JSON body (avoids clients/proxies that mishandle DELETE with long paths).</summary>
+    [HttpPost("delete")]
+    public async Task<ActionResult<APIResponse>> DeleteByKey([FromBody] CoursePlanKeyDTO? key)
+    {
+        if (key == null)
+        {
+            var bad = new APIResponse
+            {
+                IsSuccess = false,
+                statusCode = HttpStatusCode.BadRequest
+            };
+            bad.ErrorMasseges.Add("Request body is required.");
+            return BadRequest(bad);
+        }
+
+        return await DeleteCoursePlanCoreAsync(key.YearID, key.TeacherID, key.ClassID, key.DivisionID, key.SubjectID, key.TermID);
+    }
+
+    private async Task<ActionResult<APIResponse>> DeleteCoursePlanCoreAsync(
+        int yearID, int teacherID, int classID, int divisionID, int subjectID, int termID)
     {
         var response = new APIResponse();
         try
         {
-            await _unitOfWork.CoursePlans.DeleteAsync(yearID, teacherID, classID, divisionID, subjectID);
+            await _unitOfWork.CoursePlans.DeleteAsync(yearID, teacherID, classID, divisionID, subjectID, termID);
             await _unitOfWork.CompleteAsync();
             response.Result = "Deleted successfully";
             response.statusCode = HttpStatusCode.OK;

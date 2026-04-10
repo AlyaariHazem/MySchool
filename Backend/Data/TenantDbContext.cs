@@ -64,13 +64,7 @@ namespace Backend.Data
             // If not available (admin endpoints), OnConfiguring won't configure it
             // and we'll throw when actually used (lazy evaluation)
             if (!string.IsNullOrWhiteSpace(_tenant.ConnectionString))
-            {
-                optionsBuilder.UseSqlServer(_tenant.ConnectionString, sql =>
-                {
-                    sql.CommandTimeout(180);
-                    sql.MigrationsAssembly(typeof(TenantDbContext).Assembly.FullName);
-                });
-            }
+                optionsBuilder.UseTenantSqlServer(_tenant.ConnectionString);
         }
 
         // Override Database property to check connection string when accessed
@@ -295,7 +289,10 @@ namespace Backend.Data
             // Configure primary keys for entities
             modelBuilder.Entity<Student>()
                 .HasKey(s => s.StudentID);
-            
+            modelBuilder.Entity<Student>()
+                .Property(s => s.StudentID)
+                .UseIdentityColumn();
+
             modelBuilder.Entity<Accounts>()
                 .HasKey(a => a.AccountID);
             
@@ -322,6 +319,13 @@ namespace Backend.Data
             
             modelBuilder.Entity<StudentClassFees>()
                 .HasKey(a => a.StudentClassFeesID);
+
+            // SQL Server: CASCADE on Student plus Class→FeeClass→StudentClassFees creates multiple cascade paths.
+            modelBuilder.Entity<StudentClassFees>()
+                .HasOne(scf => scf.Student)
+                .WithMany(s => s.StudentClassFees)
+                .HasForeignKey(scf => scf.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<Vouchers>()
                 .HasKey(v => v.VoucherID);
@@ -372,16 +376,54 @@ namespace Backend.Data
                 .HasKey(c => new { c.SubjectID, c.ClassID });
             
             modelBuilder.Entity<CoursePlan>()
-                .HasKey(c => new { c.YearID, c.TeacherID, c.ClassID, c.DivisionID, c.SubjectID });
+                .HasKey(c => new { c.YearID, c.TeacherID, c.ClassID, c.DivisionID, c.SubjectID, c.TermID });
+
+            // SQL Server: CASCADE on both Year and Class (and Division) creates multiple cascade paths to CoursePlans.
+            modelBuilder.Entity<CoursePlan>()
+                .HasOne(cp => cp.Year)
+                .WithMany(y => y.CoursePlans)
+                .HasForeignKey(cp => cp.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CoursePlan>()
+                .HasOne(cp => cp.Division)
+                .WithMany(d => d.CoursePlans)
+                .HasForeignKey(cp => cp.DivisionID)
+                .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<MonthlyGrade>()
                 .HasKey(mg => new { mg.StudentID, mg.YearID, mg.SubjectID, mg.MonthID, mg.GradeTypeID, mg.ClassID, mg.TermID });
+
+            // SQL Server: CASCADE on Class (or Year) plus Student→…→Class chains creates multiple cascade paths.
+            modelBuilder.Entity<MonthlyGrade>()
+                .HasOne(mg => mg.Class)
+                .WithMany(c => c.MonthlyGrades)
+                .HasForeignKey(mg => mg.ClassID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MonthlyGrade>()
+                .HasOne(mg => mg.Year)
+                .WithMany(y => y.MonthlyGrades)
+                .HasForeignKey(mg => mg.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<YearTermMonth>()
                 .HasKey(ytm => new { ytm.YearID, ytm.TermID, ytm.MonthID });
             
             modelBuilder.Entity<TermlyGrade>()
                 .HasKey(t => t.TermlyGradeID);
+
+            modelBuilder.Entity<TermlyGrade>()
+                .HasOne(tg => tg.Class)
+                .WithMany(c => c.TermlyGrades)
+                .HasForeignKey(tg => tg.ClassID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TermlyGrade>()
+                .HasOne(tg => tg.Year)
+                .WithMany(y => y.TermlyGrades)
+                .HasForeignKey(tg => tg.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<AccountStudentGuardian>()
                 .HasKey(a => a.AccountStudentGuardianID);
@@ -394,6 +436,13 @@ namespace Backend.Data
             
             modelBuilder.Entity<WeeklySchedule>()
                 .HasKey(ws => ws.WeeklyScheduleID);
+
+            // SQL Server: CASCADE on both Class and Year would create multiple cascade paths (Year→Stages→Classes→…).
+            modelBuilder.Entity<WeeklySchedule>()
+                .HasOne(ws => ws.Year)
+                .WithMany()
+                .HasForeignKey(ws => ws.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Attendance>()
                 .HasKey(a => a.AttendanceId);
@@ -516,15 +565,12 @@ namespace Backend.Data
             modelBuilder.Entity<Student>()
                 .OwnsOne(s => s.FullName);
             
-            // Configure FullNameAlis as required navigation to always create an instance
-            // This fixes the warning about optional dependent with table sharing
-            // All properties remain nullable, but EF will always create the instance
+            // Optional English names — API may omit FullNameAlis when no English name is provided.
             modelBuilder.Entity<Student>()
                 .OwnsOne(s => s.FullNameAlis);
-            
             modelBuilder.Entity<Student>()
                 .Navigation(s => s.FullNameAlis)
-                .IsRequired();
+                .IsRequired(false);
             
             modelBuilder.Entity<Teacher>()
                 .OwnsOne(T => T.FullName);

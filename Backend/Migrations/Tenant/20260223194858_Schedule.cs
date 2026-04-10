@@ -65,7 +65,7 @@ namespace Backend.Migrations.Tenant
                         column: x => x.YearID,
                         principalTable: "Years",
                         principalColumn: "YearID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

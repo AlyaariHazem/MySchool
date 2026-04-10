@@ -1,7 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
 import { map } from 'rxjs';
 
+import { ApiResponse } from '../../../../core/models/response.model';
+import { Paginates } from '../models/Pagination.model';
+import { TermlyGradeQueryPayload } from '../models/termly-grade-query.model';
 import { TermlyGrade } from '../models/term.model';
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 
@@ -12,24 +14,35 @@ export class TermlyGradeService {
 
   private API = inject(BackendAspService);
 
-  getTermlyGradesReport(termId: number, yearId: number, classId: number, subjectId: number, page: number, pageSize: number) {
-    const params = new HttpParams()
-      .set('pageNumber', page)
-      .set('pageSize', pageSize);
-
-    return this.API.http.get(
-      `${this.API.baseUrl}/TermlyGrade/${termId}/${yearId}/${classId}/${subjectId}`,
-      { params }
-    ).pipe(
-      map((res: any) => res.result)
-    );
+  /**
+   * POST api/TermlyGrade/page — filters and pagination in JSON body (yearId ignored server-side; active year used).
+   */
+  getTermlyGradesReport(payload: TermlyGradeQueryPayload) {
+    return this.API.http
+      .post<ApiResponse<Paginates>>(`${this.API.baseUrl}/TermlyGrade/page`, payload)
+      .pipe(
+        map((res) => {
+          if (!res.isSuccess || res.result == null) {
+            const msg = res.errorMasseges?.[0] ?? 'Failed to load termly grades.';
+            throw new Error(msg);
+          }
+          return res.result;
+        })
+      );
   }
 
+  /** PUT api/TermlyGrade — bulk update; each row must include termlyGradeID, yearID, etc. */
   updateTermlyGrades(termlyGrades: TermlyGrade[]) {
-    return this.API.http.put(`${this.API.baseUrl}/TermlyGrade`, termlyGrades).pipe(
-      map((res: any) => {
-        return res.result;
-      })
-    );
+    return this.API.http
+      .put<ApiResponse<unknown>>(`${this.API.baseUrl}/TermlyGrade`, termlyGrades)
+      .pipe(
+        map((res) => {
+          if (!res.isSuccess) {
+            const msg = res.errorMasseges?.[0] ?? 'Failed to save termly grades.';
+            throw new Error(msg);
+          }
+          return res.result;
+        })
+      );
   }
 }

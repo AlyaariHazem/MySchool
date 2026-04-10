@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<mangeFilesService>();
         services.AddScoped<StudentClassFeesRepository>();
         services.AddScoped<TenantProvisioningService>();
+        services.AddScoped<TenantDemoDataSeeder>();
         services.AddScoped<HtmlSanitizationService>();
 
         // Register Generic CRUD Repository (open generic)

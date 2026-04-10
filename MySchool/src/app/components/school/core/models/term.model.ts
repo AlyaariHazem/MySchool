@@ -16,11 +16,14 @@ export interface TermGrades {
     subjectName?: string;
 }
 export interface TermlyGrade {
-    termlyGradeID: number;
+    /** Present when row exists in DB; required for PUT updates. */
+    termlyGradeID?: number;
     studentID: number;
     grade: number;
     classID: number;
     termID: number;
+    /** Sent on save; must match the academic year (API yearID ↔ C# YearID). Omitted on rows loaded from GET. */
+    yearID?: number;
     subjectID: number;
     note?: string;
 }

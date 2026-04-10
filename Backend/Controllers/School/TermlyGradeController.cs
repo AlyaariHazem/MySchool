@@ -26,7 +26,7 @@ public class TermlyGradeController : ControllerBase
         var termlyGrades = await _unitOfWork.TermlyGrades.GetAllAsync(termId, yearId, classId, subjectId, pageNumber, pageSize);
 
         // yearId parameter is ignored - repository uses active year automatically
-        var totalCount = await _unitOfWork.TermlyGrades.GetTotalMonthlyGradesCountAsync(termId, yearId, classId, subjectId);
+        var totalCount = await _unitOfWork.TermlyGrades.GetTotalTermlyGradesCountAsync(termId, yearId, classId, subjectId);
 
         var paginatedResult = new
         {
@@ -41,6 +41,37 @@ public class TermlyGradeController : ControllerBase
             ? Ok(APIResponse.Success(paginatedResult))
             : NotFound(APIResponse.Fail(termlyGrades.Error!));
     }
+
+    /// <summary>Same data as GET, but sends filters and paging in the JSON body.</summary>
+    [HttpPost("page")]
+    public async Task<IActionResult> GetTermlyGradesPage([FromBody] TermlyGradeQueryDTO? query)
+    {
+        if (query == null)
+            return BadRequest(APIResponse.Fail("Request body is required."));
+
+        if (query.PageNumber < 1)
+            query.PageNumber = 1;
+        if (query.PageSize < 1)
+            query.PageSize = 10;
+
+        var termlyGrades = await _unitOfWork.TermlyGrades.GetAllAsync(query);
+
+        var totalCount = await _unitOfWork.TermlyGrades.GetTotalTermlyGradesCountAsync(query);
+
+        var paginatedResult = new
+        {
+            data = termlyGrades.Value,
+            pageNumber = query.PageNumber,
+            pageSize = query.PageSize,
+            totalCount,
+            totalPages = (int)Math.Ceiling(totalCount / (double)query.PageSize)
+        };
+
+        return termlyGrades.Ok
+            ? Ok(APIResponse.Success(paginatedResult))
+            : NotFound(APIResponse.Fail(termlyGrades.Error!));
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateTermlyGrade([FromBody] TermlyGradeDTO termlyGrade)
     {

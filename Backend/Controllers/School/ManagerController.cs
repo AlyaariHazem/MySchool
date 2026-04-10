@@ -10,8 +10,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Backend.Controllers.School;
 
 /// <summary>
-/// Manager CRUD via <see cref="GenericCrudController{GetManagerDTO,int}"/>.
-/// Create uses <c>POST api/Manager/add</c> with <see cref="AddManagerDTO"/>.
+/// Manager APIs: <c>POST api/Manager/page</c> (paged list) and <c>POST api/Manager/all</c> read managers.
+/// To <b>create</b> a manager (Identity user + tenant <c>Managers</c> row + master <c>UserTenants</c> link), use
+/// <c>POST api/Manager/add</c> with <see cref="AddManagerDTO"/> (SchoolID + TenantID + credentials).
 /// </summary>
 [Route("api/[controller]")]
 public class ManagerController : GenericCrudController<GetManagerDTO, int>

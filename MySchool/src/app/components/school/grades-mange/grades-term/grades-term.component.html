@@ -121,7 +121,7 @@
         </mat-card>
     </div>
     @if (paginates) {
-    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="5"
+    <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
         [totalRecords]="paginates.totalCount" [rowsPerPageOptions]="[5, 10, 15]" />
     }
     <div class="table-container">

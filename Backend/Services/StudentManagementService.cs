@@ -46,6 +46,15 @@ public class StudentManagementService
         _auditTrail = auditTrail;
     }
 
+    /// <summary>Surfaces the innermost exception message (e.g. SQL error) in the outer message for API responses.</summary>
+    private static Exception WrapWithRootMessage(string context, Exception ex)
+    {
+        var root = ex;
+        while (root.InnerException != null)
+            root = root.InnerException;
+        return new Exception($"{context}: {root.Message}", ex);
+    }
+
     public async Task<Student> AddStudentWithGuardianAsync(
         ApplicationUser guardianUser, string guardianPassword, Guardian guardian,
         ApplicationUser studentUser, string studentPassword, Student student,
@@ -90,7 +99,10 @@ public class StudentManagementService
             {
                 foreach (var attachment in attachments)
                 {
-                    attachment.StudentID = addedStudent.StudentID; // Ensure StudentID is set
+                    attachment.StudentID = addedStudent.StudentID;
+                    if (!string.IsNullOrEmpty(attachment.AttachmentURL))
+                        attachment.AttachmentURL = attachment.AttachmentURL.Replace(
+                            "Attachments_0_", $"Attachments_{addedStudent.StudentID}_", StringComparison.Ordinal);
                     var attachmentDTO = new AttachmentDTO
                     {
                         StudentID = attachment.StudentID,
@@ -137,7 +149,7 @@ public class StudentManagementService
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception($"Error adding student with guardian: {ex.Message}", ex);
+            throw WrapWithRootMessage("Error adding student with guardian", ex);
         }
     }
     public async Task<Student> AddStudentToExistingGuardianAsync(
@@ -211,6 +223,9 @@ public class StudentManagementService
                 foreach (var attachment in attachments)
                 {
                     attachment.StudentID = addedStudent.StudentID;
+                    if (!string.IsNullOrEmpty(attachment.AttachmentURL))
+                        attachment.AttachmentURL = attachment.AttachmentURL.Replace(
+                            "Attachments_0_", $"Attachments_{addedStudent.StudentID}_", StringComparison.Ordinal);
                     var attachmentDTO = new AttachmentDTO
                     {
                         StudentID = attachment.StudentID,

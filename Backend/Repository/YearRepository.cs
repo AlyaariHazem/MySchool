@@ -36,50 +36,8 @@ public class YearRepository : IYearRepository
         await _context.SaveChangesAsync();
         yearDTO.YearID = newYear.YearID;
         
-        // Add the YearTermMonth entries
-        var YearTermMonths = new List<YearTermMonth>(){
-            new YearTermMonth(){
-                YearID = newYear.YearID,
-                TermID = 1,
-                MonthID = 5
-            },
-            new YearTermMonth(){
-                YearID = newYear.YearID,
-                TermID = 1,
-                MonthID = 6
-            },
-            new YearTermMonth(){
-                YearID = newYear.YearID,
-                TermID = 1,
-                MonthID = 7
-            },
-            new YearTermMonth(){
-                YearID = newYear.YearID,
-                TermID = 1,
-                MonthID = 8
-            },
-            new YearTermMonth(){
-                YearID = newYear.YearID,
-                TermID = 2,
-                MonthID = 9
-            },
-            new YearTermMonth(){
-                YearID = newYear.YearID,
-                TermID = 2,
-                MonthID = 10
-            },
-            new YearTermMonth(){
-                YearID = newYear.YearID,
-                TermID = 2,
-                MonthID = 11
-            },
-            new YearTermMonth(){
-                YearID = newYear.YearID,
-                TermID = 2,
-                MonthID = 12
-            }
-        };
-        await _context.YearTermMonths.AddRangeAsync(YearTermMonths);
+        var yearTermMonths = await YearTermMonthSeeding.CreateDefaultYearTermMonthsAsync(_context, newYear.YearID);
+        await _context.YearTermMonths.AddRangeAsync(yearTermMonths);
         await _context.SaveChangesAsync();
 
     }

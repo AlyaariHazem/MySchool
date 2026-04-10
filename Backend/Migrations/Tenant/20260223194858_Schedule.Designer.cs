@@ -1612,7 +1612,7 @@ namespace Backend.Migrations.Tenant
                     b.HasOne("Backend.Models.Year", "Year")
                         .WithMany()
                         .HasForeignKey("YearID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Class");

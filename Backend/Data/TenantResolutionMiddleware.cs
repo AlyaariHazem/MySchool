@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
+using Backend.Common;
 using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -37,7 +38,7 @@ namespace Backend.Middleware
             var hasTenant = int.TryParse(tenantIdStr, out var tenantId);
 
             // Platform admins may access any route without 403; if the token includes TenantId, resolve DB for that school.
-            if (IsPlatformAdmin(context.User))
+            if (PlatformAdminHelper.IsPlatformAdminUnrestricted(context.User))
             {
                 if (hasTenant)
                     await TrySetTenantConnectionAsync(tenantInfo, tenantId, adminDb, cache);
@@ -90,12 +91,5 @@ namespace Backend.Middleware
             tenantInfo.ConnectionString = cs;
         }
 
-        private static bool IsPlatformAdmin(System.Security.Claims.ClaimsPrincipal user)
-        {
-            if (user.IsInRole("ADMIN"))
-                return true;
-            var ut = user.FindFirstValue("UserType");
-            return string.Equals(ut, "ADMIN", StringComparison.OrdinalIgnoreCase);
-        }
     }
 }

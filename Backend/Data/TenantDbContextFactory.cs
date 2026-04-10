@@ -36,12 +36,7 @@ namespace Backend.Data
             var optionsBuilder = new DbContextOptionsBuilder<TenantDbContext>();
 
             // English: Configure provider explicitly for design-time
-            optionsBuilder.UseSqlServer(cs, sql =>
-            {
-                sql.CommandTimeout(180);
-                // English: Optional - keep migrations in the same assembly
-                sql.MigrationsAssembly(typeof(TenantDbContext).Assembly.FullName);
-            });
+            optionsBuilder.UseTenantSqlServer(cs);
 
             return new TenantDbContext(optionsBuilder.Options, tenant);
         }

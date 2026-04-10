@@ -136,10 +136,10 @@ namespace Backend.Controllers
                     UserType = "Student"
                 };
 
-                // Create Student Entity
+                // Create Student Entity — StudentID is IDENTITY in the database; use 0 and fix URLs after insert.
                 var student = new Student
                 {
-                    StudentID = request.StudentID,
+                    StudentID = 0,
                     FullName = new Name
                     {
                         FirstName = request.StudentFirstName,
@@ -157,7 +157,9 @@ namespace Backend.Controllers
                     DivisionID = request.DivisionID,
                     PlaceBirth = request.PlaceBirth,
                     StudentDOB = request.StudentDOB,
-                    ImageURL = $"StudentPhotos_{request.StudentID}_{request.StudentImageURL}",
+                    ImageURL = string.IsNullOrWhiteSpace(request.StudentImageURL)
+                        ? null
+                        : $"StudentPhotos_0_{request.StudentImageURL}",
                 };
 
 
@@ -176,8 +178,8 @@ namespace Backend.Controllers
                     {
                         attachments.Add(new Attachments
                         {
-                            StudentID = request.StudentID,
-                            AttachmentURL = $"Attachments_{request.StudentID}_{fileUrl}"
+                            StudentID = 0,
+                            AttachmentURL = $"Attachments_0_{fileUrl}"
                         });
                     }
                 }
@@ -189,7 +191,7 @@ namespace Backend.Controllers
                     foreach (var discount in request.Discounts)
                         studentClassFees.Add(new StudentClassFeeDTO
                         {
-                            StudentID = request.StudentID,
+                            StudentID = 0,
                             FeeClassID = discount.FeeClassID,
                             AmountDiscount = discount.AmountDiscount,
                             NoteDiscount = discount.NoteDiscount,

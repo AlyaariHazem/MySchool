@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Store } from '@ngrx/store';
 import { PaginatorState } from 'primeng/paginator';
@@ -8,6 +9,7 @@ import { ClassService } from '../../core/services/class.service';
 import { CurriculmsPlanService } from '../../core/services/curriculms-plan.service';
 import { CurriculmsPlanSubject } from '../../core/models/curriculmsPlans.model';
 import { Paginates } from '../../core/models/Pagination.model';
+import { TermlyGradeQueryPayload } from '../../core/models/termly-grade-query.model';
 import { ITerm, TermGrades, TermlyGrade } from '../../core/models/term.model';
 import { TermlyGradeService } from '../../core/services/termly-grade.service';
 import { TERMS } from '../../core/data/terms';
@@ -64,6 +66,8 @@ export class GradesTermComponent implements OnInit {
     private formBuilder: FormBuilder,
     private curriculmsPlanService: CurriculmsPlanService,
     private toastr: ToastrService,
+    private route: ActivatedRoute,
+    private router: Router,
   ) { }
 
   ngOnInit(): void {
@@ -101,9 +105,8 @@ export class GradesTermComponent implements OnInit {
           }
         }
         
-        // Only call updatePaginatedData once when both classes and subjects are loaded
         if (this.subjectsLoaded) {
-          this.updatePaginatedData();
+          this.tryInitialLoad();
         }
       },
       error: (err) => {
@@ -135,9 +138,8 @@ export class GradesTermComponent implements OnInit {
           }
         }
         
-        // Only call updatePaginatedData once when both classes and subjects are loaded
         if (this.classesLoaded) {
-          this.updatePaginatedData();
+          this.tryInitialLoad();
         }
       },
       error: () => {
@@ -161,31 +163,25 @@ export class GradesTermComponent implements OnInit {
 
   selectClass(_: any): void {
     const classId = this.form.get('selectedClass')?.value ?? this.selectedClass;
-    
-    // Update component property
     this.selectedClass = classId;
-    
-    // Only call updatePaginatedData (it will make the API call)
+    this.first = 0;
+    this.currentStudentIndex = 0;
     this.updatePaginatedData();
   }
 
   selectTerm(_: any): void {
     const termId = this.form.get('selectedTerm')?.value ?? this.selectedTerm;
-    
-    // Update component property
     this.selectedTerm = termId;
-    
-    // Only call updatePaginatedData (it will make the API call)
+    this.first = 0;
+    this.currentStudentIndex = 0;
     this.updatePaginatedData();
   }
 
   selectSubject(_: any): void {
     const subjectId = this.form.get('selectedSubject')?.value ?? this.selectedSubject;
-    
-    // Update component property
     this.selectedSubject = subjectId;
-    
-    // Only call updatePaginatedData (it will make the API call)
+    this.first = 0;
+    this.currentStudentIndex = 0;
     this.updatePaginatedData();
   }
 
@@ -196,34 +192,135 @@ export class GradesTermComponent implements OnInit {
   }
 
   yearID: number = Number(localStorage.getItem('yearID') || '1');
+
+  private initialLoadDone = false;
+
+  /** Runs once when classes + subjects are ready; applies URL query params then loads data. */
+  private tryInitialLoad(): void {
+    if (!this.classesLoaded || !this.subjectsLoaded || this.initialLoadDone) {
+      return;
+    }
+    this.initialLoadDone = true;
+    this.applyRouteQueryParamsOnce();
+    this.updatePaginatedData();
+  }
+
+  /** e.g. /school/grade/GradeTerm?termId=1&yearId=1&classId=1&subjectId=0&pageNumber=1&pageSize=5 */
+  private applyRouteQueryParamsOnce(): void {
+    const q = this.route.snapshot.queryParamMap;
+    if (q.keys.length === 0) {
+      return;
+    }
+    const y = q.get('yearId');
+    if (y) {
+      const n = Number(y);
+      if (!Number.isNaN(n) && n > 0) {
+        this.yearID = n;
+      }
+    }
+    const ps = q.get('pageSize');
+    if (ps) {
+      const n = Number(ps);
+      if (!Number.isNaN(n) && n > 0) {
+        this.rows = n;
+      }
+    }
+    const pn = q.get('pageNumber');
+    if (pn) {
+      const page = Math.max(1, Number(pn) || 1);
+      this.first = (page - 1) * this.rows;
+    }
+    const t = q.get('termId');
+    if (t != null && t !== '') {
+      const n = Number(t);
+      if (!Number.isNaN(n)) {
+        this.selectedTerm = n;
+        this.form.patchValue({ selectedTerm: n });
+      }
+    }
+    const c = q.get('classId');
+    if (c != null && c !== '') {
+      const n = Number(c);
+      if (!Number.isNaN(n)) {
+        this.selectedClass = n;
+        this.form.patchValue({ selectedClass: n });
+      }
+    }
+    const s = q.get('subjectId');
+    if (s != null && s !== '') {
+      const n = Number(s);
+      if (!Number.isNaN(n)) {
+        this.selectedSubject = n;
+        this.form.patchValue({ selectedSubject: n });
+      }
+    }
+  }
+
+  private buildTermlyQueryPayload(): TermlyGradeQueryPayload {
+    const termId = Number(this.form.get('selectedTerm')?.value ?? this.selectedTerm);
+    const classId = Number(this.form.get('selectedClass')?.value ?? this.selectedClass);
+    const subjectId = Number(this.form.get('selectedSubject')?.value ?? this.selectedSubject ?? 0);
+    const pageNumber = Math.floor(this.first / this.rows) + 1;
+    return {
+      termId,
+      yearId: this.yearID,
+      classId,
+      subjectId,
+      pageNumber,
+      pageSize: this.rows
+    };
+  }
+
+  private syncTermlyGradesUrl(): void {
+    const q = this.buildTermlyQueryPayload();
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        termId: q.termId,
+        yearId: q.yearId,
+        classId: q.classId,
+        subjectId: q.subjectId,
+        pageNumber: q.pageNumber,
+        pageSize: q.pageSize
+      },
+      replaceUrl: true
+    });
+  }
+
   saveAllGrades() {
     if (!this.selectedTerm || !this.selectedClass) {
       alert('Please select term, month, class, and subject first.');
       return;
     }
-    const payload: TermlyGrade[] = this.displayedStudents.flatMap(stu => ({
-      studentID: stu.studentID,
-      yearId: this.yearID,
-      classID: this.form.get('selectedClass')?.value,
-      termID: this.form.get('selectedTerm')?.value,
-      grade: +stu.grade,
-      note: stu.note,
-      termlyGradeID: stu.termlyGradeID,
-      subjectID: stu.subjectID
-    })
-    );
+    const classID = Number(this.form.get('selectedClass')?.value ?? this.selectedClass);
+    const termID = Number(this.form.get('selectedTerm')?.value ?? this.selectedTerm);
+    const payload: TermlyGrade[] = this.displayedStudents
+      .filter((stu) => stu.termlyGradeID != null)
+      .map((stu) => ({
+        termlyGradeID: stu.termlyGradeID,
+        studentID: stu.studentID!,
+        yearID: this.yearID,
+        classID,
+        termID,
+        subjectID: stu.subjectID!,
+        grade: Number(stu.grade ?? 0),
+        note: stu.note ?? ''
+      }));
 
-    console.log('the data are', payload);
-    this.termlyGradeService.updateTermlyGrades(payload)
-      .subscribe({
-        next: res => {
-          this.toastr.success('Grades saved successfully', res);
-        },
-        error: err => {
-          console.error(err);
-          this.toastr.error('Error occurred while saving');
-        }
-      });
+    if (payload.length === 0) {
+      this.toastr.warning('No rows to save (missing termly grade ids).');
+      return;
+    }
+
+    this.termlyGradeService.updateTermlyGrades(payload).subscribe({
+      next: () => {
+        this.toastr.success('Grades saved successfully');
+      },
+      error: (err: Error) => {
+        console.error(err);
+        this.toastr.error(err?.message || 'Error occurred while saving');
+      }
+    });
   }
 
   hidden: boolean = false;
@@ -252,8 +349,16 @@ export class GradesTermComponent implements OnInit {
       return;
     }
     
-    // Send yearID from parameter or localStorage (backend will ignore it and use active year)
-    this.termlyGradeService.getTermlyGradesReport(termId, yearIdToSend, classId, subjectId, this.first / this.rows + 1, this.rows).subscribe((res) => {
+    this.termlyGradeService
+      .getTermlyGradesReport({
+        termId,
+        yearId: yearIdToSend,
+        classId,
+        subjectId,
+        pageNumber: Math.floor(this.first / this.rows) + 1,
+        pageSize: this.rows
+      })
+      .subscribe((res) => {
       this.paginates = res; // تأكد أن res يحتوي totalCount
       this.monthlyGrades = res.data;
       this.displayedStudents = res.data;
@@ -281,24 +386,29 @@ export class GradesTermComponent implements OnInit {
     
     this.visible = true;
     this.isLoading = true;
-    // Send yearID from localStorage (backend will ignore it and use active year)
-    this.termlyGradeService.getTermlyGradesReport(termId, this.yearID, classId, subjectId, this.first / this.rows + 1, this.rows).subscribe(res => {
-      this.paginates = res;
-      this.monthlyGrades = res.data;
-      this.displayedStudents = res.data;
-      this.isLoading = false;
-      this.visible = false;
-      
-      // Set CurrentStudent when data loads
-      if (this.monthlyGrades.length > 0) {
-        // Reset index if it's out of bounds
-        if (this.currentStudentIndex >= this.monthlyGrades.length) {
-          this.currentStudentIndex = 0;
+    this.termlyGradeService.getTermlyGradesReport(this.buildTermlyQueryPayload()).subscribe({
+      next: (res) => {
+        this.paginates = res;
+        this.monthlyGrades = res.data ?? [];
+        this.displayedStudents = res.data ?? [];
+        this.isLoading = false;
+        this.visible = false;
+        this.syncTermlyGradesUrl();
+
+        if (this.monthlyGrades.length > 0) {
+          if (this.currentStudentIndex >= this.monthlyGrades.length) {
+            this.currentStudentIndex = 0;
+          }
+          this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
+        } else {
+          this.CurrentStudent = null!;
+          this.toastr.info('No students found for the selected criteria.');
         }
-        this.CurrentStudent = this.monthlyGrades[this.currentStudentIndex];
-      } else {
-        this.CurrentStudent = null!;
-        this.toastr.info('No students found for the selected criteria.');
+      },
+      error: (err: Error) => {
+        this.isLoading = false;
+        this.visible = false;
+        this.toastr.error(err?.message || 'Failed to load termly grades');
       }
     });
   }

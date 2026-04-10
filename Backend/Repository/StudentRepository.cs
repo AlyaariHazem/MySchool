@@ -49,107 +49,24 @@ public class StudentRepository : IStudentRepository
         return $"{scheme}://{host}";
     }
 
-    // Create: Add a new student
+    // Create: Add a new student (StudentID is SQL Server IDENTITY — do not insert explicit values)
     public async Task<Student> AddStudentAsync(Student student)
     {
-        // Always auto-generate StudentID to avoid duplicate key errors
-        // Since StudentID is configured with ValueGeneratedNever(), we must calculate it manually
-        // Retry logic to handle race conditions and ensure unique ID
-        const int maxRetries = 5;
-        int retryCount = 0;
-        
-        while (retryCount < maxRetries)
+        student.StudentID = 0;
+
+        _context.Students.Add(student);
+        await _context.SaveChangesAsync();
+
+        if (!string.IsNullOrEmpty(student.ImageURL) &&
+            student.ImageURL.StartsWith("StudentPhotos_0_", StringComparison.Ordinal))
         {
-            int nextId = 0;
-            int maxValue = 0;
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
-            {
-                // Always recalculate max value to ensure we get the latest
-                maxValue = await _context.Students.MaxAsync(s => (int?)s.StudentID) ?? 0;
-                
-                // Calculate next ID, but also check for gaps in case of deletions
-                nextId = maxValue + 1;
-                
-                // Double-check this ID doesn't exist (handles race conditions and gaps)
-                var exists = await _context.Students.AnyAsync(s => s.StudentID == nextId);
-                int attempts = 0;
-                while (exists && attempts < 10) // Try up to 10 times to find a free ID
-                {
-                    nextId++;
-                    exists = await _context.Students.AnyAsync(s => s.StudentID == nextId);
-                    attempts++;
-                }
-                
-                if (exists)
-                {
-                    // Still exists after checking - this shouldn't happen, but handle it
-                    _logger.LogWarning("Could not find available StudentID after {Attempts} attempts. MaxValue: {MaxValue}, LastNextId: {NextId}", attempts, maxValue, nextId);
-                    await transaction.RollbackAsync();
-                    retryCount++;
-                    continue;
-                }
-                
-                // Explicitly set the StudentID to ensure it's updated
-                student.StudentID = nextId;
-                
-                _logger.LogInformation("Attempting to add student with StudentID: {StudentID}, MaxValue was: {MaxValue}", student.StudentID, maxValue);
-                Console.WriteLine($"[LOG] Attempting to add student with StudentID: {student.StudentID}, MaxValue was: {maxValue}");
-                
-                _context.Students.Add(student);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                
-                _logger.LogInformation("Successfully added student with StudentID: {StudentID}", student.StudentID);
-                Console.WriteLine($"[LOG] Successfully added student with StudentID: {student.StudentID}");
-                break; // Success, exit retry loop
-            }
-            catch (Microsoft.EntityFrameworkCore.DbUpdateException ex) when (ex.InnerException?.Message?.Contains("duplicate key") == true || ex.InnerException?.Message?.Contains("PRIMARY KEY constraint") == true)
-            {
-                // Duplicate key error - rollback and retry
-                _logger.LogWarning(ex, 
-                    "Duplicate key error when adding student. Attempt {RetryCount}/{MaxRetries}. StudentID: {StudentID}, MaxValue: {MaxValue}, NextId: {NextId}. Inner Exception: {InnerException}", 
-                    retryCount + 1, maxRetries, student.StudentID, maxValue, nextId, ex.InnerException?.Message);
-                Console.WriteLine($"[WARNING] Duplicate key error - Attempt {retryCount + 1}/{maxRetries}. StudentID: {student.StudentID}, MaxValue: {maxValue}, NextId: {nextId}. Error: {ex.InnerException?.Message}");
-                
-                await transaction.RollbackAsync();
-                retryCount++;
-                if (retryCount >= maxRetries)
-                {
-                    _logger.LogError(ex, "Max retries reached for duplicate key error. StudentID: {StudentID}, MaxValue: {MaxValue}, NextId: {NextId}", student.StudentID, maxValue, nextId);
-                    throw; // Re-throw if max retries reached
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log detailed error information
-                var innerException = ex.InnerException;
-                var errorDetails = new System.Text.StringBuilder();
-                errorDetails.AppendLine($"Error Type: {ex.GetType().FullName}");
-                errorDetails.AppendLine($"Error Message: {ex.Message}");
-                
-                if (innerException != null)
-                {
-                    errorDetails.AppendLine($"Inner Exception Type: {innerException.GetType().FullName}");
-                    errorDetails.AppendLine($"Inner Exception Message: {innerException.Message}");
-                    if (!string.IsNullOrEmpty(innerException.StackTrace))
-                        errorDetails.AppendLine($"Inner Exception Stack Trace: {innerException.StackTrace}");
-                }
-                
-                if (!string.IsNullOrEmpty(ex.StackTrace))
-                    errorDetails.AppendLine($"Stack Trace: {ex.StackTrace}");
-                
-                errorDetails.AppendLine($"StudentID Attempted: {student.StudentID}");
-                errorDetails.AppendLine($"MaxValue: {maxValue}");
-                errorDetails.AppendLine($"NextId Calculated: {nextId}");
-                
-                _logger.LogError(ex, "Error adding student: {ErrorDetails}", errorDetails.ToString());
-                Console.WriteLine($"[ERROR] Error adding student: {errorDetails.ToString()}");
-                
-                await transaction.RollbackAsync();
-                throw;
-            }
+            var suffix = student.ImageURL["StudentPhotos_0_".Length..];
+            student.ImageURL = $"StudentPhotos_{student.StudentID}_{suffix}";
+            _context.Students.Update(student);
+            await _context.SaveChangesAsync();
         }
+
+        _logger.LogInformation("Added student with identity StudentID: {StudentID}", student.StudentID);
 
         // Add student to monthly and termly grades
         student = await _context.Students
@@ -209,18 +126,7 @@ public class StudentRepository : IStudentRepository
         {
             _logger.LogWarning("No YearTermMonths found for YearID: {YearID}. Creating default months.", yearID.Value);
             
-            var defaultMonths = new List<YearTermMonth>
-            {
-                new YearTermMonth { YearID = yearID.Value, TermID = 1, MonthID = 5 },
-                new YearTermMonth { YearID = yearID.Value, TermID = 1, MonthID = 6 },
-                new YearTermMonth { YearID = yearID.Value, TermID = 1, MonthID = 7 },
-                new YearTermMonth { YearID = yearID.Value, TermID = 1, MonthID = 8 },
-                new YearTermMonth { YearID = yearID.Value, TermID = 2, MonthID = 9 },
-                new YearTermMonth { YearID = yearID.Value, TermID = 2, MonthID = 10 },
-                new YearTermMonth { YearID = yearID.Value, TermID = 2, MonthID = 11 },
-                new YearTermMonth { YearID = yearID.Value, TermID = 2, MonthID = 12 }
-            };
-
+            var defaultMonths = await YearTermMonthSeeding.CreateDefaultYearTermMonthsAsync(_context, yearID.Value);
             await _context.YearTermMonths.AddRangeAsync(defaultMonths);
             await _context.SaveChangesAsync();
 
@@ -1299,18 +1205,7 @@ public class StudentRepository : IStudentRepository
                         if (monthsToAdd.Count == 0)
                         {
                             _logger.LogInformation("Creating default YearTermMonths for target YearID: {YearID}", targetYear.YearID);
-                            // Default: Term 1 (months 5-8), Term 2 (months 9-12)
-                            monthsToAdd = new List<YearTermMonth>
-                            {
-                                new YearTermMonth { YearID = targetYear.YearID, TermID = 1, MonthID = 5 },
-                                new YearTermMonth { YearID = targetYear.YearID, TermID = 1, MonthID = 6 },
-                                new YearTermMonth { YearID = targetYear.YearID, TermID = 1, MonthID = 7 },
-                                new YearTermMonth { YearID = targetYear.YearID, TermID = 1, MonthID = 8 },
-                                new YearTermMonth { YearID = targetYear.YearID, TermID = 2, MonthID = 9 },
-                                new YearTermMonth { YearID = targetYear.YearID, TermID = 2, MonthID = 10 },
-                                new YearTermMonth { YearID = targetYear.YearID, TermID = 2, MonthID = 11 },
-                                new YearTermMonth { YearID = targetYear.YearID, TermID = 2, MonthID = 12 }
-                            };
+                            monthsToAdd = await YearTermMonthSeeding.CreateDefaultYearTermMonthsAsync(_context, targetYear.YearID);
                         }
 
                         if (monthsToAdd.Count > 0)

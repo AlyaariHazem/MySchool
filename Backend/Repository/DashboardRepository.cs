@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.Dashboard;
 using Backend.Interfaces;
@@ -30,21 +31,9 @@ public class DashboardRepository : IDashboardRepository
     }
 
     /// <summary>Admin with no JWT tenant: aggregate metrics across all school databases.</summary>
-    private bool UseMasterDashboard()
-    {
-        if (!string.IsNullOrEmpty(_tenantInfo.ConnectionString))
-            return false;
-
-        var user = _httpContextAccessor.HttpContext?.User;
-        if (user?.Identity?.IsAuthenticated != true)
-            return false;
-
-        if (user.IsInRole("ADMIN"))
-            return true;
-
-        var ut = user.FindFirst("UserType")?.Value;
-        return string.Equals(ut, "ADMIN", StringComparison.OrdinalIgnoreCase);
-    }
+    private bool UseMasterDashboard() =>
+        string.IsNullOrEmpty(_tenantInfo.ConnectionString)
+        && PlatformAdminHelper.IsPlatformAdminUnrestricted(_httpContextAccessor.HttpContext?.User);
 
     private async Task<TenantDbContext> CreateTenantDbForTenantIdAsync(int tenantId)
     {
@@ -56,11 +45,7 @@ public class DashboardRepository : IDashboardRepository
 
         var ti = new TenantInfo { TenantId = tenantId, ConnectionString = row.ConnectionString };
         var ob = new DbContextOptionsBuilder<TenantDbContext>();
-        ob.UseSqlServer(row.ConnectionString, sql =>
-        {
-            sql.CommandTimeout(180);
-            sql.MigrationsAssembly(typeof(TenantDbContext).Assembly.FullName);
-        });
+        ob.UseTenantSqlServer(row.ConnectionString);
         return new TenantDbContext(ob.Options, ti);
     }
 

@@ -2,7 +2,10 @@ using System;
 using System.Threading.Tasks;
 using Backend.Data;
 using Backend.DTOS.School;
+using Backend.Migrations.Tenant;
 using Backend.Models;
+using Backend.Repository.School.Implements;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,11 +17,19 @@ public class TenantProvisioningService
     private readonly DatabaseContext _masterDb;
     private readonly string _sqlAdminConnectionString;
     private readonly IConfiguration _configuration;
+    private readonly IUserRepository _userRepository;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public TenantProvisioningService(DatabaseContext masterDb, IConfiguration configuration)
+    public TenantProvisioningService(
+        DatabaseContext masterDb,
+        IConfiguration configuration,
+        IUserRepository userRepository,
+        UserManager<ApplicationUser> userManager)
     {
         _masterDb = masterDb;
         _configuration = configuration;
+        _userRepository = userRepository;
+        _userManager = userManager;
         _sqlAdminConnectionString = configuration.GetConnectionString("SqlAdminConnection")
             ?? throw new InvalidOperationException("SqlAdminConnection is not configured.");
     }
@@ -47,8 +58,17 @@ public class TenantProvisioningService
 
         var tenantInfo = new TenantInfo { TenantId = null, ConnectionString = newDbConnString };
         var opts = new DbContextOptionsBuilder<TenantDbContext>()
-            .UseSqlServer(newDbConnString, sql => sql.CommandTimeout(180))
+            .UseTenantSqlServer(newDbConnString)
             .Options;
+
+        // Ensure Schools exists before EF migrations that add FKs to it (baseline may already run idempotent SQL).
+        await using (var bootstrapConn = new SqlConnection(newDbConnString))
+        {
+            await bootstrapConn.OpenAsync();
+            await using var bootstrapCmd = bootstrapConn.CreateCommand();
+            bootstrapCmd.CommandText = TenantSchoolsBootstrapSql.CreateSchoolsIfMissingSql;
+            await bootstrapCmd.ExecuteNonQueryAsync();
+        }
 
         await using (var tenantCtx = new TenantDbContext(opts, tenantInfo))
         {
@@ -92,6 +112,9 @@ public class TenantProvisioningService
 
             await tenantCtx.Years.AddAsync(year);
             await tenantCtx.SaveChangesAsync();
+
+            var demoSeeder = new TenantDemoDataSeeder(tenantCtx, _userRepository, _userManager, _configuration);
+            await demoSeeder.SeedAsync();
         }
 
         var tenant = new Tenant

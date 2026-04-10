@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School;
 using school = Backend.Models.School; // Alias for the model class
@@ -43,21 +43,9 @@ namespace Backend.Repository.School.Classes
         /// Platform admin listing schools without a JWT TenantId: catalog comes from master Tenants.
         /// In that mode, <see cref="SchoolDTO.SchoolID"/> in list/detail/update/delete refers to <see cref="Models.Tenant.TenantId"/>.
         /// </summary>
-        private bool UseMasterSchoolCatalog()
-        {
-            if (!string.IsNullOrEmpty(_tenantInfo.ConnectionString))
-                return false;
-
-            var user = _httpContextAccessor.HttpContext?.User;
-            if (user?.Identity?.IsAuthenticated != true)
-                return false;
-
-            if (user.IsInRole("ADMIN"))
-                return true;
-
-            var ut = user.FindFirst("UserType")?.Value;
-            return string.Equals(ut, "ADMIN", StringComparison.OrdinalIgnoreCase);
-        }
+        private bool UseMasterSchoolCatalog() =>
+            string.IsNullOrEmpty(_tenantInfo.ConnectionString)
+            && PlatformAdminHelper.IsPlatformAdminUnrestricted(_httpContextAccessor.HttpContext?.User);
 
         private async Task<TenantDbContext> CreateTenantDbForTenantIdAsync(int tenantId)
         {
@@ -69,11 +57,7 @@ namespace Backend.Repository.School.Classes
 
             var ti = new TenantInfo { TenantId = tenantId, ConnectionString = row.ConnectionString };
             var ob = new DbContextOptionsBuilder<TenantDbContext>();
-            ob.UseSqlServer(row.ConnectionString, sql =>
-            {
-                sql.CommandTimeout(180);
-                sql.MigrationsAssembly(typeof(TenantDbContext).Assembly.FullName);
-            });
+            ob.UseTenantSqlServer(row.ConnectionString);
             return new TenantDbContext(ob.Options, ti);
         }
 

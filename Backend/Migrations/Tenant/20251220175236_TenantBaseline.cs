@@ -13,12 +13,14 @@ namespace Backend.Migrations.Tenant
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // English: Baseline migration (no-op). Database already exists.
+            // New tenant DBs: later migrations (e.g. ReportTemplates → FK_Schools) require this table.
+            // Idempotent so existing DBs that already have Schools are unchanged.
+            TenantSchoolsBootstrapSql.Apply(migrationBuilder);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // English: No-op.
+            // Intentionally no-op: do not drop Schools if referenced.
         }
     }
 }
