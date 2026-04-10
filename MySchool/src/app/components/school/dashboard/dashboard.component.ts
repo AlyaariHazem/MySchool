@@ -111,6 +111,10 @@ export class DashboardComponent implements OnInit {
       void this.router.navigateByUrl('/teacher/workspace');
       return;
     }
+    if (typeof window !== 'undefined' && localStorage.getItem('userType') === 'STUDENT') {
+      void this.router.navigateByUrl('/students/home', { replaceUrl: true });
+      return;
+    }
 
     // Load dashboard data from API
     this.dashboardService.getDashboardData().subscribe({

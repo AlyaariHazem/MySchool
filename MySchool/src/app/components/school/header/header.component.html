@@ -5,8 +5,14 @@
             <i class="fas fa-bars"></i>
         </a>
 
+        <app-student-sidebar
+          *ngIf="studentPortal"
+          #sidebar
+          [open]="isSidebarOpen()"
+          (closed)="onSidebarClosed()"
+        ></app-student-sidebar>
         <app-sidebar
-          *ngIf="!teacherPortal"
+          *ngIf="!teacherPortal && !studentPortal"
           #sidebar
           [open]="isSidebarOpen()"
           (closed)="onSidebarClosed()"
@@ -57,7 +63,7 @@
                             </li>
                             <li *ngFor="let n of headerNotifications" class="notification-message"
                                 [class.notification-unread]="!n.isRead">
-                                <a [routerLink]="teacherPortal ? ['/teacher/notifications'] : ['/school/notifications']" class="notification-item-link">
+                                <a [routerLink]="notificationsListPath()" class="notification-item-link">
                                     <div class="media">
                                         <span class="avatar avatar-letter">{{ avatarLetter(n.title) }}</span>
                                         <div class="media-body">
@@ -75,7 +81,7 @@
                         </ul>
                     </div>
                     <div class="topnav-dropdown-footer">
-                        <a [routerLink]="teacherPortal ? ['/teacher/notifications'] : ['/school/notifications']">{{ 'notifications.viewAll' | translate }}</a>
+                        <a [routerLink]="notificationsListPath()">{{ 'notifications.viewAll' | translate }}</a>
                     </div>
                 </div>
             </li>

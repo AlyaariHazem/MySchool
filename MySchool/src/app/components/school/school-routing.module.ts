@@ -31,6 +31,7 @@ import { WeeklyScheduleComponent } from './weekly-schedule/weekly-schedule.compo
 import { AttendanceComponent } from './attendance/attendance.component';
 import { DatabaseRestoreComponent } from './sittings/database-restore/database-restore.component';
 import { NotificationsComponent } from './notifications/notifications.component';
+import { SchoolLandingComponent } from './school-landing/school-landing.component';
 
 const routes: Routes = [
   {
@@ -125,12 +126,12 @@ const routes: Routes = [
         ]
       },
       { path: 'CaptureBonds', component: FeesComponent, data: { breadcrumb: 'سند قبض' } },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: '', component: SchoolLandingComponent, pathMatch: 'full' },
       { path: 'not-found', component: PageNotFoundComponent },
       { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
     ]
   },
-  { path: '', redirectTo: '/school/dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: '/school', pathMatch: 'full' },
   { path: 'not-found', component: PageNotFoundComponent },
   { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 ];

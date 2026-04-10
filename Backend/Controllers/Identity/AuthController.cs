@@ -123,7 +123,13 @@ namespace Backend.Controllers
                         tenantId = picked.TenantId;
                         membershipTenantRole = picked.TenantRole;
                     }
-                    // else: multiple schools and no TenantId in login → tenantId stays null (client shows selector)
+                    else if (tenantChoices.Count > 1)
+                    {
+                        // Ordered by LastAccessedUtc (see GetTenantSummariesAsync). Ensures JWT always has TenantId when the client omits TenantId (avoids 403 TenantRequired on every API call).
+                        var pick = tenantChoices[0];
+                        tenantId = pick.TenantId;
+                        membershipTenantRole = pick.TenantRole;
+                    }
                 }
 
                 Tenant? tenantEntity = null;
@@ -140,8 +146,7 @@ namespace Backend.Controllers
                     membershipTenantRole = null;
                 }
 
-                // Legacy: no usable UserTenant yet — scan tenant DBs (Managers, Teachers, …).
-                // When Count > 1 we require an explicit TenantId on login / select-tenant instead.
+                // Legacy: no usable UserTenant yet — scan tenant DBs (Managers, Teachers, Students, …).
                 if (tenantEntity == null && !tenantId.HasValue && tenantChoices.Count <= 1)
                 {
                     var resolvedTenantId = await ResolveTenantIdForTeacherStudentGuardianAsync(userFromDb.Id, userFromDb.UserType);
@@ -241,6 +246,55 @@ namespace Backend.Controllers
                             }
                         }
                     }
+
+                    if (string.Equals(userFromDb.UserType, "STUDENT", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var student = await tenantContext.Students.AsNoTracking()
+                            .FirstOrDefaultAsync(s => s.UserID == userFromDb.Id);
+                        if (student?.FullName != null)
+                        {
+                            var fn = student.FullName;
+                            var parts = new[] { fn.FirstName, fn.MiddleName, fn.LastName }
+                                .Where(p => !string.IsNullOrWhiteSpace(p));
+                            var display = string.Join(" ", parts).Trim();
+                            if (display.Length > 0)
+                            {
+                                userName = fn.FirstName;
+                                managerName = display;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Last resort: same resolution as refresh-token JWT (membership + legacy scan) if TenantId is still missing.
+            if (!tenantId.HasValue && userFromDb.UserType != "ADMIN")
+            {
+                var resolved = await ResolveTenantIdForLoginAsync(userFromDb.Id, userFromDb.UserType);
+                if (resolved.HasValue)
+                {
+                    tenantId = resolved;
+                    var mem = await _tenantMembership.GetMembershipAsync(userFromDb.Id, resolved.Value);
+                    if (mem != null)
+                        membershipTenantRole = mem.TenantRole;
+                    else
+                    {
+                        var roleFromType = TenantRoleFromUserType(userFromDb.UserType);
+                        membershipTenantRole = roleFromType;
+                        if (roleFromType.HasValue)
+                            await EnsureUserTenantIfMissingAsync(userFromDb.Id, resolved.Value, roleFromType.Value);
+                    }
+                }
+            }
+
+            if (tenantId.HasValue && userFromDb.UserType != "ADMIN")
+            {
+                var utRow = await _context.UserTenants.FirstOrDefaultAsync(ut =>
+                    ut.UserId == userFromDb.Id && ut.TenantId == tenantId.Value && ut.IsActive);
+                if (utRow != null)
+                {
+                    utRow.LastAccessedUtc = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
                 }
             }
 
@@ -581,6 +635,23 @@ namespace Backend.Controllers
                 return Unauthorized();
 
             var list = await _tenantMembership.GetTenantSummariesAsync(userId);
+            // Legacy: student/teacher/guardian existed in tenant DB before UserTenant rows were introduced.
+            if (list.Count == 0)
+            {
+                var user = await userManager.FindByIdAsync(userId);
+                if (user != null && !string.Equals(user.UserType, "ADMIN", StringComparison.OrdinalIgnoreCase))
+                {
+                    var resolved = await ResolveTenantIdForTeacherStudentGuardianAsync(userId, user.UserType);
+                    if (resolved.HasValue)
+                    {
+                        var role = TenantRoleFromUserType(user.UserType);
+                        if (role.HasValue)
+                            await EnsureUserTenantIfMissingAsync(userId, resolved.Value, role.Value);
+                        list = await _tenantMembership.GetTenantSummariesAsync(userId);
+                    }
+                }
+            }
+
             return Ok(list);
         }
 
@@ -593,6 +664,21 @@ namespace Backend.Controllers
                 return Unauthorized();
 
             var mem = await _tenantMembership.GetMembershipAsync(userId, dto.TenantId);
+            if (mem == null)
+            {
+                var userForTenant = await userManager.FindByIdAsync(userId);
+                if (userForTenant == null)
+                    return Unauthorized();
+                var resolved = await ResolveTenantIdForTeacherStudentGuardianAsync(userId, userForTenant.UserType);
+                if (resolved == dto.TenantId)
+                {
+                    var role = TenantRoleFromUserType(userForTenant.UserType);
+                    if (role.HasValue)
+                        await EnsureUserTenantIfMissingAsync(userId, dto.TenantId, role.Value);
+                    mem = await _tenantMembership.GetMembershipAsync(userId, dto.TenantId);
+                }
+            }
+
             if (mem == null)
                 return Forbid();
 

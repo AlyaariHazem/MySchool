@@ -1,0 +1,59 @@
+<div class="student-home" [attr.dir]="dir$ | async">
+  @if (loading) {
+    <div class="student-home__loading">
+      <div class="student-home__spinner" aria-hidden="true"></div>
+      <p>{{ 'studentHome.loading' | translate }}</p>
+    </div>
+  } @else if (errorMessage) {
+    <div class="alert alert-danger student-home__alert" role="alert">{{ errorMessage }}</div>
+  } @else if (snapshot) {
+    <section class="student-home__hero">
+      <div class="student-home__hero-inner">
+        <div class="student-home__hero-text">
+          <h1 class="student-home__title">
+            {{ 'studentHome.title' | translate: { name: snapshot.displayName } }}
+          </h1>
+          <p class="student-home__subtitle">{{ 'studentHome.subtitle' | translate }}</p>
+        </div>
+        <div class="student-home__avatar" aria-hidden="true">
+          <span class="student-home__avatar-letter">{{ avatarLetter(snapshot.displayName) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="row g-3 mb-4 student-home__meta-row">
+      @if (snapshot.divisionName) {
+        <div class="col-6 col-md-3">
+          <div class="student-home__chip">
+            <span class="student-home__chip-label">{{ 'studentHome.division' | translate }}</span>
+            <span class="student-home__chip-value">{{ snapshot.divisionName }}</span>
+          </div>
+        </div>
+      }
+      @if (snapshot.className) {
+        <div class="col-6 col-md-3">
+          <div class="student-home__chip">
+            <span class="student-home__chip-label">{{ 'studentHome.class' | translate }}</span>
+            <span class="student-home__chip-value">{{ snapshot.className }}</span>
+          </div>
+        </div>
+      }
+      @if (snapshot.stageName) {
+        <div class="col-6 col-md-3">
+          <div class="student-home__chip">
+            <span class="student-home__chip-label">{{ 'studentHome.stage' | translate }}</span>
+            <span class="student-home__chip-value">{{ snapshot.stageName }}</span>
+          </div>
+        </div>
+      }
+      @if (snapshot.academicYearLabel) {
+        <div class="col-6 col-md-3">
+          <div class="student-home__chip">
+            <span class="student-home__chip-label">{{ 'studentHome.year' | translate }}</span>
+            <span class="student-home__chip-value">{{ snapshot.academicYearLabel }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

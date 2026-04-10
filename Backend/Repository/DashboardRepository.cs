@@ -510,4 +510,41 @@ public class DashboardRepository : IDashboardRepository
             RecentCoursePlans = recent
         };
     }
+    public async Task<StudentDashboardDTO?> GetStudentDashboardAsync(string userId)
+    {
+        if (UseMasterDashboard() || string.IsNullOrEmpty(userId))
+            return null;
+
+        var student = await _tenantContext.Students
+            .AsNoTracking()
+            .Include(s => s.Division!)
+                .ThenInclude(d => d.Class!)
+                    .ThenInclude(c => c.Stage!)
+            .Include(s => s.Division!)
+                .ThenInclude(d => d.Class!)
+                    .ThenInclude(c => c.Year!)
+            .FirstOrDefaultAsync(s => s.UserID == userId);
+
+        if (student == null)
+            return null;
+
+        var fn = student.FullName;
+        var displayName = string.Join(" ",
+            new[] { fn?.FirstName, fn?.MiddleName, fn?.LastName }.Where(p => !string.IsNullOrWhiteSpace(p))).Trim();
+
+        var y = student.Division?.Class?.Year;
+        var academicYearLabel = y != null
+            ? y.YearDateStart.ToString("yyyy")
+            : (student.Division?.Class?.ClassYear ?? string.Empty);
+
+        return new StudentDashboardDTO
+        {
+            StudentId = student.StudentID,
+            DisplayName = displayName,
+            ClassName = student.Division?.Class?.ClassName ?? string.Empty,
+            StageName = student.Division?.Class?.Stage?.StageName ?? string.Empty,
+            DivisionName = student.Division?.DivisionName ?? string.Empty,
+            AcademicYearLabel = academicYearLabel
+        };
+    }
 }

@@ -151,6 +151,17 @@
     "colDate": "Date",
     "noPlans": "No course plans assigned yet."
   },
+  "studentHome": {
+    "title": "Welcome, {{name}}",
+    "subtitle": "Your student portal — schedule, grades, notifications, and attendance in one place.",
+    "loading": "Loading your profile…",
+    "tip": "Use the sidebar or the shortcuts below to jump to a page.",
+    "division": "Division",
+    "class": "Class",
+    "stage": "Stage",
+    "year": "Academic year",
+    "quickLinks": "Quick links"
+  },
   "sidebar": {
     "menu": "Menu",
     "home": "Home",

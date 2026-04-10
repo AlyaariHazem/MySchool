@@ -1,0 +1,170 @@
+.student-home {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+.student-home__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  gap: 1rem;
+  color: #64748b;
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+.student-home__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(34, 197, 94, 0.25);
+  border-top-color: #22c55e;
+  border-radius: 50%;
+  animation: student-home-spin 0.75s linear infinite;
+}
+
+@keyframes student-home-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.student-home__alert {
+  border-radius: 10px;
+}
+
+.student-home__hero {
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #15803d 0%, #22c55e 45%, #4ade80 100%);
+  box-shadow: 0 12px 32px rgba(34, 197, 94, 0.28);
+  color: #fff;
+  overflow: hidden;
+}
+
+.student-home__hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.75rem 1.5rem;
+
+  @media (min-width: 576px) {
+    padding: 2rem 2rem;
+  }
+}
+
+.student-home__hero-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-home__title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: #fff;
+}
+
+.student-home__subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.94;
+  max-width: 42rem;
+}
+
+.student-home__avatar {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  @media (min-width: 576px) {
+    width: 88px;
+    height: 88px;
+  }
+}
+
+.student-home__avatar-letter {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.student-home__meta-row {
+  margin-top: 0;
+}
+
+.student-home__chip {
+  background: #fff;
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  height: 100%;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(34, 197, 94, 0.45);
+    box-shadow: 0 6px 18px rgba(34, 197, 94, 0.12);
+  }
+}
+
+.student-home__chip-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.student-home__chip-value {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.student-home__tip {
+  margin-top: -0.25rem;
+}
+
+.student-home__links-card {
+  border-radius: 12px;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+}
+
+.student-home__links-header {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.08) 0%, rgba(255, 255, 255, 0.9) 100%);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.15);
+}
+
+.student-home__links-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* RTL: keep hero layout natural (avatar on start side per dir) */
+[dir='rtl'] .student-home__hero-inner {
+  flex-direction: row-reverse;
+}

@@ -14,5 +14,8 @@ public interface IDashboardRepository
 
     /// <summary>Tenant-wide teaching snapshot for managers/admins (no teacher row required).</summary>
     Task<TeacherWorkspaceDTO> GetSchoolTeachingWorkspaceAsync();
+
+    /// <summary>Student profile slice for the signed-in user (matches <see cref="ApplicationUser"/> id to <see cref="Models.Student.UserID"/>).</summary>
+    Task<StudentDashboardDTO?> GetStudentDashboardAsync(string userId);
 }
 

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BackendAspService } from '../../ASP.NET/backend-asp.service';
 import { ApiResponse } from '../models/response.model';
-import { DashboardResult } from '../models/dashboard.model';
+import { DashboardResult, StudentDashboardSnapshot } from '../models/dashboard.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +12,10 @@ export class DashboardService {
 
   getDashboardData(): Observable<ApiResponse<DashboardResult>> {
     return this.API.getRequest<DashboardResult>('Dashboard');
+  }
+
+  getStudentDashboardData(): Observable<ApiResponse<StudentDashboardSnapshot>> {
+    return this.API.getRequest<StudentDashboardSnapshot>('Dashboard/student');
   }
 }
 

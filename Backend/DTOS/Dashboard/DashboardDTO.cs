@@ -49,3 +49,15 @@ public class TeacherWorkspaceSummaryDTO
     public int SubjectCount { get; set; }
 }
 
+/// <summary>Minimal home-screen data for a student account (no financial or school-wide metrics).</summary>
+public sealed class StudentDashboardDTO
+{
+    public int StudentId { get; set; }
+    public string DisplayName { get; set; } = string.Empty;
+    public string ClassName { get; set; } = string.Empty;
+    public string StageName { get; set; } = string.Empty;
+    public string DivisionName { get; set; } = string.Empty;
+    /// <summary>Human-readable academic year (e.g. year start or class year label).</summary>
+    public string AcademicYearLabel { get; set; } = string.Empty;
+}
+

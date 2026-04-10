@@ -52,6 +52,12 @@ export class LoginComponent {
             this.authService.router.navigateByUrl('admin');
           } else if (user.userType === 'TEACHER') {
             this.authService.router.navigateByUrl('/teacher');
+          } else if (user.userType === 'STUDENT') {
+            this.authService.router.navigateByUrl('/students/home');
+            const name = response.managerName || response.userName || '';
+            if (name) {
+              this.toastr.success('مرحبا بك : ' + name, '', { positionClass: 'toast-center-center' });
+            }
           } else {
             this.authService.router.navigateByUrl('school');
             console.log(response);

@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { LoginComponent } from './auth/Login/login.component';
 import { adminGuardGuard } from './core/guards/admin-guard.guard';
+import { studentGuard } from './core/guards/student.guard';
 import { PageNotFoundComponent } from './shared/components/page-not-found/page-not-found.component';
 
 export const routes: Routes = [
@@ -9,6 +10,12 @@ export const routes: Routes = [
     {
         path:'login',
         component:LoginComponent
+    },
+    {
+        path: 'students',
+        loadChildren: () =>
+            import('./components/students/students.module').then((m) => m.StudentsModule),
+        canMatch: [adminGuardGuard, studentGuard],
     },
     {
         path:'school',

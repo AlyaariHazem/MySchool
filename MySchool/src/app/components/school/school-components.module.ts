@@ -90,8 +90,11 @@ import { WeeklyScheduleComponent } from './weekly-schedule/weekly-schedule.compo
 import { AttendanceComponent } from './attendance/attendance.component';
 import { DatabaseRestoreComponent } from './sittings/database-restore/database-restore.component';
 import { NotificationsComponent } from './notifications/notifications.component';
+import { SchoolLandingComponent } from './school-landing/school-landing.component';
+import { StudentSidebarModule } from '../students/sidebar/student-sidebar.module';
 
 const components = [
+  SchoolLandingComponent,
   DashboardComponent,
   HeaderComponent,
   AllParentsComponent,
@@ -146,6 +149,7 @@ const components = [
 const modules = [
   ShardModule,
   TeacherSidebarModule,
+  StudentSidebarModule,
   ReactiveFormsModule,
   CustomTableComponent,
   MatFormFieldModule,

@@ -19,6 +19,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   /** When true, toggles the teacher portal sidebar and notification deep-links. */
   @Input() teacherPortal = false;
 
+  /** When true, shows the student sidebar and notification deep-links under `/students/...`. */
+  @Input() studentPortal = false;
+
   /* one signal drives everything */
   isSidebarOpen = signal(false);
 
@@ -68,7 +71,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         if (
           !this.router.url.includes('/school/notifications') &&
-          !this.router.url.includes('/teacher/notifications')
+          !this.router.url.includes('/teacher/notifications') &&
+          !this.router.url.includes('/students/notifications')
         ) {
           this.refreshHeaderNotifications();
         }
@@ -149,6 +153,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
     const n = Math.max(1, Math.floor(sec / 86400));
     return this.translate.instant('notifications.time.daysAgo', { n });
+  }
+
+  /** Notifications list route for header dropdown (teacher vs student vs school). */
+  notificationsListPath(): string[] {
+    if (this.teacherPortal) {
+      return ['/teacher/notifications'];
+    }
+    if (this.studentPortal) {
+      return ['/students/notifications'];
+    }
+    return ['/school/notifications'];
   }
 
   avatarLetter(title: string): string {

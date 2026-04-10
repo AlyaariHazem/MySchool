@@ -23,3 +23,13 @@ export interface DashboardResponse {
   result: DashboardResult;
 }
 
+/** GET api/Dashboard/student — camelCase from API */
+export interface StudentDashboardSnapshot {
+  studentId: number;
+  displayName: string;
+  className: string;
+  stageName: string;
+  divisionName: string;
+  academicYearLabel: string;
+}
+
