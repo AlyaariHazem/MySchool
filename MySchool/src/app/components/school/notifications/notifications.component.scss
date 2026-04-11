@@ -25,6 +25,13 @@
 
 .notifications-tabs {
   margin-top: 0.5rem;
+  /* Let p-select overlays escape tab panels without clipping */
+  overflow: visible;
+}
+
+:host ::ng-deep .notifications-tabs .p-tabpanels,
+:host ::ng-deep .notifications-tabs .p-tabs-panel {
+  overflow: visible;
 }
 
 .inbox-wrap {

@@ -82,8 +82,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.notifications.inboxChanged$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.refreshHeaderNotifications();
+    this.notifications.inboxChanged$.pipe(takeUntil(this.destroy$)).subscribe(payload => {
+      this.refreshHeaderNotifications(payload?.silent === true);
     });
   }
 
@@ -97,7 +97,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.refreshHeaderNotifications();
   }
 
-  refreshHeaderNotifications(): void {
+  refreshHeaderNotifications(silent = false): void {
     const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
     if (!token) {
       this.headerNotifications = [];
@@ -105,7 +105,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.notifLoading = true;
+    if (!silent) {
+      this.notifLoading = true;
+    }
     forkJoin({
       count: this.notifications.getUnreadCount().pipe(
         catchError(() => of({ isSuccess: true, result: { count: 0 } } as const))

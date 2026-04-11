@@ -17,11 +17,12 @@ export class NotificationsService {
   private readonly API = inject(BackendAspService);
 
   /** Emits when inbox/unread state may have changed (header listens). */
-  private readonly inboxChanged = new Subject<void>();
+  private readonly inboxChanged = new Subject<{ silent?: boolean }>();
   readonly inboxChanged$ = this.inboxChanged.asObservable();
 
-  notifyInboxChanged(): void {
-    this.inboxChanged.next();
+  /** @param options.silent — refresh header badge/list without showing the header loading state */
+  notifyInboxChanged(options?: { silent?: boolean }): void {
+    this.inboxChanged.next(options ?? {});
   }
 
   send(body: SendNotificationRequest): Observable<ApiResponse<NotificationSendResultDto>> {

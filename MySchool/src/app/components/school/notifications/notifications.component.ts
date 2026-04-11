@@ -203,6 +203,31 @@ export class NotificationsComponent implements OnInit {
   openDetail(row: NotificationInboxDto): void {
     this.selected = row;
     this.detailVisible = true;
+    if (!row.isRead) {
+      this.markOpenedAsRead(row);
+    }
+  }
+
+  /** Marks as read when opening the dialog (no toast, no header loader). */
+  private markOpenedAsRead(row: NotificationInboxDto): void {
+    this.notifications.markRead(row.deliveryId).subscribe({
+      next: res => {
+        if (res.isSuccess === false) {
+          return;
+        }
+        row.isRead = true;
+        if (this.selected?.deliveryId === row.deliveryId) {
+          this.selected = { ...row, isRead: true };
+        }
+        const inboxRow = this.inboxRows.find(r => r.deliveryId === row.deliveryId);
+        if (inboxRow) {
+          inboxRow.isRead = true;
+        }
+        this.loadUnreadCount();
+        this.notifications.notifyInboxChanged({ silent: true });
+      },
+      error: () => {}
+    });
   }
 
   closeDetail(): void {
@@ -212,29 +237,6 @@ export class NotificationsComponent implements OnInit {
 
   safeBody(html: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(html || '');
-  }
-
-  markSelectedRead(): void {
-    if (!this.selected || this.selected.isRead) {
-      this.closeDetail();
-      return;
-    }
-    this.notifications.markRead(this.selected.deliveryId).subscribe({
-      next: res => {
-        if (res.isSuccess === false) {
-          const msg = res.errorMasseges?.join(' ') || this.translate.instant('notifications.toast.markReadError');
-          this.toastr.error(msg);
-          return;
-        }
-        this.selected!.isRead = true;
-        const row = this.inboxRows.find(r => r.deliveryId === this.selected!.deliveryId);
-        if (row) row.isRead = true;
-        this.loadUnreadCount();
-        this.notifications.notifyInboxChanged();
-        this.toastr.success(this.translate.instant('notifications.toast.markReadOk'));
-      },
-      error: () => this.toastr.error(this.translate.instant('notifications.toast.markReadError'))
-    });
   }
 
   private parseUserIds(text: string): string[] {

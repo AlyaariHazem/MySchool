@@ -99,7 +99,6 @@
                   optionLabel="label"
                   optionValue="value"
                   [showClear]="false"
-                  appendTo="body"
                   panelStyleClass="notifications-select-panel" />
                 <label for="nt-target">{{ 'notifications.targetLabel' | translate }}</label>
               </p-floatLabel>
@@ -117,7 +116,6 @@
                   optionLabel="className"
                   optionValue="classID"
                   [showClear]="true"
-                  appendTo="body"
                   panelStyleClass="notifications-select-panel" />
                 <label for="nt-class">{{ 'notifications.class' | translate }}</label>
               </p-floatLabel>
@@ -186,13 +184,6 @@
     </div>
     <div class="detail-body" [innerHTML]="safeBody(selected.body)"></div>
     <div class="detail-actions">
-      <p-button
-        *ngIf="!selected.isRead"
-        type="button"
-        severity="success"
-        icon="pi pi-check"
-        [label]="'notifications.markRead' | translate"
-        (onClick)="markSelectedRead()" />
       <p-button
         type="button"
         [outlined]="true"
