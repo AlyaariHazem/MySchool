@@ -14,6 +14,7 @@ import { IMonth } from '../../core/models/month.model';
 import { ITerm } from '../../core/models/term.model';
 import { TERMS } from '../../core/data/terms';
 import { MONTHS } from '../../core/data/months';
+import { YearService } from '../../../../core/services/year.service';
 
 
 @Component({
@@ -69,6 +70,8 @@ export class GradesMonthComponent implements OnInit {
   private classesLoaded = false;
   private subjectsLoaded = false;
 
+  private yearService = inject(YearService);
+
   constructor(
     private formBuilder: FormBuilder,
     private curriculmsPlanService: CurriculmsPlanService,
@@ -84,6 +87,17 @@ export class GradesMonthComponent implements OnInit {
       selectedMonth: [this.selectedMonth],
     });
     this.currentLanguage();
+
+    // Align with API monthly grades (GetAll uses active year); localStorage yearID is often stale.
+    this.yearService.getAllYears().subscribe({
+      next: years => {
+        const active = years?.find(y => y.active);
+        if (active) {
+          this.yearID = active.yearID;
+        }
+      },
+      error: () => { /* keep default / localStorage fallback */ }
+    });
     
     // Initialize filtered months based on selected term
     this.filterMonthsByTerm();

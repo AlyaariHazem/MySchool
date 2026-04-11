@@ -86,6 +86,7 @@ public class UnitOfWork : IUnitOfWork
         WeeklySchedules = new WeeklyScheduleRepository(_tenantContext, _mapper);
         Attendance = new AttendanceRepository(_tenantContext);
         Notifications = new NotificationRepository(_tenantContext, _htmlSanitizer);
+        Exams = new ExamRepository(_tenantContext);
         
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
@@ -124,6 +125,7 @@ public class UnitOfWork : IUnitOfWork
     public IWeeklyScheduleRepository WeeklySchedules { get; private set; }
     public IAttendanceRepository Attendance { get; private set; }
     public INotificationRepository Notifications { get; private set; }
+    public IExamRepository Exams { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

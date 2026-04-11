@@ -110,6 +110,8 @@ public class ManagerRepository : IManagerRepository
             await using var bootstrapCmd = bootstrapConn.CreateCommand();
             bootstrapCmd.CommandText = TenantSchoolsBootstrapSql.CreateSchoolsIfMissingSql;
             await bootstrapCmd.ExecuteNonQueryAsync();
+            bootstrapCmd.CommandText = TenantSchoolsBootstrapSql.ExamsModuleEnsureSql;
+            await bootstrapCmd.ExecuteNonQueryAsync();
         }
 
         await using var tenantDb = new TenantDbContext(opts, tenantInfo);

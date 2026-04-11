@@ -32,6 +32,8 @@ import { Router } from '@angular/router';
 import { StudentService } from '../../../core/services/student.service';
 import { YearService } from '../../../core/services/year.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
+import { ExamsService } from '../../../core/services/exams.service';
+import { ScheduledExamList } from '../../../core/models/exams.model';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
 @Component({
   selector: 'app-dashboard',
@@ -43,6 +45,7 @@ export class DashboardComponent implements OnInit {
   private studentService = inject(StudentService);
   private yearService = inject(YearService);
   private dashboardService = inject(DashboardService);
+  private examsService = inject(ExamsService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
@@ -92,6 +95,11 @@ export class DashboardComponent implements OnInit {
   /** Excel / PDF export in progress */
   studentsExporting = false;
 
+  /** Upcoming / recent scheduled exams for the tests widget */
+  dashboardExams: ScheduledExamList[] = [];
+  examsLoading = false;
+  private static readonly dashboardExamsMax = 8;
+
   private static readonly exportPageSize = 100;
 
   onPageChange(event: PaginatorState): void {
@@ -132,6 +140,8 @@ export class DashboardComponent implements OnInit {
       }
     });
 
+    this.loadDashboardExams();
+
     // Load paginated students for table
     combineLatest([
       this.yearService.getAllYears(),
@@ -152,6 +162,51 @@ export class DashboardComponent implements OnInit {
 
   onStudentSearchChange(value: string): void {
     this.studentSearchInput$.next((value ?? '').trim());
+  }
+
+  loadDashboardExams(): void {
+    this.examsLoading = true;
+    this.examsService.getScheduled({}).subscribe({
+      next: (res) => {
+        const list = (res.result ?? []) as ScheduledExamList[];
+        const sorted = [...list].sort(
+          (a, b) => new Date(b.examDate).getTime() - new Date(a.examDate).getTime(),
+        );
+        this.dashboardExams = sorted.slice(0, DashboardComponent.dashboardExamsMax);
+        this.examsLoading = false;
+        this.cd.markForCheck();
+      },
+      error: () => {
+        this.dashboardExams = [];
+        this.examsLoading = false;
+        this.cd.markForCheck();
+      },
+    });
+  }
+
+  examTypeInitial(exam: ScheduledExamList): string {
+    const n = (exam.examTypeName ?? '?').trim();
+    return n.length ? n.charAt(0) : '?';
+  }
+
+  examAvatarClass(index: number): string {
+    const classes = ['bg-green', 'bg-purple', 'bg-dark'];
+    return classes[index % classes.length];
+  }
+
+  deleteDashboardExam(exam: ScheduledExamList, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!confirm('حذف هذا الامتحان من الجدول؟')) {
+      return;
+    }
+    this.examsService.deleteScheduled(exam.scheduledExamID).subscribe({
+      next: () => {
+        this.toastr.success('تم الحذف');
+        this.loadDashboardExams();
+      },
+      error: () => this.toastr.error('تعذر الحذف'),
+    });
   }
 
   /** First + middle + last for hover tooltip */

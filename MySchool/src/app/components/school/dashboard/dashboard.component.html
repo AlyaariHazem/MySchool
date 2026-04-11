@@ -81,11 +81,7 @@
                   <i class="fas fa-ellipsis-h"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right" [attr.dir]="dir$ | async">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <div role="separator" class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <div role="separator" class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Something else here</a>
+                  <a class="dropdown-item" routerLink="/school/exams">إدارة الامتحانات والجدولة</a>
                 </div>
               </div>
             </div>
@@ -94,6 +90,11 @@
         <div class="card-body" [attr.dir]="dir$ | async">
           <div class="row">
             <div class="col-md-12">
+              @if (examsLoading) {
+                <p class="text-muted small mb-0">جاري تحميل الامتحانات…</p>
+              } @else if (dashboardExams.length === 0) {
+                <p class="text-muted small mb-0">لا توجد امتحانات مجدولة. <a routerLink="/school/exams">إضافة من هنا</a></p>
+              } @else {
               <div class="table-responsive">
                 <table class="table custom-table">
                   <thead class="thead-light">
@@ -108,142 +109,30 @@
                     </tr>
                   </thead>
                   <tbody>
+                    @for (exam of dashboardExams; track exam.scheduledExamID; let i = $index) {
                     <tr>
                       <td>
-                        <a href="#" class="avatar bg-green">C</a>
+                        <span class="avatar text-white d-inline-flex align-items-center justify-content-center" [ngClass]="examAvatarClass(i)">{{ examTypeInitial(exam) }}</span>
                       </td>
-                      <td>تربية إسلامية</td>
-                      <td>5</td>
-                      <td>B</td>
-                      <td>10.00am</td>
-                      <td>20/1/2019</td>
+                      <td>{{ exam.subjectName }}</td>
+                      <td>{{ exam.className }}</td>
+                      <td>{{ exam.divisionName }}</td>
+                      <td>{{ exam.startTime }} – {{ exam.endTime }}</td>
+                      <td>{{ exam.examDate | date: 'dd/MM/yyyy' }}</td>
                       <td class="text-right">
-                        <a href="#" class="btn btn-primary btn-sm mb-1">
+                        <a routerLink="/school/exams" class="btn btn-primary btn-sm mb-1" title="الجدولة">
                           <i class="far fa-edit"></i>
                         </a>
-                        <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                          class="btn btn-danger btn-sm mb-1">
+                        <button type="button" class="btn btn-danger btn-sm mb-1" (click)="deleteDashboardExam(exam, $event)" title="حذف">
                           <i class="far fa-trash-alt"></i>
                         </button>
                       </td>
                     </tr>
-                    <tr>
-                      <td>
-                        <a href="#" class="avatar bg-purple">C</a>
-                      </td>
-                      <td>English</td>
-                      <td>4</td>
-                      <td>A</td>
-                      <td>10.00am</td>
-                      <td>2/1/2019</td>
-                      <td class="text-right">
-                        <a href="#" class="btn btn-primary btn-sm mb-1">
-                          <i class="far fa-edit"></i>
-                        </a>
-                        <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                          class="btn btn-danger btn-sm mb-1">
-                          <i class="far fa-trash-alt"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <a href="#" class="avatar bg-green">C</a>
-                      </td>
-                      <td>رياضيات</td>
-                      <td>6</td>
-                      <td>B</td>
-                      <td>10.00am</td>
-                      <td>2/1/2019</td>
-                      <td class="text-right">
-                        <a href="#" class="btn btn-primary btn-sm mb-1">
-                          <i class="far fa-edit"></i>
-                        </a>
-                        <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                          class="btn btn-danger btn-sm mb-1">
-                          <i class="far fa-trash-alt"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <a href="#" class="avatar bg-dark">C</a>
-                      </td>
-                      <td>علوم</td>
-                      <td>3</td>
-                      <td>B</td>
-                      <td>10.00am</td>
-                      <td>20/1/2019</td>
-                      <td class="text-right">
-                        <a href="#" class="btn btn-primary btn-sm mb-1">
-                          <i class="far fa-edit"></i>
-                        </a>
-                        <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                          class="btn btn-danger btn-sm mb-1">
-                          <i class="far fa-trash-alt"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <a href="#" class="avatar bg-green">C</a>
-                      </td>
-                      <td>قران كريم</td>
-                      <td>6</td>
-                      <td>B</td>
-                      <td>10.00am</td>
-                      <td>20/1/2019</td>
-                      <td class="text-right">
-                        <a href="#" class="btn btn-primary btn-sm mb-1">
-                          <i class="far fa-edit"></i>
-                        </a>
-                        <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                          class="btn btn-danger btn-sm mb-1">
-                          <i class="far fa-trash-alt"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <a href="#" class="avatar bg-dark">C</a>
-                      </td>
-                      <td>لغة عربية</td>
-                      <td>7</td>
-                      <td>B</td>
-                      <td>10.00am</td>
-                      <td>20/1/2019</td>
-                      <td class="text-right">
-                        <a href="#" class="btn btn-primary btn-sm mb-1">
-                          <i class="far fa-edit"></i>
-                        </a>
-                        <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                          class="btn btn-danger btn-sm mb-1">
-                          <i class="far fa-trash-alt"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <a href="#" class="avatar bg-purple">C</a>
-                      </td>
-                      <td>فيزياء</td>
-                      <td>5</td>
-                      <td>B</td>
-                      <td>10.00am</td>
-                      <td>20/1/2019</td>
-                      <td class="text-right">
-                        <a href="#" class="btn btn-primary btn-sm mb-1">
-                          <i class="far fa-edit"></i>
-                        </a>
-                        <button type="submit" data-toggle="modal" data-target="#delete_employee"
-                          class="btn btn-danger btn-sm mb-1">
-                          <i class="far fa-trash-alt"></i>
-                        </button>
-                      </td>
-                    </tr>
+                    }
                   </tbody>
                 </table>
               </div>
+              }
             </div>
           </div>
         </div>

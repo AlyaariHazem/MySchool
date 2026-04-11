@@ -135,14 +135,15 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
         if (activeYear == null)
             return Result<bool>.Fail("No active year found. Please activate a year before updating monthly grades.");
 
+        // Must match GetAllAsync: monthly grades for this screen are always scoped to the active year.
+        // Clients often send YearID from localStorage, which can disagree with the DB active flag and cause "not found".
+        var yearIdForRow = activeYear.YearID;
+
         var changed = false;
-        var notFound = new List<string>();
         var changeLog = new List<object>();
 
         foreach (var dto in dtos)
         {
-            // Prefer the year explicitly sent by the client (e.g. localStorage) when valid; otherwise active year.
-            var yearIdForRow = dto.YearID > 0 ? dto.YearID : activeYear.YearID;
             var grade = await _context.MonthlyGrades.FirstOrDefaultAsync(g =>
                 g.StudentID == dto.StudentID &&
                 g.YearID == yearIdForRow &&
@@ -154,7 +155,32 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
 
             if (grade == null)
             {
-                notFound.Add($"StudentID: {dto.StudentID}, SubjectID: {dto.SubjectID}, MonthID: {dto.MonthID}, GradeTypeID: {dto.GradeTypeID}");
+                // Upsert: row missing (e.g. after promotion or incomplete seeding) — create so save matches list/query.
+                await _context.MonthlyGrades.AddAsync(new MonthlyGrade
+                {
+                    StudentID = dto.StudentID,
+                    YearID = yearIdForRow,
+                    SubjectID = dto.SubjectID,
+                    MonthID = dto.MonthID,
+                    TermID = dto.TermID,
+                    ClassID = dto.ClassID,
+                    GradeTypeID = dto.GradeTypeID,
+                    Grade = dto.Grade
+                });
+                changeLog.Add(new
+                {
+                    dto.StudentID,
+                    YearID = yearIdForRow,
+                    dto.ClassID,
+                    dto.SubjectID,
+                    dto.MonthID,
+                    dto.TermID,
+                    dto.GradeTypeID,
+                    OldGrade = (decimal?)null,
+                    NewGrade = dto.Grade,
+                    Inserted = true
+                });
+                changed = true;
                 continue;
             }
 
@@ -176,12 +202,6 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
                 grade.Grade = dto.Grade;
                 changed = true;
             }
-        }
-
-        if (notFound.Count > 0)
-        {
-            return Result<bool>.Fail($"Some grades were not found: {string.Join("; ", notFound.Take(5))}" + 
-                (notFound.Count > 5 ? $" (and {notFound.Count - 5} more)" : ""));
         }
 
         if (!changed)

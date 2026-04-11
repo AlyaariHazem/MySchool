@@ -12,6 +12,103 @@ public static class TenantSchoolsBootstrapSql
     /// <summary>Run before <see cref="Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate"/> on a new tenant database if needed.</summary>
     public static string CreateSchoolsIfMissingSql => Sql;
 
+    /// <summary>
+    /// Idempotent DDL for the exams module (<c>ExamSessions</c>, <c>ExamTypes</c>, <c>ScheduledExams</c>, <c>ExamResults</c>).
+    /// Executed separately from <see cref="CreateSchoolsIfMissingSql"/> so tenant DBs that already ran the main bootstrap
+    /// still get these tables (see <see cref="Backend.Data.TenantSchemaBootstrapInterceptor"/>).
+    /// </summary>
+    public static string ExamsModuleEnsureSql => ExamsModuleSql;
+
+    private const string ExamsModuleSql = @"
+IF OBJECT_ID(N'[dbo].[ExamTypes]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[ExamSessions] (
+        [ExamSessionID] int NOT NULL IDENTITY(1,1),
+        [YearID] int NOT NULL,
+        [TermID] int NOT NULL,
+        [Name] nvarchar(max) NOT NULL,
+        [IsActive] bit NOT NULL,
+        CONSTRAINT [PK_ExamSessions] PRIMARY KEY ([ExamSessionID]),
+        CONSTRAINT [FK_ExamSessions_Terms_TermID] FOREIGN KEY ([TermID]) REFERENCES [dbo].[Terms]([TermID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ExamSessions_Years_YearID] FOREIGN KEY ([YearID]) REFERENCES [dbo].[Years]([YearID]) ON DELETE NO ACTION
+    );
+    CREATE NONCLUSTERED INDEX [IX_ExamSessions_TermID] ON [dbo].[ExamSessions]([TermID]);
+    CREATE NONCLUSTERED INDEX [IX_ExamSessions_YearID] ON [dbo].[ExamSessions]([YearID]);
+
+    CREATE TABLE [dbo].[ExamTypes] (
+        [ExamTypeID] int NOT NULL IDENTITY(1,1),
+        [Name] nvarchar(max) NOT NULL,
+        [SortOrder] int NOT NULL,
+        [IsActive] bit NOT NULL,
+        CONSTRAINT [PK_ExamTypes] PRIMARY KEY ([ExamTypeID])
+    );
+
+    CREATE TABLE [dbo].[ScheduledExams] (
+        [ScheduledExamID] int NOT NULL IDENTITY(1,1),
+        [ExamSessionID] int NULL,
+        [ExamTypeID] int NOT NULL,
+        [YearID] int NOT NULL,
+        [TermID] int NOT NULL,
+        [ClassID] int NOT NULL,
+        [DivisionID] int NOT NULL,
+        [SubjectID] int NOT NULL,
+        [TeacherID] int NOT NULL,
+        [ExamDate] datetime2 NOT NULL,
+        [StartTime] nvarchar(max) NOT NULL,
+        [EndTime] nvarchar(max) NOT NULL,
+        [Room] nvarchar(max) NULL,
+        [TotalMarks] decimal(18,2) NOT NULL,
+        [PassingMarks] decimal(18,2) NOT NULL,
+        [SchedulePublished] bit NOT NULL,
+        [ResultsPublished] bit NOT NULL,
+        [Notes] nvarchar(max) NULL,
+        [CreatedAtUtc] datetime2 NOT NULL,
+        [UpdatedAtUtc] datetime2 NULL,
+        CONSTRAINT [PK_ScheduledExams] PRIMARY KEY ([ScheduledExamID]),
+        CONSTRAINT [FK_ScheduledExams_Classes_ClassID] FOREIGN KEY ([ClassID]) REFERENCES [dbo].[Classes]([ClassID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ScheduledExams_Divisions_DivisionID] FOREIGN KEY ([DivisionID]) REFERENCES [dbo].[Divisions]([DivisionID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ScheduledExams_ExamSessions_ExamSessionID] FOREIGN KEY ([ExamSessionID]) REFERENCES [dbo].[ExamSessions]([ExamSessionID]) ON DELETE SET NULL,
+        CONSTRAINT [FK_ScheduledExams_ExamTypes_ExamTypeID] FOREIGN KEY ([ExamTypeID]) REFERENCES [dbo].[ExamTypes]([ExamTypeID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ScheduledExams_Subjects_SubjectID] FOREIGN KEY ([SubjectID]) REFERENCES [dbo].[Subjects]([SubjectID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ScheduledExams_Teachers_TeacherID] FOREIGN KEY ([TeacherID]) REFERENCES [dbo].[Teachers]([TeacherID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ScheduledExams_Terms_TermID] FOREIGN KEY ([TermID]) REFERENCES [dbo].[Terms]([TermID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ScheduledExams_Years_YearID] FOREIGN KEY ([YearID]) REFERENCES [dbo].[Years]([YearID]) ON DELETE NO ACTION
+    );
+    CREATE NONCLUSTERED INDEX [IX_ScheduledExams_ClassID] ON [dbo].[ScheduledExams]([ClassID]);
+    CREATE NONCLUSTERED INDEX [IX_ScheduledExams_DivisionID] ON [dbo].[ScheduledExams]([DivisionID]);
+    CREATE NONCLUSTERED INDEX [IX_ScheduledExams_ExamDate] ON [dbo].[ScheduledExams]([ExamDate]);
+    CREATE NONCLUSTERED INDEX [IX_ScheduledExams_ExamSessionID] ON [dbo].[ScheduledExams]([ExamSessionID]);
+    CREATE NONCLUSTERED INDEX [IX_ScheduledExams_ExamTypeID] ON [dbo].[ScheduledExams]([ExamTypeID]);
+    CREATE NONCLUSTERED INDEX [IX_ScheduledExams_SubjectID] ON [dbo].[ScheduledExams]([SubjectID]);
+    CREATE NONCLUSTERED INDEX [IX_ScheduledExams_TeacherID] ON [dbo].[ScheduledExams]([TeacherID]);
+    CREATE NONCLUSTERED INDEX [IX_ScheduledExams_TermID] ON [dbo].[ScheduledExams]([TermID]);
+    CREATE NONCLUSTERED INDEX [IX_ScheduledExams_YearID_TermID_ClassID_DivisionID] ON [dbo].[ScheduledExams]([YearID], [TermID], [ClassID], [DivisionID]);
+
+    CREATE TABLE [dbo].[ExamResults] (
+        [ExamResultID] int NOT NULL IDENTITY(1,1),
+        [ScheduledExamID] int NOT NULL,
+        [StudentID] int NOT NULL,
+        [Score] decimal(18,2) NULL,
+        [IsAbsent] bit NOT NULL,
+        [Remarks] nvarchar(max) NULL,
+        CONSTRAINT [PK_ExamResults] PRIMARY KEY ([ExamResultID]),
+        CONSTRAINT [FK_ExamResults_ScheduledExams_ScheduledExamID] FOREIGN KEY ([ScheduledExamID]) REFERENCES [dbo].[ScheduledExams]([ScheduledExamID]) ON DELETE CASCADE,
+        CONSTRAINT [FK_ExamResults_Students_StudentID] FOREIGN KEY ([StudentID]) REFERENCES [dbo].[Students]([StudentID]) ON DELETE NO ACTION
+    );
+    CREATE UNIQUE NONCLUSTERED INDEX [IX_ExamResults_ScheduledExamID_StudentID] ON [dbo].[ExamResults]([ScheduledExamID], [StudentID]);
+    CREATE NONCLUSTERED INDEX [IX_ExamResults_StudentID] ON [dbo].[ExamResults]([StudentID]);
+
+    SET IDENTITY_INSERT [dbo].[ExamTypes] ON;
+    INSERT INTO [dbo].[ExamTypes] ([ExamTypeID], [IsActive], [Name], [SortOrder]) VALUES
+    (1, 1, N'Midterm', 1), (2, 1, N'Final', 2), (3, 1, N'Quiz', 3), (4, 1, N'Oral', 4), (5, 1, N'Practical', 5), (6, 1, N'Makeup', 6);
+    SET IDENTITY_INSERT [dbo].[ExamTypes] OFF;
+
+    IF OBJECT_ID(N'[dbo].[__EFMigrationsHistory]', N'U') IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM [dbo].[__EFMigrationsHistory] WHERE [MigrationId] = N'20260410234115_AddExamsModule')
+        INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId], [ProductVersion]) VALUES (N'20260410234115_AddExamsModule', N'8.0.10');
+END
+";
+
     private const string Sql = @"
 IF OBJECT_ID(N'[dbo].[Schools]', N'U') IS NULL
 BEGIN

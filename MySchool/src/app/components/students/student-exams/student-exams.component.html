@@ -1,0 +1,56 @@
+<div class="student-exams p-3">
+  <h2 class="mb-3">الامتحانات</h2>
+  <label class="me-2">
+    <input type="checkbox" [(ngModel)]="upcomingOnly" (change)="toggleFilter()" />
+    القادمة فقط
+  </label>
+
+  @if (loading) {
+    <p>جاري التحميل…</p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th>التاريخ</th>
+            <th>النوع</th>
+            <th>المادة</th>
+            <th>الوقت</th>
+            <th>القاعة</th>
+            <th>الدرجة</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track row.scheduledExamID) {
+            <tr>
+              <td>{{ row.examDate | date: 'mediumDate' }}</td>
+              <td>{{ row.examTypeName }}</td>
+              <td>{{ row.subjectName }}</td>
+              <td>{{ row.startTime }} – {{ row.endTime }}</td>
+              <td>{{ row.room || '—' }}</td>
+              <td>
+                @if (row.resultsPublished) {
+                  @if (row.isAbsent) {
+                    غائب
+                  } @else {
+                    {{ row.score ?? '—' }} / {{ row.totalMarks }}
+                  }
+                } @else {
+                  —
+                }
+              </td>
+              <td>
+                @if (row.resultsPublished) {
+                  {{ row.passed ? 'ناجح' : (row.isAbsent ? 'غائب' : 'راسب') }}
+                } @else {
+                  غير منشور
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

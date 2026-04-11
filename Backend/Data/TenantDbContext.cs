@@ -55,6 +55,10 @@ namespace Backend.Data
         public DbSet<NotificationMessage> NotificationMessages { get; set; }
         public DbSet<NotificationDelivery> NotificationDeliveries { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<ExamSession> ExamSessions { get; set; }
+        public DbSet<ExamType> ExamTypes { get; set; }
+        public DbSet<ScheduledExam> ScheduledExams { get; set; }
+        public DbSet<ExamResult> ExamResults { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -541,6 +545,117 @@ namespace Backend.Data
 
             modelBuilder.Entity<AuditLog>()
                 .HasIndex(a => new { a.Category, a.CreatedAtUtc });
+
+            modelBuilder.Entity<ExamSession>()
+                .HasKey(e => e.ExamSessionID);
+            modelBuilder.Entity<ExamSession>()
+                .Property(e => e.ExamSessionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ExamSession>()
+                .HasOne(es => es.Year)
+                .WithMany()
+                .HasForeignKey(es => es.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ExamSession>()
+                .HasOne(es => es.Term)
+                .WithMany()
+                .HasForeignKey(es => es.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ExamType>()
+                .HasKey(e => e.ExamTypeID);
+            modelBuilder.Entity<ExamType>()
+                .Property(e => e.ExamTypeID)
+                .UseIdentityColumn();
+
+            modelBuilder.Entity<ScheduledExam>()
+                .HasKey(e => e.ScheduledExamID);
+            modelBuilder.Entity<ScheduledExam>()
+                .Property(e => e.ScheduledExamID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ScheduledExam>()
+                .Property(e => e.TotalMarks)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<ScheduledExam>()
+                .Property(e => e.PassingMarks)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<ScheduledExam>()
+                .HasOne(se => se.ExamSession)
+                .WithMany(s => s.ScheduledExams)
+                .HasForeignKey(se => se.ExamSessionID)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<ScheduledExam>()
+                .HasOne(se => se.ExamType)
+                .WithMany(t => t.ScheduledExams)
+                .HasForeignKey(se => se.ExamTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ScheduledExam>()
+                .HasOne(se => se.Year)
+                .WithMany()
+                .HasForeignKey(se => se.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ScheduledExam>()
+                .HasOne(se => se.Term)
+                .WithMany()
+                .HasForeignKey(se => se.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ScheduledExam>()
+                .HasOne(se => se.Class)
+                .WithMany()
+                .HasForeignKey(se => se.ClassID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ScheduledExam>()
+                .HasOne(se => se.Division)
+                .WithMany()
+                .HasForeignKey(se => se.DivisionID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ScheduledExam>()
+                .HasOne(se => se.Subject)
+                .WithMany()
+                .HasForeignKey(se => se.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ScheduledExam>()
+                .HasOne(se => se.Teacher)
+                .WithMany()
+                .HasForeignKey(se => se.TeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ScheduledExam>()
+                .HasIndex(se => new { se.YearID, se.TermID, se.ClassID, se.DivisionID });
+            modelBuilder.Entity<ScheduledExam>()
+                .HasIndex(se => se.TeacherID);
+            modelBuilder.Entity<ScheduledExam>()
+                .HasIndex(se => se.ExamDate);
+
+            modelBuilder.Entity<ExamResult>()
+                .HasKey(r => r.ExamResultID);
+            modelBuilder.Entity<ExamResult>()
+                .Property(r => r.ExamResultID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ExamResult>()
+                .Property(r => r.Score)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<ExamResult>()
+                .HasOne(r => r.ScheduledExam)
+                .WithMany(se => se.ExamResults)
+                .HasForeignKey(r => r.ScheduledExamID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ExamResult>()
+                .HasOne(r => r.Student)
+                .WithMany()
+                .HasForeignKey(r => r.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ExamResult>()
+                .HasIndex(r => new { r.ScheduledExamID, r.StudentID })
+                .IsUnique();
+
+            modelBuilder.Entity<ExamType>().HasData(
+                new ExamType { ExamTypeID = 1, Name = "Midterm", SortOrder = 1, IsActive = true },
+                new ExamType { ExamTypeID = 2, Name = "Final", SortOrder = 2, IsActive = true },
+                new ExamType { ExamTypeID = 3, Name = "Quiz", SortOrder = 3, IsActive = true },
+                new ExamType { ExamTypeID = 4, Name = "Oral", SortOrder = 4, IsActive = true },
+                new ExamType { ExamTypeID = 5, Name = "Practical", SortOrder = 5, IsActive = true },
+                new ExamType { ExamTypeID = 6, Name = "Makeup", SortOrder = 6, IsActive = true }
+            );
 
             // Configure unique index on Code + SchoolId (allows same code for different schools, but unique per school)
             modelBuilder.Entity<ReportTemplate>()

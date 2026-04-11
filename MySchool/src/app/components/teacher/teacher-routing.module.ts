@@ -10,6 +10,7 @@ import { StudentMonthResultComponent } from '../school/report/student-month-resu
 import { WeeklyScheduleComponent } from '../school/weekly-schedule/weekly-schedule.component';
 import { TeacherLayoutComponent } from './teacher-layout/teacher-layout.component';
 import { TeacherWorkspaceComponent } from './pages/teacher-workspace/teacher-workspace.component';
+import { TeacherExamsComponent } from './pages/teacher-exams/teacher-exams.component';
 
 const routes: Routes = [
   {
@@ -25,6 +26,7 @@ const routes: Routes = [
       },
       { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       { path: 'schedule', component: WeeklyScheduleComponent, data: { breadcrumb: 'جدول الحصص الأسبوعي' } },
+      { path: 'exams', component: TeacherExamsComponent, data: { breadcrumb: 'الامتحانات' } },
       { path: 'grades/month', component: GradesMonthComponent, data: { breadcrumb: 'الدرجات الشهرية' } },
       { path: 'grades/term', component: GradesTermComponent, data: { breadcrumb: 'الدرجات الفصلية' } },
       {

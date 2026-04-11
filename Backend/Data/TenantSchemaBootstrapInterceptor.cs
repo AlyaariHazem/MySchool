@@ -20,6 +20,7 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
     }
 
     private static readonly ConcurrentDictionary<string, byte> Applied = new(StringComparer.Ordinal);
+    private static readonly ConcurrentDictionary<string, byte> ExamsApplied = new(StringComparer.Ordinal);
     private static readonly SemaphoreSlim Gate = new(1, 1);
 
     private static string DatabaseKey(DbConnection connection)
@@ -61,20 +62,36 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
             return;
 
         var key = DatabaseKey(connection);
-        if (string.IsNullOrWhiteSpace(key) || Applied.ContainsKey(key))
+        if (string.IsNullOrWhiteSpace(key))
+            return;
+
+        var needMain = !Applied.ContainsKey(key);
+        var needExams = !ExamsApplied.ContainsKey(key);
+        if (!needMain && !needExams)
             return;
 
         Gate.Wait();
         try
         {
-            if (Applied.ContainsKey(key))
-                return;
+            if (needMain && !Applied.ContainsKey(key))
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = TenantSchoolsBootstrapSql.CreateSchoolsIfMissingSql;
+                cmd.CommandTimeout = 180;
+                cmd.ExecuteNonQuery();
+                Applied.TryAdd(key, 1);
+            }
 
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = TenantSchoolsBootstrapSql.CreateSchoolsIfMissingSql;
-            cmd.CommandTimeout = 180;
-            cmd.ExecuteNonQuery();
-            Applied.TryAdd(key, 1);
+            // Separate from main bootstrap: tenant DBs that already ran the big script never get new tables
+            // added to it unless we run this block (exams module DDL).
+            if (needExams && !ExamsApplied.ContainsKey(key))
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = TenantSchoolsBootstrapSql.ExamsModuleEnsureSql;
+                cmd.CommandTimeout = 180;
+                cmd.ExecuteNonQuery();
+                ExamsApplied.TryAdd(key, 1);
+            }
         }
         finally
         {
@@ -88,20 +105,34 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
             return;
 
         var key = DatabaseKey(connection);
-        if (string.IsNullOrWhiteSpace(key) || Applied.ContainsKey(key))
+        if (string.IsNullOrWhiteSpace(key))
+            return;
+
+        var needMain = !Applied.ContainsKey(key);
+        var needExams = !ExamsApplied.ContainsKey(key);
+        if (!needMain && !needExams)
             return;
 
         await Gate.WaitAsync(cancellationToken);
         try
         {
-            if (Applied.ContainsKey(key))
-                return;
+            if (needMain && !Applied.ContainsKey(key))
+            {
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = TenantSchoolsBootstrapSql.CreateSchoolsIfMissingSql;
+                cmd.CommandTimeout = 180;
+                await cmd.ExecuteNonQueryAsync(cancellationToken);
+                Applied.TryAdd(key, 1);
+            }
 
-            await using var cmd = connection.CreateCommand();
-            cmd.CommandText = TenantSchoolsBootstrapSql.CreateSchoolsIfMissingSql;
-            cmd.CommandTimeout = 180;
-            await cmd.ExecuteNonQueryAsync(cancellationToken);
-            Applied.TryAdd(key, 1);
+            if (needExams && !ExamsApplied.ContainsKey(key))
+            {
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = TenantSchoolsBootstrapSql.ExamsModuleEnsureSql;
+                cmd.CommandTimeout = 180;
+                await cmd.ExecuteNonQueryAsync(cancellationToken);
+                ExamsApplied.TryAdd(key, 1);
+            }
         }
         finally
         {
