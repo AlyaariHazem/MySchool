@@ -116,6 +116,12 @@ export interface StudentHomeworkItem {
   feedbackPublished: boolean;
 }
 
+/** Aggregated list row for guardians (all linked students). */
+export interface GuardianStudentHomeworkRow extends StudentHomeworkItem {
+  studentID: number;
+  studentName?: string | null;
+}
+
 export interface StudentHomeworkDetail extends StudentHomeworkItem {
   description?: string | null;
   taskLinks?: HomeworkTaskLinkDto[];

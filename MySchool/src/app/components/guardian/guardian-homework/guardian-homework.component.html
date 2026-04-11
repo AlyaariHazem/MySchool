@@ -1,0 +1,141 @@
+<div id="guardian-homework-page" class="exams-page student-homework-page guardian-homework-page">
+  <div class="exams-card">
+    <header class="exams-header">
+      <h2 class="exams-title">واجبات الأبناء</h2>
+    </header>
+
+    <div class="filters-toolbar">
+      <form [formGroup]="filterForm" class="filters-grid" novalidate>
+        <div class="filter-field filter-field--grow">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="hw-guardian-view"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="filterOptions"
+              formControlName="view"
+              optionLabel="label"
+              optionValue="value"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="hw-guardian-view">عرض</label>
+          </p-floatlabel>
+        </div>
+      </form>
+      <div class="toolbar-actions">
+        <p-button type="button" label="تحديث" icon="pi pi-refresh" severity="secondary" (onClick)="load()" />
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <p-table
+        [value]="rows"
+        [loading]="loading"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="p-datatable-sm exams-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>الطالب</th>
+            <th>العنوان</th>
+            <th>المادة</th>
+            <th>الاستحقاق</th>
+            <th>الحالة</th>
+            <th>الدرجة</th>
+            <th class="col-actions">إجراءات</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.studentName }}</td>
+            <td>{{ row.title }}</td>
+            <td>{{ row.subjectName }}</td>
+            <td>{{ row.dueDateUtc | date: 'medium' }}</td>
+            <td>
+              <span class="hw-status" [ngClass]="statusClass(row.status)">{{ statusLabel(row.status) }}</span>
+            </td>
+            <td>{{ row.score != null ? row.score : '—' }}</td>
+            <td class="col-actions">
+              <p-button label="التفاصيل" size="small" severity="success" (onClick)="openDetail(row)" />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7">لا توجد واجبات لهذا العرض أو لا توجد بيانات.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  [header]="dialogTitle"
+  [(visible)]="showDetail"
+  [modal]="true"
+  [dismissableMask]="true"
+  [resizable]="false"
+  [draggable]="false"
+  [style]="{ width: 'min(720px, 94vw)' }"
+  styleClass="exams-dialog student-homework-detail-dialog guardian-homework-detail-dialog"
+  appendTo="body"
+  (onHide)="showDetail = false">
+  @if (loadingDetail) {
+    <p class="student-hw-dialog-loading">جاري التحميل…</p>
+  } @else if (detail) {
+    <div class="student-hw-detail-body">
+      <p class="student-hw-meta guardian-hw-student-line">
+        <strong>الطالب:</strong> {{ detailStudentName }}
+      </p>
+      <p class="student-hw-meta">الاستحقاق: {{ detail.dueDateUtc | date: 'medium' }}</p>
+      @if (detail.description) {
+        <p class="student-hw-desc">{{ detail.description }}</p>
+      }
+      @if (detail.taskLinks && detail.taskLinks.length > 0) {
+        <p class="exams-field-label student-hw-links-title">روابط</p>
+        <ul class="student-hw-links">
+          @for (l of detail.taskLinks; track l.homeworkTaskLinkID) {
+            <li>
+              <a [href]="l.url" target="_blank" rel="noopener">{{ l.label || l.url }}</a>
+            </li>
+          }
+        </ul>
+      }
+      <p class="student-hw-status-row">
+        <span class="hw-status hw-status--inline" [ngClass]="statusClass(detail.status)">{{ statusLabel(detail.status) }}</span>
+        @if (detail.submissionRequired) {
+          <span class="student-hw-required">تسليم مطلوب</span>
+        }
+      </p>
+      @if (detail.teacherFeedback) {
+        <div class="student-hw-feedback">
+          <strong>ملاحظة المعلم:</strong> {{ detail.teacherFeedback }}
+        </div>
+      }
+      @if (detail.score != null) {
+        <p class="student-hw-score"><strong>الدرجة:</strong> {{ detail.score }}</p>
+      }
+
+      @if (detail.answerText?.trim()) {
+        <p class="exams-field-label">نص التسليم</p>
+        <p class="student-hw-desc guardian-hw-answer">{{ detail.answerText }}</p>
+      }
+
+      @if (detail.files && detail.files.length > 0) {
+        <p class="exams-field-label student-hw-attached-label">المرفقات المسلَّمة</p>
+        <ul class="student-hw-attached-files">
+          @for (f of detail.files; track f.homeworkSubmissionFileID) {
+            <li>
+              <a [href]="f.fileUrl" target="_blank" rel="noopener">{{ f.fileName || 'تحميل الملف' }}</a>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <p-button type="button" label="إغلاق" [outlined]="true" (onClick)="showDetail = false" />
+  </ng-template>
+</p-dialog>

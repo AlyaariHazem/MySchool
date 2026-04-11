@@ -11,6 +11,7 @@ import {
   HomeworkTaskDetail,
   HomeworkTaskList,
   ReviewHomeworkSubmission,
+  GuardianStudentHomeworkRow,
   StudentHomeworkDetail,
   StudentHomeworkItem,
   StudentSubmitHomework,
@@ -85,6 +86,18 @@ export class HomeworkService {
 
   submitStudentTask(taskId: number, body: StudentSubmitHomework): Observable<ApiResponse<StudentHomeworkDetail>> {
     return this.http.post<ApiResponse<StudentHomeworkDetail>>(`${this.base()}/student/tasks/${taskId}/submit`, body);
+  }
+
+  // Guardian
+  getGuardianAllTasks(filter?: string): Observable<ApiResponse<GuardianStudentHomeworkRow[]>> {
+    const params = filter ? new HttpParams().set('filter', filter) : new HttpParams();
+    return this.http.get<ApiResponse<GuardianStudentHomeworkRow[]>>(`${this.base()}/guardian/tasks`, { params });
+  }
+
+  getGuardianStudentTaskDetail(studentId: number, taskId: number): Observable<ApiResponse<StudentHomeworkDetail>> {
+    return this.http.get<ApiResponse<StudentHomeworkDetail>>(
+      `${this.base()}/guardian/students/${studentId}/tasks/${taskId}`,
+    );
   }
 
   // Manager / admin

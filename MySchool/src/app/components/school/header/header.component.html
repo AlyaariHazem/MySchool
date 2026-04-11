@@ -11,8 +11,14 @@
           [open]="isSidebarOpen()"
           (closed)="onSidebarClosed()"
         ></app-student-sidebar>
+        <app-guardian-sidebar
+          *ngIf="guardianPortal"
+          #sidebar
+          [open]="isSidebarOpen()"
+          (closed)="onSidebarClosed()"
+        ></app-guardian-sidebar>
         <app-sidebar
-          *ngIf="!teacherPortal && !studentPortal"
+          *ngIf="!teacherPortal && !studentPortal && !guardianPortal"
           #sidebar
           [open]="isSidebarOpen()"
           (closed)="onSidebarClosed()"

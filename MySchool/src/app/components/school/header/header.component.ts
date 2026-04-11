@@ -22,6 +22,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   /** When true, shows the student sidebar and notification deep-links under `/students/...`. */
   @Input() studentPortal = false;
 
+  /** When true, shows the guardian sidebar and notification deep-links under `/guardian/...`. */
+  @Input() guardianPortal = false;
+
   /* one signal drives everything */
   isSidebarOpen = signal(false);
 
@@ -72,7 +75,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if (
           !this.router.url.includes('/school/notifications') &&
           !this.router.url.includes('/teacher/notifications') &&
-          !this.router.url.includes('/students/notifications')
+          !this.router.url.includes('/students/notifications') &&
+          !this.router.url.includes('/guardian/notifications')
         ) {
           this.refreshHeaderNotifications();
         }
@@ -162,6 +166,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
     if (this.studentPortal) {
       return ['/students/notifications'];
+    }
+    if (this.guardianPortal) {
+      return ['/guardian/notifications'];
     }
     return ['/school/notifications'];
   }

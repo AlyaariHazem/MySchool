@@ -15,6 +15,8 @@ export class SchoolLandingComponent implements OnInit {
     const ut = typeof localStorage !== 'undefined' ? localStorage.getItem('userType') : '';
     if (ut === 'STUDENT') {
       void this.router.navigateByUrl('/students/home', { replaceUrl: true });
+    } else if (ut === 'GUARDIAN') {
+      void this.router.navigateByUrl('/guardian/home', { replaceUrl: true });
     } else {
       void this.router.navigateByUrl('/school/dashboard', { replaceUrl: true });
     }

@@ -1,0 +1,88 @@
+<div
+  id="sidebar"
+  class="guardian-sidebar"
+  [attr.dir]="dir$ | async"
+  [ngClass]="{
+    'active fadeinright animation-duration-500': open,
+    sidebar: (dir$ | async) === 'rtl',
+    sidebarEn: (dir$ | async) === 'ltr',
+  }"
+>
+  <div class="sidebar-inner">
+    <div id="sidebar-menu" class="sidebar-menu">
+      <div class="header-left">
+        <a [routerLink]="homePath()" class="logo" (click)="cancel()">
+          <img [src]="SchoolLogo || 'assets/img/logo.png'" width="40" height="40" alt="" />
+          <span class="text-uppercase">{{ schoolName || 'School' }}</span>
+        </a>
+        <span (click)="cancel()" class="cancel">X</span>
+      </div>
+
+      <ul class="sidebar-ul">
+        <li>{{ 'sidebar.menu' | translate }}</li>
+
+        <li class="active">
+          <a [routerLink]="homePath()" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-1.png" alt="" />
+            <span>{{ 'sidebar.home' | translate }}</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/guardian/notifications" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-9.png" alt="" />
+            <span>{{ 'sidebar.notifications' | translate }}</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/guardian/exams" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-7.png" alt="" />
+            <span>الامتحانات</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/guardian/homework" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-7.png" alt="" />
+            <span>الواجبات</span>
+          </a>
+        </li>
+
+        <li class="submenu" (click)="toggleSubmenu('guardianGrades')">
+          <a href="javascript:void(0);">
+            <img src="assets/img/sidebar/icon-3.png" alt="" />
+            <span>{{ 'sidebar.grades' | translate }}</span>
+            <span class="menu-arrow" [ngClass]="{ 'rotate-arrow': isSubmenuOpen['guardianGrades'] }"></span>
+          </a>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('guardianGrades')">
+            <li>
+              <a routerLink="/guardian/grades/month" (click)="cancel()">
+                <span>{{ 'sidebar.grades_sub.monthly' | translate }}</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/guardian/grades/term" (click)="cancel()">
+                <span>{{ 'sidebar.grades_sub.term' | translate }}</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li>
+          <a routerLink="/guardian/reports/monthly" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-11.png" alt="" />
+            <span>{{ 'sidebar.report.gradesMonth' | translate }}</span>
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/guardian/attendance" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-11.png" alt="" />
+            <span>{{ 'sidebar.studentAttendance' | translate }}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

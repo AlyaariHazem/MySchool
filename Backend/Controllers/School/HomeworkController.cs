@@ -431,6 +431,35 @@ public class HomeworkController : ControllerBase
     // --- Guardian ---
 
     [Authorize(Roles = "GUARDIAN")]
+    [HttpGet("guardian/tasks")]
+    public async Task<ActionResult<APIResponse>> GetGuardianAllTasks([FromQuery] string? filter, CancellationToken cancellationToken = default)
+    {
+        var response = new APIResponse();
+        try
+        {
+            var uid = CurrentUserId;
+            var guardianId = await _unitOfWork.Homework.GetGuardianIdByUserIdAsync(uid!, cancellationToken);
+            if (!guardianId.HasValue)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.Forbidden;
+                return StatusCode((int)HttpStatusCode.Forbidden, response);
+            }
+
+            response.Result = await _unitOfWork.Homework.ListAllGuardianStudentTasksAsync(guardianId.Value, filter, cancellationToken);
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
+    [Authorize(Roles = "GUARDIAN")]
     [HttpGet("guardian/students/{studentId:int}/tasks")]
     public async Task<ActionResult<APIResponse>> GetGuardianStudentTasks(int studentId, [FromQuery] string? filter, CancellationToken cancellationToken = default)
     {

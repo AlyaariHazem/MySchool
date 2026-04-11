@@ -24,6 +24,10 @@ public interface IHomeworkRepository
     Task<StudentHomeworkDetailDto?> SubmitStudentTaskAsync(int studentId, int homeworkTaskId, StudentSubmitHomeworkDto dto, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<StudentHomeworkListItemDto>> ListGuardianStudentTasksAsync(int guardianId, int studentId, string? filter, CancellationToken cancellationToken = default);
+
+    /// <summary>All homework submissions for students linked to this guardian (one row per submission).</summary>
+    Task<IReadOnlyList<GuardianStudentHomeworkRowDto>> ListAllGuardianStudentTasksAsync(int guardianId, string? filter, CancellationToken cancellationToken = default);
+
     Task<StudentHomeworkDetailDto?> GetGuardianStudentTaskDetailAsync(int guardianId, int studentId, int homeworkTaskId, CancellationToken cancellationToken = default);
 
     Task<HomeworkActivitySummaryDto> GetActivitySummaryAsync(int yearId, int termId, int? classId, int? teacherId, CancellationToken cancellationToken = default);

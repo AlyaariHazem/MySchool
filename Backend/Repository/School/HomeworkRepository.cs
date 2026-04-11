@@ -458,6 +458,29 @@ public class HomeworkRepository : IHomeworkRepository
         };
     }
 
+    private static GuardianStudentHomeworkRowDto MapGuardianAggregateRow(HomeworkSubmission s, HomeworkTask t, Student student)
+    {
+        var item = MapStudentListItem(s, t, guardianView: true);
+        return new GuardianStudentHomeworkRowDto
+        {
+            HomeworkTaskID = item.HomeworkTaskID,
+            HomeworkSubmissionID = item.HomeworkSubmissionID,
+            Title = item.Title,
+            SubjectName = item.SubjectName,
+            ClassName = item.ClassName,
+            DivisionName = item.DivisionName,
+            DueDateUtc = item.DueDateUtc,
+            SubmissionRequired = item.SubmissionRequired,
+            Status = item.Status,
+            SubmittedAtUtc = item.SubmittedAtUtc,
+            TeacherFeedback = item.TeacherFeedback,
+            Score = item.Score,
+            FeedbackPublished = item.FeedbackPublished,
+            StudentID = student.StudentID,
+            StudentName = FormatName(student.FullName)
+        };
+    }
+
     public async Task<IReadOnlyList<StudentHomeworkListItemDto>> ListStudentTasksAsync(int studentId, string? filter, CancellationToken cancellationToken = default)
     {
         var utcToday = DateTime.UtcNow.Date;
@@ -590,6 +613,34 @@ public class HomeworkRepository : IHomeworkRepository
         return list
             .Where(x => x.HomeworkTask != null && StudentFilterMatch(filter, x, x.HomeworkTask, utcToday))
             .Select(x => MapStudentListItem(x, x.HomeworkTask!, guardianView: true))
+            .OrderBy(x => x.DueDateUtc)
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<GuardianStudentHomeworkRowDto>> ListAllGuardianStudentTasksAsync(int guardianId, string? filter, CancellationToken cancellationToken = default)
+    {
+        var utcToday = DateTime.UtcNow.Date;
+        var studentIds = await _db.Students.AsNoTracking()
+            .Where(st => st.GuardianID == guardianId)
+            .Select(st => st.StudentID)
+            .ToListAsync(cancellationToken);
+        if (studentIds.Count == 0)
+            return Array.Empty<GuardianStudentHomeworkRowDto>();
+
+        var list = await _db.HomeworkSubmissions.AsNoTracking()
+            .Where(s => studentIds.Contains(s.StudentID))
+            .Include(s => s.Student)
+            .Include(s => s.HomeworkTask!)
+                .ThenInclude(t => t.Subject)
+            .Include(s => s.HomeworkTask!)
+                .ThenInclude(t => t.Class)
+            .Include(s => s.HomeworkTask!)
+                .ThenInclude(t => t.Division)
+            .ToListAsync(cancellationToken);
+
+        return list
+            .Where(x => x.HomeworkTask != null && x.Student != null && StudentFilterMatch(filter, x, x.HomeworkTask, utcToday))
+            .Select(x => MapGuardianAggregateRow(x, x.HomeworkTask!, x.Student))
             .OrderBy(x => x.DueDateUtc)
             .ToList();
     }

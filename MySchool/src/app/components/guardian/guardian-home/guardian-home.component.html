@@ -1,0 +1,13 @@
+<div class="guardian-home" [attr.dir]="dir$ | async">
+  <section class="guardian-home__hero">
+    <div class="guardian-home__hero-inner">
+      <div class="guardian-home__hero-text">
+        <h1 class="guardian-home__title">مرحباً{{ displayName ? '، ' + displayName : '' }}</h1>
+        <p class="guardian-home__subtitle">بوابة ولي الأمر — يمكنك متابعة الإشعارات والجدول والواجبات والامتحانات من القائمة.</p>
+      </div>
+      <div class="guardian-home__avatar" aria-hidden="true">
+        <span class="guardian-home__avatar-letter">{{ avatarLetter(displayName) }}</span>
+      </div>
+    </div>
+  </section>
+</div>

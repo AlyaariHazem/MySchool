@@ -58,6 +58,12 @@ export class LoginComponent {
             if (name) {
               this.toastr.success('مرحبا بك : ' + name, '', { positionClass: 'toast-center-center' });
             }
+          } else if (user.userType === 'GUARDIAN') {
+            this.authService.router.navigateByUrl('/guardian/home');
+            const name = response.managerName || response.userName || '';
+            if (name) {
+              this.toastr.success('مرحبا بك : ' + name, '', { positionClass: 'toast-center-center' });
+            }
           } else {
             this.authService.router.navigateByUrl('school');
             console.log(response);

@@ -1,0 +1,16 @@
+@import '../../school/exams/exams-admin.component.scss';
+
+.guardian-stub-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.guardian-stub-page__message {
+  margin: 0;
+  padding: 0.5rem 0 0;
+  color: #64748b;
+  line-height: 1.6;
+}

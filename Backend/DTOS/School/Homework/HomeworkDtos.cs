@@ -121,6 +121,13 @@ public class StudentHomeworkListItemDto
     public bool FeedbackPublished { get; set; }
 }
 
+/// <summary>Homework row for a guardian viewing all linked students' tasks.</summary>
+public class GuardianStudentHomeworkRowDto : StudentHomeworkListItemDto
+{
+    public int StudentID { get; set; }
+    public string? StudentName { get; set; }
+}
+
 public class StudentHomeworkDetailDto : StudentHomeworkListItemDto
 {
     public string? Description { get; set; }
