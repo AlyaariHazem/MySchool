@@ -24,11 +24,10 @@ const routes: Routes = [
       { path: 'homework', component: GuardianHomeworkComponent, data: { breadcrumb: 'الواجبات' } },
       {
         path: 'grades/month',
-        component: GuardianStubPageComponent,
+        component: GuardianMonthlyReportsComponent,
         data: {
           breadcrumb: 'الدرجات الشهرية',
-          stubTitle: 'الدرجات الشهرية للأبناء',
-          stubMessage: 'عرض الدرجات الشهرية لأبنائك سيتم تفعيله في تحديث قادم.',
+          pageTitle: 'الدرجات الشهرية للأبناء',
         },
       },
       {
@@ -43,7 +42,7 @@ const routes: Routes = [
       {
         path: 'reports/monthly',
         component: GuardianMonthlyReportsComponent,
-        data: { breadcrumb: 'تقارير شهرية' },
+        data: { breadcrumb: 'تقارير شهرية', pageTitle: 'تقارير شهرية' },
       },
       { path: 'attendance', component: GuardianAttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       { path: 'not-found', component: PageNotFoundComponent },

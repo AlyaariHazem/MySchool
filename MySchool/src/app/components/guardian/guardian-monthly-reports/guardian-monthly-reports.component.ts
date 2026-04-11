@@ -1,4 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Data } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { ToastrService } from 'ngx-toastr';
@@ -26,8 +28,15 @@ export class GuardianMonthlyReportsComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly dir$ = this.store.select(selectLanguage).pipe(map((l) => (l === 'ar' ? 'rtl' : 'ltr')));
+
+  /** Shown in header; overridden by route `data.pageTitle` (grades/month vs reports/monthly). */
+  pageTitle = 'تقارير شهرية';
+  pageSubtitle =
+    'الدرجات الشهرية المسجّلة لأبنائك حسب السنة والفصل والشهر (اترك الحقول فارغة لعرض كل ما يخص السنة النشطة).';
 
   readonly months: IMonth[] = MONTHS;
 
@@ -46,6 +55,9 @@ export class GuardianMonthlyReportsComponent implements OnInit {
   loading = false;
 
   ngOnInit(): void {
+    this.applyPageMeta(this.route.snapshot.data);
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((d) => this.applyPageMeta(d));
+
     this.yearsApi.getAllYears().subscribe({
       next: (years) => {
         this.yearList = years ?? [];
@@ -70,6 +82,17 @@ export class GuardianMonthlyReportsComponent implements OnInit {
     });
   }
 
+  private applyPageMeta(d: Data): void {
+    const title = d['pageTitle'];
+    if (typeof title === 'string' && title.trim()) {
+      this.pageTitle = title.trim();
+    }
+    const sub = d['pageSubtitle'];
+    if (typeof sub === 'string' && sub.trim()) {
+      this.pageSubtitle = sub.trim();
+    }
+  }
+
   load(): void {
     const v = this.filterForm.getRawValue();
     const yearId = v.yearID ?? undefined;
@@ -87,11 +110,5 @@ export class GuardianMonthlyReportsComponent implements OnInit {
         this.toastr.error('تعذر تحميل التقارير الشهرية');
       },
     });
-  }
-
-  gradeLine(row: GuardianMonthlyGradeRow): string {
-    return row.grades
-      .map((g) => `${g.gradeTypeName ?? '—'}: ${g.maxGrade != null ? g.maxGrade : '—'}`)
-      .join('  ·  ');
   }
 }

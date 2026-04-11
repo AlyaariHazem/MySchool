@@ -1,82 +1,139 @@
-<div class="teacher-exams p-3">
-  <h2 class="mb-3">امتحاناتي</h2>
-  @if (loading) {
-    <p>جاري التحميل…</p>
-  } @else {
-    <div class="table-responsive mb-4">
-      <table class="table table-sm table-striped">
-        <thead>
+<div id="teacher-exams-page" class="exams-page teacher-exams-page" [attr.dir]="dir$ | async">
+  <div class="exams-card">
+    <header class="exams-header">
+      <h2 class="exams-title">امتحاناتي</h2>
+      <p class="exams-subtitle">{{ pageSubtitle }}</p>
+    </header>
+
+    <div class="table-wrap">
+      <p-table
+        [value]="list"
+        [loading]="loading"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="p-datatable-sm exams-table">
+        <ng-template pTemplate="header">
           <tr>
             <th>التاريخ</th>
             <th>النوع</th>
             <th>المادة</th>
             <th>الشعبة</th>
             <th>درجة النجاح</th>
-            <th></th>
+            <th>النتائج</th>
+            <th class="col-actions">إجراءات</th>
           </tr>
-        </thead>
-        <tbody>
-          @for (row of list; track row.scheduledExamID) {
-            <tr>
-              <td>{{ row.examDate | date: 'mediumDate' }}</td>
-              <td>{{ row.examTypeName }}</td>
-              <td>{{ row.subjectName }}</td>
-              <td>{{ row.className }} / {{ row.divisionName }}</td>
-              <td>{{ row.passingMarks }} / {{ row.totalMarks }}</td>
-              <td>
-                <button type="button" class="btn btn-sm btn-primary" (click)="openResults(row)">إدخال الدرجات</button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>
+              {{ row.examDate | date: 'mediumDate' }}
+              @if (row.startTime || row.endTime) {
+                <span class="teacher-exams-time"> {{ row.startTime }}–{{ row.endTime }}</span>
+              }
+            </td>
+            <td>{{ row.examTypeName }}</td>
+            <td>{{ row.subjectName }}</td>
+            <td>{{ row.className }} / {{ row.divisionName }}</td>
+            <td>{{ row.passingMarks }} / {{ row.totalMarks }}</td>
+            <td>
+              <span
+                class="exams-status"
+                [class.exams-status--on]="row.resultsPublished"
+                [class.exams-status--off]="!row.resultsPublished">
+                {{ row.resultsPublished ? 'منشور' : 'مسودة' }}
+              </span>
+            </td>
+            <td class="col-actions">
+              <p-button label="إدخال الدرجات" size="small" severity="success" (onClick)="openResults(row)" />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7">لا توجد امتحانات مسندة إليك أو لا توجد بيانات.</td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
-  }
+  </div>
 
   @if (selected) {
-    <div class="card p-3">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h4>درجات: {{ selected.subjectName }} — {{ selected.examDate | date: 'mediumDate' }}</h4>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-success btn-sm" (click)="saveMarks()">حفظ</button>
-          <button type="button" class="btn btn-outline-primary btn-sm" (click)="publish(true)">نشر النتائج</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="publish(false)">إلغاء نشر النتائج</button>
+    <div class="exams-card teacher-exams-grades-card">
+      <header class="teacher-exams-grades-header">
+        <div class="teacher-exams-grades-heading">
+          <h3 class="teacher-exams-panel-title">إدخال درجات الامتحان</h3>
+          <p class="exams-subtitle teacher-exams-grades-meta">
+            {{ selected.subjectName }} — {{ selected.examDate | date: 'mediumDate' }}
+            @if (selected.startTime || selected.endTime) {
+              <span> {{ selected.startTime }}–{{ selected.endTime }}</span>
+            }
+            — {{ selected.className }} / {{ selected.divisionName }}
+          </p>
         </div>
+        <div class="teacher-exams-grades-actions">
+          <p-button type="button" label="حفظ" icon="pi pi-save" severity="success" (onClick)="saveMarks()" />
+          <p-button type="button" label="نشر النتائج" icon="pi pi-upload" (onClick)="publish(true)" />
+          <p-button
+            type="button"
+            label="إلغاء نشر النتائج"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="publish(false)" />
+          <p-button type="button" label="إغلاق" icon="pi pi-angle-left" severity="secondary" [outlined]="true" (onClick)="closeResults()" />
+        </div>
+      </header>
+
+      <div class="table-wrap">
+        <p-table
+          [value]="results"
+          [loading]="loadingResults"
+          [tableStyle]="{ 'min-width': '100%' }"
+          styleClass="p-datatable-sm exams-table teacher-exams-results-table">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>الطالب</th>
+              <th class="col-score">الدرجة</th>
+              <th class="col-absent">غائب</th>
+              <th>ملاحظات</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-r>
+            <tr>
+              <td>{{ r.studentName }}</td>
+              <td class="col-score">
+                <input
+                  type="number"
+                  class="exams-input teacher-exams-score-input"
+                  [(ngModel)]="r.score"
+                  [disabled]="r.isAbsent"
+                  [title]="'درجة: ' + (r.studentName || '')"
+                  [attr.aria-label]="'درجة: ' + (r.studentName || '')" />
+              </td>
+              <td class="col-absent">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="r.isAbsent"
+                  class="teacher-exams-absent-check"
+                  [title]="'غائب: ' + (r.studentName || '')"
+                  [attr.aria-label]="'غائب: ' + (r.studentName || '')" />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="exams-input"
+                  [(ngModel)]="r.remarks"
+                  [title]="'ملاحظات: ' + (r.studentName || '')"
+                  [attr.aria-label]="'ملاحظات: ' + (r.studentName || '')" />
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4">لا يوجد طلاب مسجّلون في هذه الشعبة، أو تعذّر تحميل القائمة.</td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
-      @if (loadingResults) {
-        <p>جاري تحميل قائمة الطلاب…</p>
-      } @else if (results.length === 0) {
-        <p class="text-muted mb-0">لا يوجد طلاب مسجّلون في هذه الشعبة، أو تعذّر تحميل القائمة.</p>
-      } @else {
-        <div class="table-responsive">
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                <th>الطالب</th>
-                <th>الدرجة</th>
-                <th>غائب</th>
-                <th>ملاحظات</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (r of results; track r.examResultID) {
-                <tr>
-                  <td>{{ r.studentName }}</td>
-                  <td>
-                    <input type="number" class="form-control form-control-sm" style="width: 6rem" [(ngModel)]="r.score" [disabled]="r.isAbsent" />
-                  </td>
-                  <td>
-                    <input type="checkbox" [(ngModel)]="r.isAbsent" />
-                  </td>
-                  <td>
-                    <input type="text" class="form-control form-control-sm" [(ngModel)]="r.remarks" />
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
     </div>
   }
 </div>

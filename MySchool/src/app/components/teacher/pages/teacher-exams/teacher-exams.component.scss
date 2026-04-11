@@ -1,3 +1,93 @@
-.teacher-exams {
-  max-width: 1100px;
+@import '../../../school/exams/exams-admin.component.scss';
+
+.teacher-exams-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.teacher-exams-page .exams-subtitle {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.teacher-exams-toolbar {
+  align-items: center;
+}
+
+.teacher-exams-toolbar-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #64748b;
+  flex: 1;
+  min-width: min(100%, 12rem);
+}
+
+.teacher-exams-time {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+::ng-deep .teacher-exams-page .col-actions .p-button {
+  white-space: nowrap;
+}
+
+.teacher-exams-grades-card {
+  margin-top: 1.25rem;
+}
+
+.teacher-exams-grades-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border, #e2e8f0);
+}
+
+.teacher-exams-panel-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-color, #1a1a1a);
+}
+
+.teacher-exams-grades-meta {
+  margin: 0 !important;
+}
+
+.teacher-exams-grades-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.teacher-exams-score-input {
+  width: 6rem;
+  min-height: 2.35rem;
+  max-width: 100%;
+}
+
+.teacher-exams-results-table .col-score {
+  width: 7rem;
+}
+
+.teacher-exams-results-table .col-absent {
+  width: 4rem;
+  text-align: center;
+}
+
+.teacher-exams-absent-check {
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+  accent-color: #009879;
 }

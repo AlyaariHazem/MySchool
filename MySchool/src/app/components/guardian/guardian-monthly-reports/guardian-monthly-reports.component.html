@@ -4,8 +4,8 @@
   [attr.dir]="dir$ | async">
   <div class="exams-card">
     <header class="exams-header">
-      <h2 class="exams-title">تقارير شهرية</h2>
-      <p class="exams-subtitle">الدرجات الشهرية المسجّلة لأبنائك حسب السنة والفصل والشهر (اترك الحقول فارغة لعرض كل ما يخص السنة النشطة).</p>
+        <h2 class="exams-title">{{ pageTitle }}</h2>
+      <p class="exams-subtitle">{{ pageSubtitle }}</p>
     </header>
 
     <div class="filters-toolbar">
@@ -88,7 +88,18 @@
             <td>{{ row.className || '—' }}</td>
             <td>{{ row.subjectName }}</td>
             <td class="grades-cell">
-              <span class="grades-text">{{ gradeLine(row) }}</span>
+              @if (row.grades?.length) {
+                <ul class="grade-chips" aria-label="تفاصيل الدرجات">
+                  @for (g of row.grades; track g.gradeTypeID) {
+                    <li class="grade-chip">
+                      <span class="grade-chip__label">{{ g.gradeTypeName || '—' }}</span>
+                      <span class="grade-chip__value">{{ g.maxGrade != null ? g.maxGrade : '—' }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <span class="grades-empty">—</span>
+              }
             </td>
           </tr>
         </ng-template>

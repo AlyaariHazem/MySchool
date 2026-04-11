@@ -1,5 +1,22 @@
 @import '../../students/student-homework/student-homework.component.scss';
 
+.guardian-homework-page .exams-subtitle {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.guardian-homework-page .exams-header {
+  margin-bottom: 1rem;
+}
+
+.guardian-hw-filters {
+  flex: 1;
+  min-width: min(100%, 280px);
+}
+
 .guardian-hw-student-line {
   margin-bottom: 0.5rem;
 }

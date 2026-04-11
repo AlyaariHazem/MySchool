@@ -18,13 +18,57 @@
 }
 
 .grades-cell {
-  max-width: 28rem;
-  white-space: normal;
-  word-break: break-word;
+  min-width: 12rem;
+  max-width: 36rem;
+  vertical-align: top;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
 }
 
-.grades-text {
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: #1e293b;
+.grades-empty {
+  color: #94a3b8;
 }
+
+.grade-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.grade-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
+  min-width: 4.5rem;
+  max-width: 10rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.grade-chip__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #64748b;
+  word-break: break-word;
+  text-align: center;
+}
+
+.grade-chip__value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0f172a;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+

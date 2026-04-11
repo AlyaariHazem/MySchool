@@ -1,11 +1,15 @@
-<div id="guardian-homework-page" class="exams-page student-homework-page guardian-homework-page">
+<div
+  id="guardian-homework-page"
+  class="exams-page student-homework-page guardian-homework-page"
+  [attr.dir]="dir$ | async">
   <div class="exams-card">
     <header class="exams-header">
       <h2 class="exams-title">واجبات الأبناء</h2>
+      <p class="exams-subtitle">{{ pageSubtitle }}</p>
     </header>
 
     <div class="filters-toolbar">
-      <form [formGroup]="filterForm" class="filters-grid" novalidate>
+      <form [formGroup]="filterForm" class="filters-grid guardian-hw-filters" novalidate>
         <div class="filter-field filter-field--grow">
           <p-floatlabel class="w-full block" variant="on">
             <p-select
@@ -13,13 +17,14 @@
               class="w-full"
               styleClass="w-full exams-filter-control"
               size="small"
+              panelStyleClass="exams-select-panel"
               [options]="filterOptions"
               formControlName="view"
               optionLabel="label"
               optionValue="value"
               placeholder=" "
               (onChange)="load()" />
-            <label for="hw-guardian-view">عرض</label>
+            <label for="hw-guardian-view">تصفية العرض</label>
           </p-floatlabel>
         </div>
       </form>
@@ -36,10 +41,10 @@
         styleClass="p-datatable-sm exams-table">
         <ng-template pTemplate="header">
           <tr>
-            <th>الطالب</th>
-            <th>العنوان</th>
-            <th>المادة</th>
             <th>الاستحقاق</th>
+            <th>الطالب</th>
+            <th>المادة</th>
+            <th>العنوان</th>
             <th>الحالة</th>
             <th>الدرجة</th>
             <th class="col-actions">إجراءات</th>
@@ -47,16 +52,16 @@
         </ng-template>
         <ng-template pTemplate="body" let-row>
           <tr>
+            <td>{{ row.dueDateUtc | date: 'mediumDate' }} {{ row.dueDateUtc | date: 'shortTime' }}</td>
             <td>{{ row.studentName }}</td>
-            <td>{{ row.title }}</td>
             <td>{{ row.subjectName }}</td>
-            <td>{{ row.dueDateUtc | date: 'medium' }}</td>
+            <td>{{ row.title }}</td>
             <td>
               <span class="hw-status" [ngClass]="statusClass(row.status)">{{ statusLabel(row.status) }}</span>
             </td>
             <td>{{ row.score != null ? row.score : '—' }}</td>
             <td class="col-actions">
-              <p-button label="التفاصيل" size="small" severity="success" (onClick)="openDetail(row)" />
+              <p-button label="عرض التفاصيل" size="small" severity="success" (onClick)="openDetail(row)" />
             </td>
           </tr>
         </ng-template>

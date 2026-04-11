@@ -1,7 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import { Store } from '@ngrx/store';
 import { ToastrService } from 'ngx-toastr';
+import { map } from 'rxjs';
 
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 import { HomeworkService } from '../../../core/services/homework.service';
 import {
   GuardianStudentHomeworkRow,
@@ -18,6 +21,12 @@ export class GuardianHomeworkComponent implements OnInit {
   private readonly homework = inject(HomeworkService);
   private readonly toastr = inject(ToastrService);
   private readonly fb = inject(FormBuilder);
+  private readonly store = inject(Store);
+
+  readonly dir$ = this.store.select(selectLanguage).pipe(map((l) => (l === 'ar' ? 'rtl' : 'ltr')));
+
+  readonly pageSubtitle =
+    'عرض مواعيد الاستحقاق وحالة التسليم لجميع الطلاب المرتبطين بحسابك، مع إمكانية فتح التفاصيل لكل واجب.';
 
   readonly filterOptions: { label: string; value: string }[] = [
     { label: 'الكل', value: 'all' },

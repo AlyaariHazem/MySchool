@@ -1,6 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { ToastrService } from 'ngx-toastr';
+import { map } from 'rxjs';
 
+import { selectLanguage } from 'app/core/store/language/language.selectors';
 import { ExamsService } from '../../../../core/services/exams.service';
 import { ExamResultRow, ScheduledExamList } from '../../../../core/models/exams.model';
 
@@ -12,6 +15,12 @@ import { ExamResultRow, ScheduledExamList } from '../../../../core/models/exams.
 export class TeacherExamsComponent implements OnInit {
   private readonly exams = inject(ExamsService);
   private readonly toastr = inject(ToastrService);
+  private readonly store = inject(Store);
+
+  readonly dir$ = this.store.select(selectLanguage).pipe(map((l) => (l === 'ar' ? 'rtl' : 'ltr')));
+
+  readonly pageSubtitle =
+    'الامتحانات المجدولة للمواد والشعب التي تدرّستها.';
 
   list: ScheduledExamList[] = [];
   loading = false;
@@ -70,5 +79,10 @@ export class TeacherExamsComponent implements OnInit {
       },
       error: () => this.toastr.error('تعذر تحديث النشر'),
     });
+  }
+
+  closeResults(): void {
+    this.selected = null;
+    this.results = [];
   }
 }
