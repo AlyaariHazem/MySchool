@@ -4,6 +4,8 @@ export interface MonthlyResult {
 
     schoolName: string;
     schoolURL?: string;
+    /** Absolute logo URL from API (Report/monthly). */
+    schoolLogoUrl?: string;
 
     year?: string;
     month?: string;

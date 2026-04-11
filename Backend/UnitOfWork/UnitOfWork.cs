@@ -79,7 +79,7 @@ public class UnitOfWork : IUnitOfWork
         Months = new MonthRepository(_tenantContext, _mapper);
         Employees = new EmployeeRepository(_tenantContext, Users);
         AccountStudentGuardians = new AccountStudentGuardianRepository(_tenantContext, _mapper);
-        Reports = new ReportRepository(_tenantContext, _htmlSanitizer);
+        Reports = new ReportRepository(_tenantContext, _htmlSanitizer, _apiBaseUrl);
         MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper, _auditTrail, _apiBaseUrl);
         TermlyGrades = new TermlyGradeRepository(_tenantContext, _mapper, _auditTrail, _apiBaseUrl);
         Dashboard = new DashboardRepository(_tenantContext, _adminContext, _tenantInfo, _httpContextAccessor);

@@ -26,7 +26,11 @@ const routes: Routes = [
         data: { breadcrumb: 'مساحة المعلم' },
       },
       { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
-      { path: 'schedule', component: WeeklyScheduleComponent, data: { breadcrumb: 'جدول الحصص الأسبوعي' } },
+      {
+        path: 'schedule',
+        component: WeeklyScheduleComponent,
+        data: { breadcrumb: 'جدول الحصص الأسبوعي', teacherPersonalSchedule: true },
+      },
       { path: 'exams', component: TeacherExamsComponent, data: { breadcrumb: 'الامتحانات' } },
       { path: 'homework', component: TeacherHomeworkComponent, data: { breadcrumb: 'الواجبات' } },
       { path: 'grades/month', component: GradesMonthComponent, data: { breadcrumb: 'الدرجات الشهرية' } },

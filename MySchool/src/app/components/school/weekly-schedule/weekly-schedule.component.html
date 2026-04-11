@@ -6,7 +6,7 @@
       <div class="tabcontent">
         <!-- Filters -->
         <form [formGroup]="filterForm" class="filters-container">
-          <div class="filter-group">
+          <div class="filter-group" *ngIf="!teacherPersonalSchedule">
             <p-floatLabel class="w-full" variant="on">
               <p-select 
                 class="w-full" 
@@ -36,7 +36,7 @@
             </p-floatLabel>
           </div>
 
-          <div class="filter-group">
+          <div class="filter-group" *ngIf="!teacherPersonalSchedule">
             <p-floatLabel class="w-full" variant="on">
               <p-select 
                 class="w-full" 
@@ -56,6 +56,7 @@
         <!-- Action Buttons -->
         <div class="action-buttons">
           <p-button 
+            *ngIf="!teacherPersonalSchedule"
             label="حفظ التغيرات" 
             icon="pi pi-check" 
             severity="success"
@@ -72,12 +73,15 @@
         </div>
 
         <!-- Schedule Grid -->
-        <div class="schedule-container" *ngIf="selectedClassId && selectedTermId" (click)="closeAllMenus()">
+        <div class="schedule-container" *ngIf="teacherPersonalSchedule ? selectedTermId : (selectedClassId && selectedTermId)" (click)="closeAllMenus()">
           <!-- Print Header (only visible when printing) -->
           <div class="print-header">
-            <div class="print-title">
+            <div class="print-title" *ngIf="!teacherPersonalSchedule">
               جدول الحصص الأسبوعي للصف {{ getSelectedClassName() }}
               <span *ngIf="getSelectedDivisionName()"> - الشعبة {{ getSelectedDivisionName() }}</span>
+            </div>
+            <div class="print-title" *ngIf="teacherPersonalSchedule">
+              جدول حصصي الأسبوعي — {{ getSelectedTermName() }}
             </div>
           </div>
           
@@ -101,6 +105,23 @@
               <div class="grid-cell schedule-cell" *ngFor="let period of periods">
                 <div class="cell-content">
                   <!-- Display teacher and subject if assigned -->
+                  <ng-container *ngIf="teacherPersonalSchedule; else adminScheduleCell">
+                    <div *ngIf="getCell(day.value, period.periodNumber)?.subjectID || getCell(day.value, period.periodNumber)?.teacherID" class="cell-assigned">
+                      <div class="assigned-subject">
+                        <i class="pi pi-book"></i>
+                        <span>{{ getCell(day.value, period.periodNumber)?.subjectName }}</span>
+                      </div>
+                      <div class="assigned-teacher">
+                        <i class="pi pi-building"></i>
+                        <span>{{ getCell(day.value, period.periodNumber)?.className }}</span>
+                        <span *ngIf="getCell(day.value, period.periodNumber)?.divisionName"> — {{ getCell(day.value, period.periodNumber)?.divisionName }}</span>
+                      </div>
+                    </div>
+                    <div *ngIf="!getCell(day.value, period.periodNumber)?.subjectID && !getCell(day.value, period.periodNumber)?.teacherID" class="cell-empty">
+                      <div class="empty-text">لا يوجد حصة</div>
+                    </div>
+                  </ng-container>
+                  <ng-template #adminScheduleCell>
                   <div *ngIf="getCell(day.value, period.periodNumber)?.teacherID" class="cell-assigned">
                     <div class="assigned-teacher">
                       <i class="pi pi-user"></i>
@@ -117,9 +138,10 @@
                     <div class="empty-text">لا يوجد حصة</div>
                     <div class="empty-text">لا يوجد معلم</div>
                   </div>
+                  </ng-template>
                   
                   <!-- Three dots menu -->
-                  <div class="cell-actions" (click)="$event.stopPropagation(); toggleMenu(day.value, period.periodNumber)">
+                  <div class="cell-actions" *ngIf="!teacherPersonalSchedule" (click)="$event.stopPropagation(); toggleMenu(day.value, period.periodNumber)">
                     <i class="pi pi-ellipsis-v"></i>
                     
                     <!-- Dropdown Menu -->
@@ -159,9 +181,10 @@
         </div>
 
         <!-- Empty State -->
-        <div *ngIf="!selectedClassId || !selectedTermId" class="empty-state">
+        <div *ngIf="teacherPersonalSchedule ? !selectedTermId : (!selectedClassId || !selectedTermId)" class="empty-state">
           <i class="pi pi-calendar-times"></i>
-          <p>يرجى اختيار الصف والفصل الدراسي لعرض الجدول</p>
+          <p *ngIf="!teacherPersonalSchedule">يرجى اختيار الصف والفصل الدراسي لعرض الجدول</p>
+          <p *ngIf="teacherPersonalSchedule">يرجى اختيار الفصل الدراسي لعرض جدول حصصك</p>
         </div>
       </div>
     </div>

@@ -16,11 +16,20 @@ public class ReportRepository : IReportRepository
 {
     private readonly TenantDbContext _context;
     private readonly HtmlSanitizationService _sanitizer;
-    
-    public ReportRepository(TenantDbContext context, HtmlSanitizationService sanitizer)
+    private readonly IApiBaseUrlProvider _apiBaseUrl;
+
+    public ReportRepository(TenantDbContext context, HtmlSanitizationService sanitizer, IApiBaseUrlProvider apiBaseUrl)
     {
         _context = context;
         _sanitizer = sanitizer;
+        _apiBaseUrl = apiBaseUrl;
+    }
+
+    private static string? BuildSchoolLogoUrl(global::Backend.Models.School? school, IApiBaseUrlProvider api)
+    {
+        if (school == null || string.IsNullOrWhiteSpace(school.ImageURL))
+            return null;
+        return api.UploadsFile($"School/School_{school.SchoolID}_{school.ImageURL}");
     }
 
     public async Task<Result<List<MonthlyResult>>> MonthlyReportsAsync(MonthlyReportQueryDTO query, int? guardianId = null)
@@ -80,6 +89,7 @@ public class ReportRepository : IReportRepository
 
                 SchoolName = g.First().Year.School.SchoolName,
                 SchoolURL = g.First().Year.School.Website,
+                SchoolLogoUrl = BuildSchoolLogoUrl(g.First().Year.School, _apiBaseUrl),
 
                 Year = $"{g.First().Year.YearDateStart:yyyy}-{(g.First().Year.YearDateEnd ?? DateTime.MinValue).ToString("yyyy")}",
                 Term = g.First().Term.Name,

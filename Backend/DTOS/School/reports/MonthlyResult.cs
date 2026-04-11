@@ -12,6 +12,8 @@ public class MonthlyResult
 
     public string SchoolName  { get; set; }
     public string? SchoolURL  { get; set; }
+    /// <summary>Absolute URL to the school logo under uploads (same pattern as school settings).</summary>
+    public string? SchoolLogoUrl { get; set; }
 
     public string? Year   { get; set; }
     public string? Month  { get; set; }

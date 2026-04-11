@@ -34,6 +34,11 @@ export class WeeklyScheduleService {
     return this.API.getRequest<WeeklyScheduleGrid>(`WeeklySchedule/grid/class/${classId}/term/${termId}${divisionParam}`);
   }
 
+  /** TEACHER role: merged grid for the logged-in teacher (active year), single term. */
+  GetMyScheduleGrid(termId: number): Observable<ApiResponse<WeeklyScheduleGrid>> {
+    return this.API.getRequest<WeeklyScheduleGrid>(`WeeklySchedule/grid/teacher/me?termId=${termId}`);
+  }
+
   // Add new schedule
   Add(schedule: AddWeeklySchedule): Observable<ApiResponse<any>> {
     return this.API.postRequest<any>("WeeklySchedule", schedule);

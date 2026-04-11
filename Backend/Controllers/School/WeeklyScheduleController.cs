@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Backend.Controllers.School
 {
@@ -104,6 +105,54 @@ namespace Backend.Controllers.School
             try
             {
                 var grid = await _unitOfWork.WeeklySchedules.GetScheduleGridAsync(classId, termId, divisionId);
+                response.Result = grid;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+        /// <summary>Logged-in teacher's weekly grid for the active year (all classes), for the given term.</summary>
+        [Authorize(Roles = "TEACHER")]
+        [HttpGet("grid/teacher/me")]
+        public async Task<ActionResult<APIResponse>> GetMyScheduleGrid([FromQuery] int termId, CancellationToken cancellationToken = default)
+        {
+            var response = new APIResponse();
+            try
+            {
+                if (termId <= 0)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMasseges.Add("termId is required.");
+                    return BadRequest(response);
+                }
+
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.Unauthorized;
+                    response.ErrorMasseges.Add("User id not found on token.");
+                    return Unauthorized(response);
+                }
+
+                var teacherId = await _unitOfWork.Teachers.GetTeacherIdByUserIdAsync(userId, cancellationToken);
+                if (!teacherId.HasValue)
+                {
+                    response.IsSuccess = false;
+                    response.statusCode = HttpStatusCode.Forbidden;
+                    response.ErrorMasseges.Add("No teacher profile is linked to this account.");
+                    return StatusCode((int)HttpStatusCode.Forbidden, response);
+                }
+
+                var grid = await _unitOfWork.WeeklySchedules.GetScheduleGridForTeacherAsync(teacherId.Value, termId);
                 response.Result = grid;
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);

@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs';
@@ -11,7 +12,7 @@ import { SubjectService } from '../core/services/subject.service';
 import { TeacherService } from '../core/services/teacher.service';
 import { CurriculmsPlanService } from '../core/services/curriculms-plan.service';
 import { DivisionService } from '../core/services/division.service';
-import {  AddWeeklySchedule, WeeklyScheduleGrid } from '../core/models/weekly-schedule.model';
+import { AddWeeklySchedule, WeeklySchedule, WeeklyScheduleGrid } from '../core/models/weekly-schedule.model';
 import { CLass } from '../core/models/class.model';
 import { Terms } from '../core/models/term.model';
 import { Subjects } from '../core/models/subjects.model';
@@ -25,6 +26,8 @@ interface ScheduleCell {
   teacherID?: number;
   subjectName?: string;
   teacherName?: string;
+  className?: string;
+  divisionName?: string;
 }
 
 interface Period {
@@ -50,9 +53,14 @@ export class WeeklyScheduleComponent implements OnInit {
   private teacherService = inject(TeacherService);
   private coursePlanService = inject(CurriculmsPlanService);
   private divisionService = inject(DivisionService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   form: FormGroup;
   filterForm: FormGroup;
+
+  /** True when opened from /teacher/schedule — shows only this teacher's slots (read-only). */
+  teacherPersonalSchedule = false;
 
   // Data
   classes: CLass[] = [];
@@ -126,9 +134,24 @@ export class WeeklyScheduleComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.teacherPersonalSchedule =
+      this.route.snapshot.data['teacherPersonalSchedule'] === true ||
+      this.router.url.includes('/teacher/schedule');
+    this.route.data.subscribe((d) => {
+      this.teacherPersonalSchedule =
+        d['teacherPersonalSchedule'] === true || this.router.url.includes('/teacher/schedule');
+    });
+
     this.loadInitialData();
-    
-    // Watch for filter changes
+
+    if (this.teacherPersonalSchedule) {
+      this.filterForm.get('termId')?.valueChanges.subscribe(() => {
+        this.loadTeacherPersonalSchedule();
+      });
+      return;
+    }
+
+    // Watch for filter changes (school admin: class / term / division)
     this.filterForm.get('classId')?.valueChanges.subscribe((classId) => {
       this.updateDivisionsByClass(classId);
       if (this.filterForm.get('classId')?.value && this.filterForm.get('termId')?.value) {
@@ -151,6 +174,26 @@ export class WeeklyScheduleComponent implements OnInit {
   }
 
   loadInitialData(): void {
+    if (this.teacherPersonalSchedule) {
+      this.termService.getAllTerm().subscribe({
+        next: (res) => {
+          if (res.result) {
+            this.terms = res.result;
+            if (this.terms.length > 0) {
+              const firstId = this.terms[0].termID;
+              this.filterForm.patchValue({ termId: firstId }, { emitEvent: false });
+              this.loadTeacherPersonalSchedule();
+            }
+          }
+        },
+        error: (err) => {
+          console.error('Error loading terms:', err);
+          this.toastr.error('فشل في تحميل الفصول الدراسية', 'خطأ');
+        }
+      });
+      return;
+    }
+
     // Load all system schedules for conflict checking
     this.scheduleService.GetAll().subscribe({
       next: (res) => {
@@ -319,86 +362,7 @@ export class WeeklyScheduleComponent implements OnInit {
         if (res.result) {
           this.scheduleGrid = res.result;
           console.log('Schedule loaded:', res.result.scheduleItems?.length || 0, 'items');
-          
-          // Merge periods from server with default periods - always show all periods
-          // NEVER clear periods array - always keep all default periods visible
-          if (res.result.periods && res.result.periods.length > 0) {
-            // Create a map of server periods by period number for quick lookup
-            const serverPeriodsMap = new Map<number, Period>(
-              res.result.periods.map((p: any) => [p.periodNumber, {
-                periodNumber: p.periodNumber,
-                periodName: p.periodName || '',
-                startTime: p.startTime || '',
-                endTime: p.endTime || ''
-              }])
-            );
-            
-            // Update existing periods with server data (time/name), but keep all periods
-            for (let i = 0; i < this.periods.length; i++) {
-              const period: Period = this.periods[i];
-              const serverPeriod = serverPeriodsMap.get(period.periodNumber);
-              if (serverPeriod) {
-                // Update time and name from server, but keep the period
-                period.periodName = serverPeriod.periodName || period.periodName;
-                period.startTime = serverPeriod.startTime || period.startTime;
-                period.endTime = serverPeriod.endTime || period.endTime;
-              }
-            }
-            
-            // Add any new periods from server that don't exist in our list
-            res.result.periods.forEach((serverPeriod: any) => {
-              if (!this.periods.find(p => p.periodNumber === serverPeriod.periodNumber)) {
-                this.periods.push({
-                  periodNumber: serverPeriod.periodNumber,
-                  periodName: serverPeriod.periodName,
-                  startTime: serverPeriod.startTime,
-                  endTime: serverPeriod.endTime
-                });
-              }
-            });
-            
-            // Sort periods by period number to maintain order
-            this.periods.sort((a, b) => a.periodNumber - b.periodNumber);
-          }
-          // If no periods from server, keep all default periods (always show all 6 periods)
-          
-          // Ensure we always have at least the default 6 periods
-          const defaultPeriods = [1, 2, 3, 4, 5, 6];
-          defaultPeriods.forEach(periodNum => {
-            if (!this.periods.find(p => p.periodNumber === periodNum)) {
-              const defaultTimes = [
-                { start: '08:00', end: '08:45' },
-                { start: '08:45', end: '09:30' },
-                { start: '09:30', end: '10:15' },
-                { start: '10:30', end: '11:15' },
-                { start: '11:15', end: '12:00' },
-                { start: '12:00', end: '12:45' }
-              ];
-              const periodNames = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة', 'السادسة'];
-              this.periods.push({
-                periodNumber: periodNum,
-                periodName: periodNames[periodNum - 1],
-                startTime: defaultTimes[periodNum - 1].start,
-                endTime: defaultTimes[periodNum - 1].end
-              });
-            }
-          });
-          this.periods.sort((a, b) => a.periodNumber - b.periodNumber);
-
-          // Initialize schedule cells from loaded data
-          this.scheduleCells.clear();
-          res.result.scheduleItems.forEach((item: any) => {
-            const key = `${item.dayOfWeek}-${item.periodNumber}`;
-            this.scheduleCells.set(key, {
-              dayOfWeek: item.dayOfWeek,
-              periodNumber: item.periodNumber,
-              subjectID: item.subjectID,
-              teacherID: item.teacherID,
-              subjectName: item.subjectName,
-              teacherName: item.teacherName
-            });
-          });
-
+          this.applyGridPayload(res.result);
           this.hasChanges = false;
         }
         this.isLoading = false;
@@ -408,6 +372,113 @@ export class WeeklyScheduleComponent implements OnInit {
         this.toastr.error('فشل في تحميل الجدول', 'خطأ');
         this.isLoading = false;
       }
+    });
+  }
+
+  loadTeacherPersonalSchedule(): void {
+    const termId = this.filterForm.get('termId')?.value;
+    if (!termId) {
+      this.scheduleCells.clear();
+      this.scheduleGrid = null;
+      this.selectedTermId = null;
+      return;
+    }
+
+    this.isLoading = true;
+    this.selectedTermId = termId;
+    this.selectedClassId = null;
+    this.selectedDivisionId = null;
+
+    this.scheduleService.GetMyScheduleGrid(termId).subscribe({
+      next: (res) => {
+        if (res.result) {
+          this.scheduleGrid = res.result;
+          this.applyGridPayload(res.result);
+          this.hasChanges = false;
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading teacher schedule:', err);
+        this.toastr.error('فشل في تحميل الجدول', 'خطأ');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private applyGridPayload(grid: WeeklyScheduleGrid): void {
+    if (grid.periods && grid.periods.length > 0) {
+      const serverPeriodsMap = new Map<number, Period>(
+        grid.periods.map((p: Period) => [
+          p.periodNumber,
+          {
+            periodNumber: p.periodNumber,
+            periodName: p.periodName || '',
+            startTime: p.startTime || '',
+            endTime: p.endTime || ''
+          }
+        ])
+      );
+
+      for (let i = 0; i < this.periods.length; i++) {
+        const period: Period = this.periods[i];
+        const serverPeriod = serverPeriodsMap.get(period.periodNumber);
+        if (serverPeriod) {
+          period.periodName = serverPeriod.periodName || period.periodName;
+          period.startTime = serverPeriod.startTime || period.startTime;
+          period.endTime = serverPeriod.endTime || period.endTime;
+        }
+      }
+
+      grid.periods.forEach((serverPeriod: Period) => {
+        if (!this.periods.find((p) => p.periodNumber === serverPeriod.periodNumber)) {
+          this.periods.push({
+            periodNumber: serverPeriod.periodNumber,
+            periodName: serverPeriod.periodName,
+            startTime: serverPeriod.startTime,
+            endTime: serverPeriod.endTime
+          });
+        }
+      });
+
+      this.periods.sort((a, b) => a.periodNumber - b.periodNumber);
+    }
+
+    const defaultPeriods = [1, 2, 3, 4, 5, 6];
+    defaultPeriods.forEach((periodNum) => {
+      if (!this.periods.find((p) => p.periodNumber === periodNum)) {
+        const defaultTimes = [
+          { start: '08:00', end: '08:45' },
+          { start: '08:45', end: '09:30' },
+          { start: '09:30', end: '10:15' },
+          { start: '10:30', end: '11:15' },
+          { start: '11:15', end: '12:00' },
+          { start: '12:00', end: '12:45' }
+        ];
+        const periodNames = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة', 'السادسة'];
+        this.periods.push({
+          periodNumber: periodNum,
+          periodName: periodNames[periodNum - 1],
+          startTime: defaultTimes[periodNum - 1].start,
+          endTime: defaultTimes[periodNum - 1].end
+        });
+      }
+    });
+    this.periods.sort((a, b) => a.periodNumber - b.periodNumber);
+
+    this.scheduleCells.clear();
+    grid.scheduleItems.forEach((item: WeeklySchedule) => {
+      const key = `${item.dayOfWeek}-${item.periodNumber}`;
+      this.scheduleCells.set(key, {
+        dayOfWeek: item.dayOfWeek,
+        periodNumber: item.periodNumber,
+        subjectID: item.subjectID ?? undefined,
+        teacherID: item.teacherID ?? undefined,
+        subjectName: item.subjectName,
+        teacherName: item.teacherName,
+        className: item.className,
+        divisionName: item.divisionName
+      });
     });
   }
 
@@ -577,6 +648,9 @@ export class WeeklyScheduleComponent implements OnInit {
   }
 
   saveChanges(): void {
+    if (this.teacherPersonalSchedule) {
+      return;
+    }
     if (!this.selectedClassId || !this.selectedTermId) {
       this.toastr.warning('يرجى اختيار الصف والفصل الدراسي', 'تحذير');
       return;
@@ -629,16 +703,18 @@ export class WeeklyScheduleComponent implements OnInit {
   }
 
   printSchedule(): void {
-    // Ensure schedule is loaded before printing
-    if (!this.selectedClassId || !this.selectedTermId) {
+    if (!this.selectedTermId) {
+      this.toastr.warning('يرجى اختيار الفصل الدراسي أولاً', 'تحذير');
+      return;
+    }
+    if (!this.teacherPersonalSchedule && !this.selectedClassId) {
       this.toastr.warning('يرجى اختيار الصف والفصل الدراسي أولاً', 'تحذير');
       return;
     }
 
     // Ensure data is loaded and DOM is updated
     setTimeout(() => {
-      // Force change detection to ensure bindings are updated
-      if (this.classes.length === 0) {
+      if (!this.teacherPersonalSchedule && this.classes.length === 0) {
         this.toastr.warning('جاري تحميل البيانات، يرجى المحاولة مرة أخرى', 'تحذير');
         return;
       }
@@ -681,5 +757,11 @@ export class WeeklyScheduleComponent implements OnInit {
     if (!this.selectedDivisionId || this.filteredDivisions.length === 0) return '';
     const selectedDivision = this.filteredDivisions.find(d => d.divisionID === this.selectedDivisionId);
     return selectedDivision?.divisionName || '';
+  }
+
+  getSelectedTermName(): string {
+    if (!this.selectedTermId || this.terms.length === 0) return '';
+    const t = this.terms.find((x) => x.termID === this.selectedTermId);
+    return t?.name || '';
   }
 }

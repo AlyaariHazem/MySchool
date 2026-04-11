@@ -191,6 +191,62 @@ namespace Backend.Repository.School
             };
         }
 
+        public async Task<WeeklyScheduleGridDTO> GetScheduleGridForTeacherAsync(int teacherId, int termId)
+        {
+            var activeYear = await _db.Years
+                .AsNoTracking()
+                .Where(y => y.Active)
+                .OrderBy(y => y.YearID)
+                .FirstOrDefaultAsync();
+            if (activeYear == null)
+                throw new InvalidOperationException("No active academic year found.");
+
+            var termEntity = await _db.Terms.FirstOrDefaultAsync(t => t.TermID == termId);
+            if (termEntity == null)
+                throw new InvalidOperationException("Term not found.");
+
+            var rows = await _db.WeeklySchedules
+                .AsNoTracking()
+                .Include(s => s.Class)
+                .Include(s => s.Term)
+                .Include(s => s.Subject)
+                .Include(s => s.Teacher)
+                .Include(s => s.Year)
+                .Include(s => s.Division)
+                .Where(s => s.TeacherID == teacherId
+                            && s.TermID == termId
+                            && s.YearID == activeYear.YearID)
+                .OrderBy(s => s.DayOfWeek)
+                .ThenBy(s => s.PeriodNumber)
+                .ToListAsync();
+
+            var schedules = rows.Select(MapToDTO).ToList();
+
+            var periods = schedules
+                .Select(s => new PeriodDTO
+                {
+                    PeriodNumber = s.PeriodNumber,
+                    PeriodName = s.PeriodName,
+                    StartTime = s.StartTime,
+                    EndTime = s.EndTime
+                })
+                .GroupBy(p => p.PeriodNumber)
+                .Select(g => g.First())
+                .OrderBy(p => p.PeriodNumber)
+                .ToList();
+
+            return new WeeklyScheduleGridDTO
+            {
+                ClassID = 0,
+                ClassName = string.Empty,
+                TermID = termId,
+                TermName = termEntity.Name ?? string.Empty,
+                YearID = activeYear.YearID,
+                ScheduleItems = schedules,
+                Periods = periods
+            };
+        }
+
         public async Task BulkUpdateAsync(List<AddWeeklyScheduleDTO> schedules)
         {
             if (schedules == null || !schedules.Any())
