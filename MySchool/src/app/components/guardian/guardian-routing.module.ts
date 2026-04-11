@@ -8,6 +8,7 @@ import { GuardianLayoutComponent } from './guardian-layout/guardian-layout.compo
 import { GuardianHomeworkComponent } from './guardian-homework/guardian-homework.component';
 import { GuardianExamsComponent } from './guardian-exams/guardian-exams.component';
 import { GuardianAttendanceComponent } from './guardian-attendance/guardian-attendance.component';
+import { GuardianMonthlyReportsComponent } from './guardian-monthly-reports/guardian-monthly-reports.component';
 import { GuardianStubPageComponent } from './guardian-stub-page/guardian-stub-page.component';
 
 const routes: Routes = [
@@ -41,12 +42,8 @@ const routes: Routes = [
       },
       {
         path: 'reports/monthly',
-        component: GuardianStubPageComponent,
-        data: {
-          breadcrumb: 'تقارير شهرية',
-          stubTitle: 'تقارير شهرية',
-          stubMessage: 'التقارير الشهرية الخاصة بأبنائك ستتوفر هنا لاحقاً.',
-        },
+        component: GuardianMonthlyReportsComponent,
+        data: { breadcrumb: 'تقارير شهرية' },
       },
       { path: 'attendance', component: GuardianAttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       { path: 'not-found', component: PageNotFoundComponent },

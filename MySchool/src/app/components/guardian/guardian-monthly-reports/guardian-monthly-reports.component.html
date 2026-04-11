@@ -1,0 +1,103 @@
+<div
+  id="guardian-monthly-reports-page"
+  class="exams-page student-homework-page guardian-monthly-reports-page"
+  [attr.dir]="dir$ | async">
+  <div class="exams-card">
+    <header class="exams-header">
+      <h2 class="exams-title">تقارير شهرية</h2>
+      <p class="exams-subtitle">الدرجات الشهرية المسجّلة لأبنائك حسب السنة والفصل والشهر (اترك الحقول فارغة لعرض كل ما يخص السنة النشطة).</p>
+    </header>
+
+    <div class="filters-toolbar">
+      <form [formGroup]="filterForm" class="filters-grid guardian-mr-filters" novalidate>
+        <div class="filter-field">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="gmr-year"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="yearOptions"
+              formControlName="yearID"
+              optionLabel="label"
+              optionValue="yearID"
+              [showClear]="true"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="gmr-year">السنة الدراسية</label>
+          </p-floatlabel>
+        </div>
+        <div class="filter-field">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="gmr-term"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="termList"
+              formControlName="termID"
+              optionLabel="name"
+              optionValue="termID"
+              [showClear]="true"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="gmr-term">الفصل الدراسي</label>
+          </p-floatlabel>
+        </div>
+        <div class="filter-field">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="gmr-month"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="months"
+              formControlName="monthID"
+              optionLabel="name"
+              optionValue="id"
+              [showClear]="true"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="gmr-month">الشهر</label>
+          </p-floatlabel>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-wrap">
+      <p-table
+        [value]="rows"
+        [loading]="loading"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="p-datatable-sm exams-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>الطالب</th>
+            <th>الفصل</th>
+            <th>الشهر</th>
+            <th>الصف</th>
+            <th>المادة</th>
+            <th>الدرجات</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.studentName }}</td>
+            <td>{{ row.termName || '—' }}</td>
+            <td>{{ row.monthName || '—' }}</td>
+            <td>{{ row.className || '—' }}</td>
+            <td>{{ row.subjectName }}</td>
+            <td class="grades-cell">
+              <span class="grades-text">{{ gradeLine(row) }}</span>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="empty-cell">لا توجد درجات شهرية في هذا العرض.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

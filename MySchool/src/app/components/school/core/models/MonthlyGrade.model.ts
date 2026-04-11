@@ -24,3 +24,23 @@ export interface updateMonthlyGrades{
     grade:number;
     
 }
+
+/** Guardian monthly report API row (student + subject + month aggregate). */
+export interface GuardianMonthlyGradeRow {
+  studentID: number;
+  studentName: string;
+  yearID: number;
+  termID: number;
+  termName?: string | null;
+  monthID: number;
+  monthName?: string | null;
+  classID: number;
+  className?: string | null;
+  subjectID: number;
+  subjectName: string;
+  grades: {
+    gradeTypeID: number;
+    maxGrade: number | null;
+    gradeTypeName?: string | null;
+  }[];
+}

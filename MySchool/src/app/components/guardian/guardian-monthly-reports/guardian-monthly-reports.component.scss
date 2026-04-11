@@ -1,0 +1,30 @@
+@import '../../students/student-homework/student-homework.component.scss';
+
+.guardian-monthly-reports-page .exams-subtitle {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.guardian-monthly-reports-page .exams-header {
+  margin-bottom: 1rem;
+}
+
+.guardian-mr-filters {
+  flex: 1;
+  min-width: min(100%, 280px);
+}
+
+.grades-cell {
+  max-width: 28rem;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.grades-text {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #1e293b;
+}

@@ -1,7 +1,9 @@
 using System.Net;
+using System.Security.Claims;
 using Backend.DTOS.School.MonthlyGrade;
 using Backend.Interfaces;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
@@ -14,6 +16,26 @@ public class MonthlyGradesController : ControllerBase
     {
         _repo = repo;
     }
+
+    private string? CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    /// <summary>Monthly grade rows for all students linked to the guardian (optional year / term / month filters).</summary>
+    [Authorize(Roles = "GUARDIAN,ADMIN,MANAGER")]
+    [HttpGet("guardian/my")]
+    public async Task<IActionResult> GetGuardianMy([FromQuery] int? yearId = null, [FromQuery] int? termId = null, [FromQuery] int? monthId = null)
+    {
+        var uid = CurrentUserId;
+        if (string.IsNullOrEmpty(uid))
+            return Unauthorized(APIResponse.Fail("User id not found on token."));
+
+        var guardianId = await _repo.GetGuardianIdByUserIdAsync(uid);
+        if (!guardianId.HasValue)
+            return StatusCode((int)HttpStatusCode.Forbidden, APIResponse.Fail("No guardian profile for this user."));
+
+        var list = await _repo.GetGuardianStudentsMonthlyGradesAsync(guardianId.Value, yearId, termId, monthId);
+        return Ok(APIResponse.Success(list));
+    }
+
     //api/MonthlyGrades
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] MonthlyGradeDTO dto)

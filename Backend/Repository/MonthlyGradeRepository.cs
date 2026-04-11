@@ -22,6 +22,96 @@ public class MonthlyGradeRepository : IMonthlyGradeRepository
         _apiBaseUrl = apiBaseUrl;
     }
 
+    public Task<int?> GetGuardianIdByUserIdAsync(string userId) =>
+        _context.Guardians.AsNoTracking()
+            .Where(g => g.UserID == userId)
+            .Select(g => (int?)g.GuardianID)
+            .FirstOrDefaultAsync();
+
+    public async Task<List<GuardianMonthlyGradeRowDto>> GetGuardianStudentsMonthlyGradesAsync(int guardianId, int? yearId, int? termId, int? monthId)
+    {
+        var studentIds = await _context.Students.AsNoTracking()
+            .Where(s => s.GuardianID == guardianId)
+            .Select(s => s.StudentID)
+            .ToListAsync();
+
+        if (studentIds.Count == 0)
+            return new List<GuardianMonthlyGradeRowDto>();
+
+        int effectiveYearId;
+        if (yearId.HasValue)
+        {
+            effectiveYearId = yearId.Value;
+        }
+        else
+        {
+            var activeYear = await _context.Years
+                .AsNoTracking()
+                .Where(y => y.Active)
+                .OrderBy(y => y.YearID)
+                .FirstOrDefaultAsync();
+            if (activeYear == null)
+                return new List<GuardianMonthlyGradeRowDto>();
+            effectiveYearId = activeYear.YearID;
+        }
+
+        var q = _context.MonthlyGrades
+            .AsNoTracking()
+            .Where(g => studentIds.Contains(g.StudentID) && g.YearID == effectiveYearId && g.GradeType.IsActive);
+
+        if (termId.HasValue)
+            q = q.Where(g => g.TermID == termId.Value);
+        if (monthId.HasValue)
+            q = q.Where(g => g.MonthID == monthId.Value);
+
+        var grades = await q
+            .Include(g => g.Student).ThenInclude(s => s.FullName)
+            .Include(g => g.Subject)
+            .Include(g => g.GradeType)
+            .Include(g => g.Term)
+            .Include(g => g.Month)
+            .Include(g => g.Class)
+            .Where(g => g.Student != null && g.Subject != null)
+            .ToListAsync();
+
+        return grades
+            .GroupBy(g => new { g.StudentID, g.SubjectID, g.YearID, g.TermID, g.MonthID, g.ClassID })
+            .Select(grp =>
+            {
+                var first = grp.First();
+                var studentName = first.Student?.FullName != null
+                    ? $"{first.Student.FullName.FirstName} {first.Student.FullName.MiddleName} {first.Student.FullName.LastName}".Replace("  ", " ").Trim()
+                    : "—";
+                return new GuardianMonthlyGradeRowDto
+                {
+                    StudentID = grp.Key.StudentID,
+                    StudentName = string.IsNullOrWhiteSpace(studentName) ? "—" : studentName,
+                    YearID = grp.Key.YearID,
+                    TermID = grp.Key.TermID,
+                    TermName = first.Term?.Name,
+                    MonthID = grp.Key.MonthID,
+                    MonthName = first.Month?.Name,
+                    ClassID = grp.Key.ClassID,
+                    ClassName = first.Class?.ClassName,
+                    SubjectID = grp.Key.SubjectID,
+                    SubjectName = first.Subject?.SubjectName ?? "—",
+                    Grades = grp.Select(g => new GradeTypeMonthDTO
+                    {
+                        GradeTypeID = g.GradeTypeID,
+                        MaxGrade = g.Grade,
+                        GradeTypeName = g.GradeType?.Name
+                    })
+                    .OrderBy(x => x.GradeTypeID)
+                    .ToList()
+                };
+            })
+            .OrderByDescending(r => r.MonthID)
+            .ThenBy(r => r.TermID)
+            .ThenBy(r => r.StudentName)
+            .ThenBy(r => r.SubjectName)
+            .ToList();
+    }
+
     /* ----------  CREATE  ---------- */
     public async Task<Result<MonthlyGradeDTO>> AddAsync(MonthlyGradeDTO dto)
     {
