@@ -83,6 +83,57 @@ public class AttendanceController : ControllerBase
         }
     }
 
+    // GET api/Attendance/guardian/my?from=2026-04-01&to=2026-04-30
+    [Authorize(Roles = "GUARDIAN,ADMIN,MANAGER")]
+    [HttpGet("guardian/my")]
+    public async Task<ActionResult<APIResponse>> GetGuardianMyAttendance([FromQuery] DateOnly? from = null, [FromQuery] DateOnly? to = null)
+    {
+        var response = new APIResponse();
+        try
+        {
+            var uid = CurrentUserId;
+            if (string.IsNullOrEmpty(uid))
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.Unauthorized;
+                response.ErrorMasseges.Add("User id not found on token.");
+                return Unauthorized(response);
+            }
+
+            var guardianId = await _unitOfWork.Attendance.GetGuardianIdByUserIdAsync(uid);
+            if (!guardianId.HasValue)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.Forbidden;
+                response.ErrorMasseges.Add("No guardian profile for this user.");
+                return StatusCode((int)HttpStatusCode.Forbidden, response);
+            }
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var f = from ?? today.AddDays(-30);
+            var t = to ?? today;
+            if (f > t)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.BadRequest;
+                response.ErrorMasseges.Add("'from' must be before or equal to 'to'.");
+                return BadRequest(response);
+            }
+
+            var list = await _unitOfWork.Attendance.GetGuardianStudentsAttendanceAsync(guardianId.Value, f, t);
+            response.Result = list;
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
     // GET api/Attendance/student/{studentId}?from=2026-04-01&to=2026-04-30
     [HttpGet("student/{studentId:int}")]
     public async Task<ActionResult<APIResponse>> GetByStudent(int studentId, [FromQuery] DateOnly? from = null, [FromQuery] DateOnly? to = null)

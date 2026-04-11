@@ -19,6 +19,12 @@ public class AttendanceRepository : IAttendanceRepository
         _db = db;
     }
 
+    public Task<int?> GetGuardianIdByUserIdAsync(string userId) =>
+        _db.Guardians.AsNoTracking()
+            .Where(g => g.UserID == userId)
+            .Select(g => (int?)g.GuardianID)
+            .FirstOrDefaultAsync();
+
     private static string FormatStudentName(Student s) =>
         $"{s.FullName.FirstName} {(s.FullName.MiddleName ?? "").Trim()} {s.FullName.LastName}".Replace("  ", " ").Trim();
 
@@ -102,6 +108,36 @@ public class AttendanceRepository : IAttendanceRepository
 
         var list = await q
             .OrderByDescending(x => x.AttendanceDate)
+            .ToListAsync();
+
+        return list.Select(MapToDto).ToList();
+    }
+
+    public async Task<List<AttendanceDTO>> GetGuardianStudentsAttendanceAsync(int guardianId, DateOnly? from = null, DateOnly? to = null)
+    {
+        var studentIds = await _db.Students.AsNoTracking()
+            .Where(s => s.GuardianID == guardianId)
+            .Select(s => s.StudentID)
+            .ToListAsync();
+
+        if (studentIds.Count == 0)
+            return new List<AttendanceDTO>();
+
+        var q = _db.Attendances
+            .AsNoTracking()
+            .Include(x => x.Student)
+            .Include(x => x.Class)
+            .Where(x => studentIds.Contains(x.StudentID));
+
+        if (from.HasValue)
+            q = q.Where(x => x.AttendanceDate >= from.Value);
+        if (to.HasValue)
+            q = q.Where(x => x.AttendanceDate <= to.Value);
+
+        var list = await q
+            .OrderByDescending(x => x.AttendanceDate)
+            .ThenBy(x => x.Student!.FullName.FirstName)
+            .ThenBy(x => x.Student!.FullName.LastName)
             .ToListAsync();
 
         return list.Select(MapToDto).ToList();

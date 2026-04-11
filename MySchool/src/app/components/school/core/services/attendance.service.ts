@@ -18,4 +18,17 @@ export class AttendanceService {
   bulkUpsert(body: BulkAttendanceRequest): Observable<ApiResponse<{ updatedCount: number }>> {
     return this.API.postRequest<{ updatedCount: number }>('Attendance/bulk', body);
   }
+
+  /** Guardian: attendance rows for all students linked to this account (optional date range; server defaults last 30 days). */
+  getGuardianMy(fromIso?: string, toIso?: string): Observable<ApiResponse<AttendanceDto[]>> {
+    const parts: string[] = [];
+    if (fromIso) {
+      parts.push(`from=${encodeURIComponent(fromIso)}`);
+    }
+    if (toIso) {
+      parts.push(`to=${encodeURIComponent(toIso)}`);
+    }
+    const qs = parts.length > 0 ? `?${parts.join('&')}` : '';
+    return this.API.getRequest<AttendanceDto[]>(`Attendance/guardian/my${qs}`);
+  }
 }

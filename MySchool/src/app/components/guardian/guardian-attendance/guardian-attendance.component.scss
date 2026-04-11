@@ -1,0 +1,58 @@
+@import '../../students/student-homework/student-homework.component.scss';
+
+.guardian-attendance-page .exams-subtitle {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.guardian-attendance-page .exams-header {
+  margin-bottom: 1rem;
+}
+
+.guardian-attendance-page .filters-grid {
+  ::ng-deep .p-datepicker.exams-filter-control,
+  .filter-field--date ::ng-deep .p-datepicker {
+    width: 100%;
+  }
+
+  .filter-field--date ::ng-deep .p-datepicker .p-inputtext {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+}
+
+.ga-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.ga-status--present {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.ga-status--absent {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.ga-status--late {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.ga-status--excused {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.ga-status--default {
+  background: var(--surface-100, #f1f5f9);
+  color: #334155;
+}

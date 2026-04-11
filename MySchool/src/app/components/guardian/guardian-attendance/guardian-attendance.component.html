@@ -1,0 +1,76 @@
+<div id="guardian-attendance-page" class="exams-page student-homework-page guardian-attendance-page" [attr.dir]="dir$ | async">
+  <div class="exams-card">
+    <header class="exams-header">
+      <h2 class="exams-title">حضور الأبناء</h2>
+      <p class="exams-subtitle">سجلات الحضور والغياب المسجّلة للطلاب المرتبطين بحسابك ضمن الفترة المحددة.</p>
+    </header>
+
+    <div class="filters-toolbar">
+      <form [formGroup]="filterForm" class="filters-grid" novalidate>
+        <div class="filter-field filter-field--date">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-datepicker
+              inputId="ga-from"
+              formControlName="fromDate"
+              dateFormat="yy-mm-dd"
+              [showIcon]="true"
+              size="small"
+              styleClass="w-full exams-filter-control"
+              appendTo="body" />
+            <label for="ga-from">من تاريخ</label>
+          </p-floatlabel>
+        </div>
+        <div class="filter-field filter-field--date">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-datepicker
+              inputId="ga-to"
+              formControlName="toDate"
+              dateFormat="yy-mm-dd"
+              [showIcon]="true"
+              size="small"
+              styleClass="w-full exams-filter-control"
+              appendTo="body" />
+            <label for="ga-to">إلى تاريخ</label>
+          </p-floatlabel>
+        </div>
+      </form>
+      <div class="toolbar-actions">
+        <p-button type="button" label="تحديث" icon="pi pi-refresh" severity="secondary" (onClick)="load()" />
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <p-table
+        [value]="rows"
+        [loading]="loading"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="p-datatable-sm exams-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>الطالب</th>
+            <th>التاريخ</th>
+            <th>الصف</th>
+            <th>الحالة</th>
+            <th>ملاحظات</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.studentName || '—' }}</td>
+            <td>{{ row.date | date: 'mediumDate' }}</td>
+            <td>{{ row.className || '—' }}</td>
+            <td>
+              <span class="ga-status" [ngClass]="statusClass(row.status)">{{ statusLabel(row.status) }}</span>
+            </td>
+            <td>{{ row.remarks?.trim() ? row.remarks : '—' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="empty-cell">لا توجد سجلات حضور في هذه الفترة.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
