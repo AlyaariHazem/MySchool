@@ -4,6 +4,12 @@
   max-height: 75vh; /* I want t */
   overflow-y: hidden;
 }
+
+/* PrimeNG dropdown overlay must not be clipped; inline panel anchors to the trigger */
+.tabcontent.tabcontent--allow-overlay {
+  overflow: visible !important;
+  max-height: none;
+}
 input[readonly]{
   background-color:#eeee;
   border:none;

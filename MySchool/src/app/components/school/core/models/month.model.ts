@@ -6,3 +6,11 @@ export interface IMonth {
   name:    string;
   termId:  TermEnum;
 }
+
+/** Row from GET api/Month (YearTermMonths for active year, or Months fallback). */
+export interface MonthDto {
+  monthID: number;
+  name: string;
+  /** Set when rows come from YearTermMonths; omitted/null when using Months fallback. */
+  termID?: number | null;
+}

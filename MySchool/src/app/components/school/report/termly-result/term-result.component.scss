@@ -3,8 +3,15 @@
     font-family: 'Tajawal', sans-serif;
   
     .toolbar button,
-    .toolbar .p-dropdown {
+    .toolbar .p-dropdown,
+    .toolbar .p-select,
+    .term-result-filters .p-select {
       min-width: 6rem;
+    }
+
+    .term-result-filters {
+      flex: 1 1 auto;
+      min-width: 0;
     }
   
     .subject-header {

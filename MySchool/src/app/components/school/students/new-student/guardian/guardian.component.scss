@@ -9,6 +9,52 @@ form {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
 }
+
+:host {
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+/* Sub-tabs: let the option list escape tab body (Material tabs clip overflow by default) */
+:host ::ng-deep .mat-mdc-tab-body,
+:host ::ng-deep .mat-mdc-tab-body-content {
+  overflow: visible !important;
+}
+
+/** تبويب «إختيار ولي أمر»: القائمة + صلة القرابة في صف واحد */
+.guardian-existing-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0;
+  position: relative;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+
+  .form-control input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+:host ::ng-deep .guardian-existing-row .guardian-mat-select {
+  width: 100%;
+}
+
+:host ::ng-deep .guardian-existing-row .guardian-mat-select .mat-mdc-form-field-infix {
+  min-height: 44px;
+}
+
+:host ::ng-deep .guardian-existing-row .guardian-mat-select .mat-mdc-select-value-text {
+  text-align: right;
+}
 .group5 {
   border: 1px solid #ccc;
   margin-top: 1rem;

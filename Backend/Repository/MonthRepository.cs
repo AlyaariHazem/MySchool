@@ -43,13 +43,45 @@ public class MonthRepository : IMonthRepository
 
     public async Task<Result<List<MonthDTO>>> GetAllMonthsAsync()
     {
-        var list = await _context.Months
-                                 .Select(m => _mapper.Map<MonthDTO>(m))
-                                 .ToListAsync();
+        var activeYearId = await _context.Years
+            .AsNoTracking()
+            .Where(y => y.Active)
+            .OrderBy(y => y.YearID)
+            .Select(y => y.YearID)
+            .FirstOrDefaultAsync();
 
-        return list.Count == 0
+        if (activeYearId == 0)
+            return Result<List<MonthDTO>>.Fail("No active year found.");
+
+        var fromYearCalendar = await (
+            from ytm in _context.YearTermMonths.AsNoTracking()
+            join m in _context.Months.AsNoTracking() on ytm.MonthID equals m.MonthID
+            where ytm.YearID == activeYearId
+            orderby ytm.TermID, ytm.MonthID
+            select new MonthDTO
+            {
+                MonthID = ytm.MonthID,
+                Name = m.Name,
+                TermID = ytm.TermID
+            }).ToListAsync();
+
+        if (fromYearCalendar.Count > 0)
+            return Result<List<MonthDTO>>.Success(fromYearCalendar);
+
+        var fallback = await _context.Months
+            .AsNoTracking()
+            .OrderBy(m => m.MonthID)
+            .Select(m => new MonthDTO
+            {
+                MonthID = m.MonthID,
+                Name = m.Name,
+                TermID = null
+            })
+            .ToListAsync();
+
+        return fallback.Count == 0
             ? Result<List<MonthDTO>>.Fail("No months found.")
-            : Result<List<MonthDTO>>.Success(list);
+            : Result<List<MonthDTO>>.Success(fallback);
     }
 
     public async Task<Result<MonthDTO>> GetMonthByIdAsync(int id)

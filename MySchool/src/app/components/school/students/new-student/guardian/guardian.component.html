@@ -46,18 +46,28 @@
 
   <!-- تبويب اختيار ولي أمر موجود -->
   <mat-tab label="إختيار ولي أمر">
-    <div class="group group1">
-      <div class="form-control">
+    <div class="guardian-existing-row">
+      <div class="form-control" [formGroup]="mainForm">
         <label for="existingGuardianId" class="label1">اختر ولي أمر</label>
-        <select id="existingGuardianId" (change)="onGuardianChange($event)">
-          <option *ngFor="let guardian of guardians" [value]="guardian.guardianID">
-            {{ guardian.guardianName }}
-          </option>
-        </select>
+        <mat-form-field appearance="outline" class="guardian-mat-select" subscriptSizing="dynamic">
+          <mat-label>اختر ولي أمر</mat-label>
+          <mat-select
+            id="existingGuardianId"
+            formControlName="existingGuardianId"
+            [disabled]="guardians.length === 0"
+            panelClass="guardian-mat-select-panel">
+            @if (guardians.length > 1) {
+              <mat-option [value]="null">—</mat-option>
+            }
+            @for (g of guardians; track g.guardianID) {
+              <mat-option [value]="g.guardianID">{{ g.guardianName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </div>
-      <div class="form-control">
-        <label for="guardianType" class="label1">صلة القرابة</label>
-        <input type="text" id="guardianType" formControlName="guardianType" />
+      <div class="form-control" [formGroup]="formGroup">
+        <label for="guardianTypeSelect" class="label1">صلة القرابة</label>
+        <input type="text" id="guardianTypeSelect" formControlName="guardianType" />
       </div>
     </div>
   </mat-tab>

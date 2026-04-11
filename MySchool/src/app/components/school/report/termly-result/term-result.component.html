@@ -1,59 +1,106 @@
 <div class="card grades-table">
+  <form [formGroup]="form" class="toolbar flex flex-wrap justify-content-between align-items-end mb-3 gap-2">
+    <div class="flex flex-wrap align-items-end gap-2 term-result-filters">
+      <p-select
+        inputId="tr-term"
+        class="w-12rem"
+        [options]="terms"
+        formControlName="termId"
+        optionLabel="name"
+        optionValue="id"
+        [showClear]="false"
+        placeholder="الفصل الدراسي" />
 
-    <div class="toolbar flex justify-content-between align-items-center mb-3 gap-2">
-        <button pButton icon="pi pi-print" label="طباعة" (click)="print()"></button>
-        <button pButton icon="pi pi-download" label="CSV"></button>
+      <p-select
+        inputId="tr-month"
+        class="w-12rem"
+        [options]="filteredMonths"
+        formControlName="monthId"
+        optionLabel="name"
+        optionValue="monthID"
+        [showClear]="false"
+        placeholder="الشهر" />
 
-        <p-dropdown class="month-filter ml-auto w-15rem" [options]="months" [(ngModel)]="selectedMonth"
-            (onChange)="filterByMonth()" placeholder="اختر الشهر"></p-dropdown>
+      <p-select
+        inputId="tr-class"
+        class="w-12rem"
+        [options]="classes"
+        formControlName="classId"
+        optionLabel="className"
+        optionValue="classID"
+        [showClear]="false"
+        placeholder="الصف" />
+
+      <p-select
+        inputId="tr-division"
+        class="w-12rem"
+        [options]="filteredDivisions"
+        formControlName="divisionId"
+        optionLabel="divisionName"
+        optionValue="divisionID"
+        [showClear]="false"
+        placeholder="الشعبة" />
+
+      <p-select
+        inputId="tr-student"
+        class="w-14rem"
+        [options]="studentOptions"
+        formControlName="studentId"
+        optionLabel="displayName"
+        optionValue="studentID"
+        [showClear]="false"
+        placeholder="الطالب" />
     </div>
-    <div class="studentResult" id="report">
-        <p class="text-center mb-3">نتيجة الطالب الفصلية</p>
-        <div class="term-result-print-fit">
-        <p-table #table [value]="monthlyReports" [scrollable]="!printing" [scrollHeight]="printing ? undefined : '400px'"
-            [paginator]="!printing" [rows]="printing ? monthlyReports.length : 10"
-            dataKey="studentID" styleClass="p-datatable-striped">
 
-            <ng-template pTemplate="header">
-                <tr>
-                    <th colspan="2" class="sticky-col w-12rem text-center">#</th>
-
-                    <th *ngFor="let sub of subjectNames" [attr.colspan]="gradeTypes.length" class="subject-header">
-                        {{ sub }}
-                    </th>
-                    <th colspan="3" class="sticky-col-right w-6rem">درجات الفصل الدراسي</th>
-                </tr>
-
-                <tr>
-                    <th>م</th>
-                    <th>اسم الطالب</th>
-                    <ng-container *ngFor="let _ of subjectNames">
-                        <th *ngFor="let type of gradeTypes">{{ type }}</th>
-                    </ng-container>
-                    <th class="sticky-col-right w-6rem">المجموع</th>
-                    <th class="sticky-col-right w-6rem">إمتحان</th>
-                    <th class="sticky-col-right w-6rem">النسبة</th>
-                </tr>
-            </ng-template>
-
-            <ng-template pTemplate="body" let-row let-i="rowIndex">
-                <tr [ngClass]="{ 'odd-row': i % 2 === 1 }">
-                    <td class="sticky-col">{{ row.studentID }}</td>
-                    <td class="sticky-col">{{ row.studentName }}</td>
-
-                    <ng-container *ngFor="let sub of subjectNames">
-                        <td *ngFor="let type of gradeTypes">
-                            {{ getGradeForSubjectType(row.gradeSubjects, sub, type) }}
-                        </td>
-                    </ng-container>
-
-                    <td class="sticky-col-right">{{ row.gradeTotal }}</td>
-                    <td class="sticky-col-right">{{ row.percentage }}</td>
-                    <td class="sticky-col-right">{{ row.percentage }}%</td>
-                </tr>
-            </ng-template>
-
-        </p-table>
-        </div>
+    <div class="flex gap-2 shrink-0">
+      <button pButton type="button" icon="pi pi-print" label="طباعة" (click)="print()"></button>
+      <button pButton type="button" icon="pi pi-download" label="CSV" [disabled]="true"></button>
     </div>
+  </form>
+
+  <div class="studentResult" id="report">
+    <p class="text-center mb-3">نتيجة الطالب الفصلية</p>
+    <div class="term-result-print-fit">
+      <p-table
+        #table
+        [value]="monthlyReports"
+        [loading]="loading"
+        [scrollable]="!printing"
+        [scrollHeight]="printing ? undefined : '400px'"
+        [paginator]="!printing"
+        [rows]="printing ? monthlyReports.length : 10"
+        dataKey="studentID"
+        styleClass="p-datatable-striped">
+        <ng-template pTemplate="header">
+          <tr>
+            <th class="sticky-col w-4rem text-center">م</th>
+            <th class="sticky-col min-w-10rem">اسم الطالب</th>
+            <th *ngFor="let sub of subjectNames" class="subject-header">{{ sub }}</th>
+            <th class="sticky-col-right min-w-6rem">المجموع</th>
+            <th class="sticky-col-right min-w-6rem">المتوسط</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-row let-i="rowIndex">
+          <tr [ngClass]="{ 'odd-row': i % 2 === 1 }">
+            <td class="sticky-col">{{ i + 1 }}</td>
+            <td class="sticky-col">{{ row.studentName }}</td>
+            <td *ngFor="let sub of subjectNames">
+              {{ getGradeForSubject(row, sub) }}
+            </td>
+            <td class="sticky-col-right">{{ row.grade }}</td>
+            <td class="sticky-col-right">{{ getAverage(row) }}</td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [attr.colspan]="2 + subjectNames.length + 2" class="text-center p-4">
+              {{ loading ? 'جاري التحميل…' : 'لا توجد بيانات.' }}
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
 </div>
