@@ -1,22 +1,282 @@
-.exams-admin {
-  position: relative;
+/* Align with attendance / notifications: card, toolbar, green datatable header */
+$exams-table-header: #009879;
+$exams-table-border: #dddddd;
+$exams-row-alt: #f3f3f3;
+
+.exams-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+  box-sizing: border-box;
 }
 
-.dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 1000;
+.exams-card {
+  background: #fff;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
+  margin-bottom: 30px;
+  padding: 1.25rem 1.5rem 1.75rem;
 }
 
-.dialog-panel {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1001;
-  max-width: 720px;
-  width: 95%;
-  max-height: 90vh;
-  overflow: auto;
+.exams-header {
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border, #e2e8f0);
+}
+
+.exams-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-color, #1a1a1a);
+  text-align: start;
+}
+
+.filters-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-50, #f8fafc);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 10px;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem 1.25rem;
+  }
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: end;
+  flex: 1;
+  min-width: min(100%, 260px);
+  margin-bottom: 0;
+}
+
+.filter-field {
+  min-width: 0;
+
+  ::ng-deep .p-select {
+    width: 100%;
+  }
+}
+
+.filters-grid {
+  ::ng-deep p-floatlabel {
+    display: block;
+    width: 100%;
+  }
+
+  ::ng-deep .p-select.exams-filter-control {
+    width: 100%;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  ::ng-deep .p-select.exams-filter-control .p-select-label {
+    line-height: 1.25;
+    padding-block: 0.45rem;
+    display: flex;
+    align-items: center;
+  }
+
+  ::ng-deep .p-select.exams-filter-control .p-select-dropdown {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.filters-toolbar .toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-shrink: 0;
+
+  @media (min-width: 768px) {
+    padding-bottom: 0.125rem;
+  }
+}
+
+.exams-page[dir='rtl'] .filters-toolbar .toolbar-actions {
+  justify-content: flex-start;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid $exams-table-border;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.empty-cell {
+  text-align: center;
+  padding: 2rem 1rem !important;
+  color: var(--text-color-secondary, #64748b);
+}
+
+.col-actions {
+  min-width: 12rem;
+  white-space: nowrap;
+}
+
+.exams-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.exams-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.exams-status--on {
+  background: rgba(0, 152, 121, 0.12);
+  color: #006b57;
+}
+
+.exams-status--off {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+::ng-deep .exams-table {
+  .p-datatable-table {
+    table-layout: auto;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .p-datatable-thead > tr > th {
+    background: $exams-table-header;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    border: 1px solid #007a63;
+  }
+
+  .p-datatable-tbody > tr > td {
+    padding: 0.65rem 1rem;
+    border: 1px solid $exams-table-border;
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  .p-datatable-tbody > tr:nth-child(even) {
+    background: $exams-row-alt;
+  }
+
+  .p-datatable-tbody > tr:nth-child(odd) {
+    background: #fff;
+  }
+
+  .p-datatable-tbody > tr:last-child > td {
+    border-bottom: 2px solid $exams-table-header;
+  }
+}
+
+/* Create dialog */
+:host ::ng-deep .exams-dialog {
+  .p-dialog-header {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .p-dialog-content {
+    padding-top: 0.75rem;
+  }
+}
+
+.exams-dialog-form {
+  margin: 0;
+}
+
+.exams-dialog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: end;
+}
+
+.exams-dialog-field--full {
+  grid-column: 1 / -1;
+}
+
+.exams-dialog-field--narrow {
+  min-width: 0;
+}
+
+.exams-dialog-field--checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  padding-bottom: 0.35rem;
+}
+
+.exams-field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.35rem;
+}
+
+.exams-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  line-height: 1.25;
+  color: #1a1a1a;
+  background-color: #fff;
+  border: 1px solid $exams-table-border;
+  border-radius: 8px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.exams-input:focus {
+  outline: none;
+  border-color: $exams-table-header;
+  box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.2);
+}
+
+.exams-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 0;
+}
+
+.exams-dialog-field ::ng-deep p-floatlabel {
+  display: block;
+  width: 100%;
+}
+
+.exams-dialog-field ::ng-deep .p-select.exams-filter-control {
+  width: 100%;
+  min-height: 2.75rem;
 }

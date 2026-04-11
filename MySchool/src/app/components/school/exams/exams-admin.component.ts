@@ -1,8 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { forkJoin, map } from 'rxjs';
 
+import { selectLanguage } from '../../../core/store/language/language.selectors';
 import { ExamsService } from '../../../core/services/exams.service';
 import { CreateScheduledExam, ExamType, ScheduledExamList } from '../../../core/models/exams.model';
 import { YearService } from '../../../core/services/year.service';
@@ -32,6 +34,12 @@ export class ExamsAdminComponent implements OnInit {
   private readonly subjects = inject(SubjectService);
   private readonly teachers = inject(TeacherService);
   private readonly toastr = inject(ToastrService);
+  private readonly store = inject(Store);
+
+  readonly dir$ = this.store.select(selectLanguage).pipe(map((l) => (l === 'ar' ? 'rtl' : 'ltr')));
+
+  /** Labels for year filter / dialog (p-select). */
+  yearOptions: { label: string; yearID: number }[] = [];
 
   yearList: Year[] = [];
   termList: Terms[] = [];
@@ -86,6 +94,10 @@ export class ExamsAdminComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.yearList = res.years ?? [];
+        this.yearOptions = this.yearList.map((y) => ({
+          label: String(new Date(y.yearDateStart).getFullYear()),
+          yearID: y.yearID,
+        }));
         this.termList = res.terms?.result ?? [];
         this.classList = res.classes?.result ?? [];
         this.allDivisions = res.divisions?.result ?? [];
