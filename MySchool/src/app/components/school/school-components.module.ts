@@ -93,6 +93,7 @@ import { NotificationsComponent } from './notifications/notifications.component'
 import { SchoolLandingComponent } from './school-landing/school-landing.component';
 import { StudentSidebarModule } from '../students/sidebar/student-sidebar.module';
 import { ExamsAdminComponent } from './exams/exams-admin.component';
+import { HomeworkAdminComponent } from './homework/homework-admin.component';
 
 const components = [
   SchoolLandingComponent,
@@ -146,6 +147,7 @@ const components = [
   DatabaseRestoreComponent,
   NotificationsComponent,
   ExamsAdminComponent,
+  HomeworkAdminComponent,
 ];
 
 const modules = [

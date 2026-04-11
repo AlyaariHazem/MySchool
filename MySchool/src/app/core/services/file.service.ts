@@ -15,7 +15,8 @@ export class FileService {
     const formData = new FormData();
     files.forEach(file => formData.append('files', file));
     formData.append('folderName', folderName.toString());
-    formData.append('itemId', itemId.toString());
+    // Matches FileController.UploadAttachments([FromForm] int voucherId)
+    formData.append('voucherId', itemId.toString());
 
     return this.API.http.post(`${this.API.baseUrl}/File/uploadFiles`, formData).pipe(
       catchError(error => {

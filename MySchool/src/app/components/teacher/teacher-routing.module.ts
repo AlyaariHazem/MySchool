@@ -11,6 +11,7 @@ import { WeeklyScheduleComponent } from '../school/weekly-schedule/weekly-schedu
 import { TeacherLayoutComponent } from './teacher-layout/teacher-layout.component';
 import { TeacherWorkspaceComponent } from './pages/teacher-workspace/teacher-workspace.component';
 import { TeacherExamsComponent } from './pages/teacher-exams/teacher-exams.component';
+import { TeacherHomeworkComponent } from './pages/teacher-homework/teacher-homework.component';
 
 const routes: Routes = [
   {
@@ -27,6 +28,7 @@ const routes: Routes = [
       { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       { path: 'schedule', component: WeeklyScheduleComponent, data: { breadcrumb: 'جدول الحصص الأسبوعي' } },
       { path: 'exams', component: TeacherExamsComponent, data: { breadcrumb: 'الامتحانات' } },
+      { path: 'homework', component: TeacherHomeworkComponent, data: { breadcrumb: 'الواجبات' } },
       { path: 'grades/month', component: GradesMonthComponent, data: { breadcrumb: 'الدرجات الشهرية' } },
       { path: 'grades/term', component: GradesTermComponent, data: { breadcrumb: 'الدرجات الفصلية' } },
       {

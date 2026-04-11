@@ -44,5 +44,6 @@ public interface IUnitOfWork : IDisposable
     IAttendanceRepository Attendance { get; }
     INotificationRepository Notifications { get; }
     IExamRepository Exams { get; }
+    IHomeworkRepository Homework { get; }
     Task<int> CompleteAsync();
 }

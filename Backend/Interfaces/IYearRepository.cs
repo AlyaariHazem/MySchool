@@ -17,4 +17,7 @@ public interface IYearRepository : IgenericRepository<YearDTO>
     Task<List<YearDTO>> GetAll();
     Task<bool> UpdatePartial(int id, JsonPatchDocument<YearDTO> partialStage);
     Task<(List<YearDTO> Items, int TotalCount)> GetYearsPageWithFiltersAsync(int pageNumber, int pageSize, Dictionary<string, FilterValue> filters, CancellationToken cancellationToken = default);
+
+    /// <summary>Returns the active academic year ID in the tenant DB, if any.</summary>
+    Task<int?> GetActiveYearIdAsync(CancellationToken cancellationToken = default);
 }

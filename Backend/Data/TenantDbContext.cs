@@ -59,6 +59,10 @@ namespace Backend.Data
         public DbSet<ExamType> ExamTypes { get; set; }
         public DbSet<ScheduledExam> ScheduledExams { get; set; }
         public DbSet<ExamResult> ExamResults { get; set; }
+        public DbSet<HomeworkTask> HomeworkTasks { get; set; }
+        public DbSet<HomeworkTaskLink> HomeworkTaskLinks { get; set; }
+        public DbSet<HomeworkSubmission> HomeworkSubmissions { get; set; }
+        public DbSet<HomeworkSubmissionFile> HomeworkSubmissionFiles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -647,6 +651,97 @@ namespace Backend.Data
             modelBuilder.Entity<ExamResult>()
                 .HasIndex(r => new { r.ScheduledExamID, r.StudentID })
                 .IsUnique();
+
+            modelBuilder.Entity<HomeworkTask>()
+                .HasKey(t => t.HomeworkTaskID);
+            modelBuilder.Entity<HomeworkTask>()
+                .Property(t => t.HomeworkTaskID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<HomeworkTask>()
+                .HasOne(t => t.Teacher)
+                .WithMany()
+                .HasForeignKey(t => t.TeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HomeworkTask>()
+                .HasOne(t => t.Year)
+                .WithMany()
+                .HasForeignKey(t => t.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HomeworkTask>()
+                .HasOne(t => t.Term)
+                .WithMany()
+                .HasForeignKey(t => t.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HomeworkTask>()
+                .HasOne(t => t.Class)
+                .WithMany()
+                .HasForeignKey(t => t.ClassID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HomeworkTask>()
+                .HasOne(t => t.Division)
+                .WithMany()
+                .HasForeignKey(t => t.DivisionID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HomeworkTask>()
+                .HasOne(t => t.Subject)
+                .WithMany()
+                .HasForeignKey(t => t.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HomeworkTask>()
+                .HasIndex(t => new { t.YearID, t.TermID, t.ClassID, t.DivisionID });
+            modelBuilder.Entity<HomeworkTask>()
+                .HasIndex(t => t.TeacherID);
+            modelBuilder.Entity<HomeworkTask>()
+                .HasIndex(t => t.DueDateUtc);
+
+            modelBuilder.Entity<HomeworkTaskLink>()
+                .HasKey(l => l.HomeworkTaskLinkID);
+            modelBuilder.Entity<HomeworkTaskLink>()
+                .Property(l => l.HomeworkTaskLinkID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<HomeworkTaskLink>()
+                .HasOne(l => l.HomeworkTask)
+                .WithMany(t => t.Links)
+                .HasForeignKey(l => l.HomeworkTaskID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HomeworkSubmission>()
+                .HasKey(s => s.HomeworkSubmissionID);
+            modelBuilder.Entity<HomeworkSubmission>()
+                .Property(s => s.HomeworkSubmissionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<HomeworkSubmission>()
+                .Property(s => s.Status)
+                .HasConversion<byte>();
+            modelBuilder.Entity<HomeworkSubmission>()
+                .Property(s => s.Score)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<HomeworkSubmission>()
+                .HasOne(s => s.HomeworkTask)
+                .WithMany(t => t.Submissions)
+                .HasForeignKey(s => s.HomeworkTaskID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<HomeworkSubmission>()
+                .HasOne(s => s.Student)
+                .WithMany()
+                .HasForeignKey(s => s.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HomeworkSubmission>()
+                .HasIndex(s => new { s.HomeworkTaskID, s.StudentID })
+                .IsUnique();
+            modelBuilder.Entity<HomeworkSubmission>()
+                .HasIndex(s => s.StudentID);
+
+            modelBuilder.Entity<HomeworkSubmissionFile>()
+                .HasKey(f => f.HomeworkSubmissionFileID);
+            modelBuilder.Entity<HomeworkSubmissionFile>()
+                .Property(f => f.HomeworkSubmissionFileID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<HomeworkSubmissionFile>()
+                .HasOne(f => f.HomeworkSubmission)
+                .WithMany(s => s.Files)
+                .HasForeignKey(f => f.HomeworkSubmissionID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ExamType>().HasData(
                 new ExamType { ExamTypeID = 1, Name = "Midterm", SortOrder = 1, IsActive = true },

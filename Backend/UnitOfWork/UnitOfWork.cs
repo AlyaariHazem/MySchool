@@ -87,6 +87,7 @@ public class UnitOfWork : IUnitOfWork
         Attendance = new AttendanceRepository(_tenantContext);
         Notifications = new NotificationRepository(_tenantContext, _htmlSanitizer);
         Exams = new ExamRepository(_tenantContext);
+        Homework = new HomeworkRepository(_tenantContext);
         
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
@@ -126,6 +127,7 @@ public class UnitOfWork : IUnitOfWork
     public IAttendanceRepository Attendance { get; private set; }
     public INotificationRepository Notifications { get; private set; }
     public IExamRepository Exams { get; private set; }
+    public IHomeworkRepository Homework { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

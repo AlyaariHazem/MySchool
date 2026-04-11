@@ -203,4 +203,13 @@ public class YearRepository : IYearRepository
         var items = _mapper.Map<List<YearDTO>>(years);
         return (items, totalCount);
     }
+
+    public async Task<int?> GetActiveYearIdAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Years.AsNoTracking()
+            .Where(y => y.Active)
+            .OrderBy(y => y.YearID)
+            .Select(y => (int?)y.YearID)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

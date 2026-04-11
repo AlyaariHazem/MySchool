@@ -1,0 +1,335 @@
+<div id="homework-admin-page" class="exams-page homework-admin-page">
+  <div class="exams-card">
+    <header class="exams-header">
+      <h2 class="exams-title">الواجبات — إشراف المدرسة</h2>
+    </header>
+
+    <div class="filters-toolbar">
+      <form [formGroup]="filterForm" class="filters-grid" novalidate>
+        <div class="filter-field">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="hw-admin-year"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="yearOptions"
+              formControlName="yearID"
+              optionLabel="label"
+              optionValue="yearID"
+              [showClear]="true"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="hw-admin-year">السنة</label>
+          </p-floatlabel>
+        </div>
+        <div class="filter-field">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="hw-admin-term"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="termList"
+              formControlName="termID"
+              optionLabel="name"
+              optionValue="termID"
+              [showClear]="true"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="hw-admin-term">الفصل</label>
+          </p-floatlabel>
+        </div>
+        <div class="filter-field">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="hw-admin-class"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="classList"
+              formControlName="classID"
+              optionLabel="className"
+              optionValue="classID"
+              [showClear]="true"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="hw-admin-class">الصف (اختياري)</label>
+          </p-floatlabel>
+        </div>
+        <div class="filter-field">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="hw-admin-teacher"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="teacherOptions"
+              formControlName="teacherID"
+              optionLabel="label"
+              optionValue="teacherID"
+              [showClear]="true"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="hw-admin-teacher">المعلم (اختياري)</label>
+          </p-floatlabel>
+        </div>
+      </form>
+      <div class="toolbar-actions">
+        <p-button type="button" label="تحديث" icon="pi pi-refresh" severity="secondary" (onClick)="load()" />
+        <p-button type="button" label="واجب جديد" icon="pi pi-plus" severity="success" (onClick)="openCreate()" />
+      </div>
+    </div>
+
+    @if (loadingSummary) {
+      <p class="text-muted">جاري تحميل الملخص…</p>
+    } @else if (summary) {
+      <div class="summary-cards mb-3">
+        <div class="summary-pill">إجمالي المهام: {{ summary.taskCount }}</div>
+        <div class="summary-pill">تسليمات ناقصة / متأخرة (تقريبي): {{ summary.missingSubmissionCount }}</div>
+        <div class="summary-pill">مقيَّمة: {{ summary.gradedCount }}</div>
+      </div>
+      @if (summary.teachers && summary.teachers.length > 0) {
+        <p class="small text-muted mb-2">نشاط المعلمين (عدد المهام):</p>
+        <ul class="teacher-activity-list">
+          @for (t of summary.teachers; track t.teacherID) {
+            <li>{{ t.teacherName || t.teacherID }} — {{ t.tasksCreated }}</li>
+          }
+        </ul>
+      }
+    }
+
+    <div class="table-wrap">
+      <p-table
+        [value]="tasks"
+        [loading]="loading"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="p-datatable-sm exams-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>العنوان</th>
+            <th>الاستحقاق</th>
+            <th>المادة</th>
+            <th>الشعبة</th>
+            <th>المعلم</th>
+            <th>تسليم / معلّق</th>
+            <th class="col-actions">إجراءات</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.title }}</td>
+            <td>{{ row.dueDateUtc | date: 'medium' }}</td>
+            <td>{{ row.subjectName }}</td>
+            <td>{{ row.className }} / {{ row.divisionName }}</td>
+            <td>{{ row.teacherName }}</td>
+            <td>{{ row.submissionCount }} / {{ row.pendingCount }}</td>
+            <td class="col-actions">
+              <p-button label="التسليمات" size="small" (onClick)="openSubmissions(row)" />
+              <p-button label="حذف" severity="danger" [outlined]="true" size="small" class="ms-1" (onClick)="deleteRow(row)" />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7">اختر سنة وفصلاً لعرض الواجبات أو لا توجد بيانات.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  header="إنشاء واجب (للمعلّم)"
+  [(visible)]="showCreate"
+  [modal]="true"
+  [dismissableMask]="true"
+  [resizable]="false"
+  [draggable]="false"
+  [style]="{ width: 'min(760px, 94vw)' }"
+  styleClass="exams-dialog"
+  appendTo="body"
+  (onHide)="showCreate = false">
+  <form [formGroup]="createForm" class="exams-dialog-form">
+    <div class="exams-dialog-grid">
+      <div class="exams-dialog-field exams-dialog-field--full">
+        <p-floatlabel class="w-full block" variant="on">
+          <p-select
+            inputId="hw-a-teacher"
+            class="w-full"
+            styleClass="w-full exams-filter-control"
+            [options]="teacherOptions"
+            formControlName="teacherID"
+            optionLabel="label"
+            optionValue="teacherID"
+            [showClear]="true"
+            placeholder=" " />
+          <label for="hw-a-teacher">المعلّم</label>
+        </p-floatlabel>
+      </div>
+      <div class="exams-dialog-field exams-dialog-field--full">
+        <p-floatlabel class="w-full block" variant="on">
+          <p-select
+            inputId="hw-a-term"
+            class="w-full"
+            styleClass="w-full exams-filter-control"
+            [options]="termList"
+            formControlName="termID"
+            optionLabel="name"
+            optionValue="termID"
+            [showClear]="true"
+            placeholder=" " />
+          <label for="hw-a-term">الفصل</label>
+        </p-floatlabel>
+      </div>
+      <div class="exams-dialog-field">
+        <p-floatlabel class="w-full block" variant="on">
+          <p-select
+            inputId="hw-a-class"
+            class="w-full"
+            styleClass="w-full exams-filter-control"
+            [options]="classList"
+            formControlName="classID"
+            optionLabel="className"
+            optionValue="classID"
+            [showClear]="true"
+            placeholder=" " />
+          <label for="hw-a-class">الصف</label>
+        </p-floatlabel>
+      </div>
+      <div class="exams-dialog-field">
+        <p-floatlabel class="w-full block" variant="on">
+          <p-select
+            inputId="hw-a-division"
+            class="w-full"
+            styleClass="w-full exams-filter-control"
+            [options]="divisionList"
+            formControlName="divisionID"
+            optionLabel="divisionName"
+            optionValue="divisionID"
+            [showClear]="true"
+            placeholder=" " />
+          <label for="hw-a-division">الشعبة</label>
+        </p-floatlabel>
+      </div>
+      <div class="exams-dialog-field exams-dialog-field--full">
+        <p-floatlabel class="w-full block" variant="on">
+          <p-select
+            inputId="hw-a-subject"
+            class="w-full"
+            styleClass="w-full exams-filter-control"
+            [options]="subjectList"
+            formControlName="subjectID"
+            optionLabel="subjectName"
+            optionValue="subjectID"
+            [showClear]="true"
+            placeholder=" " />
+          <label for="hw-a-subject">المادة</label>
+        </p-floatlabel>
+      </div>
+      <div class="exams-dialog-field exams-dialog-field--full">
+        <label class="exams-field-label" for="hw-a-title">العنوان</label>
+        <input id="hw-a-title" type="text" class="exams-input" formControlName="title" />
+      </div>
+      <div class="exams-dialog-field exams-dialog-field--full">
+        <label class="exams-field-label" for="hw-a-desc">الوصف</label>
+        <textarea id="hw-a-desc" class="exams-input" rows="4" formControlName="description"></textarea>
+      </div>
+      <div class="exams-dialog-field exams-dialog-field--full">
+        <label class="exams-field-label" for="hw-a-due">تاريخ الاستحقاق</label>
+        <input id="hw-a-due" type="datetime-local" class="exams-input" formControlName="dueDateUtc" />
+      </div>
+      <div class="exams-dialog-field exams-dialog-field--checks">
+        <label class="exams-check">
+          <input type="checkbox" formControlName="submissionRequired" />
+          التسليم مطلوب
+        </label>
+      </div>
+      <div class="exams-dialog-field exams-dialog-field--full">
+        <label class="exams-field-label" for="hw-a-link">رابط مرفق (اختياري)</label>
+        <input id="hw-a-link" type="url" class="exams-input" formControlName="linkUrl" placeholder="https://..." />
+      </div>
+      <div class="exams-dialog-field exams-dialog-field--full">
+        <label class="exams-field-label" for="hw-a-linktitle">عنوان الرابط</label>
+        <input id="hw-a-linktitle" type="text" class="exams-input" formControlName="linkLabel" placeholder="عنوان الرابط" />
+      </div>
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <p-button type="button" label="حفظ" icon="pi pi-check" severity="success" (onClick)="saveCreate()" [disabled]="createForm.invalid" />
+    <p-button type="button" label="إلغاء" [outlined]="true" (onClick)="showCreate = false" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="تسليمات الطلاب"
+  [(visible)]="showSubmissions"
+  [modal]="true"
+  [style]="{ width: 'min(960px, 98vw)' }"
+  [draggable]="false"
+  (onHide)="showSubmissions = false">
+  @if (selectedTask) {
+    <p class="mb-2"><strong>{{ selectedTask.title }}</strong> — الاستحقاق {{ selectedTask.dueDateUtc | date: 'medium' }}</p>
+  }
+  @if (taskDetail?.description) {
+    <p class="small text-muted">{{ taskDetail!.description }}</p>
+  }
+  @if (loadingSubmissions) {
+    <p>جاري التحميل…</p>
+  } @else if (submissions.length === 0) {
+    <p class="text-muted">لا تسليمات.</p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered">
+        <thead>
+          <tr>
+            <th>الطالب</th>
+            <th>الحالة</th>
+            <th>التسليم</th>
+            <th>الدرجة</th>
+            <th>ملاحظات المعلم</th>
+            <th>نشر للولي</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (sub of submissions; track sub.homeworkSubmissionID) {
+            <tr>
+              <td>{{ sub.studentName }}</td>
+              <td>
+                <select class="form-select form-select-sm" [(ngModel)]="sub.status">
+                  @for (st of [0, 1, 2, 3, 4, 5]; track st) {
+                    <option [ngValue]="st">{{ statusLabel(st) }}</option>
+                  }
+                </select>
+              </td>
+              <td>
+                @if (sub.submittedAtUtc) {
+                  {{ sub.submittedAtUtc | date: 'short' }}
+                } @else {
+                  —
+                }
+                @if (sub.answerText) {
+                  <div class="small text-muted text-truncate" style="max-width: 8rem">{{ sub.answerText }}</div>
+                }
+              </td>
+              <td>
+                <input type="number" class="form-control form-control-sm" style="width: 5rem" [(ngModel)]="sub.score" />
+              </td>
+              <td>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="sub.teacherFeedback" />
+              </td>
+              <td>
+                <input type="checkbox" [(ngModel)]="sub.feedbackPublished" />
+              </td>
+              <td>
+                <button type="button" class="btn btn-sm btn-primary" (click)="saveReview(sub)">حفظ</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</p-dialog>

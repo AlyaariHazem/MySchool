@@ -1,0 +1,187 @@
+<div id="student-homework-page" class="exams-page student-homework-page">
+  <div class="exams-card">
+    <header class="exams-header">
+      <h2 class="exams-title">واجباتي</h2>
+    </header>
+
+    <div class="filters-toolbar">
+      <form [formGroup]="filterForm" class="filters-grid" novalidate>
+        <div class="filter-field filter-field--grow">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="hw-student-view"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="filterOptions"
+              formControlName="view"
+              optionLabel="label"
+              optionValue="value"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="hw-student-view">عرض</label>
+          </p-floatlabel>
+        </div>
+      </form>
+      <div class="toolbar-actions">
+        <p-button type="button" label="تحديث" icon="pi pi-refresh" severity="secondary" (onClick)="load()" />
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <p-table
+        [value]="rows"
+        [loading]="loading"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="p-datatable-sm exams-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>العنوان</th>
+            <th>المادة</th>
+            <th>الاستحقاق</th>
+            <th>الحالة</th>
+            <th>الدرجة</th>
+            <th class="col-actions">إجراءات</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.title }}</td>
+            <td>{{ row.subjectName }}</td>
+            <td>{{ row.dueDateUtc | date: 'medium' }}</td>
+            <td>
+              <span class="hw-status" [ngClass]="statusClass(row.status)">{{ statusLabel(row.status) }}</span>
+            </td>
+            <td>{{ row.score != null ? row.score : '—' }}</td>
+            <td class="col-actions">
+              <p-button label="التفاصيل / تسليم" size="small" severity="success" (onClick)="openDetail(row)" />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6">لا توجد واجبات لهذا العرض أو لا توجد بيانات.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  [header]="dialogTitle"
+  [(visible)]="showDetail"
+  [modal]="true"
+  [dismissableMask]="true"
+  [resizable]="false"
+  [draggable]="false"
+  [style]="{ width: 'min(720px, 94vw)' }"
+  styleClass="exams-dialog student-homework-detail-dialog"
+  appendTo="body"
+  (onHide)="showDetail = false">
+  @if (loadingDetail) {
+    <p class="student-hw-dialog-loading">جاري التحميل…</p>
+  } @else if (detail) {
+    <div class="student-hw-detail-body">
+      <p class="student-hw-meta">الاستحقاق: {{ detail.dueDateUtc | date: 'medium' }}</p>
+      @if (detail.description) {
+        <p class="student-hw-desc">{{ detail.description }}</p>
+      }
+      @if (detail.taskLinks && detail.taskLinks.length > 0) {
+        <p class="exams-field-label student-hw-links-title">روابط</p>
+        <ul class="student-hw-links">
+          @for (l of detail.taskLinks; track l.homeworkTaskLinkID) {
+            <li>
+              <a [href]="l.url" target="_blank" rel="noopener">{{ l.label || l.url }}</a>
+            </li>
+          }
+        </ul>
+      }
+      <p class="student-hw-status-row">
+        <span class="hw-status hw-status--inline" [ngClass]="statusClass(detail.status)">{{ statusLabel(detail.status) }}</span>
+        @if (detail.submissionRequired) {
+          <span class="student-hw-required">تسليم مطلوب</span>
+        }
+      </p>
+      @if (detail.teacherFeedback) {
+        <div class="student-hw-feedback">
+          <strong>ملاحظة المعلم:</strong> {{ detail.teacherFeedback }}
+        </div>
+      }
+      @if (detail.score != null) {
+        <p class="student-hw-score"><strong>الدرجة:</strong> {{ detail.score }}</p>
+      }
+
+      @if (detail.files && detail.files.length > 0) {
+        <p class="exams-field-label student-hw-attached-label">المرفقات المسلَّمة</p>
+        <ul class="student-hw-attached-files">
+          @for (f of detail.files; track f.homeworkSubmissionFileID) {
+            <li>
+              <a [href]="f.fileUrl" target="_blank" rel="noopener">{{ f.fileName || 'تحميل الملف' }}</a>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (detail.status !== 3 && detail.status !== 4 && detail.status !== 5) {
+        <div class="student-hw-submit-block">
+          <h3 class="student-hw-submit-heading">تسليمك</h3>
+          <form [formGroup]="submitForm" class="exams-dialog-form">
+            <div class="exams-dialog-grid">
+              <div class="exams-dialog-field exams-dialog-field--full">
+                <label class="exams-field-label" for="hw-st-answer">نص / إجابة</label>
+                <textarea id="hw-st-answer" class="exams-input" rows="4" formControlName="answerText"></textarea>
+              </div>
+              <div class="exams-dialog-field exams-dialog-field--full">
+                <label class="exams-field-label" for="hw-st-file">رفع ملف</label>
+                <div class="student-hw-file-row">
+                  <input
+                    #hwFile
+                    id="hw-st-file"
+                    type="file"
+                    class="student-hw-file-input"
+                    [accept]="homeworkFileAccept"
+                    [disabled]="uploading"
+                    (change)="onHomeworkFileSelected($event)" />
+                  @if (pendingHomeworkFileName) {
+                    <span class="student-hw-file-picked">{{ pendingHomeworkFileName }}</span>
+                    <p-button
+                      type="button"
+                      label="إزالة"
+                      size="small"
+                      severity="secondary"
+                      [outlined]="true"
+                      (onClick)="clearHomeworkFile(hwFile)" />
+                  }
+                </div>
+                <p class="student-hw-file-hint">يُسمح بملفات PDF، Word، صور، أو أرشيف ضمن الحد المسموح من الخادم.</p>
+              </div>
+              <div class="exams-dialog-field exams-dialog-field--full">
+                <label class="exams-field-label" for="hw-st-fileurl">أو رابط ملف (اختياري)</label>
+                <input id="hw-st-fileurl" type="url" class="exams-input" formControlName="fileUrl" placeholder="https://..." />
+              </div>
+              <div class="exams-dialog-field exams-dialog-field--full">
+                <label class="exams-field-label" for="hw-st-filename">اسم الرابط (اختياري)</label>
+                <input id="hw-st-filename" type="text" class="exams-input" formControlName="fileName" placeholder="اسم الملف أو الوصف" />
+              </div>
+            </div>
+          </form>
+        </div>
+      }
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    @if (detail && detail.status !== 3 && detail.status !== 4 && detail.status !== 5) {
+      <p-button
+        type="button"
+        label="إرسال التسليم"
+        icon="pi pi-send"
+        severity="success"
+        [loading]="uploading"
+        [disabled]="uploading"
+        (onClick)="submit()" />
+    }
+    <p-button type="button" label="إغلاق" [outlined]="true" (onClick)="showDetail = false" />
+  </ng-template>
+</p-dialog>

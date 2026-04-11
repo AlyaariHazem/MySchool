@@ -106,6 +106,7 @@ builder.Services.AddSwaggerGen(swagger =>
             "Myschool tenant API. Teacher workflow is covered by: Attendance (daily rolls, bulk), " +
             "WeeklySchedule (class/term grid and CRUD), MonthlyGrades and TermlyGrade (fast grade entry), " +
             "Exams (sessions, scheduled exams, teacher mark entry, student/guardian views, reports), " +
+            "Homework (tasks per course plan, submissions, grading, guardian read-only with published feedback, manager activity), " +
             "Report (monthly reports and templates), Notifications (inbox and send), and TeacherWorkspace " +
             "(class/student/subject summary plus recent course plans)."
     });

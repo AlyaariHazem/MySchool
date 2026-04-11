@@ -33,6 +33,7 @@ import { DatabaseRestoreComponent } from './sittings/database-restore/database-r
 import { NotificationsComponent } from './notifications/notifications.component';
 import { SchoolLandingComponent } from './school-landing/school-landing.component';
 import { ExamsAdminComponent } from './exams/exams-admin.component';
+import { HomeworkAdminComponent } from './homework/homework-admin.component';
 
 const routes: Routes = [
   {
@@ -116,6 +117,7 @@ const routes: Routes = [
       },
       { path: 'schedule', component: WeeklyScheduleComponent, data: { breadcrumb: 'جدول الحصص الأسبوعي' } },
       { path: 'exams', component: ExamsAdminComponent, data: { breadcrumb: 'الامتحانات' } },
+      { path: 'homework', component: HomeworkAdminComponent, data: { breadcrumb: 'الواجبات' } },
       { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       { path: 'notifications', component: NotificationsComponent, data: { breadcrumb: 'الإشعارات' } },
       {

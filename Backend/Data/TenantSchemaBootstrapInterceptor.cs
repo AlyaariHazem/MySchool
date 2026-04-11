@@ -21,6 +21,7 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
 
     private static readonly ConcurrentDictionary<string, byte> Applied = new(StringComparer.Ordinal);
     private static readonly ConcurrentDictionary<string, byte> ExamsApplied = new(StringComparer.Ordinal);
+    private static readonly ConcurrentDictionary<string, byte> HomeworkApplied = new(StringComparer.Ordinal);
     private static readonly SemaphoreSlim Gate = new(1, 1);
 
     private static string DatabaseKey(DbConnection connection)
@@ -67,7 +68,8 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
 
         var needMain = !Applied.ContainsKey(key);
         var needExams = !ExamsApplied.ContainsKey(key);
-        if (!needMain && !needExams)
+        var needHomework = !HomeworkApplied.ContainsKey(key);
+        if (!needMain && !needExams && !needHomework)
             return;
 
         Gate.Wait();
@@ -92,6 +94,15 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
                 cmd.ExecuteNonQuery();
                 ExamsApplied.TryAdd(key, 1);
             }
+
+            if (needHomework && !HomeworkApplied.ContainsKey(key))
+            {
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = TenantSchoolsBootstrapSql.HomeworkModuleEnsureSql;
+                cmd.CommandTimeout = 180;
+                cmd.ExecuteNonQuery();
+                HomeworkApplied.TryAdd(key, 1);
+            }
         }
         finally
         {
@@ -110,7 +121,8 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
 
         var needMain = !Applied.ContainsKey(key);
         var needExams = !ExamsApplied.ContainsKey(key);
-        if (!needMain && !needExams)
+        var needHomework = !HomeworkApplied.ContainsKey(key);
+        if (!needMain && !needExams && !needHomework)
             return;
 
         await Gate.WaitAsync(cancellationToken);
@@ -132,6 +144,15 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
                 cmd.CommandTimeout = 180;
                 await cmd.ExecuteNonQueryAsync(cancellationToken);
                 ExamsApplied.TryAdd(key, 1);
+            }
+
+            if (needHomework && !HomeworkApplied.ContainsKey(key))
+            {
+                await using var cmd = connection.CreateCommand();
+                cmd.CommandText = TenantSchoolsBootstrapSql.HomeworkModuleEnsureSql;
+                cmd.CommandTimeout = 180;
+                await cmd.ExecuteNonQueryAsync(cancellationToken);
+                HomeworkApplied.TryAdd(key, 1);
             }
         }
         finally

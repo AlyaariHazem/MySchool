@@ -11,6 +11,7 @@ import { WeeklyScheduleComponent } from '../school/weekly-schedule/weekly-schedu
 import { StudentHomeComponent } from './student-home/student-home.component';
 import { StudentLayoutComponent } from './student-layout/student-layout.component';
 import { StudentExamsComponent } from './student-exams/student-exams.component';
+import { StudentHomeworkComponent } from './student-homework/student-homework.component';
 
 const routes: Routes = [
   {
@@ -23,6 +24,7 @@ const routes: Routes = [
       { path: 'notifications', component: NotificationsComponent, data: { breadcrumb: 'الإشعارات' } },
       { path: 'schedule', component: WeeklyScheduleComponent, data: { breadcrumb: 'جدول الحصص الأسبوعي' } },
       { path: 'exams', component: StudentExamsComponent, data: { breadcrumb: 'الامتحانات' } },
+      { path: 'homework', component: StudentHomeworkComponent, data: { breadcrumb: 'الواجبات' } },
       { path: 'grades/month', component: GradesMonthComponent, data: { breadcrumb: 'الدرجات الشهرية' } },
       { path: 'grades/term', component: GradesTermComponent, data: { breadcrumb: 'الدرجات الفصلية' } },
       {

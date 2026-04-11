@@ -1,0 +1,173 @@
+@import '../../school/exams/exams-admin.component.scss';
+
+.student-homework-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.filters-toolbar .filter-field--grow {
+  min-width: min(100%, 14rem);
+  flex: 1 1 12rem;
+}
+
+.hw-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.hw-status--inline {
+  vertical-align: middle;
+}
+
+.hw-status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.hw-status--submitted {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.hw-status--late {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.hw-status--graded {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.hw-status--completed {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.hw-status--missing {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.hw-status--default {
+  background: var(--surface-100, #f1f5f9);
+  color: #334155;
+}
+
+::ng-deep .student-homework-page .col-actions .p-button {
+  white-space: nowrap;
+}
+
+.student-hw-detail-body {
+  padding-top: 0.25rem;
+}
+
+.student-hw-meta {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+
+.student-hw-desc {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.student-hw-links-title {
+  margin-top: 0.5rem;
+}
+
+.student-hw-links {
+  margin: 0 0 1rem;
+  padding-inline-start: 1.25rem;
+}
+
+.student-hw-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.student-hw-required {
+  font-size: 0.875rem;
+  color: #b45309;
+}
+
+.student-hw-feedback {
+  padding: 0.65rem 0.75rem;
+  background: var(--surface-50, #f8fafc);
+  border-radius: 8px;
+  border: 1px solid var(--surface-200, #e2e8f0);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.student-hw-score {
+  margin-bottom: 1rem;
+}
+
+.student-hw-submit-block {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--surface-200, #e2e8f0);
+}
+
+.student-hw-submit-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: #0f172a;
+}
+
+.student-hw-dialog-loading {
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.student-hw-file-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.student-hw-file-input {
+  max-width: 100%;
+  font-size: 0.875rem;
+}
+
+.student-hw-file-picked {
+  font-size: 0.875rem;
+  color: #0f766e;
+  word-break: break-all;
+}
+
+.student-hw-file-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.student-hw-attached-label {
+  margin-top: 0.75rem;
+}
+
+.student-hw-attached-files {
+  margin: 0 0 1rem;
+  padding-inline-start: 1.25rem;
+}
+
+:host ::ng-deep .student-homework-detail-dialog textarea.exams-input {
+  min-height: 5.5rem;
+  resize: vertical;
+  line-height: 1.4;
+}

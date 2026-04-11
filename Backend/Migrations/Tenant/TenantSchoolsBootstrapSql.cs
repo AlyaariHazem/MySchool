@@ -19,6 +19,11 @@ public static class TenantSchoolsBootstrapSql
     /// </summary>
     public static string ExamsModuleEnsureSql => ExamsModuleSql;
 
+    /// <summary>
+    /// Idempotent DDL for homework/tasks (<c>HomeworkTasks</c>, <c>HomeworkTaskLinks</c>, <c>HomeworkSubmissions</c>, <c>HomeworkSubmissionFiles</c>).
+    /// </summary>
+    public static string HomeworkModuleEnsureSql => HomeworkModuleSql;
+
     private const string ExamsModuleSql = @"
 IF OBJECT_ID(N'[dbo].[ExamTypes]', N'U') IS NULL
 BEGIN
@@ -106,6 +111,85 @@ BEGIN
     IF OBJECT_ID(N'[dbo].[__EFMigrationsHistory]', N'U') IS NOT NULL
        AND NOT EXISTS (SELECT 1 FROM [dbo].[__EFMigrationsHistory] WHERE [MigrationId] = N'20260410234115_AddExamsModule')
         INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId], [ProductVersion]) VALUES (N'20260410234115_AddExamsModule', N'8.0.10');
+END
+";
+
+    private const string HomeworkModuleSql = @"
+IF OBJECT_ID(N'[dbo].[HomeworkTasks]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[HomeworkTasks] (
+        [HomeworkTaskID] int NOT NULL IDENTITY(1,1),
+        [TeacherID] int NOT NULL,
+        [YearID] int NOT NULL,
+        [TermID] int NOT NULL,
+        [ClassID] int NOT NULL,
+        [DivisionID] int NOT NULL,
+        [SubjectID] int NOT NULL,
+        [Title] nvarchar(max) NOT NULL,
+        [Description] nvarchar(max) NULL,
+        [DueDateUtc] datetime2 NOT NULL,
+        [SubmissionRequired] bit NOT NULL,
+        [CreatedAtUtc] datetime2 NOT NULL,
+        [UpdatedAtUtc] datetime2 NULL,
+        CONSTRAINT [PK_HomeworkTasks] PRIMARY KEY ([HomeworkTaskID]),
+        CONSTRAINT [FK_HomeworkTasks_Classes_ClassID] FOREIGN KEY ([ClassID]) REFERENCES [dbo].[Classes]([ClassID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_HomeworkTasks_Divisions_DivisionID] FOREIGN KEY ([DivisionID]) REFERENCES [dbo].[Divisions]([DivisionID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_HomeworkTasks_Subjects_SubjectID] FOREIGN KEY ([SubjectID]) REFERENCES [dbo].[Subjects]([SubjectID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_HomeworkTasks_Teachers_TeacherID] FOREIGN KEY ([TeacherID]) REFERENCES [dbo].[Teachers]([TeacherID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_HomeworkTasks_Terms_TermID] FOREIGN KEY ([TermID]) REFERENCES [dbo].[Terms]([TermID]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_HomeworkTasks_Years_YearID] FOREIGN KEY ([YearID]) REFERENCES [dbo].[Years]([YearID]) ON DELETE NO ACTION
+    );
+    CREATE NONCLUSTERED INDEX [IX_HomeworkTasks_ClassID] ON [dbo].[HomeworkTasks]([ClassID]);
+    CREATE NONCLUSTERED INDEX [IX_HomeworkTasks_DivisionID] ON [dbo].[HomeworkTasks]([DivisionID]);
+    CREATE NONCLUSTERED INDEX [IX_HomeworkTasks_DueDateUtc] ON [dbo].[HomeworkTasks]([DueDateUtc]);
+    CREATE NONCLUSTERED INDEX [IX_HomeworkTasks_SubjectID] ON [dbo].[HomeworkTasks]([SubjectID]);
+    CREATE NONCLUSTERED INDEX [IX_HomeworkTasks_TeacherID] ON [dbo].[HomeworkTasks]([TeacherID]);
+    CREATE NONCLUSTERED INDEX [IX_HomeworkTasks_TermID] ON [dbo].[HomeworkTasks]([TermID]);
+    CREATE NONCLUSTERED INDEX [IX_HomeworkTasks_YearID_TermID_ClassID_DivisionID] ON [dbo].[HomeworkTasks]([YearID], [TermID], [ClassID], [DivisionID]);
+    CREATE NONCLUSTERED INDEX [IX_HomeworkTasks_YearID] ON [dbo].[HomeworkTasks]([YearID]);
+
+    CREATE TABLE [dbo].[HomeworkTaskLinks] (
+        [HomeworkTaskLinkID] int NOT NULL IDENTITY(1,1),
+        [HomeworkTaskID] int NOT NULL,
+        [Url] nvarchar(max) NOT NULL,
+        [Label] nvarchar(max) NULL,
+        [SortOrder] int NOT NULL,
+        CONSTRAINT [PK_HomeworkTaskLinks] PRIMARY KEY ([HomeworkTaskLinkID]),
+        CONSTRAINT [FK_HomeworkTaskLinks_HomeworkTasks_HomeworkTaskID] FOREIGN KEY ([HomeworkTaskID]) REFERENCES [dbo].[HomeworkTasks]([HomeworkTaskID]) ON DELETE CASCADE
+    );
+    CREATE NONCLUSTERED INDEX [IX_HomeworkTaskLinks_HomeworkTaskID] ON [dbo].[HomeworkTaskLinks]([HomeworkTaskID]);
+
+    CREATE TABLE [dbo].[HomeworkSubmissions] (
+        [HomeworkSubmissionID] int NOT NULL IDENTITY(1,1),
+        [HomeworkTaskID] int NOT NULL,
+        [StudentID] int NOT NULL,
+        [Status] tinyint NOT NULL,
+        [SubmittedAtUtc] datetime2 NULL,
+        [AnswerText] nvarchar(max) NULL,
+        [TeacherFeedback] nvarchar(max) NULL,
+        [Score] decimal(18,2) NULL,
+        [FeedbackPublished] bit NOT NULL,
+        [ReviewedAtUtc] datetime2 NULL,
+        CONSTRAINT [PK_HomeworkSubmissions] PRIMARY KEY ([HomeworkSubmissionID]),
+        CONSTRAINT [FK_HomeworkSubmissions_HomeworkTasks_HomeworkTaskID] FOREIGN KEY ([HomeworkTaskID]) REFERENCES [dbo].[HomeworkTasks]([HomeworkTaskID]) ON DELETE CASCADE,
+        CONSTRAINT [FK_HomeworkSubmissions_Students_StudentID] FOREIGN KEY ([StudentID]) REFERENCES [dbo].[Students]([StudentID]) ON DELETE NO ACTION
+    );
+    CREATE UNIQUE NONCLUSTERED INDEX [IX_HomeworkSubmissions_HomeworkTaskID_StudentID] ON [dbo].[HomeworkSubmissions]([HomeworkTaskID], [StudentID]);
+    CREATE NONCLUSTERED INDEX [IX_HomeworkSubmissions_StudentID] ON [dbo].[HomeworkSubmissions]([StudentID]);
+
+    CREATE TABLE [dbo].[HomeworkSubmissionFiles] (
+        [HomeworkSubmissionFileID] int NOT NULL IDENTITY(1,1),
+        [HomeworkSubmissionID] int NOT NULL,
+        [FileUrl] nvarchar(max) NOT NULL,
+        [FileName] nvarchar(max) NULL,
+        CONSTRAINT [PK_HomeworkSubmissionFiles] PRIMARY KEY ([HomeworkSubmissionFileID]),
+        CONSTRAINT [FK_HomeworkSubmissionFiles_HomeworkSubmissions_HomeworkSubmissionID] FOREIGN KEY ([HomeworkSubmissionID]) REFERENCES [dbo].[HomeworkSubmissions]([HomeworkSubmissionID]) ON DELETE CASCADE
+    );
+    CREATE NONCLUSTERED INDEX [IX_HomeworkSubmissionFiles_HomeworkSubmissionID] ON [dbo].[HomeworkSubmissionFiles]([HomeworkSubmissionID]);
+
+    IF OBJECT_ID(N'[dbo].[__EFMigrationsHistory]', N'U') IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM [dbo].[__EFMigrationsHistory] WHERE [MigrationId] = N'20260411130000_AddHomeworkModule')
+        INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId], [ProductVersion]) VALUES (N'20260411130000_AddHomeworkModule', N'8.0.10');
 END
 ";
 

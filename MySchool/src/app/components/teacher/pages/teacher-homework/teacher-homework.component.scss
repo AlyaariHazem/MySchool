@@ -1,0 +1,21 @@
+/* Match school homework / exams admin: card, teal table header, filters toolbar */
+@import '../../../school/exams/exams-admin.component.scss';
+
+:host ::ng-deep .exams-dialog textarea.exams-input {
+  min-height: 5.5rem;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.teacher-homework-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+  box-sizing: border-box;
+}
+
+/* PrimeNG secondary button spacing next to primary in action cells */
+::ng-deep .teacher-homework-page .col-actions .p-button + .p-button {
+  margin-inline-start: 0.35rem;
+}

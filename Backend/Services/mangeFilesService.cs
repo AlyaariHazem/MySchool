@@ -23,7 +23,8 @@ public class mangeFilesService
                 if (file.Length > 0)
                 {
                     var fileExtension = Path.GetExtension(file.FileName);
-                    if (!new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf" }.Contains(fileExtension.ToLower()))
+                    var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx", ".txt", ".zip", ".rar" };
+                    if (!allowed.Contains(fileExtension.ToLower()))
                         throw new InvalidOperationException("Invalid file type.");
 
                     var filePath = Path.Combine(uploadsFolder, $"{folderName}_{itemId}_{Path.GetFileName(file.FileName)}");
