@@ -29,8 +29,13 @@ export class MonthlyGradesService {
   }
 
 
+  /** Server scopes rows to the active year — do not send yearID. */
   updateMonthlyGrades(monthlyGrades: updateMonthlyGrades[]) {
-    return this.API.http.put(`${this.api}/UpdateMany`, monthlyGrades).pipe(
+    const body = monthlyGrades.map((row) => {
+      const { yearID: _y, ...rest } = row as updateMonthlyGrades & { yearID?: number };
+      return rest;
+    });
+    return this.API.http.put(`${this.api}/UpdateMany`, body).pipe(
       map((res: any) => {
         return res.result;
       }

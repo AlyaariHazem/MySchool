@@ -89,8 +89,7 @@ public class TermlyGradeRepository : ITermlyGradeRepository
                 || existing.TermID != grade.TermID
                 || existing.ClassID != grade.ClassID
                 || existing.SubjectID != grade.SubjectID
-                || existing.StudentID != grade.StudentID
-                || (grade.YearID > 0 && existing.YearID != grade.YearID);
+                || existing.StudentID != grade.StudentID;
 
             if (rowChanged)
             {
@@ -112,7 +111,7 @@ public class TermlyGradeRepository : ITermlyGradeRepository
                         grade.StudentID,
                         grade.SubjectID,
                         grade.TermID,
-                        grade.YearID,
+                        YearID = existing.YearID,
                         grade.ClassID,
                         grade.Grade,
                         grade.Note
@@ -126,8 +125,6 @@ public class TermlyGradeRepository : ITermlyGradeRepository
             existing.ClassID = grade.ClassID;
             existing.SubjectID = grade.SubjectID;
             existing.StudentID = grade.StudentID;
-            if (grade.YearID > 0)
-                existing.YearID = grade.YearID;
             if (rowChanged)
                 changed = true;
         }
@@ -168,11 +165,11 @@ public class TermlyGradeRepository : ITermlyGradeRepository
     {
         if (query == null)
             return Task.FromResult(Result<List<TermlyGradesReturnDTO>>.Fail("Query is required."));
-        return GetAllAsync(query.TermId, query.YearId, query.ClassId, query.SubjectId, query.PageNumber, query.PageSize);
+        return GetAllAsync(query.TermId, query.ClassId, query.SubjectId, query.PageNumber, query.PageSize);
     }
 
     public async Task<Result<List<TermlyGradesReturnDTO>>> GetAllAsync(
-        int term, int yearId, int classId, int subjectId, int pageNumber, int pageSize)
+        int term, int classId, int subjectId, int pageNumber, int pageSize)
     {
         if (pageNumber < 1 || pageSize < 1)
             return Result<List<TermlyGradesReturnDTO>>.Fail("Page number must be greater than 0.");
@@ -225,10 +222,10 @@ public class TermlyGradeRepository : ITermlyGradeRepository
     {
         if (query == null)
             return Task.FromResult(0);
-        return GetTotalTermlyGradesCountAsync(query.TermId, query.YearId, query.ClassId, query.SubjectId);
+        return GetTotalTermlyGradesCountAsync(query.TermId, query.ClassId, query.SubjectId);
     }
 
-    public async Task<int> GetTotalTermlyGradesCountAsync(int term, int yearId, int classId, int subjectId)
+    public async Task<int> GetTotalTermlyGradesCountAsync(int term, int classId, int subjectId)
     {
         var activeYear = await GetActiveYearAsync();
         if (activeYear == null)

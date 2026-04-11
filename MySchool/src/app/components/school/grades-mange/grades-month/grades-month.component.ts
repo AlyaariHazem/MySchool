@@ -14,9 +14,6 @@ import { IMonth } from '../../core/models/month.model';
 import { ITerm } from '../../core/models/term.model';
 import { TERMS } from '../../core/data/terms';
 import { MONTHS } from '../../core/data/months';
-import { YearService } from '../../../../core/services/year.service';
-
-
 @Component({
   selector: 'app-grades-month',
   templateUrl: './grades-month.component.html',
@@ -70,8 +67,6 @@ export class GradesMonthComponent implements OnInit {
   private classesLoaded = false;
   private subjectsLoaded = false;
 
-  private yearService = inject(YearService);
-
   constructor(
     private formBuilder: FormBuilder,
     private curriculmsPlanService: CurriculmsPlanService,
@@ -88,17 +83,6 @@ export class GradesMonthComponent implements OnInit {
     });
     this.currentLanguage();
 
-    // Align with API monthly grades (GetAll uses active year); localStorage yearID is often stale.
-    this.yearService.getAllYears().subscribe({
-      next: years => {
-        const active = years?.find(y => y.active);
-        if (active) {
-          this.yearID = active.yearID;
-        }
-      },
-      error: () => { /* keep default / localStorage fallback */ }
-    });
-    
     // Initialize filtered months based on selected term
     this.filterMonthsByTerm();
     
@@ -260,7 +244,6 @@ export class GradesMonthComponent implements OnInit {
       stu.grades.map(g => ({
         studentID: stu.studentID,
         subjectID: stu.subjectID,
-        yearID: this.yearID,
         monthID: this.form.get('selectedMonth')?.value,
         classID: this.form.get('selectedClass')?.value,
         termID: this.form.get('selectedTerm')?.value,

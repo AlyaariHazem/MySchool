@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace Backend.DTOS.School.MonthlyGrade;
 
+/// <summary>No YearID: bulk update and reads use the active academic year; create maps via mapper and YearID 0 → active year.</summary>
 public class MonthlyGradeDTO
 {
     public int StudentID { get; set; }
     public int SubjectID { get; set; }
-    public int YearID { get; set; }
     public int MonthID { get; set; }
     public int ClassID { get; set; }
     public int GradeTypeID { get; set; }

@@ -11,7 +11,7 @@ public class TermlyGradeDTO
     public int StudentID { get; set; }
     public decimal Grade { get; set; }= 0;
     public int TermID { get; set; }
-    /// <summary>Academic year; when 0 or omitted on create, the active year is used.</summary>
+    /// <summary>Academic year. On create, 0 or omitted uses the active year. On bulk PUT, ignored — year stays as stored on the row.</summary>
     public int YearID { get; set; }
     public int ClassID { get; set; }
     public int SubjectID { get; set; }

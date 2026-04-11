@@ -1,7 +1,6 @@
-/** POST api/TermlyGrade/query — same filters as GET path + query, sent as JSON body. */
+/** POST api/TermlyGrade/page — filters and paging; server uses active academic year (no yearId). */
 export interface TermlyGradeQueryPayload {
   termId: number;
-  yearId: number;
   classId: number;
   subjectId: number;
   pageNumber: number;

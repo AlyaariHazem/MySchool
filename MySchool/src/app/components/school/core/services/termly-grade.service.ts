@@ -15,7 +15,7 @@ export class TermlyGradeService {
   private API = inject(BackendAspService);
 
   /**
-   * POST api/TermlyGrade/page — filters and pagination in JSON body (yearId ignored server-side; active year used).
+   * POST api/TermlyGrade/page — filters and pagination in JSON body (active year resolved on server).
    */
   getTermlyGradesReport(payload: TermlyGradeQueryPayload) {
     return this.API.http
@@ -31,10 +31,11 @@ export class TermlyGradeService {
       );
   }
 
-  /** PUT api/TermlyGrade — bulk update; each row must include termlyGradeID, yearID, etc. */
+  /** PUT api/TermlyGrade — bulk update; do not send yearID (server keeps the row’s academic year). */
   updateTermlyGrades(termlyGrades: TermlyGrade[]) {
+    const body = termlyGrades.map(({ yearID: _y, ...row }) => row);
     return this.API.http
-      .put<ApiResponse<unknown>>(`${this.API.baseUrl}/TermlyGrade`, termlyGrades)
+      .put<ApiResponse<unknown>>(`${this.API.baseUrl}/TermlyGrade`, body)
       .pipe(
         map((res) => {
           if (!res.isSuccess) {

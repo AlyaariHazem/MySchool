@@ -22,7 +22,7 @@ export interface TermlyGrade {
     grade: number;
     classID: number;
     termID: number;
-    /** Sent on save; must match the academic year (API yearID ↔ C# YearID). Omitted on rows loaded from GET. */
+    /** Not sent on PUT — server keeps the row’s year. Optional on create. */
     yearID?: number;
     subjectID: number;
     note?: string;

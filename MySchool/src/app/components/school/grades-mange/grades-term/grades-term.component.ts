@@ -191,8 +191,6 @@ export class GradesTermComponent implements OnInit {
     this.updatePaginatedData();
   }
 
-  yearID: number = Number(localStorage.getItem('yearID') || '1');
-
   private initialLoadDone = false;
 
   /** Runs once when classes + subjects are ready; applies URL query params then loads data. */
@@ -205,18 +203,11 @@ export class GradesTermComponent implements OnInit {
     this.updatePaginatedData();
   }
 
-  /** e.g. /school/grade/GradeTerm?termId=1&yearId=1&classId=1&subjectId=0&pageNumber=1&pageSize=5 */
+  /** e.g. /school/grade/GradeTerm?termId=1&classId=1&subjectId=0&pageNumber=1&pageSize=5 */
   private applyRouteQueryParamsOnce(): void {
     const q = this.route.snapshot.queryParamMap;
     if (q.keys.length === 0) {
       return;
-    }
-    const y = q.get('yearId');
-    if (y) {
-      const n = Number(y);
-      if (!Number.isNaN(n) && n > 0) {
-        this.yearID = n;
-      }
     }
     const ps = q.get('pageSize');
     if (ps) {
@@ -263,7 +254,6 @@ export class GradesTermComponent implements OnInit {
     const pageNumber = Math.floor(this.first / this.rows) + 1;
     return {
       termId,
-      yearId: this.yearID,
       classId,
       subjectId,
       pageNumber,
@@ -277,7 +267,6 @@ export class GradesTermComponent implements OnInit {
       relativeTo: this.route,
       queryParams: {
         termId: q.termId,
-        yearId: q.yearId,
         classId: q.classId,
         subjectId: q.subjectId,
         pageNumber: q.pageNumber,
@@ -299,7 +288,6 @@ export class GradesTermComponent implements OnInit {
       .map((stu) => ({
         termlyGradeID: stu.termlyGradeID,
         studentID: stu.studentID!,
-        yearID: this.yearID,
         classID,
         termID,
         subjectID: stu.subjectID!,
@@ -336,12 +324,11 @@ export class GradesTermComponent implements OnInit {
   rows: number = 5;
 
   paginates!: Paginates;
-  getAllMonthlyGrades(TermId: number, yearId: number, ClassId: number, SubjectId: number): void {
+  getAllMonthlyGrades(TermId: number, ClassId: number, SubjectId: number): void {
     // Ensure we have valid values
     const termId = TermId ?? this.selectedTerm;
     const classId = ClassId ?? this.selectedClass;
     const subjectId = SubjectId ?? this.selectedSubject ?? 0;
-    const yearIdToSend = yearId ?? this.yearID;
     
     // Don't make API call if required values are missing
     if (!termId || !classId) {
@@ -352,7 +339,6 @@ export class GradesTermComponent implements OnInit {
     this.termlyGradeService
       .getTermlyGradesReport({
         termId,
-        yearId: yearIdToSend,
         classId,
         subjectId,
         pageNumber: Math.floor(this.first / this.rows) + 1,

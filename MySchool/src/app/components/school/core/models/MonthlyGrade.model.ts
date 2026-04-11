@@ -17,12 +17,10 @@ export interface updateMonthlyGrades{
     studentID:number;
     subjectID:number;
     monthID:number;
-    yearID:number;
     classID:number;
     gradeTypeID:number;
     termID:number;
     grade:number;
-    
 }
 
 /** Guardian monthly report API row (student + subject + month aggregate). */
