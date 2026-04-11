@@ -23,21 +23,32 @@ public class ReportRepository : IReportRepository
         _sanitizer = sanitizer;
     }
 
-    public async Task<Result<List<MonthlyResult>>> MonthlyReportsAsync(MonthlyReportQueryDTO query)
+    public async Task<Result<List<MonthlyResult>>> MonthlyReportsAsync(MonthlyReportQueryDTO query, int? guardianId = null)
     {
         try
         {
             if (query == null)
                 return Result<List<MonthlyResult>>.Fail("Query payload is required.");
 
+            var activeYear = await _context.Years
+                .AsNoTracking()
+                .Where(y => y.Active)
+                .OrderBy(y => y.YearID)
+                .FirstOrDefaultAsync();
+            if (activeYear == null)
+                return Result<List<MonthlyResult>>.Fail("No active year found. Activate a year before viewing monthly reports.");
+
             IQueryable<MonthlyGrade> q = _context.MonthlyGrades
                 .AsNoTracking()
-                .Where(g => g.YearID == query.YearId &&
+                .Where(g => g.YearID == activeYear.YearID &&
                             g.TermID == query.TermId &&
                             g.MonthID == query.MonthId &&
                             g.ClassID == query.ClassId &&
                             g.Student.DivisionID == query.DivisionId &&
                             g.GradeType.IsActive);
+
+            if (guardianId.HasValue)
+                q = q.Where(g => g.Student.GuardianID == guardianId.Value);
 
             if (query.StudentId != 0)
                 q = q.Where(g => g.StudentID == query.StudentId);

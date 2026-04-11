@@ -12,10 +12,10 @@ export class MonthlyResultService {
 
   private api = inject(BackendAspService);
 
-  getMonthlyGradesReport(yearId: number, termId: number, monthId: number, classId: number, divisionId: number, studentId: number)
+  /** Uses active school year on the server; do not send yearId. */
+  getMonthlyGradesReport(termId: number, monthId: number, classId: number, divisionId: number, studentId: number)
   : Observable<ApiResponse<MonthlyResult[]>> {
     return this.api.postRequest<MonthlyResult[]>('Report/monthly', {
-      yearId,
       termId,
       monthId,
       classId,

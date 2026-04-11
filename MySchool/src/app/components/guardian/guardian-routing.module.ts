@@ -10,6 +10,7 @@ import { GuardianExamsComponent } from './guardian-exams/guardian-exams.componen
 import { GuardianAttendanceComponent } from './guardian-attendance/guardian-attendance.component';
 import { GuardianMonthlyReportsComponent } from './guardian-monthly-reports/guardian-monthly-reports.component';
 import { GuardianStubPageComponent } from './guardian-stub-page/guardian-stub-page.component';
+import { GuardianStudentMonthResultComponent } from './guardian-student-month-result/guardian-student-month-result.component';
 
 const routes: Routes = [
   {
@@ -41,8 +42,12 @@ const routes: Routes = [
       },
       {
         path: 'reports/monthly',
-        component: GuardianMonthlyReportsComponent,
-        data: { breadcrumb: 'تقارير شهرية', pageTitle: 'تقارير شهرية' },
+        component: GuardianStudentMonthResultComponent,
+        data: {
+          breadcrumb: 'تقارير شهرية',
+          pageTitle: 'تقارير شهرية',
+          showPrintableCertificate: true,
+        },
       },
       { path: 'attendance', component: GuardianAttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       { path: 'not-found', component: PageNotFoundComponent },

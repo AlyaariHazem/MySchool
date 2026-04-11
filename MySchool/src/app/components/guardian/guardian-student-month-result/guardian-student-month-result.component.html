@@ -1,0 +1,183 @@
+<form [formGroup]="form" class="form">
+  <div class="group3">
+    <p-select
+      [options]="terms"
+      class="w-2 h-3"
+      (onChange)="getAllGrades()"
+      optionValue="id"
+      [checkmark]="true"
+      optionLabel="name"
+      [editable]="true"
+      [showClear]="true"
+      inputId="gm-cert-term"
+      formControlName="termId"
+      placeholder="إختار المرحلة" />
+
+    <p-select
+      [options]="filteredMonths"
+      class="w-2 mr-1 h-3"
+      optionValue="id"
+      [checkmark]="true"
+      optionLabel="name"
+      [editable]="true"
+      [showClear]="true"
+      (onChange)="getAllGrades()"
+      formControlName="monthId"
+      placeholder="إختار الشهر" />
+
+    <p-select
+      [options]="studentSelectOptions"
+      class="w-2 mr-1 h-3"
+      optionValue="studentID"
+      [checkmark]="true"
+      optionLabel="displayName"
+      [editable]="true"
+      [showClear]="true"
+      formControlName="studentId"
+      placeholder="إختار طالب" />
+  </div>
+</form>
+@for (subj of pagedMonthlyResults; track subj.studentID) {
+<div dir="rtl" class="report" [id]="'report-' + subj.studentID" style="font-family: Tajawal, sans-serif; line-height: 1.7">
+  <header class="page-header">
+    <div class="header-col text-end">
+      <p>الجمهورية اليمنية</p>
+      <p>وزارة التربية والتعليم</p>
+      <p>مكتب التربية أمانة العاصمة</p>
+    </div>
+    <div class="header-col text-center">
+      <img [src]="SchoolLogo" alt="logo" class="logo" />
+    </div>
+
+    <div class="header-col text-start">
+      <p class="fw-bold">{{ subj.schoolName }}</p>
+      <p>{{ subj.year }}</p>
+      <p>الفصل الدراسي: {{ subj.term }}</p>
+      <p>الشهر: {{ subj.month }}</p>
+    </div>
+  </header>
+
+  <h4 class="report-title text-center mb-3 fw-bold">نتيجة الطالب الشهرية</h4>
+
+  <section class="report-card shadow-sm">
+    <div class="student-meta mb-3">
+      <span><b>رقم الطالب:</b> {{ subj.studentID }}</span>
+      <span><b>الطالب:</b> {{ subj.studentName }}</span>
+      <span><b>الصف:</b> {{ subj.class }}</span>
+      <span><b>الشعبة:</b> {{ subj.division }}</span>
+    </div>
+
+    <table class="table table-bordered text-center">
+      <thead>
+        <tr class="bg-light">
+          @for (item of subj.gradeSubjects; track $index) {
+            <th>{{ item.subjectName }}</th>
+          }
+          <th>النسبة</th>
+          <th>المجموع</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          @for (item of subj.gradeSubjects; track $index) {
+            <th>{{ item.grade }}</th>
+          }
+          <td>
+            <span
+              class="badge fw-bold"
+              [ngClass]="{
+                'bg-success-subtle text-success': subj.grade !== undefined && subj.grade >= 60,
+                'bg-danger': subj.grade !== undefined && subj.grade < 60
+              }"
+              >{{
+                (subj.grade !== undefined && subj.gradeSubjects ? subj.grade / subj.gradeSubjects.length : 0)
+                  | number: '2.2'
+              }}</span
+            >
+          </td>
+          <td>{{ subj.grade }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer text-center mt-3 fw-bold">
+      <span>المعلم:{{ subj.teacher ? subj.teacher : '...' }}</span>
+      <span>الختم: ...</span>
+      <span>التوقيع: ...</span>
+    </div>
+  </section>
+
+  <div class="text-center mt-4 d-print-none">
+    <button class="btn btn-outline-primary add px-5" type="button" (click)="printReport(subj)">طباعة</button>
+  </div>
+</div>
+} @empty {
+<div dir="rtl" class="report" [id]="'report-'" style="font-family: Tajawal, sans-serif; line-height: 1.7">
+  <header class="page-header">
+    <div class="header-col text-end">
+      <p>الجمهورية اليمنية</p>
+      <p>وزارة التربية والتعليم</p>
+      <p>مكتب التربية أمانة العاصمة</p>
+    </div>
+    <div class="header-col text-center">
+      <img [src]="SchoolLogo" alt="logo" class="logo" />
+    </div>
+
+    <div class="header-col text-start">
+      <p class="fw-bold">اسم المدرسة</p>
+      <p>السنة الدراسية</p>
+      <p>الفصل الدراسي: ...</p>
+      <p>الشهر: ...</p>
+    </div>
+  </header>
+
+  <h4 class="report-title text-center mb-3 fw-bold">نتيجة الطالب الشهرية</h4>
+
+  <section class="report-card shadow-sm">
+    <div class="student-meta mb-3">
+      <span><b>رقم الطالب:</b>...</span>
+      <span><b>الطالب:</b> ....</span>
+      <span><b>الصف:</b>...</span>
+      <span><b>الشعبة:</b>...</span>
+    </div>
+
+    <table class="table table-bordered text-center">
+      <thead>
+        <tr class="bg-light">
+          <th>اسم المادة</th>
+          <th>النسبة</th>
+          <th>المجموع</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>الدرجة</th>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer text-center mt-3 fw-bold">
+      <span>المعلم: ....</span>
+      <span>الختم: ...</span>
+      <span>التوقيع: ...</span>
+    </div>
+  </section>
+
+  <div class="text-center mt-4 d-print-none">
+    <button class="btn btn-outline-primary add px-5" type="button">طباعة</button>
+  </div>
+</div>
+}
+
+@if (monthlyResults.length > 0) {
+  <div class="d-print-none report-paginator-bar" dir="ltr">
+    <p-paginator
+      (onPageChange)="onPageChange($event)"
+      [first]="first"
+      [rows]="rows"
+      [totalRecords]="monthlyResults.length"
+      [rowsPerPageOptions]="[5, 10, 15]" />
+  </div>
+}

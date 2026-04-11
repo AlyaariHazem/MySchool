@@ -24,4 +24,5 @@ public interface IStudentRepository
     Task<(List<UnregisteredStudentDTO> Items, int TotalCount)> GetUnregisteredStudentsAsync(int? targetYearID, int pageNumber, int pageSize, string? studentName, int? stageID, int? classID, CancellationToken cancellationToken = default);
     Task<PromoteStudentsResponseDTO> PromoteStudentsAsync(List<PromoteStudentRequestDTO> students, int? targetYearID = null, bool copyCoursePlansFromCurrentYear = false);
     Task<(List<StudentNameIdDTO> Items, int TotalCount)> GetStudentNamesAndIdsPagedAsync(StudentNameIdSearchRequestDTO request);
+    Task<List<GuardianChildReportOptionDTO>> GetGuardianChildrenForMonthlyReportAsync(int guardianId, CancellationToken cancellationToken = default);
 }

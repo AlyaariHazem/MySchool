@@ -54,9 +54,16 @@ export class GuardianMonthlyReportsComponent implements OnInit {
   rows: GuardianMonthlyGradeRow[] = [];
   loading = false;
 
+  /** When true (route `reports/monthly`), show printable monthly certificate for guardian children. */
+  showPrintableCertificate = false;
+
   ngOnInit(): void {
     this.applyPageMeta(this.route.snapshot.data);
-    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((d) => this.applyPageMeta(d));
+    this.showPrintableCertificate = this.route.snapshot.data['showPrintableCertificate'] === true;
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((d) => {
+      this.applyPageMeta(d);
+      this.showPrintableCertificate = d['showPrintableCertificate'] === true;
+    });
 
     this.yearsApi.getAllYears().subscribe({
       next: (years) => {

@@ -12,6 +12,8 @@ using Backend.Repository.School.Interfaces;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using System.Security.Claims;
 using System.Threading;
 
 namespace Backend.Controllers
@@ -466,6 +468,22 @@ namespace Backend.Controllers
             {
                 return StatusCode(500, new { error = ex.Message });
             }
+        }
+
+        [Authorize(Roles = "GUARDIAN")]
+        [HttpGet("guardian/my-children-for-report")]
+        public async Task<IActionResult> GetMyChildrenForMonthlyReport(CancellationToken cancellationToken = default)
+        {
+            var uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(uid))
+                return Unauthorized(APIResponse.Fail("User id not found on token."));
+
+            var guardianId = await _unitOfWork.Attendance.GetGuardianIdByUserIdAsync(uid);
+            if (!guardianId.HasValue)
+                return StatusCode((int)HttpStatusCode.Forbidden, APIResponse.Fail("No guardian profile for this user."));
+
+            var list = await _unitOfWork.Students.GetGuardianChildrenForMonthlyReportAsync(guardianId.Value, cancellationToken);
+            return Ok(APIResponse.Success(list));
         }
 
         [Authorize(Roles = "ADMIN,MANAGER")]

@@ -8,6 +8,14 @@ export interface StudentNameIdDTO {
   fullName: string;
 }
 
+/** GET api/Students/guardian/my-children-for-report — guardian monthly report picker */
+export interface GuardianChildReportOption {
+  studentID: number;
+  displayName: string;
+  classID: number;
+  divisionID: number;
+}
+
 /** Body for POST api/Students/names-ids — Backend StudentNameIdSearchRequestDTO */
 export interface StudentNameIdSearchRequest {
   studentID?: number;

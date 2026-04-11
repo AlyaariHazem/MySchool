@@ -13,8 +13,14 @@ import { PaginatorState } from 'primeng/paginator';
 import { ITerm } from '../../core/models/term.model';
 import { MONTHS } from '../../core/data/months';
 import { TERMS } from '../../core/data/terms';
+import { StudentService } from '../../../../core/services/student.service';
 
-
+type StudentSelectRow = {
+  studentID: number;
+  displayName: string;
+  classID: number;
+  divisionID: number;
+};
 
 @Component({
   selector: 'app-student-month-result',
@@ -25,17 +31,23 @@ export class StudentMonthResultComponent implements OnInit {
   form: FormGroup = new FormGroup({});
   monthlyResults: MonthlyResult[] = [];
   private title = 'Student Month Result';
-  AllClasses: any;
+  AllClasses: any[] | undefined;
   filteredMonths: IMonth[] = [];
   divisions: divisions[] = [];
   fiteredDivisions: divisions[] = [];
   terms: ITerm[] = TERMS;
   months: IMonth[] = MONTHS;
 
-  yearId = Number(localStorage.getItem('yearId'));
+  /** Rows for طالب dropdown (guardian: own children only; staff: division roster + «جميع الطلاب»). */
+  studentSelectOptions: StudentSelectRow[] = [];
+
+  readonly isGuardian =
+    typeof localStorage !== 'undefined' && localStorage.getItem('userType') === 'GUARDIAN';
+
   divisionSerivce = inject(DivisionService);
   classService = inject(ClassService);
   monthlyResult = inject(MonthlyResultService);
+  private studentService = inject(StudentService);
   private toastr = inject(ToastrService);
 
   SchoolLogo = localStorage.getItem('SchoolImageURL');
@@ -44,22 +56,117 @@ export class StudentMonthResultComponent implements OnInit {
     this.getAllDivision();
     this.form = new FormBuilder().group({
       termId: [1, Validators.required],
-      classId: [1, Validators.required],
-      studentId: [0, Validators.required],
+      classId: [this.isGuardian ? 0 : 1],
+      studentId: [0],
       monthId: [6, Validators.required],
-      divisionId: [1, Validators.required]
+      divisionId: [this.isGuardian ? 0 : 1],
     });
-    this.form.get('termId')?.valueChanges.subscribe((termId: number) => {
-      this.filteredMonths = this.months.filter(month => month.termId === termId);
+
+    const termCtrl = this.form.get('termId');
+    this.filteredMonths = this.months.filter((m) => m.termId === termCtrl?.value);
+    termCtrl?.valueChanges.subscribe((termId: number) => {
+      this.filteredMonths = this.months.filter((month) => month.termId === termId);
     });
-    this.form.get('classId')?.valueChanges.subscribe((classId: number) => {
-      this.fiteredDivisions = this.divisions.filter(d => d.classID === classId);
+
+    if (!this.isGuardian) {
+      this.form.get('classId')?.valueChanges.subscribe((classId: number) => {
+        this.fiteredDivisions = this.divisions.filter((d) => d.classID === classId);
+      });
+      this.form.get('divisionId')?.valueChanges.subscribe(() => {
+        this.loadStaffStudentOptions();
+      });
+    }
+
+    this.form.get('studentId')?.valueChanges.subscribe((id: number) => {
+      if (this.isGuardian && id) {
+        const row = this.studentSelectOptions.find((s) => s.studentID === id);
+        if (row) {
+          this.form.patchValue(
+            { classId: row.classID, divisionId: row.divisionID },
+            { emitEvent: false }
+          );
+        }
+      }
+      this.getAllGrades();
     });
-    this.form.reset();
+
+    if (this.isGuardian) {
+      this.loadGuardianStudentOptions();
+    }
+  }
+
+  private loadGuardianStudentOptions(): void {
+    this.studentService.getGuardianMyChildrenForReport().subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.toastr.warning(res.errorMasseges[0] || 'تعذر تحميل قائمة الأبناء.');
+          this.studentSelectOptions = [];
+          return;
+        }
+        const raw = (res.result ?? []) as Record<string, unknown>[];
+        this.studentSelectOptions = raw.map((r) => ({
+          studentID: Number(r['studentID'] ?? r['StudentID'] ?? 0),
+          displayName: String(r['displayName'] ?? r['DisplayName'] ?? ''),
+          classID: Number(r['classID'] ?? r['ClassID'] ?? 0),
+          divisionID: Number(r['divisionID'] ?? r['DivisionID'] ?? 0),
+        }));
+        if (this.studentSelectOptions.length === 1) {
+          const only = this.studentSelectOptions[0];
+          this.form.patchValue({
+            studentId: only.studentID,
+            classId: only.classID,
+            divisionId: only.divisionID,
+          });
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('خطأ في تحميل قائمة الطلاب');
+        this.studentSelectOptions = [];
+      },
+    });
+  }
+
+  private loadStaffStudentOptions(): void {
+    const classId = Number(this.form.get('classId')?.value);
+    const divisionId = Number(this.form.get('divisionId')?.value);
+    if (!classId || !divisionId) {
+      this.studentSelectOptions = [];
+      return;
+    }
+    this.studentService.getStudentsPageForAttendance(1, 500, { classId, divisionId }).subscribe({
+      next: (page) => {
+        const rows = page.data ?? [];
+        const mapped: StudentSelectRow[] = rows.map((s) => ({
+          studentID: s.studentID,
+          displayName: [s.fullName?.firstName, s.fullName?.middleName, s.fullName?.lastName]
+            .filter(Boolean)
+            .join(' ')
+            .replace(/\s+/g, ' ')
+            .trim(),
+          classID: classId,
+          divisionID: divisionId,
+        }));
+        this.studentSelectOptions = [
+          {
+            studentID: 0,
+            displayName: 'جميع الطلاب',
+            classID: classId,
+            divisionID: divisionId,
+          },
+          ...mapped,
+        ];
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('تعذر تحميل قائمة الطلاب');
+        this.studentSelectOptions = [];
+      },
+    });
   }
 
   getAllMonthlyGradesReport(termId = 1, monthId = 5, classId = 1, divisionId = 1, studentId: number = 0): void {
-    this.monthlyResult.getMonthlyGradesReport(this.yearId, termId, monthId, classId, divisionId, studentId).subscribe({
+    this.monthlyResult.getMonthlyGradesReport(termId, monthId, classId, divisionId, studentId).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
           this.toastr.warning(res.errorMasseges[0] || 'Unexpected error');
@@ -75,7 +182,7 @@ export class StudentMonthResultComponent implements OnInit {
         console.error(err);
         this.monthlyResults = [];
         this.first = 0;
-      }
+      },
     });
   }
 
@@ -91,8 +198,8 @@ export class StudentMonthResultComponent implements OnInit {
       error: (err) => {
         this.toastr.error('Server error occurred');
         console.error(err);
-      }
-    })
+      },
+    });
   }
   getAllDivision(): void {
     this.divisionSerivce.GetAll().subscribe({
@@ -102,8 +209,13 @@ export class StudentMonthResultComponent implements OnInit {
           return;
         }
         this.divisions = res.result;
+        if (!this.isGuardian) {
+          const cid = this.form.get('classId')?.value;
+          this.fiteredDivisions = this.divisions.filter((d) => d.classID === cid);
+          this.loadStaffStudentOptions();
+        }
       },
-      error: () => this.toastr.error('Server error occurred')
+      error: () => this.toastr.error('Server error occurred'),
     });
   }
   getAllGrades(): void {
@@ -112,6 +224,34 @@ export class StudentMonthResultComponent implements OnInit {
     const selectedTerm = this.form.get('termId')?.value;
     const selectedMonth = this.form.get('monthId')?.value;
     const selectedStudent = this.form.get('studentId')?.value ?? 0;
+
+    if (this.isGuardian) {
+      if (!selectedTerm || selectedTerm === '' || !selectedMonth || selectedMonth === '') {
+        this.monthlyResults = [];
+        this.first = 0;
+        return;
+      }
+      if (!Number(selectedStudent)) {
+        this.monthlyResults = [];
+        this.first = 0;
+        return;
+      }
+      const selectedClassNum = Number(selectedClass);
+      const selectedDivisionNum = Number(selectedDivision);
+      if (!selectedClassNum || !selectedDivisionNum) {
+        this.monthlyResults = [];
+        this.first = 0;
+        return;
+      }
+      this.getAllMonthlyGradesReport(
+        Number(selectedTerm),
+        Number(selectedMonth),
+        selectedClassNum,
+        selectedDivisionNum,
+        Number(selectedStudent)
+      );
+      return;
+    }
 
     const ready =
       selectedTerm != null &&
@@ -130,11 +270,11 @@ export class StudentMonthResultComponent implements OnInit {
     }
 
     this.getAllMonthlyGradesReport(
-      selectedTerm,
-      selectedMonth,
-      selectedClass,
-      selectedDivision,
-      selectedStudent
+      Number(selectedTerm),
+      Number(selectedMonth),
+      Number(selectedClass),
+      Number(selectedDivision),
+      Number(selectedStudent)
     );
   }
 
@@ -148,7 +288,7 @@ export class StudentMonthResultComponent implements OnInit {
     this.title = `${subj.studentName}_${subj.year}_${subj.month}_${subj.class}`;
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
       .filter((el: Element) => el.getAttribute('href') !== 'assets/print.css')
-      .map(el => el.outerHTML)
+      .map((el) => el.outerHTML)
       .join('');
     const base = `<base href="${document.baseURI}">`;
 

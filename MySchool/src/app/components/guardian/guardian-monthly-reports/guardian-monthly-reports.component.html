@@ -4,9 +4,19 @@
   [attr.dir]="dir$ | async">
   <div class="exams-card">
     <header class="exams-header">
-        <h2 class="exams-title">{{ pageTitle }}</h2>
+      <h2 class="exams-title">{{ pageTitle }}</h2>
       <p class="exams-subtitle">{{ pageSubtitle }}</p>
     </header>
+
+    @if (showPrintableCertificate) {
+      <section class="guardian-printable-cert mb-4" aria-label="شهادة شهرية">
+        <h3 class="guardian-printable-cert__title">الشهادة الشهرية (طباعة)</h3>
+        <p class="guardian-printable-cert__hint">
+          اختر الفصل والشهر والطالب لعرض الشهادة وطباعتها. تُعرض بيانات أبنائك المسجلين فقط.
+        </p>
+        <app-guardian-student-month-result />
+      </section>
+    }
 
     <div class="filters-toolbar">
       <form [formGroup]="filterForm" class="filters-grid guardian-mr-filters" novalidate>

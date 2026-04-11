@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Backend.Common;
 using Backend.DTOS.School.reports;
 using Backend.Interfaces;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Backend.Controllers.School;
 
@@ -20,13 +23,26 @@ public class ReportController : ControllerBase
         _unitOfWork = unitOfWork;
     }
     
+    [Authorize(Roles = "ADMIN,MANAGER,GUARDIAN,TEACHER")]
     [HttpPost("monthly")]
     public async Task<IActionResult> MonthlyReports([FromBody] MonthlyReportQueryDTO? query)
     {
         if (query == null)
             return BadRequest(APIResponse.Fail("Request body is required."));
 
-        var result = await _unitOfWork.Reports.MonthlyReportsAsync(query);
+        int? guardianId = null;
+        if (User.IsInRole("GUARDIAN"))
+        {
+            var uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(uid))
+                return Unauthorized(APIResponse.Fail("User id not found on token."));
+
+            guardianId = await _unitOfWork.Attendance.GetGuardianIdByUserIdAsync(uid);
+            if (!guardianId.HasValue)
+                return StatusCode((int)HttpStatusCode.Forbidden, APIResponse.Fail("No guardian profile for this user."));
+        }
+
+        var result = await _unitOfWork.Reports.MonthlyReportsAsync(query, guardianId);
         return result.Ok
             ? Ok(APIResponse.Success(result.Value!))
             : NotFound(APIResponse.Fail(result.Error!));

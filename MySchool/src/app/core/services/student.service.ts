@@ -3,12 +3,14 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 
 import {
     AddStudent,
+    GuardianChildReportOption,
     PagedResultDto,
     StudentDetailsDTO,
     StudentNameIdDTO,
     StudentNameIdSearchRequest,
     StudentPayload
 } from '../models/students.model';
+import { ApiResponse } from '../models/response.model';
 import { BackendAspService } from '../../ASP.NET/backend-asp.service';
 
 @Injectable({
@@ -181,6 +183,11 @@ export class StudentService {
             })
         )
     }
+    /** GET api/Students/guardian/my-children-for-report */
+    getGuardianMyChildrenForReport(): Observable<ApiResponse<GuardianChildReportOption[]>> {
+        return this.API.getRequest<GuardianChildReportOption[]>('Students/guardian/my-children-for-report');
+    }
+
     DeleteStudent(id: number): Observable<any> {
         return this.API.http.delete(`${this.API.baseUrl}/Students/${id}`).pipe(
             catchError(error => {

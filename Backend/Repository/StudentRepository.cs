@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 public class StudentRepository : IStudentRepository
@@ -1895,5 +1896,34 @@ public class StudentRepository : IStudentRepository
             .ToListAsync();
 
         return (items, totalCount);
+    }
+
+    public async Task<List<GuardianChildReportOptionDTO>> GetGuardianChildrenForMonthlyReportAsync(int guardianId, CancellationToken cancellationToken = default)
+    {
+        var rows = await _context.Students
+            .AsNoTracking()
+            .Where(s => s.GuardianID == guardianId)
+            .Include(s => s.FullName)
+            .Include(s => s.Division)
+                .ThenInclude(d => d.Class)
+            .OrderBy(s => s.StudentID)
+            .ToListAsync(cancellationToken);
+
+        return rows.Select(s =>
+        {
+            var name = (s.FullName.FirstName + " " + (s.FullName.MiddleName ?? "") + " " + s.FullName.LastName).Replace("  ", " ").Trim();
+            var className = s.Division?.Class?.ClassName ?? "";
+            var divName = s.Division?.DivisionName ?? "";
+            var display = string.IsNullOrEmpty(className) && string.IsNullOrEmpty(divName)
+                ? name
+                : $"{name} — {className} / {divName}";
+            return new GuardianChildReportOptionDTO
+            {
+                StudentID = s.StudentID,
+                ClassID = s.Division?.ClassID ?? 0,
+                DivisionID = s.DivisionID,
+                DisplayName = display
+            };
+        }).ToList();
     }
 }

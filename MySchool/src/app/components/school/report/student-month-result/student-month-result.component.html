@@ -9,16 +9,16 @@
             [editable]="true" [showClear]="true" (onChange)="getAllGrades()" formControlName="monthId"
             placeholder="إختار الشهر" />
 
-        <p-select [options]="AllClasses" class="w-2 mr-1 h-3" optionValue="classID" [checkmark]="true"
+        <p-select *ngIf="!isGuardian" [options]="AllClasses" class="w-2 mr-1 h-3" optionValue="classID" [checkmark]="true"
             optionLabel="className" [editable]="true" [showClear]="true" (onChange)="getAllGrades()"
             formControlName="classId" placeholder="إختار الصف" />
 
-        <p-select [options]="fiteredDivisions" (onChange)="getAllGrades()" class="w-2 mr-1 h-3" optionValue="divisionID"
+        <p-select *ngIf="!isGuardian" [options]="fiteredDivisions" (onChange)="getAllGrades()" class="w-2 mr-1 h-3" optionValue="divisionID"
             [checkmark]="true" optionLabel="divisionName" [editable]="true" [showClear]="true"
             formControlName="divisionId" placeholder="إختار الشعبة" />
 
-        <p-select [options]="" class="w-2 mr-1 h-3" (onChange)="getAllGrades()" optionValue="studentId"
-            [checkmark]="true" optionLabel="className" [editable]="true" [showClear]="true" formControlName="studentId"
+        <p-select [options]="studentSelectOptions" class="w-2 mr-1 h-3" optionValue="studentID"
+            [checkmark]="true" optionLabel="displayName" [editable]="true" [showClear]="true" formControlName="studentId"
             placeholder="إختار طالب" />
     </div>
 </form>

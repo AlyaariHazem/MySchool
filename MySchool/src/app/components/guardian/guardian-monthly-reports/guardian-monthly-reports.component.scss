@@ -12,6 +12,27 @@
   margin-bottom: 1rem;
 }
 
+.guardian-printable-cert {
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fafbfc;
+}
+
+.guardian-printable-cert__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.guardian-printable-cert__hint {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
 .guardian-mr-filters {
   flex: 1;
   min-width: min(100%, 280px);

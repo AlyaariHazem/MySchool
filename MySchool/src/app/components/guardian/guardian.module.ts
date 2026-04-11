@@ -9,6 +9,7 @@ import { GuardianHomeworkComponent } from './guardian-homework/guardian-homework
 import { GuardianExamsComponent } from './guardian-exams/guardian-exams.component';
 import { GuardianAttendanceComponent } from './guardian-attendance/guardian-attendance.component';
 import { GuardianMonthlyReportsComponent } from './guardian-monthly-reports/guardian-monthly-reports.component';
+import { GuardianStudentMonthResultComponent } from './guardian-student-month-result/guardian-student-month-result.component';
 import { GuardianStubPageComponent } from './guardian-stub-page/guardian-stub-page.component';
 
 @NgModule({
@@ -21,6 +22,7 @@ import { GuardianStubPageComponent } from './guardian-stub-page/guardian-stub-pa
     GuardianExamsComponent,
     GuardianAttendanceComponent,
     GuardianMonthlyReportsComponent,
+    GuardianStudentMonthResultComponent,
     GuardianStubPageComponent,
   ],
   imports: [SchoolComponentsModule, GuardianRoutingModule],
