@@ -11,6 +11,7 @@ import {
   ExamType,
   ScheduledExamList,
   StudentExamCard,
+  GuardianStudentExamCard,
 } from '../models/exams.model';
 
 @Injectable({ providedIn: 'root' })
@@ -107,6 +108,11 @@ export class ExamsService {
   getStudentMy(upcomingOnly = false): Observable<ApiResponse<StudentExamCard[]>> {
     const params = new HttpParams().set('upcomingOnly', String(upcomingOnly));
     return this.http.get<ApiResponse<StudentExamCard[]>>(`${this.base()}/student/my`, { params });
+  }
+
+  getGuardianMy(upcomingOnly = false): Observable<ApiResponse<GuardianStudentExamCard[]>> {
+    const params = new HttpParams().set('upcomingOnly', String(upcomingOnly));
+    return this.http.get<ApiResponse<GuardianStudentExamCard[]>>(`${this.base()}/guardian/my`, { params });
   }
 
   getClassSheet(scheduledExamId: number): Observable<ApiResponse<unknown>> {

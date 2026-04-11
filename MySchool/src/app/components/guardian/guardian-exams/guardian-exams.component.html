@@ -1,0 +1,74 @@
+<div id="guardian-exams-page" class="exams-page student-homework-page guardian-exams-page" [attr.dir]="dir$ | async">
+  <div class="exams-card">
+    <header class="exams-header">
+      <h2 class="exams-title">امتحانات الأبناء</h2>
+      <p class="exams-subtitle">
+        جداول الامتحانات للطلاب المرتبطين بحسابك (حسب نشر المدرسة للجدول والنتائج).
+      </p>
+    </header>
+
+    <div class="filters-toolbar">
+      <form [formGroup]="filterForm" class="filters-grid" novalidate>
+        <div class="filter-field filter-field--grow">
+          <p-floatlabel class="w-full block" variant="on">
+            <p-select
+              inputId="guardian-exams-view"
+              class="w-full"
+              styleClass="w-full exams-filter-control"
+              size="small"
+              [options]="filterOptions"
+              formControlName="view"
+              optionLabel="label"
+              optionValue="value"
+              placeholder=" "
+              (onChange)="load()" />
+            <label for="guardian-exams-view">عرض</label>
+          </p-floatlabel>
+        </div>
+      </form>
+      <div class="toolbar-actions">
+        <p-button type="button" label="تحديث" icon="pi pi-refresh" severity="secondary" (onClick)="load()" />
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <p-table
+        [value]="rows"
+        [loading]="loading"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="p-datatable-sm exams-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>الطالب</th>
+            <th>التاريخ</th>
+            <th>النوع</th>
+            <th>المادة</th>
+            <th>الصف / الشعبة</th>
+            <th>الوقت</th>
+            <th>القاعة</th>
+            <th>الدرجة</th>
+            <th>النتيجة</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.studentName }}</td>
+            <td>{{ row.examDate | date: 'mediumDate' }}</td>
+            <td>{{ row.examTypeName }}</td>
+            <td>{{ row.subjectName }}</td>
+            <td>{{ row.className }} / {{ row.divisionName }}</td>
+            <td>{{ row.startTime }} – {{ row.endTime }}</td>
+            <td>{{ row.room?.trim() ? row.room : '—' }}</td>
+            <td>{{ scoreCell(row) }}</td>
+            <td>{{ resultLabel(row) }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="9" class="empty-cell">لا توجد امتحانات في هذا العرض أو لا توجد بيانات بعد.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

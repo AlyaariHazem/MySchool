@@ -6,6 +6,7 @@ import { GuardianHeaderComponent } from './header/guardian-header.component';
 import { GuardianHomeComponent } from './guardian-home/guardian-home.component';
 import { GuardianLayoutComponent } from './guardian-layout/guardian-layout.component';
 import { GuardianHomeworkComponent } from './guardian-homework/guardian-homework.component';
+import { GuardianExamsComponent } from './guardian-exams/guardian-exams.component';
 import { GuardianStubPageComponent } from './guardian-stub-page/guardian-stub-page.component';
 
 @NgModule({
@@ -15,6 +16,7 @@ import { GuardianStubPageComponent } from './guardian-stub-page/guardian-stub-pa
     GuardianHeaderComponent,
     GuardianHomeComponent,
     GuardianHomeworkComponent,
+    GuardianExamsComponent,
     GuardianStubPageComponent,
   ],
   imports: [SchoolComponentsModule, GuardianRoutingModule],

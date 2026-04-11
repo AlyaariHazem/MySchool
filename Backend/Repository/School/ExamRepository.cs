@@ -431,6 +431,52 @@ public class ExamRepository : IExamRepository
         return await GetStudentExamsAsync(studentId, upcomingOnly, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<GuardianStudentExamCardDto>> GetGuardianAllStudentsExamsAsync(int guardianId, bool upcomingOnly, CancellationToken cancellationToken = default)
+    {
+        var students = await _db.Students.AsNoTracking()
+            .Where(s => s.GuardianID == guardianId)
+            .Select(s => new { s.StudentID, s.FullName })
+            .ToListAsync(cancellationToken);
+
+        var list = new List<GuardianStudentExamCardDto>();
+        foreach (var st in students)
+        {
+            var studentName = FormatName(st.FullName);
+            var exams = await GetStudentExamsAsync(st.StudentID, upcomingOnly, cancellationToken);
+            foreach (var e in exams)
+            {
+                list.Add(new GuardianStudentExamCardDto
+                {
+                    StudentID = st.StudentID,
+                    StudentName = studentName,
+                    ScheduledExamID = e.ScheduledExamID,
+                    ExamTypeName = e.ExamTypeName,
+                    SubjectName = e.SubjectName,
+                    ClassName = e.ClassName,
+                    DivisionName = e.DivisionName,
+                    ExamDate = e.ExamDate,
+                    StartTime = e.StartTime,
+                    EndTime = e.EndTime,
+                    Room = e.Room,
+                    SchedulePublished = e.SchedulePublished,
+                    ResultsPublished = e.ResultsPublished,
+                    TotalMarks = e.TotalMarks,
+                    PassingMarks = e.PassingMarks,
+                    Score = e.Score,
+                    IsAbsent = e.IsAbsent,
+                    Remarks = e.Remarks,
+                    Passed = e.Passed
+                });
+            }
+        }
+
+        return list
+            .OrderBy(x => x.ExamDate)
+            .ThenBy(x => x.StudentName)
+            .ThenBy(x => x.SubjectName)
+            .ToList();
+    }
+
     public async Task<ClassExamSheetReportDto?> GetClassExamSheetAsync(int scheduledExamId, CancellationToken cancellationToken = default)
     {
         var se = await _db.ScheduledExams.AsNoTracking()

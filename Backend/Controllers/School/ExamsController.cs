@@ -463,6 +463,37 @@ public class ExamsController : ControllerBase
     // --- Guardian ---
 
     [Authorize(Roles = "GUARDIAN,ADMIN,MANAGER")]
+    [HttpGet("guardian/my")]
+    public async Task<ActionResult<APIResponse>> GetGuardianMyExams([FromQuery] bool upcomingOnly = false, CancellationToken cancellationToken = default)
+    {
+        var response = new APIResponse();
+        try
+        {
+            var uid = CurrentUserId;
+            if (string.IsNullOrEmpty(uid)) return Unauthorized(response);
+            var guardianId = await _unitOfWork.Exams.GetGuardianIdByUserIdAsync(uid, cancellationToken);
+            if (!guardianId.HasValue)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.Forbidden;
+                response.ErrorMasseges.Add("No guardian profile for this user.");
+                return StatusCode((int)HttpStatusCode.Forbidden, response);
+            }
+
+            response.Result = await _unitOfWork.Exams.GetGuardianAllStudentsExamsAsync(guardianId.Value, upcomingOnly, cancellationToken);
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
+    [Authorize(Roles = "GUARDIAN,ADMIN,MANAGER")]
     [HttpGet("guardian/student/{studentId:int}")]
     public async Task<ActionResult<APIResponse>> GetGuardianStudentExams(int studentId, [FromQuery] bool upcomingOnly = false, CancellationToken cancellationToken = default)
     {

@@ -132,6 +132,13 @@ public class StudentExamCardDto
     public bool Passed { get; set; }
 }
 
+/// <summary>Student exam row for guardian dashboard (includes child identity).</summary>
+public class GuardianStudentExamCardDto : StudentExamCardDto
+{
+    public int StudentID { get; set; }
+    public string StudentName { get; set; } = string.Empty;
+}
+
 public class ClassExamSheetReportDto
 {
     public int ScheduledExamID { get; set; }

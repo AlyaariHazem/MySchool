@@ -26,6 +26,7 @@ public interface IExamRepository
 
     Task<IReadOnlyList<StudentExamCardDto>> GetStudentExamsAsync(int studentId, bool upcomingOnly, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<StudentExamCardDto>> GetGuardianStudentExamsAsync(int guardianId, int studentId, bool upcomingOnly, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<GuardianStudentExamCardDto>> GetGuardianAllStudentsExamsAsync(int guardianId, bool upcomingOnly, CancellationToken cancellationToken = default);
 
     Task<ClassExamSheetReportDto?> GetClassExamSheetAsync(int scheduledExamId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<SubjectPerformanceReportDto>> GetSubjectPerformanceAsync(int yearId, int termId, int? classId, int? divisionId, CancellationToken cancellationToken = default);

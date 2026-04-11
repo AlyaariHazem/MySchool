@@ -87,3 +87,9 @@ export interface StudentExamCard {
   remarks?: string | null;
   passed: boolean;
 }
+
+/** Guardian view: same card fields plus which child the row belongs to. */
+export interface GuardianStudentExamCard extends StudentExamCard {
+  studentID: number;
+  studentName: string;
+}

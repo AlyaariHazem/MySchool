@@ -6,6 +6,7 @@ import { NotificationsComponent } from '../school/notifications/notifications.co
 import { GuardianHomeComponent } from './guardian-home/guardian-home.component';
 import { GuardianLayoutComponent } from './guardian-layout/guardian-layout.component';
 import { GuardianHomeworkComponent } from './guardian-homework/guardian-homework.component';
+import { GuardianExamsComponent } from './guardian-exams/guardian-exams.component';
 import { GuardianStubPageComponent } from './guardian-stub-page/guardian-stub-page.component';
 
 const routes: Routes = [
@@ -17,16 +18,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', component: GuardianHomeComponent, data: { breadcrumb: 'الرئيسية' } },
       { path: 'notifications', component: NotificationsComponent, data: { breadcrumb: 'الإشعارات' } },
-      {
-        path: 'exams',
-        component: GuardianStubPageComponent,
-        data: {
-          breadcrumb: 'الامتحانات',
-          stubTitle: 'امتحانات الأبناء',
-          stubMessage:
-            'سيتم هنا عرض جداول امتحانات الأبناء المرتبطين بحسابك. يمكنك حتى ذلك استخدام جدول المدرسة من «الجدول الأسبوعي».',
-        },
-      },
+      { path: 'exams', component: GuardianExamsComponent, data: { breadcrumb: 'الامتحانات' } },
       { path: 'homework', component: GuardianHomeworkComponent, data: { breadcrumb: 'الواجبات' } },
       {
         path: 'grades/month',
