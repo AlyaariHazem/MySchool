@@ -1,130 +1,224 @@
-.form {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f0f2f5;
-    padding: 20px;
+/* Green theme (scoped to login page) */
+:host {
+  display: block;
+  /* Material 3 tokens — tune form focus + primary button */
+  --mat-sys-primary: #2e7d32;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #c8e6c9;
+  --mat-sys-on-primary-container: #1b5e20;
+}
+
+.login-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2rem);
+  background: linear-gradient(
+    165deg,
+    #e8f5e9 0%,
+    #f1f8e9 35%,
+    #eef7f0 70%,
+    #fafcfa 100%
+  );
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 12px !important;
+  border-color: rgba(46, 125, 50, 0.12) !important;
+  box-shadow:
+    0 4px 6px -1px rgba(27, 94, 32, 0.06),
+    0 10px 24px -4px rgba(27, 94, 32, 0.1) !important;
+}
+
+.login-card ::ng-deep .mat-mdc-card-content {
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.login-card__header {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.login-card__icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  background: rgba(46, 125, 50, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card__icon mat-icon {
+  font-size: 1.75rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: #2e7d32;
+}
+
+.login-card__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 700;
+  color: #1b5e20;
+  letter-spacing: -0.02em;
+}
+
+.login-card__subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #558b2f;
+  line-height: 1.5;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.login-field {
+  width: 100%;
+}
+
+.login-form ::ng-deep .mat-mdc-form-field {
+  width: 100%;
+}
+
+/* Outline fields: green focus ring (Material MDC) */
+.login-form ::ng-deep .mat-mdc-text-field--focused .mdc-notched-outline__leading,
+.login-form ::ng-deep .mat-mdc-text-field--focused .mdc-notched-outline__notch,
+.login-form ::ng-deep .mat-mdc-text-field--focused .mdc-notched-outline__trailing {
+  border-color: #2e7d32 !important;
+}
+
+.login-form ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: #2e7d32;
+}
+
+.login-form ::ng-deep .mat-mdc-select.mat-mdc-select-focused .mat-mdc-select-arrow {
+  color: #2e7d32;
+}
+
+/* Submit: solid green (overrides theme primary if needed) */
+.login-submit {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.login-submit:not(:disabled) {
+  --mdc-filled-button-container-color: #2e7d32;
+  --mdc-filled-button-label-text-color: #ffffff;
+  --mat-filled-button-state-layer-color: #1b5e20;
+  --mat-filled-button-ripple-color: rgba(255, 255, 255, 0.2);
+}
+
+.login-submit:not(:disabled):hover {
+  --mdc-filled-button-container-color: #388e3c;
+}
+
+.login-submit:disabled {
+  opacity: 0.65;
+}
+
+.login-btn-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-inline-end: 0.4em;
+  vertical-align: -0.125em;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: login-spin 0.7s linear infinite;
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
   }
-  .forgot-password{
-    cursor: pointer;
-  }
-  .forgot-password--disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-  .login-btn-spinner {
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    margin-inline-end: 0.4em;
-    vertical-align: -0.125em;
-    border: 2px solid rgba(255, 255, 255, 0.35);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: login-spin 0.7s linear infinite;
-  }
-  @keyframes login-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  .toast-center-center {
-    position: fixed;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    margin: 0 !important;
-    z-index: 999999 !important; /* Ensure it appears on top */
-  }
-  form {
-    width: 100%;
-    max-width: 400px;
-    background: #ffffff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    direction: rtl;
-  }
-  
-  /* Form field styling */
-  .input2 {
-    width: 100%;
-    margin-bottom: 1.5rem;
-  }
-  
-  
-  /* Styling for error messages */
-  mat-error {
-    color: #d32f2f;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-top: -0.5rem;
-    padding-top: 0.5rem;
-  }
-  
-  /* Buttons styling */
-  button[type="submit"],
-  button[mat-raised-button] {
-    width: 100%;
-    padding: 10px;
-    font-size: 1rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 4px;
-    margin-top: 1rem;
-    transition: background-color 0.3s ease;
-    text-transform: uppercase;
-  }
-  .spinner-overlay {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px; /* Adjust height as needed */
-    background: rgba(255, 255, 255, 0.9); /* Slightly translucent background */
-    border-radius: 10px;
-    padding: 1rem;
-  }
-  
-  .loading-text {
-    margin-top: 1rem;
+}
+
+.login-divider {
+  margin: 1.25rem 0 1rem;
+}
+
+.login-footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.92rem;
+  color: #546e7a;
+  text-decoration: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.footer-link mat-icon {
+  font-size: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  opacity: 0.85;
+  color: #558b2f;
+}
+
+.footer-link:hover:not(.footer-link--disabled) {
+  background: rgba(46, 125, 50, 0.08);
+  color: #2e7d32;
+}
+
+.footer-link--accent {
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.footer-link--accent mat-icon {
+  color: #2e7d32;
+}
+
+.footer-link--accent:hover:not(.footer-link--disabled) {
+  background: rgba(46, 125, 50, 0.12);
+}
+
+.footer-link--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.toast-center-center {
+  position: fixed;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  z-index: 999999 !important;
+}
+
+@media (max-width: 400px) {
+  .login-card__title {
     font-size: 1.2rem;
-    color: #333;
-    font-weight: 500;
   }
-  
-  
-  
-  /* "Forgot password" link styling */
-  a {
-    display: block;
-    text-align: center;
-    margin-top: 1rem;
-    text-decoration: none;
-    font-weight: bold;
-  }
-  
-  a:hover {
-    text-decoration: underline;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 600px) {
-    form {
-      padding: 1.5rem;
-    }
-  }
-  .btn-custom {
-    background-color: #198754 !important; 
-    color: white !important;
-    border: 1px solid #28a745 !important; /* same green as btn-success */
-    transition: all 0.3s ease; /* smooth transition on hover */
-  }
-  
-  .btn-custom:hover {
-    background-color: #21943c !important; /* green background on hover */
-    border: 1px solid #28a745 !important; /* maintain the border */
-  }
-    
+}

@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260412192052_AddRegistrationRequests")]
+    partial class AddRegistrationRequests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,9 +39,6 @@ namespace Backend.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -76,10 +76,6 @@ namespace Backend.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("PhoneNumberNormalized")
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -103,10 +99,6 @@ namespace Backend.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("PhoneNumberNormalized")
-                        .IsUnique()
-                        .HasFilter("[PhoneNumberNormalized] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
 
@@ -143,29 +135,18 @@ namespace Backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
                     b.Property<string>("NormalizedEmail")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedPhone")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("NormalizedUserName")
                         .IsRequired()
@@ -175,11 +156,6 @@ namespace Backend.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("RejectionReason")
                         .HasMaxLength(2000)
@@ -209,7 +185,7 @@ namespace Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedPhone")
+                    b.HasIndex("NormalizedEmail")
                         .IsUnique()
                         .HasFilter("[Status] = 0");
 
@@ -220,45 +196,6 @@ namespace Backend.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("RegistrationRequests");
-                });
-
-            modelBuilder.Entity("Backend.Models.Master.RegistrationRequestAttachment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OriginalFileName")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<int>("RegistrationRequestId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RelativePath")
-                        .IsRequired()
-                        .HasMaxLength(1024)
-                        .HasColumnType("nvarchar(1024)");
-
-                    b.Property<long>("SizeBytes")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RegistrationRequestId");
-
-                    b.ToTable("RegistrationRequestAttachments");
                 });
 
             modelBuilder.Entity("Backend.Models.Master.Subscription", b =>
@@ -584,17 +521,6 @@ namespace Backend.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("Backend.Models.Master.RegistrationRequestAttachment", b =>
-                {
-                    b.HasOne("Backend.Models.Master.RegistrationRequest", "RegistrationRequest")
-                        .WithMany("Attachments")
-                        .HasForeignKey("RegistrationRequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RegistrationRequest");
-                });
-
             modelBuilder.Entity("Backend.Models.Master.Subscription", b =>
                 {
                     b.HasOne("Backend.Models.Tenant", "Tenant")
@@ -703,11 +629,6 @@ namespace Backend.Migrations
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("UserTenants");
-                });
-
-            modelBuilder.Entity("Backend.Models.Master.RegistrationRequest", b =>
-                {
-                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("Backend.Models.Tenant", b =>

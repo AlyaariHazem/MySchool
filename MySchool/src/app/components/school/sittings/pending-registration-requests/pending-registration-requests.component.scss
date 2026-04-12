@@ -1,0 +1,54 @@
+.pending-reg {
+  padding: 1rem;
+}
+
+.sub {
+  color: #555;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.attachments-cell {
+  max-width: 14rem;
+}
+
+.attachments-cell a {
+  display: block;
+  margin-bottom: 0.25rem;
+  word-break: break-all;
+}
+
+.attach-link {
+  color: var(--mat-sys-primary, #1565c0);
+}
+
+h2 {
+  margin-bottom: 1rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reject-dialog {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  max-width: 480px;
+}
+
+.reject-textarea {
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.reject-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

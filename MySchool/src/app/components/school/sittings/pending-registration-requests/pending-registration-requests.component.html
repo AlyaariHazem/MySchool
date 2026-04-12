@@ -1,0 +1,83 @@
+<div class="pending-reg" dir="rtl">
+  <h2>طلبات التسجيل المعلقة</h2>
+  <p class="sub">راجع بيانات الطالب أو ولي الأمر والمرفقات ثم وافق أو ارفض. لا يستطيع مقدم الطلب تسجيل الدخول قبل الموافقة.</p>
+
+  <p-table
+    [value]="rows"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25]"
+    styleClass="p-datatable-sm"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>اسم المستخدم</th>
+        <th>الهاتف</th>
+        <th>الجنس</th>
+        <th>تاريخ الميلاد</th>
+        <th>الدور</th>
+        <th>المدرسة</th>
+        <th>التاريخ</th>
+        <th>مرفقات</th>
+        <th>إجراءات</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td>{{ row.userName }}</td>
+        <td>{{ row.phoneNumber }}</td>
+        <td>{{ row.gender }}</td>
+        <td>{{ formatDob(row.dateOfBirth) }}</td>
+        <td>{{ roleLabel(row.requestedRole) }}</td>
+        <td>{{ row.schoolName }}</td>
+        <td>{{ formatDate(row.createdAt) }}</td>
+        <td class="attachments-cell">
+          @if (row.attachments?.length) {
+            @for (a of row.attachments; track $index) {
+              <a [href]="a.url" target="_blank" rel="noopener noreferrer" class="attach-link">{{ a.fileName }}</a>
+            }
+          } @else {
+            —
+          }
+        </td>
+        <td class="actions">
+          <p-button
+            label="موافقة"
+            severity="success"
+            [disabled]="busyId !== null"
+            (onClick)="approve(row)"
+          />
+          <p-button
+            label="رفض"
+            severity="danger"
+            [outlined]="true"
+            [disabled]="busyId !== null"
+            (onClick)="openReject(row)"
+          />
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9">لا توجد طلبات معلقة</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  @if (rejectForId !== null) {
+    <div class="reject-dialog">
+      <h3>سبب الرفض (اختياري)</h3>
+      <textarea
+        rows="3"
+        class="reject-textarea"
+        [(ngModel)]="rejectReason"
+        name="rejectReason"
+      ></textarea>
+      <div class="reject-actions">
+        <p-button label="تأكيد الرفض" severity="danger" (onClick)="confirmReject()" />
+        <p-button label="إلغاء" [outlined]="true" (onClick)="cancelReject()" />
+      </div>
+    </div>
+  }
+</div>

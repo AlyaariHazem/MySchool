@@ -1,63 +1,123 @@
+<div class="login-page" dir="rtl">
+  <div class="login-shell">
+    <mat-card class="login-card" appearance="outlined">
+      <mat-card-content>
+        <div class="login-card__header">
+          <div class="login-card__icon" aria-hidden="true">
+            <mat-icon>lock</mat-icon>
+          </div>
+          <h1 class="login-card__title">تسجيل الدخول</h1>
+          <p class="login-card__subtitle">نظام مدرستي — أدخل بياناتك للمتابعة</p>
+        </div>
 
+        <form
+          class="login-form"
+          #loginForm="ngForm"
+          (ngSubmit)="login(loginForm.value)"
+          [attr.aria-busy]="isLoading"
+        >
+          <mat-form-field appearance="outline" class="login-field">
+            <mat-label>اسم المستخدم</mat-label>
+            <input
+              matInput
+              placeholder="أدخل اسم المستخدم"
+              autocomplete="username"
+              #userName="ngModel"
+              ngModel
+              name="userName"
+              required
+              minlength="3"
+              maxlength="256"
+              [disabled]="isLoading"
+            />
+            <mat-hint>الاسم الذي سجّلت به في النظام</mat-hint>
+            @if (userName.errors?.['required'] && userName.touched) {
+              <mat-error>يجب إدخال اسم المستخدم</mat-error>
+            }
+            @if (userName.errors?.['minlength']) {
+              <mat-error>3 أحرف على الأقل</mat-error>
+            }
+          </mat-form-field>
 
-<!-- Login Form -->
-<div class="form">
-  <form class="form-inline" action="" dir="rtl" #loginForm="ngForm" (ngSubmit)="login(loginForm.value)"
-    [attr.aria-busy]="isLoading">
-    <h2 style="margin-right:2rem;">تسجيل الدخول لنظام مدرستي</h2>
+          <mat-form-field appearance="outline" class="login-field">
+            <mat-label>كلمة السر</mat-label>
+            <input
+              matInput
+              placeholder="••••••••"
+              autocomplete="current-password"
+              ngModel
+              name="password"
+              type="password"
+              required
+              minlength="3"
+              maxlength="256"
+              #password="ngModel"
+              [disabled]="isLoading"
+            />
+            @if (password.errors?.['required'] && password.touched) {
+              <mat-error>كلمة السر مطلوبة</mat-error>
+            }
+            @if (password.errors?.['minlength']) {
+              <mat-error>3 أحرف على الأقل</mat-error>
+            }
+          </mat-form-field>
 
-    <!-- Phone Input Field -->
-    <mat-form-field appearance="outline" class="input2">
-      <mat-label>إدخل اسم المستخدم</mat-label>
-      <input matInput placeholder="اسم المستخدم" autocomplete="username" #userName="ngModel" ngModel name="userName"
-        required minlength="3" maxlength="22" [disabled]="isLoading" />
-      @if (userName.errors?.['required']) {
-      <mat-error>يجب إدخال اسم المستخدم</mat-error>
-      }
-      @if (userName.errors?.['minlength']) {
-      <mat-error>اسم المستخدم يجب أن يكون 3 أرقام على الأقل</mat-error>
-      }
-    </mat-form-field>
-    <!-- Password Input Field -->
-    <mat-form-field appearance="outline" class="input2">
-      <mat-label>كلمة السر</mat-label>
-      <input matInput placeholder="كلمة السر" autocomplete="current-password" ngModel name="password" type="password"
-        required minlength="3" maxlength="22" #password="ngModel" [disabled]="isLoading" />
-      @if (password.errors?.['required']) {
-      <mat-error>كلمة السر مطلوبة</mat-error>
-      }
-      @if (password.errors?.['minlength']) {
-      <mat-error>يجب أن تكون كلمة السر أكبر من 3 أحرف</mat-error>
-      }
-    </mat-form-field>
+          <mat-form-field appearance="outline" class="login-field">
+            <mat-label>نوع المستخدم</mat-label>
+            <mat-select
+              #userType="ngModel"
+              ngModel
+              name="userType"
+              required
+              [disabled]="isLoading"
+              panelClass="login-select-panel"
+            >
+              @for (type of userTypes; track type.value) {
+                <mat-option [value]="type.value">{{ type.label }}</mat-option>
+              }
+            </mat-select>
+            @if (userType.errors?.['required'] && userType.touched) {
+              <mat-error>اختر نوع المستخدم</mat-error>
+            }
+          </mat-form-field>
 
-    <!-- User Type Selection -->
-    <mat-form-field appearance="outline" class="input2">
-      <mat-label>نوع المستخدم</mat-label>
-      <mat-select #userType="ngModel" ngModel name="userType" required [disabled]="isLoading">
-        @for (type of userTypes; track $index) {
-        <mat-option [value]="type.value">
-          {{ type.label }}
-        </mat-option>
-        }
-      </mat-select>
-      @if (userType.errors?.['required']) {
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            class="login-submit"
+            [disabled]="isLoading || !loginForm.valid"
+          >
+            @if (isLoading) {
+              <span class="login-btn-spinner" aria-hidden="true"></span>
+            }
+            تسجيل الدخول
+          </button>
+        </form>
 
-      <mat-error>يجب اختيار نوع المستخدم</mat-error>
-      }
-    </mat-form-field>
+        <mat-divider class="login-divider" />
 
-    <!-- Login and Register Buttons -->
-    <br />
-    <button type="submit" class="btn btn-success btn-custom mb-2 buttonSend" [disabled]="isLoading">
-      @if (isLoading) {
-        <span class="login-btn-spinner" aria-hidden="true"></span>
-      }
-      تسجيل دخول
-    </button>
-
-    <a class="forgot-password" [class.forgot-password--disabled]="isLoading"
-      [attr.tabindex]="isLoading ? -1 : null"
-      (click)="openRegisterDialog()">هل نسيت كلمة السر؟</a>
-  </form>
+        <nav class="login-footer-links" aria-label="روابط إضافية">
+          <a
+            class="footer-link"
+            [class.footer-link--disabled]="isLoading"
+            [attr.tabindex]="isLoading ? -1 : null"
+            (click)="openForgotPasswordHint()"
+          >
+            <mat-icon>help_outline</mat-icon>
+            <span>هل نسيت كلمة السر؟</span>
+          </a>
+          <a
+            class="footer-link footer-link--accent"
+            routerLink="/request-registration"
+            [class.footer-link--disabled]="isLoading"
+            [attr.tabindex]="isLoading ? -1 : null"
+          >
+            <mat-icon>app_registration</mat-icon>
+            <span>طلب التسجيل في مدرسة</span>
+          </a>
+        </nav>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>

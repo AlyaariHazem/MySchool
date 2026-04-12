@@ -55,6 +55,11 @@
                 <span>{{ 'settings.databaseRestore' | translate }}</span>
               </a>
             </li>
+            <li *ngIf="showPendingRegistrations">
+              <a routerLink="/school/sitting/pending-registrations" routerLinkActive="active" (click)="cancel()">
+                <span>طلبات التسجيل</span>
+              </a>
+            </li>
           </ul>
         </li>
 

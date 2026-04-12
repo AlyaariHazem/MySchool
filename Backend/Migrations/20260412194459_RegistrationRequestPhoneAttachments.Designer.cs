@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260412194459_RegistrationRequestPhoneAttachments")]
+    partial class RegistrationRequestPhoneAttachments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,11 +122,11 @@ namespace Backend.Migrations
                             Email = "ADMIN@GMAIL.COM",
                             EmailConfirmed = true,
                             Gender = "",
-                            HireDate = new DateTime(2026, 4, 8, 21, 0, 57, 735, DateTimeKind.Utc).AddTicks(6187),
+                            HireDate = new DateTime(2026, 4, 12, 19, 44, 58, 785, DateTimeKind.Utc).AddTicks(9434),
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEIauMaht3feaQi/+ngEZRiZXg+qA2bn7z77pRg1JMoNUCOspaR3/rJtVTvnkdj0VDw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEL9ECkTJeaT0b+Wy2q+OyvFrb0iAM8+fzdFk2F7h4b/mKhgT9k7/9hpB4sg9EHdRoA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "f9a7b3c2d1e04a5b9c8d7e6f5a4b3c2d",
                             TwoFactorEnabled = false,

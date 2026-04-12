@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { LoginComponent } from './auth/Login/login.component';
+import { RequestRegistrationComponent } from './auth/request-registration/request-registration.component';
 import { adminGuardGuard } from './core/guards/admin-guard.guard';
 import { studentGuard } from './core/guards/student.guard';
 import { guardianGuard } from './core/guards/guardian.guard';
@@ -11,6 +12,10 @@ export const routes: Routes = [
     {
         path:'login',
         component:LoginComponent
+    },
+    {
+        path: 'request-registration',
+        component: RequestRegistrationComponent,
     },
     {
         path: 'students',

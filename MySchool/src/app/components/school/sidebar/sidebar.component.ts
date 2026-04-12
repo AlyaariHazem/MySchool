@@ -61,6 +61,15 @@ export class SidebarComponent {
     return localStorage.getItem('userType') === 'TEACHER';
   }
 
+  /** School managers / platform admin in school shell — can review public registration requests. */
+  get showPendingRegistrations(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    const t = localStorage.getItem('userType');
+    return t === 'MANAGER' || t === 'ADMIN';
+  }
+
   homePath(): string {
     return this.isTeacher ? '/teacher/workspace' : '/school/dashboard';
   }

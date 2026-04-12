@@ -1,0 +1,243 @@
+<div class="page-shell" dir="rtl">
+  @if (submitted) {
+    <mat-card class="result-card" appearance="outlined">
+      <mat-card-content>
+      <div class="result-inner">
+        <div class="result-icon" aria-hidden="true">
+          <mat-icon>mark_email_read</mat-icon>
+        </div>
+        <h2>تم إرسال الطلب</h2>
+        <p class="result-text">
+          طلبك قيد مراجعة المدرسة. لن يُفعّل حسابك ولا يمكنك تسجيل الدخول حتى تتم الموافقة من إدارة المدرسة.
+        </p>
+        <a mat-stroked-button color="primary" routerLink="/login" class="result-cta">العودة لتسجيل الدخول</a>
+      </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <div class="page-header">
+      <h1>طلب التسجيل في مدرسة</h1>
+      <p class="lede">
+        متاح لطالب أو ولي أمر فقط. لا يُنشأ حساب فعلي إلا بعد موافقة المدرسة.
+      </p>
+    </div>
+
+    <mat-card class="form-card" appearance="outlined">
+      <mat-card-content>
+      <form (ngSubmit)="submit()" class="form-grid" novalidate>
+        @if (schoolsLoading) {
+          <div class="schools-loading full">
+            <mat-icon class="spin">hourglass_empty</mat-icon>
+            <span>جاري تحميل المدارس…</span>
+          </div>
+        }
+
+        <div class="section-title full">
+          <mat-icon>school</mat-icon>
+          <span>المدرسة والحساب</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>المدرسة</mat-label>
+          <mat-select
+            name="tenantId"
+            [(ngModel)]="tenantId"
+            required
+            [disabled]="isSubmitting || schoolsLoading"
+          >
+            @for (s of schools; track s.tenantId) {
+              <mat-option [value]="s.tenantId">{{ s.schoolName }}</mat-option>
+            }
+          </mat-select>
+          @if (!schoolsLoading && schools.length === 0) {
+            <mat-hint class="warn-hint">لا توجد مدارس متاحة حالياً</mat-hint>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>اسم المستخدم</mat-label>
+          <input
+            matInput
+            name="userName"
+            [(ngModel)]="userName"
+            required
+            minlength="3"
+            maxlength="256"
+            autocomplete="username"
+            [disabled]="isSubmitting"
+          />
+          <mat-hint>لتسجيل الدخول لاحقاً بعد الموافقة</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>رقم الهاتف</mat-label>
+          <input
+            matInput
+            type="tel"
+            name="phoneNumber"
+            [(ngModel)]="phoneNumber"
+            required
+            autocomplete="tel"
+            inputmode="tel"
+            [disabled]="isSubmitting"
+          />
+          <mat-hint>8 أرقام على الأقل</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>كلمة السر</mat-label>
+          <input
+            matInput
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            required
+            minlength="6"
+            autocomplete="new-password"
+            [disabled]="isSubmitting"
+          />
+          <mat-hint>6 أحرف على الأقل</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>تأكيد كلمة السر</mat-label>
+          <input
+            matInput
+            type="password"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            required
+            minlength="6"
+            autocomplete="new-password"
+            [disabled]="isSubmitting"
+          />
+        </mat-form-field>
+
+        <mat-divider class="full" />
+
+        <div class="section-title full">
+          <mat-icon>badge</mat-icon>
+          <span>البيانات الشخصية</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>الاسم الكامل (اختياري)</mat-label>
+          <input matInput name="fullName" [(ngModel)]="fullName" [disabled]="isSubmitting" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>الجنس</mat-label>
+          <mat-select name="gender" [(ngModel)]="gender" required [disabled]="isSubmitting">
+            @for (g of genderOptions; track g.value) {
+              <mat-option [value]="g.value">{{ g.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>تاريخ الميلاد (اختياري)</mat-label>
+          <input
+            matInput
+            type="date"
+            name="dateOfBirth"
+            [(ngModel)]="dateOfBirth"
+            [disabled]="isSubmitting"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>نوع الحساب</mat-label>
+          <mat-select
+            name="requestedRole"
+            [(ngModel)]="requestedRole"
+            required
+            [disabled]="isSubmitting"
+          >
+            @for (r of roleOptions; track r.value) {
+              <mat-option [value]="r.value">{{ r.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-divider class="full" />
+
+        <div class="section-title full">
+          <mat-icon>attach_file</mat-icon>
+          <span>المرفقات</span>
+        </div>
+
+        <div class="full attachments-block">
+          <p class="attachments-hint">
+            PDF أو صور — حتى {{ maxFiles }} ملفات، {{ maxFileMb }} ميجابايت لكل ملف
+          </p>
+          <input
+            #fileInput
+            type="file"
+            multiple
+            hidden
+            accept=".pdf,.jpg,.jpeg,.png,.webp"
+            [disabled]="isSubmitting"
+            (change)="onFilesPicked($event)"
+          />
+          <button
+            type="button"
+            mat-stroked-button
+            class="upload-trigger"
+            [disabled]="isSubmitting"
+            (click)="openFilePicker()"
+          >
+            <mat-icon>folder_open</mat-icon>
+            اختيار ملفات
+          </button>
+          <div
+            class="drop-zone"
+            [class.drop-zone--active]="fileDropActive"
+            (drop)="onDrop($event)"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+          >
+            <mat-icon class="drop-icon">cloud_upload</mat-icon>
+            <span>أو اسحب الملفات وأفلتها هنا</span>
+          </div>
+          @if (selectedFiles.length) {
+            <ul class="file-list" aria-label="الملفات المختارة">
+              @for (file of selectedFiles; track $index) {
+                <li>
+                  <mat-icon class="file-icon">description</mat-icon>
+                  <span class="file-name">{{ file.name }}</span>
+                  <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                  <button
+                    type="button"
+                    class="remove-file"
+                    (click)="removeFile($index)"
+                    [disabled]="isSubmitting"
+                    [attr.aria-label]="'حذف ' + file.name"
+                  >
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        <div class="actions full">
+          <button
+            mat-flat-button
+            color="primary"
+            class="submit-btn"
+            type="submit"
+            [disabled]="!canSubmit"
+          >
+            @if (isSubmitting) {
+              <span class="spinner" aria-hidden="true"></span>
+            }
+            إرسال الطلب
+          </button>
+          <a routerLink="/login" class="link-login">لديك حساب؟ تسجيل الدخول</a>
+        </div>
+      </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

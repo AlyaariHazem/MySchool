@@ -71,6 +71,14 @@ const routes: Routes = [
           { path: 'stages', component: StagesGradesComponent, data: { breadcrumb: 'المراحل والفصول' } },
           { path: 'feeClass', component: FeeClassComponent, data: { breadcrumb: 'رسوم الصـفوف' } },
           { path: 'databaseRestore', component: DatabaseRestoreComponent, data: { breadcrumb: 'استعادة قاعدة البيانات' } },
+          {
+            path: 'pending-registrations',
+            loadComponent: () =>
+              import('./sittings/pending-registration-requests/pending-registration-requests.component').then(
+                (m) => m.PendingRegistrationRequestsComponent,
+              ),
+            data: { breadcrumb: 'طلبات التسجيل' },
+          },
           { path: '', redirectTo: 'years', pathMatch: 'full' },
           { path: 'not-found', component: PageNotFoundComponent },
           { path: '**', redirectTo: 'not-found', pathMatch: 'full' }

@@ -5,12 +5,20 @@ import { ToastrService } from 'ngx-toastr';
 import { User } from '../../core/models/user.model';
 import { AuthAPIService } from '../authAPI.service';
 import { ShardModule } from '../../shared/shard.module';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     ShardModule,
+    MatButtonModule,
+    MatCardModule,
+    MatDividerModule,
+    MatIconModule,
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
@@ -79,10 +87,13 @@ export class LoginComponent {
     });
   }
 
-  openRegisterDialog(): void {
+  /** Placeholder until a real password-reset flow exists. */
+  openForgotPasswordHint(): void {
     if (this.isLoading) {
       return;
     }
-    this.toastr.info('فتح نافذة التسجيل');
+    this.toastr.info('تواصل مع إدارة المدرسة لاستعادة كلمة السر.', '', {
+      timeOut: 5000,
+    });
   }
 }
