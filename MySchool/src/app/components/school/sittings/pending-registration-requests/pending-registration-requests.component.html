@@ -16,205 +16,31 @@
         />
       </div>
 
-      <div class="table-container">
-        <div class="pending-table-wrap">
-          <mat-card class="pending-table-card">
-            <div class="table-scroll">
-              <table class="styled-table">
-                <thead>
-                  <tr>
-                    <th>
-                      اسم المستخدم
-                      <div class="filter-input-wrapper">
-                        <input
-                          type="text"
-                          class="column-filter-input"
-                          [(ngModel)]="filters.userName"
-                          (input)="onFilterChange()"
-                          placeholder="فلترة"
-                        />
-                      </div>
-                    </th>
-                    <th>
-                      الهاتف
-                      <div class="filter-input-wrapper">
-                        <input
-                          type="text"
-                          class="column-filter-input"
-                          [(ngModel)]="filters.phoneNumber"
-                          (input)="onFilterChange()"
-                          placeholder="فلترة"
-                        />
-                      </div>
-                    </th>
-                    <th>
-                      الجنس
-                      <div class="filter-input-wrapper">
-                        <input
-                          type="text"
-                          class="column-filter-input"
-                          [(ngModel)]="filters.gender"
-                          (input)="onFilterChange()"
-                          placeholder="فلترة"
-                        />
-                      </div>
-                    </th>
-                    <th>
-                      تاريخ الميلاد
-                      <div class="filter-input-wrapper">
-                        <input
-                          type="text"
-                          class="column-filter-input"
-                          [(ngModel)]="filters.dob"
-                          (input)="onFilterChange()"
-                          placeholder="فلترة"
-                        />
-                      </div>
-                    </th>
-                    <th>
-                      الدور
-                      <div class="filter-input-wrapper">
-                        <input
-                          type="text"
-                          class="column-filter-input"
-                          [(ngModel)]="filters.role"
-                          (input)="onFilterChange()"
-                          placeholder="فلترة"
-                        />
-                      </div>
-                    </th>
-                    <th>
-                      المدرسة
-                      <div class="filter-input-wrapper">
-                        <input
-                          type="text"
-                          class="column-filter-input"
-                          [(ngModel)]="filters.schoolName"
-                          (input)="onFilterChange()"
-                          placeholder="فلترة"
-                        />
-                      </div>
-                    </th>
-                    <th>
-                      التاريخ
-                      <div class="filter-input-wrapper">
-                        <input
-                          type="text"
-                          class="column-filter-input"
-                          [(ngModel)]="filters.createdAt"
-                          (input)="onFilterChange()"
-                          placeholder="فلترة"
-                        />
-                      </div>
-                    </th>
-                    <th>
-                      مرفقات
-                      <div class="filter-input-wrapper">
-                        <input
-                          type="text"
-                          class="column-filter-input"
-                          [(ngModel)]="filters.attachments"
-                          (input)="onFilterChange()"
-                          placeholder="فلترة"
-                        />
-                      </div>
-                    </th>
-                    <th class="th-actions">إجراءات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @if (loading) {
-                    <tr>
-                      <td colspan="9" class="loading-cell">جاري التحميل…</td>
-                    </tr>
-                  } @else if (pagedRows.length === 0) {
-                    <tr>
-                      <td colspan="9" class="empty-message">لا توجد طلبات معلقة</td>
-                    </tr>
-                  } @else {
-                    @for (row of pagedRows; track row.id) {
-                      <tr>
-                        <td class="cell-strong">{{ row.userName }}</td>
-                        <td>{{ row.phoneNumber }}</td>
-                        <td>{{ row.gender }}</td>
-                        <td>{{ formatDob(row.dateOfBirth) }}</td>
-                        <td>
-                          <span
-                            class="role-pill"
-                            [class.role-pill--guardian]="row.requestedRole === 'GUARDIAN'"
-                          >
-                            {{ roleLabel(row.requestedRole) }}
-                          </span>
-                        </td>
-                        <td>{{ row.schoolName }}</td>
-                        <td class="cell-muted">{{ formatDate(row.createdAt) }}</td>
-                        <td class="attachments-cell">
-                          @if (row.attachments.length) {
-                            @for (a of row.attachments; track $index) {
-                              <a
-                                [href]="a.url"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="attach-link"
-                              >
-                                @if (isPdfFile(a.fileName)) {
-                                  <i class="pi pi-file-pdf"></i>
-                                } @else {
-                                  <i class="pi pi-paperclip"></i>
-                                }
-                                {{ a.fileName }}
-                              </a>
-                            }
-                          } @else {
-                            <span class="cell-muted">—</span>
-                          }
-                        </td>
-                        <td class="actions">
-                          @if (row.requestedRole === 'STUDENT') {
-                            <p-button
-                              label="موافقة"
-                              icon="pi pi-check"
-                              severity="success"
-                              [disabled]="busyId !== null"
-                              (onClick)="openApproveStudent(row)"
-                            />
-                          } @else {
-                            <p-button
-                              label="موافقة"
-                              icon="pi pi-check"
-                              severity="success"
-                              [disabled]="busyId !== null"
-                              (onClick)="approveGuardian(row)"
-                            />
-                          }
-                          <p-button
-                            label="رفض"
-                            icon="pi pi-times"
-                            severity="danger"
-                            [outlined]="true"
-                            [disabled]="busyId !== null"
-                            (onClick)="openReject(row)"
-                          />
-                        </td>
-                      </tr>
-                    }
-                  }
-                </tbody>
-              </table>
-            </div>
-          </mat-card>
-
-          <div class="paginator-wrap">
-            <p-paginator
-              dir="ltr"
-              (onPageChange)="onPageChange($event)"
-              [first]="first"
-              [rows]="rowsPerPage"
-              [totalRecords]="totalFiltered"
-              [rowsPerPageOptions]="[10, 25]"
-            />
-          </div>
-        </div>
+      <div class="table-container pending-table-outer">
+        <app-custom-table
+          [data]="pagedRows"
+          [columns]="tableColumns"
+          [loading]="loading"
+          [totalRecords]="totalFiltered"
+          [rows]="rowsPerPage"
+          [first]="first"
+          [rowsPerPageOptions]="[10, 25]"
+          [showGlobalFilter]="false"
+          [showHeaderFilters]="true"
+          [trackByField]="'id'"
+          [emptyMessage]="'لا توجد طلبات معلقة'"
+          [actionsDisabled]="busyId !== null"
+          [actionHeader]="'إجراءات'"
+          [rowClickable]="false"
+          [resizableColumns]="false"
+          [syncFiltersWithStudentsDataService]="false"
+          actionMenuMode="approveReject"
+          [tableDir]="(dir$ | async) === 'ltr' ? 'ltr' : 'rtl'"
+          (pageChange)="onPageChange($event)"
+          (filterChange)="onPendingFilterChange($event)"
+          (rowApprove)="onTableApprove($event)"
+          (rowReject)="openReject($event)"
+        />
       </div>
     </div>
   </div>

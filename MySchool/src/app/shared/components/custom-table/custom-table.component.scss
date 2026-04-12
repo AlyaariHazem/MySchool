@@ -30,11 +30,19 @@
     display: block;
     width: 100%;
     max-width: 100%;
-    margin-top: 4px;
-    padding: 4px 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 12px;
+    margin-top: 0;
+    padding: 8px 10px;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #fff;
+    color: #202124;
+  }
+
+  .column-filter-input:focus {
+    outline: none;
+    border-color: #009879;
+    box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.2);
   }
 }
 
@@ -46,6 +54,7 @@
 
 .custom-table-scroll {
   overflow-x: auto;
+  overflow-y: visible;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -70,7 +79,8 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  /* allow per-column filter popovers to extend below the header */
+  overflow: visible;
 }
 
 .ct-debit-badge {
@@ -158,6 +168,60 @@
   border-top: 1px solid rgba(0, 0, 0, 0.15);
 }
 
+.ct-actions-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+:host ::ng-deep .ct-inline-action-btn.p-button {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  min-height: 2.1rem;
+}
+
+.ct-loading-cell {
+  padding: 2rem 1rem !important;
+}
+
+.ct-attach-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-inline-end: 0.5rem;
+  margin-bottom: 0.25rem;
+  color: #0d47a1;
+  text-decoration: none;
+  font-size: 0.85rem;
+  white-space: normal;
+}
+
+.ct-attach-link:hover {
+  text-decoration: underline;
+}
+
+.ct-cell-muted {
+  color: #5f6368;
+  font-size: 0.875rem;
+}
+
+.ct-role-pill {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(0, 152, 121, 0.12);
+  color: #006956;
+}
+
+.ct-role-pill--guardian {
+  background: rgba(59, 130, 246, 0.14);
+  color: #1e40af;
+}
+
 // Keep existing table styles - preserve green header
 .styled-table {
   width: 100%;
@@ -179,6 +243,98 @@
 .ct-th-resizable {
   position: relative;
   vertical-align: top;
+  overflow: visible;
+}
+
+.ct-th-resizable:has(.ct-col-filter-panel) {
+  z-index: 25;
+}
+
+.ct-col-filter-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.ct-th-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
+}
+
+.ct-th-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.ct-col-filter-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ct-col-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+.ct-col-filter-btn--on {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255,  255, 255, 0.85);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.ct-col-filter-btn--open {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.ct-col-filter-btn i {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.ct-col-filter-panel {
+  position: absolute;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  top: calc(100% + 6px);
+  z-index: 40;
+  min-width: 220px;
+  max-width: min(320px, 85vw);
+  padding: 12px;
+  background: #fff;
+  color: #202124;
+  border: 1px solid #dadce0;
+  border-radius: 10px;
+  box-shadow:
+    0 4px 16px rgba(60, 64, 67, 0.18),
+    0 1px 3px rgba(60, 64, 67, 0.12);
+  text-align: start;
+  font-weight: normal;
+}
+
+.ct-col-filter-panel .ct-filter-mat-field {
+  width: 100%;
+  margin: 0;
+}
+
+.ct-col-filter-panel .ct-filter-mat-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
 }
 
 .ct-col-resize-handle {

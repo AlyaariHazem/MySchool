@@ -16,7 +16,16 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import {
+  MatDatepickerInputEvent,
+  MatDatepickerModule,
+} from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { PaginatorModule } from 'primeng/paginator';
+import { ButtonModule } from 'primeng/button';
 import { DatePipe } from '@angular/common';
 import { StudentsDataService } from '../../../core/services/students-data.service';
 import { AgePipe } from '../../../Pipes/age.pipe';
@@ -24,20 +33,55 @@ import { AgePipe } from '../../../Pipes/age.pipe';
 /** Internal key for the actions column width map (not a data field). */
 export const CUSTOM_TABLE_ACTIONS_FIELD = '__ct_actions__';
 
+export type TableColumnFilterType = 'text' | 'select' | 'date';
+
+export interface TableColumnFilterSelectOption {
+  value: string;
+  label: string;
+}
+
 export interface TableColumn {
   field: string;
   header: string;
   sortable?: boolean;
   filterable?: boolean;
+  /**
+   * Per-column filter UI when `filterable` is true. Default `text`.
+   * Values are stored as strings in `filterChange` (`yyyy-MM-dd` for `date`).
+   */
+  filterType?: TableColumnFilterType;
+  /** Required when `filterType === 'select'`. */
+  filterSelectOptions?: TableColumnFilterSelectOption[];
   /** rowIndex = 1-based page index; debitBadge / statusToggle for accounts-style cells */
-  template?: 'text' | 'date' | 'custom' | 'rowIndex' | 'debitBadge' | 'statusToggle';
+  template?:
+    | 'text'
+    | 'date'
+    | 'custom'
+    | 'rowIndex'
+    | 'debitBadge'
+    | 'statusToggle'
+    | 'attachmentLinks'
+    | 'rolePill';
   formatter?: (value: any, row: any) => string;
 }
 
 @Component({
   selector: 'app-custom-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, PaginatorModule, DatePipe, AgePipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    PaginatorModule,
+    ButtonModule,
+    DatePipe,
+    AgePipe,
+  ],
   templateUrl: './custom-table.component.html',
   styleUrls: ['./custom-table.component.scss'],
 })
@@ -63,6 +107,18 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input() rowClickable: boolean = true;
   /** Drag the trailing edge of a header cell to resize; first drag snapshots all column widths. */
   @Input() resizableColumns: boolean = true;
+  /**
+   * When true (default), column filters sync with `StudentsDataService` (students list).
+   * Set false for standalone tables (e.g. pending registration) that only use `filterChange`.
+   */
+  @Input() syncFiltersWithStudentsDataService: boolean = true;
+  /**
+   * Row actions: `editDelete` = ellipsis menu; `approveReject` = inline موافقة / رفض buttons
+   * (for `rowApprove` / `rowReject`).
+   */
+  @Input() actionMenuMode: 'editDelete' | 'approveReject' = 'editDelete';
+  /** Message shown in a single spanning row while `loading` is true. */
+  @Input() loadingMessage: string = 'جاري التحميل…';
 
   @Output() pageChange = new EventEmitter<any>();
   @Output() rowEdit = new EventEmitter<any>();
@@ -70,6 +126,8 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
   @Output() rowClick = new EventEmitter<any>();
   @Output() filterChange = new EventEmitter<Record<string, string>>();
   @Output() statusToggle = new EventEmitter<any>();
+  @Output() rowApprove = new EventEmitter<any>();
+  @Output() rowReject = new EventEmitter<any>();
 
   private studentsDataService = inject(StudentsDataService);
   private renderer = inject(Renderer2);
@@ -82,6 +140,15 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
   openDropdownIndex: number | null = null;
   /** Viewport-fixed position for the row action menu (avoids overflow inside scrollable table). */
   dropdownPanelStyle: { top: string; left: string } | null = null;
+
+  /** Which column’s filter popover is open (field name); only one at a time. */
+  activeFilterField: string | null = null;
+
+  /**
+   * Stable `Date` for datepicker `[ngModel]` (same ref while filter string unchanged).
+   * A fresh `new Date()` each CD tick was confusing MatDatepicker and could freeze the UI.
+   */
+  private dateFilterModelCache: Record<string, { key: string; date: Date | null }> = {};
 
   private scrollUnlisten?: () => void;
   private readonly menuMinWidthPx = 170;
@@ -110,6 +177,9 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
     if (changes['columns'] && !changes['columns'].firstChange) {
       this.columnWidthsPx = {};
       this.actionColumnWidthPx = null;
+      this.activeFilterField = null;
+      this.dateFilterModelCache = {};
+      this.updateTableScrollListener();
     }
     if (changes['actionsDisabled']?.currentValue === true) {
       this.closeDropdown();
@@ -136,17 +206,72 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       delete this.columnFilters[field];
     }
-    // Apply filter through service
-    this.studentsDataService.setFilter(field, value);
-    // Also emit the filter change with current state
+    if (this.syncFiltersWithStudentsDataService) {
+      this.studentsDataService.setFilter(field, value);
+    }
     this.filterChange.emit({ ...this.columnFilters });
+  }
+
+  toggleColumnFilter(field: string, event: MouseEvent): void {
+    event.stopPropagation();
+    if (!this.showHeaderFilters) {
+      return;
+    }
+    this.activeFilterField = this.activeFilterField === field ? null : field;
+    this.updateTableScrollListener();
+  }
+
+  hasColumnFilterValue(field: string): boolean {
+    const v = this.columnFilters[field];
+    return typeof v === 'string' && v.trim() !== '';
+  }
+
+  /** `yyyy-MM-dd` string from `columnFilters` as a stable local `Date` for the datepicker. */
+  getDateFilterModel(field: string): Date | null {
+    const raw =
+      this.columnFilters[field] && typeof this.columnFilters[field] === 'string'
+        ? this.columnFilters[field].trim()
+        : '';
+    const cached = this.dateFilterModelCache[field];
+    if (cached && cached.key === raw) {
+      return cached.date;
+    }
+    let date: Date | null = null;
+    if (raw) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+      if (m) {
+        const d = new Date(+m[1], +m[2] - 1, +m[3]);
+        date = isNaN(d.getTime()) ? null : d;
+      }
+    }
+    this.dateFilterModelCache[field] = { key: raw, date };
+    return date;
+  }
+
+  /** Use `(dateChange)` only — `(ngModelChange)` fires during calendar navigation and can hang the page. */
+  onDateFilterInputChange(field: string, e: MatDatepickerInputEvent<Date | null>): void {
+    const d = e.value;
+    if (!d) {
+      this.onColumnFilter(field, '');
+      return;
+    }
+    const y = d.getFullYear();
+    const mo = d.getMonth() + 1;
+    const day = d.getDate();
+    const iso = `${y}-${String(mo).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    this.onColumnFilter(field, iso);
   }
 
   clearFilters() {
     this.globalFilterValue = '';
     this.columnFilters = {};
-    this.studentsDataService.clearFilters();
+    this.dateFilterModelCache = {};
+    this.activeFilterField = null;
+    if (this.syncFiltersWithStudentsDataService) {
+      this.studentsDataService.clearFilters();
+    }
     this.filterChange.emit({});
+    this.updateTableScrollListener();
   }
 
   hasActiveFilters(): boolean {
@@ -170,13 +295,13 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
     const { top, left } = this.computeMenuPosition(r);
     this.dropdownPanelStyle = { top: `${top}px`, left: `${left}px` };
     this.openDropdownIndex = index;
-    this.attachScrollClose();
+    this.updateTableScrollListener();
   }
 
   closeDropdown() {
     this.openDropdownIndex = null;
     this.dropdownPanelStyle = null;
-    this.detachScrollClose();
+    this.updateTableScrollListener();
   }
 
   isDropdownOpen(index: number): boolean {
@@ -198,13 +323,22 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
     return { top, left };
   }
 
-  private attachScrollClose(): void {
+  /** One listener: closes row menu and/or column filter popover on table scroll. */
+  private updateTableScrollListener(): void {
     this.detachScrollClose();
+    if (this.openDropdownIndex === null && this.activeFilterField === null) {
+      return;
+    }
     const el = this.tableScrollHost?.nativeElement;
     if (!el) {
       return;
     }
-    this.scrollUnlisten = this.renderer.listen(el, 'scroll', () => this.closeDropdown());
+    this.scrollUnlisten = this.renderer.listen(el, 'scroll', () => {
+      this.openDropdownIndex = null;
+      this.dropdownPanelStyle = null;
+      this.activeFilterField = null;
+      this.detachScrollClose();
+    });
   }
 
   private detachScrollClose(): void {
@@ -216,18 +350,31 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
-    if (this.openDropdownIndex === null) {
-      return;
-    }
     const t = event.target as HTMLElement | null;
     if (!t) {
       this.closeDropdown();
+      this.activeFilterField = null;
+      this.detachScrollClose();
       return;
     }
-    if (t.closest('.ct-action-menu-panel') || t.closest('.ct-actions-trigger')) {
-      return;
+
+    if (this.openDropdownIndex !== null) {
+      if (!t.closest('.ct-action-menu-panel') && !t.closest('.ct-actions-trigger')) {
+        this.closeDropdown();
+      }
     }
-    this.closeDropdown();
+
+    if (this.activeFilterField !== null) {
+      const inFilterWrap = !!t.closest('.ct-col-filter-wrap');
+      const inOverlay =
+        !!t.closest('.cdk-overlay-container') ||
+        !!t.closest('.mat-mdc-select-panel') ||
+        !!t.closest('.mat-datepicker-content');
+      if (!inFilterWrap && !inOverlay) {
+        this.activeFilterField = null;
+        this.updateTableScrollListener();
+      }
+    }
   }
 
   @HostListener('window:resize')
@@ -235,10 +382,15 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
     if (this.openDropdownIndex !== null) {
       this.closeDropdown();
     }
+    this.activeFilterField = null;
+    this.updateTableScrollListener();
   }
 
   ngOnDestroy() {
-    this.closeDropdown();
+    this.activeFilterField = null;
+    this.openDropdownIndex = null;
+    this.dropdownPanelStyle = null;
+    this.detachScrollClose();
     this.endColumnResize();
   }
 
@@ -367,6 +519,16 @@ export class CustomTableComponent implements OnInit, OnChanges, OnDestroy {
   onStatusToggleClick(row: any, event: Event) {
     event.stopPropagation();
     this.statusToggle.emit(row);
+  }
+
+  onApproveRow(row: any, event: Event): void {
+    event.stopPropagation();
+    this.rowApprove.emit(row);
+  }
+
+  onRejectRow(row: any, event: Event): void {
+    event.stopPropagation();
+    this.rowReject.emit(row);
   }
 
   getTrackByValue(index: number, item: any): any {

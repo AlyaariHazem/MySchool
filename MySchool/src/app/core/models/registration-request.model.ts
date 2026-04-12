@@ -8,6 +8,16 @@ export interface RegistrationAttachment {
   url: string;
 }
 
+/** Body for POST /auth/PendingRequests — all fields optional. */
+export interface PendingRegistrationRequestsFilter {
+  createdFromUtc?: string | null;
+  createdToUtc?: string | null;
+  gender?: string | null;
+  phoneNumberContains?: string | null;
+  tenantId?: number | null;
+  schoolNameContains?: string | null;
+}
+
 export interface PendingRegistrationRequest {
   id: number;
   userName: string;

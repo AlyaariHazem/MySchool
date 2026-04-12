@@ -55,6 +55,11 @@
   box-sizing: border-box;
 }
 
+.pending-table-outer {
+  width: 100%;
+  max-width: 100%;
+}
+
 .pending-table-wrap {
   width: 100%;
   max-width: 100%;
@@ -76,6 +81,7 @@
 
 .table-scroll {
   overflow-x: auto;
+  overflow-y: visible;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -100,7 +106,7 @@
 }
 
 /* Same palette as students.component.scss / custom-table */
-.styled-table thead tr {
+.styled-table thead tr.thead-row-titles {
   background-color: #009879;
   color: #ffffff;
   text-align: center;
@@ -115,9 +121,19 @@
   text-align: start;
 }
 
-.styled-table thead th {
+.styled-table thead tr.thead-row-titles th {
   text-align: center;
   padding: 14px 1rem 12px;
+}
+
+.styled-table thead tr.thead-row-titles th.th-with-filter {
+  position: relative;
+  overflow: visible;
+  vertical-align: middle;
+}
+
+.styled-table thead tr.thead-row-titles th.th-with-filter:has(.col-filter-panel) {
+  z-index: 30;
 }
 
 .styled-table th {
@@ -130,8 +146,153 @@
   text-align: center !important;
 }
 
+.col-filter-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.th-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
+}
+
+.th-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.col-filter-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.col-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+.col-filter-btn--on {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.col-filter-btn--open {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.col-filter-btn i {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.col-filter-panel {
+  position: absolute;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  top: calc(100% + 6px);
+  z-index: 40;
+  min-width: 220px;
+  max-width: min(320px, 85vw);
+  padding: 12px;
+  background: #fff;
+  color: #202124;
+  border: 1px solid #dadce0;
+  border-radius: 10px;
+  box-shadow:
+    0 4px 16px rgba(60, 64, 67, 0.18),
+    0 1px 3px rgba(60, 64, 67, 0.12);
+  text-align: start;
+  font-weight: normal;
+}
+
+.col-filter-panel--date {
+  min-width: 260px;
+}
+
 .filter-input-wrapper {
   margin-top: 10px;
+}
+
+.filter-date-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.filter-clear-btn {
+  align-self: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filter-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.filter-clear-btn--panel {
+  margin-top: 8px;
+  width: 100%;
+  color: #0d47a1;
+  background: #e8f0fe;
+  border-color: #aecbfa;
+}
+
+.filter-clear-btn--panel:hover {
+  background: #d2e3fc;
+}
+
+:host ::ng-deep .filter-field.mat-mdc-form-field {
+  width: 100%;
+  font-size: 13px;
+}
+
+:host ::ng-deep .filter-field.mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  background: #fff;
+  border-radius: 6px;
+}
+
+:host ::ng-deep .filter-field.mat-mdc-form-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+:host ::ng-deep .filter-field .mat-mdc-form-field-infix {
+  min-height: 40px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+:host ::ng-deep .filter-field--panel.mat-mdc-form-field {
+  width: 100%;
+}
+
+.col-filter-panel--date .filter-date-wrap {
+  margin-top: 0;
 }
 
 .column-filter-input {

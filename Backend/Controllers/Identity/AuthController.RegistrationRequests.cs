@@ -209,9 +209,9 @@ public partial class AuthController
         }
     }
 
-    [HttpGet("PendingRequests")]
+    [HttpPost("PendingRequests")]
     [Authorize(Roles = "ADMIN,MANAGER")]
-    public async Task<IActionResult> PendingRequests()
+    public async Task<IActionResult> PendingRequests([FromBody] PendingRegistrationRequestsFilterDto? filter)
     {
         var reviewerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(reviewerId))
@@ -230,6 +230,46 @@ public partial class AuthController
                 .ToListAsync();
 
             q = q.Where(r => allowed.Contains(r.TenantId));
+        }
+
+        if (filter != null)
+        {
+            if (filter.CreatedFromUtc.HasValue)
+                q = q.Where(r => r.CreatedAt >= filter.CreatedFromUtc.Value);
+
+            if (filter.CreatedToUtc.HasValue)
+                q = q.Where(r => r.CreatedAt <= filter.CreatedToUtc.Value);
+
+            if (!string.IsNullOrWhiteSpace(filter.Gender))
+            {
+                var g = filter.Gender.Trim();
+                q = q.Where(r => r.Gender != null && r.Gender.ToLower().Contains(g.ToLower()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.PhoneNumberContains))
+            {
+                var p = filter.PhoneNumberContains.Trim();
+                var digits = new string(p.Where(char.IsDigit).ToArray());
+                if (digits.Length > 0)
+                    q = q.Where(r =>
+                        r.PhoneNumber.Contains(p)
+                        || (r.NormalizedPhone != null && r.NormalizedPhone.Contains(digits)));
+                else
+                    q = q.Where(r => r.PhoneNumber.Contains(p));
+            }
+
+            if (filter.TenantId is int schoolId && schoolId > 0)
+                q = q.Where(r => r.TenantId == schoolId);
+            else if (!string.IsNullOrWhiteSpace(filter.SchoolNameContains))
+            {
+                var term = filter.SchoolNameContains.Trim();
+                var tenantIds = await _context.Tenants.AsNoTracking()
+                    .Where(t => t.SchoolName != null && t.SchoolName.ToLower().Contains(term.ToLower()))
+                    .Select(t => t.TenantId)
+                    .ToListAsync();
+
+                q = q.Where(r => tenantIds.Contains(r.TenantId));
+            }
         }
 
         var rows = await q

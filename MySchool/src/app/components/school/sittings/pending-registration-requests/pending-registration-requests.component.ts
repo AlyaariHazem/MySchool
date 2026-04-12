@@ -3,21 +3,24 @@ import { finalize, map } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Store } from '@ngrx/store';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
-import { PaginatorModule } from 'primeng/paginator';
 import { PaginatorState } from 'primeng/paginator';
 import { ButtonModule } from 'primeng/button';
 
 import { ShardModule } from 'app/shared/shard.module';
+import {
+  CustomTableComponent,
+  TableColumn,
+} from 'app/shared/components/custom-table/custom-table.component';
 import { selectLanguage } from 'app/core/store/language/language.selectors';
 import { RegistrationRequestService } from 'app/core/services/registration-request.service';
 import {
   ApproveRegistrationPayload,
   PendingRegistrationRequest,
+  PendingRegistrationRequestsFilter,
 } from 'app/core/models/registration-request.model';
 import { DivisionService } from '../../core/services/division.service';
 import { GuardianService } from '../../core/services/guardian.service';
@@ -30,12 +33,11 @@ import { Guardians } from '../../core/models/guardian.model';
   imports: [
     ShardModule,
     FormsModule,
-    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatDividerModule,
-    PaginatorModule,
+    CustomTableComponent,
     ButtonModule,
   ],
   templateUrl: './pending-registration-requests.component.html',
@@ -59,20 +61,25 @@ export class PendingRegistrationRequestsComponent implements OnInit {
   first = 0;
   rowsPerPage = 10;
 
+  /** Mirrors `app-custom-table` column filter keys (see `tableColumns`). */
   filters = {
     userName: '',
     phoneNumber: '',
     gender: '',
-    dob: '',
     role: '',
     schoolName: '',
-    createdAt: '',
     attachments: '',
+    dateOfBirth: '',
+    createdAt: '',
   };
+
+  tableColumns: TableColumn[] = [];
 
   rejectReason = '';
   rejectForId: number | null = null;
   rejectDialogVisible = false;
+
+  private serverFilterReloadTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** Approve student: class + division + guardian */
   approveDialogVisible = false;
@@ -99,8 +106,81 @@ export class PendingRegistrationRequestsComponent implements OnInit {
   guardianType = '';
 
   ngOnInit(): void {
+    this.tableColumns = [
+      { field: 'userName', header: 'اسم المستخدم', filterable: true },
+      { field: 'phoneNumber', header: 'الهاتف', filterable: true },
+      {
+        field: 'gender',
+        header: 'الجنس',
+        filterable: true,
+        filterType: 'select',
+        filterSelectOptions: [
+          { value: '', label: 'الكل' },
+          { value: 'Male', label: 'ذكر' },
+          { value: 'Female', label: 'أنثى' },
+        ],
+      },
+      {
+        field: 'dateOfBirth',
+        header: 'تاريخ الميلاد',
+        filterable: true,
+        filterType: 'date',
+        template: 'custom',
+        formatter: (_v, r) => this.formatDob(r.dateOfBirth),
+      },
+      {
+        field: 'requestedRole',
+        header: 'الدور',
+        filterable: true,
+        template: 'rolePill',
+        formatter: (_v, r) => this.roleLabel(r.requestedRole),
+      },
+      { field: 'schoolName', header: 'المدرسة', filterable: true },
+      {
+        field: 'createdAt',
+        header: 'التاريخ',
+        filterable: true,
+        filterType: 'date',
+        template: 'custom',
+        formatter: (_v, r) => this.formatDate(r.createdAt),
+      },
+      { field: 'attachments', header: 'مرفقات', filterable: true, template: 'attachmentLinks' },
+    ];
     this.load();
     this.loadLookupData();
+  }
+
+  /** Sync filters from `app-custom-table` and reload when server-side filters change. */
+  onPendingFilterChange(rec: Record<string, string>): void {
+    const prev = { ...this.filters };
+    this.filters = {
+      userName: rec['userName'] ?? '',
+      phoneNumber: rec['phoneNumber'] ?? '',
+      gender: rec['gender'] ?? '',
+      role: rec['requestedRole'] ?? '',
+      schoolName: rec['schoolName'] ?? '',
+      attachments: rec['attachments'] ?? '',
+      dateOfBirth: rec['dateOfBirth'] ?? '',
+      createdAt: rec['createdAt'] ?? '',
+    };
+    const serverChanged =
+      prev.phoneNumber !== this.filters.phoneNumber ||
+      prev.gender !== this.filters.gender ||
+      prev.schoolName !== this.filters.schoolName ||
+      prev.createdAt !== this.filters.createdAt;
+    if (serverChanged) {
+      this.onServerFilterChange();
+    } else {
+      this.onFilterChange();
+    }
+  }
+
+  onTableApprove(row: PendingRegistrationRequest): void {
+    if (row.requestedRole === 'STUDENT') {
+      this.openApproveStudent(row);
+    } else {
+      this.approveGuardian(row);
+    }
   }
 
   private loadLookupData(): void {
@@ -126,8 +206,9 @@ export class PendingRegistrationRequestsComponent implements OnInit {
 
   load(): void {
     this.loading = true;
+    const body = this.buildServerFilterPayload();
     this.registration
-      .getPendingRequests()
+      .searchPendingRequests(body)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (list) => {
@@ -142,8 +223,65 @@ export class PendingRegistrationRequestsComponent implements OnInit {
       });
   }
 
+  /** Debounced reload when filters that are applied on the server change. */
+  onServerFilterChange(): void {
+    this.first = 0;
+    if (this.serverFilterReloadTimer != null) {
+      clearTimeout(this.serverFilterReloadTimer);
+    }
+    this.serverFilterReloadTimer = setTimeout(() => {
+      this.serverFilterReloadTimer = null;
+      this.load();
+    }, 400);
+  }
+
+  /** Local-only column filters (username, DOB, role, attachments). */
   onFilterChange(): void {
     this.first = 0;
+  }
+
+  private buildServerFilterPayload(): PendingRegistrationRequestsFilter {
+    const f = this.filters;
+    let createdFromUtc: string | undefined;
+    let createdToUtc: string | undefined;
+    const ct = f.createdAt.trim();
+    if (ct) {
+      const parsed = this.tryParseYmd(ct);
+      if (parsed) {
+        const range = this.localCalendarDayUtcRange(parsed);
+        createdFromUtc = range.from;
+        createdToUtc = range.to;
+      }
+    }
+
+    return {
+      createdFromUtc,
+      createdToUtc,
+      phoneNumberContains: f.phoneNumber.trim() || undefined,
+      gender: f.gender.trim() || undefined,
+      schoolNameContains: f.schoolName.trim() || undefined,
+    };
+  }
+
+  /** Parses leading `yyyy-MM-dd` for request-date filter (column text). */
+  private tryParseYmd(s: string): Date | null {
+    const t = s.trim();
+    if (!t) {
+      return null;
+    }
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(t);
+    if (!m) {
+      return null;
+    }
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  /** Start/end of the chosen calendar day in local time, as ISO UTC for the API. */
+  private localCalendarDayUtcRange(d: Date): { from: string; to: string } {
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+    const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+    return { from: start.toISOString(), to: end.toISOString() };
   }
 
   onPageChange(event: PaginatorState): void {
@@ -158,16 +296,27 @@ export class PendingRegistrationRequestsComponent implements OnInit {
 
     return this.rows.filter((row) => {
       if (!match(f.userName, row.userName || '')) return false;
-      if (!match(f.phoneNumber, row.phoneNumber || '')) return false;
-      if (!match(f.gender, row.gender || '')) return false;
-      if (!match(f.dob, this.formatDob(row.dateOfBirth))) return false;
+      const dobFilter = f.dateOfBirth.trim();
+      if (dobFilter) {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dobFilter)) {
+          if (!this.rowIsoDatePrefixMatches(row.dateOfBirth, dobFilter)) return false;
+        } else if (!match(dobFilter, this.formatDob(row.dateOfBirth))) {
+          return false;
+        }
+      }
       if (!match(f.role, this.roleLabel(row.requestedRole))) return false;
-      if (!match(f.schoolName, row.schoolName || '')) return false;
-      if (!match(f.createdAt, this.formatDate(row.createdAt))) return false;
       const attachNames = (row.attachments ?? []).map((a) => a.fileName ?? '').join(' ');
       if (!match(f.attachments, attachNames)) return false;
       return true;
     });
+  }
+
+  /** Compare calendar date using ISO `yyyy-MM-dd` prefix (avoids TZ off-by-one). */
+  private rowIsoDatePrefixMatches(iso: string | null | undefined, ymd: string): boolean {
+    if (iso == null || iso === '') return false;
+    const m = /^(\d{4}-\d{2}-\d{2})/.exec(iso.trim());
+    if (!m) return false;
+    return `${m[1]}-${m[2]}-${m[3]}` === ymd;
   }
 
   get pagedRows(): PendingRegistrationRequest[] {
@@ -213,10 +362,6 @@ export class PendingRegistrationRequestsComponent implements OnInit {
     if (role === 'STUDENT') return 'طالب';
     if (role === 'GUARDIAN') return 'ولي أمر';
     return role;
-  }
-
-  isPdfFile(fileName: string | null | undefined): boolean {
-    return (fileName ?? '').toLowerCase().endsWith('.pdf');
   }
 
   onApproveClassChange(classId: number | null): void {

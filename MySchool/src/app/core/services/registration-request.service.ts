@@ -4,6 +4,7 @@ import { BackendAspService } from '../../ASP.NET/backend-asp.service';
 import {
   ApproveRegistrationPayload,
   PendingRegistrationRequest,
+  PendingRegistrationRequestsFilter,
   PublicSchoolOption,
   RequestRegistrationPayload,
 } from '../models/registration-request.model';
@@ -42,9 +43,11 @@ export class RegistrationRequestService {
     );
   }
 
-  getPendingRequests() {
-    return this.api.http.get<PendingRegistrationRequest[]>(
+  /** POST with optional filters (date range, gender, phone, school). */
+  searchPendingRequests(filter: PendingRegistrationRequestsFilter = {}) {
+    return this.api.http.post<PendingRegistrationRequest[]>(
       `${this.api.baseUrl}/auth/PendingRequests`,
+      filter,
     );
   }
 

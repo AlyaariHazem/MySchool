@@ -20,16 +20,69 @@
           <tr>
             @for (col of columns; track col.field) {
               <th class="ct-th-resizable">
-                {{ col.header }}
                 @if (showHeaderFilters && col.filterable) {
-                  <div class="filter-input-wrapper">
-                    <input
-                      type="text"
-                      class="column-filter-input"
-                      [value]="columnFilters[col.field] || ''"
-                      (input)="onColumnFilter(col.field, $any($event.target).value)"
-                      [placeholder]="'فلترة ' + col.header" />
+                  <div class="ct-col-filter-wrap">
+                    <div class="ct-th-label-row">
+                      <span class="ct-th-title">{{ col.header }}</span>
+                      <button
+                        type="button"
+                        class="ct-col-filter-btn"
+                        [class.ct-col-filter-btn--on]="hasColumnFilterValue(col.field)"
+                        [class.ct-col-filter-btn--open]="activeFilterField === col.field"
+                        [attr.aria-expanded]="activeFilterField === col.field"
+                        [attr.aria-label]="'فلترة ' + col.header"
+                        (click)="toggleColumnFilter(col.field, $event)">
+                        <i class="pi pi-filter" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                    @if (activeFilterField === col.field) {
+                      <div class="ct-col-filter-panel" (click)="$event.stopPropagation()">
+                        @switch (col.filterType ?? 'text') {
+                          @case ('select') {
+                            <mat-form-field
+                              appearance="outline"
+                              subscriptSizing="dynamic"
+                              class="ct-filter-mat-field">
+                              <mat-select
+                                [ngModel]="columnFilters[col.field] || ''"
+                                (ngModelChange)="onColumnFilter(col.field, $event)">
+                                @for (opt of col.filterSelectOptions ?? []; track opt.value) {
+                                  <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                                }
+                              </mat-select>
+                            </mat-form-field>
+                          }
+                          @case ('date') {
+                            <mat-form-field
+                              appearance="outline"
+                              subscriptSizing="dynamic"
+                              class="ct-filter-mat-field">
+                              <mat-label>{{ 'فلترة ' + col.header }}</mat-label>
+                              <input
+                                matInput
+                                [matDatepicker]="colFilterDp"
+                                [ngModel]="getDateFilterModel(col.field)"
+                                (dateChange)="onDateFilterInputChange(col.field, $event)"
+                              />
+                              <mat-datepicker-toggle matSuffix [for]="colFilterDp"></mat-datepicker-toggle>
+                              <mat-datepicker #colFilterDp></mat-datepicker>
+                            </mat-form-field>
+                          }
+                          @default {
+                            <input
+                              type="text"
+                              class="column-filter-input"
+                              [value]="columnFilters[col.field] || ''"
+                              (input)="onColumnFilter(col.field, $any($event.target).value)"
+                              [placeholder]="'فلترة ' + col.header"
+                            />
+                          }
+                        }
+                      </div>
+                    }
                   </div>
+                } @else {
+                  {{ col.header }}
                 }
                 @if (resizableColumns) {
                   <span
@@ -55,6 +108,15 @@
           </tr>
         </thead>
         <tbody>
+          @if (loading) {
+            <tr>
+              <td
+                [attr.colspan]="columns.length + (showActions ? 1 : 0)"
+                class="empty-message ct-loading-cell">
+                {{ loadingMessage }}
+              </td>
+            </tr>
+          } @else {
           @for (row of data; track getTrackByValue($index, row); let i = $index) {
             <tr (click)="onRowClick(row)" [style.cursor]="rowClickable ? 'pointer' : 'default'">
               @for (col of columns; track col.field) {
@@ -89,6 +151,33 @@
                         style="width: 3rem; height: 3rem; border-radius: 50%; object-fit: cover;" />
                       <span>{{ getFormattedValue(row, col) }}</span>
                     </div>
+                  } @else if (col.template === 'attachmentLinks') {
+                    @if (row.attachments?.length) {
+                      @for (a of row.attachments; track $index) {
+                        <a
+                          [href]="a.url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="ct-attach-link"
+                        >
+                          @if ((a.fileName || '').toLowerCase().endsWith('.pdf')) {
+                            <i class="pi pi-file-pdf" aria-hidden="true"></i>
+                          } @else {
+                            <i class="pi pi-paperclip" aria-hidden="true"></i>
+                          }
+                          {{ a.fileName }}
+                        </a>
+                      }
+                    } @else {
+                      <span class="ct-cell-muted">—</span>
+                    }
+                  } @else if (col.template === 'rolePill') {
+                    <span
+                      class="ct-role-pill"
+                      [class.ct-role-pill--guardian]="row.requestedRole === 'GUARDIAN'"
+                    >
+                      {{ col.formatter ? col.formatter(null, row) : getFormattedValue(row, col) }}
+                    </span>
                   } @else if (col.template === 'custom' && col.formatter) {
                     {{ getFormattedValue(row, col) }}
                   } @else if (col.template === 'date') {
@@ -106,39 +195,61 @@
               }
               @if (showActions) {
                 <td class="ct-actions-cell">
-                  <div class="ct-actions-cell-inner">
-                    <button
-                      class="ct-actions-trigger"
-                      type="button"
-                      aria-haspopup="true"
-                      [attr.aria-expanded]="isDropdownOpen(i)"
-                      [attr.aria-label]="actionHeader"
-                      [disabled]="actionsDisabled"
-                      (click)="toggleDropdown(i, $event)">
-                      <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
-                    </button>
-                    @if (isDropdownOpen(i)) {
-                      <div
-                        class="ct-action-menu-panel"
-                        [attr.dir]="tableDir"
-                        [ngStyle]="dropdownPanelStyle"
-                        (click)="$event.stopPropagation()">
-                        <a
-                          class="ct-action-menu-item"
-                          (click)="$event.stopPropagation(); onEdit(row); closeDropdown()">
-                          <i class="pi pi-file-edit text-primary"></i>
-                          <span>تعديل</span>
-                        </a>
-                        <div class="ct-action-menu-divider"></div>
-                        <a
-                          class="ct-action-menu-item"
-                          (click)="$event.stopPropagation(); onDelete(row); closeDropdown()">
-                          <i class="pi pi-trash text-danger"></i>
-                          <span>حذف</span>
-                        </a>
-                      </div>
-                    }
-                  </div>
+                  @if (actionMenuMode === 'approveReject') {
+                    <div class="ct-actions-inline" (click)="$event.stopPropagation()">
+                      <p-button
+                        label="موافقة"
+                        icon="pi pi-check"
+                        severity="success"
+                        [disabled]="actionsDisabled"
+                        styleClass="ct-inline-action-btn"
+                        (onClick)="onApproveRow(row, $event)"
+                      />
+                      <p-button
+                        label="رفض"
+                        icon="pi pi-times"
+                        severity="danger"
+                        [outlined]="true"
+                        [disabled]="actionsDisabled"
+                        styleClass="ct-inline-action-btn"
+                        (onClick)="onRejectRow(row, $event)"
+                      />
+                    </div>
+                  } @else {
+                    <div class="ct-actions-cell-inner">
+                      <button
+                        class="ct-actions-trigger"
+                        type="button"
+                        aria-haspopup="true"
+                        [attr.aria-expanded]="isDropdownOpen(i)"
+                        [attr.aria-label]="actionHeader"
+                        [disabled]="actionsDisabled"
+                        (click)="toggleDropdown(i, $event)">
+                        <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+                      </button>
+                      @if (isDropdownOpen(i)) {
+                        <div
+                          class="ct-action-menu-panel"
+                          [attr.dir]="tableDir"
+                          [ngStyle]="dropdownPanelStyle"
+                          (click)="$event.stopPropagation()">
+                          <a
+                            class="ct-action-menu-item"
+                            (click)="$event.stopPropagation(); onEdit(row); closeDropdown()">
+                            <i class="pi pi-file-edit text-primary"></i>
+                            <span>تعديل</span>
+                          </a>
+                          <div class="ct-action-menu-divider"></div>
+                          <a
+                            class="ct-action-menu-item"
+                            (click)="$event.stopPropagation(); onDelete(row); closeDropdown()">
+                            <i class="pi pi-trash text-danger"></i>
+                            <span>حذف</span>
+                          </a>
+                        </div>
+                      }
+                    </div>
+                  }
                 </td>
               }
             </tr>
@@ -148,6 +259,7 @@
                 {{ emptyMessage }}
               </td>
             </tr>
+          }
           }
         </tbody>
       </table>
