@@ -10,6 +10,7 @@ import { map } from 'rxjs';
 import { VoucherService } from '../core/services/voucher.service';
 import { Voucher } from '../core/models/voucher.model';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
+import { BackendAspService } from '../../../ASP.NET/backend-asp.service';
 
 @Component({
   selector: 'app-fees',
@@ -21,8 +22,16 @@ export class FeesComponent {
   form: FormGroup;
 
   private voucherService = inject(VoucherService);
-  
+  private api = inject(BackendAspService);
+
+  /** Origin for static files (strip /api from API base). */
+  private readonly fileOrigin = this.api.baseUrl.replace(/\/api\/?$/, '');
+
   visible: boolean = false;
+  attachmentsDialogVisible = false;
+  selectedAttachmentUrls: string[] = [];
+  attachmentsDialogTitle = '';
+
   isListLoading = false;
   isMutating = false;
 
@@ -147,6 +156,31 @@ export class FeesComponent {
       this.vouchersDisplay = [...this.vouchersDisplay];
     }
     this.selectedVoucher = undefined;
+  }
+
+  openAttachmentsDialog(voucher: Voucher): void {
+    if (this.isBusy || !(voucher.accountAttachments > 0)) {
+      return;
+    }
+    this.selectedAttachmentUrls = voucher.attachmentUrls?.length
+      ? [...voucher.attachmentUrls]
+      : [];
+    this.attachmentsDialogTitle = `المرفقات — سند ${voucher.voucherID}`;
+    this.attachmentsDialogVisible = true;
+  }
+
+  attachmentFileUrl(rel: string): string {
+    if (!rel) {
+      return '';
+    }
+    if (rel.startsWith('http://') || rel.startsWith('https://')) {
+      return rel;
+    }
+    return `${this.fileOrigin}${rel.startsWith('/') ? rel : `/${rel}`}`;
+  }
+
+  isImageAttachment(url: string): boolean {
+    return /\.(jpe?g|png|gif|webp)$/i.test(url.split('?')[0]);
   }
 
   Delete(id: number): void {

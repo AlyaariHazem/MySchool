@@ -7,6 +7,8 @@ export interface Voucher {
     payBy: string;
     note: string;
     accountAttachments: number;
+    /** Relative paths from API, e.g. /uploads/Vouchers/Vouchers_1_file.pdf */
+    attachmentUrls?: string[];
     accountStudentGuardianID: number;
     studentID: number;
 }

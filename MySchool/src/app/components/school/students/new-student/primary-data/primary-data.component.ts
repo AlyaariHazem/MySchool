@@ -50,13 +50,17 @@ export class PrimaryDataComponent implements OnInit {
     { value: 'Female', label: 'أنثى' }
   ];
 
+  /** Latest calendar day allowed (birth date cannot be in the future). */
+  readonly maxDob = new Date();
+
   ngOnInit(): void {
     this.getAllDivision();
     this.getAllClass();
 
-    const dobValue = this.formGroup.get('primaryData.studentDOB')?.value;
-    if (dobValue) {
-      this.formGroup.get('primaryData.studentDOB')?.setValue(this.formatDateForInput(dobValue));
+    const dobCtrl = this.formGroup.get('primaryData.studentDOB');
+    const parsed = this.parseDob(dobCtrl?.value);
+    if (parsed) {
+      dobCtrl?.setValue(parsed, { emitEvent: false });
     }
 
     const initialClass = this.formGroup.get('primaryData.classID')?.value;
@@ -69,12 +73,24 @@ export class PrimaryDataComponent implements OnInit {
     console.log('Primary Data Group:', this.formGroup);
   }
 
-  formatDateForInput(isoDate: string): string {
-    const date = new Date(isoDate);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure 2 digits
-    const day = String(date.getDate()).padStart(2, '0'); // Ensure 2 digits
-    return `${year}-${month}-${day}`;
+  /** Normalize API / patch values to a Date for mat-datepicker (avoids UTC off-by-one on date-only strings). */
+  private parseDob(raw: unknown): Date | null {
+    if (raw == null || raw === '') {
+      return null;
+    }
+    if (raw instanceof Date && !isNaN(raw.getTime())) {
+      return raw;
+    }
+    const s = String(raw).trim();
+    const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+    if (ymd) {
+      const y = +ymd[1];
+      const m = +ymd[2] - 1;
+      const d = +ymd[3];
+      return new Date(y, m, d);
+    }
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
   }
 
   getAllDivision(): void {

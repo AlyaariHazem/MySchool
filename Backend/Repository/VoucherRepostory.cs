@@ -25,6 +25,47 @@ public class VoucherRepository : IVoucherRepository
         _mangeFilesService = mangeFilesService;
     }
 
+    private static List<string> BuildAttachmentPublicPaths(ICollection<Attachments>? attachments, int voucherId)
+    {
+        if (attachments == null || attachments.Count == 0)
+            return new List<string>();
+
+        return attachments
+            .Where(a => !string.IsNullOrWhiteSpace(a.AttachmentURL))
+            .Select(a => ResolveVoucherAttachmentPublicPath(a.AttachmentURL!, voucherId))
+            .Where(p => !string.IsNullOrEmpty(p))
+            .Distinct()
+            .ToList();
+    }
+
+    /// <summary>
+    /// Normalizes DB-stored names (e.g. voucher_0_photo.jpg) to the on-disk pattern used by uploads (Vouchers_{id}_...).
+    /// </summary>
+    private static string ResolveVoucherAttachmentPublicPath(string stored, int voucherId)
+    {
+        var name = stored.Trim().Replace('\\', '/');
+        if (name.Contains('/'))
+            name = name.Split('/').Last();
+
+        if (name.StartsWith("Vouchers_", StringComparison.OrdinalIgnoreCase))
+            return $"/uploads/Vouchers/{name}";
+
+        if (name.StartsWith("voucher_", StringComparison.OrdinalIgnoreCase))
+        {
+            var afterPrefix = name["voucher_".Length..];
+            var idx = afterPrefix.IndexOf('_');
+            if (idx >= 0 && idx < afterPrefix.Length - 1)
+            {
+                var origFile = afterPrefix[(idx + 1)..];
+                name = $"Vouchers_{voucherId}_{origFile}";
+            }
+        }
+        else
+            name = $"Vouchers_{voucherId}_{name}";
+
+        return $"/uploads/Vouchers/{name}";
+    }
+
     // إرجاع جميع السندات
     public async Task<List<VouchersReturnDTO>> GetAllAsync()
     {
@@ -43,12 +84,10 @@ public class VoucherRepository : IVoucherRepository
             .Include(v => v.AccountStudentGuardians)
                 .ThenInclude(v => v.Accounts)
             .Include(v => v.Attachments)
-            .Where(v => v.AccountStudentGuardians != null && 
-                       v.AccountStudentGuardians.Student != null &&
-                       v.AccountStudentGuardians.Student.Division != null &&
-                       v.AccountStudentGuardians.Student.Division.Class != null &&
-                       ((v.AccountStudentGuardians.Student.Division.Class.Year != null && v.AccountStudentGuardians.Student.Division.Class.Year.Active == true) || 
-                        (v.AccountStudentGuardians.Student.Division.Class.Stage != null && v.AccountStudentGuardians.Student.Division.Class.Stage.Year != null && v.AccountStudentGuardians.Student.Division.Class.Stage.Year.Active == true)))
+            .Where(v => v.AccountStudentGuardians != null &&
+                        v.AccountStudentGuardians.Student != null &&
+                        v.AccountStudentGuardians.Student.Division != null &&
+                        v.AccountStudentGuardians.Student.Division.Class != null)
             .ToListAsync();
         if (vouchers == null)
             return new List<VouchersReturnDTO>();
@@ -65,6 +104,7 @@ public class VoucherRepository : IVoucherRepository
                 ? $"{v.AccountStudentGuardians.Student.FullName.FirstName} {v.AccountStudentGuardians.Student.FullName.MiddleName} {v.AccountStudentGuardians.Student.FullName.LastName}".Trim()
                 : string.Empty,
             AccountAttachments = v.Attachments?.Count ?? 0,
+            AttachmentUrls = BuildAttachmentPublicPaths(v.Attachments, v.VoucherID),
             AccountStudentGuardianID = v.AccountStudentGuardianID,
             StudentID = v.AccountStudentGuardians?.StudentID ?? 0,
         }).ToList();
@@ -92,12 +132,10 @@ public class VoucherRepository : IVoucherRepository
             .Include(v => v.AccountStudentGuardians)
                 .ThenInclude(v => v.Accounts)
             .Include(v => v.Attachments)
-            .Where(v => v.AccountStudentGuardians != null && 
-                       v.AccountStudentGuardians.Student != null &&
-                       v.AccountStudentGuardians.Student.Division != null &&
-                       v.AccountStudentGuardians.Student.Division.Class != null &&
-                       ((v.AccountStudentGuardians.Student.Division.Class.Year != null && v.AccountStudentGuardians.Student.Division.Class.Year.Active == true) || 
-                        (v.AccountStudentGuardians.Student.Division.Class.Stage != null && v.AccountStudentGuardians.Student.Division.Class.Stage.Year != null && v.AccountStudentGuardians.Student.Division.Class.Stage.Year.Active == true)))
+            .Where(v => v.AccountStudentGuardians != null &&
+                        v.AccountStudentGuardians.Student != null &&
+                        v.AccountStudentGuardians.Student.Division != null &&
+                        v.AccountStudentGuardians.Student.Division.Class != null)
             .OrderByDescending(v => v.HireDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
@@ -118,6 +156,7 @@ public class VoucherRepository : IVoucherRepository
                 ? $"{v.AccountStudentGuardians.Student.FullName.FirstName} {v.AccountStudentGuardians.Student.FullName.MiddleName} {v.AccountStudentGuardians.Student.FullName.LastName}".Trim()
                 : string.Empty,
             AccountAttachments = v.Attachments?.Count ?? 0,
+            AttachmentUrls = BuildAttachmentPublicPaths(v.Attachments, v.VoucherID),
             AccountStudentGuardianID = v.AccountStudentGuardianID,
             StudentID = v.AccountStudentGuardians?.StudentID ?? 0,
         }).ToList();
@@ -128,12 +167,10 @@ public class VoucherRepository : IVoucherRepository
     public async Task<int> GetTotalVouchersCountAsync()
     {
         return await _context.Vouchers
-            .Where(v => v.AccountStudentGuardians != null && 
-                       v.AccountStudentGuardians.Student != null &&
-                       v.AccountStudentGuardians.Student.Division != null &&
-                       v.AccountStudentGuardians.Student.Division.Class != null &&
-                       ((v.AccountStudentGuardians.Student.Division.Class.Year != null && v.AccountStudentGuardians.Student.Division.Class.Year.Active == true) || 
-                        (v.AccountStudentGuardians.Student.Division.Class.Stage != null && v.AccountStudentGuardians.Student.Division.Class.Stage.Year != null && v.AccountStudentGuardians.Student.Division.Class.Stage.Year.Active == true)))
+            .Where(v => v.AccountStudentGuardians != null &&
+                        v.AccountStudentGuardians.Student != null &&
+                        v.AccountStudentGuardians.Student.Division != null &&
+                        v.AccountStudentGuardians.Student.Division.Class != null)
             .CountAsync();
     }
 
@@ -199,9 +236,23 @@ public class VoucherRepository : IVoucherRepository
         return true;
     }
 
-    public async Task<List<VouchersGuardianDTO>> GetAllVouchersGuardian(int? guardianID = null)
+    private IQueryable<Student> ApplyGuardianVoucherStudentFilters(IQueryable<Student> query, int? guardianID)
     {
-        var query = _context.Students
+        query = query.Where(s => s.Division != null &&
+                                 s.Division.Class != null &&
+                                 ((s.Division.Class.Year != null && s.Division.Class.Year.Active == true) ||
+                                  (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null &&
+                                   s.Division.Class.Stage.Year.Active == true)));
+
+        if (guardianID.HasValue && guardianID.Value > 0)
+            query = query.Where(s => s.GuardianID == guardianID.Value);
+
+        return query;
+    }
+
+    private IQueryable<Student> GuardianVouchersStudentsDetailQuery(int? guardianID)
+    {
+        var q = _context.Students
             .Include(s => s.AccountStudentGuardians)
                 .ThenInclude(a => a.Vouchers)
             .Include(s => s.Division)
@@ -210,24 +261,16 @@ public class VoucherRepository : IVoucherRepository
             .Include(s => s.Division)
                 .ThenInclude(d => d.Class)
                     .ThenInclude(c => c.Stage)
-                        .ThenInclude(s => s.Year)
-            .Include(s => s.Attachments)
-            .Where(s => s.Division != null && 
-                       s.Division.Class != null && 
-                       ((s.Division.Class.Year != null && s.Division.Class.Year.Active == true) || 
-                        (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null && s.Division.Class.Stage.Year.Active == true)));
+                        .ThenInclude(stg => stg.Year)
+            .Include(s => s.Attachments);
 
-        // Filter by guardianID if provided
-        if (guardianID.HasValue && guardianID.Value > 0)
+        return ApplyGuardianVoucherStudentFilters(q, guardianID);
+    }
+
+    private static List<VouchersGuardianDTO> MapStudentsToVouchersGuardianDtos(IEnumerable<Student> students) =>
+        students.Select(vg => new VouchersGuardianDTO
         {
-            query = query.Where(s => s.GuardianID == guardianID.Value);
-        }
-
-        var students = await query.ToListAsync();
-
-        return students.Select(vg => new VouchersGuardianDTO()
-        {
-            StudentName = vg.FullName != null 
+            StudentName = vg.FullName != null
                 ? $"{vg.FullName.FirstName} {vg.FullName.MiddleName} {vg.FullName.LastName}".Trim()
                 : string.Empty,
             GuardianID = vg.GuardianID,
@@ -245,5 +288,33 @@ public class VoucherRepository : IVoucherRepository
                 ? vg.Attachments.Select(a => a.AttachmentURL ?? string.Empty).Where(url => !string.IsNullOrEmpty(url)).ToList()
                 : new List<string>(),
         }).ToList();
+
+    public async Task<List<VouchersGuardianDTO>> GetAllVouchersGuardian(int? guardianID = null)
+    {
+        var students = await GuardianVouchersStudentsDetailQuery(guardianID)
+            .OrderBy(s => s.StudentID)
+            .ToListAsync();
+
+        return MapStudentsToVouchersGuardianDtos(students);
+    }
+
+    public async Task<List<VouchersGuardianDTO>> GetVouchersGuardianPaginatedAsync(int? guardianID, int pageNumber, int pageSize)
+    {
+        if (pageNumber <= 0 || pageSize <= 0)
+            throw new ArgumentException("Page number and page size must be greater than zero.");
+
+        var students = await GuardianVouchersStudentsDetailQuery(guardianID)
+            .OrderBy(s => s.StudentID)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return MapStudentsToVouchersGuardianDtos(students);
+    }
+
+    public async Task<int> GetVouchersGuardianTotalCountAsync(int? guardianID)
+    {
+        return await ApplyGuardianVoucherStudentFilters(_context.Students, guardianID)
+            .CountAsync();
     }
 }

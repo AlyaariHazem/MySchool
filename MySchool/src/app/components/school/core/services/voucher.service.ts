@@ -53,10 +53,52 @@ export class VoucherService {
     );
   }
 
+  /**
+   * Paginated guardian voucher rows; filter (e.g. guardianID) is in the JSON body.
+   * GET `Vouchers/vouchersGuardian` is still available for legacy callers.
+   */
+  getVouchersGuardianPage(
+    guardianID: number | undefined,
+    pageNumber: number = 1,
+    pageSize: number = 100,
+  ): Observable<{
+    data: VouchersGuardian[];
+    pageNumber: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  }> {
+    const body = {
+      guardianID: guardianID != null && guardianID > 0 ? guardianID : null,
+      pageNumber,
+      pageSize,
+    };
+    return this.API.http
+      .post<any>(`${this.API.baseUrl}/Vouchers/vouchersGuardian/page`, body)
+      .pipe(
+        map((response: any) => {
+          const raw = response.result ?? response;
+          return {
+            data: raw.Data ?? raw.data ?? [],
+            pageNumber: raw.PageNumber ?? raw.pageNumber ?? pageNumber,
+            pageSize: raw.PageSize ?? raw.pageSize ?? pageSize,
+            totalCount: raw.TotalCount ?? raw.totalCount ?? 0,
+            totalPages: raw.TotalPages ?? raw.totalPages ?? 0,
+          };
+        }),
+        catchError((error: any) => {
+          console.error('Error fetching vouchers guardian page:', error);
+          throw error;
+        }),
+      );
+  }
+
+  /** @deprecated Prefer getVouchersGuardianPage — uses GET without pagination. */
   getAllVouchersGuardian(guardianID?: number): Observable<ApiResponse<VouchersGuardian[]>> {
-    const url = guardianID && guardianID > 0 
-      ? `Vouchers/vouchersGuardian?guardianID=${guardianID}`
-      : 'Vouchers/vouchersGuardian';
+    const url =
+      guardianID && guardianID > 0
+        ? `Vouchers/vouchersGuardian?guardianID=${guardianID}`
+        : 'Vouchers/vouchersGuardian';
     return this.API.getRequest<VouchersGuardian[]>(url);
   }
 

@@ -46,6 +46,23 @@
     </app-new-capture>
   </p-dialog>
 
+  <p-dialog [(visible)]="attachmentsDialogVisible" [header]="attachmentsDialogTitle" [modal]="true"
+    [style]="{ width: 'min(520px, 92vw)' }" [draggable]="false" [resizable]="false" [dismissableMask]="true">
+    @if (selectedAttachmentUrls.length === 0) {
+      <p class="attachments-empty">لا توجد مسارات مرفقات لهذا السند.</p>
+    }
+    @for (rel of selectedAttachmentUrls; track rel) {
+      <div class="attachment-item">
+        <a [href]="attachmentFileUrl(rel)" target="_blank" rel="noopener noreferrer" class="attachment-link">
+          {{ rel.split('/').pop() }}
+        </a>
+        @if (isImageAttachment(rel)) {
+          <img [src]="attachmentFileUrl(rel)" alt="" class="attachment-preview" />
+        }
+      </div>
+    }
+  </p-dialog>
+
 
 
   <!-- Responsive Table -->
@@ -74,7 +91,15 @@
               <td>{{voucher.note}}</td>
               <td>{{voucher.payBy}}</td>
               <td>{{voucher.hireDate| date:'yyyy-MM-dd'}}</td>
-              <td>{{voucher.accountAttachments}}</td>
+              <td>
+                @if (voucher.accountAttachments > 0) {
+                  <p-button type="button" icon="pi pi-paperclip" [label]="'عرض (' + voucher.accountAttachments + ')'"
+                    size="small" outlined severity="secondary" (onClick)="openAttachmentsDialog(voucher)"
+                    [disabled]="isBusy" title="عرض المرفقات" />
+                } @else {
+                  <span class="attachments-none">—</span>
+                }
+              </td>
 
               <td>
                 <div class="col text-left">
@@ -98,7 +123,7 @@
             </tr>
             }@empty {
             <tr>
-              <td colspan="7" class="empty-message">No Data available in a Table</td>
+              <td colspan="8" class="empty-message">No Data available in a Table</td>
             </tr>
             }
           </tbody>

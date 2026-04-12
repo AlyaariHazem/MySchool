@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, forkJoin } from 'rxjs';
+import { map, tap, switchMap, catchError } from 'rxjs/operators';
 import { VouchersGuardian } from '../models/vouchers-guardian.model';
 import { VoucherService } from './voucher.service';
-import { ApiResponse } from '../../../../core/models/response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -52,29 +51,39 @@ export class VouchersGuardianStoreService {
       return of(cachedData);
     }
 
-    // Fetch from API
+    // Fetch from API (POST body + pagination; load all pages up to backend max page size)
     this.loadingSubject.next(true);
     this.currentGuardianID = guardianID;
 
-    return this.voucherService.getAllVouchersGuardian(guardianID).pipe(
-      map((response: ApiResponse<VouchersGuardian[]>) => {
-        if (!response.isSuccess) {
-          return [];
+    const pageSize = 100;
+
+    return this.voucherService.getVouchersGuardianPage(guardianID, 1, pageSize).pipe(
+      switchMap((first) => {
+        const firstRows = [...(first.data || [])];
+        const totalPages = Math.max(1, first.totalPages ?? 1);
+        if (totalPages <= 1) {
+          return of(firstRows);
         }
-        return response.result || [];
+        const restCalls = [];
+        for (let p = 2; p <= totalPages; p++) {
+          restCalls.push(this.voucherService.getVouchersGuardianPage(guardianID, p, pageSize));
+        }
+        return forkJoin(restCalls).pipe(
+          map((pages) => {
+            const rest = pages.flatMap((r) => r.data || []);
+            return [...firstRows, ...rest];
+          }),
+        );
       }),
       tap((vouchers: VouchersGuardian[]) => {
-        // Cache the data
         this.vouchersByGuardian.set(guardianID, vouchers);
-        // Emit to subscribers
         this.currentVouchersSubject.next(vouchers);
         this.loadingSubject.next(false);
       }),
-      tap({
-        error: () => {
-          this.loadingSubject.next(false);
-        }
-      })
+      catchError(() => {
+        this.loadingSubject.next(false);
+        return of([]);
+      }),
     );
   }
 

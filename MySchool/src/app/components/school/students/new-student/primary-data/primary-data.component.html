@@ -47,15 +47,26 @@
     <!-- Group 4: Other Information -->
     <div class="group group4">
       <!-- Student DOB -->
-      <div class="form-control">
-        <label for="studentDOB" class="label2">تاريخ الميلاد<span style="color:red;"> *</span></label>
-        <input type="date" id="studentDOB" formControlName="studentDOB" />
+      <div class="form-control dob-field">
+        <span class="label2">تاريخ الميلاد<span style="color:red;"> *</span></span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="group4-field">
+          <mat-label>تاريخ الميلاد</mat-label>
+          <input
+            matInput
+            id="studentDOB"
+            [matDatepicker]="dobPicker"
+            formControlName="studentDOB"
+            [max]="maxDob"
+            (focus)="dobPicker.open()" />
+          <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+          <mat-datepicker #dobPicker></mat-datepicker>
+        </mat-form-field>
       </div>
 
       <!-- Class -->
       <div class="form-control">
         <label for="class" class="label2">الصـف<span style="color:red;"> *</span></label>
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="group4-field">
           <mat-label>إختار الصف</mat-label>
           <mat-select formControlName="classID" (selectionChange)="onSelectionChange('classID', $event.value)">
             <mat-option [value]="null">None</mat-option>
@@ -86,7 +97,7 @@
       <!-- Gender -->
       <div class="form-control">
         <label for="studentGender" class="label2">الجنس<span style="color:red;"> *</span></label>
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="group4-field">
           <mat-label>إختار النوع</mat-label>
           <mat-select formControlName="studentGender"
             (selectionChange)="onSelectionChange('studentGender', $event.value)">

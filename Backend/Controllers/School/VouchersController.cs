@@ -253,7 +253,34 @@ namespace Backend.Controllers.School
                 return StatusCode((int)HttpStatusCode.InternalServerError, response);
             }
         }
-        // GET api/vouchers/guardian
+
+        // POST api/vouchers/vouchersGuardian/page — guardian filter + pagination in JSON body
+        [HttpPost("vouchersGuardian/page")]
+        public async Task<ActionResult<PagedResult<VouchersGuardianDTO>>> GetVouchersGuardianPage(
+            [FromBody] VouchersGuardianPageRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (request.PageNumber < 1) request.PageNumber = 1;
+            if (request.PageSize < 1) request.PageSize = 8;
+            const int maxPageSize = 500;
+            if (request.PageSize > maxPageSize) request.PageSize = maxPageSize;
+
+            var rows = await _unitOfWork.Vouchers.GetVouchersGuardianPaginatedAsync(
+                request.GuardianID, request.PageNumber, request.PageSize);
+            var total = await _unitOfWork.Vouchers.GetVouchersGuardianTotalCountAsync(request.GuardianID);
+            var totalPages = (int)Math.Ceiling(total / (double)request.PageSize);
+
+            return Ok(new PagedResult<VouchersGuardianDTO>(
+                rows,
+                request.PageNumber,
+                request.PageSize,
+                total,
+                totalPages));
+        }
+
+        // GET api/vouchers/vouchersGuardian — legacy: query string filter, returns all rows (no pagination)
         [HttpGet("vouchersGuardian")]
         public async Task<ActionResult<APIResponse>> GetVouchersGuardian([FromQuery] int? guardianID = null)
         {

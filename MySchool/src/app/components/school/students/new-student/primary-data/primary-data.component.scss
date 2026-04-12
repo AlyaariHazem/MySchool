@@ -20,6 +20,26 @@ form {
   gap: 5px; /* Space between label and input */
 }
 
+/* Match outline height for date + selects in row (Material MDC can differ per control type). */
+.group4 {
+  .group4-field {
+    width: 100%;
+  }
+
+  ::ng-deep .group4-field .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  ::ng-deep .group4-field .mat-mdc-text-field-wrapper {
+    min-height: 56px;
+  }
+
+  ::ng-deep .group4-field .mat-mdc-form-field-infix {
+    min-height: 48px;
+    box-sizing: border-box;
+  }
+}
+
 label {
   // font-weight: bold;
   color: #333;

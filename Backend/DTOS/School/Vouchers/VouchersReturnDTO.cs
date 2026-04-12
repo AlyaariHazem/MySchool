@@ -15,6 +15,8 @@ public class VouchersReturnDTO
     public string? Note { get; set; }
     public string? PayBy { get; set; }
     public int? AccountAttachments { get; set; }
+    /// <summary>Public paths under wwwroot, e.g. /uploads/Vouchers/Vouchers_1_file.pdf</summary>
+    public List<string>? AttachmentUrls { get; set; }
     public int? AccountStudentGuardianID { get; set; }
     public int? StudentID { get; set; }
 }

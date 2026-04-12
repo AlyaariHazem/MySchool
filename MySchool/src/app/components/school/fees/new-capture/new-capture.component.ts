@@ -122,7 +122,12 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
       }),
     ).subscribe({
       next: (res) => {
-        this.voucherID = +res;
+        // API returns ApiResponse<number>; id is in result, not the wrapper object (+res would be NaN).
+        const rawId = res?.result ?? (res as unknown as number);
+        const parsed =
+          typeof rawId === 'number' ? rawId : Number(rawId);
+        this.voucherID = Number.isFinite(parsed) ? parsed : undefined;
+
         this.toastr.success('Voucher added successfully!');
 
         this.voucherAdded = true;
@@ -135,7 +140,9 @@ export class NewCaptureComponent implements OnInit, OnChanges, OnDestroy {
           }
         }
 
-        this.uploadFiles(this.voucherID!);
+        if (this.voucherID != null && this.files.length > 0) {
+          this.uploadFiles(this.voucherID);
+        }
       },
       error: () => {
         this.toastr.error('فشل إضافة السند', 'خطأ');
