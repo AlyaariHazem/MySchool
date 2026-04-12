@@ -1,83 +1,234 @@
-<div class="pending-reg" dir="rtl">
-  <h2>طلبات التسجيل المعلقة</h2>
-  <p class="sub">راجع بيانات الطالب أو ولي الأمر والمرفقات ثم وافق أو ارفض. لا يستطيع مقدم الطلب تسجيل الدخول قبل الموافقة.</p>
+<div id="id01" [attr.dir]="dir$ | async" class="modal-container">
+  <div class="modal-content">
+    <div class="tabcontent">
+      <div class="page-head">
+        <h2 class="school">طلبات التسجيل المعلقة</h2>
+        <p-button
+          type="button"
+          label="تحديث"
+          icon="pi pi-refresh"
+          variant="outlined"
+          severity="success"
+          styleClass="refresh-btn"
+          (onClick)="load()"
+          [disabled]="loading"
+          [loading]="loading"
+        />
+      </div>
 
-  <p-table
-    [value]="rows"
-    [loading]="loading"
-    [paginator]="true"
-    [rows]="10"
-    [rowsPerPageOptions]="[10, 25]"
-    styleClass="p-datatable-sm"
-  >
-    <ng-template pTemplate="header">
-      <tr>
-        <th>اسم المستخدم</th>
-        <th>الهاتف</th>
-        <th>الجنس</th>
-        <th>تاريخ الميلاد</th>
-        <th>الدور</th>
-        <th>المدرسة</th>
-        <th>التاريخ</th>
-        <th>مرفقات</th>
-        <th>إجراءات</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-row>
-      <tr>
-        <td>{{ row.userName }}</td>
-        <td>{{ row.phoneNumber }}</td>
-        <td>{{ row.gender }}</td>
-        <td>{{ formatDob(row.dateOfBirth) }}</td>
-        <td>{{ roleLabel(row.requestedRole) }}</td>
-        <td>{{ row.schoolName }}</td>
-        <td>{{ formatDate(row.createdAt) }}</td>
-        <td class="attachments-cell">
-          @if (row.attachments?.length) {
-            @for (a of row.attachments; track $index) {
-              <a [href]="a.url" target="_blank" rel="noopener noreferrer" class="attach-link">{{ a.fileName }}</a>
-            }
-          } @else {
-            —
-          }
-        </td>
-        <td class="actions">
-          <p-button
-            label="موافقة"
-            severity="success"
-            [disabled]="busyId !== null"
-            (onClick)="approve(row)"
-          />
-          <p-button
-            label="رفض"
-            severity="danger"
-            [outlined]="true"
-            [disabled]="busyId !== null"
-            (onClick)="openReject(row)"
-          />
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="9">لا توجد طلبات معلقة</td>
-      </tr>
-    </ng-template>
-  </p-table>
+      <div class="table-container">
+        <div class="pending-table-wrap">
+          <mat-card class="pending-table-card">
+            <div class="table-scroll">
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>
+                      اسم المستخدم
+                      <div class="filter-input-wrapper">
+                        <input
+                          type="text"
+                          class="column-filter-input"
+                          [(ngModel)]="filters.userName"
+                          (input)="onFilterChange()"
+                          placeholder="فلترة"
+                        />
+                      </div>
+                    </th>
+                    <th>
+                      الهاتف
+                      <div class="filter-input-wrapper">
+                        <input
+                          type="text"
+                          class="column-filter-input"
+                          [(ngModel)]="filters.phoneNumber"
+                          (input)="onFilterChange()"
+                          placeholder="فلترة"
+                        />
+                      </div>
+                    </th>
+                    <th>
+                      الجنس
+                      <div class="filter-input-wrapper">
+                        <input
+                          type="text"
+                          class="column-filter-input"
+                          [(ngModel)]="filters.gender"
+                          (input)="onFilterChange()"
+                          placeholder="فلترة"
+                        />
+                      </div>
+                    </th>
+                    <th>
+                      تاريخ الميلاد
+                      <div class="filter-input-wrapper">
+                        <input
+                          type="text"
+                          class="column-filter-input"
+                          [(ngModel)]="filters.dob"
+                          (input)="onFilterChange()"
+                          placeholder="فلترة"
+                        />
+                      </div>
+                    </th>
+                    <th>
+                      الدور
+                      <div class="filter-input-wrapper">
+                        <input
+                          type="text"
+                          class="column-filter-input"
+                          [(ngModel)]="filters.role"
+                          (input)="onFilterChange()"
+                          placeholder="فلترة"
+                        />
+                      </div>
+                    </th>
+                    <th>
+                      المدرسة
+                      <div class="filter-input-wrapper">
+                        <input
+                          type="text"
+                          class="column-filter-input"
+                          [(ngModel)]="filters.schoolName"
+                          (input)="onFilterChange()"
+                          placeholder="فلترة"
+                        />
+                      </div>
+                    </th>
+                    <th>
+                      التاريخ
+                      <div class="filter-input-wrapper">
+                        <input
+                          type="text"
+                          class="column-filter-input"
+                          [(ngModel)]="filters.createdAt"
+                          (input)="onFilterChange()"
+                          placeholder="فلترة"
+                        />
+                      </div>
+                    </th>
+                    <th>
+                      مرفقات
+                      <div class="filter-input-wrapper">
+                        <input
+                          type="text"
+                          class="column-filter-input"
+                          [(ngModel)]="filters.attachments"
+                          (input)="onFilterChange()"
+                          placeholder="فلترة"
+                        />
+                      </div>
+                    </th>
+                    <th class="th-actions">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (loading) {
+                    <tr>
+                      <td colspan="9" class="loading-cell">جاري التحميل…</td>
+                    </tr>
+                  } @else if (pagedRows.length === 0) {
+                    <tr>
+                      <td colspan="9" class="empty-message">لا توجد طلبات معلقة</td>
+                    </tr>
+                  } @else {
+                    @for (row of pagedRows; track row.id) {
+                      <tr>
+                        <td class="cell-strong">{{ row.userName }}</td>
+                        <td>{{ row.phoneNumber }}</td>
+                        <td>{{ row.gender }}</td>
+                        <td>{{ formatDob(row.dateOfBirth) }}</td>
+                        <td>
+                          <span
+                            class="role-pill"
+                            [class.role-pill--guardian]="row.requestedRole === 'GUARDIAN'"
+                          >
+                            {{ roleLabel(row.requestedRole) }}
+                          </span>
+                        </td>
+                        <td>{{ row.schoolName }}</td>
+                        <td class="cell-muted">{{ formatDate(row.createdAt) }}</td>
+                        <td class="attachments-cell">
+                          @if (row.attachments.length) {
+                            @for (a of row.attachments; track $index) {
+                              <a
+                                [href]="a.url"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="attach-link"
+                              >
+                                @if (isPdfFile(a.fileName)) {
+                                  <i class="pi pi-file-pdf"></i>
+                                } @else {
+                                  <i class="pi pi-paperclip"></i>
+                                }
+                                {{ a.fileName }}
+                              </a>
+                            }
+                          } @else {
+                            <span class="cell-muted">—</span>
+                          }
+                        </td>
+                        <td class="actions">
+                          <p-button
+                            label="موافقة"
+                            icon="pi pi-check"
+                            severity="success"
+                            [disabled]="busyId !== null"
+                            (onClick)="approve(row)"
+                          />
+                          <p-button
+                            label="رفض"
+                            icon="pi pi-times"
+                            severity="danger"
+                            [outlined]="true"
+                            [disabled]="busyId !== null"
+                            (onClick)="openReject(row)"
+                          />
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          </mat-card>
 
-  @if (rejectForId !== null) {
-    <div class="reject-dialog">
-      <h3>سبب الرفض (اختياري)</h3>
-      <textarea
-        rows="3"
-        class="reject-textarea"
-        [(ngModel)]="rejectReason"
-        name="rejectReason"
-      ></textarea>
-      <div class="reject-actions">
-        <p-button label="تأكيد الرفض" severity="danger" (onClick)="confirmReject()" />
-        <p-button label="إلغاء" [outlined]="true" (onClick)="cancelReject()" />
+          <div class="paginator-wrap">
+            <p-paginator
+              dir="ltr"
+              (onPageChange)="onPageChange($event)"
+              [first]="first"
+              [rows]="rowsPerPage"
+              [totalRecords]="totalFiltered"
+              [rowsPerPageOptions]="[10, 25]"
+            />
+          </div>
+        </div>
       </div>
     </div>
-  }
+  </div>
 </div>
+
+<p-dialog
+  [(visible)]="rejectDialogVisible"
+  [modal]="true"
+  [style]="{ width: 'min(100%, 26rem)' }"
+  [draggable]="false"
+  [resizable]="false"
+  header="رفض الطلب"
+  (onHide)="cancelReject()"
+>
+  <p class="reject-lede">يمكنك إضافة ملاحظة داخلية (اختياري).</p>
+  <textarea
+    rows="4"
+    class="reject-textarea"
+    [(ngModel)]="rejectReason"
+    name="rejectReason"
+    placeholder="سبب الرفض…"
+  ></textarea>
+  <ng-template pTemplate="footer">
+    <p-button label="إلغاء" [outlined]="true" severity="secondary" (onClick)="cancelReject()" />
+    <p-button label="تأكيد الرفض" icon="pi pi-times" severity="danger" (onClick)="confirmReject()" />
+  </ng-template>
+</p-dialog>

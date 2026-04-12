@@ -1,54 +1,292 @@
-.pending-reg {
-  padding: 1rem;
+/* Match school “system” pages (students / custom-table): white shell, #009879 table */
+:host {
+  display: block;
 }
 
-.sub {
-  color: #555;
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
+.modal-container {
+  background-color: #fff;
+}
+
+.modal-content {
+  border-radius: 1.5%;
+}
+
+.tabcontent {
+  color: #000;
+  display: block;
+  padding: 1.25rem clamp(0.75rem, 2vw, 1.75rem) 2rem;
+  height: 100%;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Title + refresh on one row — avoids floating button and large empty gap */
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.school {
+  text-align: start;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.35;
+  flex: 1 1 auto;
+  min-width: min(100%, 16rem);
+}
+
+:host ::ng-deep .refresh-btn.p-button {
+  flex-shrink: 0;
+  min-height: 2.5rem;
+  padding-inline: 1.1rem;
+}
+
+.table-container {
+  margin-top: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.pending-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .pending-table-card.mat-mdc-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: 0;
+  border-radius: 10px;
+  border: 1px solid #d5dbe1;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overscroll-behavior-x: contain;
+  padding: 1.25rem 1.5rem 1rem;
+}
+
+.table-scroll .styled-table {
+  width: 100% !important;
+  min-width: 900px;
+  max-width: none;
+  table-layout: auto;
+}
+
+.paginator-wrap {
+  margin-top: 0.75rem;
+  padding: 0.85rem clamp(0.75rem, 2vw, 1.5rem) 1.1rem;
+  background: #f8fafb;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+/* Same palette as students.component.scss / custom-table */
+.styled-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 14px 1.1rem;
+  border: 1px solid #dddddd;
+  vertical-align: middle;
+  text-align: start;
+}
+
+.styled-table thead th {
+  text-align: center;
+  padding: 14px 1rem 12px;
+}
+
+.styled-table th {
+  font-size: 0.9rem;
+}
+
+.th-actions {
+  vertical-align: middle;
+  min-width: 10rem;
+  text-align: center !important;
+}
+
+.filter-input-wrapper {
+  margin-top: 10px;
+}
+
+.column-filter-input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-height: 2.25rem;
+  padding: 6px 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+  background: #fff;
+  color: #333;
+}
+
+.column-filter-input::placeholder {
+  color: #9e9e9e;
+}
+
+.column-filter-input:focus {
+  outline: none;
+  border-color: #009879;
+  box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.2);
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.loading-cell,
+.empty-message {
+  text-align: center;
+  padding: 2.5rem 1.25rem !important;
+  font-weight: 600;
+  color: #0d0e0d;
+}
+
+.cell-strong {
+  font-weight: 600;
+}
+
+.cell-muted {
+  color: #5f6368;
+  font-size: 0.875rem;
+}
+
+.role-pill {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(0, 152, 121, 0.12);
+  color: #006956;
+}
+
+.role-pill--guardian {
+  background: rgba(21, 101, 192, 0.1);
+  color: #1565c0;
 }
 
 .attachments-cell {
-  max-width: 14rem;
-}
-
-.attachments-cell a {
-  display: block;
-  margin-bottom: 0.25rem;
-  word-break: break-all;
+  max-width: 12rem;
 }
 
 .attach-link {
-  color: var(--mat-sys-primary, #1565c0);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+  color: #0d47a1;
+  text-decoration: none;
+  font-weight: 500;
+  word-break: break-word;
 }
 
-h2 {
-  margin-bottom: 1rem;
+.attach-link:hover {
+  text-decoration: underline;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 9rem;
+  text-align: center;
 }
 
-.reject-dialog {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  max-width: 480px;
+.actions ::ng-deep .p-button {
+  padding: 0.4rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.reject-lede {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: #546e7a;
 }
 
 .reject-textarea {
   width: 100%;
-  margin: 0.5rem 0 1rem;
-  padding: 0.5rem;
+  margin: 0;
+  padding: 0.65rem 0.75rem;
   box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 5rem;
 }
 
-.reject-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+.reject-textarea:focus {
+  outline: none;
+  border-color: #009879;
+  box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.2);
+}
+
+@media (max-width: 900px) {
+  .tabcontent {
+    padding: 1rem 0.75rem 1.5rem;
+  }
+
+  .page-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  :host ::ng-deep .refresh-btn.p-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-scroll {
+    padding: 1rem 0.75rem 0.75rem;
+  }
+
+  .paginator-wrap {
+    padding: 0.65rem 0.5rem 0.85rem;
+  }
+
+  .styled-table th,
+  .styled-table td {
+    padding: 12px 6px;
+  }
 }

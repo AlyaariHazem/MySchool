@@ -55,11 +55,6 @@
                 <span>{{ 'settings.databaseRestore' | translate }}</span>
               </a>
             </li>
-            <li *ngIf="showPendingRegistrations">
-              <a routerLink="/school/sitting/pending-registrations" routerLinkActive="active" (click)="cancel()">
-                <span>طلبات التسجيل</span>
-              </a>
-            </li>
           </ul>
         </li>
 
@@ -100,10 +95,15 @@
             <li><a routerLink="/school/students/add-student/1" (click)="cancel()"><span>{{ 'sidebar.students_sub.add' |
                   translate
                   }}</span></a></li>
-            <li><a routerLink="/school/students/un-reg-students" (click)="cancel()"><span>{{ 'sidebar.students_sub.new'
-                  |
-                  translate
-                  }}</span></a></li>
+            <li *ngIf="showPendingRegistrations">
+              <a
+                routerLink="/school/students/pending-registrations"
+                routerLinkActive="active"
+                (click)="cancel()"
+              >
+                <span>{{ 'sidebar.students_sub.new' | translate }}</span>
+              </a>
+            </li>
             <li><a routerLink="/school/students/un-reg-students" (click)="cancel()"><span>{{
                   'sidebar.students_sub.upgrade'
                   | translate

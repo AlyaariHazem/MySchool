@@ -178,8 +178,8 @@
     "students_sub": {
       "all": "All Students",
       "add": "Add Student",
-      "new": "New Students",
-      "upgrade":"upgrade Students"
+      "new": "Registration requests",
+      "upgrade": "Student promotion"
     },
     "parents": "Parents",
     "parents_sub": {

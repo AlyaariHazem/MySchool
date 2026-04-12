@@ -58,6 +58,14 @@ const routes: Routes = [
           { path: 'all-students', component: StudentsComponent, data: { breadcrumb: 'جميع الطلاب' } },
           { path: 'about-students', component: StudentsComponent, data: { breadcrumb: 'عن الطلاب' } },
           { path: 'add-student/:id', component: StudentsComponent, data: { breadcrumb: 'إضافة طالب' } },
+          {
+            path: 'pending-registrations',
+            loadComponent: () =>
+              import('./sittings/pending-registration-requests/pending-registration-requests.component').then(
+                (m) => m.PendingRegistrationRequestsComponent,
+              ),
+            data: { breadcrumb: 'طلبات التسجيل المعلقة' },
+          },
           { path: 'un-reg-students', component: StudentPromotionComponent, data: { breadcrumb: 'الطلاب غير المسجلين' } },
           { path: '', redirectTo: 'all-students', pathMatch: 'full' },
           { path: 'not-found', component: PageNotFoundComponent },
@@ -73,11 +81,8 @@ const routes: Routes = [
           { path: 'databaseRestore', component: DatabaseRestoreComponent, data: { breadcrumb: 'استعادة قاعدة البيانات' } },
           {
             path: 'pending-registrations',
-            loadComponent: () =>
-              import('./sittings/pending-registration-requests/pending-registration-requests.component').then(
-                (m) => m.PendingRegistrationRequestsComponent,
-              ),
-            data: { breadcrumb: 'طلبات التسجيل' },
+            redirectTo: '/school/students/pending-registrations',
+            pathMatch: 'full',
           },
           { path: '', redirectTo: 'years', pathMatch: 'full' },
           { path: 'not-found', component: PageNotFoundComponent },
