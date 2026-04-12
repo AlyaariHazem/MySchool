@@ -1,15 +1,23 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using Backend.Common;
+using Backend.DTOS;
+using Backend.DTOS.School.Accounts;
 using Backend.DTOS.School.Auth;
+using Backend.DTOS.School.Guardians;
+using Backend.DTOS.School.StudentClassFee;
+using Backend.Data;
 using Backend.Models;
 using Backend.Models.Master;
+using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Controllers;
 
@@ -255,14 +263,15 @@ public partial class AuthController
 
     [HttpPost("ApproveRequest/{id:int}")]
     [Authorize(Roles = "ADMIN,MANAGER")]
-    public Task<IActionResult> ApproveRequest(int id) => ApproveOrRejectCoreAsync(id, approve: true, reason: null);
+    public Task<IActionResult> ApproveRequest(int id, [FromBody] ApproveRegistrationRequestDto? body) =>
+        ApproveOrRejectCoreAsync(id, approve: true, reason: null, approveBody: body);
 
     [HttpPost("RejectRequest/{id:int}")]
     [Authorize(Roles = "ADMIN,MANAGER")]
     public Task<IActionResult> RejectRequest(int id, [FromBody] RejectRegistrationRequestDto? body) =>
-        ApproveOrRejectCoreAsync(id, approve: false, reason: body?.Reason);
+        ApproveOrRejectCoreAsync(id, approve: false, reason: body?.Reason, approveBody: null);
 
-    private async Task<IActionResult> ApproveOrRejectCoreAsync(int id, bool approve, string? reason)
+    private async Task<IActionResult> ApproveOrRejectCoreAsync(int id, bool approve, string? reason, ApproveRegistrationRequestDto? approveBody)
     {
         var reviewerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(reviewerId))
@@ -376,6 +385,17 @@ public partial class AuthController
                     LastAccessedUtc = DateTime.UtcNow
                 });
 
+                if (string.Equals(req.RequestedRole, "STUDENT", StringComparison.OrdinalIgnoreCase))
+                {
+                    var enrollErr = await EnrollApprovedStudentInTenantAsync(req, user, approveBody);
+                    if (enrollErr != null)
+                    {
+                        await userManager.DeleteAsync(user);
+                        await tx.RollbackAsync();
+                        return enrollErr;
+                    }
+                }
+
                 req.Status = RegistrationRequestStatus.Approved;
                 req.ReviewedAt = DateTime.UtcNow;
                 req.ReviewedByUserId = reviewerId;
@@ -409,5 +429,161 @@ public partial class AuthController
         if (string.Equals(identityRole, "GUARDIAN", StringComparison.OrdinalIgnoreCase))
             return TenantRole.Parent;
         return null;
+    }
+
+    private async Task<TenantDbContext> CreateTenantDbContextForEnrollmentAsync(int tenantId)
+    {
+        var row = await _context.Tenants.AsNoTracking()
+            .FirstOrDefaultAsync(t => t.TenantId == tenantId);
+        if (row == null || string.IsNullOrWhiteSpace(row.ConnectionString))
+            throw new InvalidOperationException(
+                $"Tenant {tenantId} was not found or has no connection string in the master database.");
+
+        var ti = new TenantInfo { TenantId = tenantId, ConnectionString = row.ConnectionString };
+        var ob = new DbContextOptionsBuilder<TenantDbContext>();
+        ob.UseTenantSqlServer(row.ConnectionString);
+        return new TenantDbContext(ob.Options, ti);
+    }
+
+    private async Task<IActionResult?> EnrollApprovedStudentInTenantAsync(
+        RegistrationRequest req,
+        ApplicationUser user,
+        ApproveRegistrationRequestDto? dto)
+    {
+        if (dto == null || !dto.DivisionID.HasValue || dto.DivisionID.Value <= 0)
+            return BadRequest(new { message = "يجب اختيار الشعبة (DivisionID) عند قبول تسجيل طالب." });
+
+        TenantDbContext tenantDb;
+        try
+        {
+            tenantDb = await CreateTenantDbContextForEnrollmentAsync(req.TenantId);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+
+        using var tenantUnitOfWork = ActivatorUtilities.CreateInstance<UnitOfWork>(_serviceProvider, tenantDb);
+        var studentManagement = ActivatorUtilities.CreateInstance<StudentManagementService>(
+            _serviceProvider, tenantDb, tenantUnitOfWork);
+
+        if (!await studentManagement.DivisionExistsAsync(dto.DivisionID.Value))
+            return BadRequest(new { message = "الشعبة غير صالحة لهذه المدرسة." });
+
+        var (first, middle, last) = ParseStudentNameParts(req, dto);
+        var student = new Student
+        {
+            StudentID = 0,
+            FullName = new Name
+            {
+                FirstName = first,
+                MiddleName = middle ?? string.Empty,
+                LastName = last
+            },
+            DivisionID = dto.DivisionID.Value,
+            StudentDOB = req.DateOfBirth ?? DateTime.UtcNow.Date,
+            GuardianID = 0,
+            UserID = user.Id,
+            ImageURL = null,
+            PlaceBirth = null
+        };
+
+        List<StudentClassFeeDTO>? fees = dto.Discounts?.Select(d => new StudentClassFeeDTO
+        {
+            FeeClassID = d.FeeClassID,
+            AmountDiscount = d.AmountDiscount,
+            NoteDiscount = d.NoteDiscount,
+            Mandatory = d.Mandatory,
+            StudentID = 0
+        }).ToList();
+
+        var asgParam = new AccountStudentGuardian { Amount = dto.Amount };
+
+        try
+        {
+            if (dto.ExistingGuardianId.HasValue && dto.ExistingGuardianId.Value > 0)
+            {
+                var g = await tenantUnitOfWork.Guardians.GetGuardianByIdAsync(dto.ExistingGuardianId.Value);
+                if (g == null)
+                    return NotFound(new { message = "ولي الأمر غير موجود." });
+
+                await studentManagement.EnrollRegistrationApprovedStudentToExistingGuardianAsync(
+                    g, user.Id, student, fees, asgParam);
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(dto.GuardianEmail) || string.IsNullOrWhiteSpace(dto.GuardianFullName))
+                    return BadRequest(new { message = "عند عدم اختيار ولي أمر موجود، يلزم البريد والاسم الكامل لولي الأمر الجديد." });
+
+                var guardianUser = new ApplicationUser
+                {
+                    UserName = "Guardian_" + Guid.NewGuid().ToString("N").Substring(0, 8),
+                    Email = dto.GuardianEmail.Trim(),
+                    Address = dto.GuardianAddress ?? string.Empty,
+                    Gender = string.IsNullOrWhiteSpace(dto.GuardianGender) ? "Male" : dto.GuardianGender.Trim(),
+                    PhoneNumber = dto.GuardianPhone ?? string.Empty,
+                    UserType = "Guardian",
+                    HireDate = DateTime.UtcNow
+                };
+
+                var guardian = new Guardian
+                {
+                    FullName = dto.GuardianFullName.Trim(),
+                    Type = dto.GuardianType,
+                    GuardianDOB = dto.GuardianDOB ?? DateTime.UtcNow.Date
+                };
+
+                var account = new AccountsDTO
+                {
+                    AccountName = dto.GuardianFullName.Trim(),
+                    Note = "",
+                    State = true,
+                    TypeAccountID = 1
+                };
+
+                var pwd = string.IsNullOrWhiteSpace(dto.GuardianPassword) ? "Guardian" : dto.GuardianPassword!;
+
+                await studentManagement.EnrollRegistrationApprovedStudentWithNewGuardianAsync(
+                    guardianUser,
+                    pwd,
+                    guardian,
+                    user.Id,
+                    student,
+                    account,
+                    asgParam,
+                    fees);
+            }
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+
+        return null;
+    }
+
+    private static (string First, string Middle, string Last) ParseStudentNameParts(
+        RegistrationRequest req,
+        ApproveRegistrationRequestDto dto)
+    {
+        if (!string.IsNullOrWhiteSpace(dto.StudentFirstName) || !string.IsNullOrWhiteSpace(dto.StudentLastName))
+        {
+            return (
+                dto.StudentFirstName?.Trim() ?? "",
+                dto.StudentMiddleName?.Trim() ?? "",
+                dto.StudentLastName?.Trim() ?? "");
+        }
+
+        if (!string.IsNullOrWhiteSpace(req.FullName))
+        {
+            var parts = req.FullName.Trim().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 1)
+                return (parts[0], "", "");
+            if (parts.Length == 2)
+                return (parts[0], "", parts[1]);
+            return (parts[0], string.Join(" ", parts.Skip(1).Take(parts.Length - 2)), parts[^1]);
+        }
+
+        return (req.UserName.Trim(), "", "");
     }
 }

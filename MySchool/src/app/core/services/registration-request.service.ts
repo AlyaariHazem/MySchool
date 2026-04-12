@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import { BackendAspService } from '../../ASP.NET/backend-asp.service';
 import {
+  ApproveRegistrationPayload,
   PendingRegistrationRequest,
   PublicSchoolOption,
   RequestRegistrationPayload,
@@ -47,10 +48,10 @@ export class RegistrationRequestService {
     );
   }
 
-  approveRequest(id: number) {
+  approveRequest(id: number, body?: ApproveRegistrationPayload) {
     return this.api.http.post<{ message: string }>(
       `${this.api.baseUrl}/auth/ApproveRequest/${id}`,
-      {},
+      body ?? {},
     );
   }
 

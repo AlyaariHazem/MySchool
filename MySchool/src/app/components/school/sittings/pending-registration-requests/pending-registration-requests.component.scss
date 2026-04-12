@@ -262,6 +262,147 @@
   box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.2);
 }
 
+/* —— Approve student dialog (system green #009879) —— */
+:host ::ng-deep .approve-reg-dialog.p-dialog {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 152, 121, 0.12);
+}
+
+:host ::ng-deep .approve-reg-dialog .p-dialog-header {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(180deg, #f4fbf8 0%, #eef7f3 100%);
+  border-bottom: 1px solid rgba(0, 152, 121, 0.2);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #0d3d2f;
+}
+
+:host ::ng-deep .approve-reg-dialog .p-dialog-content {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+:host ::ng-deep .approve-reg-dialog .p-dialog-footer {
+  padding: 0;
+  border-top: 1px solid #e8eaed;
+  background: #fafbfc;
+}
+
+.approve-dialog-shell {
+  display: flex;
+  flex-direction: column;
+  max-height: min(72vh, 36rem);
+}
+
+.approve-dialog-head {
+  flex-shrink: 0;
+  padding: 1rem 1.25rem 0.75rem;
+  background: #fff;
+}
+
+.approve-lede {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: #263238;
+  line-height: 1.55;
+}
+
+.approve-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #607d8b;
+  line-height: 1.45;
+}
+
+.approve-dialog-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.25rem 1.25rem 1.25rem;
+  scrollbar-gutter: stable;
+}
+
+.approve-section {
+  padding: 0.35rem 0 0.5rem;
+}
+
+.approve-section--last {
+  padding-bottom: 0.25rem;
+}
+
+.approve-section__title {
+  margin: 0 0 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #009879;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid rgba(0, 152, 121, 0.28);
+}
+
+.approve-divider {
+  margin: 0.65rem 0 !important;
+  border-top-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.approve-grid {
+  display: grid;
+  gap: 0.75rem 1rem;
+  align-items: start;
+}
+
+.approve-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.approve-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 560px) {
+  .approve-grid--2,
+  .approve-grid--3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.approve-mat-field {
+  width: 100%;
+}
+
+.approve-mat-field--full {
+  grid-column: 1 / -1;
+}
+
+:host ::ng-deep .approve-reg-dialog .approve-mat-field .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 0.2rem;
+}
+
+:host ::ng-deep .approve-reg-dialog .approve-mat-field.mat-mdc-form-field {
+  margin-bottom: 0.15rem;
+}
+
+.approve-mini-hint {
+  margin: -0.25rem 0 0.65rem;
+  font-size: 0.8rem;
+  color: #78909c;
+  line-height: 1.45;
+}
+
+.approve-dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.25rem 1rem;
+}
+
 @media (max-width: 900px) {
   .tabcontent {
     padding: 1rem 0.75rem 1.5rem;

@@ -12,6 +12,7 @@ using Backend.Models;
 using Backend.Models.Master;
 using Backend.Data;
 using Backend.Interfaces;
+using Backend.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -30,6 +31,9 @@ namespace Backend.Controllers
         private readonly ITenantMembershipService _tenantMembership;
         private readonly IWebHostEnvironment _env;
         private readonly IApiBaseUrlProvider _apiBase;
+        private readonly StudentManagementService _studentManagementService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IServiceProvider _serviceProvider;
 
         public AuthController(
             UserManager<ApplicationUser> UserManager,
@@ -37,7 +41,10 @@ namespace Backend.Controllers
             DatabaseContext context,
             ITenantMembershipService tenantMembership,
             IWebHostEnvironment env,
-            IApiBaseUrlProvider apiBase)
+            IApiBaseUrlProvider apiBase,
+            StudentManagementService studentManagementService,
+            IUnitOfWork unitOfWork,
+            IServiceProvider serviceProvider)
         {
             userManager = UserManager;
             this.config = config;
@@ -45,6 +52,9 @@ namespace Backend.Controllers
             _tenantMembership = tenantMembership;
             _env = env;
             _apiBase = apiBase;
+            _studentManagementService = studentManagementService;
+            _unitOfWork = unitOfWork;
+            _serviceProvider = serviceProvider;
         }
 
         [HttpPost("Register")]

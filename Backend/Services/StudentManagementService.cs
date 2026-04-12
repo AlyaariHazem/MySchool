@@ -568,4 +568,152 @@ public class StudentManagementService
         }
     }
 
+    public Task<bool> DivisionExistsAsync(int divisionId) =>
+        _tenantContext.Divisions.AnyAsync(d => d.DivisionID == divisionId);
+
+    /// <summary>
+    /// After public registration approval: student Identity user already exists; link to existing guardian.
+    /// </summary>
+    public async Task<Student> EnrollRegistrationApprovedStudentToExistingGuardianAsync(
+        GuardianDTO existingGuardian,
+        string preCreatedStudentUserId,
+        Student student,
+        List<StudentClassFeeDTO>? studentClassFees,
+        AccountStudentGuardian accountStudentGuardianPram)
+    {
+        if (existingGuardian == null)
+            throw new ArgumentNullException(nameof(existingGuardian));
+        if (existingGuardian.GuardianID <= 0)
+            throw new ArgumentException("Existing guardian must have a valid GuardianID.", nameof(existingGuardian));
+
+        var guardianExists = await _tenantContext.Guardians
+            .AnyAsync(g => g.GuardianID == existingGuardian.GuardianID);
+        if (!guardianExists)
+            throw new Exception($"Guardian with ID {existingGuardian.GuardianID} does not exist in the database.");
+
+        student.UserID = preCreatedStudentUserId;
+        student.GuardianID = existingGuardian.GuardianID;
+
+        var addedStudent = await _unitOfWork.Students.AddStudentAsync(student);
+
+        var existingAccountStudentGuardian = await _tenantContext.AccountStudentGuardians
+            .Where(asg => asg.GuardianID == existingGuardian.GuardianID)
+            .FirstOrDefaultAsync();
+
+        if (existingAccountStudentGuardian == null)
+            throw new Exception(
+                $"No account found for the existing guardian with ID {existingGuardian.GuardianID}. The guardian must have at least one student with an associated account.");
+
+        var accountStudentGuardian = new AccountStudentGuardian
+        {
+            AccountID = existingAccountStudentGuardian.AccountID,
+            GuardianID = existingGuardian.GuardianID,
+            StudentID = addedStudent.StudentID,
+            Amount = accountStudentGuardianPram.Amount
+        };
+
+        await _unitOfWork.AccountStudentGuardians.AddAccountStudentGuardianAsync(accountStudentGuardian);
+
+        if (studentClassFees != null && studentClassFees.Any())
+        {
+            foreach (var studentClassFee in studentClassFees)
+            {
+                studentClassFee.StudentID = addedStudent.StudentID;
+                await _unitOfWork.StudentClassFees.AddAsync(studentClassFee);
+            }
+
+            await _auditTrail.RecordAsync(
+                "Fees",
+                "StudentClassFee.BulkCreateOnEnroll",
+                new
+                {
+                    addedStudent.StudentID,
+                    Lines = studentClassFees.Select(f => new
+                    {
+                        f.FeeClassID,
+                        f.AmountDiscount,
+                        f.Mandatory,
+                        f.NoteDiscount
+                    }).ToList()
+                });
+        }
+
+        return addedStudent;
+    }
+
+    /// <summary>
+    /// After public registration approval: student Identity user already exists; create guardian + account then link.
+    /// </summary>
+    public async Task<Student> EnrollRegistrationApprovedStudentWithNewGuardianAsync(
+        ApplicationUser guardianUser,
+        string guardianPassword,
+        Guardian guardian,
+        string preCreatedStudentUserId,
+        Student student,
+        AccountsDTO account,
+        AccountStudentGuardian accountStudentGuardian,
+        List<StudentClassFeeDTO>? studentClassFees)
+    {
+        using var transaction = await _tenantContext.Database.BeginTransactionAsync();
+        try
+        {
+            var createdGuardianUser = await _unitOfWork.Users.CreateUserAsync(guardianUser, guardianPassword, "Guardian");
+            guardian.UserID = createdGuardianUser.Id;
+
+            var addedGuardian = await _unitOfWork.Guardians.AddGuardianAsync(guardian);
+
+            student.UserID = preCreatedStudentUserId;
+            student.GuardianID = addedGuardian.GuardianID;
+
+            var addedStudent = await _unitOfWork.Students.AddStudentAsync(student);
+
+            var createdAccount = await _unitOfWork.Accounts.AddAccountAsync(account);
+            if (createdAccount?.AccountID == null)
+                throw new Exception("Failed to create account. AccountID is null.");
+
+            var amount = accountStudentGuardian.Amount;
+            accountStudentGuardian.AccountID = createdAccount.AccountID.Value;
+            accountStudentGuardian.GuardianID = addedGuardian.GuardianID;
+            accountStudentGuardian.StudentID = addedStudent.StudentID;
+            accountStudentGuardian.Amount = amount;
+            await _unitOfWork.AccountStudentGuardians.AddAccountStudentGuardianAsync(accountStudentGuardian);
+
+            if (studentClassFees != null && studentClassFees.Any())
+            {
+                foreach (var studentClassFee in studentClassFees)
+                {
+                    studentClassFee.StudentID = addedStudent.StudentID;
+                    await _unitOfWork.StudentClassFees.AddAsync(studentClassFee);
+                }
+            }
+
+            await transaction.CommitAsync();
+
+            if (studentClassFees != null && studentClassFees.Any())
+            {
+                await _auditTrail.RecordAsync(
+                    "Fees",
+                    "StudentClassFee.BulkCreateOnEnroll",
+                    new
+                    {
+                        addedStudent.StudentID,
+                        Lines = studentClassFees.Select(f => new
+                        {
+                            f.FeeClassID,
+                            f.AmountDiscount,
+                            f.Mandatory,
+                            f.NoteDiscount
+                        }).ToList()
+                    });
+            }
+
+            return addedStudent;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            throw WrapWithRootMessage("Error enrolling approved registration student with new guardian", ex);
+        }
+    }
+
 }

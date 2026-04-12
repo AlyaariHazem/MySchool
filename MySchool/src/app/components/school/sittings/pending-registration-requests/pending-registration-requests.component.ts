@@ -4,6 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Store } from '@ngrx/store';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDividerModule } from '@angular/material/divider';
 import { PaginatorModule } from 'primeng/paginator';
 import { PaginatorState } from 'primeng/paginator';
 import { ButtonModule } from 'primeng/button';
@@ -11,12 +15,29 @@ import { ButtonModule } from 'primeng/button';
 import { ShardModule } from 'app/shared/shard.module';
 import { selectLanguage } from 'app/core/store/language/language.selectors';
 import { RegistrationRequestService } from 'app/core/services/registration-request.service';
-import { PendingRegistrationRequest } from 'app/core/models/registration-request.model';
+import {
+  ApproveRegistrationPayload,
+  PendingRegistrationRequest,
+} from 'app/core/models/registration-request.model';
+import { DivisionService } from '../../core/services/division.service';
+import { GuardianService } from '../../core/services/guardian.service';
+import { divisions } from '../../core/models/division.model';
+import { Guardians } from '../../core/models/guardian.model';
 
 @Component({
   selector: 'app-pending-registration-requests',
   standalone: true,
-  imports: [ShardModule, FormsModule, MatCardModule, PaginatorModule, ButtonModule],
+  imports: [
+    ShardModule,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDividerModule,
+    PaginatorModule,
+    ButtonModule,
+  ],
   templateUrl: './pending-registration-requests.component.html',
   styleUrls: ['./pending-registration-requests.component.scss'],
 })
@@ -24,6 +45,8 @@ export class PendingRegistrationRequestsComponent implements OnInit {
   private readonly registration = inject(RegistrationRequestService);
   private readonly toastr = inject(ToastrService);
   private readonly store = inject(Store);
+  private readonly divisionService = inject(DivisionService);
+  private readonly guardianService = inject(GuardianService);
 
   readonly dir$ = this.store.select(selectLanguage).pipe(
     map((l) => (l === 'ar' ? 'rtl' : 'ltr')),
@@ -51,8 +74,54 @@ export class PendingRegistrationRequestsComponent implements OnInit {
   rejectForId: number | null = null;
   rejectDialogVisible = false;
 
+  /** Approve student: class + division + guardian */
+  approveDialogVisible = false;
+  approveRow: PendingRegistrationRequest | null = null;
+  allDivisions: divisions[] = [];
+  classOptions: { classID: number; label: string }[] = [];
+  divisionsForClass: divisions[] = [];
+  guardiansList: Guardians[] = [];
+
+  approveClassId: number | null = null;
+  approveDivisionId: number | null = null;
+  guardianMode: 'existing' | 'new' = 'existing';
+  existingGuardianId: number | null = null;
+  amount = 0;
+  studentFirstName = '';
+  studentMiddleName = '';
+  studentLastName = '';
+  guardianEmail = '';
+  guardianPassword = 'Guardian';
+  guardianFullName = '';
+  guardianPhone = '';
+  guardianGender = 'Male';
+  guardianAddress = '';
+  guardianType = '';
+
   ngOnInit(): void {
     this.load();
+    this.loadLookupData();
+  }
+
+  private loadLookupData(): void {
+    this.divisionService.GetAll().subscribe({
+      next: (res) => {
+        this.allDivisions = res.result ?? [];
+        const map = new Map<number, string>();
+        for (const d of this.allDivisions) {
+          const label = [d.stageName, d.classesName].filter(Boolean).join(' · ') || `صف ${d.classID}`;
+          map.set(d.classID, label);
+        }
+        this.classOptions = [...map.entries()].map(([classID, label]) => ({ classID, label }));
+      },
+      error: () => this.toastr.warning('تعذر تحميل الصفوف والشُعب'),
+    });
+    this.guardianService.getAllGuardians().subscribe({
+      next: (res) => {
+        this.guardiansList = res.result ?? [];
+      },
+      error: () => this.toastr.warning('تعذر تحميل قائمة أولياء الأمور'),
+    });
   }
 
   load(): void {
@@ -150,17 +219,131 @@ export class PendingRegistrationRequestsComponent implements OnInit {
     return (fileName ?? '').toLowerCase().endsWith('.pdf');
   }
 
-  approve(row: PendingRegistrationRequest): void {
+  onApproveClassChange(classId: number | null): void {
+    this.approveClassId = classId;
+    this.approveDivisionId = null;
+    if (classId == null) {
+      this.divisionsForClass = [];
+      return;
+    }
+    this.divisionsForClass = this.allDivisions.filter((d) => d.classID === classId);
+    if (this.divisionsForClass.length === 1) {
+      this.approveDivisionId = this.divisionsForClass[0].divisionID;
+    }
+  }
+
+  openApproveStudent(row: PendingRegistrationRequest): void {
+    this.approveRow = row;
+    this.approveClassId = null;
+    this.approveDivisionId = null;
+    this.divisionsForClass = [];
+    this.guardianMode = 'existing';
+    this.existingGuardianId = null;
+    this.amount = 0;
+    this.guardianEmail = '';
+    this.guardianPassword = 'Guardian';
+    this.guardianFullName = '';
+    this.guardianPhone = '';
+    this.guardianGender = 'Male';
+    this.guardianAddress = '';
+    this.guardianType = '';
+    const parts = (row.fullName ?? '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 3) {
+      this.studentFirstName = parts[0];
+      this.studentMiddleName = parts.slice(1, -1).join(' ');
+      this.studentLastName = parts[parts.length - 1];
+    } else if (parts.length === 2) {
+      this.studentFirstName = parts[0];
+      this.studentMiddleName = '';
+      this.studentLastName = parts[1];
+    } else if (parts.length === 1) {
+      this.studentFirstName = parts[0];
+      this.studentMiddleName = '';
+      this.studentLastName = '';
+    } else {
+      this.studentFirstName = row.userName;
+      this.studentMiddleName = '';
+      this.studentLastName = '';
+    }
+    this.approveDialogVisible = true;
+  }
+
+  cancelApproveStudent(): void {
+    this.approveDialogVisible = false;
+    this.approveRow = null;
+  }
+
+  confirmApproveStudent(): void {
+    if (this.approveRow == null || this.busyId != null) {
+      return;
+    }
+    if (this.approveDivisionId == null || this.approveDivisionId <= 0) {
+      this.toastr.warning('اختر الصف ثم الشعبة');
+      return;
+    }
+    if (this.guardianMode === 'existing') {
+      if (this.existingGuardianId == null || this.existingGuardianId <= 0) {
+        this.toastr.warning('اختر ولي أمراً من القائمة');
+        return;
+      }
+    } else {
+      if (!this.guardianEmail?.trim() || !this.guardianFullName?.trim()) {
+        this.toastr.warning('أدخل البريد واسم ولي الأمر الجديد');
+        return;
+      }
+    }
+
+    const id = this.approveRow.id;
+    const body: ApproveRegistrationPayload = {
+      divisionID: this.approveDivisionId,
+      amount: this.amount,
+      studentFirstName: this.studentFirstName.trim() || undefined,
+      studentMiddleName: this.studentMiddleName.trim() || undefined,
+      studentLastName: this.studentLastName.trim() || undefined,
+    };
+
+    if (this.guardianMode === 'existing') {
+      body.existingGuardianId = this.existingGuardianId;
+    } else {
+      body.guardianEmail = this.guardianEmail.trim();
+      body.guardianPassword = this.guardianPassword || 'Guardian';
+      body.guardianFullName = this.guardianFullName.trim();
+      body.guardianPhone = this.guardianPhone.trim() || undefined;
+      body.guardianGender = this.guardianGender || 'Male';
+      body.guardianAddress = this.guardianAddress.trim() || undefined;
+      body.guardianType = this.guardianType.trim() || undefined;
+    }
+
+    this.busyId = id;
+    this.registration
+      .approveRequest(id, body)
+      .pipe(finalize(() => (this.busyId = null)))
+      .subscribe({
+        next: () => {
+          this.toastr.success('تمت الموافقة وتسجيل الطالب');
+          this.rows = this.rows.filter((r) => r.id !== id);
+          this.clampPage();
+          this.cancelApproveStudent();
+        },
+        error: (err) => {
+          const msg = err?.error?.message || err?.error?.error || 'فشلت الموافقة';
+          this.toastr.error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+        },
+      });
+  }
+
+  /** ولي أمر طلب التسجيل: موافقة مباشرة بدون صف وشعبة */
+  approveGuardian(row: PendingRegistrationRequest): void {
     if (this.busyId != null) {
       return;
     }
     this.busyId = row.id;
     this.registration
-      .approveRequest(row.id)
+      .approveRequest(row.id, {})
       .pipe(finalize(() => (this.busyId = null)))
       .subscribe({
         next: () => {
-          this.toastr.success('تمت الموافقة وإنشاء المستخدم');
+          this.toastr.success('تمت الموافقة وإنشاء الحساب');
           this.rows = this.rows.filter((r) => r.id !== row.id);
           this.clampPage();
         },

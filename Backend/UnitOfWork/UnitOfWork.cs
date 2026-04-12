@@ -137,7 +137,8 @@ public class UnitOfWork : IUnitOfWork
 
     public void Dispose()
     {
+        // Tenant DB is opened per UnitOfWork (often the scoped tenant context).
+        // Master DatabaseContext is scoped by DI; the host disposes it at end of request.
         _tenantContext?.Dispose();
-        _adminContext?.Dispose();
     }
 }

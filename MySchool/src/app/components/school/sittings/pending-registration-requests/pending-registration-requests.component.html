@@ -170,13 +170,23 @@
                           }
                         </td>
                         <td class="actions">
-                          <p-button
-                            label="موافقة"
-                            icon="pi pi-check"
-                            severity="success"
-                            [disabled]="busyId !== null"
-                            (onClick)="approve(row)"
-                          />
+                          @if (row.requestedRole === 'STUDENT') {
+                            <p-button
+                              label="موافقة"
+                              icon="pi pi-check"
+                              severity="success"
+                              [disabled]="busyId !== null"
+                              (onClick)="openApproveStudent(row)"
+                            />
+                          } @else {
+                            <p-button
+                              label="موافقة"
+                              icon="pi pi-check"
+                              severity="success"
+                              [disabled]="busyId !== null"
+                              (onClick)="approveGuardian(row)"
+                            />
+                          }
                           <p-button
                             label="رفض"
                             icon="pi pi-times"
@@ -209,6 +219,156 @@
     </div>
   </div>
 </div>
+
+<p-dialog
+  [(visible)]="approveDialogVisible"
+  [modal]="true"
+  [style]="{ width: 'min(100%, 40rem)' }"
+  [contentStyle]="{ padding: '0' }"
+  [draggable]="false"
+  [resizable]="false"
+  header="قبول تسجيل طالب"
+  (onHide)="cancelApproveStudent()"
+  styleClass="approve-reg-dialog"
+>
+  @if (approveRow) {
+    <div class="approve-dialog-shell" dir="rtl">
+      <div class="approve-dialog-head">
+        <p class="approve-lede">
+          ربط الطالب <strong>{{ approveRow.userName }}</strong> بالصف والشعبة وولي الأمر — كما في «إضافة طالب».
+        </p>
+        <p class="approve-hint">اختر الصف أولاً، ثم الشعبة؛ يمكنك تعديل الاسم ثم ربط ولي الأمر.</p>
+      </div>
+
+      <div class="approve-dialog-scroll">
+        <section class="approve-section">
+          <h3 class="approve-section__title">الصف والشعبة</h3>
+          <div class="approve-grid approve-grid--2">
+            <mat-form-field appearance="outline" class="approve-mat-field">
+              <mat-label>الصف</mat-label>
+              <mat-select
+                [ngModel]="approveClassId"
+                (ngModelChange)="onApproveClassChange($event)"
+                name="approveClassId"
+              >
+                <mat-option [value]="null">— اختر الصف —</mat-option>
+                @for (c of classOptions; track c.classID) {
+                  <mat-option [value]="c.classID">{{ c.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="approve-mat-field">
+              <mat-label>الشعبة</mat-label>
+              <mat-select
+                [(ngModel)]="approveDivisionId"
+                name="approveDivisionId"
+                [disabled]="!approveClassId"
+              >
+                <mat-option [value]="null">— اختر الشعبة —</mat-option>
+                @for (d of divisionsForClass; track d.divisionID) {
+                  <mat-option [value]="d.divisionID">{{ d.divisionName }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </section>
+
+        <mat-divider class="approve-divider" />
+
+        <section class="approve-section">
+          <h3 class="approve-section__title">بيانات الطالب</h3>
+          <div class="approve-grid approve-grid--3">
+            <mat-form-field appearance="outline" class="approve-mat-field">
+              <mat-label>الاسم الأول</mat-label>
+              <input matInput [(ngModel)]="studentFirstName" name="sf" autocomplete="off" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="approve-mat-field">
+              <mat-label>الاسم الأوسط</mat-label>
+              <input matInput [(ngModel)]="studentMiddleName" name="sm" autocomplete="off" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="approve-mat-field">
+              <mat-label>الاسم الأخير</mat-label>
+              <input matInput [(ngModel)]="studentLastName" name="sl" autocomplete="off" />
+            </mat-form-field>
+          </div>
+        </section>
+
+        <mat-divider class="approve-divider" />
+
+        <section class="approve-section">
+          <h3 class="approve-section__title">ولي الأمر</h3>
+          <mat-form-field appearance="outline" class="approve-mat-field approve-mat-field--full">
+            <mat-label>طريقة الربط</mat-label>
+            <mat-select [(ngModel)]="guardianMode" name="guardianMode" panelClass="approve-select-panel">
+              <mat-option value="existing">اختيار ولي أمر مسجّل مسبقاً</mat-option>
+              <mat-option value="new">إنشاء حساب ولي أمر جديد</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          @if (guardianMode === 'existing') {
+            <p class="approve-mini-hint">يُستخدم حساب ولي الأمر الحالي دون إنشاء مستخدم جديد.</p>
+            <mat-form-field appearance="outline" class="approve-mat-field approve-mat-field--full">
+              <mat-label>اختر ولي الأمر</mat-label>
+              <mat-select [(ngModel)]="existingGuardianId" name="egid">
+                <mat-option [value]="null">— اختر من القائمة —</mat-option>
+                @for (g of guardiansList; track g.guardianID) {
+                  <mat-option [value]="g.guardianID">{{ g.fullName }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          } @else {
+            <p class="approve-mini-hint">سيتم إنشاء مستخدم ولي أمر جديد وربطه بالطالب والحساب المالي.</p>
+            <div class="approve-grid approve-grid--2">
+              <mat-form-field appearance="outline" class="approve-mat-field">
+                <mat-label>البريد الإلكتروني</mat-label>
+                <input matInput type="email" [(ngModel)]="guardianEmail" name="gem" autocomplete="off" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="approve-mat-field">
+                <mat-label>كلمة المرور</mat-label>
+                <input matInput type="password" [(ngModel)]="guardianPassword" name="gpw" autocomplete="new-password" />
+              </mat-form-field>
+            </div>
+            <mat-form-field appearance="outline" class="approve-mat-field approve-mat-field--full">
+              <mat-label>الاسم الكامل</mat-label>
+              <input matInput [(ngModel)]="guardianFullName" name="gfn" autocomplete="off" />
+            </mat-form-field>
+            <div class="approve-grid approve-grid--2">
+              <mat-form-field appearance="outline" class="approve-mat-field">
+                <mat-label>الهاتف</mat-label>
+                <input matInput [(ngModel)]="guardianPhone" name="gph" autocomplete="off" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="approve-mat-field">
+                <mat-label>الجنس</mat-label>
+                <mat-select [(ngModel)]="guardianGender" name="gg">
+                  <mat-option value="Male">ذكر</mat-option>
+                  <mat-option value="Female">أنثى</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          }
+        </section>
+
+        <mat-divider class="approve-divider" />
+
+        <section class="approve-section approve-section--last">
+          <h3 class="approve-section__title">الرسوم / الحساب</h3>
+          <mat-form-field appearance="outline" class="approve-mat-field approve-mat-field--full">
+            <mat-label>المبلغ (ربط الطالب بحساب ولي الأمر)</mat-label>
+            <input matInput type="number" [(ngModel)]="amount" name="amt" min="0" step="0.01" />
+            <mat-hint align="end">يمكن تركها 0 إن لم يكن هناك مبلغ مطلوب الآن</mat-hint>
+          </mat-form-field>
+        </section>
+      </div>
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <div class="approve-dialog-footer">
+      <p-button label="إلغاء" [outlined]="true" severity="secondary" (onClick)="cancelApproveStudent()" />
+      <p-button label="تأكيد القبول" icon="pi pi-check" severity="success" (onClick)="confirmApproveStudent()" />
+    </div>
+  </ng-template>
+</p-dialog>
 
 <p-dialog
   [(visible)]="rejectDialogVisible"
