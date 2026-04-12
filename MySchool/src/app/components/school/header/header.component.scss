@@ -48,6 +48,32 @@
 .dropdown-item{
   cursor: pointer;
 }
+
+.notification-bell-link {
+  position: relative;
+}
+
+.notification-unread-badge {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  min-width: 1.125rem;
+  min-height: 1.125rem;
+  padding: 0 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.125rem;
+  text-align: center;
+  color: #fff;
+  background: #2563eb;
+  border-radius: 999px;
+  box-sizing: border-box;
+}
+
+.header-outer[dir='rtl'] .notification-unread-badge {
+  right: auto;
+  left: 10px;
+}
 .user-menu-Ar {
   margin: 0;
   position: absolute;

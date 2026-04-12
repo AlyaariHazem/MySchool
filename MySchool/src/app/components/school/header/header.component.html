@@ -52,10 +52,14 @@
         </ul>
         <ul class="nav float-left user-menu" [ngClass]="{'user-menu-Ar': dir === 'rtl','user-menu-En': dir === 'ltr'}">
             <li class="nav-item dropdown d-none d-sm-block">
-                <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown"
-                    [class.hasnotifications]="unreadCount > 0"
+                <a href="#" class="dropdown-toggle nav-link notification-bell-link" data-toggle="dropdown"
                     (click)="onNotificationsBellClick()">
                     <img src="assets/img/sidebar/icon-22.png" alt="">
+                    @if (unreadCount > 0) {
+                        <span class="notification-unread-badge" [attr.aria-label]="unreadCount">
+                            {{ unreadCount > 99 ? '99+' : unreadCount }}
+                        </span>
+                    }
                 </a>
                 <div class="dropdown-menu notifications">
                     <div class="topnav-dropdown-header">
