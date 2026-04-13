@@ -63,9 +63,16 @@
             <div class="form-control">
               <p-card class="responsive-card student-card">
                 <ng-template pTemplate="header">
-                  <div class="card-header-wrapper">
+                  <div
+                    class="card-header-wrapper student-edit-hit"
+                    (click)="EditStudentDialog(student)"
+                    (keydown.enter)="EditStudentDialog(student)"
+                    (keydown.space)="$event.preventDefault(); EditStudentDialog(student)"
+                    [attr.tabindex]="isBusy ? -1 : 0"
+                    role="button"
+                    [attr.aria-label]="'تعديل الطالب'">
                     <img 
-                      alt="Student" 
+                      alt=""
                       class="student-image" 
                       [src]="student.photoUrl || './../../../../../assets/img/user.jpg'" 
                       (error)="handleImageError($event)" />
@@ -77,7 +84,14 @@
                 </ng-template>
                 
                 <div class="card-content">
-                  <div class="student-name">
+                  <div
+                    class="student-name student-edit-hit"
+                    (click)="EditStudentDialog(student)"
+                    [attr.tabindex]="isBusy ? -1 : 0"
+                    (keydown.enter)="EditStudentDialog(student)"
+                    (keydown.space)="$event.preventDefault(); EditStudentDialog(student)"
+                    role="button"
+                    [attr.aria-label]="'تعديل الطالب'">
                     <i class="bi bi-person-fill name-icon"></i>
                     <span class="name-text">
                       {{student.fullName.firstName +" "+ student.fullName.middleName+" "+ student.fullName.lastName}}
@@ -193,6 +207,7 @@
             [showGlobalFilter]="false"
             [trackByField]="'studentID'"
             (pageChange)="handlePageChange($event)"
+            (rowClick)="EditStudentDialog($event)"
             (rowEdit)="EditStudentDialog($event)"
             (rowDelete)="deleteStudent($event)"
             (filterChange)="onFilterChange($event)">

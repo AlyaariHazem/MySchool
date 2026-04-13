@@ -515,6 +515,15 @@ li:hover {
   background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
 }
 
+.student-edit-hit {
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #2fdf84;
+    outline-offset: 2px;
+  }
+}
+
 .student-image {
   width: 100px;
   height: 100px;
@@ -522,6 +531,11 @@ li:hover {
   object-fit: cover;
   border: 4px solid white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+.card-header-wrapper.student-edit-hit:hover .student-image {
+  box-shadow: 0 4px 16px rgba(47, 223, 132, 0.45);
 }
 
 .student-id-badge {
@@ -559,6 +573,10 @@ li:hover {
   gap: 0.5rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid #f0f0f0;
+
+  &.student-edit-hit:hover .name-text {
+    color: #2fdf84;
+  }
   
   .name-icon {
     color: #2fdf84;
