@@ -14,9 +14,8 @@
 
       <ul class="sidebar-ul">
 
-        <li>{{ 'sidebar.menu' | translate }}</li>
-
-        <li class="active">
+        <li class="sidebar-sticky-top active">
+          <div class="sidebar-menu-label">{{ 'sidebar.menu' | translate }}</div>
           <a [routerLink]="homePath()" (click)="cancel()">
             <img src="assets/img/sidebar/icon-1.png" alt="icon">
             <span>{{ isTeacher ? ('sidebar.teacherHome' | translate) : ('sidebar.home' | translate) }}</span>

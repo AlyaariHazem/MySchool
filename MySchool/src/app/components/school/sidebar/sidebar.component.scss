@@ -3,10 +3,65 @@
   display: block;
 }
 
+/*
+ * Layout: header in document flow + flex child list scrolls — avoids fixed header
+ * stacking over the menu (which clipped Home / sticky row). Global CSS used
+ * position:fixed + margin-top hacks; we override with !important (sideBar.css loads after).
+ */
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.sidebar-menu ul{
+  padding: 0 10px 10px 10px!important;
+}
+.sidebar .header-left,
+.sidebarEn .header-left {
+  position: relative !important;
+  float: none !important;
+  flex-shrink: 0;
+  width: 100% !important;
+  z-index: auto;
+}
+
 .sidebar-ul {
   direction: rtl;
-  overflow-y: scroll;
-  max-height: 100vh;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  margin-top: 0 !important;
+  max-height: none !important;
+  top: 0 !important;
+  box-sizing: border-box;
+  padding-bottom: 12px;
+}
+
+/* Keep menu title (القائمة) + Home pinned while the rest scrolls */
+.sidebar-ul > li.sidebar-sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #fff;
+}
+
+.sidebar-menu-label {
+  color: #000;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 40px;
+  min-height: 40px;
+  padding: 0 20px;
+  text-transform: uppercase;
 }
 
 .sidebar-ul ul {
@@ -113,7 +168,7 @@
 }
 
 /* RESPONSIVE BREAKPOINTS */
-@media only screen and (width<991.98px ) {
+@media only screen and (width<991.98px) {
   .sidebar.active {
     top: 0;
     height: 100%;
@@ -139,8 +194,5 @@
 @media only screen and (min-width: 991.98px) {
   .cancel {
     visibility: hidden;
-  }
-  .sidebar .header-left {
-    position: fixed !important;
   }
 }
