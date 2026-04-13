@@ -96,11 +96,22 @@ namespace Backend.Repository
 
         public async Task<List<StageDTO>> GetAll()
         {
+            // Same enrollment rule as StudentRepository.GetAllStudentsAsync: current division/class must belong to active year.
+            // Do not use StudentClassFees for counts — stale fee rows (e.g. old student id 6) can inflate totals.
+            var studentCountByClassId = await context.Students
+                .AsNoTracking()
+                .Where(s => s.Division != null &&
+                            s.Division.Class != null &&
+                            ((s.Division.Class.Year != null && s.Division.Class.Year.Active == true) ||
+                             (s.Division.Class.Stage != null && s.Division.Class.Stage.Year != null &&
+                              s.Division.Class.Stage.Year.Active == true)))
+                .GroupBy(s => s.Division!.ClassID)
+                .Select(g => new { ClassID = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.ClassID, x => x.Count);
+
             var stages = await context.Stages
                 .Include(stage => stage.Year)
                 .Include(stage => stage.Classes)
-                    .ThenInclude(cls => cls.FeeClasses)
-                        .ThenInclude(fc => fc.StudentClassFees)
                 .Where(stage => stage.Year != null && stage.Year.Active == true)
                 .ToListAsync();
 
@@ -114,18 +125,9 @@ namespace Backend.Repository
                 {
                     ClassID = cls.ClassID,
                     ClassName = cls.ClassName,
-                    StudentCount = cls.FeeClasses
-                        .SelectMany(fc => fc.StudentClassFees)
-                        .Select(fee => fee.StudentID)
-                        .Distinct()
-                        .Count()
+                    StudentCount = studentCountByClassId.GetValueOrDefault(cls.ClassID, 0)
                 }).ToList(),
-                StudentCount = stage.Classes
-                    .SelectMany(cls => cls.FeeClasses)
-                    .SelectMany(fc => fc.StudentClassFees)
-                    .Select(fee => fee.StudentID)
-                    .Distinct()
-                    .Count()
+                StudentCount = stage.Classes.Sum(cls => studentCountByClassId.GetValueOrDefault(cls.ClassID, 0))
             }).ToList();
 
             return stageDTOs;
