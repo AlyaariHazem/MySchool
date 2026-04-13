@@ -1,11 +1,28 @@
-import { Component, ViewChild, ViewContainerRef, Type, ElementRef, OnInit, inject, AfterViewInit } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import {
+  Component,
+  ViewChild,
+  ViewContainerRef,
+  Type,
+  ElementRef,
+  OnInit,
+  inject,
+  AfterViewInit,
+  OnDestroy,
+  HostListener,
+  ChangeDetectorRef,
+} from '@angular/core';
+import { FormBuilder } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { Editor } from 'primeng/editor';
 import Quill from 'quill';
 
 import { StudentMonthResultComponent } from '../../report/student-month-result/student-month-result.component';
 import { AccountReportComponent } from '../../report/account-report/account-report.component';
-import { ReportTemplateService, ReportTemplateGetDTO } from '../../core/services/report-template.service';
+import {
+  ReportTemplateService,
+  ReportTemplateGetDTO,
+  ReportTemplatePlaceholderDto,
+} from '../../core/services/report-template.service';
 
 interface ReportOption { 
   label: string; 
@@ -18,7 +35,7 @@ interface ReportOption {
   templateUrl: './allotment.component.html',
   styleUrls: ['./allotment.component.scss']
 })
-export class AllotmentComponent implements OnInit, AfterViewInit {
+export class AllotmentComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /* dynamic outlet */
   @ViewChild('reportContainer', { read: ViewContainerRef, static: true })
@@ -28,15 +45,27 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
   @ViewChild('editorPreview', { static: false })
   editorPreview!: ElementRef<HTMLDivElement>;
 
-  /* Quill editor instance */
-  private quillInstance: Quill | null = null;
-  
-  /* Editor reference */
-  @ViewChild('editor') editor: any;
+  /** PrimeNG `p-editor` — use `getQuill()` / DOM for persisted HTML, not form controls alone. */
+  @ViewChild('editor') editorCmp!: Editor;
 
-  /* rich‑text form */
-  formGroup = new FormGroup({ text: new FormControl('') });
-  currentReportHtml!: string; // declare the property
+  private readonly fb = inject(FormBuilder);
+
+  /**
+   * `text` (and optional `title`) exist only to keep `p-editor` wired to Angular forms.
+   * They are NOT the source of truth for persisted HTML because PrimeNG/Quill may normalize
+   * values through `getSemanticHTML()` — keep the `getSemanticHTML` patch for internal CVA sync,
+   * but never use `formGroup.controls.text.value` as what you save.
+   */
+  formGroup = this.fb.group({
+    title: [''],
+    text: [''],
+  });
+
+  /** Last reliable snapshot of `quill.root.innerHTML` (editor DOM), updated on change / insert. */
+  currentReportHtml = '';
+
+  /** Cached Quill instance from `onInit` (same as `editorCmp.getQuill()` once ready). */
+  private quillInstance: Quill | null = null;
 
   /* dropdown */
   selectedReportOption: ReportOption | null = null;
@@ -51,11 +80,39 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
   // Services
   private reportTemplateService = inject(ReportTemplateService);
   private toastr = inject(ToastrService);
+  private cdr = inject(ChangeDetectorRef);
 
   // Template state
   currentTemplateId?: number;
   isLoading = false;
   isSaving = false;
+
+  /** Merge fields for # autocomplete (from API, scoped by report template code). */
+  placeholderColumns: ReportTemplatePlaceholderDto[] = [];
+  filteredPlaceholderColumns: ReportTemplatePlaceholderDto[] = [];
+  mentionOpen = false;
+  mentionStartIndex = 0;
+  mentionTop = 0;
+  mentionLeft = 0;
+  mentionHighlightIndex = 0;
+  private lastMentionFilter = '';
+  private suppressMentionSync = false;
+  private quillScrollEl: HTMLElement | null = null;
+  private boundOnQuillScroll = () => this.positionMentionDropdown();
+
+  private readonly onQuillTextChangeForMention = (_d: unknown, _o: unknown, source: string) => {
+    if (source !== 'user' || this.suppressMentionSync) {
+      return;
+    }
+    this.syncMentionFromEditor();
+  };
+
+  private readonly onQuillSelectionChangeForMention = () => {
+    if (this.suppressMentionSync) {
+      return;
+    }
+    this.syncMentionFromEditor();
+  };
 
   ngOnInit(): void {
     // Set initial selected option
@@ -68,28 +125,272 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
     // Quill instance will be set via onEditorInit
   }
 
+  ngOnDestroy(): void {
+    if (this.quillInstance) {
+      this.quillInstance.off('text-change', this.onQuillTextChangeForMention);
+      this.quillInstance.off('selection-change', this.onQuillSelectionChangeForMention);
+    }
+    if (this.quillScrollEl) {
+      this.quillScrollEl.removeEventListener('scroll', this.boundOnQuillScroll);
+      this.quillScrollEl = null;
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if (!this.mentionOpen || !this.filteredPlaceholderColumns.length) {
+      return;
+    }
+    const t = event.target as Node | null;
+    if (t && !this.editorPreview?.nativeElement.contains(t)) {
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeMention();
+      return;
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.mentionHighlightIndex = Math.min(
+        this.mentionHighlightIndex + 1,
+        this.filteredPlaceholderColumns.length - 1
+      );
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.mentionHighlightIndex = Math.max(this.mentionHighlightIndex - 1, 0);
+      return;
+    }
+    if (event.key === 'Enter' || event.key === 'Tab') {
+      event.preventDefault();
+      const pick = this.filteredPlaceholderColumns[this.mentionHighlightIndex];
+      if (pick) {
+        this.selectPlaceholder(pick);
+      }
+    }
+  }
+
+  /**
+   * PrimeNG Editor (Quill 2) uses `getSemanticHTML()` for ngModel updates — that API strips
+   * inline `style`, collapses structure, and drops lines like the centered title. Preserve
+   * the real DOM string for this template editor.
+   */
+  private patchQuillPreserveTemplateHtml(quill: Quill): void {
+    const q = quill as Quill & { getSemanticHTML?: () => string };
+    q.getSemanticHTML = () => q.root.innerHTML;
+  }
+
+  /**
+   * Visual / persisted HTML as rendered inside `.ql-editor`.
+   * Read from the DOM — not from `formControl.value` — because Quill semantic HTML can strip
+   * inline styles and simplify structure.
+   *
+   * Trade-off: DOM HTML preserves formatting; Delta / semantic HTML is structurally cleaner for round-trips.
+   */
+  private getEditorDomHtml(): string {
+    const quill = (this.editorCmp?.getQuill() ?? this.quillInstance) as Quill | null | undefined;
+    if (!quill?.root) {
+      return '';
+    }
+    return quill.root.innerHTML ?? '';
+  }
+
+  private isEditorDomEmpty(html: string | null | undefined): boolean {
+    if (!html) {
+      return true;
+    }
+
+    const normalized = html
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\u00A0/g, ' ')
+      .trim();
+
+    if (!normalized) {
+      return true;
+    }
+
+    const emptyPatterns = new Set([
+      '<p><br></p>',
+      '<div><br></div>',
+      '<p></p>',
+      '<div></div>',
+    ]);
+
+    if (emptyPatterns.has(normalized)) {
+      return true;
+    }
+
+    const textOnly = normalized
+      .replace(/<br\s*\/?>/gi, '')
+      .replace(/<\/p>|<\/div>/gi, '')
+      .replace(/<p>|<div>/gi, '')
+      .replace(/<[^>]*>/g, '')
+      .trim();
+
+    return textOnly.length === 0;
+  }
+
   /**
    * Handle editor initialization - get Quill instance
    */
   onEditorInit(event: any): void {
-    // Get Quill instance from the editor
     if (event && event.editor) {
-      this.quillInstance = event.editor;
+      const editor = (this.editorCmp?.getQuill() ?? event.editor) as Quill;
+      this.quillInstance = editor;
+      this.patchQuillPreserveTemplateHtml(editor);
       this.setupQuillPasteHandler();
-      
+      this.setupPlaceholderMention();
+
       // Configure Quill to preserve spaces
       this.configureQuillForSpaces();
-      
-      // If we have pending HTML to load, load it now
-      // Check if form control is empty or only has whitespace
-      const currentValue = this.formGroup.get('text')?.value || '';
-      if (this.currentReportHtml && (!currentValue.trim() || currentValue !== this.currentReportHtml)) {
-        // Small delay to ensure editor is fully initialized
-        setTimeout(() => {
-          this.setEditorContent(this.currentReportHtml);
-        }, 150);
+
+      // PrimeNG already ran setContents(clipboard.convert(...)) which stripped CSS — re-apply full HTML
+      if (this.currentReportHtml?.trim()) {
+        setTimeout(() => this.setEditorContent(this.currentReportHtml), 0);
       }
     }
+  }
+
+  /**
+   * Load merge-field names for the selected report template (shown after typing #).
+   */
+  private loadPlaceholders(code: string): void {
+    if (!code) {
+      this.placeholderColumns = [];
+      return;
+    }
+    this.reportTemplateService.getTemplatePlaceholders(code).subscribe({
+      next: (rows) => {
+        this.placeholderColumns = rows.filter((r) => r.name?.trim());
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  /**
+   * #… mention: detect unfinished #field, show dropdown, insert #Name# on pick.
+   */
+  private setupPlaceholderMention(): void {
+    if (!this.quillInstance) {
+      return;
+    }
+
+    const ql = this.quillInstance as Quill & { __mentionBound?: boolean };
+    if (ql.__mentionBound) {
+      return;
+    }
+    ql.__mentionBound = true;
+
+    const container = ql.root.closest('.ql-container') as HTMLElement | null;
+    if (container && container !== this.quillScrollEl) {
+      if (this.quillScrollEl) {
+        this.quillScrollEl.removeEventListener('scroll', this.boundOnQuillScroll);
+      }
+      this.quillScrollEl = container;
+      this.quillScrollEl.addEventListener('scroll', this.boundOnQuillScroll, { passive: true });
+    }
+
+    ql.on('text-change', this.onQuillTextChangeForMention);
+    ql.on('selection-change', this.onQuillSelectionChangeForMention);
+  }
+
+  private syncMentionFromEditor(): void {
+    if (!this.quillInstance || this.suppressMentionSync) {
+      return;
+    }
+    const sel = this.quillInstance.getSelection();
+    if (!sel) {
+      this.closeMention();
+      return;
+    }
+    const cursor = sel.index;
+    const text = this.quillInstance.getText(0, cursor);
+    const lastHash = text.lastIndexOf('#');
+    if (lastHash === -1) {
+      this.closeMention();
+      return;
+    }
+    const afterHash = text.slice(lastHash + 1);
+    if (afterHash.includes('#')) {
+      this.closeMention();
+      return;
+    }
+    if (!/^[\w]*$/.test(afterHash)) {
+      this.closeMention();
+      return;
+    }
+
+    const filterLower = afterHash.toLowerCase();
+    const filtered = this.placeholderColumns.filter((p) =>
+      p.name.toLowerCase().includes(filterLower)
+    );
+    if (!filtered.length) {
+      this.closeMention();
+      return;
+    }
+
+    if (afterHash !== this.lastMentionFilter) {
+      this.mentionHighlightIndex = 0;
+      this.lastMentionFilter = afterHash;
+    }
+
+    this.mentionOpen = true;
+    this.mentionStartIndex = lastHash;
+    this.filteredPlaceholderColumns = filtered;
+    this.positionMentionDropdown();
+    this.cdr.markForCheck();
+  }
+
+  private positionMentionDropdown(): void {
+    if (!this.quillInstance || !this.editorPreview) {
+      return;
+    }
+    try {
+      const bounds = this.quillInstance.getBounds(this.mentionStartIndex);
+      if (!bounds) {
+        return;
+      }
+      const editor = this.quillInstance.root;
+      const editorRect = editor.getBoundingClientRect();
+      const preview = this.editorPreview.nativeElement;
+      const previewRect = preview.getBoundingClientRect();
+      this.mentionTop = editorRect.top - previewRect.top + bounds.top + bounds.height + preview.scrollTop;
+      this.mentionLeft = editorRect.left - previewRect.left + bounds.left + preview.scrollLeft;
+    } catch {
+      this.mentionTop = 0;
+      this.mentionLeft = 0;
+    }
+  }
+
+  closeMention(): void {
+    this.mentionOpen = false;
+    this.filteredPlaceholderColumns = [];
+    this.lastMentionFilter = '';
+    this.cdr.markForCheck();
+  }
+
+  selectPlaceholder(item: ReportTemplatePlaceholderDto): void {
+    if (!this.quillInstance || !item.name) {
+      this.closeMention();
+      return;
+    }
+    const sel = this.quillInstance.getSelection(true);
+    const end = sel ? sel.index : this.mentionStartIndex;
+    const len = Math.max(0, end - this.mentionStartIndex);
+    const token = `#${item.name}#`;
+
+    this.suppressMentionSync = true;
+    this.quillInstance.deleteText(this.mentionStartIndex, len, 'user');
+    this.quillInstance.insertText(this.mentionStartIndex, token, 'user');
+    this.quillInstance.setSelection(this.mentionStartIndex + token.length, 0, 'user');
+    this.suppressMentionSync = false;
+
+    this.currentReportHtml = this.getEditorDomHtml();
+    this.formGroup.patchValue({ text: this.currentReportHtml }, { emitEvent: false });
+
+    this.closeMention();
   }
 
   /**
@@ -115,6 +416,22 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
     } catch (e) {
       console.warn('Error configuring Quill:', e);
     }
+  }
+
+  /**
+   * Quill's clipboard converts HTML → Delta and drops most inline CSS (font-size, color, text-align on divs, etc.).
+   * When the template relies on inline styles or flexbox, set .ql-editor.innerHTML directly (same as flex path).
+   */
+  private htmlRequiresRawQuillRoot(html: string): boolean {
+    if (!html) {
+      return false;
+    }
+    const lower = html.toLowerCase();
+    if (lower.includes('display:flex') || lower.includes('display: flex')) {
+      return true;
+    }
+    // Any inline style= is stripped or flattened by dangerouslyPasteHTML — keep raw HTML
+    return /\sstyle\s*=/.test(html);
   }
 
   /**
@@ -144,10 +461,9 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
         }
         
         if (html) {
-          // Check if HTML contains flexbox (display:flex)
-          const hasFlexbox = html.includes('display:flex') || html.includes('display: flex');
-          
-          if (hasFlexbox) {
+          const useRawHtml = this.htmlRequiresRawQuillRoot(html);
+
+          if (useRawHtml) {
             // For flexbox HTML, insert directly to preserve structure
             // Get current selection
             const selection = this.quillInstance!.getSelection(true);
@@ -171,10 +487,9 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
             // Set HTML directly to preserve flexbox
             root.innerHTML = newHtml;
             this.quillInstance!.update('user');
-            
-            // Update form control
-            this.formGroup.get('text')?.setValue(newHtml, { emitEvent: false });
+
             this.currentReportHtml = newHtml;
+            this.formGroup.patchValue({ text: this.currentReportHtml }, { emitEvent: false });
           } else {
             // For regular HTML, use Quill's native paste method
             const selection = this.quillInstance!.getSelection(true);
@@ -192,9 +507,8 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
             // Get the updated HTML after Quill processes it
             const updatedHtml = root.innerHTML;
             
-            // Update form control
-            this.formGroup.get('text')?.setValue(updatedHtml, { emitEvent: false });
             this.currentReportHtml = updatedHtml;
+            this.formGroup.patchValue({ text: this.currentReportHtml }, { emitEvent: false });
             
             // Set cursor position after pasted content
             setTimeout(() => {
@@ -221,95 +535,43 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * Set editor content with HTML using Quill's native method
-   * This method preserves spaces and flexbox layouts correctly
+   * Load/replace template HTML. `patchValue` keeps the form bound to `p-editor` only — do not treat
+   * `formControl.value` as the persisted/visual source afterward.
    */
-  private setEditorContent(htmlContent: string): void {
-    if (!this.quillInstance || !htmlContent) return;
+  private setEditorContent(html: string): void {
+    this.currentReportHtml = html ?? '';
+
+    this.formGroup.patchValue({ text: this.currentReportHtml }, { emitEvent: false });
+
+    const quill = (this.editorCmp?.getQuill() ?? this.quillInstance) as Quill | null | undefined;
+    if (!quill) {
+      return;
+    }
+
+    if (!this.currentReportHtml.trim()) {
+      try {
+        const Delta = (Quill as any).import('delta');
+        quill.setContents(new Delta(), 'silent');
+      } catch (e) {
+        console.warn('Error clearing editor:', e);
+      }
+      return;
+    }
 
     try {
-      // Clear editor first - use empty Delta to ensure clean state
-      const Delta = (Quill as any).import('delta');
-      this.quillInstance.setContents(new Delta(), 'silent');
-      
-      // Ensure editor is ready
-      this.quillInstance.update('silent');
-      
-      // For HTML with flexbox (display:flex), we need to preserve it directly
-      // Quill doesn't support flexbox natively, so we'll set it directly
-      const hasFlexbox = htmlContent.includes('display:flex') || htmlContent.includes('display: flex');
-      
-      if (hasFlexbox) {
-        // Set HTML directly to preserve flexbox structure
-        // Then update Quill's state
-        this.quillInstance.root.innerHTML = htmlContent;
-        this.quillInstance.update('user');
-        
-        // Update form control and current HTML
-        this.formGroup.get('text')?.setValue(htmlContent, { emitEvent: false });
-        this.currentReportHtml = htmlContent;
-        
-        // Force a refresh
-        setTimeout(() => {
-          this.quillInstance!.update();
-        }, 50);
-      } else {
-        // For regular HTML, use Quill's native method
-        this.quillInstance.clipboard.dangerouslyPasteHTML(0, htmlContent);
-        this.quillInstance.update('user');
-        
-        // Get the final HTML after Quill processes it
-        setTimeout(() => {
-          try {
-            const finalHtml = this.quillInstance!.root.innerHTML;
-            if (finalHtml) {
-              this.formGroup.get('text')?.setValue(finalHtml, { emitEvent: false });
-              this.currentReportHtml = finalHtml;
-            }
-            this.quillInstance!.update();
-          } catch (e) {
-            console.warn('Error getting final HTML:', e);
-          }
-        }, 150);
+      if (quill.root.innerHTML !== this.currentReportHtml) {
+        quill.root.innerHTML = this.currentReportHtml;
+        quill.update('silent');
       }
-      
     } catch (e) {
       console.warn('Error setting editor content:', e);
-      // Fallback to form control
-      this.formGroup.get('text')?.setValue(htmlContent);
     }
   }
 
 
-  /**
-   * Handle editor text change to preserve HTML content
-   * This ensures spaces are preserved when the user types
-   * Use debouncing to avoid interfering with normal operations (delete, undo, etc.)
-   */
-  private textChangeTimeout: any = null;
-  
-  onEditorTextChange(event: any): void {
-    // Clear any pending updates
-    if (this.textChangeTimeout) {
-      clearTimeout(this.textChangeTimeout);
-    }
-    
-    // Debounce the update to avoid interfering with delete, undo, and normal typing
-    // IMPORTANT: Only update currentReportHtml, NOT the form control during typing
-    // Updating form control causes cursor to jump to beginning
-    this.textChangeTimeout = setTimeout(() => {
-      if (this.quillInstance) {
-        const html = this.quillInstance.root.innerHTML;
-        if (html) {
-          // Only update currentReportHtml - this is what we use for saving
-          // DO NOT update form control here - it causes cursor to jump
-          this.currentReportHtml = html;
-        }
-      } else if (event && event.htmlValue) {
-        // Fallback if Quill instance not available
-        this.currentReportHtml = event.htmlValue;
-      }
-    }, 500); // 500ms debounce - enough time for undo/redo operations to complete
+  /** Sync snapshot from editor DOM only — never use `event.htmlValue` as the source of truth. */
+  onEditorTextChange(_event: unknown): void {
+    this.currentReportHtml = this.getEditorDomHtml();
   }
 
   /**
@@ -320,6 +582,7 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
 
     this.isLoading = true;
     this.selectedReportCode = code;
+    this.loadPlaceholders(code);
 
     // Get schoolId from localStorage if available
     const schoolIdStr = localStorage.getItem('schoolId');
@@ -341,16 +604,15 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
           this.setEditorContent(htmlContent);
           this.isLoading = false;
         } else {
-          // Set via form control and wait for editor to initialize
-          this.formGroup.get('text')?.setValue(htmlContent);
-          // Editor will load content when it initializes (see onEditorInit)
+          this.formGroup.patchValue({ text: htmlContent }, { emitEvent: false });
           this.isLoading = false;
         }
       },
       error: (error) => {
         console.error('Error loading template:', error);
         // If template doesn't exist, start with empty editor
-        this.formGroup.patchValue({ text: '' });
+        this.formGroup.patchValue({ title: '', text: '' });
+        this.currentReportHtml = '';
         this.currentTemplateId = undefined;
         this.isLoading = false;
         
@@ -378,18 +640,14 @@ export class AllotmentComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // Get HTML content from Quill editor if available, otherwise from form control
-    let templateHtml = '';
-    if (this.quillInstance) {
-      // Get HTML directly from Quill's root element to preserve table structure
-      const root = this.quillInstance.root;
-      templateHtml = root.innerHTML || this.formGroup.get('text')?.value || '';
-    } else {
-      templateHtml = this.formGroup.get('text')?.value || '';
+    let templateHtml = this.getEditorDomHtml();
+
+    if (this.isEditorDomEmpty(templateHtml) && !this.isEditorDomEmpty(this.currentReportHtml)) {
+      templateHtml = this.currentReportHtml;
     }
-    
-    if (!templateHtml.trim()) {
-      this.toastr.warning('Template content cannot be empty.', 'Empty template');
+
+    if (this.isEditorDomEmpty(templateHtml)) {
+      this.toastr.warning('محتوى التقرير فارغ.', 'تنبيه');
       return;
     }
 

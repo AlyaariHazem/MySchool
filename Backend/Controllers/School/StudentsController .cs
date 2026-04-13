@@ -380,7 +380,8 @@ namespace Backend.Controllers
             }
         }
 
-        [Authorize(Roles = "ADMIN,MANAGER")]
+        /// <summary>Load student + guardian payload for edit forms, registration print, etc.</summary>
+        [Authorize(Roles = "ADMIN,MANAGER,TEACHER")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentDataAsRequest(int id)
         {

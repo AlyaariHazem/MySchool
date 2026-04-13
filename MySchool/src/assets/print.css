@@ -1,4 +1,3 @@
-
 @media print {
   /* Dialogs (e.g. new-student) use transform: scale on .mdc-dialog__surface — Chrome often prints a blank
      page unless transforms are cleared for print. */
@@ -10,8 +9,8 @@
   body.cdk-global-scrollblock {
     overflow: visible !important;
   }
-  /* Avoid breaking tables/images inside the report; scoped overrides below */
-  * {
+  /* لا تُطبَّع على #report ولا على إستمارة الحوار — وإلا تُلغى عروض القالب/المحرر (تنسيق بالعرض) */
+  body *:not(#report):not(#report *):not(#student-registration-form):not(#student-registration-form *) {
     width: auto !important;
   }
   body * {
@@ -55,6 +54,7 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+  /* اتجاه الطباعة بالعرض لاستمارة التسجيل: يُحقَن من التطبيق عبر @page الافتراضي (غير المسمى) */
   /* إستمارة التسجيل (new-student dialog) — fixed to viewport avoids clipped composited layers under dialog transform */
   #student-registration-form {
     display: block !important;

@@ -70,6 +70,7 @@ import { CountDirective } from '../../directives/count.directive';
 import { GradesMangeComponent } from './grades-mange/grades-mange-mange.component';
 import { GradesMonthComponent } from './grades-mange/grades-month/grades-month.component';
 import { StudentMonthResultComponent } from './report/student-month-result/student-month-result.component';
+import { RegistrationReportComponent } from './report/registration-report/registration-report.component';
 import { ReportComponent } from './report/report.component';
 import { CustomDatePipe } from '../../Pipes/customDate.pipe';
 import { InputTextModule } from 'primeng/inputtext';
@@ -105,6 +106,7 @@ const components = [
   SidebarComponent,
   TeachersComponent,
   StudentMonthResultComponent,
+  RegistrationReportComponent,
   NavigateComponent,
   StudyYearComponent,
   StagesGradesComponent,

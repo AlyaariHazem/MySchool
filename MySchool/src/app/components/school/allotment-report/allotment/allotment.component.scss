@@ -13,6 +13,9 @@
 
 }
 .container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background-color: white;
   border: 1px solid #b7b6b6;
   border-radius: 6px;
@@ -21,6 +24,9 @@
   font-family: Arial, sans-serif; /* Change font */
   font-size: 16px; /* Adjust font size */
   line-height: 1.5; /* Better spacing */
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
 }
 .save {
   margin-bottom: 3rem;
@@ -34,6 +40,58 @@
   padding-top: 1rem;
   margin-right: 2rem;
 }
+.editor-preview-wrap {
+  position: relative;
+}
+
+.placeholder-mention-dropdown {
+  position: absolute;
+  z-index: 1100;
+  min-width: 220px;
+  max-width: min(420px, 92vw);
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  background: #fff;
+  border: 1px solid #c5c5c5;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  text-align: start;
+  direction: ltr;
+}
+
+.placeholder-mention-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 12px;
+  margin: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  text-align: start;
+
+  &:hover,
+  &.active {
+    background: #e8f4fc;
+  }
+
+  .placeholder-name {
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 0.9rem;
+    color: #0c4a6e;
+  }
+
+  .placeholder-desc {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+}
+
 :host {
   ::ng-deep {
     .select {
@@ -67,6 +125,8 @@
 
     // Ensure Quill editor renders HTML properly, not as source code
     .ql-editor {
+      max-width: none !important;
+      box-sizing: border-box;
       // Make sure HTML content is rendered, not shown as text
       white-space: normal !important;
       

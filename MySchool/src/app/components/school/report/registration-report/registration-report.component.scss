@@ -1,0 +1,289 @@
+:host {
+  display: block;
+  direction: rtl;
+  font-size: 13px;
+}
+
+#page {
+  background-color: #fff;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.registration-report-toolbar {
+  margin-bottom: 1.25rem;
+}
+
+.registration-report-toolbar__surface {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.125rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(165deg, #f8fafc 0%, #f1f5f9 100%);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 4px 14px rgb(15 23 42 / 0.06);
+}
+
+@media (min-width: 1024px) {
+  .registration-report-toolbar__surface {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1.125rem 1.35rem;
+  }
+}
+
+.registration-report-toolbar__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.registration-report-toolbar__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.01em;
+}
+
+.registration-report-toolbar__form {
+  margin: 0;
+}
+
+.registration-report-toolbar__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: flex-end;
+}
+
+.registration-report-toolbar__select {
+  min-width: 180px;
+  flex: 1 1 160px;
+}
+
+.registration-report-toolbar__select--wide {
+  min-width: 240px;
+  flex: 1 1 220px;
+}
+
+.registration-report-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .registration-report-toolbar__actions {
+    flex-shrink: 0;
+    padding-bottom: 0.125rem;
+  }
+}
+
+:host ::ng-deep .registration-report-toolbar__btn.p-button {
+  height: 2.5rem;
+  padding-inline: 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  gap: 0.45rem;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+:host ::ng-deep .registration-report-toolbar__btn.p-button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(34 197 94 / 0.22);
+}
+
+:host ::ng-deep .registration-report-toolbar__btn.p-button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+:host ::ng-deep .registration-report-toolbar__btn--print.p-button.p-button-outlined {
+  border-width: 1.5px;
+}
+
+.registration-report__status {
+  margin: 0 0 0.75rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.registration-report__empty {
+  margin: 2rem 0 0;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.registration-report__preview-wrap {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* شريط تمرير أفقي + «ورقة» بعرض A4 بالعرض — كما تُطبَع */
+.registration-report__preview-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f1f5f9;
+  padding: 8px;
+}
+
+/* شاشة فقط: عرض ≥ عرض ورقة A4 بالعرض (297mm) حتى لا يُضغط التنسيق أفقياً */
+@media screen {
+  .registration-report__preview {
+    min-width: 297mm;
+    width: max(297mm, 100%);
+    max-width: none;
+    border: 1px solid #e2e8f0;
+    min-height: 120px;
+    box-sizing: border-box;
+  }
+}
+
+/* يطابق سلوك `.ql-editor` في allotment (نفس القالب HTML) */
+:host ::ng-deep #report {
+  line-height: 1.65;
+  color: #0f172a;
+
+  white-space: normal !important;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    display: block !important;
+    font-weight: bold !important;
+    margin: 1em 0 !important;
+  }
+
+  h2 {
+    font-size: 1.5em !important;
+  }
+
+  strong {
+    font-weight: bold !important;
+  }
+
+  div {
+    display: block !important;
+  }
+
+  div[style*='display:flex'],
+  div[style*='display: flex'] {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+  }
+
+  div[style*='justify-content:space-between'],
+  div[style*='justify-content: space-between'] {
+    justify-content: space-between !important;
+  }
+
+  div[style*='margin-top:60px'],
+  div[style*='margin-top: 60px'] {
+    margin-top: 60px !important;
+  }
+
+  div[style*='margin-top:20px'],
+  div[style*='margin-top: 20px'] {
+    margin-top: 20px !important;
+  }
+
+  div[style*='margin-bottom:10px'],
+  div[style*='margin-bottom: 10px'] {
+    margin-bottom: 10px !important;
+  }
+
+  div[style*='padding:20px'],
+  div[style*='padding: 20px'] {
+    padding: 20px !important;
+  }
+
+  div[style*='line-height:1.8'],
+  div[style*='line-height: 1.8'] {
+    line-height: 1.8 !important;
+  }
+
+  [style*='text-align:center'] {
+    text-align: center !important;
+  }
+
+  [style*='text-align:right'] {
+    text-align: right !important;
+  }
+
+  [style*='text-align:left'] {
+    text-align: left !important;
+  }
+
+  hr {
+    display: block !important;
+    border: none !important;
+    border-top: 1px solid #ccc !important;
+    margin: 1em 0 !important;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    display: table !important;
+
+    td,
+    th {
+      border: 1px solid #ddd;
+      padding: 8px;
+      display: table-cell !important;
+    }
+
+    tr {
+      display: table-row !important;
+    }
+  }
+}
+
+@media print {
+  .registration-report-toolbar,
+  .registration-report__status,
+  .registration-report__empty {
+    display: none !important;
+  }
+
+  .registration-report__preview-scroll {
+    overflow: visible !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  .registration-report__preview-wrap {
+    max-width: none !important;
+  }
+
+  :host ::ng-deep #report.registration-report__preview {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

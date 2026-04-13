@@ -23,7 +23,7 @@
 
     <ng-template #reportContainer></ng-template>
 
-    <div #editorPreview dir="rtl">
+    <div #editorPreview dir="rtl" class="editor-preview-wrap">
         <form [formGroup]="formGroup">
             <p-editor 
                 #editor
@@ -34,5 +34,22 @@
                 (onInit)="onEditorInit($event)">
             </p-editor>
         </form>
+        <div
+            *ngIf="mentionOpen && filteredPlaceholderColumns.length"
+            class="placeholder-mention-dropdown"
+            [style.top.px]="mentionTop"
+            [style.left.px]="mentionLeft"
+            role="listbox"
+            (mousedown)="$event.preventDefault()">
+            <button
+                type="button"
+                *ngFor="let p of filteredPlaceholderColumns; let i = index"
+                class="placeholder-mention-item"
+                [class.active]="i === mentionHighlightIndex"
+                (mousedown)="selectPlaceholder(p)">
+                <span class="placeholder-name">#{{ p.name }}#</span>
+                <span *ngIf="p.description" class="placeholder-desc">{{ p.description }}</span>
+            </button>
+        </div>
     </div>
 </div>

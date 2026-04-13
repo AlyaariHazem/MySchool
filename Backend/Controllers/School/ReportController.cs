@@ -70,6 +70,19 @@ public class ReportController : ControllerBase
     }
 
     /// <summary>
+    /// Merge-field names supported for a template code (for #Placeholder# autocomplete in the editor).
+    /// </summary>
+    [HttpGet("template-placeholders/{code}")]
+    public IActionResult GetTemplatePlaceholders(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+            return BadRequest(APIResponse.Fail("Template code is required."));
+
+        var list = ReportTemplatePlaceholdersRegistry.GetForCode(code);
+        return Ok(APIResponse.Success(list));
+    }
+
+    /// <summary>
     /// Save or update report template. Creates new template if it doesn't exist, updates if it does.
     /// </summary>
     [HttpPost("save")]

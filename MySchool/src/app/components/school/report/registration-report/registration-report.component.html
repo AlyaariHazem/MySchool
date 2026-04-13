@@ -1,0 +1,99 @@
+<div id="page" class="p-4 md:p-6 bg-white rounded-lg shadow-sm" dir="rtl">
+  <section class="registration-report-toolbar print:hidden" aria-label="تصفية الاستمارة">
+    <div class="registration-report-toolbar__surface">
+      <div class="registration-report-toolbar__main">
+        <h2 class="registration-report-toolbar__title">استمارة تسجيل الطالب</h2>
+
+        <form [formGroup]="form" class="registration-report-toolbar__form">
+          <div class="registration-report-toolbar__filters" *ngIf="!isGuardian">
+            <p-select
+              [options]="AllClasses"
+              class="registration-report-toolbar__select"
+              optionValue="classID"
+              optionLabel="className"
+              formControlName="classId"
+              placeholder="اختر الصف"
+              [showClear]="true"
+              [checkmark]="true" />
+
+            <p-select
+              [options]="fiteredDivisions"
+              class="registration-report-toolbar__select"
+              optionValue="divisionID"
+              optionLabel="divisionName"
+              formControlName="divisionId"
+              placeholder="اختر الشعبة"
+              [showClear]="true"
+              [checkmark]="true" />
+
+            <p-select
+              [options]="studentSelectOptions"
+              class="registration-report-toolbar__select registration-report-toolbar__select--wide"
+              optionValue="studentID"
+              optionLabel="displayName"
+              formControlName="studentId"
+              placeholder="اختر الطالب"
+              [showClear]="true"
+              [checkmark]="true" />
+          </div>
+
+          <div class="registration-report-toolbar__filters" *ngIf="isGuardian">
+            <p-select
+              [options]="studentSelectOptions"
+              class="registration-report-toolbar__select registration-report-toolbar__select--wide"
+              optionValue="studentID"
+              optionLabel="displayName"
+              formControlName="studentId"
+              placeholder="اختر الطالب"
+              [showClear]="true"
+              [checkmark]="true" />
+          </div>
+        </form>
+      </div>
+
+      <div class="registration-report-toolbar__actions">
+        <button
+          pButton
+          type="button"
+          label="تحديث المعاينة"
+          icon="pi pi-refresh"
+          severity="secondary"
+          [outlined]="true"
+          class="registration-report-toolbar__btn"
+          (click)="refreshReport()"
+          [disabled]="isLoadingStudent || !form.get('studentId')?.value"
+          title="تحديث المعاينة"></button>
+        <button
+          pButton
+          type="button"
+          label="طباعة"
+          icon="pi pi-print"
+          severity="success"
+          [outlined]="true"
+          class="registration-report-toolbar__btn registration-report-toolbar__btn--print"
+          (click)="printReport()"
+          [disabled]="isLoadingStudent || !safeReportHtml"
+          title="طباعة"></button>
+      </div>
+    </div>
+  </section>
+
+  <p *ngIf="isLoadingTemplate" class="registration-report__status print:hidden">جاري تحميل قالب التقرير…</p>
+  <p *ngIf="isLoadingStudent" class="registration-report__status print:hidden">جاري تحميل بيانات الطالب…</p>
+
+  <!-- id="report": required by src/assets/print.css (same as account-report) -->
+  <div *ngIf="safeReportHtml" class="registration-report__preview-wrap">
+    <div class="registration-report__preview-scroll">
+      <div
+        id="report"
+        class="report registration-report-print bg-white shadow-2 border-round p-4 md:p-6 text-sm md:text-base font-cairo registration-report__preview"
+        [innerHTML]="safeReportHtml"></div>
+    </div>
+  </div>
+
+  <p
+    *ngIf="!safeReportHtml && !isLoadingTemplate && !isLoadingStudent"
+    class="registration-report__empty print:hidden">
+    اختر الصف والشعبة والطالب (أو الطالب من القائمة) لعرض الاستمارة.
+  </p>
+</div>

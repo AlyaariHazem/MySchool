@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { ApiResponse } from '../../../../core/models/response.model';
 
@@ -19,6 +19,21 @@ export interface ReportTemplateSaveDTO {
   code: string;
   schoolId?: number;
   templateHtml: string;
+}
+
+/** Merge field for #Name# placeholders (API may return PascalCase or camelCase). */
+export interface ReportTemplatePlaceholderDto {
+  name: string;
+  description?: string | null;
+}
+
+function normalizePlaceholder(raw: Record<string, unknown>): ReportTemplatePlaceholderDto {
+  const name = String(raw['name'] ?? raw['Name'] ?? '');
+  const desc = raw['description'] ?? raw['Description'];
+  return {
+    name,
+    description: desc == null ? undefined : String(desc),
+  };
 }
 
 @Injectable({
@@ -64,6 +79,24 @@ export class ReportTemplateService {
       catchError((error) => {
         console.error('Error saving template:', error);
         return throwError(() => new Error(error.message || 'Failed to save template'));
+      })
+    );
+  }
+
+  /**
+   * Field names supported for the report template code (shown after typing # in the editor).
+   */
+  getTemplatePlaceholders(code: string): Observable<ReportTemplatePlaceholderDto[]> {
+    const encoded = encodeURIComponent(code);
+    const url = `${this.API.baseUrl}/Report/template-placeholders/${encoded}`;
+
+    return this.http.get<ApiResponse<ReportTemplatePlaceholderDto[]>>(url).pipe(
+      map((response) =>
+        (response.result ?? []).map((row: Record<string, unknown>) => normalizePlaceholder(row))
+      ),
+      catchError((error) => {
+        console.error('Error fetching template placeholders:', error);
+        return of([]);
       })
     );
   }
