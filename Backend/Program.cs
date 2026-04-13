@@ -22,8 +22,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Backend.Configuration;
+using Backend.Services.Ai;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -257,6 +259,16 @@ builder.Services.AddCors(options =>
 // Register Application Services and Repositories
 builder.Services.AddApplicationServices();
 
+// OpenAI (API key only in configuration / environment — never sent to Angular)
+builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection(OpenAiOptions.SectionName));
+builder.Services.AddHttpClient<OpenAiChatCompletionService>((sp, client) =>
+{
+    var opt = sp.GetRequiredService<IOptions<OpenAiOptions>>().Value;
+    var seconds = opt.TimeoutSeconds > 0 ? opt.TimeoutSeconds : 120;
+    client.Timeout = TimeSpan.FromSeconds(seconds);
+});
+builder.Services.AddScoped<SchoolAiToolsService>();
+builder.Services.AddScoped<SchoolAiAssistantService>();
 
 var app = builder.Build();
 

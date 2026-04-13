@@ -1,0 +1,45 @@
+<div class="ai-chat" [attr.dir]="'rtl'">
+  <div class="ai-chat__messages" #scroll>
+    <div
+      *ngFor="let m of messages"
+      class="ai-chat__row"
+      [class.ai-chat__row--user]="m.role === 'user'"
+      [class.ai-chat__row--assistant]="m.role === 'assistant'"
+    >
+      <div class="ai-chat__bubble">
+        <div class="ai-chat__role">
+          {{ m.role === 'user' ? ('aiAssistant.you' | translate) : ('aiAssistant.assistant' | translate) }}
+        </div>
+        <div class="ai-chat__text">{{ m.content }}</div>
+        <div *ngIf="m.error" class="ai-chat__err">{{ m.error }}</div>
+        <details *ngIf="m.toolSteps?.length" class="ai-chat__tools">
+          <summary>{{ 'aiAssistant.toolSteps' | translate }}</summary>
+          <div *ngFor="let s of m.toolSteps" class="ai-chat__tool">
+            <div class="ai-chat__tool-name">{{ s.toolName }}</div>
+            <pre class="ai-chat__pre">{{ s.resultJson }}</pre>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div *ngIf="loading" class="ai-chat__loading">{{ 'aiAssistant.thinking' | translate }}</div>
+  </div>
+
+  <div class="ai-chat__composer">
+    <textarea
+      class="ai-chat__input"
+      rows="2"
+      [(ngModel)]="draft"
+      [placeholder]="inputPlaceholder"
+      (keydown.control.enter)="onSend()"
+      (keydown.meta.enter)="onSend()"
+    ></textarea>
+    <button
+      pButton
+      type="button"
+      class="ai-chat__send"
+      [label]="sendLabel"
+      [disabled]="loading"
+      (click)="onSend()"
+    ></button>
+  </div>
+</div>

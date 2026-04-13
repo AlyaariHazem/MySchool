@@ -35,6 +35,7 @@ import { NotificationsComponent } from './notifications/notifications.component'
 import { SchoolLandingComponent } from './school-landing/school-landing.component';
 import { ExamsAdminComponent } from './exams/exams-admin.component';
 import { HomeworkAdminComponent } from './homework/homework-admin.component';
+import { AiAssistantComponent } from './ai-assistant/ai-assistant.component';
 
 const routes: Routes = [
   {
@@ -135,6 +136,7 @@ const routes: Routes = [
       { path: 'homework', component: HomeworkAdminComponent, data: { breadcrumb: 'الواجبات' } },
       { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       { path: 'notifications', component: NotificationsComponent, data: { breadcrumb: 'الإشعارات' } },
+      { path: 'ai-assistant', component: AiAssistantComponent, data: { breadcrumb: 'المساعد الذكي' } },
       {
         path: 'course', data: { breadcrumb: 'المقررات والخطط' }, children: [
           { path: '', component: BooksComponent, data: { breadcrumb: 'الكتب' } },

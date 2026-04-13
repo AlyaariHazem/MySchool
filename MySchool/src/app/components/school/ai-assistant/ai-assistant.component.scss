@@ -1,0 +1,59 @@
+.ai-page {
+  padding: 1rem 1.25rem 2rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.ai-page__header {
+  margin-bottom: 1.25rem;
+}
+
+.ai-page__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.ai-page__sub {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.ai-page__quick {
+  margin-bottom: 1rem;
+}
+
+.ai-page__quick-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.ai-page__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ai-chip {
+  border: 1px solid #cfd8e3;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.ai-chip:hover:not(:disabled) {
+  background: #f0f7ff;
+  border-color: #8ab4d8;
+}
+
+.ai-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

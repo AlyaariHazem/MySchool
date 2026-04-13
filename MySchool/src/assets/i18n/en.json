@@ -200,6 +200,7 @@
     "calendar": "Calendar",
     "schedule": "Weekly class schedule",
     "studentAttendance": "Attendance",
+    "aiAssistant": "AI Assistant",
     "notifications": "Notifications",
     "tests": "Tests",
     "holidays": "Holidays",
@@ -365,5 +366,26 @@
     "searchStudentLabel": "Student",
     "searchStudentPlaceholder": "Search by name or student #…",
     "orAccountNumber": "Or use account #"
+  },
+  "aiAssistant": {
+    "title": "AI Assistant",
+    "subtitle": "Ask about students, registration reports, attendance, and parent messages. Tools run on the server only — the OpenAI API key never reaches the browser.",
+    "inputPlaceholder": "Type your question…",
+    "send": "Send",
+    "you": "You",
+    "assistant": "Assistant",
+    "toolSteps": "Tool results (transparency)",
+    "thinking": "Working…",
+    "quickExamples": "Example prompts",
+    "emptyReply": "(No text — see tool results above)",
+    "errorTitle": "AI Assistant",
+    "networkError": "Could not reach the server.",
+    "examples": {
+      "details": "Show student details for Ahmed Ali",
+      "report": "Generate registration report for student 2026110001",
+      "summarize": "Summarize this student profile (search by id first if needed)",
+      "parentMsg": "Draft a parent message for repeated absence",
+      "absence": "Show students with high absence"
+    }
   }
 }
