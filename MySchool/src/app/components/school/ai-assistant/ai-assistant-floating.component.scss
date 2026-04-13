@@ -1,0 +1,209 @@
+/* Floating AI widget: isolated stacking so it never overlaps Excel/PDF/footer toolbars */
+:host {
+  display: contents;
+}
+
+.ai-float__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10040;
+  background: rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(2px);
+}
+
+.ai-float__launcher {
+  position: fixed;
+  z-index: 10050;
+  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  inset-inline-end: max(1.25rem, env(safe-area-inset-inline-end, 0px));
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.ai-float__fab {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+  /* Align with school dashboard accent (purple → green) */
+  background: linear-gradient(145deg, #5b21b6 0%, #4f46e5 45%, #16a34a 100%);
+  box-shadow:
+    0 4px 6px -1px rgba(91, 33, 182, 0.35),
+    0 10px 24px -6px rgba(22, 163, 74, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+}
+
+.ai-float__fab:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow:
+    0 8px 16px -4px rgba(91, 33, 182, 0.45),
+    0 14px 32px -8px rgba(22, 163, 74, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+}
+
+.ai-float__fab--open {
+  background: linear-gradient(145deg, #4338ca 0%, #4f46e5 50%, #15803d 100%);
+}
+
+.ai-float__fab:focus-visible {
+  outline: 3px solid rgba(99, 102, 241, 0.55);
+  outline-offset: 3px;
+}
+
+.ai-float__panel {
+  position: fixed;
+  z-index: 10051;
+  bottom: calc(3.5rem + 1.75rem + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: max(1.25rem, env(safe-area-inset-inline-end, 0px));
+  width: min(100vw - 2rem, 440px);
+  max-height: min(92vh, 880px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow:
+    0 4px 6px -2px rgba(15, 23, 42, 0.06),
+    0 24px 48px -12px rgba(15, 23, 42, 0.22);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  overflow: hidden;
+}
+
+.ai-float__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.85rem;
+  background: linear-gradient(180deg, #fafafa 0%, #f4f4f5 100%);
+  border-bottom: 1px solid #e4e4e7;
+  position: relative;
+}
+
+.ai-float__head::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, #7c3aed, #4f46e5, #16a34a);
+  opacity: 0.85;
+}
+
+.ai-float__title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #18181b;
+  letter-spacing: -0.01em;
+}
+
+.ai-float__close {
+  border: none;
+  background: #e4e4e7;
+  color: #52525b;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 10px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ai-float__close:hover {
+  background: #d4d4d8;
+  color: #18181b;
+}
+
+.ai-float__quick {
+  padding: 0.75rem 1rem 0.65rem;
+  flex-shrink: 0;
+  background: #fafafa;
+}
+
+.ai-float__quick-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #71717a;
+  margin-bottom: 0.45rem;
+}
+
+/* Let all example chips show — no inner scrollbar */
+.ai-float__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  overflow: visible;
+}
+
+.ai-float__chip {
+  border: 1px solid #e4e4e7;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  cursor: pointer;
+  max-width: 100%;
+  color: #3f3f46;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ai-float__chip:hover:not(:disabled) {
+  background: #f5f3ff;
+  border-color: #a78bfa;
+  box-shadow: 0 1px 2px rgba(124, 58, 237, 0.08);
+}
+
+.ai-float__chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-float__body {
+  flex: 1;
+  min-height: 0;
+  padding: 0.65rem 0.85rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.ai-float__body ::ng-deep .ai-chat {
+  min-height: 0;
+  /* Default chat panel min-height is large; keep floating compact but roomy */
+  min-height: 260px;
+}
+
+.ai-float__body ::ng-deep .ai-chat__messages {
+  max-height: min(48vh, 420px);
+  border-radius: 12px;
+}
+
+.ai-float__body ::ng-deep .ai-chat__bubble {
+  border-radius: 14px;
+}

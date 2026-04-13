@@ -96,7 +96,7 @@ import { StudentSidebarModule } from '../students/sidebar/student-sidebar.module
 import { GuardianSidebarModule } from '../guardian/sidebar/guardian-sidebar.module';
 import { ExamsAdminComponent } from './exams/exams-admin.component';
 import { HomeworkAdminComponent } from './homework/homework-admin.component';
-import { AiAssistantComponent } from './ai-assistant/ai-assistant.component';
+import { AiAssistantFloatingComponent } from './ai-assistant/ai-assistant-floating.component';
 import { AiChatPanelComponent } from './ai-assistant/ai-chat-panel.component';
 
 const components = [
@@ -153,7 +153,7 @@ const components = [
   NotificationsComponent,
   ExamsAdminComponent,
   HomeworkAdminComponent,
-  AiAssistantComponent,
+  AiAssistantFloatingComponent,
   AiChatPanelComponent,
 ];
 

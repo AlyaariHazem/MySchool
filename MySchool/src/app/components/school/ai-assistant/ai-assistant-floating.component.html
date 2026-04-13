@@ -1,0 +1,56 @@
+<!-- Backdrop -->
+<div
+  *ngIf="panelOpen"
+  class="ai-float__backdrop"
+  (click)="closePanel()"
+  aria-hidden="true"
+></div>
+
+<!-- Single FAB only (no text pill) — stays above page toolbars via high z-index -->
+<div class="ai-float__launcher">
+  <button
+    type="button"
+    class="ai-float__fab"
+    [class.ai-float__fab--open]="panelOpen"
+    (click)="togglePanel()"
+    [attr.aria-expanded]="panelOpen"
+    [attr.aria-label]="title"
+  >
+    <i class="pi" [ngClass]="panelOpen ? 'pi-times' : 'pi-comments'" aria-hidden="true"></i>
+  </button>
+</div>
+
+<!-- Panel -->
+<div *ngIf="panelOpen" class="ai-float__panel" role="dialog" [attr.aria-label]="title">
+  <header class="ai-float__head">
+    <h2 class="ai-float__title">{{ title }}</h2>
+    <button type="button" class="ai-float__close" (click)="closePanel()" [attr.aria-label]="'aiAssistant.close' | translate">
+      <i class="pi pi-times" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <div class="ai-float__quick">
+    <span class="ai-float__quick-label">{{ 'aiAssistant.quickExamples' | translate }}</span>
+    <div class="ai-float__chips">
+      <button
+        type="button"
+        class="ai-float__chip"
+        *ngFor="let q of quickPrompts"
+        (click)="onQuick(q.key)"
+        [disabled]="loading"
+      >
+        {{ q.key | translate }}
+      </button>
+    </div>
+  </div>
+
+  <div class="ai-float__body">
+    <app-ai-chat-panel
+      [messages]="uiMessages"
+      [loading]="loading"
+      [inputPlaceholder]="inputPlaceholder"
+      [sendLabel]="sendLabel"
+      (send)="onSend($event)"
+    ></app-ai-chat-panel>
+  </div>
+</div>

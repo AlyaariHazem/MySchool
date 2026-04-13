@@ -5,23 +5,24 @@ import { TranslateService } from '@ngx-translate/core';
 import { AiAssistantService } from './ai-assistant.service';
 import type { AiChatMessage, AiUiMessage } from './ai-assistant.models';
 
+/**
+ * Floating FAB + slide-up panel (not sidebar) — hosts the same chat flow as the former full page.
+ */
 @Component({
-  selector: 'app-ai-assistant',
-  templateUrl: './ai-assistant.component.html',
-  styleUrls: ['./ai-assistant.component.scss'],
+  selector: 'app-ai-assistant-floating',
+  templateUrl: './ai-assistant-floating.component.html',
+  styleUrls: ['./ai-assistant-floating.component.scss'],
   standalone: false,
 })
-export class AiAssistantComponent implements OnInit {
+export class AiAssistantFloatingComponent implements OnInit {
   private readonly ai = inject(AiAssistantService);
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
 
-  /** Conversation sent to API (user + assistant text only). */
+  panelOpen = false;
+
   apiHistory: AiChatMessage[] = [];
-
-  /** Full UI log including tool traces on assistant rows. */
   uiMessages: AiUiMessage[] = [];
-
   loading = false;
 
   readonly quickPrompts: { key: string }[] = [
@@ -35,7 +36,6 @@ export class AiAssistantComponent implements OnInit {
   inputPlaceholder = '';
   sendLabel = '';
   title = '';
-  subtitle = '';
 
   ngOnInit(): void {
     this.translate
@@ -43,14 +43,20 @@ export class AiAssistantComponent implements OnInit {
         'aiAssistant.inputPlaceholder',
         'aiAssistant.send',
         'aiAssistant.title',
-        'aiAssistant.subtitle',
       ])
       .subscribe((t) => {
         this.inputPlaceholder = t['aiAssistant.inputPlaceholder'];
         this.sendLabel = t['aiAssistant.send'];
         this.title = t['aiAssistant.title'];
-        this.subtitle = t['aiAssistant.subtitle'];
       });
+  }
+
+  togglePanel(): void {
+    this.panelOpen = !this.panelOpen;
+  }
+
+  closePanel(): void {
+    this.panelOpen = false;
   }
 
   onSend(text: string): void {

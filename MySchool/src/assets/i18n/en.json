@@ -200,7 +200,6 @@
     "calendar": "Calendar",
     "schedule": "Weekly class schedule",
     "studentAttendance": "Attendance",
-    "aiAssistant": "AI Assistant",
     "notifications": "Notifications",
     "tests": "Tests",
     "holidays": "Holidays",
@@ -370,6 +369,7 @@
   "aiAssistant": {
     "title": "AI Assistant",
     "subtitle": "Ask about students, registration reports, attendance, and parent messages. Tools run on the server only — the OpenAI API key never reaches the browser.",
+    "close": "Close",
     "inputPlaceholder": "Type your question…",
     "send": "Send",
     "you": "You",
