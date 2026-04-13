@@ -299,7 +299,7 @@ namespace Backend.Data
                 .HasKey(s => s.StudentID);
             modelBuilder.Entity<Student>()
                 .Property(s => s.StudentID)
-                .UseIdentityColumn();
+                .ValueGeneratedNever();
 
             modelBuilder.Entity<Accounts>()
                 .HasKey(a => a.AccountID);

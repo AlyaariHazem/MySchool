@@ -1235,10 +1235,7 @@ namespace Backend.Migrations.Tenant
             modelBuilder.Entity("Backend.Models.Student", b =>
                 {
                     b.Property<int>("StudentID")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentID"));
 
                     b.Property<int>("DivisionID")
                         .HasColumnType("int");

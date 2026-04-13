@@ -13,9 +13,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Storage;
 
 public class StudentRepository : IStudentRepository
 {
@@ -36,13 +38,42 @@ public class StudentRepository : IStudentRepository
         _apiBaseUrl = apiBaseUrl;
     }
 
-    // Create: Add a new student (StudentID is SQL Server IDENTITY — do not insert explicit values)
+    // Create: Add a new student (StudentID is structured YYYY+SS+NNNN; explicit insert uses IDENTITY_INSERT)
     public async Task<Student> AddStudentAsync(Student student)
     {
-        student.StudentID = 0;
+        IDbContextTransaction? localTx = null;
+        if (_context.Database.CurrentTransaction == null)
+            localTx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, CancellationToken.None);
 
-        _context.Students.Add(student);
-        await _context.SaveChangesAsync();
+        try
+        {
+            student.StudentID = await AllocateNextStudentIdWithLockAsync(CancellationToken.None);
+
+            await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Students] ON");
+            try
+            {
+                _context.Students.Add(student);
+                await _context.SaveChangesAsync();
+            }
+            finally
+            {
+                await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Students] OFF");
+            }
+
+            if (localTx != null)
+                await localTx.CommitAsync();
+        }
+        catch
+        {
+            if (localTx != null)
+                await localTx.RollbackAsync();
+            throw;
+        }
+        finally
+        {
+            if (localTx != null)
+                await localTx.DisposeAsync();
+        }
 
         if (!string.IsNullOrEmpty(student.ImageURL) &&
             student.ImageURL.StartsWith("StudentPhotos_0_", StringComparison.Ordinal))
@@ -678,10 +709,65 @@ public class StudentRepository : IStudentRepository
         }
     }
 
+    /// <summary>Next structured student ID for the current calendar year and school (preview for UI; actual insert uses the same rules).</summary>
     public async Task<int> MaxValue()
     {
-        var maxValue = await _context.Students.MaxAsync(s => (int?)s.StudentID) ?? 0;
-        return maxValue;
+        var school = await _context.Schools.AsNoTracking().FirstOrDefaultAsync();
+        if (school == null)
+            return 0;
+
+        var year = DateTime.Today.Year;
+        if (!StudentIdGenerator.TryGetRange(year, school.SchoolID, out var minId, out var maxId))
+            return 0;
+
+        var latest = await _context.Students
+            .AsNoTracking()
+            .Where(s => s.StudentID >= minId && s.StudentID <= maxId)
+            .OrderByDescending(s => s.StudentID)
+            .Select(s => (int?)s.StudentID)
+            .FirstOrDefaultAsync();
+
+        if (!latest.HasValue)
+            return minId;
+        var next = latest.Value + 1;
+        return next > maxId ? 0 : next;
+    }
+
+    /// <summary>Allocates the next ID using UPDLOCK/HOLDLOCK in the current DB transaction (Serializable when no outer tx).</summary>
+    private async Task<int> AllocateNextStudentIdWithLockAsync(CancellationToken cancellationToken)
+    {
+        var school = await _context.Schools.AsNoTracking().FirstOrDefaultAsync(cancellationToken)
+            ?? throw new InvalidOperationException("Cannot assign a student ID: the school record was not found.");
+
+        var year = DateTime.Today.Year;
+        if (!StudentIdGenerator.TryGetRange(year, school.SchoolID, out var minId, out var maxId))
+            throw new InvalidOperationException("Cannot assign a student ID: invalid year or school code.");
+
+        var connection = _context.Database.GetDbConnection();
+        if (connection.State != ConnectionState.Open)
+            await connection.OpenAsync(cancellationToken);
+
+        await using var cmd = connection.CreateCommand();
+        cmd.Transaction = _context.Database.CurrentTransaction?.GetDbTransaction();
+        cmd.CommandText = """
+            SELECT ISNULL(MAX([StudentID]), @minId - 1) + 1
+            FROM [Students] WITH (UPDLOCK, HOLDLOCK)
+            WHERE [StudentID] >= @minId AND [StudentID] <= @maxId
+            """;
+        var pMin = cmd.CreateParameter();
+        pMin.ParameterName = "@minId";
+        pMin.Value = minId;
+        cmd.Parameters.Add(pMin);
+        var pMax = cmd.CreateParameter();
+        pMax.ParameterName = "@maxId";
+        pMax.Value = maxId;
+        cmd.Parameters.Add(pMax);
+
+        var scalar = await cmd.ExecuteScalarAsync(cancellationToken);
+        var nextId = Convert.ToInt32(scalar);
+        if (nextId < minId || nextId > maxId)
+            throw new InvalidOperationException("Student ID sequence is exhausted for the current year and school.");
+        return nextId;
     }
 
     public async Task<(List<UnregisteredStudentDTO> Items, int TotalCount)> GetUnregisteredStudentsAsync(

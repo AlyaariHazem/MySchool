@@ -110,6 +110,11 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
     ).subscribe({
       next: r => {
+        const sid = (r as any)?.student?.studentID ?? (r as any)?.student?.StudentID;
+        if (sid != null && sid !== '') {
+          this.studentID = Number(sid);
+          this.formGroup.patchValue({ studentID: this.studentID });
+        }
         this.toastr.success('Student Added Successfully! ', r.message);
         this.uploadImageAndFiles();
         this.generateStudentID();
@@ -369,16 +374,17 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  /** Preview only: backend assigns the real ID on create (GET MaxValue returns next structured ID). */
   private generateStudentID(): void {
     this.studentService.MaxStudentID().subscribe({
       next: n => {
-        const nextId = (n ?? 0) + 1;
-        this.studentID = nextId;                      // keep the field in sync
+        const nextId = typeof n === 'number' ? n : Number(n) || 0;
+        this.studentID = nextId;
         this.formGroup.patchValue({ studentID: nextId });
       },
       error: () => {
-        this.studentID = 1;
-        this.formGroup.patchValue({ studentID: 1 });
+        this.studentID = 0;
+        this.formGroup.patchValue({ studentID: 0 });
       }
     });
   }
@@ -442,5 +448,8 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.formStore.resetForm();
+    if (!this.isEditMode) {
+      this.generateStudentID();
+    }
   }
 }

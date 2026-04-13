@@ -84,7 +84,7 @@ export class StudentFormStoreService {
 
   resetForm() {
     this.getForm().reset({
-      studentID: this.formSubject.getValue().get('studentID')?.value+1,
+      studentID: 0,
       existingGuardianId: null,
       primaryData: {
         studentFirstName: '',
