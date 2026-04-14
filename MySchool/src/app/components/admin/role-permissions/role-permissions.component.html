@@ -1,0 +1,69 @@
+<div class="role-perm-root" [attr.dir]="'rtl'">
+  <mat-card class="role-perm-card">
+    <div class="page-head">
+      <h2 class="page-title">إدارة صلاحيات الأدوار</h2>
+      <div class="actions">
+        <button
+          type="button"
+          class="btn-save"
+          mat-raised-button
+          color="primary"
+          (click)="save()"
+          [disabled]="saving || loading || !dirty"
+        >
+          {{ saving ? 'جاري الحفظ…' : 'حفظ التغييرات' }}
+        </button>
+        <button type="button" class="btn-reload" mat-stroked-button (click)="load()" [disabled]="loading || saving">
+          إعادة تحميل
+        </button>
+      </div>
+    </div>
+
+    <div class="role-perm-body">
+      @if (error) {
+        <p class="hint hint-error" role="alert">{{ error }}</p>
+      }
+      @if (loading) {
+        <p class="hint hint-muted">جاري التحميل…</p>
+      }
+      @if (!loading && rows.length && roles.length) {
+        <div class="table-scroll">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th class="sticky-col">الصفحة</th>
+                <th class="sticky-col2">الإجراء</th>
+                @for (r of roles; track r) {
+                  <th>{{ translateRole(r) }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of rows; track p.name) {
+                <tr>
+                  <td class="sticky-col">{{ translatePage(p.page) }}</td>
+                  <td class="sticky-col2">{{ translateAction(p.action) }}</td>
+                  @for (r of roles; track r) {
+                    <td class="cell">
+                      <mat-checkbox
+                        color="primary"
+                        [checked]="isAllowed(r, p.name)"
+                        (change)="toggle(r, p.name, $event.checked)"
+                        [disabled]="saving"
+                      ></mat-checkbox>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      @if (!loading && (!rows.length || !roles.length)) {
+        <div class="empty-state">
+          <p>لا توجد بيانات صلاحيات لعرضها.</p>
+        </div>
+      }
+    </div>
+  </mat-card>
+</div>

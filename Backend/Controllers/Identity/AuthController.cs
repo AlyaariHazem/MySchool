@@ -34,6 +34,7 @@ namespace Backend.Controllers
         private readonly StudentManagementService _studentManagementService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IPermissionClaimService _permissionClaimService;
 
         public AuthController(
             UserManager<ApplicationUser> UserManager,
@@ -44,7 +45,8 @@ namespace Backend.Controllers
             IApiBaseUrlProvider apiBase,
             StudentManagementService studentManagementService,
             IUnitOfWork unitOfWork,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            IPermissionClaimService permissionClaimService)
         {
             userManager = UserManager;
             this.config = config;
@@ -55,6 +57,7 @@ namespace Backend.Controllers
             _studentManagementService = studentManagementService;
             _unitOfWork = unitOfWork;
             _serviceProvider = serviceProvider;
+            _permissionClaimService = permissionClaimService;
         }
 
         [HttpPost("Register")]
@@ -365,6 +368,9 @@ namespace Backend.Controllers
                 userClaims.Add(new Claim("TenantRole", ((int)membershipTenantRole.Value).ToString()));
             }
 
+            var permClaims = await _permissionClaimService.BuildPermissionClaimsAsync(userFromDb.Id, userFromDb.UserType, tenantId);
+            userClaims.AddRange(permClaims);
+
             var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecretKey"]!));
             var signingCred = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
 
@@ -394,12 +400,17 @@ namespace Backend.Controllers
 
             Response.Cookies.Append("refreshToken", rawRefresh, BuildCookieOptions(refresh.Expires));
 
+            var permissionsList = userClaims.Where(c => c.Type == PagePermissionNames.ClaimType).Select(c => c.Value).ToList();
+            var schoolRoleClaim = userClaims.FirstOrDefault(c => c.Type == PagePermissionNames.SchoolRoleClaimType)?.Value;
+
             if (userFromDb.UserType == "ADMIN")
                 return Ok(new
                 {
                     userName = userFromDb.UserName,
                     token = accessToken,
-                    expiration = accessExpiry
+                    expiration = accessExpiry,
+                    permissions = permissionsList,
+                    schoolRole = schoolRoleClaim
                 });
 
             return Ok(new
@@ -413,7 +424,9 @@ namespace Backend.Controllers
                 tenantDatabase = tenantDatabaseName,
                 tenants = tenantChoices != null && tenantChoices.Count > 1 && !tenantId.HasValue ? tenantChoices : null,
                 token = accessToken,
-                expiration = accessExpiry
+                expiration = accessExpiry,
+                permissions = permissionsList,
+                schoolRole = schoolRoleClaim
             });
         }
 
@@ -456,6 +469,9 @@ namespace Backend.Controllers
                 if (mem != null)
                     claims.Add(new Claim("TenantRole", ((int)mem.TenantRole).ToString()));
             }
+
+            var permClaims = await _permissionClaimService.BuildPermissionClaimsAsync(user.Id, user.UserType, tid);
+            claims.AddRange(permClaims);
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecretKey"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

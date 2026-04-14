@@ -22,7 +22,7 @@
           </a>
         </li>
 
-        <li class="submenu" (click)="toggleSubmenu('sittings')">
+        <li class="submenu" (click)="toggleSubmenu('sittings')" *ngIf="canViewSettingsNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-14.png" alt="icon">
             <span>{{ 'settings.title' | translate }}</span>
@@ -59,7 +59,7 @@
 
 
         <!-- المدرسين -->
-        <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')" *ngIf="canViewTeachersNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-10.png" alt="icon">
             <span>{{ 'sidebar.teachers' | translate }}</span>
@@ -81,7 +81,7 @@
         </li>
 
         <!-- الطلاب -->
-        <li class="submenu" (click)="toggleSubmenu('studentsSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('studentsSubmenu')" *ngIf="canViewStudentsNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-10.png" alt="icon">
             <span>{{ 'sidebar.students' | translate }}</span>
@@ -159,7 +159,7 @@
           </ul>
         </li>
 
-        <li class="submenu" (click)="toggleSubmenu('reportsSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('reportsSubmenu')" *ngIf="canViewReportsNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-11.png" alt="icon">
             <span>{{ 'sidebar.reports' | translate }}</span>

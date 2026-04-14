@@ -12,6 +12,12 @@ public static class SchoolUserRoleKeys
     public const string Student = "Student";
     public const string Guardian = "Guardian";
 
+    /// <summary>All keys used in <see cref="Master.RolePermission"/>.</summary>
+    public static readonly string[] AllRoles =
+    {
+        Teacher, Manager, SystemAdmin, EducationalSupervisor, AdministrativeSupervisor, AdministrativeEmployee, Student, Guardian
+    };
+
     /// <summary>Roles stored in <see cref="Models.SchoolStaff.StaffRole"/> (non-teacher staff).</summary>
     public static readonly string[] ManagerTableRoles =
     {

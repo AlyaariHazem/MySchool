@@ -30,6 +30,7 @@ import { PasswordModule } from 'primeng/password';
 import { InputNumberModule } from 'primeng/inputnumber';
 
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { MatMenuModule } from '@angular/material/menu';
 
@@ -49,6 +50,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AdminRoutingModule } from './admin-routing.module';
 import { SchoolInfoComponent } from './school-info/school-info.component';
 import { AddManagerComponent } from './users/add-manager/add-manager.component';
+import { RolePermissionsComponent } from './role-permissions/role-permissions.component';
 import { ChartModule } from 'primeng/chart';
 import { Select } from 'primeng/select';
 
@@ -68,7 +70,8 @@ const components = [
   SidebarComponent,
   NavigateComponent,
   ActionComponent,
-  AddManagerComponent
+  AddManagerComponent,
+  RolePermissionsComponent
 ];
 
 const modules = [
@@ -78,6 +81,7 @@ const modules = [
   AdminRoutingModule,
   MatButtonModule,
   MatIconModule,
+  MatCheckboxModule,
   MatMenuModule,
   ReactiveFormsModule,
   MatTableModule,

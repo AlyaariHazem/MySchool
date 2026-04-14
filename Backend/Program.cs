@@ -21,6 +21,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Backend.Authorization;
+using Backend.Common;
 using Backend.Configuration;
 using Backend.Services.Ai;
 using System.Security.Claims;
@@ -224,8 +226,16 @@ builder.Services
         };
     });
 
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
 builder.Services.AddAuthorization(options =>
 {
+    foreach (var perm in PagePermissionNames.All)
+    {
+        options.AddPolicy(perm, policy =>
+            policy.Requirements.Add(new PermissionRequirement(perm)));
+    }
+
     options.AddPolicy("DatabaseRestore", policy =>
     {
         policy.RequireAssertion(context =>
@@ -277,6 +287,8 @@ using (var scope = app.Services.CreateScope())
     // Ensure the admin database exists and all migrations are applied before seeding roles.
     var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
     db.Database.Migrate();
+
+    await PermissionSeeder.SeedAsync(db);
 
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var roles = new[] { "ADMIN","GUARDIAN", "STUDENT", "TEACHER", "MANAGER" };

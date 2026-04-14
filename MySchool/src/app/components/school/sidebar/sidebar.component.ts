@@ -1,11 +1,13 @@
 /* sidebar.component.ts */
 import {
-  Component, EventEmitter, Input, Output
+  Component, EventEmitter, inject, Input, Output
 } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { map } from 'rxjs';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
 import { Store } from '@ngrx/store';
+
+import { PagePermission, PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -27,6 +29,8 @@ export class SidebarComponent {
   readonly dir$ = this.store.select(selectLanguage).pipe(
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
   );
+  private readonly perm = inject(PermissionService);
+
   constructor(private store: Store) {}
 
   /* ---------- open / close from the header ---------- */
@@ -72,5 +76,19 @@ export class SidebarComponent {
 
   homePath(): string {
     return this.isTeacher ? '/teacher/workspace' : '/school/dashboard';
+  }
+
+  /** Page-level flags for sidebar (JWT + login <c>permissions</c>). */
+  get canViewTeachersNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Teachers.View);
+  }
+  get canViewStudentsNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Students.View);
+  }
+  get canViewSettingsNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Settings.View);
+  }
+  get canViewReportsNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Reports.View);
   }
 }

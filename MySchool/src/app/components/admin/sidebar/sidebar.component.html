@@ -62,6 +62,12 @@
             <span> الإعدادات</span>
           </a>
         </li>
+        <li class="submenu" *ngIf="showRolePermissionsLink">
+          <a routerLink="/admin/role-permissions">
+            <img src="assets/img/sidebar/icon-3.png" alt="icon" />
+            <span> صلاحيات الأدوار</span>
+          </a>
+        </li>
       </ul>
 
     </div>

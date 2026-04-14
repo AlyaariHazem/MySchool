@@ -12,6 +12,7 @@ import { FileManagerComponent } from './file-manager/file-manager.component';
 import { SittingComponent } from './sitting/sitting.component';
 import { SchoolsComponent } from './schools/schools.component';
 import { PageNotFoundComponent } from '../../shared/components/page-not-found/page-not-found.component';
+import { RolePermissionsComponent } from './role-permissions/role-permissions.component';
 
 const routes: Routes = [
   {
@@ -27,6 +28,7 @@ const routes: Routes = [
       { path: 'message', component: MessagesComponent, data: { breadcrumb: 'الرسائل' } },
       { path: 'file', component: FileManagerComponent, data: { breadcrumb: 'ملف المدير' } },
       { path: 'sitting', component: SittingComponent, data: { breadcrumb: 'الإعدادات' } },
+      { path: 'role-permissions', component: RolePermissionsComponent, data: { breadcrumb: 'صلاحيات الأدوار' } },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'not-found', component: PageNotFoundComponent },

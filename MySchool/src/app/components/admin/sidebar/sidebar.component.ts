@@ -53,4 +53,11 @@ export class SidebarComponent {
   /* ---------- misc fields (logo, school name) ------- */
   SchoolLogo = localStorage.getItem('SchoolImageURL');
   schoolName = localStorage.getItem('schoolName');
+
+  /** Matrix API is limited to platform identities with Identity roles ADMIN/MANAGER. */
+  get showRolePermissionsLink(): boolean {
+    if (typeof localStorage === 'undefined') return false;
+    const t = localStorage.getItem('userType');
+    return t === 'ADMIN' || t === 'MANAGER';
+  }
 }

@@ -4,6 +4,7 @@ import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 
 import { User } from '../core/models/user.model';
 import { BackendAspService } from '../ASP.NET/backend-asp.service';
+import { PermissionService } from '../core/services/permission.service';
 
 
 @Injectable({
@@ -11,6 +12,7 @@ import { BackendAspService } from '../ASP.NET/backend-asp.service';
 })
 export class AuthAPIService {
   private API = inject(BackendAspService);
+  private permissions = inject(PermissionService);
 
   constructor(public router: Router) { }
 
@@ -149,6 +151,11 @@ export class AuthAPIService {
         if (user.userType) {
           localStorage.setItem('userType', user.userType);
         }
+        this.permissions.setFromLoginResponse({
+          permissions: response?.permissions,
+          schoolRole: response?.schoolRole,
+          token: response?.token,
+        });
       })
     );
   }
@@ -165,7 +172,8 @@ export class AuthAPIService {
       { withCredentials: true })               // what this will do?
       .pipe(
         tap(() => {
-          ['token', 'tenantId', 'managerName', 'yearId', 'schoolName', 'userName', 'schoolId', 'userType'].forEach(item => localStorage.removeItem(item));
+          ['token', 'tenantId', 'managerName', 'yearId', 'schoolName', 'userName', 'schoolId', 'userType', 'permissions', 'schoolRole'].forEach(item => localStorage.removeItem(item));
+          this.permissions.clear();
           this.router.navigate(['/']);
         })
       );

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NgxLoadingBar } from '@ngx-loading-bar/core';
 
@@ -7,6 +7,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { PrimeNG } from 'primeng/config';
 import { ShardModule } from './shared/shard.module';
+import { PermissionService } from './core/services/permission.service';
 @Component({
     selector: 'app-root',
     standalone: true,
@@ -16,6 +17,7 @@ import { ShardModule } from './shared/shard.module';
 })
 export class AppComponent {
   title = 'MySchool';
+  private readonly permissions = inject(PermissionService);
 
   lang$: Observable<string>;
   constructor(private store: Store<{ language: string }>, private primeng: PrimeNG) {
@@ -23,7 +25,8 @@ export class AppComponent {
   }
 
   ngOnInit(): void {
-    
+    this.permissions.hydrateFromStorage();
+
     this.primeng.zIndex = {
       modal: 1100,    // dialog, sidebar
       overlay: 1000,  // dropdown, overlaypanel

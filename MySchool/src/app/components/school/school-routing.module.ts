@@ -35,12 +35,18 @@ import { NotificationsComponent } from './notifications/notifications.component'
 import { SchoolLandingComponent } from './school-landing/school-landing.component';
 import { ExamsAdminComponent } from './exams/exams-admin.component';
 import { HomeworkAdminComponent } from './homework/homework-admin.component';
+import { permissionGuard } from '../../core/guards/permission.guard';
 const routes: Routes = [
   {
     path: '',
     component: NavigateComponent, data: { breadcrumb: 'الرئيسية  / ' },
     children: [
-      { path: 'dashboard', component: DashboardComponent, data: { breadcrumb: '' } },
+      {
+        path: 'dashboard',
+        component: DashboardComponent,
+        data: { breadcrumb: '', permission: 'Dashboard.View' },
+        canMatch: [permissionGuard],
+      },
       { path: 'sidebar', component: BreadcrumbComponent, data: { breadcrumb: 'Sidebar' } },
       {
         path: 'reports', data: { breadcrumb: 'تقارير' }, children: [

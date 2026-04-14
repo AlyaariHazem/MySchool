@@ -21,6 +21,8 @@ public class DatabaseContext : IdentityDbContext<ApplicationUser>
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<RegistrationRequest> RegistrationRequests => Set<RegistrationRequest>();
     public DbSet<RegistrationRequestAttachment> RegistrationRequestAttachments => Set<RegistrationRequestAttachment>();
+    public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -116,6 +118,22 @@ public class DatabaseContext : IdentityDbContext<ApplicationUser>
             e.HasIndex(u => u.PhoneNumberNormalized)
                 .IsUnique()
                 .HasFilter("[PhoneNumberNormalized] IS NOT NULL");
+        });
+
+        modelBuilder.Entity<Permission>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => x.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<RolePermission>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => new { x.RoleName, x.PermissionId }).IsUnique();
+            e.HasOne(x => x.Permission)
+                .WithMany()
+                .HasForeignKey(x => x.PermissionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<IdentityRole>().HasData(
