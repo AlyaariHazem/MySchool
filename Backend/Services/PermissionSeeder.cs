@@ -59,6 +59,18 @@ public static class PermissionSeeder
     private static bool IsPage(string perm, string page) =>
         perm.StartsWith(page + ".", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>Legacy umbrella <see cref="PagePermissionNames.PageReports"/> plus each report sub-screen.</summary>
+    private static bool IsAnyReportPermission(string perm) =>
+        IsPage(perm, PagePermissionNames.PageReports)
+        || IsPage(perm, PagePermissionNames.PageReportsFinancial)
+        || IsPage(perm, PagePermissionNames.PageReportsTerm)
+        || IsPage(perm, PagePermissionNames.PageReportsMonthly)
+        || IsPage(perm, PagePermissionNames.PageReportsRegistration)
+        || IsPage(perm, PagePermissionNames.PageReportsAllotment);
+
+    private static bool IsAiChatPermission(string perm) =>
+        IsPage(perm, PagePermissionNames.PageAiChat);
+
     private static bool DefaultAllowed(string role, string perm)
     {
         if (role == SchoolUserRoleKeys.SystemAdmin || role == SchoolUserRoleKeys.Manager)
@@ -72,7 +84,9 @@ public static class PermissionSeeder
                 return true;
             if (IsPage(perm, PagePermissionNames.PageEvaluations))
                 return true;
-            if (IsPage(perm, PagePermissionNames.PageReports))
+            if (IsAnyReportPermission(perm))
+                return true;
+            if (IsAiChatPermission(perm))
                 return true;
             // Academic / oversight modules
             if (IsPage(perm, PagePermissionNames.PageGrades))
@@ -118,6 +132,10 @@ public static class PermissionSeeder
                 return true;
             if (IsPage(perm, PagePermissionNames.PageSettings))
                 return true;
+            if (IsAnyReportPermission(perm))
+                return true;
+            if (IsAiChatPermission(perm))
+                return true;
             if (perm == PagePermissionNames.P(PagePermissionNames.PageCalendar, PagePermissionNames.ActionView)
                 || perm == PagePermissionNames.P(PagePermissionNames.PageSchedule, PagePermissionNames.ActionView)
                 || perm == PagePermissionNames.P(PagePermissionNames.PageNotifications, PagePermissionNames.ActionView))
@@ -152,6 +170,12 @@ public static class PermissionSeeder
                 || perm == PagePermissionNames.P(PagePermissionNames.PageNotifications, PagePermissionNames.ActionView)
                 || perm == PagePermissionNames.P(PagePermissionNames.PageTeachers, PagePermissionNames.ActionView))
                 return true;
+            if (IsPage(perm, PagePermissionNames.PageReportsTerm)
+                || IsPage(perm, PagePermissionNames.PageReportsMonthly)
+                || IsPage(perm, PagePermissionNames.PageReportsRegistration))
+                return true;
+            if (IsAiChatPermission(perm))
+                return true;
             return false;
         }
 
@@ -169,6 +193,10 @@ public static class PermissionSeeder
                 return true;
             if (perm == PagePermissionNames.P(PagePermissionNames.PageNotifications, PagePermissionNames.ActionView))
                 return true;
+            if (IsPage(perm, PagePermissionNames.PageReportsFinancial))
+                return true;
+            if (IsAiChatPermission(perm))
+                return true;
             return false;
         }
 
@@ -176,7 +204,10 @@ public static class PermissionSeeder
         {
             if (perm == PagePermissionNames.P(PagePermissionNames.PageDashboard, PagePermissionNames.ActionView))
                 return true;
-            if (perm == PagePermissionNames.P(PagePermissionNames.PageReports, PagePermissionNames.ActionView))
+            if (perm == PagePermissionNames.P(PagePermissionNames.PageReports, PagePermissionNames.ActionView)
+                || perm == PagePermissionNames.P(PagePermissionNames.PageReportsTerm, PagePermissionNames.ActionView)
+                || perm == PagePermissionNames.P(PagePermissionNames.PageReportsMonthly, PagePermissionNames.ActionView)
+                || perm == PagePermissionNames.P(PagePermissionNames.PageReportsRegistration, PagePermissionNames.ActionView))
                 return true;
             if (perm == PagePermissionNames.P(PagePermissionNames.PageNotifications, PagePermissionNames.ActionView))
                 return true;
@@ -190,6 +221,8 @@ public static class PermissionSeeder
                 || perm == PagePermissionNames.P(PagePermissionNames.PageHolidays, PagePermissionNames.ActionView)
                 || perm == PagePermissionNames.P(PagePermissionNames.PageTests, PagePermissionNames.ActionView)
                 || perm == PagePermissionNames.P(PagePermissionNames.PageCourses, PagePermissionNames.ActionView))
+                return true;
+            if (role == SchoolUserRoleKeys.Guardian && IsAiChatPermission(perm))
                 return true;
             return false;
         }

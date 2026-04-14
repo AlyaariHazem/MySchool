@@ -91,8 +91,28 @@ export class SidebarComponent {
   get canViewSettingsNav(): boolean {
     return this.perm.hasPermission(PagePermission.Settings.View);
   }
-  get canViewReportsNav(): boolean {
-    return this.perm.hasPermission(PagePermission.Reports.View);
+  /** Show التقارير submenu when any report (umbrella or sub-route) is allowed. */
+  get canViewReportsSection(): boolean {
+    return this.perm.hasAny([
+      PagePermission.Reports.View,
+      PagePermission.ReportsFinancial.View,
+      PagePermission.ReportsTerm.View,
+      PagePermission.ReportsMonthly.View,
+      PagePermission.ReportsRegistration.View,
+      PagePermission.ReportsAllotment.View,
+    ]);
+  }
+  get canViewReportsFinancialNav(): boolean {
+    return this.perm.hasPermission(PagePermission.ReportsFinancial.View);
+  }
+  get canViewReportsTermNav(): boolean {
+    return this.perm.hasPermission(PagePermission.ReportsTerm.View);
+  }
+  get canViewReportsMonthlyNav(): boolean {
+    return this.perm.hasPermission(PagePermission.ReportsMonthly.View);
+  }
+  get canViewReportsRegistrationNav(): boolean {
+    return this.perm.hasPermission(PagePermission.ReportsRegistration.View);
   }
   get canViewGuardiansNav(): boolean {
     return this.perm.hasPermission(PagePermission.Guardians.View);

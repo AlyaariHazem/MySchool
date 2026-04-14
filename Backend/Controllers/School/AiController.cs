@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Authorization;
 using Backend.DTOS.Ai;
 using Backend.Services.Ai;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.School;
@@ -24,7 +24,7 @@ public class AiController : ControllerBase
     }
 
     /// <summary>Natural-language chat with OpenAI tool calling (server-side tools only).</summary>
-    [Authorize(Roles = "ADMIN,MANAGER,TEACHER")]
+    [HasPermission("AiChat.View")]
     [HttpPost("chat")]
     public async Task<ActionResult<AiChatResponseDto>> Chat([FromBody] AiChatRequestDto? dto, CancellationToken cancellationToken)
     {

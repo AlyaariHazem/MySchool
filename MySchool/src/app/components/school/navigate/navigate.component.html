@@ -11,5 +11,5 @@
         </div>
     </div>
 
-    <app-ai-assistant-floating [attr.dir]="(dir$ | async) ?? 'rtl'"></app-ai-assistant-floating>
+    <app-ai-assistant-floating *ngIf="canUseAiChat" [attr.dir]="(dir$ | async) ?? 'rtl'"></app-ai-assistant-floating>
 </div>

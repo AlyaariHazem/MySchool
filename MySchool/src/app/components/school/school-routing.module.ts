@@ -49,16 +49,47 @@ const routes: Routes = [
       },
       { path: 'sidebar', component: BreadcrumbComponent, data: { breadcrumb: 'Sidebar' } },
       {
-        path: 'reports', data: { breadcrumb: 'تقارير' }, children: [
-          {path:'',redirectTo:'account',pathMatch:'full'},
-          { path: 'account', component: AccountReportComponent, data: { breadcrumb: 'حسابات' } },
-          { path: 'allotment', component: AllotmentComponent, data: { breadcrumb: 'تخصيص التقارير' } },
-          { path: 'grades-month', component: StudentMonthResultComponent, data: { breadcrumb: 'تقارير شهرية' } },
-          { path: 'registration', component: RegistrationReportComponent, data: { breadcrumb: 'استمارة التسجيل' } },
-          { path: 'term-result', component: TermResultComponent, data: { breadcrumb: 'الدرجات الفصلية' } },
+        path: 'reports',
+        data: { breadcrumb: 'تقارير' },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./report/reports-entry/reports-entry.component').then((m) => m.ReportsEntryComponent),
+          },
+          {
+            path: 'account',
+            component: AccountReportComponent,
+            data: { breadcrumb: 'حسابات', permission: 'ReportsFinancial.View' },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'allotment',
+            component: AllotmentComponent,
+            data: { breadcrumb: 'تخصيص التقارير', permission: 'ReportsAllotment.View' },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'grades-month',
+            component: StudentMonthResultComponent,
+            data: { breadcrumb: 'تقارير شهرية', permission: 'ReportsMonthly.View' },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'registration',
+            component: RegistrationReportComponent,
+            data: { breadcrumb: 'استمارة التسجيل', permission: 'ReportsRegistration.View' },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'term-result',
+            component: TermResultComponent,
+            data: { breadcrumb: 'الدرجات الفصلية', permission: 'ReportsTerm.View' },
+            canMatch: [permissionGuard],
+          },
           { path: 'not-found', component: PageNotFoundComponent },
-          { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
-        ]
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
       },
       {
         path: 'students', data: { breadcrumb: 'الطلاب' }, children: [

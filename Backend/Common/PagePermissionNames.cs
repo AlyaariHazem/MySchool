@@ -18,6 +18,19 @@ public static class PagePermissionNames
     public const string PageAccounts = "Accounts";
     public const string PageGrades = "Grades";
     public const string PageReports = "Reports";
+    /// <summary>Financial / account reports (route: <c>reports/account</c>).</summary>
+    public const string PageReportsFinancial = "ReportsFinancial";
+    /// <summary>Term grades report (<c>reports/term-result</c>).</summary>
+    public const string PageReportsTerm = "ReportsTerm";
+    /// <summary>Monthly grades report (<c>reports/grades-month</c>).</summary>
+    public const string PageReportsMonthly = "ReportsMonthly";
+    /// <summary>Registration form report (<c>reports/registration</c>).</summary>
+    public const string PageReportsRegistration = "ReportsRegistration";
+    /// <summary>Allotment / custom report layout (<c>reports/allotment</c>).</summary>
+    public const string PageReportsAllotment = "ReportsAllotment";
+    /// <summary>Floating AI assistant (<c>api/Ai/chat</c>).</summary>
+    public const string PageAiChat = "AiChat";
+
     public const string PageCalendar = "Calendar";
     public const string PageSchedule = "Schedule";
     public const string PageExams = "Exams";
@@ -66,6 +79,12 @@ public static class PagePermissionNames
             PageAccounts,
             PageGrades,
             PageReports,
+            PageReportsFinancial,
+            PageReportsTerm,
+            PageReportsMonthly,
+            PageReportsRegistration,
+            PageReportsAllotment,
+            PageAiChat,
             PageCalendar,
             PageSchedule,
             PageExams,

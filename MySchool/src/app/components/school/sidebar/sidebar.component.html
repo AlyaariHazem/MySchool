@@ -159,7 +159,7 @@
           </ul>
         </li>
 
-        <li class="submenu" (click)="toggleSubmenu('reportsSubmenu')" *ngIf="canViewReportsNav">
+        <li class="submenu" (click)="toggleSubmenu('reportsSubmenu')" *ngIf="canViewReportsSection">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-11.png" alt="icon">
             <span>{{ 'sidebar.reports' | translate }}</span>
@@ -167,15 +167,15 @@
               [ngClass]="{'rotate-arrow': isSubmenuOpen['reportsSubmenu']}"></span>
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('reportsSubmenu')">
-            <li><a routerLink="/school/reports" (click)="cancel()"><span>{{ 'sidebar.report.reports' | translate
+            <li *ngIf="canViewReportsSection"><a routerLink="/school/reports" (click)="cancel()"><span>{{ 'sidebar.report.reports' | translate
                   }}</span></a></li>
-            <li><a routerLink="/school/reports/account" (click)="cancel()"><span>{{ 'sidebar.report.account' | translate
+            <li *ngIf="canViewReportsFinancialNav"><a routerLink="/school/reports/account" (click)="cancel()"><span>{{ 'sidebar.report.account' | translate
                   }}</span></a></li>
-            <li><a routerLink="/school/reports/term-result" (click)="cancel()"><span>الدرجات الفصلية</span></a></li>
-            <li><a routerLink="/school/reports/grades-month" (click)="cancel()"><span>{{ 'sidebar.report.gradesMonth' |
+            <li *ngIf="canViewReportsTermNav"><a routerLink="/school/reports/term-result" (click)="cancel()"><span>الدرجات الفصلية</span></a></li>
+            <li *ngIf="canViewReportsMonthlyNav"><a routerLink="/school/reports/grades-month" (click)="cancel()"><span>{{ 'sidebar.report.gradesMonth' |
                   translate
                   }}</span></a></li>
-            <li><a routerLink="/school/reports/registration" (click)="cancel()"><span>استمارة التسجيل</span></a></li>
+            <li *ngIf="canViewReportsRegistrationNav"><a routerLink="/school/reports/registration" (click)="cancel()"><span>استمارة التسجيل</span></a></li>
           </ul>
 
         </li>
@@ -356,7 +356,7 @@
             </li>
 
             <!-- التقارير (nested submenu) -->
-            <li class="submenu" (click)="toggleSubmenu('reportsSubmenu', 'mangmentSubmenu')" *ngIf="canViewReportsNav">
+            <li class="submenu" (click)="toggleSubmenu('reportsSubmenu', 'mangmentSubmenu')" *ngIf="canViewReportsSection">
               <a href="javascript:void(0);">
                 <img src="assets/img/sidebar/icon-3.png" alt="icon">
                 <span>{{ 'sidebar.reports' | translate }}</span>
