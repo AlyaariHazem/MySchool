@@ -41,14 +41,17 @@ public class StudentRepository : IStudentRepository
     }
 
     /// <summary>
-    /// Students visible in school UIs: division/class must belong to the canonical active academic year
-    /// (<see cref="IYearRepository.GetActiveYearIdAsync"/>), matching either class or stage year id.
+    /// Students for the active academic year (<see cref="IYearRepository.GetActiveYearIdAsync"/>):
+    /// current division/class targets that year (via <c>Class.YearID</c> or <c>Stage.YearID</c>),
+    /// or the student has monthly or termly grade rows for that year — same breadth as dashboard enrollment trend.
     /// </summary>
-    private static IQueryable<Student> WhereEnrolledInAcademicYear(IQueryable<Student> query, int activeYearId) =>
-        query.Where(s => s.Division != null &&
-                         s.Division.Class != null &&
-                         (s.Division.Class.YearID == activeYearId ||
-                          (s.Division.Class.Stage != null && s.Division.Class.Stage.YearID == activeYearId)));
+    private IQueryable<Student> WhereEnrolledInAcademicYear(IQueryable<Student> query, int activeYearId) =>
+        query.Where(s =>
+            (s.Division != null && s.Division.Class != null &&
+             (s.Division.Class.YearID == activeYearId ||
+              (s.Division.Class.Stage != null && s.Division.Class.Stage.YearID == activeYearId)))
+            || _context.MonthlyGrades.Any(mg => mg.StudentID == s.StudentID && mg.YearID == activeYearId)
+            || _context.TermlyGrades.Any(tg => tg.StudentID == s.StudentID && tg.YearID == activeYearId));
 
     // Create: Add a new student (StudentID is structured YYYY+SS+NNNN; explicit insert uses IDENTITY_INSERT)
     public async Task<Student> AddStudentAsync(Student student)
