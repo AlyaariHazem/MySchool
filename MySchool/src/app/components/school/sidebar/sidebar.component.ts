@@ -79,6 +79,9 @@ export class SidebarComponent {
   }
 
   /** Page-level flags for sidebar (JWT + login <c>permissions</c>). */
+  get canViewDashboardNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Dashboard.View);
+  }
   get canViewTeachersNav(): boolean {
     return this.perm.hasPermission(PagePermission.Teachers.View);
   }
@@ -90,5 +93,69 @@ export class SidebarComponent {
   }
   get canViewReportsNav(): boolean {
     return this.perm.hasPermission(PagePermission.Reports.View);
+  }
+  get canViewGuardiansNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Guardians.View);
+  }
+  get canViewAccountsNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Accounts.View);
+  }
+  get canViewGradesNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Grades.View);
+  }
+  get canViewCalendarNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Calendar.View);
+  }
+  get canViewScheduleNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Schedule.View);
+  }
+  get canViewExamsNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Exams.View);
+  }
+  get canViewHomeworkNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Homework.View);
+  }
+  get canViewAttendanceNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Attendance.View);
+  }
+  get canViewNotificationsNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Notifications.View);
+  }
+  get canViewTestsNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Tests.View);
+  }
+  get canViewHolidaysNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Holidays.View);
+  }
+  get canViewEventsNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Events.View);
+  }
+  get canViewFeesNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Fees.View);
+  }
+  /** المقررات والخطط — books / curricula / plans. */
+  get canViewCoursesOrPlansNav(): boolean {
+    return (
+      this.perm.hasPermission(PagePermission.Courses.View) ||
+      this.perm.hasPermission(PagePermission.Plans.View)
+    );
+  }
+  get canViewPayrollNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Payroll.View);
+  }
+  get canViewBlogsNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Blogs.View);
+  }
+  get canViewEmployeesNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Employees.View);
+  }
+  get canViewActivitiesNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Activities.View);
+  }
+  /** إدارة — show when any nested module is allowed. */
+  get canViewManagementSection(): boolean {
+    return (
+      this.perm.hasPermission(PagePermission.Employees.View) 
+    );
   }
 }

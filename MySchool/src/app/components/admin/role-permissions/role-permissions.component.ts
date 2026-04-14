@@ -16,19 +16,37 @@ const ROLE_LABELS_AR: Record<string, string> = {
   Guardian: 'ولي أمر',
 };
 
+/** Module/page keys from API → Arabic titles (permission matrix display). */
 const PAGE_LABELS_AR: Record<string, string> = {
+  Accounts: 'الحسابات',
+  Activities: 'الأنشطة',
+  Attendance: 'الحضور والغياب',
+  Blogs: 'المدونات',
+  Calendar: 'التقويم',
+  Complaints: 'الشكاوى',
+  Courses: 'المقررات',
   Dashboard: 'لوحة التحكم',
   Employees: 'الموظفون',
-  Teachers: 'المعلمون',
-  Students: 'الطلاب',
   Evaluations: 'التقييمات',
-  Reports: 'التقارير',
-  Plans: 'الخطط',
-  Activities: 'الأنشطة',
-  Complaints: 'الشكاوى',
+  Events: 'الفعاليات',
+  Exams: 'الامتحانات',
+  Fees: 'الرسوم',
+  Grades: 'الدرجات',
+  Guardians: 'أولياء الأمور',
+  Holidays: 'الإجازات',
+  Homework: 'الواجبات',
+  Management: 'الإدارة',
   Meetings: 'الاجتماعات',
+  Notifications: 'الإشعارات',
+  Payroll: 'الرواتب',
+  Plans: 'الخطط',
+  Reports: 'التقارير',
   Requests: 'الطلبات',
+  Schedule: 'الجدول الدراسي',
   Settings: 'الإعدادات',
+  Students: 'الطلاب',
+  Teachers: 'المعلمون',
+  Tests: 'الاختبارات',
 };
 
 const ACTION_LABELS_AR: Record<string, string> = {

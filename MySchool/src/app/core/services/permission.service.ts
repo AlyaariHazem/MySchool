@@ -3,20 +3,47 @@ import { Injectable } from '@angular/core';
 const STORAGE_PERMISSIONS = 'permissions';
 const STORAGE_SCHOOL_ROLE = 'schoolRole';
 
-/** Mirrors backend <c>PagePermissionNames</c> for use in templates and route <c>data</c>. */
+/** CRUD keys for a module (matches <c>PagePermissionNames</c> on the server). */
+function crud(page: string) {
+  return {
+    View: `${page}.View`,
+    Create: `${page}.Create`,
+    Update: `${page}.Update`,
+    Delete: `${page}.Delete`,
+  } as const;
+}
+
+/** Mirrors backend <c>PagePermissionNames</c> for templates and route <c>data</c>. */
 export const PagePermission = {
   Dashboard: { View: 'Dashboard.View' },
-  Employees: { View: 'Employees.View', Create: 'Employees.Create', Update: 'Employees.Update', Delete: 'Employees.Delete' },
-  Teachers: { View: 'Teachers.View', Create: 'Teachers.Create', Update: 'Teachers.Update', Delete: 'Teachers.Delete' },
-  Students: { View: 'Students.View', Create: 'Students.Create', Update: 'Students.Update', Delete: 'Students.Delete' },
-  Evaluations: { View: 'Evaluations.View', Create: 'Evaluations.Create', Update: 'Evaluations.Update', Delete: 'Evaluations.Delete' },
-  Reports: { View: 'Reports.View', Create: 'Reports.Create', Update: 'Reports.Update', Delete: 'Reports.Delete' },
-  Plans: { View: 'Plans.View', Create: 'Plans.Create', Update: 'Plans.Update', Delete: 'Plans.Delete' },
-  Activities: { View: 'Activities.View', Create: 'Activities.Create', Update: 'Activities.Update', Delete: 'Activities.Delete' },
-  Complaints: { View: 'Complaints.View', Create: 'Complaints.Create', Update: 'Complaints.Update', Delete: 'Complaints.Delete' },
-  Meetings: { View: 'Meetings.View', Create: 'Meetings.Create', Update: 'Meetings.Update', Delete: 'Meetings.Delete' },
-  Requests: { View: 'Requests.View', Create: 'Requests.Create', Update: 'Requests.Update', Delete: 'Requests.Delete' },
-  Settings: { View: 'Settings.View', Create: 'Settings.Create', Update: 'Settings.Update', Delete: 'Settings.Delete' },
+  Settings: crud('Settings'),
+  Employees: crud('Employees'),
+  Teachers: crud('Teachers'),
+  Students: crud('Students'),
+  Guardians: crud('Guardians'),
+  Accounts: crud('Accounts'),
+  Grades: crud('Grades'),
+  Reports: crud('Reports'),
+  Calendar: crud('Calendar'),
+  Schedule: crud('Schedule'),
+  Exams: crud('Exams'),
+  Homework: crud('Homework'),
+  Attendance: crud('Attendance'),
+  Notifications: crud('Notifications'),
+  Tests: crud('Tests'),
+  Holidays: crud('Holidays'),
+  Events: crud('Events'),
+  Fees: crud('Fees'),
+  Courses: crud('Courses'),
+  Payroll: crud('Payroll'),
+  Blogs: crud('Blogs'),
+  Management: crud('Management'),
+  Evaluations: crud('Evaluations'),
+  Plans: crud('Plans'),
+  Activities: crud('Activities'),
+  Complaints: crud('Complaints'),
+  Meetings: crud('Meetings'),
+  Requests: crud('Requests'),
 } as const;
 
 @Injectable({ providedIn: 'root' })

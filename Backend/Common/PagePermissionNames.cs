@@ -8,38 +8,96 @@ public static class PagePermissionNames
     public const string ActionUpdate = "Update";
     public const string ActionDelete = "Delete";
 
-    // Pages
+    // Pages (school shell modules / sidebar)
     public const string PageDashboard = "Dashboard";
+    public const string PageSettings = "Settings";
     public const string PageEmployees = "Employees";
     public const string PageTeachers = "Teachers";
     public const string PageStudents = "Students";
-    public const string PageEvaluations = "Evaluations";
+    public const string PageGuardians = "Guardians";
+    public const string PageAccounts = "Accounts";
+    public const string PageGrades = "Grades";
     public const string PageReports = "Reports";
+    public const string PageCalendar = "Calendar";
+    public const string PageSchedule = "Schedule";
+    public const string PageExams = "Exams";
+    public const string PageHomework = "Homework";
+    public const string PageAttendance = "Attendance";
+    public const string PageNotifications = "Notifications";
+    public const string PageTests = "Tests";
+    public const string PageHolidays = "Holidays";
+    public const string PageEvents = "Events";
+    public const string PageFees = "Fees";
+    public const string PageCourses = "Courses";
+    public const string PagePayroll = "Payroll";
+    public const string PageBlogs = "Blogs";
+    public const string PageManagement = "Management";
+
+    public const string PageEvaluations = "Evaluations";
     public const string PagePlans = "Plans";
     public const string PageActivities = "Activities";
     public const string PageComplaints = "Complaints";
     public const string PageMeetings = "Meetings";
     public const string PageRequests = "Requests";
-    public const string PageSettings = "Settings";
 
     public static string P(string page, string action) => $"{page}.{action}";
 
-    /// <summary>Every defined permission string (for seeding and admin “grant all”).</summary>
-    public static readonly string[] All =
+    private static string[] ActionsFor(string page) =>
+    [
+        P(page, ActionView),
+        P(page, ActionCreate),
+        P(page, ActionUpdate),
+        P(page, ActionDelete),
+    ];
+
+    /// <summary>Every defined permission string (for seeding, policies, and admin “grant all”).</summary>
+    public static readonly string[] All = BuildAll();
+
+    private static string[] BuildAll()
     {
-        P(PageDashboard, ActionView),
-        P(PageEmployees, ActionView), P(PageEmployees, ActionCreate), P(PageEmployees, ActionUpdate), P(PageEmployees, ActionDelete),
-        P(PageTeachers, ActionView), P(PageTeachers, ActionCreate), P(PageTeachers, ActionUpdate), P(PageTeachers, ActionDelete),
-        P(PageStudents, ActionView), P(PageStudents, ActionCreate), P(PageStudents, ActionUpdate), P(PageStudents, ActionDelete),
-        P(PageEvaluations, ActionView), P(PageEvaluations, ActionCreate), P(PageEvaluations, ActionUpdate), P(PageEvaluations, ActionDelete),
-        P(PageReports, ActionView), P(PageReports, ActionCreate), P(PageReports, ActionUpdate), P(PageReports, ActionDelete),
-        P(PagePlans, ActionView), P(PagePlans, ActionCreate), P(PagePlans, ActionUpdate), P(PagePlans, ActionDelete),
-        P(PageActivities, ActionView), P(PageActivities, ActionCreate), P(PageActivities, ActionUpdate), P(PageActivities, ActionDelete),
-        P(PageComplaints, ActionView), P(PageComplaints, ActionCreate), P(PageComplaints, ActionUpdate), P(PageComplaints, ActionDelete),
-        P(PageMeetings, ActionView), P(PageMeetings, ActionCreate), P(PageMeetings, ActionUpdate), P(PageMeetings, ActionDelete),
-        P(PageRequests, ActionView), P(PageRequests, ActionCreate), P(PageRequests, ActionUpdate), P(PageRequests, ActionDelete),
-        P(PageSettings, ActionView), P(PageSettings, ActionCreate), P(PageSettings, ActionUpdate), P(PageSettings, ActionDelete),
-    };
+        var pages = new[]
+        {
+            PageDashboard,
+            PageSettings,
+            PageEmployees,
+            PageTeachers,
+            PageStudents,
+            PageGuardians,
+            PageAccounts,
+            PageGrades,
+            PageReports,
+            PageCalendar,
+            PageSchedule,
+            PageExams,
+            PageHomework,
+            PageAttendance,
+            PageNotifications,
+            PageTests,
+            PageHolidays,
+            PageEvents,
+            PageFees,
+            PageCourses,
+            PagePayroll,
+            PageBlogs,
+            PageManagement,
+            PageEvaluations,
+            PagePlans,
+            PageActivities,
+            PageComplaints,
+            PageMeetings,
+            PageRequests,
+        };
+
+        var list = new List<string> { P(PageDashboard, ActionView) };
+        foreach (var page in pages)
+        {
+            if (page == PageDashboard)
+                continue;
+            list.AddRange(ActionsFor(page));
+        }
+
+        return list.ToArray();
+    }
 
     public const string ClaimType = "permission";
     public const string SchoolRoleClaimType = "SchoolRole";

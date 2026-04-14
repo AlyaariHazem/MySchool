@@ -14,7 +14,7 @@
 
       <ul class="sidebar-ul">
 
-        <li class="sidebar-sticky-top active">
+        <li class="sidebar-sticky-top active" *ngIf="canViewDashboardNav">
           <div class="sidebar-menu-label">{{ 'sidebar.menu' | translate }}</div>
           <a [routerLink]="homePath()" (click)="cancel()">
             <img src="assets/img/sidebar/icon-1.png" alt="icon">
@@ -59,7 +59,7 @@
 
 
         <!-- المدرسين -->
-        <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')" *ngIf="canViewTeachersNav">
+        <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')" *ngIf="canViewManagementSection">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-10.png" alt="icon">
             <span>{{ 'sidebar.teachers' | translate }}</span>
@@ -111,7 +111,7 @@
         </li>
 
         <!-- أولياء الأمور -->
-        <li class="submenu" (click)="toggleSubmenu('guardianSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('guardianSubmenu')" *ngIf="canViewGuardiansNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-4.png" alt="icon">
             <span>{{ 'sidebar.parents' | translate }}</span>
@@ -126,7 +126,7 @@
         </li>
 
         <!-- الحسابات -->
-        <li class="submenu" (click)="toggleSubmenu('accountSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('accountSubmenu')" *ngIf="canViewAccountsNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-3.png" alt="icon">
             <span>{{ 'sidebar.accounts' | translate }}</span>
@@ -142,7 +142,7 @@
         </li>
 
         <!-- درجات الطلاب -->
-        <li class="submenu" (click)="toggleSubmenu('GradeSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('GradeSubmenu')" *ngIf="canViewGradesNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-3.png" alt="icon">
             <span>{{ 'sidebar.grades' | translate }}</span>
@@ -180,45 +180,45 @@
 
         </li>
         <!-- التقويم -->
-        <li>
+        <li *ngIf="canViewCalendarNav">
           <a routerLink="/school/allotment" (click)="cancel()">
             <img src="assets/img/sidebar/icon-6.png" alt="icon">
             <span>{{ 'sidebar.calendar' | translate }}</span>
           </a>
         </li>
         <!-- جدول الحصص الأسبوعي -->
-        <li>
+        <li *ngIf="canViewScheduleNav">
           <a routerLink="/school/schedule" (click)="cancel()">
             <img src="assets/img/sidebar/icon-11.png" alt="icon">
             <span>{{ 'sidebar.schedule' | translate }}</span>
           </a>
         </li>
-        <li>
+        <li *ngIf="canViewExamsNav">
           <a routerLink="/school/exams" (click)="cancel()">
             <img src="assets/img/sidebar/icon-7.png" alt="icon">
             <span>الامتحانات</span>
           </a>
         </li>
-        <li>
+        <li *ngIf="canViewHomeworkNav">
           <a routerLink="/school/homework" (click)="cancel()">
             <img src="assets/img/sidebar/icon-7.png" alt="icon">
             <span>الواجبات</span>
           </a>
         </li>
-        <li>
+        <li *ngIf="canViewAttendanceNav">
           <a routerLink="/school/attendance" (click)="cancel()">
             <img src="assets/img/sidebar/icon-11.png" alt="icon">
             <span>{{ 'sidebar.studentAttendance' | translate }}</span>
           </a>
         </li>
-        <li>
+        <li *ngIf="canViewNotificationsNav">
           <a routerLink="/school/notifications" (click)="cancel()">
             <img src="assets/img/sidebar/icon-9.png" alt="icon">
             <span>{{ 'sidebar.notifications' | translate }}</span>
           </a>
         </li>
         <!-- الإختبارات / monthly grades entry -->
-        <li>
+        <li *ngIf="canViewTestsNav">
           <a routerLink="/school/grade/GradeMonth" (click)="cancel()">
             <img src="assets/img/sidebar/icon-7.png" alt="icon">
             <span>{{ 'sidebar.tests' | translate }}</span>
@@ -226,7 +226,7 @@
         </li>
 
         <!-- العطل -->
-        <li>
+        <li *ngIf="canViewHolidaysNav">
           <a routerLink="dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-8.png" alt="icon">
             <span>{{ 'sidebar.holidays' | translate }}</span>
@@ -234,7 +234,7 @@
         </li>
 
         <!-- الأحداث -->
-        <li>
+        <li *ngIf="canViewEventsNav">
           <a routerLink="dashboard" (click)="cancel()">
             <img src="assets/img/sidebar/icon-9.png" alt="icon">
             <span>{{ 'sidebar.events' | translate }}</span>
@@ -242,7 +242,7 @@
         </li>
 
         <!-- الرسوم -->
-        <li class="submenu" (click)="toggleSubmenu('accountsSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('accountsSubmenu')" *ngIf="canViewFeesNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-11.png" alt="icon">
             <span>{{ 'sidebar.fees' | translate }}</span>
@@ -262,7 +262,7 @@
         </li>
 
         <!-- المقررات و الخطط -->
-        <li class="submenu" (click)="toggleSubmenu('courses')">
+        <li class="submenu" (click)="toggleSubmenu('courses')" *ngIf="canViewCoursesOrPlansNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-19.png" alt="icon">
             <span>{{ 'sidebar.courses' | translate }}</span>
@@ -280,7 +280,7 @@
         </li>
 
         <!-- كشف المرتبات -->
-        <li class="submenu" (click)="toggleSubmenu('payrollSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('payrollSubmenu')" *ngIf="canViewPayrollNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-11.png" alt="icon">
             <span>{{ 'sidebar.payroll' | translate }}</span>
@@ -295,7 +295,7 @@
         </li>
 
         <!-- المدونات -->
-        <li class="submenu" (click)="toggleSubmenu('blogSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('blogSubmenu')" *ngIf="canViewBlogsNav">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-12.png" alt="icon">
             <span>{{ 'sidebar.blogs' | translate }}</span>
@@ -310,7 +310,7 @@
         </li>
 
         <!-- إدارة -->
-        <li class="submenu" (click)="toggleSubmenu('mangmentSubmenu')">
+        <li class="submenu" (click)="toggleSubmenu('mangmentSubmenu')" *ngIf="canViewManagementSection">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-3.png" alt="icon">
             <span>{{ 'sidebar.management' | translate }}</span>
@@ -319,7 +319,7 @@
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('mangmentSubmenu')">
 
             <!-- الموظفين (nested submenu) -->
-            <li class="submenu" (click)="toggleSubmenu('employeesSubmenu', 'mangmentSubmenu')">
+            <li class="submenu" (click)="toggleSubmenu('employeesSubmenu', 'mangmentSubmenu')" *ngIf="canViewEmployeesNav">
               <a href="javascript:void(0);">
                 <img src="assets/img/sidebar/icon-3.png" alt="icon">
                 <span>{{ 'sidebar.employees' | translate }}</span>
@@ -346,7 +346,7 @@
             </li>
 
             <!-- الأنشطة -->
-            <li>
+            <li *ngIf="canViewActivitiesNav">
               <a href="#" (click)="cancel()"><span>{{ 'sidebar.activities' | translate }}</span></a>
             </li>
 
@@ -356,7 +356,7 @@
             </li>
 
             <!-- التقارير (nested submenu) -->
-            <li class="submenu" (click)="toggleSubmenu('reportsSubmenu', 'mangmentSubmenu')">
+            <li class="submenu" (click)="toggleSubmenu('reportsSubmenu', 'mangmentSubmenu')" *ngIf="canViewReportsNav">
               <a href="javascript:void(0);">
                 <img src="assets/img/sidebar/icon-3.png" alt="icon">
                 <span>{{ 'sidebar.reports' | translate }}</span>
