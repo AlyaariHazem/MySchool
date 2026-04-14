@@ -9,7 +9,7 @@
           mat-raised-button
           color="primary"
           (click)="save()"
-          [disabled]="saving || loading || !dirty"
+          [disabled]="saving || loading || !hasDirtyChangesForSelection"
         >
           {{ saving ? 'جاري الحفظ…' : 'حفظ التغييرات' }}
         </button>
@@ -26,38 +26,66 @@
       @if (loading) {
         <p class="hint hint-muted">جاري التحميل…</p>
       }
-      @if (!loading && rows.length && roles.length) {
-        <div class="table-scroll">
-          <table class="matrix-table">
-            <thead>
-              <tr>
-                <th class="sticky-col">الصفحة</th>
-                <th class="sticky-col2">الإجراء</th>
-                @for (r of roles; track r) {
-                  <th>{{ translateRole(r) }}</th>
-                }
-              </tr>
-            </thead>
-            <tbody>
-              @for (p of rows; track p.name) {
-                <tr>
-                  <td class="sticky-col">{{ translatePage(p.page) }}</td>
-                  <td class="sticky-col2">{{ translateAction(p.action) }}</td>
-                  @for (r of roles; track r) {
-                    <td class="cell">
-                      <mat-checkbox
-                        color="primary"
-                        [checked]="isAllowed(r, p.name)"
-                        (change)="toggle(r, p.name, $event.checked)"
-                        [disabled]="saving"
-                      ></mat-checkbox>
-                    </td>
-                  }
-                </tr>
+      @if (!loading && pageGroups.length && roles.length) {
+        <div class="filters-row">
+          <mat-form-field appearance="outline" class="role-select-field" subscriptSizing="dynamic">
+            <mat-label>الدور</mat-label>
+            <mat-select
+              [(ngModel)]="selectedRole"
+              name="permRole"
+              [disabled]="saving"
+              panelClass="role-perm-select-panel"
+            >
+              @for (r of roles; track r) {
+                <mat-option [value]="r">{{ translateRole(r) }}</mat-option>
               }
-            </tbody>
-          </table>
+            </mat-select>
+          </mat-form-field>
+          <p class="filters-hint">عرض وتعديل صلاحيات الدور المحدد لكل صفحة.</p>
         </div>
+
+        @if (selectedRole; as role) {
+          <div class="cards-scroll">
+            <div class="cards-grid">
+              @for (g of pageGroups; track g.pageKey) {
+                @defer (on viewport) {
+                  <article class="perm-page-card">
+                    <header class="perm-page-card__head">
+                      <h3 class="perm-page-card__title">{{ translatePage(g.pageKey) }}</h3>
+                      <mat-checkbox
+                        class="perm-page-card__select-all"
+                        color="primary"
+                        [checked]="pageAllAllowed(g)"
+                        [indeterminate]="pageSomeAllowed(g)"
+                        (change)="togglePageForRole(g.pageKey, $event.checked)"
+                        [disabled]="saving"
+                      >
+                        تحديد الكل
+                      </mat-checkbox>
+                    </header>
+                    <div class="perm-action-list" role="list">
+                      @for (p of g.items; track p.name) {
+                        <div class="perm-action-row" role="listitem">
+                          <span class="perm-action-label">{{ translateAction(p.action) }}</span>
+                          <mat-checkbox
+                            color="primary"
+                            [checked]="isAllowed(role, p.name)"
+                            (change)="toggle(role, p.name, $event.checked)"
+                            [disabled]="saving"
+                          ></mat-checkbox>
+                        </div>
+                      }
+                    </div>
+                  </article>
+                } @placeholder {
+                  <div class="perm-card-placeholder" aria-hidden="true">
+                    <div class="perm-card-placeholder__shimmer"></div>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        }
       }
       @if (!loading && (!rows.length || !roles.length)) {
         <div class="empty-state">

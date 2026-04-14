@@ -30,7 +30,14 @@ public class RolePermissionsController : ControllerBase
     {
         if (body?.Cells == null)
             return BadRequest(new { message = "Cells required." });
-        await _service.SaveMatrixAsync(body, cancellationToken);
+        try
+        {
+            await _service.SaveMatrixAsync(body, cancellationToken);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
         return NoContent();
     }
 }

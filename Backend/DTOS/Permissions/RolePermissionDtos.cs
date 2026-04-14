@@ -17,12 +17,19 @@ public class PermissionItemDto
 
 public class RolePermissionMatrixUpdateDto
 {
+    /// <summary>
+    /// When set, every cell applies only to this school role (partial matrix update).
+    /// Cells may omit <see cref="RolePermissionCellDto.RoleName"/>; if provided it must match.
+    /// </summary>
+    public string? ScopeToRoleName { get; set; }
+
     public List<RolePermissionCellDto> Cells { get; set; } = new();
 }
 
 public class RolePermissionCellDto
 {
-    public string RoleName { get; set; } = string.Empty;
+    /// <summary>Optional when <see cref="RolePermissionMatrixUpdateDto.ScopeToRoleName"/> is set.</summary>
+    public string? RoleName { get; set; }
     public string PermissionName { get; set; } = string.Empty;
     public bool IsAllowed { get; set; }
 }

@@ -80,6 +80,14 @@ export interface RolePermissionMatrixDto {
   matrix: Record<string, boolean>;
 }
 
+/** Permissions for one page/module, used for card UI. */
+export interface PagePermissionGroup {
+  pageKey: string;
+  items: PermissionItemDto[];
+}
+
+const ACTION_SORT_ORDER = ['View', 'Create', 'Update', 'Delete'];
+
 @Component({
   selector: 'app-role-permissions',
   templateUrl: './role-permissions.component.html',
@@ -95,9 +103,19 @@ export class RolePermissionsComponent implements OnInit {
 
   roles: string[] = [];
   rows: PermissionItemDto[] = [];
+  /** Grouped by `page` for card grid (lazy-rendered). */
+  pageGroups: PagePermissionGroup[] = [];
+  /** Currently edited role (matrix columns collapsed into one). */
+  selectedRole: string | null = null;
   /** Local editable copy of matrix keys → allowed */
   localMatrix: Record<string, boolean> = {};
-  dirty = false;
+  /** Roles with unsaved edits (partial PUT sends one role at a time). */
+  private readonly dirtyRoles = new Set<string>();
+
+  /** True when the role in the dropdown has pending changes. */
+  get hasDirtyChangesForSelection(): boolean {
+    return !!this.selectedRole && this.dirtyRoles.has(this.selectedRole);
+  }
 
   ngOnInit(): void {
     this.load();
@@ -114,7 +132,9 @@ export class RolePermissionsComponent implements OnInit {
           this.roles = dto.roles;
           this.rows = dto.permissions;
           this.localMatrix = { ...dto.matrix };
-          this.dirty = false;
+          this.dirtyRoles.clear();
+          this.selectedRole = this.roles[0] ?? null;
+          this.rebuildPageGroups();
           this.loading = false;
         },
         error: (e) => {
@@ -122,10 +142,6 @@ export class RolePermissionsComponent implements OnInit {
           this.loading = false;
         },
       });
-  }
-
-  cellKey(role: string, permissionName: string): string {
-    return `${role}|${permissionName}`;
   }
 
   isAllowed(role: string, permissionName: string): boolean {
@@ -136,7 +152,7 @@ export class RolePermissionsComponent implements OnInit {
   toggle(role: string, permissionName: string, checked: boolean): void {
     const k = this.matrixKey(role, permissionName);
     this.localMatrix[k] = checked;
-    this.dirty = true;
+    this.dirtyRoles.add(role);
   }
 
   /** Arabic label for role column (canonical key unchanged in API). */
@@ -152,24 +168,72 @@ export class RolePermissionsComponent implements OnInit {
     return labelAr(ACTION_LABELS_AR, actionKey);
   }
 
-  save(): void {
-    const cells: { roleName: string; permissionName: string; isAllowed: boolean }[] = [];
-    for (const role of this.roles) {
-      for (const p of this.rows) {
-        const k = this.matrixKey(role, p.name);
-        cells.push({
-          roleName: role,
-          permissionName: p.name,
-          isAllowed: !!this.localMatrix[k],
-        });
+  /** All permissions on this page allowed for `selectedRole`. */
+  pageAllAllowed(group: PagePermissionGroup): boolean {
+    const role = this.selectedRole;
+    if (!role || !group.items.length) return false;
+    return group.items.every((p) => this.isAllowed(role, p.name));
+  }
+
+  /** Some but not all (for indeterminate). */
+  pageSomeAllowed(group: PagePermissionGroup): boolean {
+    const role = this.selectedRole;
+    if (!role || !group.items.length) return false;
+    const any = group.items.some((p) => this.isAllowed(role, p.name));
+    const all = group.items.every((p) => this.isAllowed(role, p.name));
+    return any && !all;
+  }
+
+  togglePageForRole(pageKey: string, checked: boolean): void {
+    const role = this.selectedRole;
+    if (!role) return;
+    for (const p of this.rows) {
+      if (p.page === pageKey) {
+        this.toggle(role, p.name, checked);
       }
     }
+  }
+
+  private rebuildPageGroups(): void {
+    const map = new Map<string, PermissionItemDto[]>();
+    for (const p of this.rows) {
+      const list = map.get(p.page) ?? [];
+      list.push(p);
+      map.set(p.page, list);
+    }
+    const actionRank = (a: string): number => {
+      const i = ACTION_SORT_ORDER.indexOf(a);
+      return i >= 0 ? i : 100;
+    };
+    this.pageGroups = [...map.keys()]
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+      .map((pageKey) => {
+        const items = (map.get(pageKey) ?? [])
+          .slice()
+          .sort((x, y) => actionRank(x.action) - actionRank(y.action) || x.name.localeCompare(y.name));
+        return { pageKey, items };
+      });
+  }
+
+  save(): void {
+    const role = this.selectedRole;
+    if (!role || !this.dirtyRoles.has(role)) {
+      return;
+    }
+    const cells = this.rows.map((p) => ({
+      permissionName: p.name,
+      isAllowed: !!this.localMatrix[this.matrixKey(role, p.name)],
+    }));
+    const body = {
+      scopeToRoleName: role,
+      cells,
+    };
     this.saving = true;
     this.error = null;
-    this.http.put(`${this.api.baseUrl}/RolePermissions/matrix`, { cells }).subscribe({
+    this.http.put(`${this.api.baseUrl}/RolePermissions/matrix`, body).subscribe({
       next: () => {
         this.saving = false;
-        this.dirty = false;
+        this.dirtyRoles.delete(role);
         this.load();
       },
       error: (e) => {

@@ -1,4 +1,4 @@
-/* Align with admin / school “system” list pages: card shell, #009879 headers, readable grid */
+/* Card shell + role dropdown + lazy card grid (defer / viewport) */
 :host {
   display: block;
 }
@@ -98,101 +98,158 @@
   margin: 0;
 }
 
-.table-scroll {
-  overflow: auto;
-  max-height: min(70vh, calc(100vh - 220px));
-  width: 100%;
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem 1.5rem;
+  padding: 1rem clamp(1rem, 3vw, 1.5rem) 0.75rem;
+  border-bottom: 1px solid #eef0f4;
+  box-sizing: border-box;
+}
+
+.role-select-field {
+  min-width: min(100%, 16rem);
+  flex: 0 1 auto;
+}
+
+:host ::ng-deep .role-select-field.mat-mdc-form-field {
+  /* tighten outline field in toolbar */
+  margin-bottom: 0;
+}
+
+.filters-hint {
+  margin: 0;
+  flex: 1 1 12rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.45;
+  padding-bottom: 0.35rem;
+}
+
+.cards-scroll {
+  max-height: min(75vh, calc(100vh - 240px));
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem clamp(0.75rem, 2vw, 1.25rem) 1.5rem;
   box-sizing: border-box;
   overscroll-behavior: contain;
-  padding: 1.25rem clamp(0.75rem, 2vw, 1.5rem) 1.5rem;
 }
 
-.matrix-table {
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 0.9rem;
-  width: max-content;
-  min-width: 100%;
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: 1rem;
+  align-items: start;
 }
 
-.matrix-table th,
-.matrix-table td {
-  border: 1px solid #dddddd;
-  padding: 0.65rem 0.75rem;
-  text-align: center;
-  vertical-align: middle;
+.perm-page-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 8.5rem;
+}
+
+.perm-page-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(135deg, #009879 0%, #0d6e5c 100%);
+  color: #fff;
+}
+
+.perm-page-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: start;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+:host ::ng-deep .perm-page-card__select-all.mat-mdc-checkbox {
+  flex-shrink: 0;
+  --mdc-checkbox-selected-checkmark-color: #fff;
+  --mdc-checkbox-selected-focus-icon-color: #fff;
+  --mdc-checkbox-selected-hover-icon-color: #fff;
+  --mdc-checkbox-selected-pressed-icon-color: #fff;
+  --mdc-checkbox-selected-icon-color: #fff;
+  --mdc-checkbox-unselected-icon-color: rgba(255, 255, 255, 0.85);
+  --mdc-checkbox-unselected-hover-icon-color: #fff;
+}
+
+:host ::ng-deep .perm-page-card__select-all .mdc-label {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
-.matrix-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background-color: #009879;
-  color: #fff;
-  font-weight: 600;
-  box-shadow: 0 1px 0 #007a63;
+.perm-action-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
 }
 
-.matrix-table tbody tr:nth-child(even) {
-  background-color: #f9fafb;
+.perm-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.matrix-table tbody tr:hover {
-  background-color: #f1f5f9;
+.perm-action-row:last-child {
+  border-bottom: none;
 }
 
-.matrix-table tbody tr:nth-child(even):hover {
-  background-color: #eef2f7;
+.perm-action-label {
+  font-size: 0.9rem;
+  color: #334155;
+  text-align: start;
 }
 
-.sticky-col {
-  position: sticky;
-  right: 0;
-  z-index: 1;
-  text-align: right !important;
-  min-width: 7.5rem;
-  max-width: 14rem;
-  box-shadow: -4px 0 8px -4px rgba(0, 0, 0, 0.06);
+/* Placeholder for @defer — reserves space, avoids layout jump */
+.perm-card-placeholder {
+  min-height: 10rem;
+  border-radius: 10px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  overflow: hidden;
 }
 
-.sticky-col2 {
-  position: sticky;
-  right: 7.5rem;
-  z-index: 1;
-  min-width: 5rem;
-  box-shadow: -2px 0 6px -2px rgba(0, 0, 0, 0.05);
+.perm-card-placeholder__shimmer {
+  height: 100%;
+  min-height: 10rem;
+  background: linear-gradient(
+    110deg,
+    #f1f5f9 0%,
+    #f8fafc 40%,
+    #e2e8f0 50%,
+    #f8fafc 60%,
+    #f1f5f9 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
 }
 
-.matrix-table tbody .sticky-col,
-.matrix-table tbody .sticky-col2 {
-  background-color: #fff;
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 
-.matrix-table tbody tr:nth-child(even) .sticky-col,
-.matrix-table tbody tr:nth-child(even) .sticky-col2 {
-  background-color: #f9fafb;
-}
-
-.matrix-table tbody tr:hover .sticky-col,
-.matrix-table tbody tr:hover .sticky-col2 {
-  background-color: #f1f5f9;
-}
-
-.matrix-table thead .sticky-col,
-.matrix-table thead .sticky-col2 {
-  z-index: 4;
-  background-color: #009879;
-  color: #fff;
-  box-shadow: -4px 0 8px -4px rgba(0, 0, 0, 0.12);
-}
-
-.matrix-table .cell {
-  padding: 0.35rem 0.5rem;
-}
-
-/* Checkboxes: match system green */
-:host ::ng-deep .matrix-table .mat-mdc-checkbox.mat-primary {
+:host ::ng-deep .perm-page-card .mat-mdc-checkbox.mat-primary {
   --mdc-checkbox-selected-checkmark-color: #fff;
   --mdc-checkbox-selected-focus-icon-color: #009879;
   --mdc-checkbox-selected-hover-icon-color: #009879;
@@ -215,5 +272,15 @@
   .page-head .actions button {
     flex: 1;
     min-width: 0;
+  }
+
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .role-select-field {
+    width: 100%;
+    max-width: none;
   }
 }

@@ -47,18 +47,22 @@ public class RolePermissionAdminService : IRolePermissionAdminService
 
         foreach (var cell in dto.Cells)
         {
+            var roleName = ResolveRoleName(dto.ScopeToRoleName, cell.RoleName);
+            if (string.IsNullOrWhiteSpace(roleName))
+                continue;
+
             if (!permIds.TryGetValue(cell.PermissionName, out var pid))
                 continue;
 
             var row = await _db.RolePermissions
                 .FirstOrDefaultAsync(
-                    rp => rp.RoleName == cell.RoleName && rp.PermissionId == pid,
+                    rp => rp.RoleName == roleName && rp.PermissionId == pid,
                     cancellationToken);
             if (row == null)
             {
                 _db.RolePermissions.Add(new RolePermission
                 {
-                    RoleName = cell.RoleName,
+                    RoleName = roleName,
                     PermissionId = pid,
                     IsAllowed = cell.IsAllowed
                 });
@@ -70,5 +74,19 @@ public class RolePermissionAdminService : IRolePermissionAdminService
         }
 
         await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static string? ResolveRoleName(string? scopeToRoleName, string? cellRoleName)
+    {
+        if (!string.IsNullOrWhiteSpace(scopeToRoleName))
+        {
+            if (!string.IsNullOrWhiteSpace(cellRoleName)
+                && !string.Equals(cellRoleName, scopeToRoleName, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException(
+                    $"Cell RoleName '{cellRoleName}' does not match ScopeToRoleName '{scopeToRoleName}'.");
+            return scopeToRoleName;
+        }
+
+        return string.IsNullOrWhiteSpace(cellRoleName) ? null : cellRoleName;
     }
 }
