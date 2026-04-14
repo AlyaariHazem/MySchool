@@ -28,6 +28,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly IAuditTrailService _auditTrail;
     private readonly TenantInfo _tenantInfo;
     private readonly IApiBaseUrlProvider _apiBaseUrl;
+    private readonly IEmployeeYearAssignmentService _employeeYearAssignments;
 
     public UnitOfWork(
         TenantDbContext tenantContext,
@@ -40,7 +41,8 @@ public class UnitOfWork : IUnitOfWork
         HtmlSanitizationService htmlSanitizer,
         IAuditTrailService auditTrail,
         TenantInfo tenantInfo,
-        IApiBaseUrlProvider apiBaseUrl)
+        IApiBaseUrlProvider apiBaseUrl,
+        IEmployeeYearAssignmentService employeeYearAssignments)
     {
         _tenantContext = tenantContext;
         _adminContext = adminContext;
@@ -53,6 +55,7 @@ public class UnitOfWork : IUnitOfWork
         _htmlSanitizer = htmlSanitizer;
         _auditTrail = auditTrail;
         _apiBaseUrl = apiBaseUrl;
+        _employeeYearAssignments = employeeYearAssignments;
 
         // Tenant-specific repositories use TenantDbContext
         // Initialize Users first since it's needed by Students, Teachers, and Employees
@@ -73,11 +76,11 @@ public class UnitOfWork : IUnitOfWork
         Attachments = new AttachmentsRepository(_tenantContext);
         Curriculums = new CurriculumRepository(_tenantContext, _mapper);
         CoursePlans = new CoursePlanRepository(_tenantContext, _mapper);
-        Teachers = new TeacherRepository(_tenantContext, Users, _apiBaseUrl);
+        Teachers = new TeacherRepository(_tenantContext, Users, _apiBaseUrl, _employeeYearAssignments);
         GradeTypes = new GradeTypesRepository(_tenantContext, _mapper);
         Terms = new TermRepository(_tenantContext, _mapper);
         Months = new MonthRepository(_tenantContext, _mapper);
-        Employees = new EmployeeRepository(_tenantContext, Users);
+        Employees = new EmployeeRepository(_tenantContext, Users, _employeeYearAssignments, Guardians, Students);
         AccountStudentGuardians = new AccountStudentGuardianRepository(_tenantContext, _mapper);
         Reports = new ReportRepository(_tenantContext, _htmlSanitizer, _apiBaseUrl);
         MonthlyGrades = new MonthlyGradeRepository(_tenantContext, _mapper, _auditTrail, _apiBaseUrl);
@@ -91,7 +94,7 @@ public class UnitOfWork : IUnitOfWork
         
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
-        Managers = new ManagerRepository(_tenantContext, _adminContext, Users, Tenants, _userManager, _tenantInfo, _httpContextAccessor);
+        Managers = new ManagerRepository(_tenantContext, _adminContext, Users, Tenants, _userManager, _tenantInfo, _httpContextAccessor, _employeeYearAssignments);
     }
 
     public ISubjectsRepository Subjects { get; private set; }

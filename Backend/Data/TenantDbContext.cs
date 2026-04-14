@@ -27,6 +27,7 @@ namespace Backend.Data
         public DbSet<Class> Classes { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Manager> Managers { get; set; }
+        public DbSet<SchoolStaff> SchoolStaff { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Accounts> Accounts { get; set; }
         public DbSet<Division> Divisions { get; set; }
@@ -63,6 +64,7 @@ namespace Backend.Data
         public DbSet<HomeworkTaskLink> HomeworkTaskLinks { get; set; }
         public DbSet<HomeworkSubmission> HomeworkSubmissions { get; set; }
         public DbSet<HomeworkSubmissionFile> HomeworkSubmissionFiles { get; set; }
+        public DbSet<EmployeeYearAssignment> EmployeeYearAssignments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -358,6 +360,19 @@ namespace Backend.Data
             
             modelBuilder.Entity<Manager>()
                 .HasKey(m => m.ManagerID);
+
+            modelBuilder.Entity<SchoolStaff>()
+                .HasKey(s => s.SchoolStaffID);
+
+            modelBuilder.Entity<SchoolStaff>()
+                .Property(s => s.UserID)
+                .IsRequired(false);
+
+            modelBuilder.Entity<SchoolStaff>()
+                .HasOne(s => s.School)
+                .WithMany()
+                .HasForeignKey(s => s.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<Guardian>()
                 .HasKey(g => g.GuardianID);
@@ -743,6 +758,26 @@ namespace Backend.Data
                 .HasForeignKey(f => f.HomeworkSubmissionID)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<EmployeeYearAssignment>()
+                .HasKey(e => e.AssignmentID);
+            modelBuilder.Entity<EmployeeYearAssignment>()
+                .Property(e => e.AssignmentID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeeYearAssignment>()
+                .HasOne(e => e.Year)
+                .WithMany()
+                .HasForeignKey(e => e.YearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeYearAssignment>()
+                .HasIndex(e => new { e.YearID, e.EmployeeRole, e.EmployeeEntityID })
+                .IsUnique();
+            modelBuilder.Entity<EmployeeYearAssignment>()
+                .Property(e => e.EmployeeRole)
+                .HasMaxLength(32);
+            modelBuilder.Entity<EmployeeYearAssignment>()
+                .Property(e => e.AssignmentStatus)
+                .HasMaxLength(32);
+
             modelBuilder.Entity<ExamType>().HasData(
                 new ExamType { ExamTypeID = 1, Name = "Midterm", SortOrder = 1, IsActive = true },
                 new ExamType { ExamTypeID = 2, Name = "Final", SortOrder = 2, IsActive = true },
@@ -787,6 +822,9 @@ namespace Backend.Data
             
             modelBuilder.Entity<Manager>()
                 .OwnsOne(M => M.FullName);
+
+            modelBuilder.Entity<SchoolStaff>()
+                .OwnsOne(s => s.FullName);
 
             // Configure decimal precision
             modelBuilder.Entity<Accounts>()

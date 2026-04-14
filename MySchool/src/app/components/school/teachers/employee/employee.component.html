@@ -83,6 +83,31 @@
               </div>
             </div>
 
+            <!-- Student: division + guardian -->
+            <div class="grid p-fluid mt-3" *ngIf="isStudentRole()">
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <p-select
+                    id="divisionID"
+                    formControlName="divisionID"
+                    [options]="divisionOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    [showClear]="true"
+                    [filter]="true"
+                    class="w-full">
+                  </p-select>
+                  <label for="divisionID">الشعبة *</label>
+                </p-floatLabel>
+              </div>
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <input pInputText id="guardianID" formControlName="guardianID" type="number" />
+                  <label for="guardianID">رقم ولي الأمر *</label>
+                </p-floatLabel>
+              </div>
+            </div>
+
             <!-- Row 3: date of birth (single) -->
             <div class="grid p-fluid mt-3">
               <div class="col-12 md:col-6">
@@ -134,6 +159,21 @@
                 <p-floatLabel variant="on">
                   <input pInputText id="email" formControlName="email" type="email" />
                   <label for="email">البريد الإلكتروني</label>
+                </p-floatLabel>
+              </div>
+            </div>
+
+            <div class="grid p-fluid mt-3">
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <input pInputText id="password" formControlName="password" type="password" autocomplete="new-password" />
+                  <label for="password">كلمة المرور (اختياري)</label>
+                </p-floatLabel>
+              </div>
+              <div class="col-12 md:col-6">
+                <p-floatLabel variant="on">
+                  <input pInputText id="schoolID" formControlName="schoolID" type="number" />
+                  <label for="schoolID">رقم المدرسة (اختياري)</label>
                 </p-floatLabel>
               </div>
             </div>

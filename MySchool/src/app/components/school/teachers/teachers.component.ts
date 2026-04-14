@@ -8,6 +8,8 @@ import { ActivatedRoute } from '@angular/router';
 import { EmployeeComponent } from './employee/employee.component';
 import { EmployeeService } from '../core/services/employee.service';
 import { Employee } from '../core/models/employee.model';
+import { YearService } from '../../../core/services/year.service';
+import { Year } from '../../../core/models/year.model';
 import { PaginatorService } from '../../../core/services/paginator.service';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs';
@@ -15,6 +17,10 @@ import { selectLanguage } from '../../../core/store/language/language.selectors'
 import { TableColumn } from '../../../shared/components/custom-table/custom-table.component';
 import { ConfirmationService } from 'primeng/api';
 
+/**
+ * School staff directory: teachers and managers for the selected academic year.
+ * Data source: POST /api/Employee/page — unified school users (teachers, managers, school staff, students, guardians).
+ */
 @Component({
   selector: 'app-teachers',
   templateUrl: './teachers.component.html',
@@ -24,8 +30,12 @@ export class TeachersComponent implements OnInit {
   form: FormGroup;
 
   employeeService = inject(EmployeeService);
+  private yearService = inject(YearService);
   paginatorService = inject(PaginatorService);
   confirmationService = inject(ConfirmationService);
+
+  /** Active (or latest) academic year for POST Teacher/page filters — aligns with EmployeeYearAssignments. */
+  listYearId: number | null = null;
 
   Employees: Employee[] = []
   paginated: Employee[] = []; // Paginated data
@@ -42,19 +52,25 @@ export class TeachersComponent implements OnInit {
   
   // Table columns configuration
   tableColumns: TableColumn[] = [
-    { field: 'employeeID', header: 'رقم المستخدم', sortable: true, filterable: true },
-    { 
-      field: 'fullName', 
-      header: 'اسم المستخدم', 
-      sortable: true, 
+    {
+      field: 'jopName',
+      header: 'الوظيفة',
+      sortable: true,
       filterable: true,
       template: 'custom',
-      formatter: (value: any, row: Employee) => {
-        return `${row.firstName || ''} ${row.lastName || ''}`.trim();
-      }
+      formatter: (_value: unknown, row: Employee) => this.jobLabelAr(row.jopName),
     },
-    { field: 'jopName', header: 'الوضيفة', sortable: true, filterable: true },
-    { field: 'employeeID', header: 'رقم المستخدم', sortable: true, filterable: true },
+    { field: 'employeeID', header: 'رقم الموظف', sortable: true, filterable: true },
+    {
+      field: 'fullName',
+      header: 'اسم الموظف',
+      sortable: true,
+      filterable: true,
+      template: 'custom',
+      formatter: (_value: unknown, row: Employee) => {
+        return `${row.firstName || ''} ${row.lastName || ''}`.trim();
+      },
+    },
     { 
       field: 'age', 
       header: 'العمر', 
@@ -78,6 +94,23 @@ export class TeachersComponent implements OnInit {
   readonly dir$ = this.store.select(selectLanguage).pipe(
     map(l => (l === 'ar' ? 'rtl' : 'ltr')),
   );
+
+  /** Arabic label for backend <c>jopName</c> (API role keys). */
+  jobLabelAr(jopName: string | undefined): string {
+    const j = (jopName || '').trim();
+    const map: Record<string, string> = {
+      Teacher: 'معلم',
+      Manager: 'مدير',
+      SystemAdmin: 'مدير النظام',
+      EducationalSupervisor: 'مشرف تربوي',
+      AdministrativeSupervisor: 'مشرف إداري',
+      AdministrativeEmployee: 'موظف إداري',
+      Student: 'طالب',
+      Guardian: 'ولي أمر',
+    };
+    return map[j] ?? (j || '—');
+  }
+
   showteacherCulomn(): void {
     this.showCulomn = true;
     this.showGrid = false;
@@ -140,36 +173,54 @@ export class TeachersComponent implements OnInit {
     this.pageSize = 10;
     this.paginatorService.first.set(0);
     this.paginatorService.rows.set(10);
-    this.getAllEmployees();
+
+    this.yearService.getAllYears().subscribe({
+      next: (years: Year[]) => {
+        const active = years.find(y => y.active);
+        const sorted = [...years].sort((a, b) => b.yearID - a.yearID);
+        this.listYearId = active?.yearID ?? sorted[0]?.yearID ?? null;
+        this.getAllEmployees();
+      },
+      error: () => this.getAllEmployees(),
+    });
   }
   
   getAllEmployees(): void {
     this.isLoading = true;
-    this.employeeService.getEmployeesPage(this.currentPage, this.pageSize, {}).subscribe({
+    const filters: Record<string, string> = {};
+    if (this.listYearId != null) {
+      filters['yearId'] = String(this.listYearId);
+    }
+    this.employeeService.getEmployeesPage(this.currentPage, this.pageSize, filters).subscribe({
       next: (res) => {
         const rawEmployees = res.data || [];
         
         // Map API response to Employee model structure
         // API returns teacherID, phoneNumber but Employee model expects employeeID, mobile
-        const employees = rawEmployees.map((teacher: any) => ({
-          employeeID: teacher.teacherID, // Map teacherID to employeeID
-          firstName: teacher.firstName || '',
-          middleName: teacher.middleName || '',
-          lastName: teacher.lastName || '',
-          jopName: teacher.jopName || 'Teacher', // Default to Teacher if not provided
-          address: teacher.address || null,
-          mobile: teacher.phoneNumber || '', // Map phoneNumber to mobile
-          gender: teacher.gender || 'Male',
-          hireDate: teacher.hireDate || new Date(),
-          dob: teacher.dob || new Date(),
-          email: teacher.email || null,
-          imageURL: teacher.imageURL || null,
-          managerID: teacher.managerID || null,
-          // Keep original fields for reference
-          teacherID: teacher.teacherID,
-          userID: teacher.userID,
-          userName: teacher.userName
-        }));
+        const employees: Employee[] = rawEmployees.map((row: any) => {
+          const jopName = row.jopName ?? row.JopName ?? 'Teacher';
+          const id = row.employeeID ?? row.EmployeeID ?? row.teacherID ?? row.TeacherID;
+          const phone = row.mobile ?? row.Mobile ?? row.phoneNumber ?? row.PhoneNumber ?? '';
+          return {
+            employeeID: id,
+            employeeRowKey: `${jopName}-${id}`,
+            firstName: row.firstName ?? row.FirstName ?? '',
+            middleName: row.middleName ?? row.MiddleName ?? '',
+            lastName: row.lastName ?? row.LastName ?? '',
+            jopName,
+            address: row.address ?? row.Address ?? null,
+            mobile: phone,
+            gender: row.gender ?? row.Gender ?? 'Male',
+            hireDate: row.hireDate ?? row.HireDate ?? new Date(),
+            dob: row.dob ?? row.DOB ?? new Date(),
+            email: row.email ?? row.Email ?? null,
+            imageURL: row.imageURL ?? row.ImageURL ?? null,
+            managerID: row.managerID ?? row.ManagerID ?? null,
+            teacherID: row.teacherID ?? row.TeacherID,
+            userID: row.userID ?? row.UserID,
+            userName: row.userName ?? row.UserName,
+          };
+        });
         
         // Get totalRecords from server
         this.totalRecords = res.totalCount || 0;
@@ -237,8 +288,8 @@ export class TeachersComponent implements OnInit {
   //show confirm dialog before deleting
   deleteEmployee(id: number, jobType: string): void {
     this.confirmationService.confirm({
-      message: 'هل أنت متأكد من حذف الموظف؟',
-      header: 'تأكيد الحذف',
+      message: 'سيتم أرشفة الموظف للسنة الحالية (لن يُحذف من قاعدة البيانات). هل تريد المتابعة؟',
+      header: 'تأكيد الأرشفة',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'نعم',
       rejectLabel: 'لا',
@@ -249,14 +300,14 @@ export class TeachersComponent implements OnInit {
       accept: () => {
         this.employeeService.deleteEmployee(id, jobType).subscribe({
           next: (res) => {
-            console.log('Employee deleted successfully', res);
-            this.toastr.success('تم حذف الموظف بنجاح');
+            console.log('Employee archived successfully', res);
+            this.toastr.success('تم أرشفة الموظف بنجاح');
             // Reload employees to get updated list from server
             this.getAllEmployees();
           },
           error: (err) => {
-            console.error('Error deleting employee:', err);
-            this.toastr.error('فشل في حذف الموظف', 'خطأ');
+            console.error('Error archiving employee:', err);
+            this.toastr.error('فشل في أرشفة الموظف', 'خطأ');
           }
         });
       }

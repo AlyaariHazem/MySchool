@@ -1,5 +1,7 @@
 export interface Employee {
     employeeID?: number;
+    /** Stable row id: `${jopName}-${employeeID}` (Teacher/Manager can share numeric ids). */
+    employeeRowKey?: string;
     firstName: string;
     middleName: string;
     lastName: string;
@@ -12,5 +14,12 @@ export interface Employee {
     email: string | null;
     imageURL: string | null;
     managerID: number | null;
+    schoolID?: number | null;
+    divisionID?: number | null;
+    guardianID?: number | null;
+    password?: string | null;
+    teacherID?: number;
+    userID?: string;
+    userName?: string;
   }
   

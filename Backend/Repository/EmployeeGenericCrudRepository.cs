@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Backend.Common;
@@ -7,8 +8,9 @@ using Backend.Interfaces;
 namespace Backend.Repository;
 
 /// <summary>
-/// Adapts aggregate employee operations (teachers + managers) to <see cref="IGenericCrudRepository{TEntity,TKey}"/>.
+/// Adapts aggregate employee operations (teachers + managers) to <see cref="IGenericCrudRepository{EmployeeDTO,int}"/>.
 /// Filtering, sorting, and paging run in-memory on the combined DTO list.
+/// Use filters <c>yearId</c> / <c>schoolYearId</c> to scope active staff to an academic year.
 /// </summary>
 public class EmployeeGenericCrudRepository : IGenericCrudRepository<EmployeeDTO, int>
 {
@@ -21,12 +23,13 @@ public class EmployeeGenericCrudRepository : IGenericCrudRepository<EmployeeDTO,
 
     public async Task<EmployeeDTO?> GetByIdAsync(int id)
     {
-        return await _employees.GetEmployeeByIdAsync(id);
+        return await _employees.GetEmployeeByIdAsync(id, null);
     }
 
     public async Task<List<EmployeeDTO>> GetAllAsync(GenericQueryRequest request)
     {
-        var list = await _employees.GetAllEmployeesAsync();
+        var yearId = TryParseYearFilter(request.Filters);
+        var list = await _employees.GetAllEmployeesAsync(yearId);
         list = ApplyFilters(list, request.Filters);
         list = ApplyOrdering(list, request.Orders);
         return list;
@@ -34,7 +37,8 @@ public class EmployeeGenericCrudRepository : IGenericCrudRepository<EmployeeDTO,
 
     public async Task<(List<EmployeeDTO> Items, int TotalCount)> GetPagedAsync(GenericQueryRequest request)
     {
-        var list = await _employees.GetAllEmployeesAsync();
+        var yearId = TryParseYearFilter(request.Filters);
+        var list = await _employees.GetAllEmployeesAsync(yearId);
         list = ApplyFilters(list, request.Filters);
         list = ApplyOrdering(list, request.Orders);
         var total = list.Count;
@@ -43,6 +47,20 @@ public class EmployeeGenericCrudRepository : IGenericCrudRepository<EmployeeDTO,
             .Take(request.PageSize)
             .ToList();
         return (page, total);
+    }
+
+    private static int? TryParseYearFilter(Dictionary<string, string>? filters)
+    {
+        if (filters == null || filters.Count == 0)
+            return null;
+
+        foreach (var key in new[] { "yearId", "schoolYearId", "YearId", "SchoolYearId" })
+        {
+            if (filters.TryGetValue(key, out var raw) && int.TryParse(raw, out var y) && y > 0)
+                return y;
+        }
+
+        return null;
     }
 
     public async Task<EmployeeDTO> CreateAsync(EmployeeDTO entity)

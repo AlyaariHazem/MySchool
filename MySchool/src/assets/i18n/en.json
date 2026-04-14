@@ -167,12 +167,12 @@
     "home": "Home",
     "teacherHome": "Teacher home",
     "teacherHub": "Teacher tools",
-    "teachers": "Teachers",
+    "teachers": "Staff",
     "teachers_sub": {
-      "all": "All Teachers",
-      "add": "Add Teacher",
-      "edit": "Edit Teacher",
-      "about": "About Teachers"
+      "all": "All staff",
+      "add": "Add employee",
+      "edit": "Edit employee",
+      "about": "About staff"
     },
     "students": "Students",
     "students_sub": {

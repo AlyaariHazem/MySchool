@@ -9,6 +9,7 @@ using Backend.DTOS.School.Tenant;
 using Backend.Migrations.Tenant;
 using Backend.Models;
 using Backend.Models.Master;
+using Backend.Interfaces;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -32,6 +33,7 @@ public class ManagerRepository : IManagerRepository
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly TenantInfo _tenantInfo;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IEmployeeYearAssignmentService _employeeYearAssignments;
 
     public ManagerRepository(
         TenantDbContext tenantContext,
@@ -40,7 +42,8 @@ public class ManagerRepository : IManagerRepository
         ITenantRepository tenantRepository,
         UserManager<ApplicationUser> userManager,
         TenantInfo tenantInfo,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IEmployeeYearAssignmentService employeeYearAssignments)
     {
         _tenantContext = tenantContext ?? throw new ArgumentNullException(nameof(tenantContext));
         _masterDb = masterDb ?? throw new ArgumentNullException(nameof(masterDb));
@@ -49,6 +52,7 @@ public class ManagerRepository : IManagerRepository
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _tenantInfo = tenantInfo ?? throw new ArgumentNullException(nameof(tenantInfo));
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        _employeeYearAssignments = employeeYearAssignments ?? throw new ArgumentNullException(nameof(employeeYearAssignments));
     }
 
     /// <summary>
@@ -140,6 +144,12 @@ public class ManagerRepository : IManagerRepository
         }
 
         await tenantDb.SaveChangesAsync();
+
+        var managerId = existing != null
+            ? existing.ManagerID
+            : await tenantDb.Managers.OrderByDescending(m => m.ManagerID).Select(m => m.ManagerID).FirstAsync();
+        await _employeeYearAssignments.EnsureActiveAssignmentAsync(
+            EmployeeYearAssignmentRoles.Manager, managerId, null, tenantDb);
 
         // Master DB: link Identity user ↔ tenant (JWT / tenant picker); same pattern as AuthController.EnsureUserTenantIfMissingAsync.
         await EnsureUserTenantForManagerAsync(createdUser.Id, tid);
@@ -316,6 +326,17 @@ public class ManagerRepository : IManagerRepository
             .Include(m => m.School)
             .ToListAsync();
 
+        if (await _employeeYearAssignments.TenantUsesYearAssignmentsAsync(_tenantContext))
+        {
+            var yearId = await _employeeYearAssignments.ResolveYearIdForListAsync(null, _tenantContext);
+            if (yearId is > 0)
+            {
+                var allowed = await _employeeYearAssignments.GetActiveEntityIdsForYearAsync(
+                    EmployeeYearAssignmentRoles.Manager, yearId.Value, _tenantContext);
+                managersList = managersList.Where(m => allowed.Contains(m.ManagerID)).ToList();
+            }
+        }
+
         TenantDTO? tenantMetaSingle = null;
         if (_tenantInfo.TenantId is int tId)
         {
@@ -401,9 +422,14 @@ public class ManagerRepository : IManagerRepository
             if (manager == null)
                 throw new InvalidOperationException("Manager not found.");
 
-            await _userRepository.DeleteAsync(manager.UserID);
-            db.Managers.Remove(manager);
-            await db.SaveChangesAsync();
+            await _employeeYearAssignments.ArchiveEmployeeForYearAsync(
+                EmployeeYearAssignmentRoles.Manager,
+                localId,
+                null,
+                DateTime.UtcNow,
+                null,
+                "Archived via manager API (replaces physical delete).",
+                db);
             return;
         }
 
@@ -411,9 +437,14 @@ public class ManagerRepository : IManagerRepository
         if (row == null)
             throw new InvalidOperationException("Manager not found.");
 
-        await _userRepository.DeleteAsync(row.UserID);
-        _tenantContext.Managers.Remove(row);
-        await _tenantContext.SaveChangesAsync();
+        await _employeeYearAssignments.ArchiveEmployeeForYearAsync(
+            EmployeeYearAssignmentRoles.Manager,
+            id,
+            null,
+            DateTime.UtcNow,
+            null,
+            "Archived via manager API (replaces physical delete).",
+            _tenantContext);
     }
 
     private static GetManagerDTO Map(Manager manager, ApplicationUser? appUser, TenantDTO? tenantMeta)

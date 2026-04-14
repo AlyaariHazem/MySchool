@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations.Tenant
 {
     [DbContext(typeof(TenantDbContext))]
-    partial class TenantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414190000_EmployeeYearAssignments")]
+    partial class EmployeeYearAssignments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -369,6 +371,8 @@ namespace Backend.Migrations.Tenant
 
                     b.HasKey("AssignmentID");
 
+                    b.HasIndex("YearID");
+
                     b.HasIndex("YearID", "EmployeeRole", "EmployeeEntityID")
                         .IsUnique();
 
@@ -503,6 +507,170 @@ namespace Backend.Migrations.Tenant
                             Name = "Makeup",
                             SortOrder = 6
                         });
+                });
+
+            modelBuilder.Entity("Backend.Models.HomeworkSubmission", b =>
+                {
+                    b.Property<int>("HomeworkSubmissionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HomeworkSubmissionID"));
+
+                    b.Property<string>("AnswerText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("FeedbackPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("HomeworkTaskID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReviewedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Score")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("StudentID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("SubmittedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TeacherFeedback")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("HomeworkSubmissionID");
+
+                    b.HasIndex("StudentID");
+
+                    b.HasIndex("HomeworkTaskID", "StudentID")
+                        .IsUnique();
+
+                    b.ToTable("HomeworkSubmissions");
+                });
+
+            modelBuilder.Entity("Backend.Models.HomeworkSubmissionFile", b =>
+                {
+                    b.Property<int>("HomeworkSubmissionFileID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HomeworkSubmissionFileID"));
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("HomeworkSubmissionID")
+                        .HasColumnType("int");
+
+                    b.HasKey("HomeworkSubmissionFileID");
+
+                    b.HasIndex("HomeworkSubmissionID");
+
+                    b.ToTable("HomeworkSubmissionFiles");
+                });
+
+            modelBuilder.Entity("Backend.Models.HomeworkTask", b =>
+                {
+                    b.Property<int>("HomeworkTaskID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HomeworkTaskID"));
+
+                    b.Property<int>("ClassID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DivisionID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DueDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SubjectID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("SubmissionRequired")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TeacherID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TermID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("YearID")
+                        .HasColumnType("int");
+
+                    b.HasKey("HomeworkTaskID");
+
+                    b.HasIndex("ClassID");
+
+                    b.HasIndex("DivisionID");
+
+                    b.HasIndex("DueDateUtc");
+
+                    b.HasIndex("SubjectID");
+
+                    b.HasIndex("TeacherID");
+
+                    b.HasIndex("TermID");
+
+                    b.HasIndex("YearID", "TermID", "ClassID", "DivisionID");
+
+                    b.HasIndex("YearID");
+
+                    b.ToTable("HomeworkTasks");
+                });
+
+            modelBuilder.Entity("Backend.Models.HomeworkTaskLink", b =>
+                {
+                    b.Property<int>("HomeworkTaskLinkID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HomeworkTaskLinkID"));
+
+                    b.Property<int>("HomeworkTaskID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Label")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("HomeworkTaskLinkID");
+
+                    b.HasIndex("HomeworkTaskID");
+
+                    b.ToTable("HomeworkTaskLinks");
                 });
 
             modelBuilder.Entity("Backend.Models.Fee", b =>
@@ -668,168 +836,6 @@ namespace Backend.Migrations.Tenant
                     b.HasKey("GuardianID");
 
                     b.ToTable("Guardians");
-                });
-
-            modelBuilder.Entity("Backend.Models.HomeworkSubmission", b =>
-                {
-                    b.Property<int>("HomeworkSubmissionID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HomeworkSubmissionID"));
-
-                    b.Property<string>("AnswerText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("FeedbackPublished")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("HomeworkTaskID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ReviewedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("Score")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<byte>("Status")
-                        .HasColumnType("tinyint");
-
-                    b.Property<int>("StudentID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("SubmittedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TeacherFeedback")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("HomeworkSubmissionID");
-
-                    b.HasIndex("StudentID");
-
-                    b.HasIndex("HomeworkTaskID", "StudentID")
-                        .IsUnique();
-
-                    b.ToTable("HomeworkSubmissions");
-                });
-
-            modelBuilder.Entity("Backend.Models.HomeworkSubmissionFile", b =>
-                {
-                    b.Property<int>("HomeworkSubmissionFileID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HomeworkSubmissionFileID"));
-
-                    b.Property<string>("FileName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("HomeworkSubmissionID")
-                        .HasColumnType("int");
-
-                    b.HasKey("HomeworkSubmissionFileID");
-
-                    b.HasIndex("HomeworkSubmissionID");
-
-                    b.ToTable("HomeworkSubmissionFiles");
-                });
-
-            modelBuilder.Entity("Backend.Models.HomeworkTask", b =>
-                {
-                    b.Property<int>("HomeworkTaskID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HomeworkTaskID"));
-
-                    b.Property<int>("ClassID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DivisionID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DueDateUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("SubjectID")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("SubmissionRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("TeacherID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TermID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("YearID")
-                        .HasColumnType("int");
-
-                    b.HasKey("HomeworkTaskID");
-
-                    b.HasIndex("ClassID");
-
-                    b.HasIndex("DivisionID");
-
-                    b.HasIndex("DueDateUtc");
-
-                    b.HasIndex("SubjectID");
-
-                    b.HasIndex("TeacherID");
-
-                    b.HasIndex("TermID");
-
-                    b.HasIndex("YearID", "TermID", "ClassID", "DivisionID");
-
-                    b.ToTable("HomeworkTasks");
-                });
-
-            modelBuilder.Entity("Backend.Models.HomeworkTaskLink", b =>
-                {
-                    b.Property<int>("HomeworkTaskLinkID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HomeworkTaskLinkID"));
-
-                    b.Property<int>("HomeworkTaskID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Label")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("HomeworkTaskLinkID");
-
-                    b.HasIndex("HomeworkTaskID");
-
-                    b.ToTable("HomeworkTaskLinks");
                 });
 
             modelBuilder.Entity("Backend.Models.Manager", b =>
@@ -1240,38 +1246,6 @@ namespace Backend.Migrations.Tenant
                     b.HasKey("SchoolID");
 
                     b.ToTable("Schools");
-                });
-
-            modelBuilder.Entity("Backend.Models.SchoolStaff", b =>
-                {
-                    b.Property<int>("SchoolStaffID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SchoolStaffID"));
-
-                    b.Property<DateTime?>("DOB")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ImageURL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SchoolID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StaffRole")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("UserID")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("SchoolStaffID");
-
-                    b.HasIndex("SchoolID");
-
-                    b.ToTable("SchoolStaff");
                 });
 
             modelBuilder.Entity("Backend.Models.Stage", b =>
@@ -1884,44 +1858,6 @@ namespace Backend.Migrations.Tenant
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("Backend.Models.ExamSession", b =>
-                {
-                    b.HasOne("Backend.Models.Term", "Term")
-                        .WithMany()
-                        .HasForeignKey("TermID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.Year", "Year")
-                        .WithMany()
-                        .HasForeignKey("YearID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Term");
-
-                    b.Navigation("Year");
-                });
-
-            modelBuilder.Entity("Backend.Models.FeeClass", b =>
-                {
-                    b.HasOne("Backend.Models.Class", "Class")
-                        .WithMany("FeeClasses")
-                        .HasForeignKey("ClassID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.Fee", "Fee")
-                        .WithMany("FeeClasses")
-                        .HasForeignKey("FeeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("Fee");
-                });
-
             modelBuilder.Entity("Backend.Models.HomeworkSubmission", b =>
                 {
                     b.HasOne("Backend.Models.HomeworkTask", "HomeworkTask")
@@ -2012,6 +1948,44 @@ namespace Backend.Migrations.Tenant
                         .IsRequired();
 
                     b.Navigation("HomeworkTask");
+                });
+
+            modelBuilder.Entity("Backend.Models.ExamSession", b =>
+                {
+                    b.HasOne("Backend.Models.Term", "Term")
+                        .WithMany()
+                        .HasForeignKey("TermID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.Year", "Year")
+                        .WithMany()
+                        .HasForeignKey("YearID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Term");
+
+                    b.Navigation("Year");
+                });
+
+            modelBuilder.Entity("Backend.Models.FeeClass", b =>
+                {
+                    b.HasOne("Backend.Models.Class", "Class")
+                        .WithMany("FeeClasses")
+                        .HasForeignKey("ClassID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.Fee", "Fee")
+                        .WithMany("FeeClasses")
+                        .HasForeignKey("FeeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Fee");
                 });
 
             modelBuilder.Entity("Backend.Models.Manager", b =>
@@ -2207,44 +2181,6 @@ namespace Backend.Migrations.Tenant
                     b.Navigation("Term");
 
                     b.Navigation("Year");
-                });
-
-            modelBuilder.Entity("Backend.Models.SchoolStaff", b =>
-                {
-                    b.HasOne("Backend.Models.School", "School")
-                        .WithMany()
-                        .HasForeignKey("SchoolID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.OwnsOne("Backend.Models.Name", "FullName", b1 =>
-                        {
-                            b1.Property<int>("SchoolStaffID")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("MiddleName")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("SchoolStaffID");
-
-                            b1.ToTable("SchoolStaff");
-
-                            b1.WithOwner()
-                                .HasForeignKey("SchoolStaffID");
-                        });
-
-                    b.Navigation("FullName")
-                        .IsRequired();
-
-                    b.Navigation("School");
                 });
 
             modelBuilder.Entity("Backend.Models.Stage", b =>
@@ -2554,6 +2490,18 @@ namespace Backend.Migrations.Tenant
                     b.Navigation("Students");
                 });
 
+            modelBuilder.Entity("Backend.Models.HomeworkSubmission", b =>
+                {
+                    b.Navigation("Files");
+                });
+
+            modelBuilder.Entity("Backend.Models.HomeworkTask", b =>
+                {
+                    b.Navigation("Links");
+
+                    b.Navigation("Submissions");
+                });
+
             modelBuilder.Entity("Backend.Models.ExamSession", b =>
                 {
                     b.Navigation("ScheduledExams");
@@ -2584,18 +2532,6 @@ namespace Backend.Migrations.Tenant
                     b.Navigation("AccountStudentGuardians");
 
                     b.Navigation("Students");
-                });
-
-            modelBuilder.Entity("Backend.Models.HomeworkSubmission", b =>
-                {
-                    b.Navigation("Files");
-                });
-
-            modelBuilder.Entity("Backend.Models.HomeworkTask", b =>
-                {
-                    b.Navigation("Links");
-
-                    b.Navigation("Submissions");
                 });
 
             modelBuilder.Entity("Backend.Models.Month", b =>

@@ -18,12 +18,18 @@ namespace Backend.Repository
         private readonly TenantDbContext _context;
         private readonly IUserRepository _userRepository;
         private readonly IApiBaseUrlProvider _apiBaseUrl;
+        private readonly IEmployeeYearAssignmentService _yearAssignments;
 
-        public TeacherRepository(TenantDbContext context, IUserRepository userRepository, IApiBaseUrlProvider apiBaseUrl)
+        public TeacherRepository(
+            TenantDbContext context,
+            IUserRepository userRepository,
+            IApiBaseUrlProvider apiBaseUrl,
+            IEmployeeYearAssignmentService yearAssignments)
         {
             _context = context;
             _userRepository = userRepository;
             _apiBaseUrl = apiBaseUrl;
+            _yearAssignments = yearAssignments;
         }
 
         public async Task<int?> GetTeacherIdByUserIdAsync(string userId, CancellationToken cancellationToken = default)
@@ -78,6 +84,9 @@ namespace Backend.Repository
             _context.Teachers.Add(newTeacher);
             await _context.SaveChangesAsync(); // Use SaveChangesAsync() for async IO
             teacher.TeacherID = newTeacher.TeacherID;
+
+            await _yearAssignments.EnsureActiveAssignmentAsync(
+                EmployeeYearAssignmentRoles.Teacher, newTeacher.TeacherID, null, _context);
 
             return teacher; // Return the DTO
         }
@@ -137,6 +146,8 @@ namespace Backend.Repository
             var baseQuery = _context.Teachers
                 .Include(t => t.Manager)
                 .AsQueryable();
+
+            baseQuery = await ApplyTeacherYearScopeAsync(baseQuery, new Dictionary<string, FilterValue>(), cancellationToken);
 
             // Get total count
             var totalCount = await baseQuery.CountAsync(cancellationToken);
@@ -238,6 +249,8 @@ namespace Backend.Repository
                     _ => query // Unknown filter, ignore it
                 };
             }
+
+            query = await ApplyTeacherYearScopeAsync(query, filters, cancellationToken);
 
             // Check if email filter is present (requires special handling since email is in separate database)
             var hasEmailFilter = filters.TryGetValue("email", out var emailFilterValue) && !string.IsNullOrEmpty(emailFilterValue.Value);
@@ -395,6 +408,36 @@ namespace Backend.Repository
             teacher.TeacherID = existingTeacher.TeacherID;
             teacher.UserID = existingTeacher.UserID;
             return teacher;
+        }
+
+        /// <summary>
+        /// When year assignments exist, restrict to teachers with an Active row for the selected year (query params
+        /// <c>yearId</c> / <c>schoolYearId</c>) or the active academic year.
+        /// </summary>
+        private async Task<IQueryable<Teacher>> ApplyTeacherYearScopeAsync(
+            IQueryable<Teacher> query,
+            Dictionary<string, FilterValue> filters,
+            CancellationToken cancellationToken)
+        {
+            if (!await _yearAssignments.TenantUsesYearAssignmentsAsync(_context, cancellationToken))
+                return query;
+
+            int? requested = null;
+            if (filters.TryGetValue("yearId", out var y1) && y1.IntValue is int yi && yi > 0)
+                requested = yi;
+            else if (filters.TryGetValue("schoolYearId", out var y2) && y2.IntValue is int yi2 && yi2 > 0)
+                requested = yi2;
+
+            var yearId = await _yearAssignments.ResolveYearIdForListAsync(requested, _context, cancellationToken);
+            if (yearId is null or <= 0)
+                return query;
+
+            var ids = await _yearAssignments.GetActiveEntityIdsForYearAsync(
+                EmployeeYearAssignmentRoles.Teacher, yearId.Value, _context, cancellationToken);
+            if (ids.Count == 0)
+                return query.Where(t => false);
+
+            return query.Where(t => ids.Contains(t.TeacherID));
         }
     }
 }

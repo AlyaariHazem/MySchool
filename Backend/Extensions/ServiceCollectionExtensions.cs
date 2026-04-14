@@ -61,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITermRepository, TermRepository>();
         services.AddScoped<IMonthRepository, MonthRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        services.AddScoped<IEmployeeYearAssignmentService, EmployeeYearAssignmentService>();
         services.AddScoped<IAccountStudentGuardianRepository, AccountStudentGuardianRepository>();
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IWeeklyScheduleRepository, WeeklyScheduleRepository>();

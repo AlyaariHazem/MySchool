@@ -1,6 +1,6 @@
 <div id="id01" [attr.dir]="(dir$ | async)" class="modal-container">
   <div class="modal-content">
-    <h2 class="school">جميع الموظفين</h2>
+    <h2 class="school">موظفو المدرسة</h2>
     <div class="container">
       <div class="tabcontent">
         <div [ngClass]="{'col-4':(dir$ | async)==='rtl','col-4En':(dir$ | async)==='ltr'}">
@@ -43,7 +43,7 @@
 
         @if (showGrid) {
         <div class="group group2">
-          @for (teacher of paginated; track $index) {
+          @for (teacher of paginated; track teacher.employeeRowKey) {
           <div class="form-control">
             <p-card class="responsive-card employee-card">
               <ng-template pTemplate="header">
@@ -74,7 +74,7 @@
                   <div class="info-item" *ngIf="teacher.jopName">
                     <i class="pi pi-briefcase"></i>
                     <span class="info-label">الوظيفة:</span>
-                    <span class="info-value">{{teacher.jopName == 'Teacher' ? 'معلم' : 'مدير'}}</span>
+                    <span class="info-value">{{ teacher.jopName === 'Manager' ? 'مدير' : 'معلم' }}</span>
                   </div>
                 </div>
               </div>
@@ -87,10 +87,10 @@
                     (click)="EditDialog(teacher)" 
                     styleClass="p-button-outlined p-button-success" />
                   <p-button 
-                    label="حذف" 
+                    label="أرشفة" 
                     icon="pi pi-trash" 
                     class="btn-delete" 
-                    (click)="deleteEmployee(teacher.employeeID!, teacher.jopName)" 
+                    (click)="deleteEmployee(teacher.employeeID!, teacher.jopName || 'Teacher')" 
                     styleClass="p-button-outlined p-button-danger" />
                 </div>
               </ng-template>
@@ -117,7 +117,7 @@
             [first]="paginatorService.first()"
             [rowsPerPageOptions]="[4, 10, 20]"
             [showGlobalFilter]="false"
-            [trackByField]="'employeeID'"
+            [trackByField]="'employeeRowKey'"
             (pageChange)="handlePageChange($event)"
             (rowEdit)="onRowEdit($event)"
             (rowDelete)="onRowDelete($event)">

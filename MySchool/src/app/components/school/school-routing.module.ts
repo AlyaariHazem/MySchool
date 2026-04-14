@@ -91,8 +91,8 @@ const routes: Routes = [
         ]
       },
       {
-        path: 'teacher', data: { breadcrumb: 'الإستاذ' }, children: [
-          { path: '', component: TeachersComponent, data: { breadcrumb: 'الإستاذ' } },
+        path: 'teacher', data: { breadcrumb: 'الموظفون' }, children: [
+          { path: '', component: TeachersComponent, data: { breadcrumb: 'قائمة الموظفين' } },
           { path: 'action', component: ActionComponent, data: { breadcrumb: 'حدث' } },
           { path: 'not-found', component: PageNotFoundComponent },
           { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
