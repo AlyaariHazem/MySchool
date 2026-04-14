@@ -59,14 +59,14 @@ public class UnitOfWork : IUnitOfWork
         Users = new UsersRepository(_userManager);
         Guardians = new GuardianRepository(_tenantContext, _mapper, Users);
         Subjects = new SubjectRepository(_tenantContext, _mapper);
-        Students = new StudentRepository(_tenantContext, Guardians, _mangeFilesService, Users, _studentRepositoryLogger, _apiBaseUrl);
+        Years = new YearRepository(_tenantContext, _mapper);
+        Students = new StudentRepository(_tenantContext, Guardians, _mangeFilesService, Users, _studentRepositoryLogger, _apiBaseUrl, Years);
         Classes = new ClassesRepository(_tenantContext, _mapper);
         Divisions = new DivisionRepository(_tenantContext, _mapper);
         Stages = new StagesRepository(_tenantContext, _mapper);
         Accounts = new AccountRepository(_tenantContext, _mapper);
         FeeClasses = new FeeClassRepository(_tenantContext, _mapper);
         Fees = new FeesRepository(_tenantContext, _mapper);
-        Years = new YearRepository(_tenantContext, _mapper);
         Schools = new SchoolRepository(_tenantContext, _adminContext, Years, _mapper, _httpContextAccessor, _tenantInfo, _apiBaseUrl);
         StudentClassFees = new StudentClassFeeRepository(_tenantContext, _mapper, _auditTrail);
         Vouchers = new VoucherRepository(_tenantContext, _mapper, _mangeFilesService);
