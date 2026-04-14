@@ -238,12 +238,15 @@ public class EmployeeRepository : IEmployeeRepository
         return MapGuardianToDto(row, createdUser);
     }
 
-    public async Task DeleteEmployeeAsync(int employeeId, string jopName)
+    public Task<bool> ExistsForJobTypeAsync(int employeeId, string jopName) =>
+        EntityExistsForRoleAsync(employeeId, jopName);
+
+    public async Task<bool> DeleteEmployeeAsync(int employeeId, string jopName)
     {
         var role = EmployeeJopNameToYearRole.ToAssignmentRole(jopName);
         var exists = await EntityExistsForRoleAsync(employeeId, jopName);
         if (!exists)
-            return;
+            return false;
 
         await _yearAssignments.ArchiveEmployeeForYearAsync(
             role,
@@ -253,6 +256,7 @@ public class EmployeeRepository : IEmployeeRepository
             exitReason: null,
             notes: "Archived via employee API (replaces physical delete).",
             _context);
+        return true;
     }
 
     private async Task<bool> EntityExistsForRoleAsync(int id, string jopName)
@@ -269,8 +273,10 @@ public class EmployeeRepository : IEmployeeRepository
         foreach (var r in SchoolUserRoleKeys.ManagerTableRoles)
         {
             if (!string.Equals(j, r, StringComparison.OrdinalIgnoreCase)) continue;
-            return await _context.SchoolStaff.AsNoTracking()
-                .AnyAsync(s => s.SchoolStaffID == id && s.StaffRole == r);
+            var staff = await _context.SchoolStaff.AsNoTracking()
+                .FirstOrDefaultAsync(s => s.SchoolStaffID == id);
+            if (staff == null) return false;
+            return string.Equals(staff.StaffRole?.Trim(), r, StringComparison.OrdinalIgnoreCase);
         }
 
         return false;
@@ -410,8 +416,10 @@ public class EmployeeRepository : IEmployeeRepository
             {
                 if (!string.Equals(hint, r, StringComparison.OrdinalIgnoreCase)) continue;
                 var row = await _context.SchoolStaff.AsNoTracking()
-                    .FirstOrDefaultAsync(s => s.SchoolStaffID == employeeId && s.StaffRole == r);
+                    .FirstOrDefaultAsync(s => s.SchoolStaffID == employeeId);
                 if (row == null) return null;
+                if (!string.Equals(row.StaffRole?.Trim(), r, StringComparison.OrdinalIgnoreCase))
+                    return null;
                 var u = string.IsNullOrEmpty(row.UserID) ? null : await _userRepository.GetUserByIdAsync(row.UserID);
                 return MapSchoolStaffToDto(row, u);
             }

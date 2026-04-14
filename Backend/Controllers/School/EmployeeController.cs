@@ -33,7 +33,7 @@ public class EmployeeController : GenericCrudController<EmployeeDTO, int>
     [HttpGet("{id}")]
     public override async Task<IActionResult> GetById(int id)
     {
-        var jobType = Request.Query["jobType"].FirstOrDefault();
+        var jobType = GetJobTypeFromQuery();
         var entity = await _employeeRepository.GetEmployeeByIdAsync(id, jobType);
         if (entity == null)
             return NotFound(new { message = $"Entity with ID {id} was not found." });
@@ -50,7 +50,7 @@ public class EmployeeController : GenericCrudController<EmployeeDTO, int>
     {
         var jobType = body?.JobType;
         if (string.IsNullOrWhiteSpace(jobType))
-            jobType = Request.Query["jobType"].FirstOrDefault();
+            jobType = GetJobTypeFromQuery();
 
         if (string.IsNullOrWhiteSpace(jobType))
         {
@@ -60,17 +60,8 @@ public class EmployeeController : GenericCrudController<EmployeeDTO, int>
             });
         }
 
-        var existing = await _employeeRepository.GetEmployeeByIdAsync(id);
-        if (existing == null)
-            return NotFound(new { message = $"Employee with ID {id} not found." });
-
-        if (!string.Equals(existing.JopName, jobType, StringComparison.OrdinalIgnoreCase))
-        {
-            return BadRequest(new
-            {
-                message = $"Employee {id} is recorded as {existing.JopName}; jobType must match."
-            });
-        }
+        if (!await _employeeRepository.ExistsForJobTypeAsync(id, jobType))
+            return NotFound(new { message = $"No employee {id} with job type {jobType}." });
 
         var role = EmployeeJopNameToYearRole.ToAssignmentRole(jobType);
 
@@ -119,7 +110,7 @@ public class EmployeeController : GenericCrudController<EmployeeDTO, int>
     [HttpDelete("{id}")]
     public override async Task<IActionResult> Delete(int id)
     {
-        var jobType = Request.Query["jobType"].FirstOrDefault();
+        var jobType = GetJobTypeFromQuery();
         if (string.IsNullOrWhiteSpace(jobType))
         {
             return BadRequest(new
@@ -128,19 +119,28 @@ public class EmployeeController : GenericCrudController<EmployeeDTO, int>
             });
         }
 
-        var existing = await _employeeRepository.GetEmployeeByIdAsync(id);
-        if (existing == null)
-            return NotFound(new { message = $"Employee with ID {id} not found." });
+        var archived = await _employeeRepository.DeleteEmployeeAsync(id, jobType);
+        if (!archived)
+            return NotFound(new { message = $"No employee {id} with job type {jobType}." });
 
-        if (!string.Equals(existing.JopName, jobType, StringComparison.OrdinalIgnoreCase))
+        return NoContent();
+    }
+
+    /// <summary>Reads <c>jobType</c> / <c>JobType</c> from the query string.</summary>
+    private string? GetJobTypeFromQuery()
+    {
+        if (Request.Query.TryGetValue("jobType", out var a) && a.Count > 0)
         {
-            return BadRequest(new
-            {
-                message = $"Employee {id} is recorded as {existing.JopName}; jobType must match."
-            });
+            var s = a.ToString().Trim();
+            if (s.Length > 0) return s;
         }
 
-        await _employeeRepository.DeleteEmployeeAsync(id, jobType);
-        return NoContent();
+        if (Request.Query.TryGetValue("JobType", out var b) && b.Count > 0)
+        {
+            var s = b.ToString().Trim();
+            if (s.Length > 0) return s;
+        }
+
+        return null;
     }
 }

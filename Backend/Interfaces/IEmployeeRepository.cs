@@ -12,10 +12,13 @@ public interface IEmployeeRepository
     Task<EmployeeDTO?> UpdateEmployeeAsync(int id, EmployeeDTO employee);
 
     /// <summary>
-    /// Archives the employee for the current (or active) academic year — does not delete <see cref="Models.Teacher"/> /
-    /// <see cref="Models.Manager"/> rows or identity users.
+    /// Archives the employee for the current (or active) academic year — does not delete person rows or identity users.
     /// </summary>
-    Task DeleteEmployeeAsync(int employeeId, string jobType);
+    /// <returns>True if a matching entity existed and was archived; false if nothing matched <paramref name="jobType"/>.</returns>
+    Task<bool> DeleteEmployeeAsync(int employeeId, string jobType);
+
+    /// <summary>True if <paramref name="employeeId"/> exists for the given API <paramref name="jopName"/> (Teacher, EducationalSupervisor, …).</summary>
+    Task<bool> ExistsForJobTypeAsync(int employeeId, string jopName);
 
     /// <param name="schoolYearId">When year assignments are used, filter active staff for this year; null uses active/latest year.</param>
     Task<List<EmployeeDTO>> GetAllEmployeesAsync(int? schoolYearId = null);
