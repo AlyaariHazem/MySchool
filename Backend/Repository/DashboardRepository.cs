@@ -218,8 +218,6 @@ public class DashboardRepository : IDashboardRepository
         if (UseMasterDashboard())
         {
             var merged = new Dictionary<int, int>();
-            for (var y = 2025; y <= 2028; y++)
-                merged[y] = 0;
 
             foreach (var tenant in await GetTenantsWithConnectionsAsync())
             {
@@ -241,13 +239,12 @@ public class DashboardRepository : IDashboardRepository
         TenantDbContext db)
     {
         var years = await db.Years
+            .OrderBy(y => y.YearID)
             .Select(y => new { y.YearID, CalendarYear = y.YearDateStart.Year })
             .ToListAsync();
 
         if (years.Count == 0)
-            return GetEmptyTrendStatic();
-
-        var yearIdToCalendarYear = years.ToDictionary(y => y.YearID, y => y.CalendarYear);
+            return new List<StudentEnrollmentTrendDTO>();
 
         var studentsWithClassYear = await db.Students
             .Include(s => s.Division)
@@ -274,38 +271,19 @@ public class DashboardRepository : IDashboardRepository
             .Select(g => new { g.Key.StudentID, g.Key.YearID })
             .ToList();
 
-        if (allStudentYearPairs.Count == 0)
-            return GetEmptyTrendStatic();
-
-        var enrollmentYears = new Dictionary<int, int>();
-        foreach (var pair in allStudentYearPairs)
-        {
-            if (yearIdToCalendarYear.TryGetValue(pair.YearID, out var calendarYear))
-                enrollmentYears[calendarYear] = enrollmentYears.GetValueOrDefault(calendarYear, 0) + 1;
-        }
+        var yearIdsInCatalog = years.Select(y => y.YearID).ToHashSet();
+        var countsByYearId = allStudentYearPairs
+            .Where(p => yearIdsInCatalog.Contains(p.YearID))
+            .GroupBy(p => p.YearID)
+            .ToDictionary(g => g.Key, g => g.Count());
 
         var trend = new List<StudentEnrollmentTrendDTO>();
-        for (var year = 2025; year <= 2028; year++)
+        foreach (var row in years)
         {
             trend.Add(new StudentEnrollmentTrendDTO
             {
-                Year = year,
-                StudentCount = enrollmentYears.GetValueOrDefault(year, 0)
-            });
-        }
-
-        return trend;
-    }
-
-    private static List<StudentEnrollmentTrendDTO> GetEmptyTrendStatic()
-    {
-        var trend = new List<StudentEnrollmentTrendDTO>();
-        for (var year = 2025; year <= 2028; year++)
-        {
-            trend.Add(new StudentEnrollmentTrendDTO
-            {
-                Year = year,
-                StudentCount = 0
+                Year = row.CalendarYear,
+                StudentCount = countsByYearId.GetValueOrDefault(row.YearID, 0)
             });
         }
 
