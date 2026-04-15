@@ -120,6 +120,7 @@ public class ManagerRepository : IManagerRepository
 
         await using var tenantDb = new TenantDbContext(opts, tenantInfo);
         await tenantDb.Database.MigrateAsync();
+        await EnsureManagersSchoolIdIndexNotUniqueAsync(tenantRow.ConnectionString);
 
         // SchoolID must be the tenant DB's Schools.SchoolID (often 1). Admin UIs often send master TenantId as SchoolID.
         var schoolId = await ResolveSchoolIdForManagerAsync(tenantDb, managerDTO.SchoolID, tid);
@@ -144,12 +145,6 @@ public class ManagerRepository : IManagerRepository
         }
 
         await tenantDb.SaveChangesAsync();
-
-        var managerId = existing != null
-            ? existing.ManagerID
-            : await tenantDb.Managers.OrderByDescending(m => m.ManagerID).Select(m => m.ManagerID).FirstAsync();
-        await _employeeYearAssignments.EnsureActiveAssignmentAsync(
-            EmployeeYearAssignmentRoles.Manager, managerId, null, tenantDb);
 
         // Master DB: link Identity user ↔ tenant (JWT / tenant picker); same pattern as AuthController.EnsureUserTenantIfMissingAsync.
         await EnsureUserTenantForManagerAsync(createdUser.Id, tid);
@@ -207,7 +202,48 @@ public class ManagerRepository : IManagerRepository
             IsActive = true,
             LastAccessedUtc = DateTime.UtcNow
         });
-        await _masterDb.SaveChangesAsync();
+        try
+        {
+            await _masterDb.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (IsSqlServerDuplicateKey(ex))
+        {
+            // Another request inserted the same (UserId, TenantId) between our check and SaveChanges.
+        }
+    }
+
+    /// <summary>
+    /// Ensures <c>IX_Managers_SchoolID</c> is non-unique so multiple managers can share a school.
+    /// Idempotent; fixes tenant DBs where the EF migration was not applied or the index was recreated as unique.
+    /// </summary>
+    private static async Task EnsureManagersSchoolIdIndexNotUniqueAsync(string connectionString)
+    {
+        await using var conn = new SqlConnection(connectionString);
+        await conn.OpenAsync();
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = @"
+IF OBJECT_ID(N'dbo.Managers', N'U') IS NOT NULL
+BEGIN
+  IF EXISTS (
+      SELECT 1 FROM sys.indexes i
+      WHERE i.name = N'IX_Managers_SchoolID' AND i.object_id = OBJECT_ID(N'dbo.Managers'))
+    DROP INDEX [IX_Managers_SchoolID] ON [dbo].[Managers];
+  IF NOT EXISTS (
+      SELECT 1 FROM sys.indexes i
+      WHERE i.name = N'IX_Managers_SchoolID' AND i.object_id = OBJECT_ID(N'dbo.Managers'))
+    CREATE NONCLUSTERED INDEX [IX_Managers_SchoolID] ON [dbo].[Managers]([SchoolID]);
+END";
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    private static bool IsSqlServerDuplicateKey(Exception ex)
+    {
+        for (var e = ex; e != null; e = e.InnerException)
+        {
+            if (e is SqlException sql && (sql.Number == 2601 || sql.Number == 2627))
+                return true;
+        }
+        return false;
     }
 
     public async Task<GetManagerDTO?> GetManager(int id)
@@ -294,14 +330,21 @@ public class ManagerRepository : IManagerRepository
                         ConnectionString = tenant.ConnectionString
                     };
 
-                    var userIds = managers.Select(m => m.UserID).Distinct().ToList();
+                    var userIds = managers
+                        .Select(m => m.UserID)
+                        .Where(uid => !string.IsNullOrEmpty(uid))
+                        .Distinct()
+                        .ToList();
                     var users = new Dictionary<string, ApplicationUser?>(StringComparer.Ordinal);
                     foreach (var uid in userIds)
                         users[uid] = await _userManager.FindByIdAsync(uid);
 
                     foreach (var m in managers)
                     {
-                        var dto = Map(m, users.GetValueOrDefault(m.UserID), tenantMeta);
+                        var dto = Map(
+                            m,
+                            string.IsNullOrEmpty(m.UserID) ? null : users.GetValueOrDefault(m.UserID),
+                            tenantMeta);
                         dto.ManagerID = EncodeCrossTenantManagerId(tenant.TenantId, m.ManagerID);
                         result.Add(dto);
                     }
@@ -350,12 +393,21 @@ public class ManagerRepository : IManagerRepository
             }
         }
 
-        var ids = managersList.Select(m => m.UserID).Distinct().ToList();
+        var ids = managersList
+            .Select(m => m.UserID)
+            .Where(uid => !string.IsNullOrEmpty(uid))
+            .Distinct()
+            .ToList();
         var userMap = new Dictionary<string, ApplicationUser?>(StringComparer.Ordinal);
         foreach (var uid in ids)
             userMap[uid] = await _userManager.FindByIdAsync(uid);
 
-        return managersList.Select(m => Map(m, userMap.GetValueOrDefault(m.UserID), tenantMetaSingle)).ToList();
+        return managersList
+            .Select(m => Map(
+                m,
+                string.IsNullOrEmpty(m.UserID) ? null : userMap.GetValueOrDefault(m.UserID),
+                tenantMetaSingle))
+            .ToList();
     }
 
     public async Task UpdateManager(GetManagerDTO managerDTO)

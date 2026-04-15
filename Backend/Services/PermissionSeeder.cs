@@ -32,6 +32,16 @@ public static class PermissionSeeder
         byName = await db.Permissions.AsNoTracking()
             .ToDictionaryAsync(p => p.Name, p => p.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
+        var roleNames = SchoolUserRoleKeys.AllRoles;
+        var existingPairs = await db.RolePermissions.AsNoTracking()
+            .Where(rp => roleNames.Contains(rp.RoleName))
+            .Select(rp => new { rp.RoleName, rp.PermissionId })
+            .ToListAsync(cancellationToken);
+
+        var existingSet = existingPairs
+            .Select(x => (x.RoleName, x.PermissionId))
+            .ToHashSet();
+
         foreach (var role in SchoolUserRoleKeys.AllRoles)
         {
             foreach (var permName in PagePermissionNames.All)
@@ -39,9 +49,7 @@ public static class PermissionSeeder
                 if (!byName.TryGetValue(permName, out var pid))
                     continue;
 
-                var exists = await db.RolePermissions
-                    .AnyAsync(rp => rp.RoleName == role && rp.PermissionId == pid, cancellationToken);
-                if (exists)
+                if (existingSet.Contains((role, pid)))
                     continue;
 
                 db.RolePermissions.Add(new RolePermission
@@ -50,6 +58,7 @@ public static class PermissionSeeder
                     PermissionId = pid,
                     IsAllowed = DefaultAllowed(role, permName),
                 });
+                existingSet.Add((role, pid));
             }
         }
 

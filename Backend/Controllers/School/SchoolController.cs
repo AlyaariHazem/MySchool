@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using Backend.Common;
 using Backend.Controllers;
 using Backend.DTOS.School;
@@ -7,6 +8,8 @@ using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Backend.Controllers.School;
 
@@ -18,13 +21,34 @@ namespace Backend.Controllers.School;
 public class SchoolController : GenericCrudController<SchoolDTO, int>
 {
     private readonly TenantProvisioningService _tenantProvisioningService;
+    private readonly ILogger<SchoolController> _logger;
+    private readonly IHostEnvironment _env;
 
     public SchoolController(
         IGenericCrudRepository<SchoolDTO, int> repository,
-        TenantProvisioningService tenantProvisioningService)
+        TenantProvisioningService tenantProvisioningService,
+        ILogger<SchoolController> logger,
+        IHostEnvironment env)
         : base(repository)
     {
         _tenantProvisioningService = tenantProvisioningService;
+        _logger = logger;
+        _env = env;
+    }
+
+    private static string FormatProvisioningError(Exception ex, bool isDevelopment)
+    {
+        if (isDevelopment)
+        {
+            var sb = new StringBuilder(ex.Message);
+            for (var inner = ex.InnerException; inner != null; inner = inner.InnerException)
+                sb.Append(" → ").Append(inner.Message);
+            return sb.ToString();
+        }
+
+        return ex.InnerException != null
+            ? $"{ex.Message} ({ex.InnerException.Message})"
+            : ex.Message;
     }
 
     /// <summary>GET / — Legacy list shape for the admin UI (<see cref="APIResponse"/>).</summary>
@@ -101,9 +125,10 @@ public class SchoolController : GenericCrudController<SchoolDTO, int>
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Create school (tenant provisioning) failed for {SchoolName}", schoolDTO?.SchoolName);
             response.IsSuccess = false;
             response.statusCode = HttpStatusCode.InternalServerError;
-            response.ErrorMasseges.Add(ex.Message);
+            response.ErrorMasseges.Add(FormatProvisioningError(ex, _env.IsDevelopment()));
             return StatusCode((int)HttpStatusCode.InternalServerError, response);
         }
     }

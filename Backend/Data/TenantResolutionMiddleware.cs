@@ -37,11 +37,26 @@ namespace Backend.Middleware
             var tenantIdStr = context.User.FindFirstValue("TenantId");
             var hasTenant = int.TryParse(tenantIdStr, out var tenantId);
 
-            // Platform admins may access any route without 403; if the token includes TenantId, resolve DB for that school.
+            // Platform admins can browse master-only routes (school catalog, dashboard aggregates, etc.) without TenantId.
+            // School-scoped APIs need a resolved tenant connection; otherwise TenantDbContext is registered with no SQL
+            // provider and throws "No database provider has been configured for this DbContext."
             if (PlatformAdminHelper.IsPlatformAdminUnrestricted(context.User))
             {
                 if (hasTenant)
                     await TrySetTenantConnectionAsync(tenantInfo, tenantId, adminDb, cache);
+                else if (!AllowsPlatformAdminWithoutTenantConnection(path))
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync(JsonSerializer.Serialize(new
+                    {
+                        error = "TenantRequired",
+                        message =
+                            "Select a school first. Platform admins must call POST /api/auth/select-tenant or use a JWT that includes TenantId before using school-scoped APIs (students, classes, grades, etc.)."
+                    }));
+                    return;
+                }
+
                 await _next(context);
                 return;
             }
@@ -91,5 +106,25 @@ namespace Backend.Middleware
             tenantInfo.ConnectionString = cs;
         }
 
+        /// <summary>
+        /// Routes that only use <see cref="DatabaseContext"/> or create ad hoc <see cref="TenantDbContext"/> instances
+        /// (see master-dashboard / school-catalog helpers) — safe when <see cref="TenantInfo.ConnectionString"/> is empty.
+        /// </summary>
+        private static bool AllowsPlatformAdminWithoutTenantConnection(string path)
+        {
+            if (path.StartsWith("/api/school", StringComparison.Ordinal))
+                return true;
+            if (path.StartsWith("/api/dashboard", StringComparison.Ordinal))
+                return true;
+            if (path.StartsWith("/api/manager", StringComparison.Ordinal))
+                return true;
+            if (path.StartsWith("/api/rolepermissions", StringComparison.Ordinal))
+                return true;
+            if (path.StartsWith("/api/databaserestore", StringComparison.Ordinal))
+                return true;
+            if (path.StartsWith("/api/tenantseed", StringComparison.Ordinal))
+                return true;
+            return false;
+        }
     }
 }

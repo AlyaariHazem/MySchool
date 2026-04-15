@@ -84,9 +84,15 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
                 Applied.TryAdd(key, 1);
             }
 
+            // Exams/homework DDL must not run before EF has created __EFMigrationsHistory (new tenant DBs).
+            // Otherwise the batch references that table (migration stamp) and SQL Server fails with
+            // "Invalid object name 'dbo.__EFMigrationsHistory'" at compile time, before MigrateAsync runs.
+            // After migrations exist, this stays idempotent for older DBs that lack exam/homework tables.
+            var historyReady = EfMigrationsHistoryExists((SqlConnection)connection);
+
             // Separate from main bootstrap: tenant DBs that already ran the big script never get new tables
             // added to it unless we run this block (exams module DDL).
-            if (needExams && !ExamsApplied.ContainsKey(key))
+            if (needExams && !ExamsApplied.ContainsKey(key) && historyReady)
             {
                 using var cmd = connection.CreateCommand();
                 cmd.CommandText = TenantSchoolsBootstrapSql.ExamsModuleEnsureSql;
@@ -95,7 +101,7 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
                 ExamsApplied.TryAdd(key, 1);
             }
 
-            if (needHomework && !HomeworkApplied.ContainsKey(key))
+            if (needHomework && !HomeworkApplied.ContainsKey(key) && historyReady)
             {
                 using var cmd = connection.CreateCommand();
                 cmd.CommandText = TenantSchoolsBootstrapSql.HomeworkModuleEnsureSql;
@@ -137,7 +143,9 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
                 Applied.TryAdd(key, 1);
             }
 
-            if (needExams && !ExamsApplied.ContainsKey(key))
+            var historyReady = await EfMigrationsHistoryExistsAsync((SqlConnection)connection, cancellationToken);
+
+            if (needExams && !ExamsApplied.ContainsKey(key) && historyReady)
             {
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = TenantSchoolsBootstrapSql.ExamsModuleEnsureSql;
@@ -146,7 +154,7 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
                 ExamsApplied.TryAdd(key, 1);
             }
 
-            if (needHomework && !HomeworkApplied.ContainsKey(key))
+            if (needHomework && !HomeworkApplied.ContainsKey(key) && historyReady)
             {
                 await using var cmd = connection.CreateCommand();
                 cmd.CommandText = TenantSchoolsBootstrapSql.HomeworkModuleEnsureSql;
@@ -159,6 +167,22 @@ public sealed class TenantSchemaBootstrapInterceptor : DbConnectionInterceptor
         {
             Gate.Release();
         }
+    }
+
+    private static bool EfMigrationsHistoryExists(SqlConnection sql)
+    {
+        using var cmd = sql.CreateCommand();
+        cmd.CommandText = "SELECT CASE WHEN OBJECT_ID(N'[dbo].[__EFMigrationsHistory]', N'U') IS NOT NULL THEN 1 ELSE 0 END;";
+        var o = cmd.ExecuteScalar();
+        return o is int i && i == 1;
+    }
+
+    private static async Task<bool> EfMigrationsHistoryExistsAsync(SqlConnection sql, CancellationToken cancellationToken)
+    {
+        await using var cmd = sql.CreateCommand();
+        cmd.CommandText = "SELECT CASE WHEN OBJECT_ID(N'[dbo].[__EFMigrationsHistory]', N'U') IS NOT NULL THEN 1 ELSE 0 END;";
+        var o = await cmd.ExecuteScalarAsync(cancellationToken);
+        return o is int i && i == 1;
     }
 }
 

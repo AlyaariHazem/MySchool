@@ -361,6 +361,13 @@ namespace Backend.Data
             modelBuilder.Entity<Manager>()
                 .HasKey(m => m.ManagerID);
 
+            // One school, many managers (do not use School.Manager one-to-one — unique IX_Managers_SchoolID).
+            modelBuilder.Entity<Manager>()
+                .HasOne(m => m.School)
+                .WithMany(s => s.Managers)
+                .HasForeignKey(m => m.SchoolID)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<SchoolStaff>()
                 .HasKey(s => s.SchoolStaffID);
 

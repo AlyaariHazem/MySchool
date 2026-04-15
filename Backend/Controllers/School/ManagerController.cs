@@ -99,9 +99,17 @@ public class ManagerController : GenericCrudController<GetManagerDTO, int>
         {
             response.IsSuccess = false;
             response.statusCode = HttpStatusCode.InternalServerError;
-            response.ErrorMasseges.Add(ex.Message);
+            response.ErrorMasseges.Add(FormatExceptionChain(ex));
             return StatusCode((int)HttpStatusCode.InternalServerError, response);
         }
+    }
+
+    private static string FormatExceptionChain(Exception ex)
+    {
+        var parts = new List<string>();
+        for (Exception? e = ex; e != null; e = e.InnerException)
+            parts.Add(e.Message);
+        return string.Join(" | ", parts);
     }
 
     /// <summary>PUT /{id} — Legacy route (same body as PUT /).</summary>

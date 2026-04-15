@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Backend.Data;
 using Backend.Interfaces;
 using Backend.Models;
-using Backend.Repository.School.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
@@ -14,15 +13,46 @@ namespace Backend.Services;
 public class EmployeeYearAssignmentService : IEmployeeYearAssignmentService
 {
     private readonly TenantDbContext _context;
-    private readonly IYearRepository _years;
 
-    public EmployeeYearAssignmentService(TenantDbContext context, IYearRepository years)
+    public EmployeeYearAssignmentService(TenantDbContext context)
     {
         _context = context;
-        _years = years;
     }
 
     private TenantDbContext Db(TenantDbContext? ctx) => ctx ?? _context;
+
+    /// <summary>
+    /// Active year in the given DB, or the latest year if none is marked active.
+    /// Do not use <see cref="IYearRepository.GetActiveYearIdAsync"/> here: that uses the scoped
+    /// request <see cref="TenantDbContext"/>, which may be a different tenant than an explicitly
+    /// passed context (e.g. <see cref="Repository.School.Classes.ManagerRepository.AddManager"/>).
+    /// </summary>
+    private static async Task<int?> ResolveDefaultYearIdFromDbAsync(
+        TenantDbContext db,
+        CancellationToken cancellationToken = default)
+    {
+        var yid = await db.Years.AsNoTracking()
+            .Where(y => y.Active)
+            .OrderBy(y => y.YearID)
+            .Select(y => (int?)y.YearID)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (yid is > 0)
+            return yid;
+        return await db.Years.AsNoTracking()
+            .OrderByDescending(y => y.YearID)
+            .Select(y => (int?)y.YearID)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    private static async Task<int?> ResolveYearIdForOperationAsync(
+        TenantDbContext db,
+        int? yearId,
+        CancellationToken cancellationToken = default)
+    {
+        if (yearId is > 0)
+            return yearId;
+        return await ResolveDefaultYearIdFromDbAsync(db, cancellationToken);
+    }
 
     public async Task<bool> TenantUsesYearAssignmentsAsync(TenantDbContext? context = null, CancellationToken cancellationToken = default)
     {
@@ -35,15 +65,8 @@ public class EmployeeYearAssignmentService : IEmployeeYearAssignmentService
         if (requestedYearId is > 0)
             return requestedYearId;
 
-        var active = await _years.GetActiveYearIdAsync(cancellationToken);
-        if (active is > 0)
-            return active;
-
         var db = Db(context);
-        return await db.Years.AsNoTracking()
-            .OrderByDescending(y => y.YearID)
-            .Select(y => (int?)y.YearID)
-            .FirstOrDefaultAsync(cancellationToken);
+        return await ResolveDefaultYearIdFromDbAsync(db, cancellationToken);
     }
 
     public async Task<HashSet<int>> GetActiveEntityIdsForYearAsync(
@@ -71,9 +94,7 @@ public class EmployeeYearAssignmentService : IEmployeeYearAssignmentService
         CancellationToken cancellationToken = default)
     {
         var db = Db(context);
-        var yid = yearId ?? await _years.GetActiveYearIdAsync(cancellationToken);
-        if (yid is null or <= 0)
-            yid = await db.Years.AsNoTracking().OrderByDescending(y => y.YearID).Select(y => (int?)y.YearID).FirstOrDefaultAsync(cancellationToken);
+        var yid = await ResolveYearIdForOperationAsync(db, yearId, cancellationToken);
 
         if (yid is null or <= 0)
             return;
@@ -116,9 +137,7 @@ public class EmployeeYearAssignmentService : IEmployeeYearAssignmentService
         CancellationToken cancellationToken = default)
     {
         var db = Db(context);
-        var yid = yearId ?? await _years.GetActiveYearIdAsync(cancellationToken);
-        if (yid is null or <= 0)
-            yid = await db.Years.AsNoTracking().OrderByDescending(y => y.YearID).Select(y => (int?)y.YearID).FirstOrDefaultAsync(cancellationToken);
+        var yid = await ResolveYearIdForOperationAsync(db, yearId, cancellationToken);
 
         if (yid is null or <= 0)
             return;

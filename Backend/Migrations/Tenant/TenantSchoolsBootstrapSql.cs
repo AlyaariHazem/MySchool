@@ -289,7 +289,7 @@ BEGIN
         CONSTRAINT [PK_Managers] PRIMARY KEY ([ManagerID]),
         CONSTRAINT [FK_Managers_Schools_SchoolID] FOREIGN KEY ([SchoolID]) REFERENCES [dbo].[Schools]([SchoolID]) ON DELETE CASCADE
     );
-    CREATE UNIQUE NONCLUSTERED INDEX [IX_Managers_SchoolID] ON [dbo].[Managers]([SchoolID]);
+    CREATE NONCLUSTERED INDEX [IX_Managers_SchoolID] ON [dbo].[Managers]([SchoolID]);
     CREATE UNIQUE NONCLUSTERED INDEX [IX_Managers_TenantID] ON [dbo].[Managers]([TenantID]) WHERE [TenantID] IS NOT NULL;
 END
 

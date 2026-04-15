@@ -857,8 +857,7 @@ namespace Backend.Migrations.Tenant
 
                     b.HasKey("ManagerID");
 
-                    b.HasIndex("SchoolID")
-                        .IsUnique();
+                    b.HasIndex("SchoolID");
 
                     b.ToTable("Managers");
                 });
@@ -2017,8 +2016,8 @@ namespace Backend.Migrations.Tenant
             modelBuilder.Entity("Backend.Models.Manager", b =>
                 {
                     b.HasOne("Backend.Models.School", "School")
-                        .WithOne("Manager")
-                        .HasForeignKey("Backend.Models.Manager", "SchoolID")
+                        .WithMany("Managers")
+                        .HasForeignKey("SchoolID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2617,8 +2616,7 @@ namespace Backend.Migrations.Tenant
 
             modelBuilder.Entity("Backend.Models.School", b =>
                 {
-                    b.Navigation("Manager")
-                        .IsRequired();
+                    b.Navigation("Managers");
 
                     b.Navigation("Years");
                 });

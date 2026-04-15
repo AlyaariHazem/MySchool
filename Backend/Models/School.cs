@@ -32,7 +32,7 @@ public class School
     public string? zone { get; set; }
     public virtual ICollection<Year> Years { get; set; }
     [JsonIgnore]
-    public Manager Manager { get; set; }
+    public virtual ICollection<Manager> Managers { get; set; } = new List<Manager>();
 
 }
 }

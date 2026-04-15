@@ -98,7 +98,12 @@ builder.Services.AddDbContext<TenantDbContext>((serviceProvider, optionsBuilder)
     // This ensures dynamic tenant resolution works correctly
 });
 
-builder.Services.AddAutoMapper(cfg => cfg.LicenseKey = "", typeof(MappingConfig));
+builder.Services.AddAutoMapper(cfg =>
+{
+    var key = builder.Configuration["AutoMapper:LicenseKey"];
+    if (!string.IsNullOrWhiteSpace(key))
+        cfg.LicenseKey = key;
+}, typeof(MappingConfig));
 
 builder.Services.AddSwaggerGen(swagger =>
 {

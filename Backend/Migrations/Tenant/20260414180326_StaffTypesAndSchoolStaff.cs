@@ -10,13 +10,23 @@ namespace Backend.Migrations.Tenant
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_HomeworkTasks_YearID",
-                table: "HomeworkTasks");
+            // Idempotent: new tenant DBs may not have these indexes yet (or EmployeeYearAssignments
+            // is created in a later migration). Unconditional DropIndex fails on provision.
+            migrationBuilder.Sql(@"
+IF EXISTS (
+    SELECT 1 FROM sys.indexes i
+    INNER JOIN sys.tables t ON i.object_id = t.object_id
+    WHERE i.name = N'IX_HomeworkTasks_YearID' AND SCHEMA_NAME(t.schema_id) = N'dbo' AND t.name = N'HomeworkTasks')
+    DROP INDEX [IX_HomeworkTasks_YearID] ON [dbo].[HomeworkTasks];
+");
 
-            migrationBuilder.DropIndex(
-                name: "IX_EmployeeYearAssignments_YearID",
-                table: "EmployeeYearAssignments");
+            migrationBuilder.Sql(@"
+IF EXISTS (
+    SELECT 1 FROM sys.indexes i
+    INNER JOIN sys.tables t ON i.object_id = t.object_id
+    WHERE i.name = N'IX_EmployeeYearAssignments_YearID' AND SCHEMA_NAME(t.schema_id) = N'dbo' AND t.name = N'EmployeeYearAssignments')
+    DROP INDEX [IX_EmployeeYearAssignments_YearID] ON [dbo].[EmployeeYearAssignments];
+");
         }
 
         /// <inheritdoc />
