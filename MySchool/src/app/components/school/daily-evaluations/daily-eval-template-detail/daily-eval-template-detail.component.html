@@ -1,0 +1,162 @@
+<div class="employees-hr-page" *ngIf="canView && !loading && template">
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ template!.name }}</h2>
+      <div class="header-actions">
+        <p-button
+          [label]="'dailyEvaluations.templates.listTitle' | translate"
+          icon="pi pi-list"
+          [outlined]="true"
+          routerLink="/school/daily-evaluations/templates"
+        />
+        <p-button
+          *ngIf="canManage"
+          [label]="'employeesHr.actions.edit' | translate"
+          icon="pi pi-pencil"
+          [routerLink]="['/school/daily-evaluations/templates', templateId, 'edit']"
+        />
+      </div>
+    </header>
+
+    <div class="filters-grid" style="margin-bottom: 1rem">
+      <div>
+        <div class="c-label">{{ 'employeesHr.col.school' | translate }}</div>
+        <div>{{ schoolName(template!.schoolID) }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'employeesHr.col.year' | translate }}</div>
+        <div>{{ yearLabel(template!.academicYearID) }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'dailyEvaluations.templates.colStatus' | translate }}</div>
+        <div>{{ 'dailyEvaluations.templateStatus.' + statusLabelKey(template!.status) | translate }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'dailyEvaluations.templates.effectiveFrom' | translate }}</div>
+        <div>{{ template!.effectiveFrom || '—' }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'dailyEvaluations.templates.effectiveTo' | translate }}</div>
+        <div>{{ template!.effectiveTo || '—' }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'dailyEvaluations.templates.isDefault' | translate }}</div>
+        <div>{{ template!.isDefault ? ('employeesHr.yes' | translate) : ('employeesHr.no' | translate) }}</div>
+      </div>
+    </div>
+
+    <p *ngIf="template!.description" class="muted">{{ template!.description }}</p>
+
+    <h3 class="eh-section">{{ 'dailyEvaluations.criteria.sectionTitle' | translate }}</h3>
+    <div class="tab-toolbar" style="margin-bottom: 0.75rem">
+      <p-button
+        *ngIf="canManage"
+        [label]="'dailyEvaluations.criteria.add' | translate"
+        icon="pi pi-plus"
+        (onClick)="openNewCriteria()"
+      />
+    </div>
+
+    <div *ngIf="criteriaLoading" class="loading-wrap">
+      <p-progressSpinner strokeWidth="3" />
+    </div>
+
+    <p-table *ngIf="!criteriaLoading" [value]="criteria" styleClass="p-datatable-sm employees-hr-table">
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8">{{ 'dailyEvaluations.criteria.empty' | translate }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'dailyEvaluations.criteria.colName' | translate }}</th>
+          <th>{{ 'dailyEvaluations.criteria.weight' | translate }}</th>
+          <th>{{ 'dailyEvaluations.criteria.minScore' | translate }}</th>
+          <th>{{ 'dailyEvaluations.criteria.maxScore' | translate }}</th>
+          <th>{{ 'dailyEvaluations.criteria.mandatory' | translate }}</th>
+          <th>{{ 'dailyEvaluations.criteria.sortOrder' | translate }}</th>
+          <th>{{ 'employeesHr.form.isActive' | translate }}</th>
+          <th *ngIf="canManage">{{ 'employeesHr.col.actions' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.name }}</td>
+          <td>{{ row.weight }}</td>
+          <td>{{ row.minScore }}</td>
+          <td>{{ row.maxScore }}</td>
+          <td>{{ row.isMandatory ? ('employeesHr.yes' | translate) : ('employeesHr.no' | translate) }}</td>
+          <td>{{ row.sortOrder }}</td>
+          <td>{{ row.isActive ? ('employeesHr.yes' | translate) : ('employeesHr.no' | translate) }}</td>
+          <td *ngIf="canManage">
+            <p-button
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              (onClick)="openEditCriteria(row)"
+              [pTooltip]="'employeesHr.actions.edit' | translate"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<div *ngIf="loading" class="employees-hr-page loading-wrap">
+  <p-progressSpinner strokeWidth="3" />
+</div>
+
+<div class="employees-hr-page" *ngIf="!canView">
+  <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
+</div>
+
+<p-dialog
+  [header]="(editingCriteriaId ? 'dailyEvaluations.criteria.edit' : 'dailyEvaluations.criteria.add') | translate"
+  [(visible)]="criteriaDialog"
+  [modal]="true"
+  [style]="{ width: '32rem' }"
+  [dismissableMask]="true"
+>
+  <form [formGroup]="critForm" class="filters-grid" *ngIf="criteriaDialog">
+    <p-floatlabel class="filter-field" style="grid-column: 1 / -1">
+      <input pInputText id="cn" formControlName="name" class="w-full" />
+      <label for="cn">{{ 'dailyEvaluations.criteria.colName' | translate }} *</label>
+    </p-floatlabel>
+    <p-floatlabel class="filter-field" style="grid-column: 1 / -1">
+      <textarea pTextarea id="cd" formControlName="description" rows="2" class="w-full"></textarea>
+      <label for="cd">{{ 'dailyEvaluations.templates.fieldDescription' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel class="filter-field">
+      <p-inputNumber inputId="cw" formControlName="weight" [minFractionDigits]="0" [maxFractionDigits]="4" />
+      <label for="cw">{{ 'dailyEvaluations.criteria.weight' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel class="filter-field">
+      <p-inputNumber inputId="cmin" formControlName="minScore" />
+      <label for="cmin">{{ 'dailyEvaluations.criteria.minScore' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel class="filter-field">
+      <p-inputNumber inputId="cmax" formControlName="maxScore" />
+      <label for="cmax">{{ 'dailyEvaluations.criteria.maxScore' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel class="filter-field">
+      <p-inputNumber inputId="cs" formControlName="sortOrder" />
+      <label for="cs">{{ 'dailyEvaluations.criteria.sortOrder' | translate }}</label>
+    </p-floatlabel>
+    <div class="filter-field flex align-items-center gap-2">
+      <p-inputSwitch formControlName="isMandatory" inputId="cm" />
+      <label for="cm">{{ 'dailyEvaluations.criteria.mandatory' | translate }}</label>
+    </div>
+    <div class="filter-field flex align-items-center gap-2" *ngIf="editingCriteriaId">
+      <p-inputSwitch formControlName="isActive" inputId="ca" />
+      <label for="ca">{{ 'employeesHr.form.isActive' | translate }}</label>
+    </div>
+    <p-floatlabel class="filter-field" style="grid-column: 1 / -1">
+      <textarea pTextarea id="cnotes" formControlName="notes" rows="2" class="w-full"></textarea>
+      <label for="cnotes">{{ 'employeesHr.form.notes' | translate }}</label>
+    </p-floatlabel>
+    <div class="filter-actions" style="grid-column: 1 / -1">
+      <p-button [label]="'employeesHr.actions.save' | translate" icon="pi pi-save" (onClick)="saveCriteria()" />
+    </div>
+  </form>
+</p-dialog>

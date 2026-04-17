@@ -1,0 +1,164 @@
+<div class="employees-hr-page" *ngIf="canView" [attr.dir]="dir$ | async">
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'dailyEvaluations.templates.listTitle' | translate }}</h2>
+      <div class="header-actions">
+        <p-button
+          [label]="'dailyEvaluations.evaluations.title' | translate"
+          icon="pi pi-list"
+          [outlined]="true"
+          routerLink="/school/daily-evaluations"
+        />
+        <p-button
+          *ngIf="canManage"
+          [label]="'dailyEvaluations.templates.add' | translate"
+          icon="pi pi-plus"
+          routerLink="/school/daily-evaluations/templates/new"
+        />
+      </div>
+    </header>
+
+    <div class="filters-toolbar filters-grid">
+      <p-floatlabel class="filter-field">
+        <p-select
+          inputId="de-tpl-school"
+          [options]="schoolOptions"
+          [(ngModel)]="filter.schoolID"
+          (ngModelChange)="onSchoolChange()"
+          [showClear]="true"
+          optionLabel="label"
+          optionValue="value"
+          [placeholder]="'employeesHr.filter.school' | translate"
+        />
+        <label for="de-tpl-school">{{ 'employeesHr.filter.school' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel class="filter-field">
+        <p-select
+          inputId="de-tpl-year"
+          [options]="yearOptions"
+          [(ngModel)]="filter.academicYearID"
+          [showClear]="true"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="de-tpl-year">{{ 'employeesHr.filter.year' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel class="filter-field">
+        <p-select
+          inputId="de-tpl-status"
+          [options]="statusOptions"
+          [(ngModel)]="filter.status"
+          [showClear]="true"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="de-tpl-status">{{ 'dailyEvaluations.templates.colStatus' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel class="filter-field">
+        <p-select
+          inputId="de-tpl-active"
+          [options]="activeOptions"
+          [(ngModel)]="filter.isActive"
+          [showClear]="true"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="de-tpl-active">{{ 'employeesHr.filter.active' | translate }}</label>
+      </p-floatlabel>
+      <div class="filter-actions">
+        <p-button [label]="'employeesHr.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="load()" />
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-wrap">
+      <p-progressSpinner strokeWidth="3" />
+    </div>
+    <p *ngIf="error && !loading" class="error-block">{{ error }}</p>
+
+    <p-table
+      *ngIf="!loading && !error"
+      [value]="rows"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      styleClass="p-datatable-sm employees-hr-table"
+      [responsiveLayout]="'scroll'"
+    >
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9">{{ 'dailyEvaluations.templates.empty' | translate }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'dailyEvaluations.templates.colName' | translate }}</th>
+          <th>{{ 'employeesHr.col.school' | translate }}</th>
+          <th>{{ 'employeesHr.col.year' | translate }}</th>
+          <th>{{ 'dailyEvaluations.templates.colStatus' | translate }}</th>
+          <th>{{ 'employeesHr.form.isActive' | translate }}</th>
+          <th>{{ 'dailyEvaluations.templates.colUpdated' | translate }}</th>
+          <th>{{ 'employeesHr.col.actions' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.name }}</td>
+          <td>{{ schoolName(row.schoolID) }}</td>
+          <td>{{ yearLabel(row.academicYearID) }}</td>
+          <td>{{ 'dailyEvaluations.templateStatus.' + statusLabelKey(row.status) | translate }}</td>
+          <td>{{ row.isActive ? ('employeesHr.yes' | translate) : ('employeesHr.no' | translate) }}</td>
+          <td>{{ row.updatedAtUtc | date : 'short' }}</td>
+          <td class="action-btns">
+            <p-button
+              icon="pi pi-eye"
+              [rounded]="true"
+              [text]="true"
+              [routerLink]="['/school/daily-evaluations/templates', row.dailyEvaluationTemplateID]"
+              [pTooltip]="'employeesHr.actions.view' | translate"
+            />
+            <p-button
+              *ngIf="canManage"
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              [routerLink]="['/school/daily-evaluations/templates', row.dailyEvaluationTemplateID, 'edit']"
+              [pTooltip]="'employeesHr.actions.edit' | translate"
+            />
+            <p-button
+              *ngIf="canManage && row.status !== EvaluationTemplateStatus.Archived"
+              icon="pi pi-check"
+              [rounded]="true"
+              [text]="true"
+              severity="success"
+              (onClick)="confirmActivate(row)"
+              [pTooltip]="'dailyEvaluations.templates.activate' | translate"
+            />
+            <p-button
+              *ngIf="canManage && row.status !== EvaluationTemplateStatus.Archived"
+              icon="pi pi-pause"
+              [rounded]="true"
+              [text]="true"
+              (onClick)="confirmDeactivate(row)"
+              [pTooltip]="'dailyEvaluations.templates.deactivate' | translate"
+            />
+            <p-button
+              *ngIf="canManage && row.status !== EvaluationTemplateStatus.Archived"
+              icon="pi pi-folder"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              (onClick)="confirmArchive(row)"
+              [pTooltip]="'dailyEvaluations.templates.archive' | translate"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<div class="employees-hr-page" *ngIf="!canView">
+  <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
+</div>
+
+<p-confirmDialog />

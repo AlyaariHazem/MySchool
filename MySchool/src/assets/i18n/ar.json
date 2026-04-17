@@ -177,7 +177,9 @@
       "jobPostings": "الوظائف الشاغرة",
       "jobPostingAdd": "إعلان وظيفة جديد",
       "applications": "طلبات التوظيف",
-      "applicationAdd": "طلب توظيف جديد"
+      "applicationAdd": "طلب توظيف جديد",
+      "dailyEvaluations": "التقييمات اليومية",
+      "dailyEvalTemplates": "قوالب التقييم"
     },
     "teachers_sub": {
       "all": "جميع الموظفين",
@@ -562,6 +564,134 @@
       "updated": "تم تحديث البيانات.",
       "deactivated": "تم تعطيل الموظف.",
       "childSaved": "تمت الإضافة بنجاح."
+    }
+  },
+  "dailyEvaluations": {
+    "errors": {
+      "noPermission": "لا تملك صلاحية الوصول لهذا القسم."
+    },
+    "templateStatus": {
+      "draft": "مسودة",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "archived": "مؤرشف"
+    },
+    "status": {
+      "draft": "مسودة",
+      "submitted": "مُرسَل",
+      "locked": "مُقفَل"
+    },
+    "templates": {
+      "listTitle": "قوالب التقييم اليومي",
+      "add": "قالب جديد",
+      "colName": "الاسم",
+      "colStatus": "الحالة",
+      "colUpdated": "آخر تحديث",
+      "empty": "لا توجد قوالب مطابقة للمرشحات.",
+      "fieldDescription": "الوصف",
+      "effectiveFrom": "ساري من",
+      "effectiveTo": "ساري إلى",
+      "isDefault": "قالب افتراضي",
+      "dateError": "تاريخ النهاية لا يمكن أن يسبق البداية.",
+      "activate": "تفعيل",
+      "deactivate": "إيقاف",
+      "archive": "أرشفة",
+      "confirmActivate": "تفعيل القالب \"{{name}}\"؟",
+      "confirmDeactivate": "إيقاف القالب \"{{name}}\"؟",
+      "confirmArchive": "أرشفة القالب \"{{name}}\"؟ لا يمكن تعديل القوالب المؤرشفة.",
+      "createTitle": "قالب تقييم يومي جديد",
+      "editTitle": "تعديل قالب التقييم"
+    },
+    "criteria": {
+      "sectionTitle": "المعايير",
+      "add": "إضافة معيار",
+      "edit": "تعديل معيار",
+      "colName": "الاسم",
+      "weight": "الوزن",
+      "minScore": "الحد الأدنى للدرجة",
+      "maxScore": "الحد الأقصى للدرجة",
+      "mandatory": "إلزامي",
+      "sortOrder": "الترتيب",
+      "empty": "لا توجد معايير بعد.",
+      "scoreRangeError": "الحد الأقصى يجب أن يكون أكبر من أو يساوي الحد الأدنى."
+    },
+    "evaluations": {
+      "title": "التقييمات اليومية",
+      "add": "تقييم جديد",
+      "createTitle": "تقييم يومي جديد",
+      "editTitle": "تعديل التقييم اليومي",
+      "detailTitle": "التقييم اليومي",
+      "editHint": "احفظ الدرجات والتعليقات لكل معيار. أرسل التقييم عند استيفاء المعايير الإلزامية.",
+      "employee": "الموظف",
+      "template": "القالب",
+      "colDate": "التاريخ",
+      "colStatus": "الحالة",
+      "totalScore": "المجموع",
+      "locked": "مقفول",
+      "lockedYes": "مقفول",
+      "lockedNo": "مفتوح",
+      "empty": "لا توجد تقييمات مطابقة للمرشحات.",
+      "fromDate": "من تاريخ",
+      "toDate": "إلى تاريخ",
+      "score": "الدرجة",
+      "comment": "تعليق",
+      "scoreRangeHint": "النطاق المسموح: {{min}} – {{max}}",
+      "submit": "إرسال التقييم",
+      "createSubmit": "إنشاء التقييم",
+      "readOnlyLocked": "هذا التقييم مقفول ولا يمكن تعديله من هنا.",
+      "submittedAt": "تاريخ الإرسال"
+    },
+    "lock": {
+      "title": "قفل يوم التقييم",
+      "scopeTemplate": "تحديد القالب (اختياري)",
+      "submit": "قفل اليوم",
+      "alreadyLocked": "هذا النطاق مقفول مسبقاً.",
+      "previewOpen": "لا يوجد قفل مسجل لهذا النطاق بعد.",
+      "validation": "المدرسة والسنة والتاريخ مطلوبة."
+    },
+    "reopen": {
+      "title": "إعادة فتح يوم مقفول",
+      "submit": "إعادة الفتح",
+      "noLock": "لم يُعثر على قفل نشط لهذه المدرسة والسنة والتاريخ ونطاق القالب."
+    },
+    "override": {
+      "title": "تجاوز (تعديل بعد القفل)",
+      "warning": "أنت تقوم بتجاوز تقييم مقفول. السبب مطلوب وسيُسجَّل في سجل التدقيق.",
+      "reason": "السبب",
+      "reasonRequired": "السبب مطلوب.",
+      "adminNotes": "ملاحظات إضافية (اختياري)",
+      "submit": "تطبيق التجاوز",
+      "logsTitle": "سجل التجاوزات",
+      "actions": {
+        "editAfterLock": "تعديل بعد القفل",
+        "reopenEvaluation": "إعادة فتح التقييم",
+        "unlockDay": "فتح اليوم",
+        "forceUpdate": "تحديث قسري",
+        "deleteAfterLock": "حذف بعد القفل"
+      }
+    },
+    "logs": {
+      "action": "الإجراء",
+      "at": "الوقت",
+      "snapshots": "لقطات القيم (JSON)",
+      "empty": "لا توجد سجلات تجاوز لهذا التقييم."
+    },
+    "detail": {
+      "lockHint": "قد يطبق قفل على مستوى اليوم أو القالب على تاريخ هذا التقييم."
+    },
+    "toast": {
+      "templateActivated": "تم تفعيل القالب.",
+      "templateDeactivated": "تم إيقاف القالب.",
+      "templateArchived": "تمت أرشفة القالب.",
+      "templateSaved": "تم حفظ القالب.",
+      "templateCreated": "تم إنشاء القالب.",
+      "criteriaSaved": "تم حفظ المعيار.",
+      "evaluationCreated": "تم إنشاء التقييم.",
+      "evaluationSaved": "تم حفظ التقييم.",
+      "evaluationSubmitted": "تم إرسال التقييم.",
+      "dayLocked": "تم قفل اليوم بنجاح.",
+      "lockReopened": "تم إعادة فتح القفل.",
+      "overrideSaved": "تم تطبيق التجاوز."
     }
   },
   "recruitment": {

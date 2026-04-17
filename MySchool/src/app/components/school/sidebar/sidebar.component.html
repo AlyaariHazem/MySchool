@@ -92,6 +92,16 @@
                 <span>{{ 'sidebar.staff_hr.applications' | translate }}</span>
               </a>
             </li>
+            <li *ngIf="canViewDailyEvaluationsNav">
+              <a routerLink="/school/daily-evaluations" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.dailyEvaluations' | translate }}</span>
+              </a>
+            </li>
+            <li *ngIf="canViewDailyEvaluationsNav">
+              <a routerLink="/school/daily-evaluations/templates" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.dailyEvalTemplates' | translate }}</span>
+              </a>
+            </li>
             <li *ngIf="canViewStaffHrSection">
               <a routerLink="/school/recruitment/job-applications/create" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.applicationAdd' | translate }}</span>

@@ -1,0 +1,136 @@
+<div class="employees-hr-page" *ngIf="!evaluationId && canCreate">
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.createTitle' | translate }}</h2>
+      <p-button [label]="'employeesHr.actions.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
+    </header>
+
+    <form [formGroup]="headerForm" class="filters-grid" *ngIf="!loadingMeta">
+      <p-floatlabel class="filter-field">
+        <p-select
+          inputId="ev-cr-school"
+          [options]="schoolOptions"
+          formControlName="schoolID"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="ev-cr-school">{{ 'employeesHr.filter.school' | translate }} *</label>
+      </p-floatlabel>
+      <p-floatlabel class="filter-field">
+        <p-select
+          inputId="ev-cr-year"
+          [options]="yearOptions"
+          formControlName="academicYearID"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="ev-cr-year">{{ 'employeesHr.filter.year' | translate }} *</label>
+      </p-floatlabel>
+      <p-floatlabel class="filter-field">
+        <p-select
+          inputId="ev-cr-emp"
+          [options]="employeeOptions"
+          formControlName="evaluatedEmployeeProfileID"
+          [filter]="true"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="ev-cr-emp">{{ 'dailyEvaluations.evaluations.employee' | translate }} *</label>
+      </p-floatlabel>
+      <p-floatlabel class="filter-field">
+        <p-select
+          inputId="ev-cr-tpl"
+          [options]="templateOptions"
+          formControlName="dailyEvaluationTemplateID"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="ev-cr-tpl">{{ 'dailyEvaluations.evaluations.template' | translate }} *</label>
+      </p-floatlabel>
+      <p-floatlabel class="filter-field">
+        <p-datepicker formControlName="evaluationDate" [showIcon]="true" dateFormat="yy-mm-dd" />
+        <label>{{ 'dailyEvaluations.evaluations.colDate' | translate }} *</label>
+      </p-floatlabel>
+      <p-floatlabel class="filter-field" style="grid-column: 1 / -1">
+        <textarea pTextarea formControlName="notes" rows="2" class="w-full"></textarea>
+        <label>{{ 'employeesHr.form.notes' | translate }}</label>
+      </p-floatlabel>
+      <div class="filter-actions" style="grid-column: 1 / -1">
+        <p-button
+          type="button"
+          [label]="'dailyEvaluations.evaluations.createSubmit' | translate"
+          icon="pi pi-check"
+          (onClick)="createEvaluation()"
+          [loading]="saving"
+          [disabled]="headerForm.invalid"
+        />
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="employees-hr-page" *ngIf="evaluationId && canUpdate">
+  <div *ngIf="loadingMeta" class="loading-wrap">
+    <p-progressSpinner strokeWidth="3" />
+  </div>
+
+  <div class="employees-hr-card" *ngIf="!loadingMeta && full">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.editTitle' | translate }}</h2>
+      <div class="header-actions">
+        <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" routerLink="/school/daily-evaluations" />
+      </div>
+    </header>
+
+    <p class="muted">{{ 'dailyEvaluations.evaluations.editHint' | translate }}</p>
+
+    <p-floatlabel class="filter-field" style="margin-top: 1rem">
+      <textarea pTextarea [(ngModel)]="full.notes" rows="2" class="w-full"></textarea>
+      <label>{{ 'employeesHr.form.notes' | translate }}</label>
+    </p-floatlabel>
+
+    <h3 class="eh-section">{{ 'dailyEvaluations.criteria.sectionTitle' | translate }}</h3>
+    <div class="de-items" *ngFor="let it of full.items">
+      <div class="de-item-card">
+        <div class="de-item-head">
+          <strong>{{ it.criteriaName }}</strong>
+          <span *ngIf="critById.get(it.dailyEvaluationCriteriaID)?.mandatory" class="de-badge de-badge--override">{{
+            'dailyEvaluations.criteria.mandatory' | translate
+          }}</span>
+        </div>
+        <div class="de-item-grid">
+          <p-floatlabel>
+            <p-inputNumber
+              [inputId]="'sc-' + it.dailyEvaluationItemID"
+              [(ngModel)]="itemRow(it).score"
+              [min]="criteriaRange(it).min"
+              [max]="criteriaRange(it).max"
+              [useGrouping]="false"
+            />
+            <label [for]="'sc-' + it.dailyEvaluationItemID">{{ 'dailyEvaluations.evaluations.score' | translate }}</label>
+          </p-floatlabel>
+          <p-floatlabel class="grow">
+            <input pInputText [(ngModel)]="itemRow(it).comment" class="w-full" />
+            <label>{{ 'dailyEvaluations.evaluations.comment' | translate }}</label>
+          </p-floatlabel>
+        </div>
+        <small class="muted">{{ 'dailyEvaluations.evaluations.scoreRangeHint' | translate : { min: criteriaRange(it).min, max: criteriaRange(it).max } }}</small>
+      </div>
+    </div>
+
+    <div class="tab-toolbar" style="margin-top: 1rem">
+      <p-button [label]="'employeesHr.actions.save' | translate" icon="pi pi-save" (onClick)="saveItemsAndNotes()" [loading]="saving" />
+      <p-button
+        [label]="'dailyEvaluations.evaluations.submit' | translate"
+        icon="pi pi-send"
+        severity="success"
+        (onClick)="submitEvaluation()"
+        [loading]="saving"
+      />
+    </div>
+  </div>
+</div>
+
+<div class="employees-hr-page" *ngIf="(!evaluationId && !canCreate) || (evaluationId && !canUpdate)">
+  <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
+</div>

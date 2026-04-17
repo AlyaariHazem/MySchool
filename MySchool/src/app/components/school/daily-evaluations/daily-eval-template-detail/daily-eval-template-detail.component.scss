@@ -1,0 +1,17 @@
+@use '../daily-evaluations-shared.scss';
+
+.c-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 0.15rem;
+}
+
+.eh-section {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.muted {
+  color: #64748b;
+}

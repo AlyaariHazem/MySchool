@@ -1,0 +1,43 @@
+@use '../employees-hr/employees-hr-shared.scss';
+
+.de-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.de-badge--locked {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.de-badge--draft {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.de-badge--submitted {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.de-badge--override {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.de-json-preview {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 240px;
+  overflow: auto;
+  background: #f8fafc;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}

@@ -176,7 +176,9 @@
       "jobPostings": "Job postings",
       "jobPostingAdd": "New job posting",
       "applications": "Job applications",
-      "applicationAdd": "New application"
+      "applicationAdd": "New application",
+      "dailyEvaluations": "Daily evaluations",
+      "dailyEvalTemplates": "Evaluation templates"
     },
     "teachers_sub": {
       "all": "All staff",
@@ -561,6 +563,134 @@
       "updated": "Employee updated.",
       "deactivated": "Employee deactivated.",
       "childSaved": "Record added."
+    }
+  },
+  "dailyEvaluations": {
+    "errors": {
+      "noPermission": "You do not have access to this section."
+    },
+    "templateStatus": {
+      "draft": "Draft",
+      "active": "Active",
+      "inactive": "Inactive",
+      "archived": "Archived"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "locked": "Locked"
+    },
+    "templates": {
+      "listTitle": "Daily evaluation templates",
+      "add": "New template",
+      "colName": "Name",
+      "colStatus": "Status",
+      "colUpdated": "Updated",
+      "empty": "No templates match the filters.",
+      "fieldDescription": "Description",
+      "effectiveFrom": "Effective from",
+      "effectiveTo": "Effective to",
+      "isDefault": "Default template",
+      "dateError": "Effective end cannot be before start.",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "archive": "Archive",
+      "confirmActivate": "Activate template \"{{name}}\"?",
+      "confirmDeactivate": "Deactivate template \"{{name}}\"?",
+      "confirmArchive": "Archive template \"{{name}}\"? Archived templates cannot be edited.",
+      "createTitle": "New evaluation template",
+      "editTitle": "Edit evaluation template"
+    },
+    "criteria": {
+      "sectionTitle": "Criteria",
+      "add": "Add criterion",
+      "edit": "Edit criterion",
+      "colName": "Name",
+      "weight": "Weight",
+      "minScore": "Min score",
+      "maxScore": "Max score",
+      "mandatory": "Mandatory",
+      "sortOrder": "Sort order",
+      "empty": "No criteria defined yet.",
+      "scoreRangeError": "Max score must be greater than or equal to min score."
+    },
+    "evaluations": {
+      "title": "Daily evaluations",
+      "add": "New evaluation",
+      "createTitle": "New daily evaluation",
+      "editTitle": "Edit daily evaluation",
+      "detailTitle": "Daily evaluation",
+      "editHint": "Scores and comments are saved per criterion. Submit when all mandatory criteria are satisfied.",
+      "employee": "Employee",
+      "template": "Template",
+      "colDate": "Date",
+      "colStatus": "Status",
+      "totalScore": "Total score",
+      "locked": "Locked",
+      "lockedYes": "Locked",
+      "lockedNo": "Open",
+      "empty": "No evaluations match the filters.",
+      "fromDate": "From date",
+      "toDate": "To date",
+      "score": "Score",
+      "comment": "Comment",
+      "scoreRangeHint": "Allowed range: {{min}} – {{max}}",
+      "submit": "Submit evaluation",
+      "createSubmit": "Create evaluation",
+      "readOnlyLocked": "This evaluation is locked and cannot be edited here.",
+      "submittedAt": "Submitted at"
+    },
+    "lock": {
+      "title": "Lock evaluation day",
+      "scopeTemplate": "Limit to template (optional)",
+      "submit": "Lock day",
+      "alreadyLocked": "This scope is already locked.",
+      "previewOpen": "No lock record for this scope yet.",
+      "validation": "School, academic year, and date are required."
+    },
+    "reopen": {
+      "title": "Reopen locked day",
+      "submit": "Reopen",
+      "noLock": "No active lock was found for this school, year, date, and template scope."
+    },
+    "override": {
+      "title": "Override (post-lock edit)",
+      "warning": "You are overriding a locked evaluation. A reason is required and will be stored in the audit log.",
+      "reason": "Reason",
+      "reasonRequired": "Reason is required.",
+      "adminNotes": "Additional notes (optional)",
+      "submit": "Apply override",
+      "logsTitle": "Override history",
+      "actions": {
+        "editAfterLock": "Edit after lock",
+        "reopenEvaluation": "Reopen evaluation",
+        "unlockDay": "Unlock day",
+        "forceUpdate": "Force update",
+        "deleteAfterLock": "Delete after lock"
+      }
+    },
+    "logs": {
+      "action": "Action",
+      "at": "Time",
+      "snapshots": "Value snapshots (JSON)",
+      "empty": "No override entries for this evaluation."
+    },
+    "detail": {
+      "lockHint": "A day-level or template-level lock may apply to this evaluation date."
+    },
+    "toast": {
+      "templateActivated": "Template activated.",
+      "templateDeactivated": "Template deactivated.",
+      "templateArchived": "Template archived.",
+      "templateSaved": "Template saved.",
+      "templateCreated": "Template created.",
+      "criteriaSaved": "Criterion saved.",
+      "evaluationCreated": "Evaluation created.",
+      "evaluationSaved": "Evaluation saved.",
+      "evaluationSubmitted": "Evaluation submitted.",
+      "dayLocked": "Day locked successfully.",
+      "lockReopened": "Lock reopened.",
+      "overrideSaved": "Override applied."
     }
   },
   "recruitment": {

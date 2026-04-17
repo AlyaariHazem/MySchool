@@ -1,0 +1,155 @@
+<div class="employees-hr-page" *ngIf="canView">
+  <div *ngIf="loading" class="loading-wrap">
+    <p-progressSpinner strokeWidth="3" />
+  </div>
+
+  <div class="employees-hr-card" *ngIf="!loading && full">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.detailTitle' | translate }}</h2>
+      <div class="header-actions">
+        <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" routerLink="/school/daily-evaluations" />
+        <p-button
+          *ngIf="canUpdate && !full.isLocked && full.status !== DailyEvaluationStatus.Locked"
+          [label]="'employeesHr.actions.edit' | translate"
+          icon="pi pi-pencil"
+          [routerLink]="['/school/daily-evaluations', full.dailyEvaluationID, 'edit']"
+        />
+        <p-button
+          *ngIf="canOverride && (full.isLocked || full.status === DailyEvaluationStatus.Locked)"
+          [label]="'dailyEvaluations.override.title' | translate"
+          icon="pi pi-exclamation-triangle"
+          severity="danger"
+          [outlined]="true"
+          (onClick)="openOverride()"
+        />
+        <p-button
+          *ngIf="canOverride"
+          [label]="'dailyEvaluations.override.logsTitle' | translate"
+          icon="pi pi-history"
+          [outlined]="true"
+          (onClick)="openLogs()"
+        />
+      </div>
+    </header>
+
+    <div class="de-badges">
+      <span *ngIf="full.isLocked || full.status === DailyEvaluationStatus.Locked" class="de-badge de-badge--locked">{{
+        'dailyEvaluations.evaluations.lockedYes' | translate
+      }}</span>
+      <span class="de-badge de-badge--draft">{{ 'dailyEvaluations.status.' + statusLabelKey(full.status) | translate }}</span>
+    </div>
+
+    <div class="filters-grid" style="margin-top: 1rem">
+      <div>
+        <div class="c-label">{{ 'employeesHr.col.school' | translate }}</div>
+        <div>{{ schoolName(full.schoolID) }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'employeesHr.col.year' | translate }}</div>
+        <div>{{ full.academicYearID }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'dailyEvaluations.evaluations.employee' | translate }}</div>
+        <div>{{ employeeLabel }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'dailyEvaluations.evaluations.template' | translate }}</div>
+        <div>{{ templateName }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'dailyEvaluations.evaluations.colDate' | translate }}</div>
+        <div>{{ full.evaluationDate }}</div>
+      </div>
+      <div>
+        <div class="c-label">{{ 'dailyEvaluations.evaluations.totalScore' | translate }}</div>
+        <div>{{ full.totalScore }}</div>
+      </div>
+      <div *ngIf="full.submittedAtUtc">
+        <div class="c-label">{{ 'dailyEvaluations.evaluations.submittedAt' | translate }}</div>
+        <div>{{ full.submittedAtUtc | date : 'short' }}</div>
+      </div>
+    </div>
+
+    <p *ngIf="full.notes" class="notes-block"><strong>{{ 'employeesHr.form.notes' | translate }}:</strong> {{ full.notes }}</p>
+
+    <div *ngIf="lockForDay" class="lock-hint muted">
+      {{ 'dailyEvaluations.detail.lockHint' | translate }}
+    </div>
+
+    <h3 class="eh-section">{{ 'dailyEvaluations.criteria.sectionTitle' | translate }}</h3>
+    <p-table [value]="full.items" styleClass="p-datatable-sm employees-hr-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'dailyEvaluations.criteria.colName' | translate }}</th>
+          <th>{{ 'dailyEvaluations.evaluations.score' | translate }}</th>
+          <th>{{ 'dailyEvaluations.evaluations.comment' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-it>
+        <tr>
+          <td>{{ it.criteriaName }}</td>
+          <td>{{ it.score }}</td>
+          <td>{{ it.comment }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<div class="employees-hr-page" *ngIf="!canView">
+  <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
+</div>
+
+<p-dialog
+  [header]="'dailyEvaluations.override.title' | translate"
+  [(visible)]="overrideDialog"
+  [modal]="true"
+  [style]="{ width: '34rem' }"
+  [dismissableMask]="true"
+>
+  <div *ngIf="overrideDialog && full" class="override-body">
+    <p class="muted">{{ 'dailyEvaluations.override.warning' | translate }}</p>
+    <p-floatlabel class="filter-field" style="width: 100%">
+      <textarea pTextarea [(ngModel)]="full.notes" rows="2" class="w-full"></textarea>
+      <label>{{ 'employeesHr.form.notes' | translate }}</label>
+    </p-floatlabel>
+    <div *ngFor="let it of full.items" class="de-item-card">
+      <strong>{{ it.criteriaName }}</strong>
+      <div class="de-item-grid">
+        <p-floatlabel>
+          <p-inputNumber [(ngModel)]="oRow(it).score" [useGrouping]="false" />
+          <label>{{ 'dailyEvaluations.evaluations.score' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel class="grow">
+          <input pInputText [(ngModel)]="oRow(it).comment" class="w-full" />
+          <label>{{ 'dailyEvaluations.evaluations.comment' | translate }}</label>
+        </p-floatlabel>
+      </div>
+    </div>
+    <p-floatlabel class="filter-field" style="width: 100%">
+      <textarea pTextarea [(ngModel)]="overrideReason" rows="2" class="w-full"></textarea>
+      <label>{{ 'dailyEvaluations.override.reason' | translate }} *</label>
+    </p-floatlabel>
+    <p-floatlabel class="filter-field" style="width: 100%">
+      <textarea pTextarea [(ngModel)]="overrideNotes" rows="2" class="w-full"></textarea>
+      <label>{{ 'dailyEvaluations.override.adminNotes' | translate }}</label>
+    </p-floatlabel>
+    <p-button [label]="'dailyEvaluations.override.submit' | translate" icon="pi pi-check" (onClick)="submitOverride()" [loading]="overrideSaving" />
+  </div>
+</p-dialog>
+
+<p-dialog [header]="'dailyEvaluations.override.logsTitle' | translate" [(visible)]="logsDialog" [modal]="true" [style]="{ width: '40rem' }">
+  <div *ngIf="logsDialog && logs.length === 0" class="muted">{{ 'dailyEvaluations.logs.empty' | translate }}</div>
+  <div *ngFor="let log of logs" class="log-card">
+    <div class="log-row">
+      <strong>{{ 'dailyEvaluations.override.actions.' + actionLabel(log.overrideActionType) | translate }}</strong>
+      <span class="muted">{{ log.performedAtUtc | date : 'short' }}</span>
+    </div>
+    <div>{{ log.reason }}</div>
+    <details *ngIf="log.previousValuesJson || log.newValuesJson">
+      <summary>{{ 'dailyEvaluations.logs.snapshots' | translate }}</summary>
+      <div *ngIf="log.previousValuesJson" class="de-json-preview">{{ log.previousValuesJson }}</div>
+      <div *ngIf="log.newValuesJson" class="de-json-preview">{{ log.newValuesJson }}</div>
+    </details>
+  </div>
+</p-dialog>
