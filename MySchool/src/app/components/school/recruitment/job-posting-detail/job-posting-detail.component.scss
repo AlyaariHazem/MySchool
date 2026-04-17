@@ -1,0 +1,28 @@
+@import '../recruitment-shared.scss';
+
+.pre-wrap {
+  white-space: pre-wrap;
+  margin: 0.25rem 0 1rem;
+}
+
+.muted {
+  color: #64748b;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

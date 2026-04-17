@@ -1,0 +1,30 @@
+<div class="employees-hr-page">
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'recruitment.postings.createTitle' | translate }}</h2>
+      <p-button
+        [label]="'employeesHr.actions.backList' | translate"
+        icon="pi pi-arrow-right"
+        [outlined]="true"
+        routerLink="/school/recruitment/job-postings"
+      />
+    </header>
+
+    <div *ngIf="!canCreate" class="empty-block muted">{{ 'employeesHr.errors.noPermission' | translate }}</div>
+
+    <div *ngIf="loadingMeta && canCreate" class="loading-wrap">
+      <p-progressSpinner strokeWidth="4" />
+    </div>
+
+    <app-job-posting-form
+      *ngIf="!loadingMeta && canCreate"
+      [schools]="schools"
+      [years]="years"
+      [initial]="null"
+      [submitting]="submitting"
+      [submitLabelKey]="'recruitment.postings.createSubmit'"
+      (submitted)="onSubmit($event)"
+      (cancelled)="cancel()"
+    />
+  </div>
+</div>

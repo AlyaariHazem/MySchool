@@ -1,0 +1,36 @@
+<div class="employees-hr-page">
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'recruitment.applications.editTitle' | translate }}</h2>
+      <p-button
+        [label]="'employeesHr.actions.backDetail' | translate"
+        icon="pi pi-arrow-right"
+        [outlined]="true"
+        [routerLink]="['/school/recruitment/job-applications', id]"
+      />
+    </header>
+
+    <div *ngIf="!canUpdate" class="empty-block muted">{{ 'employeesHr.errors.noPermission' | translate }}</div>
+
+    <div *ngIf="loadingRow && canUpdate" class="loading-wrap">
+      <p-progressSpinner strokeWidth="4" />
+    </div>
+
+    <app-job-application-form
+      *ngIf="!loadingRow && canUpdate && initial"
+      [years]="years"
+      [openPostings]="[]"
+      [initial]="initial"
+      [submitting]="submitting"
+      [submitLabelKey]="'recruitment.applications.save'"
+      mode="edit"
+      [lockPostingId]="true"
+      (submitted)="onSubmit($event)"
+      (cancelled)="cancel()"
+    />
+
+    <div *ngIf="!loadingRow && canUpdate && !initial" class="empty-block muted">
+      {{ 'recruitment.applications.notFound' | translate }}
+    </div>
+  </div>
+</div>

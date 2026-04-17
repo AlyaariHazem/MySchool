@@ -226,6 +226,110 @@ const routes: Routes = [
         ],
       },
       {
+        path: 'recruitment',
+        data: { breadcrumb: 'التوظيف' },
+        children: [
+          {
+            path: 'job-postings',
+            loadComponent: () =>
+              import('./recruitment/job-postings-list/job-postings-list.component').then(
+                (m) => m.JobPostingsListComponent,
+              ),
+            data: {
+              breadcrumb: 'الوظائف الشاغرة',
+              permissions: [PagePermission.Recruitment.View, PagePermission.Employees.View],
+            },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'job-postings/create',
+            loadComponent: () =>
+              import('./recruitment/job-posting-create/job-posting-create.component').then(
+                (m) => m.JobPostingCreateComponent,
+              ),
+            data: {
+              breadcrumb: 'إعلان وظيفة',
+              permissions: [PagePermission.Recruitment.Create, PagePermission.Employees.Create],
+            },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'job-postings/:id/edit',
+            loadComponent: () =>
+              import('./recruitment/job-posting-edit/job-posting-edit.component').then(
+                (m) => m.JobPostingEditComponent,
+              ),
+            data: {
+              breadcrumb: 'تعديل إعلان',
+              permissions: [PagePermission.Recruitment.Update, PagePermission.Employees.Update],
+            },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'job-postings/:id',
+            loadComponent: () =>
+              import('./recruitment/job-posting-detail/job-posting-detail.component').then(
+                (m) => m.JobPostingDetailComponent,
+              ),
+            data: {
+              breadcrumb: 'تفاصيل الإعلان',
+              permissions: [PagePermission.Recruitment.View, PagePermission.Employees.View],
+            },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'job-applications',
+            loadComponent: () =>
+              import('./recruitment/job-applications-list/job-applications-list.component').then(
+                (m) => m.JobApplicationsListComponent,
+              ),
+            data: {
+              breadcrumb: 'طلبات التوظيف',
+              permissions: [PagePermission.Recruitment.View, PagePermission.Employees.View],
+            },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'job-applications/create',
+            loadComponent: () =>
+              import('./recruitment/job-application-create/job-application-create.component').then(
+                (m) => m.JobApplicationCreateComponent,
+              ),
+            data: {
+              breadcrumb: 'طلب توظيف جديد',
+              permissions: [PagePermission.Recruitment.Create, PagePermission.Employees.Create],
+            },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'job-applications/:id/edit',
+            loadComponent: () =>
+              import('./recruitment/job-application-edit/job-application-edit.component').then(
+                (m) => m.JobApplicationEditComponent,
+              ),
+            data: {
+              breadcrumb: 'تعديل طلب',
+              permissions: [PagePermission.Recruitment.Update, PagePermission.Employees.Update],
+            },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'job-applications/:id',
+            loadComponent: () =>
+              import('./recruitment/job-application-detail/job-application-detail.component').then(
+                (m) => m.JobApplicationDetailComponent,
+              ),
+            data: {
+              breadcrumb: 'مسار الطلب',
+              permissions: [PagePermission.Recruitment.View, PagePermission.Employees.View],
+            },
+            canMatch: [permissionGuard],
+          },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
+      {
         path: 'course', data: { breadcrumb: 'المقررات والخطط' }, children: [
           { path: '', component: BooksComponent, data: { breadcrumb: 'الكتب' } },
           { path: 'courses', component: CoursesComponent, data: { breadcrumb: 'المقررات' } },

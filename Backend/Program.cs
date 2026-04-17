@@ -317,6 +317,8 @@ app.UseStaticFiles();
 app.UseCors("MyPolicy");
 app.UseAuthentication();
 app.UseMiddleware<TenantResolutionMiddleware>(); // Resolve tenant from JWT before authorization
+// if (app.Environment.IsDevelopment())
+//     app.UseMiddleware<TenantDevAutoMigrateMiddleware>(); // Apply pending tenant EF migrations (e.g. JobPostings)
 app.UseAuthorization();
 
 // Add a default route to redirect to Swagger

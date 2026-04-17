@@ -58,8 +58,8 @@
         </li>
 
 
-        <!-- Staff / HR (single module: register + legacy teacher directory) -->
-        <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')" *ngIf="canViewManagementSection">
+        <!-- Staff / HR (single module: register + recruitment + legacy teacher directory) -->
+        <li class="submenu" (click)="toggleSubmenu('teachersSubmenu')" *ngIf="canViewStaffHrSection">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-10.png" alt="icon">
             <span>{{ 'sidebar.staff_hr.title' | translate }}</span>
@@ -67,7 +67,7 @@
               [ngClass]="{'rotate-arrow': isSubmenuOpen['teachersSubmenu']}"></span>
           </a>
           <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('teachersSubmenu')">
-            <li>
+            <li *ngIf="canViewEmployeesNav">
               <a routerLink="/school/employees-hr" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.register' | translate }}</span>
               </a>
@@ -75,6 +75,26 @@
             <li *ngIf="canCreateEmployeesHrNav">
               <a routerLink="/school/employees-hr/new" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.add' | translate }}</span>
+              </a>
+            </li>
+            <li *ngIf="canViewRecruitmentNav">
+              <a routerLink="/school/recruitment/job-postings" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.jobPostings' | translate }}</span>
+              </a>
+            </li>
+            <li *ngIf="canCreateRecruitmentNav">
+              <a routerLink="/school/recruitment/job-postings/create" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.jobPostingAdd' | translate }}</span>
+              </a>
+            </li>
+            <li *ngIf="canViewRecruitmentNav">
+              <a routerLink="/school/recruitment/job-applications" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.applications' | translate }}</span>
+              </a>
+            </li>
+            <li *ngIf="canCreateRecruitmentNav">
+              <a routerLink="/school/recruitment/job-applications/create" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.applicationAdd' | translate }}</span>
               </a>
             </li>
             <li><a routerLink="/school/teacher" routerLinkActive="active" (click)="cancel()"><span>{{ 'sidebar.staff_hr.teacherDirectory' | translate }}</span></a></li>

@@ -1,0 +1,197 @@
+<div class="employees-hr-page recruitment-job-postings" [attr.dir]="dir$ | async">
+  <p-confirmDialog [style]="{ width: '28rem' }" />
+
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'recruitment.postings.listTitle' | translate }}</h2>
+      <div class="header-actions">
+        <p-button
+          *ngIf="canCreate"
+          [label]="'recruitment.postings.add' | translate"
+          icon="pi pi-plus"
+          routerLink="/school/recruitment/job-postings/create"
+        />
+        <p-button
+          [label]="'employeesHr.list.refresh' | translate"
+          icon="pi pi-refresh"
+          [outlined]="true"
+          (onClick)="load()"
+          [loading]="loading"
+        />
+      </div>
+    </header>
+
+    <div class="filters-toolbar" *ngIf="canView">
+      <div class="filters-grid">
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="jp-filter-school"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="schoolOptions"
+            [(ngModel)]="filter.schoolID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            (onChange)="onSchoolChange()"
+          />
+          <label for="jp-filter-school">{{ 'employeesHr.filter.school' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="jp-filter-year"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="yearOptions"
+            [(ngModel)]="filter.academicYearID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="jp-filter-year">{{ 'employeesHr.filter.year' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="jp-filter-job"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="jobTypeOptions"
+            [(ngModel)]="filter.employeeJobTypeID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [disabled]="jobTypesLoading"
+          />
+          <label for="jp-filter-job">{{ 'employeesHr.filter.jobType' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="jp-filter-status"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="statusOptions"
+            [(ngModel)]="filter.status"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="jp-filter-status">{{ 'recruitment.postings.status' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="jp-filter-active"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="activeOptions"
+            [(ngModel)]="filter.isActive"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="jp-filter-active">{{ 'employeesHr.filter.active' | translate }}</label>
+        </p-floatlabel>
+
+        <div class="filter-actions">
+          <p-button [label]="'employeesHr.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="load()" />
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="error" class="error-block">{{ error }}</div>
+
+    <div *ngIf="loading" class="loading-wrap">
+      <p-progressSpinner strokeWidth="3" />
+    </div>
+
+    <div *ngIf="!loading && canView && rows.length === 0 && !error" class="empty-block">
+      {{ 'recruitment.postings.empty' | translate }}
+    </div>
+
+    <p-table *ngIf="!loading && rows.length > 0" [value]="rows" styleClass="p-datatable-sm employees-hr-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'recruitment.postings.colTitle' | translate }}</th>
+          <th>{{ 'recruitment.postings.colDepartment' | translate }}</th>
+          <th>{{ 'employeesHr.filter.school' | translate }}</th>
+          <th>{{ 'employeesHr.filter.year' | translate }}</th>
+          <th>{{ 'employeesHr.filter.jobType' | translate }}</th>
+          <th>{{ 'recruitment.postings.colOpenings' | translate }}</th>
+          <th>{{ 'recruitment.postings.colPostingDate' | translate }}</th>
+          <th>{{ 'recruitment.postings.colClosingDate' | translate }}</th>
+          <th>{{ 'recruitment.postings.status' | translate }}</th>
+          <th style="width: 12rem">{{ 'employeesHr.col.actions' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.title }}</td>
+          <td>{{ row.department || '—' }}</td>
+          <td>{{ schoolName(row.schoolID) }}</td>
+          <td>{{ yearLabel(row.academicYearID) }}</td>
+          <td>{{ row.jobTypeName || '—' }}</td>
+          <td>{{ row.numberOfOpenings }}</td>
+          <td>{{ row.postingDate | date: 'mediumDate' }}</td>
+          <td>{{ row.closingDate ? (row.closingDate | date: 'mediumDate') : '—' }}</td>
+          <td>
+            <p-tag
+              [value]="'recruitment.postingStatus.' + postingStatusLabelKey(row.status) | translate"
+              [severity]="severityStatus(row.status)"
+            />
+          </td>
+          <td>
+            <div class="action-btns">
+              <p-button
+                icon="pi pi-eye"
+                [rounded]="true"
+                [text]="true"
+                [routerLink]="['/school/recruitment/job-postings', row.jobPostingID]"
+                [pTooltip]="'employeesHr.actions.view' | translate"
+              />
+              <p-button
+                *ngIf="canUpdate"
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                [routerLink]="['/school/recruitment/job-postings', row.jobPostingID, 'edit']"
+                [pTooltip]="'employeesHr.actions.edit' | translate"
+              />
+              <p-button
+                *ngIf="canUpdate && (row.status === JobPostingStatus.Draft || row.status === JobPostingStatus.Closed)"
+                icon="pi pi-unlock"
+                [rounded]="true"
+                [text]="true"
+                (onClick)="confirmOpen(row)"
+                [pTooltip]="'recruitment.postings.actionOpen' | translate"
+              />
+              <p-button
+                *ngIf="canUpdate && row.status === JobPostingStatus.Open"
+                icon="pi pi-lock"
+                [rounded]="true"
+                [text]="true"
+                (onClick)="confirmClose(row)"
+                [pTooltip]="'recruitment.postings.actionClose' | translate"
+              />
+              <p-button
+                *ngIf="canUpdate"
+                icon="pi pi-folder"
+                [rounded]="true"
+                [text]="true"
+                (onClick)="confirmArchive(row)"
+                [pTooltip]="'recruitment.postings.actionArchive' | translate"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

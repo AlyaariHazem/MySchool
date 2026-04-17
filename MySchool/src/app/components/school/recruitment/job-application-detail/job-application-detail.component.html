@@ -1,0 +1,417 @@
+<div class="employees-hr-page" *ngIf="canView">
+  <p-confirmDialog [style]="{ width: '28rem' }" />
+
+  <div *ngIf="loading" class="loading-wrap">
+    <p-progressSpinner strokeWidth="4" />
+  </div>
+
+  <div class="employees-hr-card" *ngIf="!loading && full">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'recruitment.workflow.title' | translate }}</h2>
+      <div class="header-actions">
+        <p-button
+          [label]="'employeesHr.actions.backList' | translate"
+          icon="pi pi-arrow-right"
+          [outlined]="true"
+          routerLink="/school/recruitment/job-applications"
+        />
+        <p-button
+          *ngIf="canUpdate"
+          [label]="'employeesHr.actions.edit' | translate"
+          icon="pi pi-pencil"
+          [routerLink]="['/school/recruitment/job-applications', id, 'edit']"
+        />
+        <p-button
+          *ngIf="canUpdate"
+          [label]="'recruitment.workflow.moveStatus' | translate"
+          icon="pi pi-arrow-right-arrow-left"
+          [outlined]="true"
+          (onClick)="openStatusMove()"
+        />
+      </div>
+    </header>
+
+    <mat-tab-group class="eh-tabs" animationDuration="0ms">
+      <mat-tab [label]="'recruitment.workflow.tabOverview' | translate">
+        <div class="tab-pad">
+          <div class="summary-cards">
+            <div class="card">
+              <div class="c-label">{{ 'recruitment.applications.status' | translate }}</div>
+              <div class="c-val">
+                <p-tag
+                  [value]="'recruitment.appStatus.' + appStatusLabelKey(full.application.status) | translate"
+                />
+              </div>
+            </div>
+            <div class="card" *ngIf="full.application.convertedEmployeeProfileID">
+              <div class="c-label">{{ 'recruitment.workflow.convertedProfile' | translate }}</div>
+              <div class="c-val">
+                <a
+                  [routerLink]="['/school/employees-hr', full.application.convertedEmployeeProfileID]"
+                  >#{{ full.application.convertedEmployeeProfileID }}</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <h3 class="eh-section">{{ 'recruitment.applications.sectionApplicant' | translate }}</h3>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span class="k">{{ 'recruitment.applications.fieldName' | translate }}</span>
+              <span
+                >{{ full.application.applicantFirstName }} {{ full.application.applicantLastName }}</span
+              >
+            </div>
+            <div class="detail-row">
+              <span class="k">{{ 'recruitment.applications.colEmail' | translate }}</span>
+              <span>{{ full.application.email || '—' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="k">{{ 'recruitment.applications.fieldPhone' | translate }}</span>
+              <span>{{ full.application.phone || '—' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="k">{{ 'recruitment.applications.colApplied' | translate }}</span>
+              <span>{{ full.application.appliedAt | date: 'medium' }}</span>
+            </div>
+          </div>
+
+          <h3 class="eh-section">{{ 'recruitment.postings.listTitle' | translate }}</h3>
+          <div class="detail-grid" *ngIf="full.posting as p">
+            <div class="detail-row">
+              <span class="k">{{ 'recruitment.postings.fieldTitle' | translate }}</span>
+              <span>{{ p.title }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="k">{{ 'recruitment.postings.status' | translate }}</span>
+              <span>{{ 'recruitment.postingStatus.' + postingStatusKey(p.status) | translate }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'recruitment.workflow.tabInterviews' | translate">
+        <div class="tab-pad tab-toolbar">
+          <p-button
+            *ngIf="canUpdate"
+            [label]="'recruitment.workflow.addInterview' | translate"
+            icon="pi pi-plus"
+            (onClick)="openNewInterview()"
+          />
+        </div>
+        <p-table [value]="full.interviews" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>{{ 'recruitment.interviews.date' | translate }}</th>
+              <th>{{ 'recruitment.interviews.type' | translate }}</th>
+              <th>{{ 'recruitment.interviews.status' | translate }}</th>
+              <th style="width: 10rem"></th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>{{ row.interviewDate | date: 'medium' }}</td>
+              <td>{{ row.interviewType || '—' }}</td>
+              <td>{{ row.status }}</td>
+              <td>
+                <p-button
+                  *ngIf="canUpdate"
+                  icon="pi pi-pencil"
+                  [rounded]="true"
+                  [text]="true"
+                  (onClick)="editInterview(row)"
+                />
+                <p-button
+                  *ngIf="canUpdate && row.status === InterviewStatus.Scheduled"
+                  icon="pi pi-check"
+                  [rounded]="true"
+                  [text]="true"
+                  (onClick)="confirmCompleteInterview(row)"
+                />
+                <p-button
+                  *ngIf="canUpdate && row.status === InterviewStatus.Scheduled"
+                  icon="pi pi-times"
+                  [rounded]="true"
+                  [text]="true"
+                  (onClick)="cancelInterviewRow(row)"
+                />
+                <p-button
+                  *ngIf="canUpdate && row.status === InterviewStatus.Scheduled"
+                  icon="pi pi-user-minus"
+                  [rounded]="true"
+                  [text]="true"
+                  (onClick)="noShowInterviewRow(row)"
+                />
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </mat-tab>
+
+      <mat-tab [label]="'recruitment.workflow.tabEvaluations' | translate">
+        <div class="tab-pad tab-toolbar">
+          <p-button
+            *ngIf="canUpdate"
+            [label]="'recruitment.workflow.addEvaluation' | translate"
+            icon="pi pi-plus"
+            (onClick)="openNewEval()"
+          />
+        </div>
+        <p-table [value]="full.evaluations" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>{{ 'recruitment.evaluations.overall' | translate }}</th>
+              <th>{{ 'recruitment.evaluations.recommendation' | translate }}</th>
+              <th>{{ 'recruitment.evaluations.evaluatedAt' | translate }}</th>
+              <th style="width: 4rem"></th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>{{ row.overallScore ?? '—' }}</td>
+              <td>{{ row.recommendation }}</td>
+              <td>{{ row.evaluatedAt | date: 'medium' }}</td>
+              <td>
+                <p-button
+                  *ngIf="canUpdate"
+                  icon="pi pi-pencil"
+                  [rounded]="true"
+                  [text]="true"
+                  (onClick)="editEval(row)"
+                />
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </mat-tab>
+
+      <mat-tab [label]="'recruitment.workflow.tabDecision' | translate">
+        <div class="tab-pad">
+          <div *ngIf="full.decision as dec" class="detail-grid mb-3">
+            <div class="detail-row">
+              <span class="k">{{ 'recruitment.decision.status' | translate }}</span>
+              <span>{{ dec.decisionStatus }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="k">{{ 'recruitment.decision.offerJobType' | translate }}</span>
+              <span>{{ dec.offerJobTypeName || dec.offerJobTypeID }}</span>
+            </div>
+          </div>
+          <div class="tab-toolbar">
+            <p-button
+              *ngIf="canUpdate"
+              [label]="'recruitment.workflow.editDecision' | translate"
+              icon="pi pi-pencil"
+              (onClick)="openDecisionDialog()"
+            />
+            <p-button
+              *ngIf="canUpdate"
+              [label]="'recruitment.workflow.accept' | translate"
+              severity="success"
+              (onClick)="accept()"
+            />
+            <p-button
+              *ngIf="canUpdate"
+              [label]="'recruitment.workflow.reject' | translate"
+              severity="danger"
+              [outlined]="true"
+              (onClick)="reject()"
+            />
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'recruitment.workflow.tabConvert' | translate">
+        <div class="tab-pad">
+          <p *ngIf="!canConvert()">{{ 'recruitment.workflow.convertHint' | translate }}</p>
+          <p-button
+            *ngIf="canUpdate && canConvert()"
+            [label]="'recruitment.workflow.convert' | translate"
+            icon="pi pi-user-plus"
+            (onClick)="openConvert()"
+          />
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+
+  <div *ngIf="!loading && !full" class="empty-block muted">{{ 'recruitment.applications.notFound' | translate }}</div>
+</div>
+
+<!-- Interview dialog -->
+<p-dialog
+  [header]="(interviewEdit ? 'recruitment.workflow.editInterview' : 'recruitment.workflow.addInterview') | translate"
+  [(visible)]="showInterview"
+  [modal]="true"
+  [style]="{ width: '32rem' }"
+  (onHide)="showInterview = false"
+>
+  <div class="dialog-form" *ngIf="showInterview">
+    <p-floatlabel variant="on" class="mb-3">
+      <p-datepicker
+        inputId="dlg-int-date"
+        [(ngModel)]="interviewDraft.interviewDate"
+        [showIcon]="true"
+        dateFormat="yy-mm-dd"
+        [showTime]="true"
+        hourFormat="24"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="dlg-int-date">{{ 'recruitment.interviews.date' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <input pInputText id="dlg-int-type" class="w-full" [(ngModel)]="interviewDraft.interviewType" />
+      <label for="dlg-int-type">{{ 'recruitment.interviews.type' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <input pInputText id="dlg-int-loc" class="w-full" [(ngModel)]="interviewDraft.locationOrMeetingLink" />
+      <label for="dlg-int-loc">{{ 'recruitment.interviews.location' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <input pInputText id="dlg-int-name" class="w-full" [(ngModel)]="interviewDraft.interviewerName" />
+      <label for="dlg-int-name">{{ 'recruitment.interviews.interviewerName' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <textarea pTextarea id="dlg-int-notes" rows="3" class="w-full" [(ngModel)]="interviewDraft.notes"></textarea>
+      <label for="dlg-int-notes">{{ 'employeesHr.form.notes' | translate }}</label>
+    </p-floatlabel>
+    <p-button [label]="'employeesHr.form.save' | translate" (onClick)="saveInterview()" [loading]="saving" />
+  </div>
+</p-dialog>
+
+<!-- Evaluation dialog -->
+<p-dialog
+  [header]="(evalEdit ? 'recruitment.workflow.editEvaluation' : 'recruitment.workflow.addEvaluation') | translate"
+  [(visible)]="showEval"
+  [modal]="true"
+  [style]="{ width: '34rem' }"
+>
+  <div class="dialog-form" *ngIf="showEval">
+    <div class="eh-row">
+      <p-floatlabel variant="on" class="eh-field">
+        <p-inputNumber
+          inputId="ev-t"
+          [(ngModel)]="evalDraft.technicalScore"
+          [min]="0"
+          [max]="100"
+          styleClass="w-full"
+          class="w-full"
+        />
+        <label for="ev-t">{{ 'recruitment.evaluations.technical' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="eh-field">
+        <p-inputNumber
+          inputId="ev-c"
+          [(ngModel)]="evalDraft.communicationScore"
+          [min]="0"
+          [max]="100"
+          styleClass="w-full"
+          class="w-full"
+        />
+        <label for="ev-c">{{ 'recruitment.evaluations.communication' | translate }}</label>
+      </p-floatlabel>
+    </div>
+    <p-floatlabel variant="on" class="mb-3">
+      <p-select
+        inputId="ev-rec"
+        [(ngModel)]="evalDraft.recommendation"
+        [options]="evalRecommendationOptions"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="ev-rec">{{ 'recruitment.evaluations.recommendation' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <textarea pTextarea id="ev-notes" rows="3" class="w-full" [(ngModel)]="evalDraft.notes"></textarea>
+      <label for="ev-notes">{{ 'employeesHr.form.notes' | translate }}</label>
+    </p-floatlabel>
+    <p-button [label]="'employeesHr.form.save' | translate" (onClick)="saveEval()" [loading]="saving" />
+  </div>
+</p-dialog>
+
+<!-- Decision dialog -->
+<p-dialog
+  [header]="'recruitment.workflow.editDecision' | translate"
+  [(visible)]="showDecision"
+  [modal]="true"
+  [style]="{ width: '32rem' }"
+>
+  <div class="dialog-form" *ngIf="showDecision">
+    <p-floatlabel variant="on" class="mb-3">
+      <p-select
+        inputId="dec-job"
+        [(ngModel)]="decisionDraft.offerJobTypeID"
+        [options]="jobTypeOptions"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="dec-job">{{ 'recruitment.decision.offerJobType' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <textarea pTextarea id="dec-reason" rows="2" class="w-full" [(ngModel)]="decisionDraft.reason"></textarea>
+      <label for="dec-reason">{{ 'recruitment.decision.reason' | translate }}</label>
+    </p-floatlabel>
+    <div class="mb-3 inline-check">
+      <p-checkbox [(ngModel)]="decisionDraft.skipEvaluationCheck" [binary]="true" inputId="sk" />
+      <label for="sk">{{ 'recruitment.decision.skipEval' | translate }}</label>
+    </div>
+    <p-button [label]="'employeesHr.form.save' | translate" (onClick)="saveDecision()" [loading]="saving" />
+  </div>
+</p-dialog>
+
+<!-- Status dialog -->
+<p-dialog [header]="'recruitment.workflow.moveStatus' | translate" [(visible)]="showStatus" [modal]="true" [style]="{ width: '26rem' }">
+  <div *ngIf="showStatus">
+    <p-floatlabel variant="on" class="mb-3">
+      <p-select
+        inputId="st-new"
+        [(ngModel)]="statusMove.newStatus"
+        [options]="[
+          { label: 'Under review', value: JobApplicationStatus.UnderReview },
+          { label: 'Interview scheduled', value: JobApplicationStatus.InterviewScheduled },
+          { label: 'Evaluated', value: JobApplicationStatus.Evaluated },
+          { label: 'Withdrawn', value: JobApplicationStatus.Withdrawn }
+        ]"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="st-new">{{ 'recruitment.applications.status' | translate }}</label>
+    </p-floatlabel>
+    <p-button [label]="'employeesHr.form.save' | translate" (onClick)="saveStatusMove()" />
+  </div>
+</p-dialog>
+
+<!-- Convert dialog -->
+<p-dialog [header]="'recruitment.workflow.convert' | translate" [(visible)]="showConvert" [modal]="true" [style]="{ width: '28rem' }">
+  <div *ngIf="showConvert" class="dialog-form">
+    <p-floatlabel variant="on" class="mb-3">
+      <input pInputText id="cv-code" class="w-full" [(ngModel)]="convertDraft.employeeCode" />
+      <label for="cv-code">{{ 'recruitment.convert.employeeCode' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <p-select
+        inputId="cv-jt"
+        [(ngModel)]="convertDraft.employeeJobTypeID"
+        [options]="jobTypeOptions"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="cv-jt">{{ 'employeesHr.filter.jobType' | translate }}</label>
+    </p-floatlabel>
+    <div class="mb-3 inline-check">
+      <p-checkbox [(ngModel)]="convertDraft.mapQualificationAndSpecialization" [binary]="true" inputId="mq" />
+      <label for="mq">{{ 'recruitment.convert.mapQual' | translate }}</label>
+    </div>
+    <p-button [label]="'recruitment.workflow.convert' | translate" (onClick)="convert()" [loading]="saving" />
+  </div>
+</p-dialog>

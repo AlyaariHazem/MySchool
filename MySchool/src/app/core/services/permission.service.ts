@@ -18,6 +18,7 @@ export const PagePermission = {
   Dashboard: { View: 'Dashboard.View' },
   Settings: crud('Settings'),
   Employees: crud('Employees'),
+  Recruitment: crud('Recruitment'),
   Teachers: crud('Teachers'),
   Students: crud('Students'),
   Guardians: crud('Guardians'),

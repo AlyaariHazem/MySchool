@@ -1,0 +1,141 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="eh-form-grid">
+  <div class="eh-row" *ngIf="mode === 'create'">
+    <p-floatlabel variant="on" class="eh-field">
+      <p-select
+        inputId="ja-posting"
+        formControlName="jobPostingID"
+        [options]="postingOptions"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full"
+        class="w-full"
+        [disabled]="lockPostingId"
+      />
+      <label for="ja-posting">{{ 'recruitment.applications.fieldPosting' | translate }} *</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="on" class="eh-field">
+      <p-select
+        inputId="ja-year"
+        formControlName="academicYearID"
+        [options]="yearOptions"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="ja-year">{{ 'employeesHr.filter.year' | translate }}</label>
+    </p-floatlabel>
+  </div>
+
+  <h3 class="eh-section">{{ 'recruitment.applications.sectionApplicant' | translate }}</h3>
+  <div class="eh-row">
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-fn" formControlName="applicantFirstName" class="w-full" />
+      <label for="ja-fn">{{ 'recruitment.applications.fieldFirstName' | translate }} *</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-ln" formControlName="applicantLastName" class="w-full" />
+      <label for="ja-ln">{{ 'recruitment.applications.fieldLastName' | translate }} *</label>
+    </p-floatlabel>
+  </div>
+  <div class="eh-row">
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-ar" formControlName="applicantArabicName" class="w-full" />
+      <label for="ja-ar">{{ 'recruitment.applications.fieldArabicName' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-en" formControlName="applicantEnglishName" class="w-full" />
+      <label for="ja-en">{{ 'recruitment.applications.fieldEnglishName' | translate }}</label>
+    </p-floatlabel>
+  </div>
+
+  <div class="eh-row">
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-nid" formControlName="nationalID" class="w-full" />
+      <label for="ja-nid">{{ 'recruitment.applications.fieldNationalId' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="eh-field">
+      <p-datepicker
+        inputId="ja-dob"
+        formControlName="dateOfBirth"
+        [showIcon]="true"
+        dateFormat="yy-mm-dd"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="ja-dob">{{ 'recruitment.applications.fieldDob' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-gender" formControlName="gender" class="w-full" />
+      <label for="ja-gender">{{ 'recruitment.applications.fieldGender' | translate }}</label>
+    </p-floatlabel>
+  </div>
+
+  <div class="eh-row">
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-phone" formControlName="phone" class="w-full" />
+      <label for="ja-phone">{{ 'recruitment.applications.fieldPhone' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-email" formControlName="email" class="w-full" autocomplete="email" />
+      <label for="ja-email">{{ 'recruitment.applications.colEmail' | translate }}</label>
+    </p-floatlabel>
+  </div>
+  <p-floatlabel variant="on" class="eh-field-full">
+    <input pInputText id="ja-addr" formControlName="address" class="w-full" />
+    <label for="ja-addr">{{ 'recruitment.applications.fieldAddress' | translate }}</label>
+  </p-floatlabel>
+
+  <h3 class="eh-section">{{ 'recruitment.applications.sectionProfessional' | translate }}</h3>
+  <div class="eh-row">
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-hq" formControlName="highestQualification" class="w-full" />
+      <label for="ja-hq">{{ 'recruitment.applications.fieldQualification' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-spec" formControlName="specialization" class="w-full" />
+      <label for="ja-spec">{{ 'recruitment.applications.fieldSpecialization' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="eh-field">
+      <p-inputNumber
+        inputId="ja-yoe"
+        formControlName="yearsOfExperience"
+        [min]="0"
+        [max]="80"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="ja-yoe">{{ 'recruitment.applications.fieldYearsExp' | translate }}</label>
+    </p-floatlabel>
+  </div>
+  <p-floatlabel variant="on" class="eh-field-full">
+    <input pInputText id="ja-ce" formControlName="currentEmployer" class="w-full" />
+    <label for="ja-ce">{{ 'recruitment.applications.fieldCurrentEmployer' | translate }}</label>
+  </p-floatlabel>
+
+  <div class="eh-row">
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-resume" formControlName="resumeFileUrl" class="w-full" />
+      <label for="ja-resume">{{ 'recruitment.applications.fieldResumeUrl' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="eh-field">
+      <input pInputText id="ja-src" formControlName="source" class="w-full" />
+      <label for="ja-src">{{ 'recruitment.applications.fieldSource' | translate }}</label>
+    </p-floatlabel>
+  </div>
+  <p-floatlabel variant="on" class="eh-field-full">
+    <textarea pTextarea id="ja-cl" formControlName="coverLetter" rows="4" class="w-full"></textarea>
+    <label for="ja-cl">{{ 'recruitment.applications.fieldCoverLetter' | translate }}</label>
+  </p-floatlabel>
+  <p-floatlabel variant="on" class="eh-field-full">
+    <textarea pTextarea id="ja-notes" formControlName="notes" rows="2" class="w-full"></textarea>
+    <label for="ja-notes">{{ 'employeesHr.form.notes' | translate }}</label>
+  </p-floatlabel>
+
+  <div class="eh-actions">
+    <p-button type="button" [label]="'employeesHr.form.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
+    <p-button type="submit" [label]="submitLabelKey | translate" [loading]="submitting" [disabled]="submitting" />
+  </div>
+</form>

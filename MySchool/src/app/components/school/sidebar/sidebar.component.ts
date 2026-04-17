@@ -169,6 +169,19 @@ export class SidebarComponent {
   get canViewEmployeesNav(): boolean {
     return this.perm.hasPermission(PagePermission.Employees.View);
   }
+  /** Job postings & applications (falls back to HR register permission). */
+  get canViewRecruitmentNav(): boolean {
+    return this.perm.hasAny([
+      PagePermission.Recruitment.View,
+      PagePermission.Employees.View,
+    ]);
+  }
+  get canCreateRecruitmentNav(): boolean {
+    return this.perm.hasAny([
+      PagePermission.Recruitment.Create,
+      PagePermission.Employees.Create,
+    ]);
+  }
   get canCreateEmployeesHrNav(): boolean {
     return this.perm.hasPermission(PagePermission.Employees.Create);
   }
@@ -180,6 +193,13 @@ export class SidebarComponent {
     return (
       this.perm.hasPermission(PagePermission.Employees.View) ||
       this.perm.hasPermission(PagePermission.Teachers.View)
+    );
+  }
+  /** Staff & HR sidebar block: employee register, recruitment, or teacher directory. */
+  get canViewStaffHrSection(): boolean {
+    return (
+      this.canViewManagementSection ||
+      this.perm.hasPermission(PagePermission.Recruitment.View)
     );
   }
 }

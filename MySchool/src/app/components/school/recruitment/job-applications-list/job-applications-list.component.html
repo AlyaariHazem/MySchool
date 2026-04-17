@@ -1,0 +1,146 @@
+<div class="employees-hr-page" [attr.dir]="dir$ | async">
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'recruitment.applications.listTitle' | translate }}</h2>
+      <div class="header-actions">
+        <p-button
+          *ngIf="canCreate"
+          [label]="'recruitment.applications.add' | translate"
+          icon="pi pi-plus"
+          routerLink="/school/recruitment/job-applications/create"
+        />
+        <p-button
+          [label]="'employeesHr.list.refresh' | translate"
+          icon="pi pi-refresh"
+          [outlined]="true"
+          (onClick)="load()"
+          [loading]="loading"
+        />
+      </div>
+    </header>
+
+    <div class="filters-toolbar" *ngIf="canView">
+      <div class="filters-grid">
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="ja-filter-school"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="schoolOptions"
+            [(ngModel)]="filter.schoolID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            (onChange)="onSchoolChange()"
+          />
+          <label for="ja-filter-school">{{ 'employeesHr.filter.school' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="ja-filter-year"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="yearOptions"
+            [(ngModel)]="filter.academicYearID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="ja-filter-year">{{ 'employeesHr.filter.year' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="ja-filter-status"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="statusOptions"
+            [(ngModel)]="filter.status"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="ja-filter-status">{{ 'recruitment.applications.status' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <input pInputText id="ja-email" class="w-full" [(ngModel)]="filter.email" />
+          <label for="ja-email">{{ 'recruitment.applications.filterEmail' | translate }}</label>
+        </p-floatlabel>
+
+        <div class="filter-actions">
+          <p-button [label]="'employeesHr.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="load()" />
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="error" class="error-block">{{ error }}</div>
+
+    <div *ngIf="loading" class="loading-wrap">
+      <p-progressSpinner strokeWidth="3" />
+    </div>
+
+    <div *ngIf="!loading && canView && rows.length === 0 && !error" class="empty-block">
+      {{ 'recruitment.applications.empty' | translate }}
+    </div>
+
+    <p-table *ngIf="!loading && rows.length > 0" [value]="rows" styleClass="p-datatable-sm employees-hr-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'recruitment.applications.colApplicant' | translate }}</th>
+          <th>{{ 'recruitment.applications.colPosting' | translate }}</th>
+          <th>{{ 'employeesHr.filter.school' | translate }}</th>
+          <th>{{ 'recruitment.applications.colEmail' | translate }}</th>
+          <th>{{ 'recruitment.applications.status' | translate }}</th>
+          <th>{{ 'recruitment.applications.colApplied' | translate }}</th>
+          <th>{{ 'recruitment.applications.colConverted' | translate }}</th>
+          <th style="width: 8rem">{{ 'employeesHr.col.actions' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ applicantName(row) }}</td>
+          <td>{{ row.jobPostingTitle || '—' }}</td>
+          <td>{{ schoolName(row.schoolID) }}</td>
+          <td>{{ row.email || '—' }}</td>
+          <td>
+            <p-tag
+              [value]="'recruitment.appStatus.' + appStatusLabelKey(row.status) | translate"
+              [severity]="appStatusSeverity(row.status)"
+            />
+          </td>
+          <td>{{ row.appliedAt | date: 'medium' }}</td>
+          <td>
+            <a
+              *ngIf="row.convertedEmployeeProfileID"
+              [routerLink]="['/school/employees-hr', row.convertedEmployeeProfileID]"
+              >#{{ row.convertedEmployeeProfileID }}</a
+            >
+            <span *ngIf="!row.convertedEmployeeProfileID">—</span>
+          </td>
+          <td>
+            <p-button
+              icon="pi pi-sitemap"
+              [rounded]="true"
+              [text]="true"
+              [routerLink]="['/school/recruitment/job-applications', row.jobApplicationID]"
+              [pTooltip]="'recruitment.applications.workflow' | translate"
+            />
+            <p-button
+              *ngIf="canUpdate"
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              [routerLink]="['/school/recruitment/job-applications', row.jobApplicationID, 'edit']"
+              [pTooltip]="'employeesHr.actions.edit' | translate"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+@import '../employees-hr/employees-hr-shared.scss';
+
+.recruitment-page {
+  @extend .employees-hr-page;
+}
+
+.recruitment-card {
+  @extend .employees-hr-card;
+}
+
+.recruitment-header {
+  @extend .employees-hr-header;
+}
+
+.recruitment-title {
+  @extend .employees-hr-title;
+}

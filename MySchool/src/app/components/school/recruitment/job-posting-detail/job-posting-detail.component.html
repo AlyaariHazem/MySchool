@@ -1,0 +1,108 @@
+<div class="employees-hr-page">
+  <p-confirmDialog [style]="{ width: '28rem' }" />
+
+  <div class="employees-hr-card" *ngIf="!loading && row">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ row.title }}</h2>
+      <div class="header-actions">
+        <p-button
+          [label]="'employeesHr.actions.backList' | translate"
+          icon="pi pi-arrow-right"
+          [outlined]="true"
+          routerLink="/school/recruitment/job-postings"
+        />
+        <p-button
+          *ngIf="canUpdate"
+          [label]="'employeesHr.actions.edit' | translate"
+          icon="pi pi-pencil"
+          [routerLink]="['/school/recruitment/job-postings', id, 'edit']"
+        />
+        <p-button
+          [label]="'recruitment.postings.viewApplications' | translate"
+          icon="pi pi-users"
+          [outlined]="true"
+          [routerLink]="['/school/recruitment/job-applications']"
+          [queryParams]="{ jobPostingID: id }"
+        />
+      </div>
+    </header>
+
+    <div class="detail-meta mb-3">
+      <p-tag
+        [value]="'recruitment.postingStatus.' + postingStatusLabelKey(row.status) | translate"
+        [severity]="severityStatus(row.status)"
+      />
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-row">
+        <span class="k">{{ 'employeesHr.filter.school' | translate }}</span>
+        <span>{{ schoolName || row.schoolID }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'employeesHr.filter.jobType' | translate }}</span>
+        <span>{{ row.jobTypeName || row.jobTypeCode || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldDepartment' | translate }}</span>
+        <span>{{ row.department || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldEmploymentType' | translate }}</span>
+        <span>{{ row.employmentType || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldOpenings' | translate }}</span>
+        <span>{{ row.numberOfOpenings }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldPostingDate' | translate }}</span>
+        <span>{{ row.postingDate | date: 'medium' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldClosingDate' | translate }}</span>
+        <span>{{ row.closingDate ? (row.closingDate | date: 'medium') : '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldIsActive' | translate }}</span>
+        <span>{{ row.isActive ? ('recruitment.yes' | translate) : ('recruitment.no' | translate) }}</span>
+      </div>
+    </div>
+
+    <h3 class="eh-section">{{ 'recruitment.postings.sectionText' | translate }}</h3>
+    <p class="pre-wrap" *ngIf="row.description">{{ row.description }}</p>
+    <p class="muted" *ngIf="!row.description">{{ 'recruitment.empty.none' | translate }}</p>
+    <h4 class="eh-section">{{ 'recruitment.postings.fieldRequirements' | translate }}</h4>
+    <p class="pre-wrap" *ngIf="row.requirements">{{ row.requirements }}</p>
+    <h4 class="eh-section">{{ 'recruitment.postings.fieldResponsibilities' | translate }}</h4>
+    <p class="pre-wrap" *ngIf="row.responsibilities">{{ row.responsibilities }}</p>
+    <p *ngIf="row.notes" class="mt-2"><strong>{{ 'employeesHr.form.notes' | translate }}:</strong> {{ row.notes }}</p>
+
+    <div class="tab-toolbar mt-3" *ngIf="canUpdate">
+      <p-button
+        *ngIf="row.status === JobPostingStatus.Draft || row.status === JobPostingStatus.Closed"
+        [label]="'recruitment.postings.actionOpen' | translate"
+        icon="pi pi-unlock"
+        (onClick)="confirmOpen()"
+      />
+      <p-button
+        *ngIf="row.status === JobPostingStatus.Open"
+        [label]="'recruitment.postings.actionClose' | translate"
+        icon="pi pi-lock"
+        (onClick)="confirmClose()"
+      />
+      <p-button
+        [label]="'recruitment.postings.actionArchive' | translate"
+        icon="pi pi-folder"
+        [outlined]="true"
+        (onClick)="confirmArchive()"
+      />
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-wrap">
+    <p-progressSpinner strokeWidth="4" />
+  </div>
+
+  <div *ngIf="!loading && !row" class="empty-block muted">{{ 'recruitment.postings.notFound' | translate }}</div>
+</div>
