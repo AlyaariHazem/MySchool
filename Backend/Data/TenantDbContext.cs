@@ -79,6 +79,13 @@ namespace Backend.Data
         public DbSet<CandidateEvaluation> CandidateEvaluations { get; set; }
         public DbSet<HiringDecision> HiringDecisions { get; set; }
 
+        public DbSet<DailyEvaluationTemplate> DailyEvaluationTemplates { get; set; }
+        public DbSet<DailyEvaluationCriteria> DailyEvaluationCriteria { get; set; }
+        public DbSet<DailyEvaluation> DailyEvaluations { get; set; }
+        public DbSet<DailyEvaluationItem> DailyEvaluationItems { get; set; }
+        public DbSet<EvaluationLock> EvaluationLocks { get; set; }
+        public DbSet<EvaluationOverrideLog> EvaluationOverrideLogs { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -1207,6 +1214,170 @@ namespace Backend.Data
                 .HasOne(d => d.ConvertedEmployeeProfile)
                 .WithMany()
                 .HasForeignKey(d => d.ConvertedEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Daily evaluation (employee performance) ---
+            modelBuilder.Entity<DailyEvaluationTemplate>()
+                .HasKey(t => t.DailyEvaluationTemplateID);
+            modelBuilder.Entity<DailyEvaluationTemplate>()
+                .Property(t => t.DailyEvaluationTemplateID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<DailyEvaluationTemplate>()
+                .Property(t => t.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<DailyEvaluationTemplate>()
+                .HasIndex(t => new { t.SchoolID, t.AcademicYearID, t.EmployeeJobTypeID, t.Status });
+            modelBuilder.Entity<DailyEvaluationTemplate>()
+                .HasOne(t => t.School)
+                .WithMany()
+                .HasForeignKey(t => t.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DailyEvaluationTemplate>()
+                .HasOne(t => t.AcademicYear)
+                .WithMany()
+                .HasForeignKey(t => t.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DailyEvaluationTemplate>()
+                .HasOne(t => t.JobType)
+                .WithMany()
+                .HasForeignKey(t => t.EmployeeJobTypeID)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<DailyEvaluationCriteria>()
+                .HasKey(c => c.DailyEvaluationCriteriaID);
+            modelBuilder.Entity<DailyEvaluationCriteria>()
+                .Property(c => c.DailyEvaluationCriteriaID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<DailyEvaluationCriteria>()
+                .HasIndex(c => new { c.DailyEvaluationTemplateID, c.SortOrder, c.IsActive });
+            modelBuilder.Entity<DailyEvaluationCriteria>()
+                .HasOne(c => c.Template)
+                .WithMany(t => t.Criteria)
+                .HasForeignKey(c => c.DailyEvaluationTemplateID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DailyEvaluation>()
+                .HasKey(e => e.DailyEvaluationID);
+            modelBuilder.Entity<DailyEvaluation>()
+                .Property(e => e.DailyEvaluationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<DailyEvaluation>()
+                .Property(e => e.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<DailyEvaluation>()
+                .Property(e => e.TotalScore)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<DailyEvaluation>()
+                .HasIndex(e => new { e.SchoolID, e.AcademicYearID, e.EvaluatedEmployeeProfileID, e.EvaluationDate, e.DailyEvaluationTemplateID, e.IsLocked });
+            modelBuilder.Entity<DailyEvaluation>()
+                .HasIndex(e => new { e.EvaluatedEmployeeProfileID, e.EvaluationDate, e.DailyEvaluationTemplateID })
+                .IsUnique();
+            modelBuilder.Entity<DailyEvaluation>()
+                .HasOne(e => e.School)
+                .WithMany()
+                .HasForeignKey(e => e.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DailyEvaluation>()
+                .HasOne(e => e.AcademicYear)
+                .WithMany()
+                .HasForeignKey(e => e.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DailyEvaluation>()
+                .HasOne(e => e.EvaluatedEmployeeProfile)
+                .WithMany(p => p.DailyEvaluationsAsEvaluated)
+                .HasForeignKey(e => e.EvaluatedEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DailyEvaluation>()
+                .HasOne(e => e.EvaluatorEmployeeProfile)
+                .WithMany(p => p.DailyEvaluationsAsEvaluator)
+                .HasForeignKey(e => e.EvaluatorEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DailyEvaluation>()
+                .HasOne(e => e.Template)
+                .WithMany(t => t.DailyEvaluations)
+                .HasForeignKey(e => e.DailyEvaluationTemplateID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DailyEvaluationItem>()
+                .HasKey(i => i.DailyEvaluationItemID);
+            modelBuilder.Entity<DailyEvaluationItem>()
+                .Property(i => i.DailyEvaluationItemID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<DailyEvaluationItem>()
+                .Property(i => i.Score)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<DailyEvaluationItem>()
+                .HasIndex(i => new { i.DailyEvaluationID, i.DailyEvaluationCriteriaID })
+                .IsUnique();
+            modelBuilder.Entity<DailyEvaluationItem>()
+                .HasOne(i => i.DailyEvaluation)
+                .WithMany(e => e.Items)
+                .HasForeignKey(i => i.DailyEvaluationID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<DailyEvaluationItem>()
+                .HasOne(i => i.Criteria)
+                .WithMany(c => c.Items)
+                .HasForeignKey(i => i.DailyEvaluationCriteriaID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EvaluationLock>()
+                .HasKey(l => l.EvaluationLockID);
+            modelBuilder.Entity<EvaluationLock>()
+                .Property(l => l.EvaluationLockID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EvaluationLock>()
+                .Property(l => l.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<EvaluationLock>()
+                .HasIndex(l => new { l.SchoolID, l.AcademicYearID, l.LockDate, l.Status });
+            modelBuilder.Entity<EvaluationLock>()
+                .HasIndex(l => new { l.SchoolID, l.AcademicYearID, l.LockDate, l.DailyEvaluationTemplateID })
+                .IsUnique();
+            modelBuilder.Entity<EvaluationLock>()
+                .HasOne(l => l.School)
+                .WithMany()
+                .HasForeignKey(l => l.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EvaluationLock>()
+                .HasOne(l => l.AcademicYear)
+                .WithMany()
+                .HasForeignKey(l => l.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EvaluationLock>()
+                .HasOne(l => l.Template)
+                .WithMany()
+                .HasForeignKey(l => l.DailyEvaluationTemplateID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EvaluationOverrideLog>()
+                .HasKey(x => x.EvaluationOverrideLogID);
+            modelBuilder.Entity<EvaluationOverrideLog>()
+                .Property(x => x.EvaluationOverrideLogID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EvaluationOverrideLog>()
+                .Property(x => x.OverrideActionType)
+                .HasConversion<int>();
+            modelBuilder.Entity<EvaluationOverrideLog>()
+                .HasIndex(x => new { x.DailyEvaluationID, x.EvaluationLockID, x.PerformedAtUtc });
+            modelBuilder.Entity<EvaluationOverrideLog>()
+                .HasOne(x => x.DailyEvaluation)
+                .WithMany(e => e.OverrideLogs)
+                .HasForeignKey(x => x.DailyEvaluationID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EvaluationOverrideLog>()
+                .HasOne(x => x.EvaluationLock)
+                .WithMany(l => l.OverrideLogs)
+                .HasForeignKey(x => x.EvaluationLockID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EvaluationOverrideLog>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EvaluationOverrideLog>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ExamType>().HasData(

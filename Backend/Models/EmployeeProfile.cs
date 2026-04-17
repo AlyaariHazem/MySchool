@@ -100,5 +100,9 @@ public class EmployeeProfile
 
     public ICollection<EmployeePerformanceSummary> PerformanceSummaries { get; set; } = new List<EmployeePerformanceSummary>();
 
-    // Future: DailyEvaluation, Achievement, Violation, StaffRequest, Activity — link via EmployeeProfileID or Year-scoped tables (see module TODOs in service/docs).
+    public ICollection<DailyEvaluation> DailyEvaluationsAsEvaluated { get; set; } = new List<DailyEvaluation>();
+
+    public ICollection<DailyEvaluation> DailyEvaluationsAsEvaluator { get; set; } = new List<DailyEvaluation>();
+
+    // Future: Achievement, Violation, StaffRequest, Activity — link via EmployeeProfileID or Year-scoped tables (see module TODOs in service/docs).
 }
