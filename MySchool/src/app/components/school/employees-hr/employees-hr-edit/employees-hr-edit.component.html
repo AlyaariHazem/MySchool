@@ -1,0 +1,27 @@
+<div class="employees-hr-page">
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'employeesHr.edit.title' | translate }}</h2>
+      <p-button [label]="'employeesHr.actions.backDetail' | translate" icon="pi pi-eye" [outlined]="true" [routerLink]="['/school/employees-hr', id]" />
+    </header>
+
+    <div *ngIf="!canUpdate" class="empty-block muted">{{ 'employeesHr.errors.noPermission' | translate }}</div>
+
+    <div *ngIf="loading && canUpdate" class="loading-wrap">
+      <p-progressSpinner strokeWidth="4" />
+    </div>
+
+    <div *ngIf="!loading && canUpdate && !profile" class="empty-block">{{ 'employeesHr.errors.notFound' | translate }}</div>
+
+    <app-employees-hr-profile-form
+      *ngIf="!loading && canUpdate && profile"
+      [schools]="schools"
+      [years]="years"
+      [initial]="profile"
+      [submitting]="submitting"
+      [submitLabelKey]="'employeesHr.edit.submit'"
+      (submitted)="onSubmit($event)"
+      (cancelled)="router.navigate(['/school/employees-hr', id])"
+    />
+  </div>
+</div>

@@ -1,0 +1,219 @@
+<ng-container *ngIf="!canView">
+  <div class="employees-hr-page"><div class="empty-block muted">{{ 'employeesHr.errors.noPermission' | translate }}</div></div>
+</ng-container>
+
+<div class="employees-hr-page" *ngIf="canView">
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'employeesHr.fullProfile.title' | translate }}</h2>
+      <div class="header-actions">
+        <p-button [label]="'employeesHr.actions.backDetail' | translate" icon="pi pi-user" [outlined]="true" [routerLink]="['/school/employees-hr', id]" />
+        <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" routerLink="/school/employees-hr" />
+      </div>
+    </header>
+
+    <div *ngIf="loading" class="loading-wrap"><p-progressSpinner strokeWidth="4" /></div>
+
+    <div *ngIf="!loading && !data" class="empty-block">{{ 'employeesHr.errors.notFound' | translate }}</div>
+
+    <mat-tab-group *ngIf="data" animationDuration="0ms" class="eh-tabs">
+      <mat-tab [label]="'employeesHr.tabs.overview' | translate">
+        <div class="tab-pad">
+          <div class="summary-cards">
+            <div class="card"><div class="c-label">{{ 'employeesHr.col.name' | translate }}</div><div class="c-val">{{ displayName() }}</div></div>
+            <div class="card"><div class="c-label">{{ 'employeesHr.col.code' | translate }}</div><div class="c-val">{{ data.profile.employeeCode }}</div></div>
+            <div class="card"><div class="c-label">{{ 'employeesHr.col.jobType' | translate }}</div><div class="c-val">{{ data.profile.jobTypeName }}</div></div>
+            <div class="card"><div class="c-label">{{ 'employeesHr.fullProfile.counts' | translate }}</div>
+              <div class="c-val small">
+                {{ data.qualifications.length }} / {{ data.specializations.length }} / {{ data.historyRecords.length }} /
+                {{ data.documents.length }} / {{ data.leaves.length }} / {{ data.performanceSummaries.length }}
+              </div>
+            </div>
+          </div>
+          <p class="future-hint">{{ 'employeesHr.futureModules' | translate }}</p>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'employeesHr.tabs.qualifications' | translate">
+        <div class="tab-pad">
+          <div class="tab-toolbar">
+            <p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openQual()" />
+          </div>
+          <p-table [value]="data.qualifications" *ngIf="data.qualifications.length; else emptyQual">
+            <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.child.degree' | translate }}</th><th>{{ 'employeesHr.child.major' | translate }}</th><th>{{ 'employeesHr.child.institution' | translate }}</th></tr></ng-template>
+            <ng-template pTemplate="body" let-r><tr><td>{{ r.degreeName }}</td><td>{{ r.major }}</td><td>{{ r.institution }}</td></tr></ng-template>
+          </p-table>
+          <ng-template #emptyQual><div class="empty-block">{{ 'employeesHr.empty.section' | translate }}</div></ng-template>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'employeesHr.tabs.specializations' | translate">
+        <div class="tab-pad">
+          <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openSpec()" /></div>
+          <p-table [value]="data.specializations" *ngIf="data.specializations.length; else emptySp">
+            <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.child.name' | translate }}</th><th>{{ 'employeesHr.child.category' | translate }}</th><th>{{ 'employeesHr.child.level' | translate }}</th></tr></ng-template>
+            <ng-template pTemplate="body" let-r><tr><td>{{ r.name }}</td><td>{{ r.category }}</td><td>{{ r.level }}</td></tr></ng-template>
+          </p-table>
+          <ng-template #emptySp><div class="empty-block">{{ 'employeesHr.empty.section' | translate }}</div></ng-template>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'employeesHr.tabs.history' | translate">
+        <div class="tab-pad">
+          <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openHist()" /></div>
+          <p-table [value]="data.historyRecords" *ngIf="data.historyRecords.length; else emptyH">
+            <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.form.year' | translate }}</th><th>{{ 'employeesHr.form.school' | translate }}</th><th>{{ 'employeesHr.col.jobType' | translate }}</th><th>{{ 'employeesHr.child.jobTitle' | translate }}</th><th>{{ 'employeesHr.child.start' | translate }}</th><th>{{ 'employeesHr.child.end' | translate }}</th></tr></ng-template>
+            <ng-template pTemplate="body" let-r><tr><td>{{ r.academicYearID }}</td><td>{{ r.schoolID }}</td><td>{{ jobTypeLabelForId(r.employeeJobTypeID) }}</td><td>{{ r.jobTitle }}</td><td>{{ r.startDate | date:'mediumDate' }}</td><td>{{ r.endDate | date:'mediumDate' }}</td></tr></ng-template>
+          </p-table>
+          <ng-template #emptyH><div class="empty-block">{{ 'employeesHr.empty.section' | translate }}</div></ng-template>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'employeesHr.tabs.documents' | translate">
+        <div class="tab-pad">
+          <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openDoc()" /></div>
+          <p-table [value]="data.documents" *ngIf="data.documents.length; else emptyD">
+            <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.child.docType' | translate }}</th><th>{{ 'employeesHr.child.title' | translate }}</th><th>{{ 'employeesHr.child.fileUrl' | translate }}</th></tr></ng-template>
+            <ng-template pTemplate="body" let-r><tr><td>{{ r.documentType }}</td><td>{{ r.title }}</td><td><a *ngIf="r.fileUrl" [href]="r.fileUrl" target="_blank" rel="noopener">{{ r.fileUrl }}</a></td></tr></ng-template>
+          </p-table>
+          <ng-template #emptyD><div class="empty-block">{{ 'employeesHr.empty.section' | translate }}</div></ng-template>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'employeesHr.tabs.leaves' | translate">
+        <div class="tab-pad">
+          <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openLeave()" /></div>
+          <p-table [value]="data.leaves" *ngIf="data.leaves.length; else emptyL">
+            <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.form.year' | translate }}</th><th>{{ 'employeesHr.child.leaveType' | translate }}</th><th>{{ 'employeesHr.child.start' | translate }}</th><th>{{ 'employeesHr.child.end' | translate }}</th><th>{{ 'employeesHr.child.days' | translate }}</th></tr></ng-template>
+            <ng-template pTemplate="body" let-r><tr><td>{{ r.academicYearID }}</td><td>{{ r.leaveType }}</td><td>{{ r.startDate | date:'mediumDate' }}</td><td>{{ r.endDate | date:'mediumDate' }}</td><td>{{ r.totalDays }}</td></tr></ng-template>
+          </p-table>
+          <ng-template #emptyL><div class="empty-block">{{ 'employeesHr.empty.section' | translate }}</div></ng-template>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'employeesHr.tabs.performance' | translate">
+        <div class="tab-pad">
+          <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openPerf()" /></div>
+          <p-table [value]="data.performanceSummaries" *ngIf="data.performanceSummaries.length; else emptyP">
+            <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.form.year' | translate }}</th><th>{{ 'employeesHr.col.jobType' | translate }}</th><th>{{ 'employeesHr.child.score' | translate }}</th><th>{{ 'employeesHr.child.generated' | translate }}</th></tr></ng-template>
+            <ng-template pTemplate="body" let-r><tr><td>{{ r.academicYearID }}</td><td>{{ jobTypeLabelForId(r.employeeJobTypeID) }}</td><td>{{ r.evaluationScore }}</td><td>{{ r.generatedAtUtc | date:'medium' }}</td></tr></ng-template>
+          </p-table>
+          <ng-template #emptyP><div class="empty-block">{{ 'employeesHr.empty.section' | translate }}</div></ng-template>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'employeesHr.tabs.future' | translate">
+        <div class="tab-pad muted">
+          <p>{{ 'employeesHr.futurePlaceholder' | translate }}</p>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>
+
+<p-dialog [(visible)]="showQual" [header]="'employeesHr.dialogs.qualification' | translate" [modal]="true" [style]="{ width: '32rem' }">
+  <div class="dialog-form">
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="qualDraft.degreeName" /><label>{{ 'employeesHr.child.degree' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="qualDraft.major" /><label>{{ 'employeesHr.child.major' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="qualDraft.institution" /><label>{{ 'employeesHr.child.institution' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="qualDraft.graduationYear" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.child.gradYear' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="qualDraft.gradeOrScore" /><label>{{ 'employeesHr.child.grade' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><textarea pTextarea class="w-full" [(ngModel)]="qualDraft.notes" rows="2"></textarea><label>{{ 'employeesHr.form.notes' | translate }}</label></p-floatlabel>
+    <p-button [label]="'employeesHr.actions.save' | translate" (onClick)="saveQual()" [loading]="savingChild" />
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="showSpec" [header]="'employeesHr.dialogs.specialization' | translate" [modal]="true" [style]="{ width: '32rem' }">
+  <div class="dialog-form">
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="specDraft.name" /><label>{{ 'employeesHr.child.name' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="specDraft.category" /><label>{{ 'employeesHr.child.category' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="specDraft.level" /><label>{{ 'employeesHr.child.level' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><textarea pTextarea class="w-full" [(ngModel)]="specDraft.notes" rows="2"></textarea><label>{{ 'employeesHr.form.notes' | translate }}</label></p-floatlabel>
+    <p-button [label]="'employeesHr.actions.save' | translate" (onClick)="saveSpec()" [loading]="savingChild" />
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="showHist" [header]="'employeesHr.dialogs.history' | translate" [modal]="true" [style]="{ width: '34rem' }">
+  <div class="dialog-form">
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="histDraft.academicYearID" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.form.year' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="histDraft.schoolID" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.form.schoolId' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <p-select
+        inputId="eh-hist-job"
+        [options]="jobTypeSelectOptions"
+        [(ngModel)]="histDraft.employeeJobTypeID"
+        optionLabel="label"
+        optionValue="employeeJobTypeID"
+        [showClear]="true"
+        [disabled]="jobTypesLoading"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="eh-hist-job">{{ 'employeesHr.form.jobTypeOptional' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="histDraft.jobTitle" /><label>{{ 'employeesHr.child.jobTitle' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="histDraft.department" /><label>{{ 'employeesHr.child.department' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="histDraft.startDate" placeholder="2026-01-01" /><label>{{ 'employeesHr.child.start' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="histDraft.endDate" placeholder="2026-06-30" /><label>{{ 'employeesHr.child.end' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><textarea pTextarea class="w-full" [(ngModel)]="histDraft.notes" rows="2"></textarea><label>{{ 'employeesHr.form.notes' | translate }}</label></p-floatlabel>
+    <p-button [label]="'employeesHr.actions.save' | translate" (onClick)="saveHist()" [loading]="savingChild" />
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="showDoc" [header]="'employeesHr.dialogs.document' | translate" [modal]="true" [style]="{ width: '34rem' }">
+  <div class="dialog-form">
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="docDraft.documentType" /><label>{{ 'employeesHr.child.docType' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="docDraft.title" /><label>{{ 'employeesHr.child.title' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="docDraft.fileUrl" /><label>{{ 'employeesHr.child.fileUrl' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><textarea pTextarea class="w-full" [(ngModel)]="docDraft.notes" rows="2"></textarea><label>{{ 'employeesHr.form.notes' | translate }}</label></p-floatlabel>
+    <label class="inline-check mb-3"><input type="checkbox" [(ngModel)]="docDraft.isActive" /> {{ 'employeesHr.form.isActive' | translate }}</label>
+    <p-button [label]="'employeesHr.actions.save' | translate" (onClick)="saveDoc()" [loading]="savingChild" />
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="showLeave" [header]="'employeesHr.dialogs.leave' | translate" [modal]="true" [style]="{ width: '34rem' }">
+  <div class="dialog-form">
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="leaveDraft.academicYearID" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.form.year' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <p-select [options]="leaveTypeOptions" [(ngModel)]="leaveDraft.leaveType" optionLabel="label" optionValue="value" styleClass="w-full" class="w-full" />
+      <label>{{ 'employeesHr.child.leaveType' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="leaveDraft.startDate" /><label>{{ 'employeesHr.child.start' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><input pInputText class="w-full" [(ngModel)]="leaveDraft.endDate" /><label>{{ 'employeesHr.child.end' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="leaveDraft.totalDays" [min]="0" [maxFractionDigits]="2" styleClass="w-full" /><label>{{ 'employeesHr.child.days' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <p-select [options]="approvalOptions" [(ngModel)]="leaveDraft.approvalStatus" optionLabel="label" optionValue="value" styleClass="w-full" class="w-full" />
+      <label>{{ 'employeesHr.child.approval' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><textarea pTextarea class="w-full" [(ngModel)]="leaveDraft.reason" rows="2"></textarea><label>{{ 'employeesHr.child.reason' | translate }}</label></p-floatlabel>
+    <p-button [label]="'employeesHr.actions.save' | translate" (onClick)="saveLeave()" [loading]="savingChild" />
+  </div>
+</p-dialog>
+
+<p-dialog [(visible)]="showPerf" [header]="'employeesHr.dialogs.performance' | translate" [modal]="true" [style]="{ width: '36rem' }">
+  <div class="dialog-form">
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="perfDraft.academicYearID" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.form.year' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="perfDraft.schoolID" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.form.schoolId' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3">
+      <p-select
+        inputId="eh-perf-job"
+        [options]="jobTypeSelectOptions"
+        [(ngModel)]="perfDraft.employeeJobTypeID"
+        optionLabel="label"
+        optionValue="employeeJobTypeID"
+        [showClear]="true"
+        [disabled]="jobTypesLoading"
+        styleClass="w-full"
+        class="w-full"
+      />
+      <label for="eh-perf-job">{{ 'employeesHr.form.jobTypeOptional' | translate }}</label>
+    </p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="perfDraft.evaluationScore" [maxFractionDigits]="2" styleClass="w-full" /><label>{{ 'employeesHr.child.score' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="perfDraft.achievementPoints" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.child.ach' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="perfDraft.violationPoints" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.child.viol' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="perfDraft.requestCount" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.child.req' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><p-inputNumber [(ngModel)]="perfDraft.activityCount" [useGrouping]="false" styleClass="w-full" /><label>{{ 'employeesHr.child.act' | translate }}</label></p-floatlabel>
+    <p-floatlabel variant="on" class="mb-3"><textarea pTextarea class="w-full" [(ngModel)]="perfDraft.finalNotes" rows="2"></textarea><label>{{ 'employeesHr.child.finalNotes' | translate }}</label></p-floatlabel>
+    <p-button [label]="'employeesHr.actions.save' | translate" (onClick)="savePerf()" [loading]="savingChild" />
+  </div>
+</p-dialog>

@@ -36,6 +36,7 @@ import { SchoolLandingComponent } from './school-landing/school-landing.componen
 import { ExamsAdminComponent } from './exams/exams-admin.component';
 import { HomeworkAdminComponent } from './homework/homework-admin.component';
 import { permissionGuard } from '../../core/guards/permission.guard';
+import { PagePermission } from '../../core/services/permission.service';
 const routes: Routes = [
   {
     path: '',
@@ -171,6 +172,59 @@ const routes: Routes = [
       { path: 'homework', component: HomeworkAdminComponent, data: { breadcrumb: 'الواجبات' } },
       { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       { path: 'notifications', component: NotificationsComponent, data: { breadcrumb: 'الإشعارات' } },
+      {
+        path: 'employees-hr',
+        data: { breadcrumb: 'الموارد البشرية' },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./employees-hr/employees-hr-list/employees-hr-list.component').then(
+                (m) => m.EmployeesHrListComponent,
+              ),
+            data: { breadcrumb: 'سجل الموظفين', permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('./employees-hr/employees-hr-create/employees-hr-create.component').then(
+                (m) => m.EmployeesHrCreateComponent,
+              ),
+            data: { breadcrumb: 'إضافة موظف', permission: PagePermission.Employees.Create },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: ':id/edit',
+            loadComponent: () =>
+              import('./employees-hr/employees-hr-edit/employees-hr-edit.component').then(
+                (m) => m.EmployeesHrEditComponent,
+              ),
+            data: { breadcrumb: 'تعديل موظف', permission: PagePermission.Employees.Update },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: ':id/profile',
+            loadComponent: () =>
+              import('./employees-hr/employees-hr-full-profile/employees-hr-full-profile.component').then(
+                (m) => m.EmployeesHrFullProfileComponent,
+              ),
+            data: { breadcrumb: 'الملف الكامل', permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./employees-hr/employees-hr-detail/employees-hr-detail.component').then(
+                (m) => m.EmployeesHrDetailComponent,
+              ),
+            data: { breadcrumb: 'تفاصيل موظف', permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
       {
         path: 'course', data: { breadcrumb: 'المقررات والخطط' }, children: [
           { path: '', component: BooksComponent, data: { breadcrumb: 'الكتب' } },

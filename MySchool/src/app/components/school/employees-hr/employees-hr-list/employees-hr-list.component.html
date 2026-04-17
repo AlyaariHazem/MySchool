@@ -1,0 +1,197 @@
+<div class="employees-hr-page" [attr.dir]="dir$ | async">
+  <p-confirmDialog [style]="{ width: '28rem' }" />
+
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'employeesHr.list.title' | translate }}</h2>
+      <div class="header-actions">
+        <p-button
+          *ngIf="canCreate"
+          [label]="'employeesHr.list.add' | translate"
+          icon="pi pi-plus"
+          routerLink="/school/employees-hr/new"
+        />
+        <p-button
+          [label]="'employeesHr.list.refresh' | translate"
+          icon="pi pi-refresh"
+          [outlined]="true"
+          (onClick)="load()"
+          [loading]="loading"
+        />
+      </div>
+    </header>
+
+    <div class="filters-toolbar" *ngIf="canView">
+      <div class="filters-grid">
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="eh-filter-school"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="schoolOptions"
+            [(ngModel)]="filter.schoolID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            (onChange)="onSchoolChange()"
+          />
+          <label for="eh-filter-school">{{ 'employeesHr.filter.school' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="eh-filter-year"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="yearOptions"
+            [(ngModel)]="filter.academicYearID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="eh-filter-year">{{ 'employeesHr.filter.year' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="eh-filter-job"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="jobTypeOptions"
+            [(ngModel)]="filter.employeeJobTypeID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [disabled]="jobTypesLoading"
+            [placeholder]="jobTypesLoading ? ('employeesHr.filter.jobTypesLoading' | translate) : ''"
+          />
+          <label for="eh-filter-job">{{ 'employeesHr.filter.jobType' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="eh-filter-active"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="activeOptions"
+            [(ngModel)]="filter.isActive"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="eh-filter-active">{{ 'employeesHr.filter.active' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="filter-field">
+          <p-select
+            inputId="eh-filter-emp-status"
+            class="w-full"
+            styleClass="w-full"
+            size="small"
+            [options]="employmentOptions"
+            [(ngModel)]="filter.employmentStatus"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="eh-filter-emp-status">{{ 'employeesHr.filter.employmentStatus' | translate }}</label>
+        </p-floatlabel>
+
+        <div class="filter-actions">
+          <p-button [label]="'employeesHr.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="load()" />
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!canView" class="empty-block muted">
+      {{ 'employeesHr.errors.noPermission' | translate }}
+    </div>
+
+    <div *ngIf="loading && canView" class="loading-wrap">
+      <p-progressSpinner strokeWidth="4" />
+    </div>
+
+    <div *ngIf="error && canView" class="error-block">{{ error }}</div>
+
+    <div *ngIf="!loading && canView && rows.length === 0" class="empty-block">
+      {{ 'employeesHr.list.empty' | translate }}
+    </div>
+
+    <p-table
+      *ngIf="!loading && canView && rows.length > 0"
+      [value]="rows"
+      [paginator]="rows.length > 15"
+      [rows]="15"
+      styleClass="p-datatable-sm employees-hr-table"
+      [rowHover]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'employeesHr.col.code' | translate }}</th>
+          <th>{{ 'employeesHr.col.name' | translate }}</th>
+          <th>{{ 'employeesHr.col.school' | translate }}</th>
+          <th>{{ 'employeesHr.col.year' | translate }}</th>
+          <th>{{ 'employeesHr.col.jobType' | translate }}</th>
+          <th>{{ 'employeesHr.col.employment' | translate }}</th>
+          <th>{{ 'employeesHr.col.active' | translate }}</th>
+          <th>{{ 'employeesHr.col.hireDate' | translate }}</th>
+          <th style="width: 12rem">{{ 'employeesHr.col.actions' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.employeeCode }}</td>
+          <td>{{ displayName(row) }}</td>
+          <td>{{ schoolName(row.schoolID) }}</td>
+          <td>{{ yearLabel(row.currentAcademicYearID) }}</td>
+          <td>{{ jobTypeLabelForRow(row) }}</td>
+          <td>{{ employmentLabel(row.employmentStatus) }}</td>
+          <td>
+            <span [class.inactive]="!row.isActive">{{ row.isActive ? ('employeesHr.yes' | translate) : ('employeesHr.no' | translate) }}</span>
+          </td>
+          <td>{{ row.hireDate ? (row.hireDate | date : 'mediumDate') : '—' }}</td>
+          <td>
+            <div class="action-btns">
+              <p-button
+                icon="pi pi-eye"
+                [rounded]="true"
+                [text]="true"
+                [pTooltip]="'employeesHr.actions.view' | translate"
+                [routerLink]="['/school/employees-hr', row.employeeProfileID]"
+              />
+              <p-button
+                *ngIf="canUpdate"
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                [pTooltip]="'employeesHr.actions.edit' | translate"
+                [routerLink]="['/school/employees-hr', row.employeeProfileID, 'edit']"
+              />
+              <p-button
+                icon="pi pi-id-card"
+                [rounded]="true"
+                [text]="true"
+                severity="help"
+                [pTooltip]="'employeesHr.actions.fullProfile' | translate"
+                [routerLink]="['/school/employees-hr', row.employeeProfileID, 'profile']"
+              />
+              <p-button
+                *ngIf="canDelete && row.isActive"
+                icon="pi pi-user-minus"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+                [pTooltip]="'employeesHr.actions.deactivate' | translate"
+                (onClick)="confirmDeactivate(row)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

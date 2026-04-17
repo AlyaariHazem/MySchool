@@ -15,6 +15,26 @@ public class EmployeeProfileService : IEmployeeProfileService
         _db = db;
     }
 
+    public async Task<IReadOnlyList<EmployeeJobTypeListDto>> GetJobTypesAsync(CancellationToken cancellationToken = default)
+    {
+        var rows = await _db.EmployeeJobTypes
+            .AsNoTracking()
+            .OrderBy(j => j.SortOrder)
+            .ThenBy(j => j.EmployeeJobTypeID)
+            .Select(j => new EmployeeJobTypeListDto
+            {
+                EmployeeJobTypeID = j.EmployeeJobTypeID,
+                Code = j.Code,
+                Name = j.Name,
+                NameAr = j.NameAr,
+                SortOrder = j.SortOrder,
+                IsActive = j.IsActive
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows;
+    }
+
     public async Task<EmployeeProfileReadDto> CreateAsync(EmployeeProfileCreateDto dto, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(dto.FullName);

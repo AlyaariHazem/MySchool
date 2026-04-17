@@ -4,6 +4,8 @@ namespace Backend.Interfaces;
 
 public interface IEmployeeProfileService
 {
+    Task<IReadOnlyList<EmployeeJobTypeListDto>> GetJobTypesAsync(CancellationToken cancellationToken = default);
+
     Task<EmployeeProfileReadDto> CreateAsync(EmployeeProfileCreateDto dto, CancellationToken cancellationToken = default);
     Task<EmployeeProfileReadDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<EmployeeProfileReadDto>> GetAllAsync(EmployeeProfileListFilterDto? filter, CancellationToken cancellationToken = default);

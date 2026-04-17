@@ -174,6 +174,11 @@
       "edit": "Edit employee",
       "about": "About staff"
     },
+    "employees_hr": {
+      "title": "Human resources (HR)",
+      "list": "Employee register",
+      "add": "Add employee (HR)"
+    },
     "students": "Students",
     "students_sub": {
       "all": "All Students",
@@ -386,6 +391,166 @@
       "summarize": "Summarize this student profile (search by id first if needed)",
       "parentMsg": "Draft a parent message for repeated absence",
       "absence": "Show students with high absence"
+    }
+  },
+  "employeesHr": {
+    "yes": "Yes",
+    "no": "No",
+    "list": {
+      "title": "Employees — HR register",
+      "add": "Add employee",
+      "refresh": "Refresh",
+      "applyFilters": "Apply filters",
+      "empty": "No matching records.",
+      "confirmDeactivate": "Deactivate {{name}} ({{code}})? The row is not deleted from the database.",
+      "confirmHeader": "Confirm deactivation"
+    },
+    "create": { "title": "Add employee (HR)", "submit": "Save and open details" },
+    "edit": { "title": "Edit employee", "submit": "Save changes" },
+    "detail": { "title": "Employee details" },
+    "fullProfile": { "title": "Full HR profile", "counts": "Qualifications / specializations / history / documents / leaves / summaries" },
+    "tabs": {
+      "overview": "Overview",
+      "qualifications": "Qualifications",
+      "specializations": "Specializations",
+      "history": "Employment history",
+      "documents": "Documents",
+      "leaves": "Leaves",
+      "performance": "Performance summaries",
+      "future": "Coming soon"
+    },
+    "futureModules": "Later: daily evaluations, achievements, violations, requests, activities — add sections here without restructuring this page.",
+    "futurePlaceholder": "Reserved for future modules (evaluations, achievements, violations, requests, activities).",
+    "empty": { "section": "No records in this section." },
+    "dialogs": {
+      "qualification": "Add qualification",
+      "specialization": "Add specialization",
+      "history": "Add history record",
+      "document": "Add document",
+      "leave": "Add leave",
+      "performance": "Add performance summary"
+    },
+    "filter": {
+      "school": "School",
+      "year": "Academic year",
+      "jobTypesLoading": "Loading job types…",
+      "jobType": "Job type",
+      "active": "Active state",
+      "employmentStatus": "Employment status",
+      "allActive": "All",
+      "activeOnly": "Active only",
+      "inactiveOnly": "Inactive only"
+    },
+    "col": {
+      "code": "Employee code",
+      "name": "Name",
+      "school": "School",
+      "year": "Year",
+      "jobType": "Job type",
+      "employment": "Employment status",
+      "active": "Active",
+      "hireDate": "Hire date",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "onLeave": "On leave",
+      "suspended": "Suspended",
+      "terminated": "Terminated"
+    },
+    "form": {
+      "school": "School",
+      "year": "Current academic year",
+      "jobType": "Job type (lookup)",
+      "code": "Employee code",
+      "sectionNameAr": "Name (Arabic)",
+      "sectionNameEn": "Name (English — optional)",
+      "sectionLegacy": "Optional link to legacy records",
+      "firstName": "First name",
+      "middleName": "Middle name",
+      "lastName": "Last name",
+      "firstNameEn": "First name (EN)",
+      "middleNameEn": "Middle name (EN)",
+      "lastNameEn": "Last name (EN)",
+      "nationalId": "National / ID number",
+      "dob": "Date of birth",
+      "gender": "Gender",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "hireDate": "Hire date",
+      "employmentStatus": "Employment status",
+      "isActive": "Active in system",
+      "userId": "User id (optional)",
+      "teacherId": "Teacher id (optional)",
+      "managerId": "Manager id (optional)",
+      "staffId": "School staff id (optional)",
+      "notes": "Notes",
+      "schoolId": "School id",
+      "jobTypeIdOptional": "Job type id (optional)",
+      "jobTypeOptional": "Job type (optional)",
+      "jobTypeInactiveSuffix": "inactive",
+      "jobTypeDash": "—",
+      "save": "Save"
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "fullProfile": "Full profile",
+      "backList": "List",
+      "backDetail": "Details",
+      "add": "Add",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "child": {
+      "degree": "Degree",
+      "major": "Major",
+      "institution": "Institution",
+      "gradYear": "Graduation year",
+      "grade": "Grade / score",
+      "name": "Name",
+      "category": "Category",
+      "level": "Level",
+      "jobTitle": "Job title",
+      "department": "Department",
+      "start": "Start",
+      "end": "End",
+      "docType": "Document type",
+      "title": "Title",
+      "fileUrl": "File URL",
+      "leaveType": "Leave type",
+      "days": "Total days",
+      "approval": "Approval status",
+      "reason": "Reason",
+      "score": "Evaluation score",
+      "generated": "Generated at",
+      "ach": "Achievement points",
+      "viol": "Violation points",
+      "req": "Request count",
+      "act": "Activity count",
+      "finalNotes": "Final notes"
+    },
+    "validation": {
+      "degreeRequired": "Degree name is required.",
+      "nameRequired": "Name is required.",
+      "yearSchool": "Year and school are required.",
+      "dateOrder": "End date cannot be before start date.",
+      "docFields": "Document type and title are required.",
+      "badDate": "Invalid date format."
+    },
+    "errors": {
+      "loadSchools": "Could not load schools.",
+      "loadYears": "Could not load years.",
+      "noPermission": "You do not have access to this page.",
+      "notFound": "Employee not found."
+    },
+    "toast": {
+      "created": "Employee created.",
+      "updated": "Employee updated.",
+      "deactivated": "Employee deactivated.",
+      "childSaved": "Record added."
     }
   }
 }

@@ -1,0 +1,47 @@
+<div class="employees-hr-page">
+  <div class="employees-hr-card">
+    <header class="employees-hr-header">
+      <h2 class="employees-hr-title">{{ 'employeesHr.detail.title' | translate }}</h2>
+      <div class="header-actions" *ngIf="row">
+        <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" routerLink="/school/employees-hr" />
+        <p-button
+          *ngIf="canUpdate"
+          [label]="'employeesHr.actions.edit' | translate"
+          icon="pi pi-pencil"
+          [routerLink]="['/school/employees-hr', id, 'edit']"
+        />
+        <p-button
+          [label]="'employeesHr.actions.fullProfile' | translate"
+          icon="pi pi-id-card"
+          severity="help"
+          [routerLink]="['/school/employees-hr', id, 'profile']"
+        />
+      </div>
+    </header>
+
+    <div *ngIf="!canView" class="empty-block muted">{{ 'employeesHr.errors.noPermission' | translate }}</div>
+
+    <div *ngIf="loading && canView" class="loading-wrap">
+      <p-progressSpinner strokeWidth="4" />
+    </div>
+
+    <div *ngIf="!loading && canView && !row" class="empty-block">{{ 'employeesHr.errors.notFound' | translate }}</div>
+
+    <div *ngIf="row" class="detail-grid">
+      <div class="detail-row"><span class="k">{{ 'employeesHr.col.code' | translate }}</span><span>{{ row.employeeCode }}</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.col.name' | translate }}</span><span>{{ displayName(row) }}</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.form.school' | translate }}</span><span>{{ row.schoolID }}</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.form.year' | translate }}</span><span>{{ row.currentAcademicYearID }}</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.col.jobType' | translate }}</span><span>{{ row.jobTypeName }} ({{ row.jobTypeCode }})</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.col.active' | translate }}</span><span>{{ row.isActive ? ('employeesHr.yes' | translate) : ('employeesHr.no' | translate) }}</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.form.phone' | translate }}</span><span>{{ row.phone || '—' }}</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.form.email' | translate }}</span><span>{{ row.email || '—' }}</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.form.address' | translate }}</span><span>{{ row.address || '—' }}</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.form.hireDate' | translate }}</span><span>{{ row.hireDate ? (row.hireDate | date : 'mediumDate') : '—' }}</span></div>
+      <div class="detail-row"><span class="k">{{ 'employeesHr.form.notes' | translate }}</span><span>{{ row.notes || '—' }}</span></div>
+      <div class="detail-row" *ngIf="row.teacherID"><span class="k">{{ 'employeesHr.form.teacherId' | translate }}</span><span>{{ row.teacherID }}</span></div>
+      <div class="detail-row" *ngIf="row.managerID"><span class="k">{{ 'employeesHr.form.managerId' | translate }}</span><span>{{ row.managerID }}</span></div>
+      <div class="detail-row" *ngIf="row.schoolStaffID"><span class="k">{{ 'employeesHr.form.staffId' | translate }}</span><span>{{ row.schoolStaffID }}</span></div>
+    </div>
+  </div>
+</div>

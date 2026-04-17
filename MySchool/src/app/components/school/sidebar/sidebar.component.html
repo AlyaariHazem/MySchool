@@ -80,6 +80,26 @@
           </ul>
         </li>
 
+        <li class="submenu" (click)="toggleSubmenu('employeesHrSubmenu')" *ngIf="canViewEmployeesNav">
+          <a href="javascript:void(0);">
+            <img src="assets/img/sidebar/icon-10.png" alt="icon">
+            <span>{{ 'sidebar.employees_hr.title' | translate }}</span>
+            <span class="menu-arrow" [ngClass]="{'rotate-arrow': isSubmenuOpen['employeesHrSubmenu']}"></span>
+          </a>
+          <ul class="list-unstyled" [@submenuToggle]="getSubmenuState('employeesHrSubmenu')">
+            <li>
+              <a routerLink="/school/employees-hr" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.employees_hr.list' | translate }}</span>
+              </a>
+            </li>
+            <li *ngIf="canCreateEmployeesHrNav">
+              <a routerLink="/school/employees-hr/new" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.employees_hr.add' | translate }}</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+
         <!-- الطلاب -->
         <li class="submenu" (click)="toggleSubmenu('studentsSubmenu')" *ngIf="canViewStudentsNav">
           <a href="javascript:void(0);">

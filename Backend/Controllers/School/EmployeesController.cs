@@ -95,6 +95,26 @@ public class EmployeesController : ControllerBase
         }
     }
 
+    /// <summary>Active and inactive job types for filters and display; assignment still requires an active type per validation rules.</summary>
+    [HttpGet("job-types")]
+    public async Task<ActionResult<APIResponse>> GetJobTypes(CancellationToken cancellationToken)
+    {
+        var response = new APIResponse();
+        try
+        {
+            response.Result = await _employees.GetJobTypesAsync(cancellationToken);
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
     [HttpPost]
     public async Task<ActionResult<APIResponse>> Create([FromBody] EmployeeProfileCreateDto body, CancellationToken cancellationToken)
     {

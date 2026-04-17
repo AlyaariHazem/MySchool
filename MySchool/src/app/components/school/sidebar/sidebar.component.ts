@@ -169,6 +169,9 @@ export class SidebarComponent {
   get canViewEmployeesNav(): boolean {
     return this.perm.hasPermission(PagePermission.Employees.View);
   }
+  get canCreateEmployeesHrNav(): boolean {
+    return this.perm.hasPermission(PagePermission.Employees.Create);
+  }
   get canViewActivitiesNav(): boolean {
     return this.perm.hasPermission(PagePermission.Activities.View);
   }
