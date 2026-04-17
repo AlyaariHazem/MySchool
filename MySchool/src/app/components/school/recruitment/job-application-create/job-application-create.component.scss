@@ -1,5 +1,48 @@
 @import '../recruitment-shared.scss';
 
+.job-application-create__surface {
+  padding: clamp(1.25rem, 3vw, 1.75rem) clamp(1.25rem, 3vw, 2rem);
+}
+
+.job-application-create__page-head {
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.job-application-create__intro {
+  flex: 1;
+  min-width: 0;
+}
+
+.job-application-create__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #16a34a;
+}
+
+.job-application-create__title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.35rem, 3vw, 1.6rem);
+}
+
+.job-application-create__lead {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+::ng-deep .job-application-create__back-btn.p-button {
+  font-weight: 600;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
 .query-banner {
   margin-bottom: 1rem;
 }

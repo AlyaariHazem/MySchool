@@ -157,6 +157,19 @@
   opacity: 1;
 }
 
+/* Login: distinct idle style so it reads as “account” vs browse tabs */
+.public-recruitment-topbar__action--secondary:not(.public-recruitment-topbar__action--active) {
+  background: rgba(241, 245, 249, 0.95);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #475569;
+}
+
+.public-recruitment-topbar__action--secondary:not(.public-recruitment-topbar__action--active):hover {
+  background: #fff;
+  border-color: rgba(22, 163, 74, 0.28);
+  color: #166534;
+}
+
 @media (max-width: 640px) {
   .public-recruitment-topbar__inner {
     flex-direction: column;

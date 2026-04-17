@@ -1,11 +1,18 @@
-<div class="employees-hr-page">
-  <div class="employees-hr-card">
-    <header class="employees-hr-header">
-      <h2 class="employees-hr-title">{{ 'recruitment.applications.createTitle' | translate }}</h2>
+<div class="employees-hr-page job-application-create">
+  <div class="employees-hr-card job-application-create__surface">
+    <header class="employees-hr-header job-application-create__page-head">
+      <div class="job-application-create__intro">
+        <p class="job-application-create__eyebrow">{{ 'recruitment.applications.createEyebrow' | translate }}</p>
+        <h2 class="employees-hr-title job-application-create__title">
+          {{ 'recruitment.applications.createTitle' | translate }}
+        </h2>
+        <p class="job-application-create__lead">{{ 'recruitment.applications.createLead' | translate }}</p>
+      </div>
       <p-button
-        [label]="'employeesHr.actions.backList' | translate"
+        [label]="'recruitment.applications.backToJobs' | translate"
         icon="pi pi-arrow-right"
         [outlined]="true"
+        styleClass="job-application-create__back-btn"
         routerLink="/school/recruitment/job-postings"
       />
     </header>

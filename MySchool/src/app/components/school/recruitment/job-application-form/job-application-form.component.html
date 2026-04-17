@@ -1,6 +1,9 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="eh-form-grid">
-  <div *ngIf="mode === 'create' && postingSummary" class="posting-summary-card">
-    <h3 class="eh-section posting-summary-title">{{ 'recruitment.applications.postingSummaryTitle' | translate }}</h3>
+  <div *ngIf="mode === 'create' && postingSummary" class="posting-summary-card posting-summary-card--accent">
+    <div class="posting-summary-card__head">
+      <span class="posting-summary-card__icon" aria-hidden="true"><i class="pi pi-briefcase"></i></span>
+      <h3 class="posting-summary-title">{{ 'recruitment.applications.postingSummaryTitle' | translate }}</h3>
+    </div>
     <div class="posting-summary-grid">
       <div>
         <span class="k">{{ 'recruitment.postings.fieldTitle' | translate }}</span>
@@ -52,7 +55,11 @@
     </div>
   </div>
 
-  <h3 class="eh-section">{{ 'recruitment.applications.sectionApplicant' | translate }}</h3>
+  <section class="ja-panel" aria-labelledby="ja-section-applicant">
+    <h3 class="ja-panel__title" id="ja-section-applicant">
+      {{ 'recruitment.applications.sectionApplicant' | translate }}
+    </h3>
+    <div class="ja-panel__body">
   <div class="eh-row">
     <div class="eh-field eh-field-stack">
       <p-floatlabel variant="on" class="eh-field-inner">
@@ -125,8 +132,14 @@
     <input pInputText id="ja-addr" formControlName="address" class="w-full" />
     <label for="ja-addr">{{ 'recruitment.applications.fieldAddress' | translate }}</label>
   </p-floatlabel>
+    </div>
+  </section>
 
-  <h3 class="eh-section">{{ 'recruitment.applications.sectionProfessional' | translate }}</h3>
+  <section class="ja-panel" aria-labelledby="ja-section-professional">
+    <h3 class="ja-panel__title" id="ja-section-professional">
+      {{ 'recruitment.applications.sectionProfessional' | translate }}
+    </h3>
+    <div class="ja-panel__body">
   <div class="eh-row">
     <p-floatlabel variant="on" class="eh-field">
       <input pInputText id="ja-hq" formControlName="highestQualification" class="w-full" />
@@ -169,11 +182,25 @@
   </p-floatlabel>
   <p-floatlabel variant="on" class="eh-field-full">
     <textarea pTextarea id="ja-notes" formControlName="notes" rows="2" class="w-full"></textarea>
-    <label for="ja-notes">{{ 'employeesHr.form.notes' | translate }}</label>
+    <label for="ja-notes">{{ 'recruitment.applications.fieldNotes' | translate }}</label>
   </p-floatlabel>
+    </div>
+  </section>
 
-  <div class="eh-actions">
-    <p-button type="button" [label]="'employeesHr.form.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
-    <p-button type="submit" [label]="submitLabelKey | translate" [loading]="submitting" [disabled]="submitting" />
+  <div class="ja-form-actions">
+    <p-button
+      type="button"
+      [label]="'recruitment.applications.cancel' | translate"
+      [outlined]="true"
+      styleClass="ja-form-actions__cancel"
+      (onClick)="cancel()"
+    />
+    <p-button
+      type="submit"
+      [label]="submitLabelKey | translate"
+      [loading]="submitting"
+      [disabled]="submitting"
+      styleClass="ja-form-actions__submit"
+    />
   </div>
 </form>

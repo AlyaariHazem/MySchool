@@ -647,6 +647,11 @@
     },
     "applications": {
       "listTitle": "Job applications",
+      "createEyebrow": "Apply",
+      "createLead": "Fill in your details below. Fields marked with * are required.",
+      "backToJobs": "Back to jobs",
+      "cancel": "Cancel",
+      "fieldNotes": "Notes",
       "createTitle": "New application",
       "editTitle": "Edit application",
       "add": "New application",

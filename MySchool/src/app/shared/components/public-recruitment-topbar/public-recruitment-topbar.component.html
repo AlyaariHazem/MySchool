@@ -18,27 +18,24 @@
       <div class="public-recruitment-topbar__nav-cluster" role="toolbar">
         <a
           routerLink="/school/recruitment/about"
-          routerLinkActive="public-recruitment-topbar__action--active"
-          [routerLinkActiveOptions]="{ exact: true }"
           class="public-recruitment-topbar__action"
+          [class.public-recruitment-topbar__action--active]="isAboutActive()"
         >
           <i class="pi pi-info-circle" aria-hidden="true"></i>
           <span>{{ 'recruitment.jobBoard.publicNavAbout' | translate }}</span>
         </a>
         <a
           routerLink="/login"
-          routerLinkActive="public-recruitment-topbar__action--active"
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="public-recruitment-topbar__action"
+          class="public-recruitment-topbar__action public-recruitment-topbar__action--secondary"
+          [class.public-recruitment-topbar__action--active]="isLoginActive()"
         >
           <i class="pi pi-sign-in" aria-hidden="true"></i>
           <span>{{ 'recruitment.jobBoard.publicNavLogin' | translate }}</span>
         </a>
         <a
           routerLink="/school/recruitment/job-postings"
-          routerLinkActive="public-recruitment-topbar__action--active"
-          [routerLinkActiveOptions]="{ exact: false }"
           class="public-recruitment-topbar__action"
+          [class.public-recruitment-topbar__action--active]="isJobsActive()"
         >
           <i class="pi pi-briefcase" aria-hidden="true"></i>
           <span>{{ 'recruitment.jobBoard.publicNavJobs' | translate }}</span>

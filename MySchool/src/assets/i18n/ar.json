@@ -648,6 +648,11 @@
     },
     "applications": {
       "listTitle": "طلبات التوظيف",
+      "createEyebrow": "التقديم",
+      "createLead": "أكمل البيانات أدناه. الحقول ذات العلامة * إلزامية.",
+      "backToJobs": "العودة للوظائف",
+      "cancel": "إلغاء",
+      "fieldNotes": "ملاحظات",
       "createTitle": "طلب جديد",
       "editTitle": "تعديل طلب",
       "add": "طلب جديد",
