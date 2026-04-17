@@ -1,0 +1,12 @@
+@import '../recruitment-shared.scss';
+
+.recruitment-about__header {
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.recruitment-about__body {
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}

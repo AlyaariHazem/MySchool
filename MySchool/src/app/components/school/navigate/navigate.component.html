@@ -1,5 +1,7 @@
 <div class="main-wrapper" [class.main-wrapper--public-job-board]="!showSchoolChrome">
 
+    <app-public-recruitment-topbar *ngIf="!showSchoolChrome" />
+
     <app-header *ngIf="showSchoolChrome" [attr.dir]="dir$ | async"></app-header>
 
     <div

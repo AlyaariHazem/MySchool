@@ -230,6 +230,14 @@ const routes: Routes = [
         data: { breadcrumb: 'التوظيف' },
         children: [
           {
+            path: 'about',
+            loadComponent: () =>
+              import('./recruitment/recruitment-about/recruitment-about.component').then(
+                (m) => m.RecruitmentAboutComponent,
+              ),
+            data: { breadcrumb: 'عن المدرسة' },
+          },
+          {
             path: 'job-postings',
             loadComponent: () =>
               import('./recruitment/job-postings-list/job-postings-list.component').then(

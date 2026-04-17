@@ -11,6 +11,8 @@ export function isPublicSchoolRecruitmentPath(url: string): boolean {
 
   if (path.startsWith('/school/recruitment/job-applications/create')) return true;
 
+  if (path === '/school/recruitment/about') return true;
+
   if (path === '/school/recruitment/job-postings') return true;
 
   if (path.startsWith('/school/recruitment/job-postings/')) {

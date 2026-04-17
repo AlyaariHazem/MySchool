@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 
 import { User } from '../../core/models/user.model';
 import { AuthAPIService } from '../authAPI.service';
+import { PublicRecruitmentTopbarComponent } from '../../shared/components/public-recruitment-topbar/public-recruitment-topbar.component';
 import { ShardModule } from '../../shared/shard.module';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -16,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [
     ShardModule,
+    PublicRecruitmentTopbarComponent,
     RouterLink,
     MatButtonModule,
     MatCardModule,

@@ -32,6 +32,7 @@ import { ChartModule } from 'primeng/chart';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+import { PublicRecruitmentTopbarComponent } from '../../shared/components/public-recruitment-topbar/public-recruitment-topbar.component';
 import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { TeacherSidebarModule } from '../teacher/teacher-sidebar/teacher-sidebar.module';
@@ -159,6 +160,7 @@ const components = [
 
 const modules = [
   ShardModule,
+  PublicRecruitmentTopbarComponent,
   TeacherSidebarModule,
   StudentSidebarModule,
   GuardianSidebarModule,
