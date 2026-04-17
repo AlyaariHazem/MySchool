@@ -235,11 +235,7 @@ const routes: Routes = [
               import('./recruitment/job-postings-list/job-postings-list.component').then(
                 (m) => m.JobPostingsListComponent,
               ),
-            data: {
-              breadcrumb: 'الوظائف الشاغرة',
-              permissions: [PagePermission.Recruitment.View, PagePermission.Employees.View],
-            },
-            canMatch: [permissionGuard],
+            data: { breadcrumb: 'الوظائف الشاغرة' },
           },
           {
             path: 'job-postings/create',
@@ -271,11 +267,15 @@ const routes: Routes = [
               import('./recruitment/job-posting-detail/job-posting-detail.component').then(
                 (m) => m.JobPostingDetailComponent,
               ),
-            data: {
-              breadcrumb: 'تفاصيل الإعلان',
-              permissions: [PagePermission.Recruitment.View, PagePermission.Employees.View],
-            },
-            canMatch: [permissionGuard],
+            data: { breadcrumb: 'تفاصيل الإعلان' },
+          },
+          {
+            path: 'job-applications/create',
+            loadComponent: () =>
+              import('./recruitment/job-application-create/job-application-create.component').then(
+                (m) => m.JobApplicationCreateComponent,
+              ),
+            data: { breadcrumb: 'طلب توظيف جديد' },
           },
           {
             path: 'job-applications',
@@ -286,18 +286,6 @@ const routes: Routes = [
             data: {
               breadcrumb: 'طلبات التوظيف',
               permissions: [PagePermission.Recruitment.View, PagePermission.Employees.View],
-            },
-            canMatch: [permissionGuard],
-          },
-          {
-            path: 'job-applications/create',
-            loadComponent: () =>
-              import('./recruitment/job-application-create/job-application-create.component').then(
-                (m) => m.JobApplicationCreateComponent,
-              ),
-            data: {
-              breadcrumb: 'طلب توظيف جديد',
-              permissions: [PagePermission.Recruitment.Create, PagePermission.Employees.Create],
             },
             canMatch: [permissionGuard],
           },

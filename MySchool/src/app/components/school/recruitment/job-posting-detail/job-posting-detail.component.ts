@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe, NgIf } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -10,7 +11,7 @@ import { TagModule } from 'primeng/tag';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
 
-import { PagePermission, PermissionService } from 'app/core/services/permission.service';
+import { isSchoolHrManager } from 'app/core/utils/school-role.util';
 import { SchoolService } from 'app/core/services/school.service';
 import { ShardModule } from 'app/shared/shard.module';
 
@@ -42,22 +43,28 @@ export class JobPostingDetailComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
   private readonly confirm = inject(ConfirmationService);
-  private readonly perm = inject(PermissionService);
-
   id = 0;
   row: JobPostingReadDto | null = null;
   loading = true;
   schoolName = '';
+  /** Set when GET fails (404, network, etc.). */
+  loadError: string | null = null;
+  httpStatus = 0;
 
-  readonly canView = this.perm.hasAny([PagePermission.Recruitment.View, PagePermission.Employees.View]);
-  readonly canUpdate = this.perm.hasAny([PagePermission.Recruitment.Update, PagePermission.Employees.Update]);
+  readonly isHrUser = isSchoolHrManager();
+  readonly canUpdate = this.isHrUser;
+  /** True when this posting is visible on the public board (open + active). */
+  canApply(): boolean {
+    const r = this.row;
+    return !!r && r.status === JobPostingStatus.Open && r.isActive;
+  }
 
   JobPostingStatus = JobPostingStatus;
 
   ngOnInit(): void {
     const p = this.route.snapshot.paramMap.get('id');
     this.id = p ? +p : 0;
-    if (!this.id || !this.canView) {
+    if (!this.id) {
       this.loading = false;
       return;
     }
@@ -66,6 +73,8 @@ export class JobPostingDetailComponent implements OnInit {
 
   load(): void {
     this.loading = true;
+    this.loadError = null;
+    this.httpStatus = 0;
     this.recruitment
       .getJobPostingById(this.id)
       .pipe(finalize(() => (this.loading = false)))
@@ -73,17 +82,21 @@ export class JobPostingDetailComponent implements OnInit {
         next: (r) => {
           this.row = r;
           if (r?.schoolID) {
-            this.schoolService.getAllSchools().subscribe({
-              next: (list) => {
-                const s = list?.find((x) => x.schoolID === r.schoolID);
+            this.schoolService.getSchoolByID(r.schoolID).subscribe({
+              next: (s) => {
                 this.schoolName = s?.schoolName ?? String(r.schoolID);
+              },
+              error: () => {
+                this.schoolName = String(r.schoolID);
               },
             });
           }
         },
-        error: (err) => {
-          this.toastr.error(readRecruitmentHttpError(err));
+        error: (err: unknown) => {
+          const e = err as HttpErrorResponse;
           this.row = null;
+          this.loadError = readRecruitmentHttpError(err);
+          this.httpStatus = typeof e?.status === 'number' ? e.status : 0;
         },
       });
   }

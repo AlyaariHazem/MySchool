@@ -169,18 +169,20 @@ export class SidebarComponent {
   get canViewEmployeesNav(): boolean {
     return this.perm.hasPermission(PagePermission.Employees.View);
   }
-  /** Job postings & applications (falls back to HR register permission). */
-  get canViewRecruitmentNav(): boolean {
-    return this.perm.hasAny([
-      PagePermission.Recruitment.View,
-      PagePermission.Employees.View,
-    ]);
-  }
   get canCreateRecruitmentNav(): boolean {
     return this.perm.hasAny([
       PagePermission.Recruitment.Create,
       PagePermission.Employees.Create,
     ]);
+  }
+
+  /** ADMIN / MANAGER — create postings and review the applications pipeline. */
+  get canManageSchoolRecruitmentNav(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    const t = localStorage.getItem('userType');
+    return t === 'ADMIN' || t === 'MANAGER';
   }
   get canCreateEmployeesHrNav(): boolean {
     return this.perm.hasPermission(PagePermission.Employees.Create);

@@ -108,6 +108,15 @@
             <span>هل نسيت كلمة السر؟</span>
           </a>
           <a
+            class="footer-link"
+            routerLink="/school/recruitment/job-postings"
+            [class.footer-link--disabled]="isLoading"
+            [attr.tabindex]="isLoading ? -1 : null"
+          >
+            <mat-icon>work_outline</mat-icon>
+            <span>الوظائف الشاغرة</span>
+          </a>
+          <a
             class="footer-link footer-link--accent"
             routerLink="/request-registration"
             [class.footer-link--disabled]="isLoading"

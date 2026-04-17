@@ -8,6 +8,7 @@ using Backend.Models;
 using Backend.Repository.School.Classes;
 using Backend.Repository.School.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.School
@@ -54,6 +55,7 @@ namespace Backend.Controllers.School
 
         // GET api/year
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<APIResponse>> GetYears()
         {
             var response = new APIResponse();

@@ -6,11 +6,22 @@
         [label]="'employeesHr.actions.backList' | translate"
         icon="pi pi-arrow-right"
         [outlined]="true"
-        routerLink="/school/recruitment/job-applications"
+        routerLink="/school/recruitment/job-postings"
       />
     </header>
 
-    <div *ngIf="!canCreate" class="empty-block muted">{{ 'employeesHr.errors.noPermission' | translate }}</div>
+    <div *ngIf="queryPostingInvalid" class="rec-banner rec-banner-error query-banner" role="alert">
+      <i class="pi pi-times-circle" aria-hidden="true"></i>
+      <span>{{ 'recruitment.postings.unavailableOrNotFound' | translate }}</span>
+    </div>
+
+    <div *ngIf="queryPostingClosed && closedQueryPosting" class="rec-banner rec-banner-warn query-banner" role="status">
+      <i class="pi pi-info-circle" aria-hidden="true"></i>
+      <span
+        >{{ 'recruitment.postings.unavailableForApply' | translate }} —
+        <strong>{{ closedQueryPosting.title }}</strong></span
+      >
+    </div>
 
     <div *ngIf="loadingMeta && canCreate" class="loading-wrap">
       <p-progressSpinner strokeWidth="4" />
@@ -21,6 +32,10 @@
       [years]="years"
       [openPostings]="openPostings"
       [initial]="null"
+      [presetJobPostingId]="presetJobPostingId"
+      [lockPostingId]="lockPostingFromQuery"
+      [postingSummary]="postingSummary"
+      [postingSchoolName]="postingSchoolName"
       [submitting]="submitting"
       [submitLabelKey]="'recruitment.applications.createSubmit'"
       mode="create"

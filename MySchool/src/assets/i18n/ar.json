@@ -585,6 +585,16 @@
       "convertedToEmployee": "تم التحويل لموظف",
       "withdrawn": "مسحوب"
     },
+    "jobBoard": {
+      "applicantSubtitle": "تصفح الشواغر المفتوحة وأرسل طلبك.",
+      "emptyNoOpenVacancies": "لا توجد شواغر مفتوحة حالياً. يرجى المحاولة لاحقاً.",
+      "academicYear": "السنة الدراسية",
+      "postingDate": "تاريخ الإعلان",
+      "closingDate": "آخر موعد للتقديم",
+      "openings": "الشواغر",
+      "applyNow": "تقديم طلب",
+      "statusOpen": "مفتوح"
+    },
     "postings": {
       "listTitle": "إعلانات الوظائف",
       "createTitle": "إعلان وظيفة جديد",
@@ -615,6 +625,7 @@
       "fieldResponsibilities": "المسؤوليات",
       "dateError": "آخر موعد لا يمكن أن يسبق تاريخ الإعلان.",
       "viewApplications": "الطلبات",
+      "apply": "تقديم طلب",
       "confirmOpen": "فتح الإعلان لاستقبال الطلبات؟",
       "confirmClose": "إغلاق الإعلان؟",
       "confirmArchive": "أرشفة الإعلان؟",
@@ -623,7 +634,9 @@
       "archived": "تمت الأرشفة.",
       "actionOpen": "فتح",
       "actionClose": "إغلاق",
-      "actionArchive": "أرشفة"
+      "actionArchive": "أرشفة",
+      "unavailableForApply": "هذا الإعلان لا يستقبل طلبات حالياً.",
+      "unavailableOrNotFound": "تعذر العثور على هذا الإعلان أو لم يعد متاحاً."
     },
     "applications": {
       "listTitle": "طلبات التوظيف",
@@ -663,7 +676,14 @@
       "fieldSource": "المصدر",
       "sectionApplicant": "المتقدم",
       "sectionProfessional": "المهني",
-      "fieldName": "الاسم"
+      "fieldName": "الاسم",
+      "postingSummaryTitle": "أنت تتقدم إلى",
+      "submittedSuccessApplicant": "تم إرسال طلبك بنجاح.",
+      "validation": {
+        "required": "هذا الحقل مطلوب.",
+        "emailInvalid": "أدخل بريداً إلكترونياً صالحاً.",
+        "postingRequired": "اختر إعلان الوظيفة."
+      }
     },
     "interviews": {
       "date": "موعد المقابلة",

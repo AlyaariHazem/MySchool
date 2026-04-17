@@ -1,6 +1,7 @@
-import { NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   Component,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -9,7 +10,8 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
@@ -21,14 +23,26 @@ import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 
 import { Year } from 'app/core/models/year.model';
+import { readSchoolApplicantPrefill } from 'app/core/utils/applicant-prefill.util';
 
-import { JobApplicationCreateDto, JobApplicationReadDto, JobPostingListDto } from '../recruitment.models';
+import {
+  JobApplicationCreateDto,
+  JobApplicationReadDto,
+  JobPostingListDto,
+  JobPostingReadDto,
+} from '../recruitment.models';
+
+function optionalEmail(control: AbstractControl): ValidationErrors | null {
+  const v = (control.value as string | null | undefined)?.trim();
+  if (!v) return null;
+  return Validators.email(control);
+}
 
 @Component({
   selector: 'app-job-application-form',
   standalone: true,
   imports: [
-    NgIf,
+    CommonModule,
     ReactiveFormsModule,
     TranslateModule,
     ButtonModule,
@@ -45,13 +59,20 @@ import { JobApplicationCreateDto, JobApplicationReadDto, JobPostingListDto } fro
 })
 export class JobApplicationFormComponent implements OnChanges, OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
   @Input() years: Year[] = [];
   /** Open postings for create mode. */
   @Input() openPostings: JobPostingListDto[] = [];
   @Input() initial: JobApplicationReadDto | null = null;
+  /** When set in create mode, pre-selects the job posting (e.g. from query <c>jobPostingID</c>). */
+  @Input() presetJobPostingId: number | null = null;
   /** When true, jobPostingId is disabled (fixed context). */
   @Input() lockPostingId = false;
+  /** Rich posting context when applying from a specific vacancy. */
+  @Input() postingSummary: JobPostingReadDto | null = null;
+  /** Resolved school name for <c>postingSummary</c>. */
+  @Input() postingSchoolName: string | null = null;
   @Input() submitting = false;
   @Input() submitLabelKey = 'recruitment.applications.save';
   @Input() mode: 'create' | 'edit' = 'create';
@@ -60,7 +81,6 @@ export class JobApplicationFormComponent implements OnChanges, OnInit {
   @Output() cancelled = new EventEmitter<void>();
 
   postingOptions: { label: string; value: number }[] = [];
-  yearOptions: { label: string; value: number }[] = [];
 
   form = this.fb.nonNullable.group({
     jobPostingID: [0, [Validators.required, Validators.min(1)]],
@@ -73,7 +93,7 @@ export class JobApplicationFormComponent implements OnChanges, OnInit {
     dateOfBirth: [null as Date | null],
     gender: [''],
     phone: [''],
-    email: [''],
+    email: ['', [optionalEmail]],
     address: [''],
     highestQualification: [''],
     specialization: [''],
@@ -88,15 +108,53 @@ export class JobApplicationFormComponent implements OnChanges, OnInit {
   ngOnInit(): void {
     this.rebuildPostingOptions();
     this.applyModeValidators();
+    this.applySessionPrefill();
+    this.form.controls.jobPostingID.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.mode === 'create') this.applyAutoAcademicYear();
+      });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['openPostings'] || changes['initial']) {
+    if (changes['openPostings'] || changes['initial'] || changes['presetJobPostingId']) {
       this.rebuildPostingOptions();
       if (this.initial && this.mode === 'edit') this.patchEdit(this.initial);
+      else if (this.mode === 'create' && this.presetJobPostingId && this.presetJobPostingId > 0) {
+        this.form.patchValue({ jobPostingID: this.presetJobPostingId }, { emitEvent: false });
+      }
     }
-    if (changes['years']) this.rebuildYearOptions();
+    if (changes['postingSummary']?.currentValue && this.mode === 'create') {
+      const p = changes['postingSummary'].currentValue as JobPostingReadDto;
+      this.form.patchValue({ jobPostingID: p.jobPostingID }, { emitEvent: false });
+    }
     if (changes['mode']) this.applyModeValidators();
+
+    const shouldRecomputeYear =
+      this.mode === 'create' &&
+      (changes['years'] ||
+        changes['openPostings'] ||
+        changes['postingSummary'] ||
+        changes['presetJobPostingId']);
+    if (shouldRecomputeYear) this.applyAutoAcademicYear();
+  }
+
+  private applySessionPrefill(): void {
+    if (this.mode !== 'create' || this.initial) return;
+    const pre = readSchoolApplicantPrefill();
+    const patch: Record<string, string | null> = {};
+    const fn = this.form.get('applicantFirstName')?.value?.trim();
+    const ln = this.form.get('applicantLastName')?.value?.trim();
+    if (!fn && pre.applicantFirstName) patch['applicantFirstName'] = pre.applicantFirstName;
+    if (!ln && pre.applicantLastName) patch['applicantLastName'] = pre.applicantLastName;
+    if (!this.form.get('email')?.value?.trim() && pre.email) patch['email'] = pre.email;
+    if (!this.form.get('phone')?.value?.trim() && pre.phone) patch['phone'] = pre.phone;
+    if (Object.keys(patch).length) this.form.patchValue(patch, { emitEvent: false });
+  }
+
+  showFieldError(controlName: string): boolean {
+    const c = this.form.get(controlName);
+    return !!c && c.invalid && (c.touched || c.dirty);
   }
 
   private applyModeValidators(): void {
@@ -116,13 +174,26 @@ export class JobApplicationFormComponent implements OnChanges, OnInit {
     }));
   }
 
-  private rebuildYearOptions(): void {
-    this.yearOptions = this.years
-      .filter((y) => y.yearID != null && y.yearID > 0)
-      .map((y) => ({
-        label: `${y.yearDateStart ? new Date(y.yearDateStart).getFullYear() : y.yearID}`,
-        value: y.yearID!,
-      }));
+  /** Create mode: posting year wins, else active tenant year. */
+  private applyAutoAcademicYear(): void {
+    if (this.mode !== 'create') return;
+    const id = this.resolveAcademicYearId();
+    this.form.patchValue({ academicYearID: id }, { emitEvent: false });
+  }
+
+  private resolveAcademicYearId(): number | null {
+    const fromPosting = this.postingSummary?.academicYearID;
+    if (fromPosting != null && fromPosting > 0) return fromPosting;
+
+    const jid = this.form.get('jobPostingID')?.value;
+    if (jid && jid > 0) {
+      const row = this.openPostings?.find((p) => p.jobPostingID === jid);
+      const y = row?.academicYearID;
+      if (y != null && y > 0) return y;
+    }
+
+    const active = this.years?.find((x) => x.active && x.yearID > 0);
+    return active?.yearID ?? null;
   }
 
   private patchEdit(p: JobApplicationReadDto): void {

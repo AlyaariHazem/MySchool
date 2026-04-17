@@ -1,3 +1,18 @@
 // .page-wrapperEn{
 //     right:2px;
 // }
+
+.main-wrapper--public-job-board {
+  min-height: 100vh;
+}
+
+.public-job-board-shell {
+  min-height: 100vh;
+  padding: 1rem 1.25rem 2rem;
+  box-sizing: border-box;
+}
+
+.content--public-job-board {
+  max-width: 1200px;
+  margin-inline: auto;
+}

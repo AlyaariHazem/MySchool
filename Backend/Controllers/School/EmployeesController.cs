@@ -12,7 +12,7 @@ namespace Backend.Controllers.School;
 /// </summary>
 [ApiController]
 [Route("api/employees")]
-[Authorize(Roles = "ADMIN,MANAGER")]
+[Authorize]
 public class EmployeesController : ControllerBase
 {
     private readonly IEmployeeProfileService _employees;
@@ -23,6 +23,7 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> GetAll([FromQuery] EmployeeProfileListFilterDto? filter, CancellationToken cancellationToken)
     {
         var response = new APIResponse();
@@ -42,6 +43,7 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> GetById(int id, CancellationToken cancellationToken)
     {
         var response = new APIResponse();
@@ -70,6 +72,7 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet("{id:int}/full-profile")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> GetFullProfile(int id, CancellationToken cancellationToken)
     {
         var response = new APIResponse();
@@ -95,8 +98,9 @@ public class EmployeesController : ControllerBase
         }
     }
 
-    /// <summary>Active and inactive job types for filters and display; assignment still requires an active type per validation rules.</summary>
+    /// <summary>Active and inactive job types for recruitment filters and display; any authenticated school user.</summary>
     [HttpGet("job-types")]
+    [AllowAnonymous]
     public async Task<ActionResult<APIResponse>> GetJobTypes(CancellationToken cancellationToken)
     {
         var response = new APIResponse();
@@ -116,6 +120,7 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> Create([FromBody] EmployeeProfileCreateDto body, CancellationToken cancellationToken)
     {
         var response = new APIResponse();
@@ -150,6 +155,7 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> Update(int id, [FromBody] EmployeeProfileUpdateDto body, CancellationToken cancellationToken)
     {
         var response = new APIResponse();
@@ -192,6 +198,7 @@ public class EmployeesController : ControllerBase
 
     /// <summary>Soft-deactivate profile (<see cref="EmployeeProfile.IsActive"/> = false).</summary>
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> Deactivate(int id, CancellationToken cancellationToken)
     {
         var response = new APIResponse();
@@ -219,26 +226,32 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpPost("{id:int}/qualifications")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> AddQualification(int id, [FromBody] EmployeeQualificationDto body, CancellationToken cancellationToken) =>
         await RunChildAddAsync(() => _employees.AddQualificationAsync(id, body, cancellationToken));
 
     [HttpPost("{id:int}/specializations")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> AddSpecialization(int id, [FromBody] EmployeeSpecializationDto body, CancellationToken cancellationToken) =>
         await RunChildAddAsync(() => _employees.AddSpecializationAsync(id, body, cancellationToken));
 
     [HttpPost("{id:int}/history")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> AddHistory(int id, [FromBody] EmployeeHistoryDto body, CancellationToken cancellationToken) =>
         await RunChildAddAsync(() => _employees.AddHistoryAsync(id, body, cancellationToken));
 
     [HttpPost("{id:int}/documents")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> AddDocument(int id, [FromBody] EmployeeDocumentDto body, CancellationToken cancellationToken) =>
         await RunChildAddAsync(() => _employees.AddDocumentAsync(id, body, cancellationToken));
 
     [HttpPost("{id:int}/leaves")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> AddLeave(int id, [FromBody] EmployeeLeaveDto body, CancellationToken cancellationToken) =>
         await RunChildAddAsync(() => _employees.AddLeaveAsync(id, body, cancellationToken));
 
     [HttpPost("{id:int}/performance-summaries")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> AddPerformanceSummary(int id, [FromBody] EmployeePerformanceSummaryDto body, CancellationToken cancellationToken) =>
         await RunChildAddAsync(() => _employees.AddPerformanceSummaryAsync(id, body, cancellationToken));
 

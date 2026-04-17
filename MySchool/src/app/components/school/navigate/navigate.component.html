@@ -1,15 +1,20 @@
-<div class="main-wrapper">
+<div class="main-wrapper" [class.main-wrapper--public-job-board]="!showSchoolChrome">
 
-    <app-header [attr.dir]="dir$ | async"></app-header>
+    <app-header *ngIf="showSchoolChrome" [attr.dir]="dir$ | async"></app-header>
 
-    <div [ngClass]="{'page-wrapperEn':(dir$ | async)==='ltr','page-wrapper':(dir$ | async)==='rtl'}" >
-        <div class="content container-fluid" dir="ltr"  >
-            
-            <app-breadcrumb/>
-            
+    <div
+      [ngClass]="{
+        'page-wrapperEn': showSchoolChrome && (dir$ | async)==='ltr',
+        'page-wrapper': showSchoolChrome && (dir$ | async)==='rtl',
+        'public-job-board-shell': !showSchoolChrome
+      }"
+      [attr.dir]="dir$ | async"
+    >
+        <div class="content container-fluid" [class.content--public-job-board]="!showSchoolChrome" dir="ltr">
+            <app-breadcrumb *ngIf="showSchoolChrome"/>
             <router-outlet></router-outlet>
         </div>
     </div>
 
-    <app-ai-assistant-floating *ngIf="canUseAiChat" [attr.dir]="(dir$ | async) ?? 'rtl'"></app-ai-assistant-floating>
+    <app-ai-assistant-floating *ngIf="showSchoolChrome && canUseAiChat" [attr.dir]="(dir$ | async) ?? 'rtl'"></app-ai-assistant-floating>
 </div>

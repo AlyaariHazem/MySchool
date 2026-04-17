@@ -2,6 +2,11 @@
   <p-confirmDialog [style]="{ width: '28rem' }" />
 
   <div class="employees-hr-card" *ngIf="!loading && row">
+    <div *ngIf="!isHrUser && !canApply()" class="rec-banner rec-banner-warn" role="status">
+      <i class="pi pi-info-circle" aria-hidden="true"></i>
+      <span>{{ 'recruitment.postings.unavailableForApply' | translate }}</span>
+    </div>
+
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ row.title }}</h2>
       <div class="header-actions">
@@ -12,12 +17,21 @@
           routerLink="/school/recruitment/job-postings"
         />
         <p-button
+          *ngIf="canApply()"
+          [label]="'recruitment.jobBoard.applyNow' | translate"
+          icon="pi pi-send"
+          [routerLink]="['/school/recruitment/job-applications/create']"
+          [queryParams]="{ jobPostingID: id }"
+          [disabled]="!canApply()"
+        />
+        <p-button
           *ngIf="canUpdate"
           [label]="'employeesHr.actions.edit' | translate"
           icon="pi pi-pencil"
           [routerLink]="['/school/recruitment/job-postings', id, 'edit']"
         />
         <p-button
+          *ngIf="isHrUser"
           [label]="'recruitment.postings.viewApplications' | translate"
           icon="pi pi-users"
           [outlined]="true"
@@ -104,5 +118,25 @@
     <p-progressSpinner strokeWidth="4" />
   </div>
 
-  <div *ngIf="!loading && !row" class="empty-block muted">{{ 'recruitment.postings.notFound' | translate }}</div>
+  <div *ngIf="!loading && !row && loadError" class="employees-hr-card job-posting-unavailable">
+    <div *ngIf="httpStatus === 404" class="rec-banner rec-banner-error" role="alert">
+      <i class="pi pi-times-circle" aria-hidden="true"></i>
+      <span>{{ 'recruitment.postings.unavailableOrNotFound' | translate }}</span>
+    </div>
+    <div *ngIf="httpStatus !== 404 && httpStatus > 0" class="rec-banner rec-banner-error" role="alert">
+      <i class="pi pi-times-circle" aria-hidden="true"></i>
+      <span>{{ loadError }}</span>
+    </div>
+    <p-button
+      class="mt-3"
+      [label]="'employeesHr.actions.backList' | translate"
+      icon="pi pi-arrow-right"
+      [outlined]="true"
+      routerLink="/school/recruitment/job-postings"
+    />
+  </div>
+
+  <div *ngIf="!loading && !row && !loadError" class="empty-block muted">
+    {{ 'recruitment.postings.notFound' | translate }}
+  </div>
 </div>

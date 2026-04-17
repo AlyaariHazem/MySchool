@@ -3,7 +3,12 @@
 
   <div class="employees-hr-card">
     <header class="employees-hr-header">
-      <h2 class="employees-hr-title">{{ 'recruitment.postings.listTitle' | translate }}</h2>
+      <div class="title-block">
+        <h2 class="employees-hr-title">{{ 'recruitment.postings.listTitle' | translate }}</h2>
+        <p *ngIf="!isHrUser" class="job-board-subtitle muted">
+          {{ 'recruitment.jobBoard.applicantSubtitle' | translate }}
+        </p>
+      </div>
       <div class="header-actions">
         <p-button
           *ngIf="canCreate"
@@ -21,7 +26,7 @@
       </div>
     </header>
 
-    <div class="filters-toolbar" *ngIf="canView">
+    <div class="filters-toolbar" *ngIf="canView && showFilters">
       <div class="filters-grid">
         <p-floatlabel variant="on" class="filter-field">
           <p-select
@@ -70,7 +75,7 @@
           <label for="jp-filter-job">{{ 'employeesHr.filter.jobType' | translate }}</label>
         </p-floatlabel>
 
-        <p-floatlabel variant="on" class="filter-field">
+        <p-floatlabel *ngIf="isHrUser" variant="on" class="filter-field">
           <p-select
             inputId="jp-filter-status"
             class="w-full"
@@ -85,7 +90,7 @@
           <label for="jp-filter-status">{{ 'recruitment.postings.status' | translate }}</label>
         </p-floatlabel>
 
-        <p-floatlabel variant="on" class="filter-field">
+        <p-floatlabel *ngIf="isHrUser" variant="on" class="filter-field">
           <p-select
             inputId="jp-filter-active"
             class="w-full"
@@ -112,11 +117,76 @@
       <p-progressSpinner strokeWidth="3" />
     </div>
 
-    <div *ngIf="!loading && canView && rows.length === 0 && !error" class="empty-block">
-      {{ 'recruitment.postings.empty' | translate }}
+    <div *ngIf="!loading && !error && rows.length === 0" class="empty-block empty-job-board">
+      <i class="pi pi-inbox empty-job-board-icon" *ngIf="!isHrUser"></i>
+      <p *ngIf="!isHrUser">{{ 'recruitment.jobBoard.emptyNoOpenVacancies' | translate }}</p>
+      <p *ngIf="isHrUser">{{ 'recruitment.postings.empty' | translate }}</p>
     </div>
 
-    <p-table *ngIf="!loading && rows.length > 0" [value]="rows" styleClass="p-datatable-sm employees-hr-table">
+    <!-- Applicant job board (cards) -->
+    <div *ngIf="!isHrUser && !loading && rows.length > 0" class="jb-grid">
+      <article class="jb-card" *ngFor="let row of rows">
+        <div class="jb-card-head">
+          <h3 class="jb-title">{{ row.title }}</h3>
+          <p-tag
+            [value]="'recruitment.postingStatus.' + postingStatusLabelKey(row.status) | translate"
+            [severity]="severityStatus(row.status)"
+          />
+        </div>
+        <dl class="jb-meta">
+          <div *ngIf="row.department">
+            <dt>{{ 'recruitment.postings.colDepartment' | translate }}</dt>
+            <dd>{{ row.department }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'employeesHr.filter.jobType' | translate }}</dt>
+            <dd>{{ row.jobTypeName || '—' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'employeesHr.filter.school' | translate }}</dt>
+            <dd>{{ schoolName(row.schoolID) }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'recruitment.jobBoard.academicYear' | translate }}</dt>
+            <dd>{{ yearLabel(row.academicYearID) }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'recruitment.jobBoard.postingDate' | translate }}</dt>
+            <dd>{{ row.postingDate | date: 'mediumDate' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'recruitment.jobBoard.closingDate' | translate }}</dt>
+            <dd>{{ row.closingDate ? (row.closingDate | date: 'mediumDate') : '—' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'recruitment.jobBoard.openings' | translate }}</dt>
+            <dd>{{ row.numberOfOpenings }}</dd>
+          </div>
+        </dl>
+        <div class="jb-actions">
+          <p-button
+            [label]="'employeesHr.actions.view' | translate"
+            icon="pi pi-eye"
+            [outlined]="true"
+            [routerLink]="['/school/recruitment/job-postings', row.jobPostingID]"
+          />
+          <p-button
+            *ngIf="canApplyToRow(row)"
+            [label]="'recruitment.jobBoard.applyNow' | translate"
+            icon="pi pi-send"
+            [routerLink]="['/school/recruitment/job-applications/create']"
+            [queryParams]="{ jobPostingID: row.jobPostingID }"
+          />
+        </div>
+      </article>
+    </div>
+
+    <!-- HR: full table with workflow actions -->
+    <p-table
+      *ngIf="isHrUser && !loading && rows.length > 0"
+      [value]="rows"
+      styleClass="p-datatable-sm employees-hr-table"
+    >
       <ng-template pTemplate="header">
         <tr>
           <th>{{ 'recruitment.postings.colTitle' | translate }}</th>
@@ -124,11 +194,11 @@
           <th>{{ 'employeesHr.filter.school' | translate }}</th>
           <th>{{ 'employeesHr.filter.year' | translate }}</th>
           <th>{{ 'employeesHr.filter.jobType' | translate }}</th>
-          <th>{{ 'recruitment.postings.colOpenings' | translate }}</th>
-          <th>{{ 'recruitment.postings.colPostingDate' | translate }}</th>
-          <th>{{ 'recruitment.postings.colClosingDate' | translate }}</th>
+          <th>{{ 'recruitment.jobBoard.openings' | translate }}</th>
+          <th>{{ 'recruitment.jobBoard.postingDate' | translate }}</th>
+          <th>{{ 'recruitment.jobBoard.closingDate' | translate }}</th>
           <th>{{ 'recruitment.postings.status' | translate }}</th>
-          <th style="width: 12rem">{{ 'employeesHr.col.actions' | translate }}</th>
+          <th style="width: 14rem">{{ 'employeesHr.col.actions' | translate }}</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-row>

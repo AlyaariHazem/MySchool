@@ -6,6 +6,7 @@ using Backend.DTOS.School;
 using Backend.Interfaces;
 using Backend.Models;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -74,6 +75,7 @@ public class SchoolController : GenericCrudController<SchoolDTO, int>
 
     /// <summary>GET /{id} — Legacy wrapper for the admin UI.</summary>
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public override async Task<IActionResult> GetById(int id)
     {
         var school = await _repository.GetByIdAsync(id);

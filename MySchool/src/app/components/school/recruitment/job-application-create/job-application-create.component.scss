@@ -1,1 +1,32 @@
 @import '../recruitment-shared.scss';
+
+.query-banner {
+  margin-bottom: 1rem;
+}
+
+.rec-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.rec-banner .pi {
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+
+.rec-banner-warn {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+}
+
+.rec-banner-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}

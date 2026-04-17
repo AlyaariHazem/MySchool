@@ -1,1 +1,48 @@
 @import '../recruitment-shared.scss';
+
+.posting-summary-card {
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  margin-bottom: 0.5rem;
+}
+
+.posting-summary-title {
+  margin-top: 0;
+}
+
+.posting-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem 1.25rem;
+  font-size: 0.95rem;
+
+  .k {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.15rem;
+  }
+}
+
+.eh-field-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: stretch;
+}
+
+.eh-field-inner {
+  min-width: 0;
+  width: 100%;
+}
+
+.field-error {
+  display: block;
+  font-size: 0.8rem;
+  color: #b91c1c;
+  margin: 0;
+  padding-inline-start: 2px;
+}

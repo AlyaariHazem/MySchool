@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe, NgFor, NgIf } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -13,12 +13,13 @@ import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { map } from 'rxjs';
+import { catchError, forkJoin, map, of } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-import { PagePermission, PermissionService } from 'app/core/services/permission.service';
+import { hasAuthToken } from 'app/core/utils/auth-token.util';
+import { isSchoolHrManager } from 'app/core/utils/school-role.util';
 import { SchoolService } from 'app/core/services/school.service';
 import { YearService } from 'app/core/services/year.service';
 import { Year } from 'app/core/models/year.model';
@@ -37,6 +38,7 @@ import { RecruitmentService, readRecruitmentHttpError } from '../recruitment.ser
   imports: [
     ShardModule,
     NgIf,
+    NgFor,
     AsyncPipe,
     DatePipe,
     FormsModule,
@@ -63,15 +65,20 @@ export class JobPostingsListComponent implements OnInit, OnDestroy {
   private readonly toastr = inject(ToastrService);
   private readonly confirm = inject(ConfirmationService);
   private readonly translate = inject(TranslateService);
-  private readonly perm = inject(PermissionService);
   private readonly store = inject(Store);
   private langSub?: Subscription;
 
   readonly dir$ = this.store.select(selectLanguage).pipe(map((l) => (l === 'ar' ? 'rtl' : 'ltr')));
 
-  readonly canView = this.perm.hasAny([PagePermission.Recruitment.View, PagePermission.Employees.View]);
-  readonly canCreate = this.perm.hasAny([PagePermission.Recruitment.Create, PagePermission.Employees.Create]);
-  readonly canUpdate = this.perm.hasAny([PagePermission.Recruitment.Update, PagePermission.Employees.Update]);
+  /** Any logged-in school user can browse job postings (API enforces open-only for non-HR). */
+  readonly canView = true;
+  /** Posting management matches backend ADMIN/MANAGER. */
+  readonly isHrUser = isSchoolHrManager();
+  readonly canCreate = this.isHrUser;
+  readonly canUpdate = this.isHrUser;
+
+  /** Filters + GET /api/School list require login; guests use anonymous job board APIs only. */
+  readonly showFilters = hasAuthToken();
 
   schools: School[] = [];
   years: Year[] = [];
@@ -103,23 +110,25 @@ export class JobPostingsListComponent implements OnInit, OnDestroy {
       { label: this.translate.instant('employeesHr.filter.inactiveOnly'), value: false },
     ];
     this.langSub = this.translate.onLangChange.subscribe(() => this.rebuildStaticLabels());
-    this.schoolService.getAllSchools().subscribe({
-      next: (list) => {
-        this.schools = list ?? [];
-        this.schoolOptions = this.schools
-          .filter((s): s is School & { schoolID: number } => s.schoolID != null && s.schoolID > 0)
-          .map((s) => ({ label: s.schoolName || String(s.schoolID), value: s.schoolID }));
-      },
-      error: () => this.toastr.error(this.translate.instant('employeesHr.errors.loadSchools')),
-    });
-    this.yearService.getAllYears().subscribe({
-      next: (list) => {
-        this.years = list ?? [];
-        this.rebuildYearOptions();
-      },
-      error: () => this.toastr.error(this.translate.instant('employeesHr.errors.loadYears')),
-    });
-    this.loadJobTypes();
+    if (this.showFilters) {
+      this.schoolService.getAllSchools().subscribe({
+        next: (list) => {
+          this.schools = list ?? [];
+          this.schoolOptions = this.schools
+            .filter((s): s is School & { schoolID: number } => s.schoolID != null && s.schoolID > 0)
+            .map((s) => ({ label: s.schoolName || String(s.schoolID), value: s.schoolID }));
+        },
+        error: () => this.toastr.error(this.translate.instant('employeesHr.errors.loadSchools')),
+      });
+      this.yearService.getAllYears().subscribe({
+        next: (list) => {
+          this.years = list ?? [];
+          this.rebuildYearOptions();
+        },
+        error: () => this.toastr.error(this.translate.instant('employeesHr.errors.loadYears')),
+      });
+      this.loadJobTypes();
+    }
     this.load();
   }
 
@@ -170,19 +179,46 @@ export class JobPostingsListComponent implements OnInit, OnDestroy {
   }
 
   load(): void {
-    if (!this.canView) return;
     this.loading = true;
     this.error = null;
     this.recruitment
       .getJobPostings(this.filter)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (r) => (this.rows = r ?? []),
+        next: (r) => {
+          this.rows = r ?? [];
+          if (!this.showFilters && this.rows.length) {
+            this.hydrateSchoolsForGuest(this.rows);
+          }
+        },
         error: (err) => {
           this.error = readRecruitmentHttpError(err);
           this.rows = [];
         },
       });
+  }
+
+  /**
+   * Guests cannot call GET /api/School (HR-only). Resolve names via GET /api/School/{id} (AllowAnonymous + tenant).
+   */
+  private hydrateSchoolsForGuest(rows: JobPostingListDto[]): void {
+    const ids = [
+      ...new Set(
+        rows.map((row) => row.schoolID).filter((id): id is number => id != null && id > 0),
+      ),
+    ];
+    if (ids.length === 0) return;
+    forkJoin(
+      ids.map((id) =>
+        this.schoolService.getSchoolByID(id).pipe(catchError(() => of(null as School | null))),
+      ),
+    ).subscribe((list) => {
+      const ok = list.filter((s): s is School => s != null);
+      this.schools = ok;
+      this.schoolOptions = ok
+        .filter((s): s is School & { schoolID: number } => s.schoolID != null && s.schoolID > 0)
+        .map((s) => ({ label: s.schoolName || String(s.schoolID), value: s.schoolID }));
+    });
   }
 
   schoolName(id: number): string {
@@ -249,6 +285,11 @@ export class JobPostingsListComponent implements OnInit, OnDestroy {
           error: (e) => this.toastr.error(readRecruitmentHttpError(e)),
         }),
     });
+  }
+
+  /** Applicants may apply to open postings only (list for non-HR is open+active from API). */
+  canApplyToRow(row: JobPostingListDto): boolean {
+    return row.status === JobPostingStatus.Open;
   }
 
   confirmArchive(row: JobPostingListDto): void {

@@ -584,6 +584,16 @@
       "convertedToEmployee": "Converted to employee",
       "withdrawn": "Withdrawn"
     },
+    "jobBoard": {
+      "applicantSubtitle": "Browse open vacancies and submit an application.",
+      "emptyNoOpenVacancies": "There are no open vacancies right now. Please check back later.",
+      "academicYear": "Academic year",
+      "postingDate": "Posting date",
+      "closingDate": "Closing date",
+      "openings": "Openings",
+      "applyNow": "Apply now",
+      "statusOpen": "Open"
+    },
     "postings": {
       "listTitle": "Job postings",
       "createTitle": "New job posting",
@@ -614,6 +624,7 @@
       "fieldResponsibilities": "Responsibilities",
       "dateError": "Closing date cannot be before posting date.",
       "viewApplications": "Applications",
+      "apply": "Apply now",
       "confirmOpen": "Open this posting for applications?",
       "confirmClose": "Close this posting?",
       "confirmArchive": "Archive this posting?",
@@ -622,7 +633,9 @@
       "archived": "Posting archived.",
       "actionOpen": "Open",
       "actionClose": "Close",
-      "actionArchive": "Archive"
+      "actionArchive": "Archive",
+      "unavailableForApply": "This posting is not accepting applications.",
+      "unavailableOrNotFound": "This job posting could not be found or is no longer available."
     },
     "applications": {
       "listTitle": "Job applications",
@@ -662,7 +675,14 @@
       "fieldSource": "Source",
       "sectionApplicant": "Applicant",
       "sectionProfessional": "Professional",
-      "fieldName": "Name"
+      "fieldName": "Name",
+      "postingSummaryTitle": "You are applying for",
+      "submittedSuccessApplicant": "Your application was submitted successfully.",
+      "validation": {
+        "required": "This field is required.",
+        "emailInvalid": "Enter a valid email address.",
+        "postingRequired": "Select a job posting."
+      }
     },
     "interviews": {
       "date": "Interview date",

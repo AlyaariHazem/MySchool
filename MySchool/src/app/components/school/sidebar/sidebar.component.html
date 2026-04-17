@@ -77,22 +77,22 @@
                 <span>{{ 'sidebar.staff_hr.add' | translate }}</span>
               </a>
             </li>
-            <li *ngIf="canViewRecruitmentNav">
+            <li *ngIf="canViewStaffHrSection">
               <a routerLink="/school/recruitment/job-postings" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.jobPostings' | translate }}</span>
               </a>
             </li>
-            <li *ngIf="canCreateRecruitmentNav">
+            <li *ngIf="canManageSchoolRecruitmentNav">
               <a routerLink="/school/recruitment/job-postings/create" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.jobPostingAdd' | translate }}</span>
               </a>
             </li>
-            <li *ngIf="canViewRecruitmentNav">
+            <li *ngIf="canManageSchoolRecruitmentNav">
               <a routerLink="/school/recruitment/job-applications" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.applications' | translate }}</span>
               </a>
             </li>
-            <li *ngIf="canCreateRecruitmentNav">
+            <li *ngIf="canViewStaffHrSection">
               <a routerLink="/school/recruitment/job-applications/create" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.applicationAdd' | translate }}</span>
               </a>

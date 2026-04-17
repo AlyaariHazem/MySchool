@@ -1,44 +1,77 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="eh-form-grid">
-  <div class="eh-row" *ngIf="mode === 'create'">
-    <p-floatlabel variant="on" class="eh-field">
-      <p-select
-        inputId="ja-posting"
-        formControlName="jobPostingID"
-        [options]="postingOptions"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full"
-        class="w-full"
-        [disabled]="lockPostingId"
-      />
-      <label for="ja-posting">{{ 'recruitment.applications.fieldPosting' | translate }} *</label>
-    </p-floatlabel>
+  <div *ngIf="mode === 'create' && postingSummary" class="posting-summary-card">
+    <h3 class="eh-section posting-summary-title">{{ 'recruitment.applications.postingSummaryTitle' | translate }}</h3>
+    <div class="posting-summary-grid">
+      <div>
+        <span class="k">{{ 'recruitment.postings.fieldTitle' | translate }}</span>
+        <span>{{ postingSummary.title }}</span>
+      </div>
+      <div *ngIf="postingSummary.department">
+        <span class="k">{{ 'recruitment.postings.colDepartment' | translate }}</span>
+        <span>{{ postingSummary.department }}</span>
+      </div>
+      <div>
+        <span class="k">{{ 'employeesHr.filter.jobType' | translate }}</span>
+        <span>{{ postingSummary.jobTypeName || postingSummary.jobTypeCode || '—' }}</span>
+      </div>
+      <div>
+        <span class="k">{{ 'employeesHr.filter.school' | translate }}</span>
+        <span>{{ postingSchoolName || postingSummary.schoolID }}</span>
+      </div>
+      <div>
+        <span class="k">{{ 'recruitment.jobBoard.closingDate' | translate }}</span>
+        <span>{{
+          postingSummary.closingDate ? (postingSummary.closingDate | date: 'mediumDate') : '—'
+        }}</span>
+      </div>
+      <div>
+        <span class="k">{{ 'recruitment.jobBoard.openings' | translate }}</span>
+        <span>{{ postingSummary.numberOfOpenings }}</span>
+      </div>
+    </div>
+  </div>
 
-    <p-floatlabel variant="on" class="eh-field">
-      <p-select
-        inputId="ja-year"
-        formControlName="academicYearID"
-        [options]="yearOptions"
-        optionLabel="label"
-        optionValue="value"
-        [showClear]="true"
-        styleClass="w-full"
-        class="w-full"
-      />
-      <label for="ja-year">{{ 'employeesHr.filter.year' | translate }}</label>
-    </p-floatlabel>
+  <div class="eh-row" *ngIf="mode === 'create'">
+    <div class="eh-field eh-field-stack">
+      <p-floatlabel variant="on" class="eh-field-inner">
+        <p-select
+          inputId="ja-posting"
+          formControlName="jobPostingID"
+          [options]="postingOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          class="w-full"
+          [disabled]="lockPostingId"
+        />
+        <label for="ja-posting">{{ 'recruitment.applications.fieldPosting' | translate }} *</label>
+      </p-floatlabel>
+      <small *ngIf="showFieldError('jobPostingID')" class="field-error">{{
+        'recruitment.applications.validation.postingRequired' | translate
+      }}</small>
+    </div>
   </div>
 
   <h3 class="eh-section">{{ 'recruitment.applications.sectionApplicant' | translate }}</h3>
   <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="ja-fn" formControlName="applicantFirstName" class="w-full" />
-      <label for="ja-fn">{{ 'recruitment.applications.fieldFirstName' | translate }} *</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="ja-ln" formControlName="applicantLastName" class="w-full" />
-      <label for="ja-ln">{{ 'recruitment.applications.fieldLastName' | translate }} *</label>
-    </p-floatlabel>
+    <div class="eh-field eh-field-stack">
+      <p-floatlabel variant="on" class="eh-field-inner">
+        <input pInputText id="ja-fn" formControlName="applicantFirstName" class="w-full" />
+        <label for="ja-fn">{{ 'recruitment.applications.fieldFirstName' | translate }} *</label>
+      </p-floatlabel>
+      <small *ngIf="showFieldError('applicantFirstName')" class="field-error">{{
+        'recruitment.applications.validation.required' | translate
+      }}</small>
+    </div>
+    <div class="eh-field eh-field-stack">
+      <p-floatlabel variant="on" class="eh-field-inner">
+        <input pInputText id="ja-ln" formControlName="applicantLastName" class="w-full" />
+        <label for="ja-ln">{{ 'recruitment.applications.fieldLastName' | translate }} *</label>
+      </p-floatlabel>
+      <small *ngIf="showFieldError('applicantLastName')" class="field-error">{{
+        'recruitment.applications.validation.required' | translate
+      }}</small>
+    </div>
   </div>
   <div class="eh-row">
     <p-floatlabel variant="on" class="eh-field">
@@ -78,10 +111,15 @@
       <input pInputText id="ja-phone" formControlName="phone" class="w-full" />
       <label for="ja-phone">{{ 'recruitment.applications.fieldPhone' | translate }}</label>
     </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="ja-email" formControlName="email" class="w-full" autocomplete="email" />
-      <label for="ja-email">{{ 'recruitment.applications.colEmail' | translate }}</label>
-    </p-floatlabel>
+    <div class="eh-field eh-field-stack">
+      <p-floatlabel variant="on" class="eh-field-inner">
+        <input pInputText id="ja-email" formControlName="email" class="w-full" autocomplete="email" />
+        <label for="ja-email">{{ 'recruitment.applications.colEmail' | translate }}</label>
+      </p-floatlabel>
+      <small *ngIf="showFieldError('email')" class="field-error">{{
+        'recruitment.applications.validation.emailInvalid' | translate
+      }}</small>
+    </div>
   </div>
   <p-floatlabel variant="on" class="eh-field-full">
     <input pInputText id="ja-addr" formControlName="address" class="w-full" />

@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
@@ -15,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [
     ShardModule,
+    RouterLink,
     MatButtonModule,
     MatCardModule,
     MatDividerModule,
