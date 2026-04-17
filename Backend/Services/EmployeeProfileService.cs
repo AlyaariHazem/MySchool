@@ -2,6 +2,7 @@ using Backend.Data;
 using Backend.DTOS.School.Employees;
 using Backend.Interfaces;
 using Backend.Models;
+using Backend.Repository.School.Implements;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
@@ -9,10 +10,17 @@ namespace Backend.Services;
 public class EmployeeProfileService : IEmployeeProfileService
 {
     private readonly TenantDbContext _db;
+    private readonly IUserRepository _userRepository;
+    private readonly IEmployeeYearAssignmentService _yearAssignments;
 
-    public EmployeeProfileService(TenantDbContext db)
+    public EmployeeProfileService(
+        TenantDbContext db,
+        IUserRepository userRepository,
+        IEmployeeYearAssignmentService yearAssignments)
     {
         _db = db;
+        _userRepository = userRepository;
+        _yearAssignments = yearAssignments;
     }
 
     public async Task<IReadOnlyList<EmployeeJobTypeListDto>> GetJobTypesAsync(CancellationToken cancellationToken = default)
@@ -40,11 +48,20 @@ public class EmployeeProfileService : IEmployeeProfileService
         ArgumentNullException.ThrowIfNull(dto.FullName);
         await ValidateCoreReferencesAsync(dto.SchoolID, dto.CurrentAcademicYearID, dto.EmployeeJobTypeID, cancellationToken);
         await EnsureEmployeeCodeUniqueAsync(dto.SchoolID, dto.EmployeeCode, excludeProfileId: null, cancellationToken);
-        await ValidateLegacyLinksAsync(dto.SchoolID, dto.TeacherID, dto.ManagerID, dto.SchoolStaffID, cancellationToken);
+
+        var teacherId = dto.TeacherID;
+        var managerId = dto.ManagerID;
+        var schoolStaffId = dto.SchoolStaffID;
+        var userId = dto.UserId;
+
+        (teacherId, managerId, schoolStaffId, userId) = await ApplyAutoLegacyRowsForHrAsync(
+            MapCreateToUpdate(dto), teacherId, managerId, schoolStaffId, userId, existingTeacherId: null, existingManagerId: null, cancellationToken);
+
+        await ValidateLegacyLinksAsync(dto.SchoolID, teacherId, managerId, schoolStaffId, cancellationToken);
 
         var entity = new EmployeeProfile
         {
-            UserId = dto.UserId,
+            UserId = userId,
             SchoolID = dto.SchoolID,
             CurrentAcademicYearID = dto.CurrentAcademicYearID,
             EmployeeJobTypeID = dto.EmployeeJobTypeID,
@@ -61,9 +78,9 @@ public class EmployeeProfileService : IEmployeeProfileService
             EmploymentStatus = dto.EmploymentStatus,
             Notes = dto.Notes,
             IsActive = dto.IsActive,
-            TeacherID = dto.TeacherID,
-            ManagerID = dto.ManagerID,
-            SchoolStaffID = dto.SchoolStaffID,
+            TeacherID = teacherId,
+            ManagerID = managerId,
+            SchoolStaffID = schoolStaffId,
             CreatedAtUtc = DateTime.UtcNow,
             UpdatedAtUtc = DateTime.UtcNow
         };
@@ -106,9 +123,18 @@ public class EmployeeProfileService : IEmployeeProfileService
 
         await ValidateCoreReferencesAsync(dto.SchoolID, dto.CurrentAcademicYearID, dto.EmployeeJobTypeID, cancellationToken);
         await EnsureEmployeeCodeUniqueAsync(dto.SchoolID, dto.EmployeeCode, excludeProfileId: id, cancellationToken);
-        await ValidateLegacyLinksAsync(dto.SchoolID, dto.TeacherID, dto.ManagerID, dto.SchoolStaffID, cancellationToken);
 
-        entity.UserId = dto.UserId;
+        var teacherId = dto.TeacherID;
+        var managerId = dto.ManagerID;
+        var schoolStaffId = dto.SchoolStaffID;
+        var userId = dto.UserId;
+
+        (teacherId, managerId, schoolStaffId, userId) = await ApplyAutoLegacyRowsForHrAsync(
+            dto, teacherId, managerId, schoolStaffId, userId, entity.TeacherID, entity.ManagerID, cancellationToken);
+
+        await ValidateLegacyLinksAsync(dto.SchoolID, teacherId, managerId, schoolStaffId, cancellationToken);
+
+        entity.UserId = userId;
         entity.SchoolID = dto.SchoolID;
         entity.CurrentAcademicYearID = dto.CurrentAcademicYearID;
         entity.EmployeeJobTypeID = dto.EmployeeJobTypeID;
@@ -125,9 +151,9 @@ public class EmployeeProfileService : IEmployeeProfileService
         entity.EmploymentStatus = dto.EmploymentStatus;
         entity.Notes = dto.Notes;
         entity.IsActive = dto.IsActive;
-        entity.TeacherID = dto.TeacherID;
-        entity.ManagerID = dto.ManagerID;
-        entity.SchoolStaffID = dto.SchoolStaffID;
+        entity.TeacherID = teacherId;
+        entity.ManagerID = managerId;
+        entity.SchoolStaffID = schoolStaffId;
         entity.UpdatedAtUtc = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
@@ -397,6 +423,201 @@ public class EmployeeProfileService : IEmployeeProfileService
             cancellationToken);
         if (taken)
             throw new ArgumentException($"EmployeeCode '{trimmed}' is already used in this school.");
+    }
+
+    private static EmployeeProfileUpdateDto MapCreateToUpdate(EmployeeProfileCreateDto c) => new()
+    {
+        SchoolID = c.SchoolID,
+        CurrentAcademicYearID = c.CurrentAcademicYearID,
+        EmployeeJobTypeID = c.EmployeeJobTypeID,
+        EmployeeCode = c.EmployeeCode,
+        FullName = c.FullName,
+        FullNameAlis = c.FullNameAlis,
+        NationalId = c.NationalId,
+        DateOfBirth = c.DateOfBirth,
+        Gender = c.Gender,
+        Phone = c.Phone,
+        Email = c.Email,
+        Address = c.Address,
+        HireDate = c.HireDate,
+        EmploymentStatus = c.EmploymentStatus,
+        Notes = c.Notes,
+        IsActive = c.IsActive,
+        UserId = c.UserId,
+        TeacherID = c.TeacherID,
+        ManagerID = c.ManagerID,
+        SchoolStaffID = c.SchoolStaffID
+    };
+
+    /// <summary>
+    /// When HR creates a teacher/manager profile without linking an existing legacy row, create the corresponding
+    /// <see cref="Teacher"/> or <see cref="Manager"/> row so lists like GET /api/Teacher stay in sync.
+    /// </summary>
+    private async Task<(int? TeacherId, int? ManagerId, int? SchoolStaffId, string? UserId)> ApplyAutoLegacyRowsForHrAsync(
+        EmployeeProfileUpdateDto dto,
+        int? teacherId,
+        int? managerId,
+        int? schoolStaffId,
+        string? userId,
+        int? existingTeacherId,
+        int? existingManagerId,
+        CancellationToken cancellationToken)
+    {
+        if (teacherId is null or 0 && existingTeacherId is > 0)
+            teacherId = existingTeacherId;
+        if (managerId is null or 0 && existingManagerId is > 0)
+            managerId = existingManagerId;
+
+        if (CountLegacyLinks(teacherId, managerId, schoolStaffId) > 0)
+            return (teacherId, managerId, schoolStaffId, userId);
+
+        var jt = await _db.EmployeeJobTypes.AsNoTracking()
+            .FirstOrDefaultAsync(j => j.EmployeeJobTypeID == dto.EmployeeJobTypeID, cancellationToken);
+        if (jt == null)
+            return (teacherId, managerId, schoolStaffId, userId);
+
+        if (string.Equals(jt.Code, "TEACHER", StringComparison.OrdinalIgnoreCase) && !(teacherId is > 0))
+        {
+            var r = await CreateTeacherRowForHrAsync(dto, userId, cancellationToken);
+            // Always persist canonical Identity user id on the profile (client may send UserName like "Hazem").
+            return (r.TeacherId, managerId, schoolStaffId, r.UserId);
+        }
+
+        if (string.Equals(jt.Code, "MANAGER", StringComparison.OrdinalIgnoreCase) && !(managerId is > 0))
+        {
+            var r = await CreateManagerRowForHrAsync(dto, userId, cancellationToken);
+            return (teacherId, r.ManagerId, schoolStaffId, r.UserId);
+        }
+
+        return (teacherId, managerId, schoolStaffId, userId);
+    }
+
+    private async Task<int> ResolveDefaultManagerIdForSchoolAsync(int schoolId, CancellationToken cancellationToken)
+    {
+        var mid = await _db.Managers.AsNoTracking()
+            .Where(m => m.SchoolID == schoolId)
+            .OrderBy(m => m.ManagerID)
+            .Select(m => (int?)m.ManagerID)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (mid is null or <= 0)
+            throw new ArgumentException(
+                "The school has no manager record yet. Add a manager first, then create teachers, or link an existing teacher.");
+        return mid.Value;
+    }
+
+    private async Task<(int TeacherId, string UserId)> CreateTeacherRowForHrAsync(
+        EmployeeProfileUpdateDto dto,
+        string? preferredUserId,
+        CancellationToken cancellationToken)
+    {
+        ApplicationUser? resolvedUser = null;
+        if (!string.IsNullOrWhiteSpace(preferredUserId))
+        {
+            resolvedUser = await _userRepository.GetUserByIdOrNameAsync(preferredUserId);
+            if (resolvedUser != null)
+            {
+                var linked = await _db.Teachers.AsNoTracking()
+                    .FirstOrDefaultAsync(t => t.UserID == resolvedUser.Id, cancellationToken);
+                if (linked != null)
+                    return (linked.TeacherID, resolvedUser.Id);
+            }
+        }
+
+        var managerLegacyId = await ResolveDefaultManagerIdForSchoolAsync(dto.SchoolID, cancellationToken);
+        ApplicationUser userRow;
+        if (resolvedUser != null)
+        {
+            userRow = resolvedUser;
+        }
+        else if (!string.IsNullOrWhiteSpace(preferredUserId))
+        {
+            throw new ArgumentException(
+                "UserId is invalid. Use the account user id (GUID) or the login user name (e.g. Hazem).");
+        }
+        else
+        {
+            var userName = "HrTeacher_" + Guid.NewGuid().ToString("N")[..8];
+            userRow = await _userRepository.CreateUserAsync(new ApplicationUser
+            {
+                UserName = userName,
+                Email = string.IsNullOrWhiteSpace(dto.Email) ? $"{userName}@school.local" : dto.Email!,
+                Address = dto.Address,
+                Gender = string.IsNullOrWhiteSpace(dto.Gender) ? "Male" : dto.Gender,
+                HireDate = dto.HireDate ?? DateTime.UtcNow,
+                PhoneNumber = dto.Phone,
+                UserType = "TEACHER"
+            }, "TEACHER", "TEACHER");
+        }
+
+        var teacher = new Teacher
+        {
+            FullName = MapName(dto.FullName),
+            DOB = dto.DateOfBirth ?? DateTime.UtcNow,
+            UserID = userRow.Id,
+            ManagerID = managerLegacyId
+        };
+        _db.Teachers.Add(teacher);
+        await _db.SaveChangesAsync(cancellationToken);
+        await _yearAssignments.EnsureActiveAssignmentAsync(
+            EmployeeYearAssignmentRoles.Teacher, teacher.TeacherID, null, _db);
+        return (teacher.TeacherID, userRow.Id);
+    }
+
+    private async Task<(int ManagerId, string UserId)> CreateManagerRowForHrAsync(
+        EmployeeProfileUpdateDto dto,
+        string? preferredUserId,
+        CancellationToken cancellationToken)
+    {
+        ApplicationUser? resolvedUser = null;
+        if (!string.IsNullOrWhiteSpace(preferredUserId))
+        {
+            resolvedUser = await _userRepository.GetUserByIdOrNameAsync(preferredUserId);
+            if (resolvedUser != null)
+            {
+                var linked = await _db.Managers.AsNoTracking()
+                    .FirstOrDefaultAsync(m => m.UserID == resolvedUser.Id && m.SchoolID == dto.SchoolID, cancellationToken);
+                if (linked != null)
+                    return (linked.ManagerID, resolvedUser.Id);
+            }
+        }
+
+        ApplicationUser userRow;
+        if (resolvedUser != null)
+        {
+            userRow = resolvedUser;
+        }
+        else if (!string.IsNullOrWhiteSpace(preferredUserId))
+        {
+            throw new ArgumentException(
+                "UserId is invalid. Use the account user id (GUID) or the login user name (e.g. Hazem).");
+        }
+        else
+        {
+            var userName = "HrManager_" + Guid.NewGuid().ToString("N")[..8];
+            userRow = await _userRepository.CreateUserAsync(new ApplicationUser
+            {
+                UserName = userName,
+                Email = string.IsNullOrWhiteSpace(dto.Email) ? $"{userName}@school.local" : dto.Email!,
+                Address = dto.Address,
+                Gender = string.IsNullOrWhiteSpace(dto.Gender) ? "Male" : dto.Gender,
+                HireDate = dto.HireDate ?? DateTime.UtcNow,
+                PhoneNumber = dto.Phone,
+                UserType = "MANAGER"
+            }, "MANAGER", "MANAGER");
+        }
+
+        var manager = new Manager
+        {
+            FullName = MapName(dto.FullName),
+            DOB = dto.DateOfBirth ?? DateTime.UtcNow,
+            UserID = userRow.Id,
+            SchoolID = dto.SchoolID
+        };
+        _db.Managers.Add(manager);
+        await _db.SaveChangesAsync(cancellationToken);
+        await _yearAssignments.EnsureActiveAssignmentAsync(
+            EmployeeYearAssignmentRoles.Manager, manager.ManagerID, null, _db);
+        return (manager.ManagerID, userRow.Id);
     }
 
     private static int CountLegacyLinks(int? teacherId, int? managerId, int? staffId)

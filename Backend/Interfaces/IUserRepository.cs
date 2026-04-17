@@ -10,6 +10,9 @@ public interface IUserRepository
 {
     Task<ApplicationUser> CreateUserAsync(ApplicationUser user, string password, string role);
     Task<ApplicationUser?> GetUserByIdAsync(string userId);
+
+    /// <summary>Resolve by ASP.NET Identity user id (GUID) or by <see cref="ApplicationUser.UserName"/>.</summary>
+    Task<ApplicationUser?> GetUserByIdOrNameAsync(string userIdOrName);
     Task<IEnumerable<ApplicationUser>> GetAllAsync();
     Task AddAsync(ApplicationUser user);
     Task UpdateAsync(ApplicationUser user);

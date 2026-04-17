@@ -34,6 +34,17 @@ public class UsersRepository : IUserRepository
     {
         return await _userManager.FindByIdAsync(userId);
     }
+
+    public async Task<ApplicationUser?> GetUserByIdOrNameAsync(string userIdOrName)
+    {
+        if (string.IsNullOrWhiteSpace(userIdOrName))
+            return null;
+        var s = userIdOrName.Trim();
+        var byId = await _userManager.FindByIdAsync(s);
+        if (byId != null)
+            return byId;
+        return await _userManager.FindByNameAsync(s);
+    }
     public async Task<IEnumerable<ApplicationUser>> GetAllAsync()
         {
             return await _userManager.Users.ToListAsync();

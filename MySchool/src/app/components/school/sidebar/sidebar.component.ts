@@ -175,10 +175,11 @@ export class SidebarComponent {
   get canViewActivitiesNav(): boolean {
     return this.perm.hasPermission(PagePermission.Activities.View);
   }
-  /** إدارة — show when any nested module is allowed. */
+  /** إدارة — staff/HR block: employees (HR) or legacy teachers module. */
   get canViewManagementSection(): boolean {
     return (
-      this.perm.hasPermission(PagePermission.Employees.View) 
+      this.perm.hasPermission(PagePermission.Employees.View) ||
+      this.perm.hasPermission(PagePermission.Teachers.View)
     );
   }
 }

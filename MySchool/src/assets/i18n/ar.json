@@ -169,6 +169,12 @@
     "teacherHome": "رئيسية المعلم",
     "teacherHub": "أدوات المعلم",
     "teachers": "الموظفون",
+    "staff_hr": {
+      "title": "(HR) الموارد البشرية",
+      "register": "سجل الموظفين (HR)",
+      "add": "إضافة موظف",
+      "teacherDirectory": "دليل المعلمين"
+    },
     "teachers_sub": {
       "all": "جميع الموظفين",
       "add": "إضافة موظف",

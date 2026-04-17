@@ -168,6 +168,12 @@
     "teacherHome": "Teacher home",
     "teacherHub": "Teacher tools",
     "teachers": "Staff",
+    "staff_hr": {
+      "title": "Staff & HR",
+      "register": "Employee register (HR)",
+      "add": "Add employee",
+      "teacherDirectory": "Teacher directory"
+    },
     "teachers_sub": {
       "all": "All staff",
       "add": "Add employee",
