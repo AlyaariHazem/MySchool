@@ -12,6 +12,8 @@ public static class PagePermissionNames
     public const string PageDashboard = "Dashboard";
     public const string PageSettings = "Settings";
     public const string PageEmployees = "Employees";
+    /// <summary>Recruitment / hiring (job postings, applications, interviews).</summary>
+    public const string PageRecruitment = "Recruitment";
     public const string PageTeachers = "Teachers";
     public const string PageStudents = "Students";
     public const string PageGuardians = "Guardians";
@@ -73,6 +75,7 @@ public static class PagePermissionNames
             PageDashboard,
             PageSettings,
             PageEmployees,
+            PageRecruitment,
             PageTeachers,
             PageStudents,
             PageGuardians,

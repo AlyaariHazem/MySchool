@@ -73,6 +73,11 @@ namespace Backend.Data
         public DbSet<EmployeeDocument> EmployeeDocuments { get; set; }
         public DbSet<EmployeeLeave> EmployeeLeaves { get; set; }
         public DbSet<EmployeePerformanceSummary> EmployeePerformanceSummaries { get; set; }
+        public DbSet<JobPosting> JobPostings { get; set; }
+        public DbSet<JobApplication> JobApplications { get; set; }
+        public DbSet<Interview> RecruitmentInterviews { get; set; }
+        public DbSet<CandidateEvaluation> CandidateEvaluations { get; set; }
+        public DbSet<HiringDecision> HiringDecisions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -992,6 +997,217 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<EmployeePerformanceSummary>()
                 .HasIndex(s => new { s.EmployeeProfileID, s.AcademicYearID, s.GeneratedAtUtc });
+
+            // --- Recruitment / hiring ---
+            modelBuilder.Entity<JobPosting>()
+                .HasKey(j => j.JobPostingID);
+            modelBuilder.Entity<JobPosting>()
+                .Property(j => j.JobPostingID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<JobPosting>()
+                .Property(j => j.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<JobPosting>()
+                .HasIndex(j => j.SchoolID);
+            modelBuilder.Entity<JobPosting>()
+                .HasIndex(j => j.AcademicYearID);
+            modelBuilder.Entity<JobPosting>()
+                .HasIndex(j => j.EmployeeJobTypeID);
+            modelBuilder.Entity<JobPosting>()
+                .HasIndex(j => j.Status);
+            modelBuilder.Entity<JobPosting>()
+                .HasOne(j => j.School)
+                .WithMany()
+                .HasForeignKey(j => j.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<JobPosting>()
+                .HasOne(j => j.AcademicYear)
+                .WithMany()
+                .HasForeignKey(j => j.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<JobPosting>()
+                .HasOne(j => j.JobType)
+                .WithMany()
+                .HasForeignKey(j => j.EmployeeJobTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<JobApplication>()
+                .HasKey(a => a.JobApplicationID);
+            modelBuilder.Entity<JobApplication>()
+                .Property(a => a.JobApplicationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<JobApplication>()
+                .Property(a => a.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<JobApplication>()
+                .HasIndex(a => a.JobPostingID);
+            modelBuilder.Entity<JobApplication>()
+                .HasIndex(a => a.SchoolID);
+            modelBuilder.Entity<JobApplication>()
+                .HasIndex(a => a.AcademicYearID);
+            modelBuilder.Entity<JobApplication>()
+                .HasIndex(a => a.Status);
+            modelBuilder.Entity<JobApplication>()
+                .HasIndex(a => a.Email);
+            modelBuilder.Entity<JobApplication>()
+                .HasIndex(a => a.NationalID);
+            modelBuilder.Entity<JobApplication>()
+                .HasOne(a => a.JobPosting)
+                .WithMany(p => p.Applications)
+                .HasForeignKey(a => a.JobPostingID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<JobApplication>()
+                .HasOne(a => a.School)
+                .WithMany()
+                .HasForeignKey(a => a.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<JobApplication>()
+                .HasOne(a => a.AcademicYear)
+                .WithMany()
+                .HasForeignKey(a => a.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<JobApplication>()
+                .HasOne(a => a.ConvertedEmployeeProfile)
+                .WithMany()
+                .HasForeignKey(a => a.ConvertedEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Interview>()
+                .ToTable("RecruitmentInterviews");
+            modelBuilder.Entity<Interview>()
+                .HasKey(i => i.InterviewID);
+            modelBuilder.Entity<Interview>()
+                .Property(i => i.InterviewID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<Interview>()
+                .Property(i => i.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<Interview>()
+                .Property(i => i.Score)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Interview>()
+                .HasIndex(i => i.JobApplicationID);
+            modelBuilder.Entity<Interview>()
+                .HasIndex(i => i.InterviewDate);
+            modelBuilder.Entity<Interview>()
+                .HasIndex(i => i.Status);
+            modelBuilder.Entity<Interview>()
+                .HasOne(i => i.JobApplication)
+                .WithMany(a => a.Interviews)
+                .HasForeignKey(i => i.JobApplicationID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Interview>()
+                .HasOne(i => i.School)
+                .WithMany()
+                .HasForeignKey(i => i.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Interview>()
+                .HasOne(i => i.AcademicYear)
+                .WithMany()
+                .HasForeignKey(i => i.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Interview>()
+                .HasOne(i => i.InterviewerEmployeeProfile)
+                .WithMany()
+                .HasForeignKey(i => i.InterviewerEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CandidateEvaluation>()
+                .HasKey(e => e.CandidateEvaluationID);
+            modelBuilder.Entity<CandidateEvaluation>()
+                .Property(e => e.CandidateEvaluationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<CandidateEvaluation>()
+                .Property(e => e.Recommendation)
+                .HasConversion<int>();
+            modelBuilder.Entity<CandidateEvaluation>()
+                .Property(e => e.TechnicalScore)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<CandidateEvaluation>()
+                .Property(e => e.CommunicationScore)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<CandidateEvaluation>()
+                .Property(e => e.ClassManagementScore)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<CandidateEvaluation>()
+                .Property(e => e.CultureFitScore)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<CandidateEvaluation>()
+                .Property(e => e.OverallScore)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<CandidateEvaluation>()
+                .HasIndex(e => e.JobApplicationID);
+            modelBuilder.Entity<CandidateEvaluation>()
+                .HasIndex(e => e.InterviewID);
+            modelBuilder.Entity<CandidateEvaluation>()
+                .HasOne(e => e.JobApplication)
+                .WithMany(a => a.Evaluations)
+                .HasForeignKey(e => e.JobApplicationID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<CandidateEvaluation>()
+                .HasOne(e => e.Interview)
+                .WithMany(i => i.Evaluations)
+                .HasForeignKey(e => e.InterviewID)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<CandidateEvaluation>()
+                .HasOne(e => e.School)
+                .WithMany()
+                .HasForeignKey(e => e.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<CandidateEvaluation>()
+                .HasOne(e => e.AcademicYear)
+                .WithMany()
+                .HasForeignKey(e => e.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<CandidateEvaluation>()
+                .HasOne(e => e.EvaluatorEmployeeProfile)
+                .WithMany()
+                .HasForeignKey(e => e.EvaluatorEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<HiringDecision>()
+                .HasKey(d => d.HiringDecisionID);
+            modelBuilder.Entity<HiringDecision>()
+                .Property(d => d.HiringDecisionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<HiringDecision>()
+                .Property(d => d.DecisionStatus)
+                .HasConversion<int>();
+            modelBuilder.Entity<HiringDecision>()
+                .HasIndex(d => d.JobApplicationID)
+                .IsUnique();
+            modelBuilder.Entity<HiringDecision>()
+                .HasIndex(d => d.DecisionStatus);
+            modelBuilder.Entity<HiringDecision>()
+                .HasOne(d => d.JobApplication)
+                .WithOne(a => a.HiringDecision)
+                .HasForeignKey<HiringDecision>(d => d.JobApplicationID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HiringDecision>()
+                .HasOne(d => d.School)
+                .WithMany()
+                .HasForeignKey(d => d.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HiringDecision>()
+                .HasOne(d => d.AcademicYear)
+                .WithMany()
+                .HasForeignKey(d => d.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HiringDecision>()
+                .HasOne(d => d.OfferJobType)
+                .WithMany()
+                .HasForeignKey(d => d.OfferJobTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HiringDecision>()
+                .HasOne(d => d.DecidedByEmployeeProfile)
+                .WithMany()
+                .HasForeignKey(d => d.DecidedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<HiringDecision>()
+                .HasOne(d => d.ConvertedEmployeeProfile)
+                .WithMany()
+                .HasForeignKey(d => d.ConvertedEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ExamType>().HasData(
                 new ExamType { ExamTypeID = 1, Name = "Midterm", SortOrder = 1, IsActive = true },

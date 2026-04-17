@@ -125,6 +125,8 @@ public static class PermissionSeeder
                 return true;
             if (IsPage(perm, PagePermissionNames.PageEmployees))
                 return true;
+            if (IsPage(perm, PagePermissionNames.PageRecruitment))
+                return true;
             if (IsPage(perm, PagePermissionNames.PageRequests))
                 return true;
             if (IsPage(perm, PagePermissionNames.PageComplaints))
