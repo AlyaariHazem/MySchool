@@ -65,6 +65,14 @@ namespace Backend.Data
         public DbSet<HomeworkSubmission> HomeworkSubmissions { get; set; }
         public DbSet<HomeworkSubmissionFile> HomeworkSubmissionFiles { get; set; }
         public DbSet<EmployeeYearAssignment> EmployeeYearAssignments { get; set; }
+        public DbSet<EmployeeJobType> EmployeeJobTypes { get; set; }
+        public DbSet<EmployeeProfile> EmployeeProfiles { get; set; }
+        public DbSet<EmployeeQualification> EmployeeQualifications { get; set; }
+        public DbSet<EmployeeSpecialization> EmployeeSpecializations { get; set; }
+        public DbSet<EmployeeHistory> EmployeeHistories { get; set; }
+        public DbSet<EmployeeDocument> EmployeeDocuments { get; set; }
+        public DbSet<EmployeeLeave> EmployeeLeaves { get; set; }
+        public DbSet<EmployeePerformanceSummary> EmployeePerformanceSummaries { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -784,6 +792,206 @@ namespace Backend.Data
             modelBuilder.Entity<EmployeeYearAssignment>()
                 .Property(e => e.AssignmentStatus)
                 .HasMaxLength(32);
+
+            // --- HR: Employee profiles (School Performance Analysis foundation) ---
+            modelBuilder.Entity<EmployeeJobType>()
+                .HasKey(j => j.EmployeeJobTypeID);
+            modelBuilder.Entity<EmployeeJobType>()
+                .Property(j => j.EmployeeJobTypeID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeeJobType>()
+                .HasIndex(j => j.Code)
+                .IsUnique();
+            modelBuilder.Entity<EmployeeJobType>().HasData(
+                new EmployeeJobType { EmployeeJobTypeID = 1, Code = "TEACHER", Name = "Teacher", NameAr = "معلم", SortOrder = 1, IsActive = true },
+                new EmployeeJobType { EmployeeJobTypeID = 2, Code = "MANAGER", Name = "Manager", NameAr = "مدير", SortOrder = 2, IsActive = true },
+                new EmployeeJobType { EmployeeJobTypeID = 3, Code = "SCHOOL_STAFF", Name = "School staff", NameAr = "موظف مدرسة", SortOrder = 3, IsActive = true },
+                new EmployeeJobType { EmployeeJobTypeID = 4, Code = "ADMINISTRATOR", Name = "Administrator", NameAr = "إداري", SortOrder = 4, IsActive = true },
+                new EmployeeJobType { EmployeeJobTypeID = 5, Code = "SUPPORT", Name = "Support", NameAr = "دعم", SortOrder = 5, IsActive = true },
+                new EmployeeJobType { EmployeeJobTypeID = 6, Code = "OTHER", Name = "Other", NameAr = "أخرى", SortOrder = 99, IsActive = true }
+            );
+
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasKey(e => e.EmployeeProfileID);
+            modelBuilder.Entity<EmployeeProfile>()
+                .Property(e => e.EmployeeProfileID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeeProfile>()
+                .Property(e => e.EmploymentStatus)
+                .HasConversion<int>();
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasIndex(e => new { e.SchoolID, e.EmployeeCode })
+                .IsUnique();
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasIndex(e => e.SchoolID);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasIndex(e => e.CurrentAcademicYearID);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasIndex(e => e.EmployeeJobTypeID);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasIndex(e => e.EmploymentStatus);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasIndex(e => e.IsActive);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasIndex(e => e.UserId);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasOne(e => e.School)
+                .WithMany()
+                .HasForeignKey(e => e.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasOne(e => e.CurrentAcademicYear)
+                .WithMany()
+                .HasForeignKey(e => e.CurrentAcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasOne(e => e.JobType)
+                .WithMany(j => j.EmployeeProfiles)
+                .HasForeignKey(e => e.EmployeeJobTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            // SQL Server: Teacher→Manager is CASCADE; SET NULL on both Teacher and Manager from EmployeeProfiles
+            // creates multiple cascade paths (error 1785). Use NO ACTION — clear legacy FKs in app code before deletes.
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasOne(e => e.Teacher)
+                .WithMany()
+                .HasForeignKey(e => e.TeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasOne(e => e.Manager)
+                .WithMany()
+                .HasForeignKey(e => e.ManagerID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeProfile>()
+                .HasOne(e => e.SchoolStaff)
+                .WithMany()
+                .HasForeignKey(e => e.SchoolStaffID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeProfile>()
+                .OwnsOne(e => e.FullName);
+            modelBuilder.Entity<EmployeeProfile>()
+                .OwnsOne(e => e.FullNameAlis);
+            modelBuilder.Entity<EmployeeProfile>()
+                .Navigation(e => e.FullNameAlis)
+                .IsRequired(false);
+
+            modelBuilder.Entity<EmployeeQualification>()
+                .HasKey(q => q.EmployeeQualificationID);
+            modelBuilder.Entity<EmployeeQualification>()
+                .Property(q => q.EmployeeQualificationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeeQualification>()
+                .HasOne(q => q.EmployeeProfile)
+                .WithMany(p => p.Qualifications)
+                .HasForeignKey(q => q.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EmployeeSpecialization>()
+                .HasKey(s => s.EmployeeSpecializationID);
+            modelBuilder.Entity<EmployeeSpecialization>()
+                .Property(s => s.EmployeeSpecializationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeeSpecialization>()
+                .HasOne(s => s.EmployeeProfile)
+                .WithMany(p => p.Specializations)
+                .HasForeignKey(s => s.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EmployeeHistory>()
+                .HasKey(h => h.EmployeeHistoryID);
+            modelBuilder.Entity<EmployeeHistory>()
+                .Property(h => h.EmployeeHistoryID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeeHistory>()
+                .HasOne(h => h.EmployeeProfile)
+                .WithMany(p => p.HistoryRecords)
+                .HasForeignKey(h => h.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<EmployeeHistory>()
+                .HasOne(h => h.AcademicYear)
+                .WithMany()
+                .HasForeignKey(h => h.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeHistory>()
+                .HasOne(h => h.School)
+                .WithMany()
+                .HasForeignKey(h => h.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeHistory>()
+                .HasOne(h => h.JobType)
+                .WithMany(j => j.EmployeeHistories)
+                .HasForeignKey(h => h.EmployeeJobTypeID)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<EmployeeHistory>()
+                .HasIndex(h => new { h.EmployeeProfileID, h.AcademicYearID });
+
+            modelBuilder.Entity<EmployeeDocument>()
+                .HasKey(d => d.EmployeeDocumentID);
+            modelBuilder.Entity<EmployeeDocument>()
+                .Property(d => d.EmployeeDocumentID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeeDocument>()
+                .HasOne(d => d.EmployeeProfile)
+                .WithMany(p => p.Documents)
+                .HasForeignKey(d => d.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EmployeeLeave>()
+                .HasKey(l => l.EmployeeLeaveID);
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(l => l.EmployeeLeaveID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(l => l.LeaveType)
+                .HasConversion<int>();
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(l => l.ApprovalStatus)
+                .HasConversion<int>();
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(l => l.TotalDays)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<EmployeeLeave>()
+                .HasOne(l => l.EmployeeProfile)
+                .WithMany(p => p.Leaves)
+                .HasForeignKey(l => l.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<EmployeeLeave>()
+                .HasOne(l => l.AcademicYear)
+                .WithMany()
+                .HasForeignKey(l => l.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeLeave>()
+                .HasIndex(l => new { l.EmployeeProfileID, l.AcademicYearID });
+
+            modelBuilder.Entity<EmployeePerformanceSummary>()
+                .HasKey(s => s.EmployeePerformanceSummaryID);
+            modelBuilder.Entity<EmployeePerformanceSummary>()
+                .Property(s => s.EmployeePerformanceSummaryID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeePerformanceSummary>()
+                .Property(s => s.EvaluationScore)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<EmployeePerformanceSummary>()
+                .HasOne(s => s.EmployeeProfile)
+                .WithMany(p => p.PerformanceSummaries)
+                .HasForeignKey(s => s.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<EmployeePerformanceSummary>()
+                .HasOne(s => s.AcademicYear)
+                .WithMany()
+                .HasForeignKey(s => s.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeePerformanceSummary>()
+                .HasOne(s => s.School)
+                .WithMany()
+                .HasForeignKey(s => s.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeePerformanceSummary>()
+                .HasOne(s => s.JobType)
+                .WithMany(j => j.PerformanceSummaries)
+                .HasForeignKey(s => s.EmployeeJobTypeID)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<EmployeePerformanceSummary>()
+                .HasIndex(s => new { s.EmployeeProfileID, s.AcademicYearID, s.GeneratedAtUtc });
 
             modelBuilder.Entity<ExamType>().HasData(
                 new ExamType { ExamTypeID = 1, Name = "Midterm", SortOrder = 1, IsActive = true },

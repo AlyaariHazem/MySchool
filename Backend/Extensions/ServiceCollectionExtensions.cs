@@ -62,6 +62,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMonthRepository, MonthRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IEmployeeYearAssignmentService, EmployeeYearAssignmentService>();
+        services.AddScoped<IEmployeeProfileService, EmployeeProfileService>();
         services.AddScoped<ISchoolRoleResolver, SchoolRoleResolver>();
         services.AddScoped<IPermissionClaimService, PermissionClaimService>();
         services.AddScoped<IRolePermissionAdminService, RolePermissionAdminService>();
