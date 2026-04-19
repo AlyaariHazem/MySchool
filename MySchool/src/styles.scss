@@ -47,9 +47,9 @@ body {
   z-index: 3000 !important;
 }
 
-// Make PrimeNG DatePicker overlay appear above Angular Material dialogs
+// Make PrimeNG DatePicker overlay appear above Angular Material dialogs and PrimeNG dialogs
 .p-datepicker-panel {
-  z-index: 4000 !important;
+  z-index: 13000 !important;
 }
 
 /* Attendance page: p-select overlay is often attached to body — keep option row height compact */
@@ -86,13 +86,14 @@ body {
 }
 
 .p-dialog.de-daily-eval-dialog .p-dialog-content {
-  padding: 1rem 1.25rem 1.25rem;
+  padding: 1.25rem 1.5rem 1.5rem;
   background: #fff;
 }
 
 .p-dialog.de-template-form-dialog .p-dialog-content {
-  max-height: min(70vh, 32rem);
-  overflow: auto;
+  max-height: min(85vh, 44rem);
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .p-dialog.de-template-view-dialog .p-dialog-content {
@@ -133,6 +134,23 @@ body {
 }
 
 .p-select.de-filter-select.p-focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+}
+
+/* Template form dialog: date pickers (full width, match selects) */
+.p-datepicker.de-template-form-datepicker {
+  width: 100%;
+}
+
+.p-datepicker.de-template-form-datepicker .p-inputtext {
+  width: 100%;
+  min-height: 2.75rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+}
+
+.p-datepicker.de-template-form-datepicker.p-focus .p-inputtext {
   border-color: #14b8a6;
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
 }

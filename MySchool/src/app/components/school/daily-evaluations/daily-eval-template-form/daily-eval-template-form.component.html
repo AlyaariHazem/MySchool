@@ -10,8 +10,14 @@
       <p-progressSpinner strokeWidth="3" />
     </div>
 
-    <form *ngIf="!loadingEdit" [formGroup]="form" (ngSubmit)="submit()" class="filters-grid">
-      <p-floatlabel class="filter-field" *ngIf="!editId && !isTeacherEvaluations">
+    <form
+      *ngIf="!loadingEdit"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="filters-grid de-template-form-grid"
+      [class.de-template-form-grid--embedded]="embedded"
+    >
+      <p-floatlabel class="filter-field de-template-form-field" *ngIf="!editId && !isTeacherEvaluations">
         <p-select
           inputId="dt-school"
           styleClass="de-filter-select"
@@ -20,11 +26,10 @@
           formControlName="schoolID"
           optionLabel="label"
           optionValue="value"
-          [placeholder]="'employeesHr.filter.school' | translate"
         />
         <label for="dt-school">{{ 'employeesHr.filter.school' | translate }} *</label>
       </p-floatlabel>
-      <p-floatlabel class="filter-field" *ngIf="!editId">
+      <p-floatlabel class="filter-field de-template-form-field" *ngIf="!editId">
         <p-select
           inputId="dt-year"
           styleClass="de-filter-select"
@@ -36,7 +41,7 @@
         />
         <label for="dt-year">{{ 'employeesHr.filter.year' | translate }} *</label>
       </p-floatlabel>
-      <p-floatlabel class="filter-field" *ngIf="!editId">
+      <p-floatlabel class="filter-field de-template-form-field" *ngIf="!editId">
         <p-select
           inputId="dt-jt"
           styleClass="de-filter-select"
@@ -50,32 +55,56 @@
         <label for="dt-jt">{{ 'employeesHr.filter.jobType' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel class="filter-field" style="grid-column: 1 / -1">
-        <input pInputText id="dt-name" formControlName="name" autocomplete="off" class="w-full" />
+      <p-floatlabel class="filter-field de-template-form-field de-template-form-field--full" style="grid-column: 1 / -1">
+        <input pInputText id="dt-name" formControlName="name" autocomplete="off" class="w-full de-template-form-input" />
         <label for="dt-name">{{ 'dailyEvaluations.templates.colName' | translate }} *</label>
       </p-floatlabel>
 
-      <p-floatlabel class="filter-field" style="grid-column: 1 / -1">
-        <textarea pTextarea id="dt-desc" formControlName="description" rows="3" class="w-full"></textarea>
+      <p-floatlabel class="filter-field de-template-form-field de-template-form-field--full" style="grid-column: 1 / -1">
+        <textarea
+          pTextarea
+          id="dt-desc"
+          formControlName="description"
+          rows="5"
+          class="w-full de-template-form-textarea"
+        ></textarea>
         <label for="dt-desc">{{ 'dailyEvaluations.templates.fieldDescription' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel class="filter-field">
-        <p-datepicker inputId="dt-eff-from" formControlName="effectiveFrom" [showIcon]="true" dateFormat="yy-mm-dd" />
-        <label for="dt-eff-from">{{ 'dailyEvaluations.templates.effectiveFrom' | translate }}</label>
-      </p-floatlabel>
-      <p-floatlabel class="filter-field">
-        <p-datepicker inputId="dt-eff-to" formControlName="effectiveTo" [showIcon]="true" dateFormat="yy-mm-dd" />
-        <label for="dt-eff-to">{{ 'dailyEvaluations.templates.effectiveTo' | translate }}</label>
-      </p-floatlabel>
-
-      <div class="filter-field flex align-items-center gap-2">
-        <p-inputSwitch formControlName="isDefault" inputId="dt-def" />
-        <label for="dt-def">{{ 'dailyEvaluations.templates.isDefault' | translate }}</label>
+      <div class="de-template-form-dates" style="grid-column: 1 / -1">
+        <p-floatlabel class="filter-field de-template-form-field de-template-form-field--grow">
+          <p-datepicker
+            inputId="dt-eff-from"
+            formControlName="effectiveFrom"
+            [showIcon]="true"
+            dateFormat="yy-mm-dd"
+            [appendTo]="'body'"
+            styleClass="de-template-form-datepicker"
+          />
+          <label for="dt-eff-from">{{ 'dailyEvaluations.templates.effectiveFrom' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel class="filter-field de-template-form-field de-template-form-field--grow">
+          <p-datepicker
+            inputId="dt-eff-to"
+            formControlName="effectiveTo"
+            [showIcon]="true"
+            dateFormat="yy-mm-dd"
+            [appendTo]="'body'"
+            styleClass="de-template-form-datepicker"
+          />
+          <label for="dt-eff-to">{{ 'dailyEvaluations.templates.effectiveTo' | translate }}</label>
+        </p-floatlabel>
       </div>
-      <div class="filter-field flex align-items-center gap-2" *ngIf="editId">
-        <p-inputSwitch formControlName="isActive" inputId="dt-act" />
-        <label for="dt-act">{{ 'employeesHr.form.isActive' | translate }}</label>
+
+      <div class="de-template-form-toggles" style="grid-column: 1 / -1">
+        <div class="de-template-form-toggle">
+          <p-inputSwitch formControlName="isDefault" inputId="dt-def" />
+          <label for="dt-def">{{ 'dailyEvaluations.templates.isDefault' | translate }}</label>
+        </div>
+        <div class="de-template-form-toggle" *ngIf="editId">
+          <p-inputSwitch formControlName="isActive" inputId="dt-act" />
+          <label for="dt-act">{{ 'employeesHr.form.isActive' | translate }}</label>
+        </div>
       </div>
 
       <small *ngIf="form.errors?.['effectiveRange']" class="error-block" style="grid-column: 1 / -1">
