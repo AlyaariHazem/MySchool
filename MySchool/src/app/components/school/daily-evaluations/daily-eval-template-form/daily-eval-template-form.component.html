@@ -1,12 +1,11 @@
-<div class="employees-hr-page" *ngIf="canManage">
-  <div class="employees-hr-card">
-    <header class="employees-hr-header">
+<div class="employees-hr-page" *ngIf="canManage" [class.de-template-form--embedded]="embedded">
+  <div class="employees-hr-card" [class.de-template-form-card--embedded]="embedded">
+    <header class="employees-hr-header" *ngIf="!embedded">
       <h2 class="employees-hr-title">
         {{ (editId ? 'dailyEvaluations.templates.editTitle' : 'dailyEvaluations.templates.createTitle') | translate }}
       </h2>
       <p-button [label]="'employeesHr.actions.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
     </header>
-
     <div *ngIf="loadingEdit" class="loading-wrap">
       <p-progressSpinner strokeWidth="3" />
     </div>
@@ -15,6 +14,8 @@
       <p-floatlabel class="filter-field" *ngIf="!editId && !isTeacherEvaluations">
         <p-select
           inputId="dt-school"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
           [options]="schoolOptions"
           formControlName="schoolID"
           optionLabel="label"
@@ -26,6 +27,8 @@
       <p-floatlabel class="filter-field" *ngIf="!editId">
         <p-select
           inputId="dt-year"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
           [options]="yearOptions"
           formControlName="academicYearID"
           optionLabel="label"
@@ -36,6 +39,8 @@
       <p-floatlabel class="filter-field" *ngIf="!editId">
         <p-select
           inputId="dt-jt"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
           [options]="jobTypeOptions"
           formControlName="employeeJobTypeID"
           [showClear]="true"
@@ -77,7 +82,14 @@
         {{ 'dailyEvaluations.templates.dateError' | translate }}
       </small>
 
-      <div class="filter-actions" style="grid-column: 1 / -1">
+      <div class="filter-actions de-template-form-actions" style="grid-column: 1 / -1">
+        <p-button
+          *ngIf="embedded"
+          type="button"
+          [label]="'employeesHr.actions.cancel' | translate"
+          [outlined]="true"
+          (onClick)="cancel()"
+        />
         <p-button
           type="submit"
           [label]="'employeesHr.actions.save' | translate"

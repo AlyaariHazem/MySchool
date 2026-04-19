@@ -7,6 +7,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
@@ -32,6 +33,8 @@ import {
 } from '../daily-evaluations.models';
 import { DailyEvaluationsNavService } from '../daily-evaluations-nav.service';
 import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evaluations.service';
+import { DailyEvalTemplateFormComponent } from '../daily-eval-template-form/daily-eval-template-form.component';
+import { DailyEvalTemplateDetailComponent } from '../daily-eval-template-detail/daily-eval-template-detail.component';
 
 @Component({
   selector: 'app-daily-eval-templates-list',
@@ -51,6 +54,9 @@ import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evalua
     ProgressSpinnerModule,
     TooltipModule,
     ConfirmDialogModule,
+    DialogModule,
+    DailyEvalTemplateFormComponent,
+    DailyEvalTemplateDetailComponent,
   ],
   providers: [ConfirmationService],
   templateUrl: './daily-eval-templates-list.component.html',
@@ -94,6 +100,14 @@ export class DailyEvalTemplatesListComponent implements OnInit, OnDestroy {
   activeOptions: { label: string; value: boolean | null }[] = [];
 
   EvaluationTemplateStatus = EvaluationTemplateStatus;
+
+  /** Template create/edit dialog (same page as list). */
+  templateDialogVisible = false;
+  templateDialogEditId: number | null = null;
+
+  /** Template view (detail + criteria) dialog. */
+  viewDialogVisible = false;
+  viewTemplateId: number | null = null;
 
   ngOnInit(): void {
     this.statusOptions = [
@@ -280,6 +294,46 @@ export class DailyEvalTemplatesListComponent implements OnInit, OnDestroy {
           error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
         }),
     });
+  }
+
+  openTemplateCreateDialog(): void {
+    this.templateDialogEditId = null;
+    this.templateDialogVisible = true;
+  }
+
+  openTemplateEditDialog(row: DailyEvaluationTemplateListDto): void {
+    this.templateDialogEditId = row.dailyEvaluationTemplateID;
+    this.templateDialogVisible = true;
+  }
+
+  closeTemplateDialog(): void {
+    this.templateDialogVisible = false;
+    this.templateDialogEditId = null;
+  }
+
+  onTemplateSaved(): void {
+    this.load();
+    this.closeTemplateDialog();
+  }
+
+  openTemplateViewDialog(row: DailyEvaluationTemplateListDto): void {
+    this.viewTemplateId = row.dailyEvaluationTemplateID;
+    this.viewDialogVisible = true;
+  }
+
+  onViewDialogHide(): void {
+    this.viewTemplateId = null;
+    this.load();
+  }
+
+  /** From view dialog: switch to edit dialog for the same template. */
+  onViewRequestEdit(templateId: number): void {
+    this.viewDialogVisible = false;
+    this.viewTemplateId = null;
+    this.templateDialogEditId = templateId;
+    setTimeout(() => {
+      this.templateDialogVisible = true;
+    }, 150);
   }
 
   confirmArchive(row: DailyEvaluationTemplateListDto): void {

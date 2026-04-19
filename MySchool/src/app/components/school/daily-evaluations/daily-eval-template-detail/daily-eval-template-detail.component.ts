@@ -1,5 +1,5 @@
-import { DatePipe, NgIf } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { NgIf, NgTemplateOutlet } from '@angular/common';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -37,7 +37,7 @@ import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evalua
   imports: [
     ShardModule,
     NgIf,
-    DatePipe,
+    NgTemplateOutlet,
     RouterLink,
     TranslateModule,
     ReactiveFormsModule,
@@ -96,10 +96,24 @@ export class DailyEvalTemplateDetailComponent implements OnInit {
 
   templateId = 0;
 
+  /** When true, shown inside a dialog on the list page (no route). */
+  @Input() embedded = false;
+  /** Template id when embedded (from list). */
+  @Input() templateIdInput: number | null = null;
+
+  @Output() closed = new EventEmitter<void>();
+  @Output() requestEdit = new EventEmitter<number>();
+
   ngOnInit(): void {
-    this.templateId = Number(this.route.snapshot.paramMap.get('templateId')) || 0;
+    this.templateId = this.embedded
+      ? this.templateIdInput != null && this.templateIdInput > 0
+        ? this.templateIdInput
+        : 0
+      : Number(this.route.snapshot.paramMap.get('templateId')) || 0;
     if (!this.templateId) {
-      this.router.navigate([this.dailyEvalNav.basePath(), 'templates']).catch(() => undefined);
+      if (!this.embedded) {
+        this.router.navigate([this.dailyEvalNav.basePath(), 'templates']).catch(() => undefined);
+      }
       return;
     }
     if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute()) {
@@ -128,7 +142,11 @@ export class DailyEvalTemplateDetailComponent implements OnInit {
         },
         error: (err) => {
           this.toastr.error(readDailyEvalHttpError(err));
-          this.router.navigate([this.dailyEvalNav.basePath(), 'templates']).catch(() => undefined);
+          if (this.embedded) {
+            this.closed.emit();
+          } else {
+            this.router.navigate([this.dailyEvalNav.basePath(), 'templates']).catch(() => undefined);
+          }
         },
       });
   }
@@ -149,7 +167,19 @@ export class DailyEvalTemplateDetailComponent implements OnInit {
   }
 
   yearLabel(id: number): string {
-    return this.years.find((y) => y.yearID === id) ? String(id) : String(id);
+    const y = this.years.find((x) => x.yearID === id);
+    if (y) {
+      return `${y.yearID} — ${y.yearDateStart ? new Date(y.yearDateStart).toLocaleDateString() : ''}`.trim();
+    }
+    return String(id);
+  }
+
+  closeEmbedded(): void {
+    this.closed.emit();
+  }
+
+  emitEditRequest(): void {
+    this.requestEdit.emit(this.templateId);
   }
 
   statusLabelKey(s: EvaluationTemplateStatus): string {

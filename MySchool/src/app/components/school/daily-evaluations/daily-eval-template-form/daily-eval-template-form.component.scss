@@ -1,1 +1,18 @@
 @use '../daily-evaluations-shared.scss';
+
+.de-template-form--embedded {
+  padding: 0;
+  min-height: unset;
+}
+
+.de-template-form-card--embedded {
+  box-shadow: none;
+  padding: 0;
+}
+
+.de-template-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}

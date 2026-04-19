@@ -68,3 +68,71 @@ body {
   padding-block: 0.4rem;
   min-height: 2rem;
 }
+
+/* Daily evaluation templates: dialogs (often appendTo body) */
+.p-dialog.de-daily-eval-dialog {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18);
+  border: 1px solid #e2e8f0;
+}
+
+.p-dialog.de-daily-eval-dialog .p-dialog-header {
+  padding: 1rem 1.25rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.p-dialog.de-daily-eval-dialog .p-dialog-content {
+  padding: 1rem 1.25rem 1.25rem;
+  background: #fff;
+}
+
+.p-dialog.de-template-form-dialog .p-dialog-content {
+  max-height: min(70vh, 32rem);
+  overflow: auto;
+}
+
+.p-dialog.de-template-view-dialog .p-dialog-content {
+  max-height: min(78vh, 40rem);
+  overflow: auto;
+}
+
+.p-dialog.de-criteria-subdialog .p-dialog-content {
+  max-height: min(70vh, 28rem);
+  overflow: auto;
+}
+
+/* Daily eval filter dropdowns when overlay is on body */
+.p-select-overlay.de-filter-select-panel {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+}
+
+.p-select-overlay.de-filter-select-panel .p-select-option {
+  border-radius: 8px;
+  margin: 2px 6px;
+}
+
+/* Shared: school/year/job dropdowns (filters + template form dialogs) */
+.p-select.de-filter-select {
+  min-height: 2.75rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.p-select.de-filter-select:not(.p-disabled):hover {
+  border-color: #94a3b8;
+}
+
+.p-select.de-filter-select.p-focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+}

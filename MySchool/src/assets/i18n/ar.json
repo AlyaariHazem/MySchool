@@ -605,7 +605,8 @@
       "confirmDeactivate": "إيقاف القالب \"{{name}}\"؟",
       "confirmArchive": "أرشفة القالب \"{{name}}\"؟ لا يمكن تعديل القوالب المؤرشفة.",
       "createTitle": "قالب تقييم يومي جديد",
-      "editTitle": "تعديل قالب التقييم"
+      "editTitle": "تعديل قالب التقييم",
+      "viewTitle": "تفاصيل القالب"
     },
     "criteria": {
       "sectionTitle": "المعايير",

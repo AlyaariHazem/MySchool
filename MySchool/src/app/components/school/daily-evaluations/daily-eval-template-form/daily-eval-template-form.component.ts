@@ -1,5 +1,5 @@
 import { NgIf } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   AbstractControl,
@@ -80,6 +80,14 @@ export class DailyEvalTemplateFormComponent implements OnInit {
 
   canManage = this.perm.hasPermission(PagePermission.Evaluations.Update);
 
+  /** When true, form is shown inside a dialog (list page); no route params, no full-page chrome. */
+  @Input() embedded = false;
+  /** Edit id when embedded (null = create). Ignored when not embedded. */
+  @Input() editTemplateId: number | null = null;
+
+  @Output() closed = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<void>();
+
   get isTeacherEvaluations(): boolean {
     return this.dailyEvalNav.isTeacherDailyEvaluationsRoute();
   }
@@ -104,7 +112,11 @@ export class DailyEvalTemplateFormComponent implements OnInit {
       this.loadingMeta = false;
       return;
     }
-    this.editId = Number(this.route.snapshot.paramMap.get('templateId')) || null;
+    this.editId = this.embedded
+      ? this.editTemplateId != null && this.editTemplateId > 0
+        ? this.editTemplateId
+        : null
+      : Number(this.route.snapshot.paramMap.get('templateId')) || null;
     if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute()) {
       const opt = this.dailyEvalNav.teacherSessionSchoolOption();
       if (opt) {
@@ -206,6 +218,10 @@ export class DailyEvalTemplateFormComponent implements OnInit {
   }
 
   cancel(): void {
+    if (this.embedded) {
+      this.closed.emit();
+      return;
+    }
     this.router.navigate([this.dailyEvalNav.basePath(), 'templates']).catch(() => undefined);
   }
 
@@ -231,7 +247,11 @@ export class DailyEvalTemplateFormComponent implements OnInit {
         .subscribe({
           next: () => {
             this.toastr.success('dailyEvaluations.toast.templateSaved');
-            this.router.navigate([this.dailyEvalNav.basePath(), 'templates', this.editId]).catch(() => undefined);
+            if (this.embedded) {
+              this.saved.emit();
+            } else {
+              this.router.navigate([this.dailyEvalNav.basePath(), 'templates', this.editId]).catch(() => undefined);
+            }
           },
           error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
         });
@@ -252,7 +272,13 @@ export class DailyEvalTemplateFormComponent implements OnInit {
         .subscribe({
           next: (row) => {
             this.toastr.success('dailyEvaluations.toast.templateCreated');
-            this.router.navigate([this.dailyEvalNav.basePath(), 'templates', row.dailyEvaluationTemplateID]).catch(() => undefined);
+            if (this.embedded) {
+              this.saved.emit();
+            } else {
+              this.router
+                .navigate([this.dailyEvalNav.basePath(), 'templates', row.dailyEvaluationTemplateID])
+                .catch(() => undefined);
+            }
           },
           error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
         });

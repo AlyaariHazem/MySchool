@@ -13,7 +13,7 @@
           *ngIf="canManage && !isTeacherEvaluations"
           [label]="'dailyEvaluations.templates.add' | translate"
           icon="pi pi-plus"
-          [routerLink]="[dailyEvalNav.basePath(), 'templates', 'new']"
+          (onClick)="openTemplateCreateDialog()"
         />
       </div>
     </header>
@@ -116,7 +116,7 @@
               icon="pi pi-eye"
               [rounded]="true"
               [text]="true"
-              [routerLink]="[dailyEvalNav.basePath(), 'templates', row.dailyEvaluationTemplateID]"
+              (onClick)="openTemplateViewDialog(row)"
               [pTooltip]="'employeesHr.actions.view' | translate"
             />
             <p-button
@@ -124,7 +124,7 @@
               icon="pi pi-pencil"
               [rounded]="true"
               [text]="true"
-              [routerLink]="[dailyEvalNav.basePath(), 'templates', row.dailyEvaluationTemplateID, 'edit']"
+              (onClick)="openTemplateEditDialog(row)"
               [pTooltip]="'employeesHr.actions.edit' | translate"
             />
             <p-button
@@ -163,5 +163,49 @@
 <div class="employees-hr-page" *ngIf="!canView">
   <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
 </div>
+
+<p-dialog
+  [(visible)]="templateDialogVisible"
+  [header]="
+    (templateDialogEditId ? 'dailyEvaluations.templates.editTitle' : 'dailyEvaluations.templates.createTitle') | translate
+  "
+  [modal]="true"
+  [style]="{ width: 'min(42rem, 96vw)' }"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [appendTo]="'body'"
+  styleClass="de-daily-eval-dialog de-template-form-dialog"
+  (onHide)="closeTemplateDialog()"
+>
+  <app-daily-eval-template-form
+    *ngIf="templateDialogVisible"
+    [embedded]="true"
+    [editTemplateId]="templateDialogEditId"
+    (closed)="closeTemplateDialog()"
+    (saved)="onTemplateSaved()"
+  />
+</p-dialog>
+
+<p-dialog
+  [(visible)]="viewDialogVisible"
+  [header]="'dailyEvaluations.templates.viewTitle' | translate"
+  [modal]="true"
+  [style]="{ width: 'min(52rem, 96vw)' }"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [appendTo]="'body'"
+  styleClass="de-daily-eval-dialog de-template-view-dialog"
+  (onHide)="onViewDialogHide()"
+>
+  <app-daily-eval-template-detail
+    *ngIf="viewDialogVisible && viewTemplateId != null"
+    [embedded]="true"
+    [templateIdInput]="viewTemplateId!"
+    (closed)="viewDialogVisible = false"
+    (requestEdit)="onViewRequestEdit($event)"
+  />
+</p-dialog>
 
 <p-confirmDialog />

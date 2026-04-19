@@ -604,7 +604,8 @@
       "confirmDeactivate": "Deactivate template \"{{name}}\"?",
       "confirmArchive": "Archive template \"{{name}}\"? Archived templates cannot be edited.",
       "createTitle": "New evaluation template",
-      "editTitle": "Edit evaluation template"
+      "editTitle": "Edit evaluation template",
+      "viewTitle": "Template details"
     },
     "criteria": {
       "sectionTitle": "Criteria",

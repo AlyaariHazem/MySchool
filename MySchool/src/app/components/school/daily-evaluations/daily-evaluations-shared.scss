@@ -69,3 +69,50 @@
 .de-filter-select-panel .p-select-list {
   max-width: 100%;
 }
+
+/* --- Filter row: school / status / active dropdowns --- */
+.de-eval-filters .p-select,
+.de-eval-filters .p-inputtext,
+.de-eval-filters .p-datepicker-input {
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.de-eval-filters .p-select:not(.p-disabled):hover,
+.de-eval-filters .p-inputtext:not(.p-disabled):hover {
+  border-color: #94a3b8;
+}
+
+.de-eval-filters .p-select.p-focus,
+.de-eval-filters .p-inputtext:focus,
+.de-eval-filters .p-datepicker-input:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+}
+
+.de-eval-filters .filter-actions .p-button {
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* PrimeNG Select filter strip — label + trigger */
+.de-filter-select {
+  width: 100%;
+  min-height: 2.75rem;
+}
+
+.de-filter-select-panel {
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12) !important;
+  margin-top: 4px;
+}
+
+.de-filter-select-panel .p-select-option {
+  border-radius: 8px;
+  margin: 2px 6px;
+}
