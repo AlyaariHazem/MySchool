@@ -4,6 +4,7 @@ import { Observable, catchError, map, of, shareReplay } from 'rxjs';
 
 import { BackendAspService } from 'app/ASP.NET/backend-asp.service';
 import { ApiResponse } from 'app/core/models/response.model';
+import { PagedResultDto } from 'app/core/models/students.model';
 
 import {
   EmployeeDocumentDto,
@@ -14,6 +15,9 @@ import {
   EmployeeProfileFullDto,
   employeeProfileListFilterForPostApi,
   EmployeeProfileListFilterDto,
+  EmployeeProfileOptionDto,
+  EmployeeProfilePageRequestDto,
+  employeeProfilePageRequestForPostApi,
   EmployeeProfileReadDto,
   EmployeeProfileUpdateDto,
   EmployeeQualificationDto,
@@ -71,6 +75,14 @@ export class EmployeesHrService {
     return this.http
       .post<ApiResponse<EmployeeProfileReadDto[]>>(`${this.api.baseUrl}/employees/list`, body)
       .pipe(map((r) => unwrap<EmployeeProfileReadDto[]>(r) ?? []));
+  }
+
+  /** Paged employees (id + fullName). Zero-based pageIndex. */
+  getEmployeesPage(body: EmployeeProfilePageRequestDto): Observable<PagedResultDto<EmployeeProfileOptionDto>> {
+    const payload = employeeProfilePageRequestForPostApi(body);
+    return this.http
+      .post<ApiResponse<PagedResultDto<EmployeeProfileOptionDto>>>(`${this.api.baseUrl}/employees/page`, payload)
+      .pipe(map((r) => unwrap<PagedResultDto<EmployeeProfileOptionDto>>(r)));
   }
 
   getEmployeeById(id: number): Observable<EmployeeProfileReadDto> {

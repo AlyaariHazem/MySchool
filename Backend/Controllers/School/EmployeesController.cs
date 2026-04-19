@@ -41,6 +41,30 @@ public class EmployeesController : ControllerBase
             filter.SchoolID = id;
     }
 
+    /// <summary>Paged rows (id + fullName only). <c>PageIndex</c> is zero-based; same manager school scoping as <see cref="List"/>.</summary>
+    [HttpPost("page")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
+    public async Task<ActionResult<APIResponse>> Page([FromBody] EmployeeProfilePageRequestDto? request, CancellationToken cancellationToken)
+    {
+        var response = new APIResponse();
+        try
+        {
+            request ??= new EmployeeProfilePageRequestDto();
+            request.Filter ??= new EmployeeProfileListFilterDto();
+            await ApplyManagerSchoolScopeAsync(request.Filter, cancellationToken);
+            response.Result = await _employees.GetPageAsync(request, cancellationToken);
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
     /// <summary>Paged-style filter in body. <c>POST /employees</c> is reserved for create.</summary>
     [HttpPost("list")]
     [Authorize(Roles = "ADMIN,MANAGER")]

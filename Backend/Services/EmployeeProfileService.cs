@@ -1,3 +1,4 @@
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.Employees;
 using Backend.Interfaces;
@@ -9,6 +10,8 @@ namespace Backend.Services;
 
 public class EmployeeProfileService : IEmployeeProfileService
 {
+    private const int MaxEmployeesPageSize = 200;
+
     private readonly TenantDbContext _db;
     private readonly IUserRepository _userRepository;
     private readonly IEmployeeYearAssignmentService _yearAssignments;
@@ -120,21 +123,19 @@ public class EmployeeProfileService : IEmployeeProfileService
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<EmployeeProfileReadDto>> GetAllAsync(EmployeeProfileListFilterDto? filter, CancellationToken cancellationToken = default)
+    /// <summary>Shared filters for list and paged endpoints (active year for school is enforced server-side).</summary>
+    private async Task<IQueryable<EmployeeProfile>> GetEmployeeProfilesFilteredQueryAsync(
+        EmployeeProfileListFilterDto filter, CancellationToken cancellationToken)
     {
         filter ??= new EmployeeProfileListFilterDto();
         int? activeYearForSchool = null;
         if (filter.SchoolID is int sid && sid > 0)
             activeYearForSchool = await GetActiveYearIdForSchoolAsync(sid, cancellationToken);
 
-        var q = _db.EmployeeProfiles
-            .AsNoTracking()
-            .Include(e => e.JobType)
-            .AsQueryable();
+        var q = _db.EmployeeProfiles.AsNoTracking().AsQueryable();
 
         if (filter.SchoolID is > 0)
             q = q.Where(e => e.SchoolID == filter.SchoolID);
-        // Scope to the school's active academic year (client must not drive year filtering).
         if (activeYearForSchool is int y)
             q = q.Where(e => e.CurrentAcademicYearID == y);
         if (filter.EmployeeJobTypeID is > 0)
@@ -144,8 +145,53 @@ public class EmployeeProfileService : IEmployeeProfileService
         if (filter.EmploymentStatus is { } es)
             q = q.Where(e => e.EmploymentStatus == es);
 
-        var rows = await q.OrderBy(e => e.SchoolID).ThenBy(e => e.EmployeeCode).ToListAsync(cancellationToken);
+        return q;
+    }
+
+    public async Task<IReadOnlyList<EmployeeProfileReadDto>> GetAllAsync(EmployeeProfileListFilterDto? filter, CancellationToken cancellationToken = default)
+    {
+        filter ??= new EmployeeProfileListFilterDto();
+        var q = await GetEmployeeProfilesFilteredQueryAsync(filter, cancellationToken);
+        var rows = await q
+            .Include(e => e.JobType)
+            .OrderBy(e => e.SchoolID).ThenBy(e => e.EmployeeCode)
+            .ToListAsync(cancellationToken);
         return rows.Select(MapToReadDtoFromEntity).ToList();
+    }
+
+    public async Task<PagedResult<EmployeeProfileOptionDto>> GetPageAsync(
+        EmployeeProfilePageRequestDto request, CancellationToken cancellationToken = default)
+    {
+        request ??= new EmployeeProfilePageRequestDto();
+        var filter = request.Filter ?? new EmployeeProfileListFilterDto();
+
+        var pageIndex = Math.Max(0, request.PageIndex);
+        var pageSize = request.PageSize < 1 ? 20 : request.PageSize;
+        if (pageSize > MaxEmployeesPageSize)
+            pageSize = MaxEmployeesPageSize;
+
+        var q = await GetEmployeeProfilesFilteredQueryAsync(filter, cancellationToken);
+        var ordered = q.OrderBy(e => e.SchoolID).ThenBy(e => e.EmployeeCode);
+
+        var totalCount = await ordered.CountAsync(cancellationToken);
+
+        var items = await ordered
+            .Skip(pageIndex * pageSize)
+            .Take(pageSize)
+            .Select(e => new EmployeeProfileOptionDto
+            {
+                Id = e.EmployeeProfileID,
+                FullName = new EmployeeNameDto
+                {
+                    FirstName = e.FullName.FirstName,
+                    MiddleName = e.FullName.MiddleName,
+                    LastName = e.FullName.LastName
+                }
+            })
+            .ToListAsync(cancellationToken);
+
+        var totalPages = pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+        return new PagedResult<EmployeeProfileOptionDto>(items, pageIndex + 1, pageSize, totalCount, totalPages);
     }
 
     public async Task<EmployeeProfileReadDto> UpdateAsync(int id, EmployeeProfileUpdateDto dto, CancellationToken cancellationToken = default)

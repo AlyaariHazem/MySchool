@@ -9,7 +9,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { Select } from 'primeng/select';
+import { Select, SelectLazyLoadEvent } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, of } from 'rxjs';
@@ -22,8 +22,9 @@ import { YearService } from 'app/core/services/year.service';
 import { School } from 'app/core/models/school.modul';
 import { Year } from 'app/core/models/year.model';
 import { ShardModule } from 'app/shared/shard.module';
+import { PagedResultDto } from 'app/core/models/students.model';
 
-import { EmployeeProfileReadDto } from '../../employees-hr/employees-hr.models';
+import { EmployeeProfileOptionDto } from '../../employees-hr/employees-hr.models';
 import { EmployeesHrService } from '../../employees-hr/employees-hr.service';
 import {
   DailyEvaluationCreateDto,
@@ -76,7 +77,6 @@ export class DailyEvaluationsFormComponent implements OnInit {
 
   schools: School[] = [];
   years: Year[] = [];
-  employees: EmployeeProfileReadDto[] = [];
   templates: DailyEvaluationTemplateListDto[] = [];
   schoolOptions: { label: string; value: number }[] = [];
   yearOptions: { label: string; value: number }[] = [];
@@ -87,6 +87,13 @@ export class DailyEvaluationsFormComponent implements OnInit {
   readonly filterSelectPanelStyle: Record<string, string> = {
     maxWidth: 'min(22rem, calc(100vw - 2rem))',
   };
+
+  /** Admin HR dropdown: paged + lazy scroll (not used for student/teacher portal pickers). */
+  readonly employeePageSize = 30;
+  employeeTotalCount = 0;
+  employeePageLoading = false;
+  /** Next zero-based page index; first page is loaded with templates in forkJoin. */
+  employeeNextPageIndex = 0;
 
   loadingMeta = true;
   saving = false;
@@ -110,6 +117,11 @@ export class DailyEvaluationsFormComponent implements OnInit {
 
   get isSchoolManager(): boolean {
     return isSchoolManagerUser();
+  }
+
+  /** When true, employee dropdown uses POST /employees/page + virtual scroll. */
+  get employeeSelectLazy(): boolean {
+    return !this.isStudentDailyEvaluations && !this.isTeacherEvaluations;
   }
 
   get canCreateEvaluations(): boolean {
@@ -359,7 +371,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
     const sid = this.headerForm.get('schoolID')?.value;
     const yid = this.headerForm.get('academicYearID')?.value;
     if (!sid || !yid) {
-      this.employees = [];
+      this.resetEmployeeScrollState();
       this.templates = [];
       this.employeeOptions = [];
       this.templateOptions = [];
@@ -420,7 +432,6 @@ export class DailyEvaluationsFormComponent implements OnInit {
         .subscribe({
           next: ({ tpl, teachers }) => {
             this.applyTemplateList(tpl);
-            this.employees = [];
             this.employeeOptions = (teachers ?? []).map((r) => ({
               label: r.displayName,
               value: r.employeeProfileID,
@@ -456,7 +467,6 @@ export class DailyEvaluationsFormComponent implements OnInit {
         .subscribe({
           next: ({ tpl, empId }) => {
             this.applyTemplateList(tpl);
-            this.employees = [];
             this.employeeOptions = [];
             if (!this.evaluationId && empId != null) {
               this.headerForm.patchValue({ evaluatedEmployeeProfileID: empId });
@@ -473,10 +483,24 @@ export class DailyEvaluationsFormComponent implements OnInit {
       return;
     }
 
+    const emptyEmpPage: PagedResultDto<EmployeeProfileOptionDto> = {
+      data: [],
+      pageNumber: 0,
+      pageSize: 0,
+      totalCount: 0,
+      totalPages: 0,
+    };
+
+    this.resetEmployeeScrollState();
+
     forkJoin({
       em: this.employeesHr
-        .getEmployees({ schoolID: sid })
-        .pipe(catchError(() => of([] as EmployeeProfileReadDto[]))),
+        .getEmployeesPage({
+          pageIndex: 0,
+          pageSize: this.employeePageSize,
+          filter: { schoolID: sid },
+        })
+        .pipe(catchError(() => of(emptyEmpPage))),
       tpl: this.svc.getTemplates(this.templateFilterForCreate(sid, yid)).pipe(
         catchError((err) => {
           this.toastr.error(readDailyEvalHttpError(err));
@@ -485,22 +509,85 @@ export class DailyEvaluationsFormComponent implements OnInit {
       ),
     }).subscribe({
       next: ({ em, tpl }) => {
-        this.employees = em ?? [];
+        this.applyEmployeePageResult(em, false);
         this.applyTemplateList(tpl);
-        this.employeeOptions = this.employees.map((e) => ({
-          label: this.displayName(e),
-          value: e.employeeProfileID,
-        }));
         done?.();
       },
       error: () => done?.(),
     });
   }
 
-  displayName(e: EmployeeProfileReadDto): string {
-    const n = e.fullName;
-    if (!n) return e.employeeCode || String(e.employeeProfileID);
+  private resetEmployeeScrollState(): void {
+    this.employeeTotalCount = 0;
+    this.employeeNextPageIndex = 0;
+    this.employeePageLoading = false;
+  }
+
+  private applyEmployeePageResult(p: PagedResultDto<EmployeeProfileOptionDto>, append: boolean): void {
+    const rows = p.data ?? [];
+    const mapped = rows.map((o) => ({
+      label: this.displayNameFromOption(o),
+      value: o.id,
+    }));
+    if (append) {
+      const existing = new Set(this.employeeOptions.map((x) => x.value));
+      const merged = [...this.employeeOptions];
+      for (const m of mapped) {
+        if (!existing.has(m.value)) {
+          merged.push(m);
+          existing.add(m.value);
+        }
+      }
+      this.employeeOptions = merged;
+    } else {
+      this.employeeOptions = mapped;
+    }
+    this.employeeTotalCount = p.totalCount;
+    this.employeeNextPageIndex = p.pageNumber;
+  }
+
+  displayNameFromOption(o: EmployeeProfileOptionDto): string {
+    const n = o.fullName;
+    if (!n) return String(o.id);
     return [n.firstName, n.middleName, n.lastName].filter(Boolean).join(' ');
+  }
+
+  onEmployeeLazyLoad(event: SelectLazyLoadEvent): void {
+    if (!this.employeeSelectLazy) return;
+    if (this.employeePageLoading) return;
+    const sid = this.headerForm.get('schoolID')?.value;
+    const yid = this.headerForm.get('academicYearID')?.value;
+    if (!sid || !yid) return;
+    if (this.employeeNextPageIndex === 0) return;
+    if (this.employeeTotalCount <= 0) return;
+    const loaded = this.employeeOptions.length;
+    if (loaded >= this.employeeTotalCount) return;
+    const buffer = 5;
+    if (loaded > 0 && event.last + buffer < loaded - 1) return;
+
+    this.appendEmployeePage();
+  }
+
+  private appendEmployeePage(): void {
+    if (!this.employeeSelectLazy) return;
+    if (this.employeePageLoading) return;
+    const sid = this.headerForm.get('schoolID')?.value;
+    const yid = this.headerForm.get('academicYearID')?.value;
+    if (!sid || !yid) return;
+    if (this.employeeTotalCount > 0 && this.employeeOptions.length >= this.employeeTotalCount) return;
+
+    this.employeePageLoading = true;
+    this.employeesHr
+      .getEmployeesPage({
+        pageIndex: this.employeeNextPageIndex,
+        pageSize: this.employeePageSize,
+        filter: { schoolID: sid },
+      })
+      .pipe(finalize(() => (this.employeePageLoading = false)))
+      .subscribe({
+        next: (p) => this.applyEmployeePageResult(p, true),
+        error: () => undefined,
+      });
   }
 
   cancel(): void {

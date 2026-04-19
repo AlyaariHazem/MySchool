@@ -117,6 +117,26 @@ export function employeeProfileListFilterForPostApi(f: EmployeeProfileListFilter
   return out;
 }
 
+/** POST /employees/page — same filter rules as list. */
+export interface EmployeeProfilePageRequestDto {
+  pageIndex: number;
+  pageSize: number;
+  filter?: EmployeeProfileListFilterDto | null;
+}
+
+/** Minimal employee row for dropdowns (matches API). */
+export interface EmployeeProfileOptionDto {
+  id: number;
+  fullName: EmployeeNameDto;
+}
+
+export function employeeProfilePageRequestForPostApi(req: EmployeeProfilePageRequestDto): EmployeeProfilePageRequestDto {
+  return {
+    ...req,
+    filter: employeeProfileListFilterForPostApi(req.filter ?? {}),
+  };
+}
+
 export interface EmployeeQualificationDto {
   employeeQualificationID?: number | null;
   degreeName: string;
