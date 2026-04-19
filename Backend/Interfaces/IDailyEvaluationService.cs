@@ -1,3 +1,4 @@
+using Backend.Common;
 using Backend.DTOS.School.DailyEvaluation;
 using Backend.Models;
 
@@ -9,7 +10,7 @@ public interface IDailyEvaluationService
     Task<DailyEvaluationTemplateReadDto> CreateTemplateAsync(DailyEvaluationTemplateCreateDto dto, CancellationToken cancellationToken = default);
     Task<DailyEvaluationTemplateReadDto> UpdateTemplateAsync(int id, DailyEvaluationTemplateUpdateDto dto, CancellationToken cancellationToken = default);
     Task<DailyEvaluationTemplateReadDto?> GetTemplateByIdAsync(int id, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<DailyEvaluationTemplateListDto>> GetTemplatesAsync(DailyEvaluationTemplateFilterDto? filter, CancellationToken cancellationToken = default);
+    Task<PagedResult<DailyEvaluationTemplateListDto>> GetTemplatesPageAsync(DailyEvaluationTemplatesPageRequestDto request, CancellationToken cancellationToken = default);
     Task<DailyEvaluationTemplateReadDto> ActivateTemplateAsync(int id, CancellationToken cancellationToken = default);
     Task<DailyEvaluationTemplateReadDto> DeactivateTemplateAsync(int id, CancellationToken cancellationToken = default);
     Task<DailyEvaluationTemplateReadDto> ArchiveTemplateAsync(int id, CancellationToken cancellationToken = default);
@@ -23,7 +24,7 @@ public interface IDailyEvaluationService
     Task<DailyEvaluationReadDto> CreateEvaluationAsync(DailyEvaluationCreateDto dto, CancellationToken cancellationToken = default);
     Task<DailyEvaluationReadDto?> GetEvaluationByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<DailyEvaluationFullDto> GetEvaluationFullAsync(int id, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<DailyEvaluationListDto>> GetEvaluationsAsync(DailyEvaluationFilterDto? filter, CancellationToken cancellationToken = default);
+    Task<PagedResult<DailyEvaluationListDto>> GetEvaluationsPageAsync(DailyEvaluationsPageRequestDto request, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<TeacherEvaluationOptionDto>> GetTeachersForStudentEvaluationAsync(
         int schoolId,
         string? studentUserId,

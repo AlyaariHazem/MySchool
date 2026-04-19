@@ -166,18 +166,15 @@ export class DailyEvaluationsFormComponent implements OnInit {
       next: (y) => {
         this.years = y ?? [];
         this.rebuildYearOptions();
-        if (this.isStudentDailyEvaluations && !this.evaluationId) {
-          this.patchStudentActiveAcademicYear();
-          // Always load meta here — do not rely on academicYearID valueChanges (patch may not emit or yid may stay null).
-          this.reloadEmployeesAndTemplates();
-          return;
-        }
-        if (this.isSessionPortalDailyEvaluations && !this.evaluationId) {
+        if (!this.evaluationId) {
+          if (!this.isTeacherEvaluations) {
+            this.patchActiveYearForCurrentSchool();
+          }
           this.reloadEmployeesAndTemplates();
         }
       },
       error: () => {
-        if (this.isStudentDailyEvaluations && !this.evaluationId) {
+        if (!this.evaluationId && !this.isTeacherEvaluations) {
           this.loadingMeta = false;
         }
       },
@@ -265,12 +262,14 @@ export class DailyEvaluationsFormComponent implements OnInit {
 
   private onSchoolChange(): void {
     this.rebuildYearOptions();
-    const yid = this.headerForm.get('academicYearID')?.value;
-    if (yid && !this.yearOptions.some((y) => y.value === yid)) {
-      this.headerForm.patchValue({ academicYearID: null });
+    if (this.isTeacherEvaluations) {
+      const yid = this.headerForm.get('academicYearID')?.value;
+      if (yid && !this.yearOptions.some((opt) => opt.value === yid)) {
+        this.headerForm.patchValue({ academicYearID: null });
+      }
     }
-    if (this.isStudentDailyEvaluations && !this.evaluationId) {
-      this.patchStudentActiveAcademicYear();
+    if (!this.isTeacherEvaluations && !this.evaluationId) {
+      this.patchActiveYearForCurrentSchool();
       this.reloadEmployeesAndTemplates();
       return;
     }
@@ -305,9 +304,9 @@ export class DailyEvaluationsFormComponent implements OnInit {
     return latest.length ? this.yearIdNum(latest[0]) : null;
   }
 
-  /** Student create: hidden year control — set active academic year for templates + API body. */
-  private patchStudentActiveAcademicYear(): void {
-    if (!this.isStudentDailyEvaluations || this.evaluationId) return;
+  /** School HR + student: no year dropdown — active year for the selected school (matches backend). */
+  private patchActiveYearForCurrentSchool(): void {
+    if (this.evaluationId || this.isTeacherEvaluations) return;
     const sid = this.headerForm.get('schoolID')?.value ?? null;
     const yid = this.resolveActiveYearIdForSchool(sid);
     if (yid != null) {

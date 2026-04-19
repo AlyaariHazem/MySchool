@@ -10,7 +10,7 @@ import {
   DailyEvaluationCriteriaCreateDto,
   DailyEvaluationCriteriaReadDto,
   DailyEvaluationCriteriaUpdateDto,
-  DailyEvaluationFilterDto,
+  DailyEvaluationsPageRequestDto,
   DailyEvaluationFullDto,
   DailyEvaluationItemCreateDto,
   DailyEvaluationItemReadDto,
@@ -20,6 +20,8 @@ import {
   DailyEvaluationTemplateCreateDto,
   DailyEvaluationTemplateFilterDto,
   DailyEvaluationTemplateListDto,
+  DailyEvaluationTemplatesPageRequestDto,
+  PagedResultDto,
   DailyEvaluationTemplateReadDto,
   DailyEvaluationTemplateUpdateDto,
   DailyEvaluationUpdateDto,
@@ -50,17 +52,6 @@ export function readDailyEvalHttpError(err: unknown): string {
   return 'Request failed';
 }
 
-function templateFilterParams(f?: DailyEvaluationTemplateFilterDto | null): HttpParams {
-  let p = new HttpParams();
-  if (!f) return p;
-  if (f.schoolID != null && f.schoolID > 0) p = p.set('schoolID', String(f.schoolID));
-  if (f.academicYearID != null && f.academicYearID > 0) p = p.set('academicYearID', String(f.academicYearID));
-  if (f.employeeJobTypeID != null && f.employeeJobTypeID > 0) p = p.set('employeeJobTypeID', String(f.employeeJobTypeID));
-  if (f.status != null) p = p.set('status', String(f.status));
-  if (f.isActive != null) p = p.set('isActive', String(f.isActive));
-  return p;
-}
-
 function normalizeTeacherOptionDto(raw: Record<string, unknown>): TeacherEvaluationOptionDto {
   const id = raw['employeeProfileID'] ?? raw['EmployeeProfileID'];
   const name = raw['displayName'] ?? raw['DisplayName'] ?? '';
@@ -69,23 +60,6 @@ function normalizeTeacherOptionDto(raw: Record<string, unknown>): TeacherEvaluat
     employeeProfileID: Number.isFinite(n) && n > 0 ? n : 0,
     displayName: typeof name === 'string' ? name : String(name),
   };
-}
-
-function evaluationFilterParams(f?: DailyEvaluationFilterDto | null): HttpParams {
-  let p = new HttpParams();
-  if (!f) return p;
-  if (f.schoolID != null && f.schoolID > 0) p = p.set('schoolID', String(f.schoolID));
-  if (f.academicYearID != null && f.academicYearID > 0) p = p.set('academicYearID', String(f.academicYearID));
-  if (f.evaluatedEmployeeProfileID != null && f.evaluatedEmployeeProfileID > 0) {
-    p = p.set('evaluatedEmployeeProfileID', String(f.evaluatedEmployeeProfileID));
-  }
-  if (f.dailyEvaluationTemplateID != null && f.dailyEvaluationTemplateID > 0) {
-    p = p.set('dailyEvaluationTemplateID', String(f.dailyEvaluationTemplateID));
-  }
-  if (f.fromDate) p = p.set('fromDate', f.fromDate);
-  if (f.toDate) p = p.set('toDate', f.toDate);
-  if (f.status != null) p = p.set('status', String(f.status));
-  return p;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -97,12 +71,25 @@ export class DailyEvaluationsService {
     return `${this.api.baseUrl}/daily-evaluations${path}`;
   }
 
+  /**
+   * Paged templates (POST body: pageIndex, pageSize, filter).
+   * Use for grids; for dropdowns use {@link getTemplates} which requests the first page at max size.
+   */
+  getTemplatesPage(
+    body: DailyEvaluationTemplatesPageRequestDto,
+  ): Observable<PagedResultDto<DailyEvaluationTemplateListDto>> {
+    return this.http
+      .post<ApiResponse<PagedResultDto<DailyEvaluationTemplateListDto>>>(this.root('/templates/page'), body)
+      .pipe(map((r) => unwrap<PagedResultDto<DailyEvaluationTemplateListDto>>(r)));
+  }
+
+  /** All templates matching the filter (first page, server max page size). For selects and non-paged callers. */
   getTemplates(filter?: DailyEvaluationTemplateFilterDto | null): Observable<DailyEvaluationTemplateListDto[]> {
-    const q = templateFilterParams(filter);
-    const qs = q.keys().length ? `?${q.toString()}` : '';
-    return this.http.get<ApiResponse<DailyEvaluationTemplateListDto[]>>(this.root(`/templates${qs}`)).pipe(
-      map((r) => unwrap<DailyEvaluationTemplateListDto[]>(r) ?? []),
-    );
+    return this.getTemplatesPage({
+      pageIndex: 0,
+      pageSize: 500,
+      filter: filter ?? null,
+    }).pipe(map((p) => p.data ?? []));
   }
 
   /** Teacher-only: HR employee profile id for the signed-in user (self-evaluation target). */
@@ -188,12 +175,11 @@ export class DailyEvaluationsService {
       .pipe(map((r) => unwrap<DailyEvaluationCriteriaReadDto>(r)));
   }
 
-  getEvaluations(filter?: DailyEvaluationFilterDto | null): Observable<DailyEvaluationListDto[]> {
-    const q = evaluationFilterParams(filter);
-    const qs = q.keys().length ? `?${q.toString()}` : '';
-    return this.http.get<ApiResponse<DailyEvaluationListDto[]>>(this.root(`${qs}`)).pipe(
-      map((r) => unwrap<DailyEvaluationListDto[]>(r) ?? []),
-    );
+  /** Paged evaluations (POST body: pageIndex, pageSize, filter). */
+  getEvaluationsPage(body: DailyEvaluationsPageRequestDto): Observable<PagedResultDto<DailyEvaluationListDto>> {
+    return this.http
+      .post<ApiResponse<PagedResultDto<DailyEvaluationListDto>>>(this.root('/page'), body)
+      .pipe(map((r) => unwrap<PagedResultDto<DailyEvaluationListDto>>(r)));
   }
 
   getEvaluationById(id: number): Observable<DailyEvaluationReadDto> {

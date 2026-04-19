@@ -108,13 +108,16 @@ public class DailyEvaluationController : ControllerBase
 
     // --- Templates ---
 
-    [HttpGet("templates")]
-    public async Task<ActionResult<APIResponse>> GetTemplates([FromQuery] DailyEvaluationTemplateFilterDto? filter, CancellationToken cancellationToken)
+    /// <summary>Paged template list (filter in body). <c>POST /templates</c> is reserved for create.</summary>
+    [HttpPost("templates/page")]
+    public async Task<ActionResult<APIResponse>> GetTemplatesPage(
+        [FromBody] DailyEvaluationTemplatesPageRequestDto? body,
+        CancellationToken cancellationToken)
     {
         var response = new APIResponse();
         try
         {
-            response.Result = await _svc.GetTemplatesAsync(filter, cancellationToken);
+            response.Result = await _svc.GetTemplatesPageAsync(body ?? new DailyEvaluationTemplatesPageRequestDto(), cancellationToken);
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
         }
@@ -270,8 +273,11 @@ public class DailyEvaluationController : ControllerBase
 
     // --- Evaluations ---
 
-    [HttpGet]
-    public async Task<ActionResult<APIResponse>> GetEvaluations([FromQuery] DailyEvaluationFilterDto? filter, CancellationToken cancellationToken)
+    /// <summary>Paged list (filter in body). <c>POST</c> on the root route is reserved for create.</summary>
+    [HttpPost("page")]
+    public async Task<ActionResult<APIResponse>> GetEvaluationsPage(
+        [FromBody] DailyEvaluationsPageRequestDto? body,
+        CancellationToken cancellationToken)
     {
         var response = new APIResponse();
         try
@@ -280,9 +286,10 @@ public class DailyEvaluationController : ControllerBase
             if (scope.ErrorResponse != null)
                 return scope.ErrorResponse;
 
-            filter ??= new DailyEvaluationFilterDto();
+            body ??= new DailyEvaluationsPageRequestDto();
+            body.Filter ??= new DailyEvaluationFilterDto();
             if (scope.RestrictToOwnProfile && scope.OwnEmployeeProfileId is int ownId)
-                filter.EvaluatedEmployeeProfileID = ownId;
+                body.Filter.EvaluatedEmployeeProfileID = ownId;
             else if (IsStudentUser)
             {
                 var uid = CurrentUserId;
@@ -293,10 +300,10 @@ public class DailyEvaluationController : ControllerBase
                     return Unauthorized(r);
                 }
 
-                filter.EvaluatorUserId = uid;
+                body.Filter.EvaluatorUserId = uid;
             }
 
-            response.Result = await _svc.GetEvaluationsAsync(filter, cancellationToken);
+            response.Result = await _svc.GetEvaluationsPageAsync(body, cancellationToken);
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
         }

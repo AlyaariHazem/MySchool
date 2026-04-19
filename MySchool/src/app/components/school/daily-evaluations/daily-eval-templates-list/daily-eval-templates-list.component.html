@@ -37,20 +37,6 @@
       </p-floatlabel>
       <p-floatlabel class="filter-field">
         <p-select
-          inputId="de-tpl-year"
-          styleClass="de-filter-select"
-          panelStyleClass="de-filter-select-panel"
-          [panelStyle]="filterSelectPanelStyle"
-          [options]="yearOptions"
-          [(ngModel)]="filter.academicYearID"
-          [showClear]="true"
-          optionLabel="label"
-          optionValue="value"
-        />
-        <label for="de-tpl-year">{{ 'employeesHr.filter.year' | translate }}</label>
-      </p-floatlabel>
-      <p-floatlabel class="filter-field">
-        <p-select
           inputId="de-tpl-status"
           styleClass="de-filter-select"
           panelStyleClass="de-filter-select-panel"
@@ -78,20 +64,25 @@
         <label for="de-tpl-active">{{ 'employeesHr.filter.active' | translate }}</label>
       </p-floatlabel>
       <div class="filter-actions">
-        <p-button [label]="'employeesHr.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="load()" />
+        <p-button [label]="'employeesHr.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="applyFilters()" />
       </div>
     </div>
 
-    <div *ngIf="loading" class="loading-wrap">
+    <div *ngIf="yearLoading" class="loading-wrap">
       <p-progressSpinner strokeWidth="3" />
     </div>
-    <p *ngIf="error && !loading" class="error-block">{{ error }}</p>
+    <p *ngIf="error" class="error-block">{{ error }}</p>
 
     <p-table
-      *ngIf="!loading && !error"
+      *ngIf="!error && !yearLoading"
       [value]="rows"
+      [loading]="loading"
+      [lazy]="true"
+      (onLazyLoad)="onLazyLoad($event)"
       [paginator]="true"
-      [rows]="10"
+      [totalRecords]="totalRecords"
+      [first]="first"
+      [rows]="pageSize"
       [rowsPerPageOptions]="[10, 25, 50]"
       styleClass="p-datatable-sm employees-hr-table"
       [responsiveLayout]="'scroll'"

@@ -13,6 +13,14 @@ public class DailyEvaluationTemplateFilterDto
     public bool? IsActive { get; set; }
 }
 
+/// <summary>Paged template list: <see cref="PageIndex"/> is zero-based.</summary>
+public class DailyEvaluationTemplatesPageRequestDto
+{
+    public int PageIndex { get; set; }
+    public int PageSize { get; set; }
+    public DailyEvaluationTemplateFilterDto? Filter { get; set; }
+}
+
 public class DailyEvaluationTemplateCreateDto
 {
     public int SchoolID { get; set; }
@@ -120,6 +128,14 @@ public class DailyEvaluationFilterDto
 
     /// <summary>When set, only evaluations created by this identity user (e.g. student evaluators).</summary>
     public string? EvaluatorUserId { get; set; }
+}
+
+/// <summary>Paged evaluations list: <see cref="PageIndex"/> is zero-based.</summary>
+public class DailyEvaluationsPageRequestDto
+{
+    public int PageIndex { get; set; }
+    public int PageSize { get; set; }
+    public DailyEvaluationFilterDto? Filter { get; set; }
 }
 
 /// <summary>Teacher (HR profile) pick list for student-submitted daily evaluations.</summary>

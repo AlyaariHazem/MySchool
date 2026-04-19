@@ -25,7 +25,7 @@
         />
         <label for="ev-cr-school">{{ 'employeesHr.filter.school' | translate }} *</label>
       </p-floatlabel>
-      <p-floatlabel class="filter-field" *ngIf="!isStudentDailyEvaluations">
+      <p-floatlabel class="filter-field" *ngIf="isTeacherEvaluations">
         <p-select
           inputId="ev-cr-year"
           styleClass="de-filter-select"

@@ -34,6 +34,22 @@ export interface DailyEvaluationTemplateFilterDto {
   isActive?: boolean;
 }
 
+/** Zero-based page index; matches POST api/daily-evaluations/templates/page. */
+export interface DailyEvaluationTemplatesPageRequestDto {
+  pageIndex: number;
+  pageSize: number;
+  filter?: DailyEvaluationTemplateFilterDto | null;
+}
+
+/** Mirrors Backend.Common.PagedResult (camelCase JSON). */
+export interface PagedResultDto<T> {
+  data: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 export interface DailyEvaluationTemplateCreateDto {
   schoolID: number;
   academicYearID: number;
@@ -127,6 +143,13 @@ export interface DailyEvaluationFilterDto {
   toDate?: string | null;
   status?: DailyEvaluationStatus;
   evaluatorUserId?: string | null;
+}
+
+/** Zero-based page index; matches POST api/daily-evaluations/page. */
+export interface DailyEvaluationsPageRequestDto {
+  pageIndex: number;
+  pageSize: number;
+  filter?: DailyEvaluationFilterDto | null;
 }
 
 /** GET /daily-evaluations/for-student/teachers */

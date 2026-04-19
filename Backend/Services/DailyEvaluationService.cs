@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.DailyEvaluation;
 using Backend.Interfaces;
@@ -124,16 +125,54 @@ public class DailyEvaluationService : IDailyEvaluationService
         return e == null ? null : MapTemplateRead(e);
     }
 
-    public async Task<IReadOnlyList<DailyEvaluationTemplateListDto>> GetTemplatesAsync(DailyEvaluationTemplateFilterDto? filter, CancellationToken cancellationToken = default)
+    private const int MaxTemplatesPageSize = 500;
+
+    private async Task<DailyEvaluationTemplateFilterDto> ResolveTemplateFilterAsync(
+        DailyEvaluationTemplateFilterDto? filter,
+        CancellationToken cancellationToken)
     {
         filter ??= new DailyEvaluationTemplateFilterDto();
-        var q = _db.DailyEvaluationTemplates.AsNoTracking().AsQueryable();
-        if (filter.SchoolID is int sid) q = q.Where(t => t.SchoolID == sid);
-        if (filter.AcademicYearID is int y) q = q.Where(t => t.AcademicYearID == y);
-        if (filter.EmployeeJobTypeID is int j) q = q.Where(t => t.EmployeeJobTypeID == j);
-        if (filter.Status is EvaluationTemplateStatus st) q = q.Where(t => t.Status == st);
-        if (filter.IsActive is bool ia) q = q.Where(t => t.IsActive == ia);
-        return await q.OrderByDescending(t => t.UpdatedAtUtc)
+        if (filter.SchoolID is int schoolForYear && filter.AcademicYearID is null)
+        {
+            var ay = await GetActiveYearIdForSchoolAsync(schoolForYear, cancellationToken);
+            if (ay is int yDef && yDef > 0)
+                filter.AcademicYearID = yDef;
+        }
+
+        return filter;
+    }
+
+    private static IQueryable<DailyEvaluationTemplate> ApplyTemplateFilters(
+        IQueryable<DailyEvaluationTemplate> query,
+        DailyEvaluationTemplateFilterDto filter)
+    {
+        if (filter.SchoolID is int sid) query = query.Where(t => t.SchoolID == sid);
+        if (filter.AcademicYearID is int y) query = query.Where(t => t.AcademicYearID == y);
+        if (filter.EmployeeJobTypeID is int j) query = query.Where(t => t.EmployeeJobTypeID == j);
+        if (filter.Status is EvaluationTemplateStatus st) query = query.Where(t => t.Status == st);
+        if (filter.IsActive is bool ia) query = query.Where(t => t.IsActive == ia);
+        return query;
+    }
+
+    public async Task<PagedResult<DailyEvaluationTemplateListDto>> GetTemplatesPageAsync(
+        DailyEvaluationTemplatesPageRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        request ??= new DailyEvaluationTemplatesPageRequestDto();
+        var filter = await ResolveTemplateFilterAsync(request.Filter, cancellationToken);
+
+        var pageIndex = Math.Max(0, request.PageIndex);
+        var pageSize = request.PageSize < 1 ? 10 : request.PageSize;
+        if (pageSize > MaxTemplatesPageSize) pageSize = MaxTemplatesPageSize;
+
+        var baseQuery = ApplyTemplateFilters(_db.DailyEvaluationTemplates.AsNoTracking(), filter);
+        var ordered = baseQuery.OrderByDescending(t => t.UpdatedAtUtc);
+
+        var totalCount = await ordered.CountAsync(cancellationToken);
+
+        var items = await ordered
+            .Skip(pageIndex * pageSize)
+            .Take(pageSize)
             .Select(t => new DailyEvaluationTemplateListDto
             {
                 DailyEvaluationTemplateID = t.DailyEvaluationTemplateID,
@@ -143,7 +182,16 @@ public class DailyEvaluationService : IDailyEvaluationService
                 Status = t.Status,
                 IsActive = t.IsActive,
                 UpdatedAtUtc = t.UpdatedAtUtc
-            }).ToListAsync(cancellationToken);
+            })
+            .ToListAsync(cancellationToken);
+
+        var totalPages = pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+        return new PagedResult<DailyEvaluationTemplateListDto>(
+            items,
+            pageIndex + 1,
+            pageSize,
+            totalCount,
+            totalPages);
     }
 
     public async Task<DailyEvaluationTemplateReadDto> ActivateTemplateAsync(int id, CancellationToken cancellationToken = default)
@@ -395,20 +443,58 @@ public class DailyEvaluationService : IDailyEvaluationService
         };
     }
 
-    public async Task<IReadOnlyList<DailyEvaluationListDto>> GetEvaluationsAsync(DailyEvaluationFilterDto? filter, CancellationToken cancellationToken = default)
+    private const int MaxEvaluationsPageSize = 500;
+
+    private async Task<DailyEvaluationFilterDto> ResolveEvaluationFilterAsync(
+        DailyEvaluationFilterDto? filter,
+        CancellationToken cancellationToken)
     {
         filter ??= new DailyEvaluationFilterDto();
-        var q = _db.DailyEvaluations.AsNoTracking().AsQueryable();
-        if (filter.SchoolID is int s) q = q.Where(e => e.SchoolID == s);
-        if (filter.AcademicYearID is int y) q = q.Where(e => e.AcademicYearID == y);
-        if (filter.EvaluatedEmployeeProfileID is int eid) q = q.Where(e => e.EvaluatedEmployeeProfileID == eid);
-        if (filter.DailyEvaluationTemplateID is int tid) q = q.Where(e => e.DailyEvaluationTemplateID == tid);
-        if (filter.FromDate is DateOnly fd) q = q.Where(e => e.EvaluationDate >= fd);
-        if (filter.ToDate is DateOnly td) q = q.Where(e => e.EvaluationDate <= td);
-        if (filter.Status is DailyEvaluationStatus st) q = q.Where(e => e.Status == st);
+        if (filter.SchoolID is int schoolForYear && filter.AcademicYearID is null)
+        {
+            var ay = await GetActiveYearIdForSchoolAsync(schoolForYear, cancellationToken);
+            if (ay is int yDef && yDef > 0)
+                filter.AcademicYearID = yDef;
+        }
+
+        return filter;
+    }
+
+    private static IQueryable<DailyEvaluation> ApplyEvaluationFilters(
+        IQueryable<DailyEvaluation> query,
+        DailyEvaluationFilterDto filter)
+    {
+        if (filter.SchoolID is int s) query = query.Where(e => e.SchoolID == s);
+        if (filter.AcademicYearID is int y) query = query.Where(e => e.AcademicYearID == y);
+        if (filter.EvaluatedEmployeeProfileID is int eid) query = query.Where(e => e.EvaluatedEmployeeProfileID == eid);
+        if (filter.DailyEvaluationTemplateID is int tid) query = query.Where(e => e.DailyEvaluationTemplateID == tid);
+        if (filter.FromDate is DateOnly fd) query = query.Where(e => e.EvaluationDate >= fd);
+        if (filter.ToDate is DateOnly td) query = query.Where(e => e.EvaluationDate <= td);
+        if (filter.Status is DailyEvaluationStatus st) query = query.Where(e => e.Status == st);
         if (!string.IsNullOrWhiteSpace(filter.EvaluatorUserId))
-            q = q.Where(e => e.EvaluatorUserId == filter.EvaluatorUserId);
-        return await q.OrderByDescending(e => e.EvaluationDate).ThenByDescending(e => e.DailyEvaluationID)
+            query = query.Where(e => e.EvaluatorUserId == filter.EvaluatorUserId);
+        return query;
+    }
+
+    public async Task<PagedResult<DailyEvaluationListDto>> GetEvaluationsPageAsync(
+        DailyEvaluationsPageRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        request ??= new DailyEvaluationsPageRequestDto();
+        var filter = await ResolveEvaluationFilterAsync(request.Filter, cancellationToken);
+
+        var pageIndex = Math.Max(0, request.PageIndex);
+        var pageSize = request.PageSize < 1 ? 10 : request.PageSize;
+        if (pageSize > MaxEvaluationsPageSize) pageSize = MaxEvaluationsPageSize;
+
+        var baseQuery = ApplyEvaluationFilters(_db.DailyEvaluations.AsNoTracking(), filter);
+        var ordered = baseQuery.OrderByDescending(e => e.EvaluationDate).ThenByDescending(e => e.DailyEvaluationID);
+
+        var totalCount = await ordered.CountAsync(cancellationToken);
+
+        var items = await ordered
+            .Skip(pageIndex * pageSize)
+            .Take(pageSize)
             .Select(e => new DailyEvaluationListDto
             {
                 DailyEvaluationID = e.DailyEvaluationID,
@@ -419,7 +505,16 @@ public class DailyEvaluationService : IDailyEvaluationService
                 TotalScore = e.TotalScore,
                 IsLocked = e.IsLocked,
                 UpdatedAtUtc = e.UpdatedAtUtc
-            }).ToListAsync(cancellationToken);
+            })
+            .ToListAsync(cancellationToken);
+
+        var totalPages = pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+        return new PagedResult<DailyEvaluationListDto>(
+            items,
+            pageIndex + 1,
+            pageSize,
+            totalCount,
+            totalPages);
     }
 
     public async Task<IReadOnlyList<TeacherEvaluationOptionDto>> GetTeachersForStudentEvaluationAsync(

@@ -11,7 +11,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { map } from 'rxjs';
@@ -88,6 +88,11 @@ export class DailyEvaluationsListComponent implements OnInit {
   employees: EmployeeProfileReadDto[] = [];
   templates: DailyEvaluationTemplateListDto[] = [];
   rows: DailyEvaluationListDto[] = [];
+  totalRecords = 0;
+  first = 0;
+  pageSize = 10;
+  /** School HR: wait for years before first lazy load (filter uses active year). */
+  yearLoading = false;
   loading = false;
   error: string | null = null;
 
@@ -151,6 +156,7 @@ export class DailyEvaluationsListComponent implements OnInit {
       { label: this.translate.instant('dailyEvaluations.status.locked'), value: DailyEvaluationStatus.Locked },
     ];
     if (this.isSessionPortalDailyEvaluations) {
+      this.yearLoading = false;
       this.applyTeacherSchoolContextFromSession();
       const yid = this.dailyEvalNav.teacherSessionYearId();
       if (yid != null) {
@@ -161,6 +167,7 @@ export class DailyEvaluationsListComponent implements OnInit {
         this.yearOptions = [{ label: yLabel ? `${yid} — ${yLabel}` : String(yid), value: yid }];
       }
     } else {
+      this.yearLoading = true;
       this.schoolService.getAllSchools().subscribe({
         next: (list) => {
           this.schools = list ?? [];
@@ -174,14 +181,30 @@ export class DailyEvaluationsListComponent implements OnInit {
         next: (list) => {
           this.years = list ?? [];
           this.rebuildYearOptions();
+          this.patchFilterActiveAcademicYear();
+          this.loadTemplatesForFilter();
+          this.loadEmployeesForFilter();
+          if (this.isStudentEvaluations && this.filter.schoolID != null && this.filter.schoolID > 0) {
+            this.svc.getTeachersForStudentEvaluation(this.filter.schoolID).subscribe({
+              next: (rows) => {
+                this.teacherEvalOptions = (rows ?? []).map((r) => ({
+                  label: r.displayName,
+                  value: r.employeeProfileID,
+                }));
+              },
+              error: () => undefined,
+            });
+          }
+          this.yearLoading = false;
         },
-        error: () => this.toastr.error('employeesHr.errors.loadYears'),
+        error: () => {
+          this.yearLoading = false;
+          this.toastr.error('employeesHr.errors.loadYears');
+        },
       });
+      return;
     }
     this.loadTemplatesForFilter();
-    if (!this.isSessionPortalDailyEvaluations) {
-      this.loadEmployeesForFilter();
-    }
     if (this.isStudentEvaluations && this.filter.schoolID != null && this.filter.schoolID > 0) {
       this.svc.getTeachersForStudentEvaluation(this.filter.schoolID).subscribe({
         next: (rows) => {
@@ -193,7 +216,6 @@ export class DailyEvaluationsListComponent implements OnInit {
         error: () => undefined,
       });
     }
-    this.load();
   }
 
   get isTeacherEvaluations(): boolean {
@@ -221,7 +243,7 @@ export class DailyEvaluationsListComponent implements OnInit {
 
   private loadTemplatesForFilter(): void {
     let f: DailyEvaluationTemplateFilterDto = {};
-    if (this.isTeacherEvaluations) {
+    if (this.isTeacherEvaluations || !this.isSessionPortalDailyEvaluations) {
       if (this.filter.schoolID != null && this.filter.schoolID > 0) {
         f.schoolID = this.filter.schoolID;
       }
@@ -253,25 +275,71 @@ export class DailyEvaluationsListComponent implements OnInit {
 
   onSchoolChange(): void {
     this.rebuildYearOptions();
-    if (
-      this.filter.academicYearID &&
-      !this.yearOptions.some((y) => y.value === this.filter.academicYearID)
-    ) {
-      this.filter.academicYearID = undefined;
-    }
+    this.patchFilterActiveAcademicYear();
+    this.loadTemplatesForFilter();
     if (!this.isTeacherEvaluations) {
       this.loadEmployeesForFilter();
     }
+    this.first = 0;
+    this.load();
   }
 
+  applyFilters(): void {
+    this.first = 0;
+    this.load();
+  }
+
+  onLazyLoad(event: TableLazyLoadEvent): void {
+    this.first = event.first ?? 0;
+    const r = event.rows;
+    if (r != null && r > 0) {
+      this.pageSize = r;
+    }
+    this.load();
+  }
+
+  private yearSchoolId(y: Year): number {
+    const raw = y as unknown as { schoolID?: number; SchoolID?: number };
+    return raw.schoolID ?? raw.SchoolID ?? 0;
+  }
+
+  private yearIsActive(y: Year): boolean {
+    const raw = y as unknown as { active?: boolean; Active?: boolean };
+    return !!(raw.active ?? raw.Active);
+  }
+
+  private yearIdNum(y: Year): number {
+    const raw = y as unknown as { yearID?: number; YearID?: number };
+    const n = raw.yearID ?? raw.YearID;
+    return typeof n === 'number' && !Number.isNaN(n) ? n : 0;
+  }
+
+  /** Align with backend GetActiveYearIdForSchoolAsync. */
+  private resolveActiveYearIdForSchool(schoolId: number | null | undefined): number | null {
+    if (schoolId == null || schoolId <= 0) return null;
+    const forSchool = this.years.filter((x) => this.yearSchoolId(x) === schoolId);
+    const actives = forSchool.filter((x) => this.yearIsActive(x)).sort((a, b) => this.yearIdNum(a) - this.yearIdNum(b));
+    if (actives.length) return this.yearIdNum(actives[0]);
+    const latest = [...forSchool].sort((a, b) => this.yearIdNum(b) - this.yearIdNum(a));
+    return latest.length ? this.yearIdNum(latest[0]) : null;
+  }
+
+  /** School HR list: no year filter UI — scope to active year for the selected school. */
+  private patchFilterActiveAcademicYear(): void {
+    if (this.isSessionPortalDailyEvaluations) return;
+    const yid = this.resolveActiveYearIdForSchool(this.filter.schoolID);
+    if (yid != null) {
+      this.filter.academicYearID = yid;
+    }
+  }
 
   private rebuildYearOptions(): void {
     const sid = this.filter.schoolID;
     const filtered =
-      sid != null && sid > 0 ? this.years.filter((y) => y.schoolID === sid) : [...this.years];
+      sid != null && sid > 0 ? this.years.filter((y) => this.yearSchoolId(y) === sid) : [...this.years];
     this.yearOptions = filtered.map((y) => ({
-      label: `${y.yearID} — ${y.yearDateStart ? new Date(y.yearDateStart).toLocaleDateString() : ''}`,
-      value: y.yearID,
+      label: `${this.yearIdNum(y)} — ${y.yearDateStart ? new Date(y.yearDateStart).toLocaleDateString() : ''}`,
+      value: this.yearIdNum(y),
     }));
   }
 
@@ -293,13 +361,24 @@ export class DailyEvaluationsListComponent implements OnInit {
       this.error = 'dailyEvaluations.errors.noPermission';
       return;
     }
+    if (this.yearLoading) {
+      return;
+    }
     this.loading = true;
     this.error = null;
+    const pageIndex = this.pageSize > 0 ? Math.floor(this.first / this.pageSize) : 0;
     this.svc
-      .getEvaluations(this.filter)
+      .getEvaluationsPage({
+        pageIndex,
+        pageSize: this.pageSize,
+        filter: this.filter,
+      })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (data) => (this.rows = data ?? []),
+        next: (page) => {
+          this.rows = page.data ?? [];
+          this.totalRecords = page.totalCount ?? 0;
+        },
         error: (err) => {
           this.error = readDailyEvalHttpError(err);
           this.toastr.error(this.error);
@@ -335,9 +414,39 @@ export class DailyEvaluationsListComponent implements OnInit {
       templateId: null,
       notes: '',
     };
+    if (!this.isSessionPortalDailyEvaluations && this.lockForm.schoolID != null) {
+      const yid = this.resolveActiveYearIdForSchool(this.lockForm.schoolID);
+      if (yid != null) {
+        this.lockForm.academicYearID = yid;
+      }
+    }
+    this.rebuildYearOptionsForLockSchool();
     this.lockPreview = null;
     this.lockDialog = true;
     this.refreshLockPreview();
+  }
+
+  /** Lock/reopen dialogs: year dropdown options follow selected school. */
+  onLockFormSchoolChange(): void {
+    this.rebuildYearOptionsForLockSchool();
+    if (!this.isSessionPortalDailyEvaluations && this.lockForm.schoolID != null) {
+      const yid = this.resolveActiveYearIdForSchool(this.lockForm.schoolID);
+      if (yid != null) {
+        this.lockForm.academicYearID = yid;
+      }
+    }
+    this.refreshLockPreview();
+    this.refreshReopenLock();
+  }
+
+  private rebuildYearOptionsForLockSchool(): void {
+    const sid = this.lockForm.schoolID;
+    const filtered =
+      sid != null && sid > 0 ? this.years.filter((y) => this.yearSchoolId(y) === sid) : [...this.years];
+    this.yearOptions = filtered.map((y) => ({
+      label: `${this.yearIdNum(y)} — ${y.yearDateStart ? new Date(y.yearDateStart).toLocaleDateString() : ''}`,
+      value: this.yearIdNum(y),
+    }));
   }
 
   refreshLockPreview(): void {
@@ -394,6 +503,13 @@ export class DailyEvaluationsListComponent implements OnInit {
       templateId: null,
       notes: '',
     };
+    if (!this.isSessionPortalDailyEvaluations && this.lockForm.schoolID != null) {
+      const yid = this.resolveActiveYearIdForSchool(this.lockForm.schoolID);
+      if (yid != null) {
+        this.lockForm.academicYearID = yid;
+      }
+    }
+    this.rebuildYearOptionsForLockSchool();
     this.reopenLock = null;
     this.reopenDialog = true;
     this.refreshReopenLock();
