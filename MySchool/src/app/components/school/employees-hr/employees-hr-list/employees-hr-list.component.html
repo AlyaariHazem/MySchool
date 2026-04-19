@@ -23,7 +23,7 @@
 
     <div class="filters-toolbar" *ngIf="canView">
       <div class="filters-grid">
-        <p-floatlabel variant="on" class="filter-field">
+        <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
           <p-select
             inputId="eh-filter-school"
             class="w-full"
@@ -34,24 +34,9 @@
             optionLabel="label"
             optionValue="value"
             [showClear]="true"
-            (onChange)="onSchoolChange()"
+            (onChange)="load()"
           />
           <label for="eh-filter-school">{{ 'employeesHr.filter.school' | translate }}</label>
-        </p-floatlabel>
-
-        <p-floatlabel variant="on" class="filter-field">
-          <p-select
-            inputId="eh-filter-year"
-            class="w-full"
-            styleClass="w-full"
-            size="small"
-            [options]="yearOptions"
-            [(ngModel)]="filter.academicYearID"
-            optionLabel="label"
-            optionValue="value"
-            [showClear]="true"
-          />
-          <label for="eh-filter-year">{{ 'employeesHr.filter.year' | translate }}</label>
         </p-floatlabel>
 
         <p-floatlabel variant="on" class="filter-field">

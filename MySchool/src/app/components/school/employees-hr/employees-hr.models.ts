@@ -1,3 +1,5 @@
+import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
+
 /** Mirrors backend enums (int). */
 export enum EmploymentStatus {
   Active = 1,
@@ -98,10 +100,21 @@ export type EmployeeProfileUpdateDto = EmployeeProfileCreateDto;
 
 export interface EmployeeProfileListFilterDto {
   schoolID?: number | null;
+  /** Ignored by the API; the server uses the school's active academic year. */
   academicYearID?: number | null;
   employeeJobTypeID?: number | null;
   isActive?: boolean | null;
   employmentStatus?: EmploymentStatus | null;
+}
+
+/** POST /employees/list: active year is server-side. MANAGER: school is server-side — omit from payload. */
+export function employeeProfileListFilterForPostApi(f: EmployeeProfileListFilterDto): EmployeeProfileListFilterDto {
+  const out = { ...f };
+  delete out.academicYearID;
+  if (isSchoolManagerUser()) {
+    delete out.schoolID;
+  }
+  return out;
 }
 
 export interface EmployeeQualificationDto {

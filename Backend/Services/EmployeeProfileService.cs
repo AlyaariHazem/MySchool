@@ -93,22 +93,55 @@ public class EmployeeProfileService : IEmployeeProfileService
     public async Task<EmployeeProfileReadDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         await MapToReadDtoAsync(id, cancellationToken);
 
+    /// <summary>Active year for the school (<see cref="Year.Active"/>), else latest year id for that school.</summary>
+    private async Task<int?> GetActiveYearIdForSchoolAsync(int schoolId, CancellationToken ct)
+    {
+        var yid = await _db.Years.AsNoTracking()
+            .Where(y => y.SchoolID == schoolId && y.Active)
+            .OrderBy(y => y.YearID)
+            .Select(y => (int?)y.YearID)
+            .FirstOrDefaultAsync(ct);
+        if (yid is > 0)
+            return yid;
+        return await _db.Years.AsNoTracking()
+            .Where(y => y.SchoolID == schoolId)
+            .OrderByDescending(y => y.YearID)
+            .Select(y => (int?)y.YearID)
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<int?> GetSchoolIdForManagerUserAsync(string? userId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return null;
+        return await _db.Managers.AsNoTracking()
+            .Where(m => m.UserID == userId)
+            .Select(m => (int?)m.SchoolID)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<EmployeeProfileReadDto>> GetAllAsync(EmployeeProfileListFilterDto? filter, CancellationToken cancellationToken = default)
     {
+        filter ??= new EmployeeProfileListFilterDto();
+        int? activeYearForSchool = null;
+        if (filter.SchoolID is int sid && sid > 0)
+            activeYearForSchool = await GetActiveYearIdForSchoolAsync(sid, cancellationToken);
+
         var q = _db.EmployeeProfiles
             .AsNoTracking()
             .Include(e => e.JobType)
             .AsQueryable();
 
-        if (filter?.SchoolID is > 0)
+        if (filter.SchoolID is > 0)
             q = q.Where(e => e.SchoolID == filter.SchoolID);
-        if (filter?.AcademicYearID is > 0)
-            q = q.Where(e => e.CurrentAcademicYearID == filter.AcademicYearID);
-        if (filter?.EmployeeJobTypeID is > 0)
+        // Scope to the school's active academic year (client must not drive year filtering).
+        if (activeYearForSchool is int y)
+            q = q.Where(e => e.CurrentAcademicYearID == y);
+        if (filter.EmployeeJobTypeID is > 0)
             q = q.Where(e => e.EmployeeJobTypeID == filter.EmployeeJobTypeID);
-        if (filter?.IsActive is bool b)
+        if (filter.IsActive is bool b)
             q = q.Where(e => e.IsActive == b);
-        if (filter?.EmploymentStatus is { } es)
+        if (filter.EmploymentStatus is { } es)
             q = q.Where(e => e.EmploymentStatus == es);
 
         var rows = await q.OrderBy(e => e.SchoolID).ThenBy(e => e.EmployeeCode).ToListAsync(cancellationToken);

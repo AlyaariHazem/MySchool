@@ -17,6 +17,7 @@ import { map } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
 
+import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
 import { PagePermission, PermissionService } from 'app/core/services/permission.service';
 import { SchoolService } from 'app/core/services/school.service';
 import { YearService } from 'app/core/services/year.service';
@@ -85,8 +86,11 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
   canDelete = this.perm.hasPermission(PagePermission.Employees.Delete);
   canView = this.perm.hasPermission(PagePermission.Employees.View);
 
+  get isSchoolManager(): boolean {
+    return isSchoolManagerUser();
+  }
+
   schoolOptions: { label: string; value: number }[] = [];
-  yearOptions: { label: string; value: number }[] = [];
   jobTypeOptions: { label: string; value: number }[] = [];
   jobTypesLoading = false;
   activeOptions: { label: string; value: boolean | null }[] = [];
@@ -105,6 +109,12 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
     ];
     this.loadJobTypes();
     this.langSub = this.translate.onLangChange.subscribe(() => this.rebuildJobTypeFilterLabels());
+    if (this.isSchoolManager) {
+      const sid = Number(typeof localStorage !== 'undefined' ? localStorage.getItem('schoolId') : '');
+      if (Number.isFinite(sid) && sid > 0) {
+        this.filter.schoolID = sid;
+      }
+    }
     this.schoolService.getAllSchools().subscribe({
       next: (list) => {
         this.schools = list ?? [];
@@ -120,7 +130,6 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
     this.yearService.getAllYears().subscribe({
       next: (list) => {
         this.years = list ?? [];
-        this.rebuildYearOptions();
       },
       error: () => this.toastr.error('employeesHr.errors.loadYears'),
     });
@@ -158,26 +167,6 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
       ? ` (${this.translate.instant('employeesHr.form.jobTypeInactiveSuffix')})`
       : '';
     return `${primary} (${j.code})${inactive}`;
-  }
-
-  onSchoolChange(): void {
-    this.rebuildYearOptions();
-    if (
-      this.filter.academicYearID &&
-      !this.yearOptions.some((y) => y.value === this.filter.academicYearID)
-    ) {
-      this.filter.academicYearID = undefined;
-    }
-  }
-
-  private rebuildYearOptions(): void {
-    const sid = this.filter.schoolID;
-    const filtered =
-      sid != null && sid > 0 ? this.years.filter((y) => y.schoolID === sid) : [...this.years];
-    this.yearOptions = filtered.map((y) => ({
-      label: `${y.yearID} — ${y.yearDateStart ? new Date(y.yearDateStart).toLocaleDateString() : ''}`,
-      value: y.yearID,
-    }));
   }
 
   load(): void {

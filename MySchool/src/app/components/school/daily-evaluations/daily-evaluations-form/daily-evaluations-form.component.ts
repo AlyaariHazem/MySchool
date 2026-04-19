@@ -15,6 +15,7 @@ import { ToastrService } from 'ngx-toastr';
 import { forkJoin, of } from 'rxjs';
 import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 
+import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
 import { PagePermission, PermissionService } from 'app/core/services/permission.service';
 import { SchoolService } from 'app/core/services/school.service';
 import { YearService } from 'app/core/services/year.service';
@@ -107,6 +108,10 @@ export class DailyEvaluationsFormComponent implements OnInit {
     return this.isTeacherEvaluations || this.isStudentDailyEvaluations;
   }
 
+  get isSchoolManager(): boolean {
+    return isSchoolManagerUser();
+  }
+
   get canCreateEvaluations(): boolean {
     if (this.isSessionPortalDailyEvaluations) return true;
     return this.perm.hasPermission(PagePermission.Evaluations.Create);
@@ -153,6 +158,12 @@ export class DailyEvaluationsFormComponent implements OnInit {
         }
       }
     } else {
+      if (this.isSchoolManager) {
+        const sid = Number(typeof localStorage !== 'undefined' ? localStorage.getItem('schoolId') : '');
+        if (Number.isFinite(sid) && sid > 0) {
+          this.headerForm.patchValue({ schoolID: sid });
+        }
+      }
       this.schoolService.getAllSchools().subscribe({
         next: (s) => {
           this.schools = s ?? [];
@@ -464,7 +475,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
 
     forkJoin({
       em: this.employeesHr
-        .getEmployees({ schoolID: sid, academicYearID: yid })
+        .getEmployees({ schoolID: sid })
         .pipe(catchError(() => of([] as EmployeeProfileReadDto[]))),
       tpl: this.svc.getTemplates(this.templateFilterForCreate(sid, yid)).pipe(
         catchError((err) => {

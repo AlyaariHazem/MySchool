@@ -10,7 +10,7 @@
     </div>
 
     <form [formGroup]="headerForm" class="filters-toolbar filters-grid de-eval-filters" *ngIf="!loadingMeta">
-      <p-floatlabel class="filter-field" *ngIf="!isSessionPortalDailyEvaluations">
+      <p-floatlabel class="filter-field" *ngIf="!isSessionPortalDailyEvaluations && !isSchoolManager">
         <p-select
           inputId="ev-cr-school"
           styleClass="de-filter-select"

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Claims;
 using Backend.DTOS.School.Employees;
 using Backend.Interfaces;
 using Backend.Models;
@@ -22,13 +23,34 @@ public class EmployeesController : ControllerBase
         _employees = employees;
     }
 
-    [HttpGet]
+    private string? CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    private string? UserTypeClaim => User.FindFirstValue("UserType");
+
+    /// <summary>School managers: ignore client <see cref="EmployeeProfileListFilterDto.SchoolID"/>; use the manager's school.</summary>
+    private async Task ApplyManagerSchoolScopeAsync(EmployeeProfileListFilterDto filter, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(UserTypeClaim, "MANAGER", StringComparison.OrdinalIgnoreCase))
+            return;
+        filter.SchoolID = null;
+        var uid = CurrentUserId;
+        if (string.IsNullOrEmpty(uid))
+            return;
+        var sid = await _employees.GetSchoolIdForManagerUserAsync(uid, cancellationToken);
+        if (sid is int id && id > 0)
+            filter.SchoolID = id;
+    }
+
+    /// <summary>Paged-style filter in body. <c>POST /employees</c> is reserved for create.</summary>
+    [HttpPost("list")]
     [Authorize(Roles = "ADMIN,MANAGER")]
-    public async Task<ActionResult<APIResponse>> GetAll([FromQuery] EmployeeProfileListFilterDto? filter, CancellationToken cancellationToken)
+    public async Task<ActionResult<APIResponse>> List([FromBody] EmployeeProfileListFilterDto? filter, CancellationToken cancellationToken)
     {
         var response = new APIResponse();
         try
         {
+            filter ??= new EmployeeProfileListFilterDto();
+            await ApplyManagerSchoolScopeAsync(filter, cancellationToken);
             response.Result = await _employees.GetAllAsync(filter, cancellationToken);
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);

@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, catchError, map, of, shareReplay } from 'rxjs';
 
@@ -12,6 +12,7 @@ import {
   EmployeePerformanceSummaryDto,
   EmployeeProfileCreateDto,
   EmployeeProfileFullDto,
+  employeeProfileListFilterForPostApi,
   EmployeeProfileListFilterDto,
   EmployeeProfileReadDto,
   EmployeeProfileUpdateDto,
@@ -47,27 +48,6 @@ export class EmployeesHrService {
   /** Cached successful (or empty fallback) job types — avoids duplicate HTTP calls across HR screens. */
   private jobTypes$: Observable<EmployeeJobTypeDto[]> | null = null;
 
-  private qUrl(path: string, filter?: EmployeeProfileListFilterDto | null): string {
-    let params = new HttpParams();
-    if (filter?.schoolID != null && filter.schoolID > 0) {
-      params = params.set('schoolID', String(filter.schoolID));
-    }
-    if (filter?.academicYearID != null && filter.academicYearID > 0) {
-      params = params.set('academicYearID', String(filter.academicYearID));
-    }
-    if (filter?.employeeJobTypeID != null && filter.employeeJobTypeID > 0) {
-      params = params.set('employeeJobTypeID', String(filter.employeeJobTypeID));
-    }
-    if (filter?.isActive != null) {
-      params = params.set('isActive', String(filter.isActive));
-    }
-    if (filter?.employmentStatus != null && filter.employmentStatus > 0) {
-      params = params.set('employmentStatus', String(filter.employmentStatus));
-    }
-    const q = params.keys().length ? `?${params.toString()}` : '';
-    return `${this.api.baseUrl}/${path}${q}`;
-  }
-
   /** Clears cached job types (e.g. after tenant admin changes lookup data — optional). */
   clearEmployeeJobTypesCache(): void {
     this.jobTypes$ = null;
@@ -87,9 +67,10 @@ export class EmployeesHrService {
   }
 
   getEmployees(filter?: EmployeeProfileListFilterDto | null): Observable<EmployeeProfileReadDto[]> {
-    return this.http.get<ApiResponse<EmployeeProfileReadDto[]>>(this.qUrl('employees', filter)).pipe(
-      map((r) => unwrap<EmployeeProfileReadDto[]>(r) ?? []),
-    );
+    const body = employeeProfileListFilterForPostApi(filter ?? {});
+    return this.http
+      .post<ApiResponse<EmployeeProfileReadDto[]>>(`${this.api.baseUrl}/employees/list`, body)
+      .pipe(map((r) => unwrap<EmployeeProfileReadDto[]>(r) ?? []));
   }
 
   getEmployeeById(id: number): Observable<EmployeeProfileReadDto> {
