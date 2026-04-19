@@ -126,6 +126,13 @@ export interface DailyEvaluationFilterDto {
   fromDate?: string | null;
   toDate?: string | null;
   status?: DailyEvaluationStatus;
+  evaluatorUserId?: string | null;
+}
+
+/** GET /daily-evaluations/for-student/teachers */
+export interface TeacherEvaluationOptionDto {
+  employeeProfileID: number;
+  displayName: string;
 }
 
 export interface DailyEvaluationCreateDto {

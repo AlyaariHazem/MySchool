@@ -93,31 +93,23 @@
   width: 100%;
 }
 
-/* Password toggle sits beside the field (not matSuffix) so it always shows in RTL / outline fields */
-.login-password-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.25rem;
-  width: 100%;
+/* Suffix eye: keep Material Icons ligatures (global Noto rule skips .mat-icon but reinforce on toggle) */
+.login-field--password .login-password-toggle .mat-icon {
+  font-family: 'Material Icons', 'Material Icons Outlined' !important;
 }
 
-.login-password-row__field {
-  flex: 1;
-  min-width: 0;
-}
-
-.login-password-toggle {
-  flex-shrink: 0;
-  margin-top: 0.35rem;
+.login-field--password .login-password-toggle {
   color: #558b2f;
-
-  .mat-icon {
-    font-family: 'Material Icons', 'Material Icons Outlined' !important;
-  }
 }
 
 .login-form ::ng-deep .mat-mdc-form-field {
   width: 100%;
+}
+
+/* Ensure trailing icon slot paints in outline + RTL (password same width as other fields) */
+.login-form ::ng-deep .login-field--password.mat-mdc-form-field-has-icon-suffix .mat-mdc-form-field-icon-suffix {
+  display: flex;
+  align-items: center;
 }
 
 /* Outline fields: green focus ring (Material MDC) */

@@ -245,6 +245,65 @@ namespace Backend.Controllers
                         }
                     }
 
+                    // SPA (teacher/student home) needs schoolId + active year in login response — only managers had schoolData above.
+                    if (schoolData == null && string.Equals(userFromDb.UserType, "TEACHER", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var teacherRow = await tenantContext.Teachers.AsNoTracking()
+                            .FirstOrDefaultAsync(t => t.UserID == userFromDb.Id);
+                        if (teacherRow != null)
+                        {
+                            var mgr = await tenantContext.Managers.AsNoTracking()
+                                .FirstOrDefaultAsync(m => m.ManagerID == teacherRow.ManagerID);
+                            if (mgr != null)
+                            {
+                                var school = await tenantContext.Schools.AsNoTracking()
+                                    .FirstOrDefaultAsync(s => s.SchoolID == mgr.SchoolID);
+                                if (school != null)
+                                {
+                                    var activeYearId = await tenantContext.Years.AsNoTracking()
+                                        .Where(y => y.SchoolID == school.SchoolID && y.Active == true)
+                                        .OrderBy(y => y.YearID)
+                                        .Select(y => (int?)y.YearID)
+                                        .FirstOrDefaultAsync();
+                                    schoolData = new
+                                    {
+                                        SchoolName = school.SchoolName,
+                                        SchoolId = school.SchoolID,
+                                        ManagerFirstName = (string?)null,
+                                        ManagerLastName = (string?)null,
+                                        ActiveYearId = activeYearId
+                                    };
+                                }
+                            }
+                        }
+                    }
+
+                    if (schoolData == null && string.Equals(userFromDb.UserType, "STUDENT", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var studentSchoolId = await tenantContext.Students.AsNoTracking()
+                            .Where(s => s.UserID == userFromDb.Id)
+                            .Select(s => (int?)s.Division.Class.Stage.Year.SchoolID)
+                            .FirstOrDefaultAsync();
+                        if (studentSchoolId is int sid)
+                        {
+                            var school = await tenantContext.Schools.AsNoTracking()
+                                .FirstOrDefaultAsync(s => s.SchoolID == sid);
+                            var activeYearId = await tenantContext.Years.AsNoTracking()
+                                .Where(y => y.SchoolID == sid && y.Active == true)
+                                .OrderBy(y => y.YearID)
+                                .Select(y => (int?)y.YearID)
+                                .FirstOrDefaultAsync();
+                            schoolData = new
+                            {
+                                SchoolName = school?.SchoolName,
+                                SchoolId = sid,
+                                ManagerFirstName = (string?)null,
+                                ManagerLastName = (string?)null,
+                                ActiveYearId = activeYearId
+                            };
+                        }
+                    }
+
                     yearID = schoolData?.ActiveYearId ?? 1;
                     managerName = (schoolData?.ManagerFirstName + " " + schoolData?.ManagerLastName)?.Trim();
                     userName = schoolData?.ManagerFirstName;

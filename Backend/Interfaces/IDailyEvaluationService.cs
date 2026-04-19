@@ -24,6 +24,12 @@ public interface IDailyEvaluationService
     Task<DailyEvaluationReadDto?> GetEvaluationByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<DailyEvaluationFullDto> GetEvaluationFullAsync(int id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<DailyEvaluationListDto>> GetEvaluationsAsync(DailyEvaluationFilterDto? filter, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<TeacherEvaluationOptionDto>> GetTeachersForStudentEvaluationAsync(
+        int schoolId,
+        string? studentUserId,
+        CancellationToken cancellationToken = default);
+    Task<string?> ValidateStudentEvaluationCreateAsync(DailyEvaluationCreateDto body, string studentUserId, CancellationToken cancellationToken = default);
+    Task<int?> GetEvaluationIdForItemAsync(int dailyEvaluationItemId, CancellationToken cancellationToken = default);
     Task<DailyEvaluationReadDto> UpdateEvaluationAsync(int id, DailyEvaluationUpdateDto dto, string? currentUserId, CancellationToken cancellationToken = default);
     Task<DailyEvaluationReadDto> SubmitEvaluationAsync(int id, CancellationToken cancellationToken = default);
 

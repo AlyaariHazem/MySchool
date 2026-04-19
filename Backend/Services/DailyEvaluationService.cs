@@ -31,6 +31,23 @@ public class DailyEvaluationService : IDailyEvaluationService
             throw new InvalidOperationException($"Academic year {yearId} is not valid for school {schoolId}.");
     }
 
+    /// <summary>Active year for the school (<see cref="Year.Active"/>), else latest year id for that school.</summary>
+    private async Task<int?> GetActiveYearIdForSchoolAsync(int schoolId, CancellationToken ct)
+    {
+        var yid = await _db.Years.AsNoTracking()
+            .Where(y => y.SchoolID == schoolId && y.Active)
+            .OrderBy(y => y.YearID)
+            .Select(y => (int?)y.YearID)
+            .FirstOrDefaultAsync(ct);
+        if (yid is > 0)
+            return yid;
+        return await _db.Years.AsNoTracking()
+            .Where(y => y.SchoolID == schoolId)
+            .OrderByDescending(y => y.YearID)
+            .Select(y => (int?)y.YearID)
+            .FirstOrDefaultAsync(ct);
+    }
+
     private async Task<bool> IsDateLockedAsync(int schoolId, int yearId, DateOnly date, int? templateId, CancellationToken ct)
     {
         var locks = await _db.EvaluationLocks.AsNoTracking()
@@ -389,6 +406,8 @@ public class DailyEvaluationService : IDailyEvaluationService
         if (filter.FromDate is DateOnly fd) q = q.Where(e => e.EvaluationDate >= fd);
         if (filter.ToDate is DateOnly td) q = q.Where(e => e.EvaluationDate <= td);
         if (filter.Status is DailyEvaluationStatus st) q = q.Where(e => e.Status == st);
+        if (!string.IsNullOrWhiteSpace(filter.EvaluatorUserId))
+            q = q.Where(e => e.EvaluatorUserId == filter.EvaluatorUserId);
         return await q.OrderByDescending(e => e.EvaluationDate).ThenByDescending(e => e.DailyEvaluationID)
             .Select(e => new DailyEvaluationListDto
             {
@@ -401,6 +420,129 @@ public class DailyEvaluationService : IDailyEvaluationService
                 IsLocked = e.IsLocked,
                 UpdatedAtUtc = e.UpdatedAtUtc
             }).ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<TeacherEvaluationOptionDto>> GetTeachersForStudentEvaluationAsync(
+        int schoolId,
+        string? studentUserId,
+        CancellationToken cancellationToken = default)
+    {
+        async Task<IReadOnlyList<TeacherEvaluationOptionDto>> AllSchoolTeachersAsync()
+        {
+            var rows = await _db.EmployeeProfiles.AsNoTracking()
+                .Where(ep => ep.SchoolID == schoolId && ep.TeacherID != null && ep.TeacherID > 0 && ep.IsActive)
+                .OrderBy(ep => ep.EmployeeCode)
+                .Select(ep => new { ep.EmployeeProfileID, ep.FullName, ep.EmployeeCode })
+                .ToListAsync(cancellationToken);
+            return rows.Select(r => new TeacherEvaluationOptionDto
+            {
+                EmployeeProfileID = r.EmployeeProfileID,
+                DisplayName = FormatPersonName(r.FullName) is { Length: > 0 } n ? n : r.EmployeeCode,
+            }).ToList();
+        }
+
+        // Non-student callers (e.g. school admin) — full teaching staff list for the school.
+        if (string.IsNullOrWhiteSpace(studentUserId))
+            return await AllSchoolTeachersAsync();
+
+        studentUserId = studentUserId.Trim();
+
+        var studentInfo = await _db.Students.AsNoTracking()
+            .Where(s => s.UserID != null && s.UserID == studentUserId)
+            .Select(s => new
+            {
+                s.DivisionID,
+                ClassTeacherId = s.Division.Class.TeacherID,
+                StudentSchoolId = s.Division.Class.Stage.Year.SchoolID,
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // If the login user is not linked to a Student row (UserID not set), still return school teachers so the UI works.
+        if (studentInfo == null)
+            return await AllSchoolTeachersAsync();
+
+        if (studentInfo.StudentSchoolId != schoolId)
+            throw new InvalidOperationException("School does not match the student's enrollment.");
+
+        var teacherIds = new HashSet<int>();
+        if (studentInfo.ClassTeacherId is int homeroomId && homeroomId > 0)
+            teacherIds.Add(homeroomId);
+
+        var activeYearId = await GetActiveYearIdForSchoolAsync(schoolId, cancellationToken);
+        var cpBase = _db.CoursePlans.AsNoTracking()
+            .Where(cp => cp.DivisionID == studentInfo.DivisionID);
+        List<int> cpTeacherIds;
+        if (activeYearId is int yearFilter && yearFilter > 0)
+        {
+            cpTeacherIds = await cpBase.Where(cp => cp.YearID == yearFilter)
+                .Select(cp => cp.TeacherID).Distinct().ToListAsync(cancellationToken);
+            // Course plans often keyed by a different year than "Active" — use division teachers from any year if none for active year.
+            if (cpTeacherIds.Count == 0)
+            {
+                cpTeacherIds = await cpBase.Select(cp => cp.TeacherID).Distinct().ToListAsync(cancellationToken);
+            }
+        }
+        else
+        {
+            cpTeacherIds = await cpBase.Select(cp => cp.TeacherID).Distinct().ToListAsync(cancellationToken);
+        }
+
+        foreach (var tid in cpTeacherIds)
+        {
+            if (tid > 0)
+                teacherIds.Add(tid);
+        }
+
+        if (teacherIds.Count == 0)
+            return await AllSchoolTeachersAsync();
+
+        var profiles = await _db.EmployeeProfiles.AsNoTracking()
+            .Where(ep => ep.SchoolID == schoolId && ep.TeacherID != null && teacherIds.Contains(ep.TeacherID!.Value) && ep.IsActive)
+            .OrderBy(ep => ep.EmployeeCode)
+            .Select(ep => new { ep.EmployeeProfileID, ep.FullName, ep.EmployeeCode })
+            .ToListAsync(cancellationToken);
+
+        if (profiles.Count == 0)
+            return await AllSchoolTeachersAsync();
+
+        return profiles.Select(r => new TeacherEvaluationOptionDto
+        {
+            EmployeeProfileID = r.EmployeeProfileID,
+            DisplayName = FormatPersonName(r.FullName) is { Length: > 0 } n ? n : r.EmployeeCode,
+        }).ToList();
+    }
+
+    public async Task<string?> ValidateStudentEvaluationCreateAsync(DailyEvaluationCreateDto body, string studentUserId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(studentUserId))
+            return "Student user id is required.";
+
+        var studentSchoolId = await _db.Students.AsNoTracking()
+            .Where(s => s.UserID == studentUserId)
+            .Select(s => (int?)s.Division.Class.Stage.Year.SchoolID)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (!studentSchoolId.HasValue)
+            return "Student record was not found or is not linked to a class.";
+
+        if (studentSchoolId.Value != body.SchoolID)
+            return "School does not match the student's enrollment.";
+
+        var ep = await _db.EmployeeProfiles.AsNoTracking()
+            .FirstOrDefaultAsync(e => e.EmployeeProfileID == body.EvaluatedEmployeeProfileID, cancellationToken);
+        if (ep == null)
+            return "Evaluated employee was not found.";
+        if (ep.SchoolID != body.SchoolID)
+            return "The selected person does not belong to this school.";
+        if (!ep.TeacherID.HasValue || ep.TeacherID.Value <= 0)
+            return "Daily evaluations by students may only target teaching staff.";
+
+        return null;
+    }
+
+    private static string FormatPersonName(Name? name)
+    {
+        if (name == null) return string.Empty;
+        return string.Join(" ", new[] { name.FirstName, name.MiddleName, name.LastName }.Where(static x => !string.IsNullOrWhiteSpace(x)));
     }
 
     public async Task<DailyEvaluationReadDto> UpdateEvaluationAsync(int id, DailyEvaluationUpdateDto dto, string? currentUserId, CancellationToken cancellationToken = default)
@@ -494,6 +636,12 @@ public class DailyEvaluationService : IDailyEvaluationService
             IsMandatorySatisfied = item.IsMandatorySatisfied
         };
     }
+
+    public Task<int?> GetEvaluationIdForItemAsync(int dailyEvaluationItemId, CancellationToken cancellationToken = default) =>
+        _db.DailyEvaluationItems.AsNoTracking()
+            .Where(i => i.DailyEvaluationItemID == dailyEvaluationItemId)
+            .Select(i => (int?)i.DailyEvaluationID)
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<DailyEvaluationItemReadDto> UpdateItemAsync(int itemId, DailyEvaluationItemUpdateDto dto, CancellationToken cancellationToken = default)
     {

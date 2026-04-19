@@ -1,4 +1,4 @@
-<div class="employees-hr-page" *ngIf="canView">
+<div class="employees-hr-page" *ngIf="canViewEvaluations">
   <div *ngIf="loading" class="loading-wrap">
     <p-progressSpinner strokeWidth="3" />
   </div>
@@ -9,7 +9,7 @@
       <div class="header-actions">
         <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" [routerLink]="dailyEvalNav.basePath()" />
         <p-button
-          *ngIf="canUpdate && !full.isLocked && full.status !== DailyEvaluationStatus.Locked"
+          *ngIf="canUpdateEvaluations && !full.isLocked && full.status !== DailyEvaluationStatus.Locked"
           [label]="'employeesHr.actions.edit' | translate"
           icon="pi pi-pencil"
           [routerLink]="[dailyEvalNav.basePath(), full.dailyEvaluationID, 'edit']"
@@ -49,7 +49,9 @@
         <div>{{ full.academicYearID }}</div>
       </div>
       <div>
-        <div class="c-label">{{ 'dailyEvaluations.evaluations.employee' | translate }}</div>
+        <div class="c-label">{{
+          (isStudentEvaluations ? 'dailyEvaluations.evaluations.teachers' : 'dailyEvaluations.evaluations.employee') | translate
+        }}</div>
         <div>{{ employeeLabel }}</div>
       </div>
       <div>
@@ -96,7 +98,7 @@
   </div>
 </div>
 
-<div class="employees-hr-page" *ngIf="!canView">
+<div class="employees-hr-page" *ngIf="!canViewEvaluations">
   <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
 </div>
 

@@ -117,6 +117,16 @@ public class DailyEvaluationFilterDto
     public DateOnly? FromDate { get; set; }
     public DateOnly? ToDate { get; set; }
     public DailyEvaluationStatus? Status { get; set; }
+
+    /// <summary>When set, only evaluations created by this identity user (e.g. student evaluators).</summary>
+    public string? EvaluatorUserId { get; set; }
+}
+
+/// <summary>Teacher (HR profile) pick list for student-submitted daily evaluations.</summary>
+public class TeacherEvaluationOptionDto
+{
+    public int EmployeeProfileID { get; set; }
+    public string DisplayName { get; set; } = string.Empty;
 }
 
 public class DailyEvaluationCreateDto

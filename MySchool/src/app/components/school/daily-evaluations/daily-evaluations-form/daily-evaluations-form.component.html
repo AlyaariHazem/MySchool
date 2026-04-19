@@ -1,4 +1,4 @@
-<div class="employees-hr-page" *ngIf="!evaluationId && canCreate">
+<div class="employees-hr-page" *ngIf="!evaluationId && canCreateEvaluations">
   <div class="employees-hr-card">
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.createTitle' | translate }}</h2>
@@ -10,7 +10,7 @@
     </div>
 
     <form [formGroup]="headerForm" class="filters-toolbar filters-grid de-eval-filters" *ngIf="!loadingMeta">
-      <p-floatlabel class="filter-field" *ngIf="!isTeacherEvaluations">
+      <p-floatlabel class="filter-field" *ngIf="!isSessionPortalDailyEvaluations">
         <p-select
           inputId="ev-cr-school"
           styleClass="de-filter-select"
@@ -25,7 +25,7 @@
         />
         <label for="ev-cr-school">{{ 'employeesHr.filter.school' | translate }} *</label>
       </p-floatlabel>
-      <p-floatlabel class="filter-field">
+      <p-floatlabel class="filter-field" *ngIf="!isStudentDailyEvaluations">
         <p-select
           inputId="ev-cr-year"
           styleClass="de-filter-select"
@@ -55,7 +55,10 @@
           optionLabel="label"
           optionValue="value"
         />
-        <label for="ev-cr-emp">{{ 'dailyEvaluations.evaluations.employee' | translate }} *</label>
+        <label for="ev-cr-emp">{{
+          (isStudentDailyEvaluations ? 'dailyEvaluations.evaluations.teachers' : 'dailyEvaluations.evaluations.employee') | translate
+        }}
+          *</label>
       </p-floatlabel>
       <p-floatlabel class="filter-field">
         <p-select
@@ -96,7 +99,7 @@
   </div>
 </div>
 
-<div class="employees-hr-page" *ngIf="evaluationId && canUpdate">
+<div class="employees-hr-page" *ngIf="evaluationId && canUpdateEvaluations">
   <div *ngIf="loadingMeta" class="loading-wrap">
     <p-progressSpinner strokeWidth="3" />
   </div>
@@ -158,6 +161,6 @@
   </div>
 </div>
 
-<div class="employees-hr-page" *ngIf="(!evaluationId && !canCreate) || (evaluationId && !canUpdate)">
+<div class="employees-hr-page" *ngIf="(!evaluationId && !canCreateEvaluations) || (evaluationId && !canUpdateEvaluations)">
   <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
 </div>

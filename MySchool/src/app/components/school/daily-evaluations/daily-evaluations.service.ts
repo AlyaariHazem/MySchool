@@ -28,6 +28,7 @@ import {
   EvaluationOverrideLogReadDto,
   EvaluationOverrideRequestDto,
   EvaluationReopenDto,
+  TeacherEvaluationOptionDto,
 } from './daily-evaluations.models';
 
 function unwrap<T>(body: ApiResponse<T> | Record<string, unknown>): T {
@@ -58,6 +59,16 @@ function templateFilterParams(f?: DailyEvaluationTemplateFilterDto | null): Http
   if (f.status != null) p = p.set('status', String(f.status));
   if (f.isActive != null) p = p.set('isActive', String(f.isActive));
   return p;
+}
+
+function normalizeTeacherOptionDto(raw: Record<string, unknown>): TeacherEvaluationOptionDto {
+  const id = raw['employeeProfileID'] ?? raw['EmployeeProfileID'];
+  const name = raw['displayName'] ?? raw['DisplayName'] ?? '';
+  const n = typeof id === 'number' ? id : Number(id);
+  return {
+    employeeProfileID: Number.isFinite(n) && n > 0 ? n : 0,
+    displayName: typeof name === 'string' ? name : String(name),
+  };
 }
 
 function evaluationFilterParams(f?: DailyEvaluationFilterDto | null): HttpParams {
@@ -100,6 +111,19 @@ export class DailyEvaluationsService {
       map((r) => {
         const v = unwrap<number>(r);
         return typeof v === 'number' && v > 0 ? v : null;
+      }),
+    );
+  }
+
+  /**
+   * Teachers the student may evaluate: homeroom + course-plan teachers for the division for the school's active academic year (server-resolved).
+   */
+  getTeachersForStudentEvaluation(schoolId: number): Observable<TeacherEvaluationOptionDto[]> {
+    const q = new HttpParams().set('schoolId', String(schoolId));
+    return this.http.get<ApiResponse<Record<string, unknown>[]>>(this.root(`/for-student/teachers?${q.toString()}`)).pipe(
+      map((r) => {
+        const rows = unwrap<Record<string, unknown>[]>(r) ?? [];
+        return rows.map((row) => normalizeTeacherOptionDto(row as Record<string, unknown>)).filter((x) => x.employeeProfileID > 0);
       }),
     );
   }

@@ -93,14 +93,36 @@ export class DailyEvaluationsListComponent implements OnInit {
 
   filter: DailyEvaluationFilterDto = {};
 
-  canView = this.perm.hasPermission(PagePermission.Evaluations.View);
-  canCreate = this.perm.hasPermission(PagePermission.Evaluations.Create);
-  canUpdate = this.perm.hasPermission(PagePermission.Evaluations.Update);
   canLock = this.hasManagerOrEvalUpdate();
+
+  get isStudentEvaluations(): boolean {
+    return this.dailyEvalNav.isStudentDailyEvaluationsRoute();
+  }
+
+  get isSessionPortalDailyEvaluations(): boolean {
+    return this.isTeacherEvaluations || this.isStudentEvaluations;
+  }
+
+  get canViewEvaluations(): boolean {
+    if (this.isSessionPortalDailyEvaluations) return true;
+    return this.perm.hasPermission(PagePermission.Evaluations.View);
+  }
+
+  get canCreateEvaluations(): boolean {
+    if (this.isSessionPortalDailyEvaluations) return true;
+    return this.perm.hasPermission(PagePermission.Evaluations.Create);
+  }
+
+  get canUpdateEvaluations(): boolean {
+    if (this.isSessionPortalDailyEvaluations) return true;
+    return this.perm.hasPermission(PagePermission.Evaluations.Update);
+  }
 
   schoolOptions: { label: string; value: number }[] = [];
   yearOptions: { label: string; value: number }[] = [];
   employeeOptions: { label: string; value: number }[] = [];
+  /** Student portal: teacher names for evaluatedEmployeeProfileID column (HR list not available). */
+  teacherEvalOptions: { label: string; value: number }[] = [];
   templateOptions: { label: string; value: number }[] = [];
   statusOptions: { label: string; value: DailyEvaluationStatus }[] = [];
 
@@ -128,7 +150,7 @@ export class DailyEvaluationsListComponent implements OnInit {
       { label: this.translate.instant('dailyEvaluations.status.submitted'), value: DailyEvaluationStatus.Submitted },
       { label: this.translate.instant('dailyEvaluations.status.locked'), value: DailyEvaluationStatus.Locked },
     ];
-    if (this.isTeacherEvaluations) {
+    if (this.isSessionPortalDailyEvaluations) {
       this.applyTeacherSchoolContextFromSession();
       const yid = this.dailyEvalNav.teacherSessionYearId();
       if (yid != null) {
@@ -157,8 +179,19 @@ export class DailyEvaluationsListComponent implements OnInit {
       });
     }
     this.loadTemplatesForFilter();
-    if (!this.isTeacherEvaluations) {
+    if (!this.isSessionPortalDailyEvaluations) {
       this.loadEmployeesForFilter();
+    }
+    if (this.isStudentEvaluations && this.filter.schoolID != null && this.filter.schoolID > 0) {
+      this.svc.getTeachersForStudentEvaluation(this.filter.schoolID).subscribe({
+        next: (rows) => {
+          this.teacherEvalOptions = (rows ?? []).map((r) => ({
+            label: r.displayName,
+            value: r.employeeProfileID,
+          }));
+        },
+        error: () => undefined,
+      });
     }
     this.load();
   }
@@ -199,7 +232,7 @@ export class DailyEvaluationsListComponent implements OnInit {
     this.svc.getTemplates(f).subscribe({
       next: (rows) => {
         this.templates = rows ?? [];
-        if (!this.isTeacherEvaluations) {
+        if (!this.isSessionPortalDailyEvaluations) {
           this.templateOptions = this.templates.map((t) => ({ label: t.name, value: t.dailyEvaluationTemplateID }));
         } else {
           this.templateOptions = [];
@@ -256,7 +289,7 @@ export class DailyEvaluationsListComponent implements OnInit {
   }
 
   load(): void {
-    if (!this.canView) {
+    if (!this.canViewEvaluations) {
       this.error = 'dailyEvaluations.errors.noPermission';
       return;
     }
@@ -279,6 +312,8 @@ export class DailyEvaluationsListComponent implements OnInit {
   }
 
   employeeName(id: number): string {
+    const t = this.teacherEvalOptions.find((x) => x.value === id);
+    if (t) return t.label;
     const e = this.employees.find((x) => x.employeeProfileID === id);
     return e ? this.displayName(e) : String(id);
   }

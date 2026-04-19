@@ -40,32 +40,25 @@
             }
           </mat-form-field>
 
-          <div class="login-password-row">
-            <mat-form-field appearance="outline" class="login-field login-password-row__field">
-              <mat-label>كلمة السر</mat-label>
-              <input
-                matInput
-                placeholder="••••••••"
-                autocomplete="current-password"
-                ngModel
-                name="password"
-                [type]="hidePassword ? 'password' : 'text'"
-                required
-                minlength="3"
-                maxlength="256"
-                #password="ngModel"
-                [disabled]="isLoading"
-              />
-              @if (password.errors?.['required'] && password.touched) {
-                <mat-error>كلمة السر مطلوبة</mat-error>
-              }
-              @if (password.errors?.['minlength']) {
-                <mat-error>3 أحرف على الأقل</mat-error>
-              }
-            </mat-form-field>
+          <mat-form-field appearance="outline" class="login-field login-field--password">
+            <mat-label>كلمة السر</mat-label>
+            <input
+              matInput
+              placeholder="••••••••"
+              autocomplete="current-password"
+              ngModel
+              name="password"
+              [type]="hidePassword ? 'password' : 'text'"
+              required
+              minlength="3"
+              maxlength="256"
+              #password="ngModel"
+              [disabled]="isLoading"
+            />
             <button
               type="button"
               mat-icon-button
+              matSuffix
               class="login-password-toggle"
               (click)="togglePasswordVisibility($event)"
               [disabled]="isLoading"
@@ -78,7 +71,13 @@
                 <mat-icon fontSet="material-icons">visibility_off</mat-icon>
               }
             </button>
-          </div>
+            @if (password.errors?.['required'] && password.touched) {
+              <mat-error>كلمة السر مطلوبة</mat-error>
+            }
+            @if (password.errors?.['minlength']) {
+              <mat-error>3 أحرف على الأقل</mat-error>
+            }
+          </mat-form-field>
 
           <mat-form-field appearance="outline" class="login-field">
             <mat-label>نوع المستخدم</mat-label>

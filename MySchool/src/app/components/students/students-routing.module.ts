@@ -33,6 +33,46 @@ const routes: Routes = [
         data: { breadcrumb: 'تقارير شهرية' },
       },
       { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
+      {
+        path: 'daily-evaluations',
+        data: { breadcrumb: 'التقييم اليومي' },
+        children: [
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('../school/daily-evaluations/daily-evaluations-form/daily-evaluations-form.component').then(
+                (m) => m.DailyEvaluationsFormComponent,
+              ),
+            data: { breadcrumb: 'تقييم يومي جديد' },
+          },
+          {
+            path: ':evaluationId/edit',
+            loadComponent: () =>
+              import('../school/daily-evaluations/daily-evaluations-form/daily-evaluations-form.component').then(
+                (m) => m.DailyEvaluationsFormComponent,
+              ),
+            data: { breadcrumb: 'تعديل تقييم يومي' },
+          },
+          {
+            path: ':evaluationId',
+            loadComponent: () =>
+              import('../school/daily-evaluations/daily-evaluations-detail/daily-evaluations-detail.component').then(
+                (m) => m.DailyEvaluationsDetailComponent,
+              ),
+            data: { breadcrumb: 'تقييم يومي' },
+          },
+          {
+            path: '',
+            loadComponent: () =>
+              import('../school/daily-evaluations/daily-evaluations-list/daily-evaluations-list.component').then(
+                (m) => m.DailyEvaluationsListComponent,
+              ),
+            data: { breadcrumb: 'التقييمات اليومية' },
+          },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
       { path: 'not-found', component: PageNotFoundComponent },
       { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
     ],

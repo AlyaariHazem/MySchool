@@ -61,6 +61,51 @@ public class DailyEvaluationController : ControllerBase
         return (true, empId, null);
     }
 
+    private bool IsStudentUser =>
+        string.Equals(UserTypeClaim, "STUDENT", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Teachers: evaluated must be self. Students: must be the evaluator. Others: allowed.</summary>
+    private async Task<ActionResult<APIResponse>?> EnsureEvaluationRowAccessAsync(DailyEvaluationReadDto? row, CancellationToken cancellationToken)
+    {
+        if (row == null)
+        {
+            var nf = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.NotFound };
+            nf.ErrorMasseges.Add("Evaluation was not found.");
+            return NotFound(nf);
+        }
+
+        if (IsPrivilegedAppUser)
+            return null;
+
+        if (string.Equals(UserTypeClaim, "TEACHER", StringComparison.OrdinalIgnoreCase))
+        {
+            var scope = await GetTeacherDailyEvalScopeAsync(cancellationToken);
+            if (scope.ErrorResponse != null)
+                return scope.ErrorResponse;
+            if (scope.RestrictToOwnProfile && scope.OwnEmployeeProfileId is int ownId && row.EvaluatedEmployeeProfileID != ownId)
+            {
+                var f = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.Forbidden };
+                f.ErrorMasseges.Add("You do not have access to this evaluation.");
+                return StatusCode((int)HttpStatusCode.Forbidden, f);
+            }
+            return null;
+        }
+
+        if (IsStudentUser)
+        {
+            var uid = CurrentUserId;
+            if (string.IsNullOrEmpty(uid) || !string.Equals(row.EvaluatorUserId, uid, StringComparison.Ordinal))
+            {
+                var f = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.Forbidden };
+                f.ErrorMasseges.Add("You do not have access to this evaluation.");
+                return StatusCode((int)HttpStatusCode.Forbidden, f);
+            }
+            return null;
+        }
+
+        return null;
+    }
+
     // --- Templates ---
 
     [HttpGet("templates")]
@@ -104,6 +149,47 @@ public class DailyEvaluationController : ControllerBase
             response.Result = id;
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
+    /// <summary>
+    /// Teachers relevant to the current student (homeroom + course plans for the division for the school's active academic year), scoped to the school.
+    /// When the caller is not a student, returns all teaching staff in the school (same as legacy behaviour).
+    /// </summary>
+    [HttpGet("for-student/teachers")]
+    public async Task<ActionResult<APIResponse>> GetTeachersForStudentEvaluation(
+        [FromQuery] int schoolId,
+        CancellationToken cancellationToken)
+    {
+        var response = new APIResponse();
+        try
+        {
+            if (schoolId <= 0)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.BadRequest;
+                response.ErrorMasseges.Add("schoolId is required.");
+                return BadRequest(response);
+            }
+
+            var studentUserId = IsStudentUser ? CurrentUserId : null;
+            response.Result = await _svc.GetTeachersForStudentEvaluationAsync(schoolId, studentUserId, cancellationToken);
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.BadRequest;
+            response.ErrorMasseges.Add(ex.Message);
+            return BadRequest(response);
         }
         catch (Exception ex)
         {
@@ -197,6 +283,18 @@ public class DailyEvaluationController : ControllerBase
             filter ??= new DailyEvaluationFilterDto();
             if (scope.RestrictToOwnProfile && scope.OwnEmployeeProfileId is int ownId)
                 filter.EvaluatedEmployeeProfileID = ownId;
+            else if (IsStudentUser)
+            {
+                var uid = CurrentUserId;
+                if (string.IsNullOrEmpty(uid))
+                {
+                    var r = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.Unauthorized };
+                    r.ErrorMasseges.Add("User id not found on token.");
+                    return Unauthorized(r);
+                }
+
+                filter.EvaluatorUserId = uid;
+            }
 
             response.Result = await _svc.GetEvaluationsAsync(filter, cancellationToken);
             response.statusCode = HttpStatusCode.OK;
@@ -222,21 +320,9 @@ public class DailyEvaluationController : ControllerBase
                 return scope.ErrorResponse;
 
             var row = await _svc.GetEvaluationByIdAsync(id, cancellationToken);
-            if (row == null)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.NotFound;
-                response.ErrorMasseges.Add($"Evaluation {id} was not found.");
-                return NotFound(response);
-            }
-
-            if (scope.RestrictToOwnProfile && scope.OwnEmployeeProfileId is int ownId && row.EvaluatedEmployeeProfileID != ownId)
-            {
-                response.IsSuccess = false;
-                response.statusCode = HttpStatusCode.Forbidden;
-                response.ErrorMasseges.Add("You do not have access to this evaluation.");
-                return StatusCode((int)HttpStatusCode.Forbidden, response);
-            }
+            var denied = await EnsureEvaluationRowAccessAsync(row, cancellationToken);
+            if (denied != null)
+                return denied;
 
             response.Result = row;
             response.statusCode = HttpStatusCode.OK;
@@ -266,12 +352,9 @@ public class DailyEvaluationController : ControllerBase
             return NotFound(notFound);
         }
 
-        if (scope.RestrictToOwnProfile && scope.OwnEmployeeProfileId is int ownId && summary.EvaluatedEmployeeProfileID != ownId)
-        {
-            var forbidden = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.Forbidden };
-            forbidden.ErrorMasseges.Add("You do not have access to this evaluation.");
-            return StatusCode((int)HttpStatusCode.Forbidden, forbidden);
-        }
+        var deniedFull = await EnsureEvaluationRowAccessAsync(summary, cancellationToken);
+        if (deniedFull != null)
+            return deniedFull;
 
         return await RunAsync(() => _svc.GetEvaluationFullAsync(id, cancellationToken));
     }
@@ -289,24 +372,75 @@ public class DailyEvaluationController : ControllerBase
         if (string.IsNullOrEmpty(body.EvaluatorUserId))
             body.EvaluatorUserId = CurrentUserId;
 
+        if (IsStudentUser)
+        {
+            var uid = CurrentUserId;
+            if (string.IsNullOrEmpty(uid))
+            {
+                var r = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.Unauthorized };
+                r.ErrorMasseges.Add("User id not found on token.");
+                return Unauthorized(r);
+            }
+
+            var err = await _svc.ValidateStudentEvaluationCreateAsync(body, uid, cancellationToken);
+            if (err != null)
+            {
+                var bad = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.BadRequest };
+                bad.ErrorMasseges.Add(err);
+                return BadRequest(bad);
+            }
+        }
+
         return await RunAsync(() => _svc.CreateEvaluationAsync(body, cancellationToken));
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<APIResponse>> UpdateEvaluation(int id, [FromBody] DailyEvaluationUpdateDto body, CancellationToken cancellationToken) =>
-        await RunAsync(() => _svc.UpdateEvaluationAsync(id, body, CurrentUserId, cancellationToken));
+    public async Task<ActionResult<APIResponse>> UpdateEvaluation(int id, [FromBody] DailyEvaluationUpdateDto body, CancellationToken cancellationToken)
+    {
+        var row = await _svc.GetEvaluationByIdAsync(id, cancellationToken);
+        var denied = await EnsureEvaluationRowAccessAsync(row, cancellationToken);
+        if (denied != null)
+            return denied;
+        return await RunAsync(() => _svc.UpdateEvaluationAsync(id, body, CurrentUserId, cancellationToken));
+    }
 
     [HttpPost("{id:int}/submit")]
-    public async Task<ActionResult<APIResponse>> SubmitEvaluation(int id, CancellationToken cancellationToken) =>
-        await RunAsync(() => _svc.SubmitEvaluationAsync(id, cancellationToken));
+    public async Task<ActionResult<APIResponse>> SubmitEvaluation(int id, CancellationToken cancellationToken)
+    {
+        var row = await _svc.GetEvaluationByIdAsync(id, cancellationToken);
+        var denied = await EnsureEvaluationRowAccessAsync(row, cancellationToken);
+        if (denied != null)
+            return denied;
+        return await RunAsync(() => _svc.SubmitEvaluationAsync(id, cancellationToken));
+    }
 
     [HttpPost("{id:int}/items")]
-    public async Task<ActionResult<APIResponse>> UpsertItem(int id, [FromBody] DailyEvaluationItemCreateDto body, CancellationToken cancellationToken) =>
-        await RunAsync(() => _svc.UpsertItemAsync(id, body, cancellationToken));
+    public async Task<ActionResult<APIResponse>> UpsertItem(int id, [FromBody] DailyEvaluationItemCreateDto body, CancellationToken cancellationToken)
+    {
+        var row = await _svc.GetEvaluationByIdAsync(id, cancellationToken);
+        var denied = await EnsureEvaluationRowAccessAsync(row, cancellationToken);
+        if (denied != null)
+            return denied;
+        return await RunAsync(() => _svc.UpsertItemAsync(id, body, cancellationToken));
+    }
 
     [HttpPut("items/{itemId:int}")]
-    public async Task<ActionResult<APIResponse>> UpdateItem(int itemId, [FromBody] DailyEvaluationItemUpdateDto body, CancellationToken cancellationToken) =>
-        await RunAsync(() => _svc.UpdateItemAsync(itemId, body, cancellationToken));
+    public async Task<ActionResult<APIResponse>> UpdateItem(int itemId, [FromBody] DailyEvaluationItemUpdateDto body, CancellationToken cancellationToken)
+    {
+        var evalId = await _svc.GetEvaluationIdForItemAsync(itemId, cancellationToken);
+        if (evalId == null)
+        {
+            var nf = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.NotFound };
+            nf.ErrorMasseges.Add("Evaluation item was not found.");
+            return NotFound(nf);
+        }
+
+        var row = await _svc.GetEvaluationByIdAsync(evalId.Value, cancellationToken);
+        var denied = await EnsureEvaluationRowAccessAsync(row, cancellationToken);
+        if (denied != null)
+            return denied;
+        return await RunAsync(() => _svc.UpdateItemAsync(itemId, body, cancellationToken));
+    }
 
     // --- Locks ---
 

@@ -1,22 +1,23 @@
-<div class="employees-hr-page" *ngIf="canView" [attr.dir]="dir$ | async">
+<div class="employees-hr-page" *ngIf="canViewEvaluations" [attr.dir]="dir$ | async">
   <div class="employees-hr-card">
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.title' | translate }}</h2>
       <div class="header-actions">
         <p-button
+          *ngIf="!isSessionPortalDailyEvaluations"
           [label]="'dailyEvaluations.templates.listTitle' | translate"
           icon="pi pi-table"
           [outlined]="true"
           [routerLink]="[dailyEvalNav.basePath(), 'templates']"
         />
         <p-button
-          *ngIf="canCreate"
+          *ngIf="canCreateEvaluations"
           [label]="'dailyEvaluations.evaluations.add' | translate"
           icon="pi pi-plus"
           [routerLink]="[dailyEvalNav.basePath(), 'new']"
         />
         <p-button
-          *ngIf="canLock && !isTeacherEvaluations"
+          *ngIf="canLock && !isSessionPortalDailyEvaluations"
           [label]="'dailyEvaluations.lock.title' | translate"
           icon="pi pi-lock"
           severity="danger"
@@ -24,7 +25,7 @@
           (onClick)="openLockDialog()"
         />
         <p-button
-          *ngIf="canLock && !isTeacherEvaluations"
+          *ngIf="canLock && !isSessionPortalDailyEvaluations"
           [label]="'dailyEvaluations.reopen.title' | translate"
           icon="pi pi-unlock"
           [outlined]="true"
@@ -34,7 +35,7 @@
     </header>
 
     <div class="filters-toolbar filters-grid de-eval-filters">
-      <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
+      <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field">
         <p-select
           inputId="de-ev-school"
           styleClass="de-filter-select"
@@ -49,7 +50,7 @@
         />
         <label for="de-ev-school">{{ 'employeesHr.filter.school' | translate }}</label>
       </p-floatlabel>
-      <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
+      <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field">
         <p-select
           inputId="de-ev-year"
           styleClass="de-filter-select"
@@ -63,7 +64,7 @@
         />
         <label for="de-ev-year">{{ 'employeesHr.filter.year' | translate }}</label>
       </p-floatlabel>
-      <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
+      <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field">
         <p-select
           inputId="de-ev-emp"
           styleClass="de-filter-select"
@@ -78,7 +79,7 @@
         />
         <label for="de-ev-emp">{{ 'dailyEvaluations.evaluations.employee' | translate }}</label>
       </p-floatlabel>
-      <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
+      <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field">
         <p-select
           inputId="de-ev-tpl"
           styleClass="de-filter-select"
@@ -139,7 +140,9 @@
       <ng-template pTemplate="header">
         <tr>
           <th>{{ 'dailyEvaluations.evaluations.colDate' | translate }}</th>
-          <th *ngIf="!isTeacherEvaluations">{{ 'dailyEvaluations.evaluations.employee' | translate }}</th>
+          <th *ngIf="!isTeacherEvaluations">{{
+            (isStudentEvaluations ? 'dailyEvaluations.evaluations.teachers' : 'dailyEvaluations.evaluations.employee') | translate
+          }}</th>
           <th>{{ 'dailyEvaluations.evaluations.template' | translate }}</th>
           <th>{{ 'dailyEvaluations.evaluations.totalScore' | translate }}</th>
           <th>{{ 'dailyEvaluations.evaluations.colStatus' | translate }}</th>
@@ -164,7 +167,7 @@
               [pTooltip]="'employeesHr.actions.view' | translate"
             />
             <p-button
-              *ngIf="canUpdate && !row.isLocked && row.status !== DailyEvaluationStatus.Locked"
+              *ngIf="canUpdateEvaluations && !row.isLocked && row.status !== DailyEvaluationStatus.Locked"
               icon="pi pi-pencil"
               [rounded]="true"
               [text]="true"
@@ -178,7 +181,7 @@
   </div>
 </div>
 
-<div class="employees-hr-page" *ngIf="!canView">
+<div class="employees-hr-page" *ngIf="!canViewEvaluations">
   <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
 </div>
 
@@ -190,7 +193,7 @@
   (onShow)="refreshLockPreview()"
 >
   <div class="filters-grid" *ngIf="lockDialog">
-    <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
+    <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field">
       <p-select
         inputId="lk-school"
         [options]="schoolOptions"
@@ -250,7 +253,7 @@
   (onShow)="refreshReopenLock()"
 >
   <div class="filters-grid" *ngIf="reopenDialog">
-    <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
+    <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field">
       <p-select
         inputId="ro-school"
         [options]="schoolOptions"

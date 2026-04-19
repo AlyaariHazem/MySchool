@@ -82,9 +82,29 @@ export class DailyEvaluationsDetailComponent implements OnInit {
   years: Year[] = [];
   lockForDay: EvaluationLockReadDto | null = null;
 
-  canView = this.perm.hasPermission(PagePermission.Evaluations.View);
-  canUpdate = this.perm.hasPermission(PagePermission.Evaluations.Update);
   canOverride = this.hasOverrideAccess();
+
+  get isTeacherEvaluations(): boolean {
+    return this.dailyEvalNav.isTeacherDailyEvaluationsRoute();
+  }
+
+  get isStudentEvaluations(): boolean {
+    return this.dailyEvalNav.isStudentDailyEvaluationsRoute();
+  }
+
+  get isSessionPortalDailyEvaluations(): boolean {
+    return this.isTeacherEvaluations || this.isStudentEvaluations;
+  }
+
+  get canViewEvaluations(): boolean {
+    if (this.isSessionPortalDailyEvaluations) return true;
+    return this.perm.hasPermission(PagePermission.Evaluations.View);
+  }
+
+  get canUpdateEvaluations(): boolean {
+    if (this.isSessionPortalDailyEvaluations) return true;
+    return this.perm.hasPermission(PagePermission.Evaluations.Update);
+  }
 
   overrideDialog = false;
   logsDialog = false;
@@ -100,11 +120,11 @@ export class DailyEvaluationsDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('evaluationId')) || 0;
-    if (!id || !this.canView) {
+    if (!id || !this.canViewEvaluations) {
       this.loading = false;
       return;
     }
-    if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute()) {
+    if (this.isSessionPortalDailyEvaluations) {
       const opt = this.dailyEvalNav.teacherSessionSchoolOption();
       this.schools = opt ? ([{ schoolID: opt.value, schoolName: opt.label }] as School[]) : [];
     } else {
@@ -146,6 +166,16 @@ export class DailyEvaluationsDetailComponent implements OnInit {
       next: (t) => (this.templateName = t.name),
       error: () => (this.templateName = String(f.dailyEvaluationTemplateID)),
     });
+    if (this.isStudentEvaluations) {
+      this.svc.getTeachersForStudentEvaluation(f.schoolID).subscribe({
+        next: (rows) => {
+          const m = rows.find((r) => r.employeeProfileID === f.evaluatedEmployeeProfileID);
+          this.employeeLabel = m?.displayName ?? String(f.evaluatedEmployeeProfileID);
+        },
+        error: () => (this.employeeLabel = String(f.evaluatedEmployeeProfileID)),
+      });
+      return;
+    }
     this.employeesHr.getEmployeeById(f.evaluatedEmployeeProfileID).subscribe({
       next: (e) => (this.employeeLabel = this.displayName(e)),
       error: () => (this.employeeLabel = String(f.evaluatedEmployeeProfileID)),

@@ -32,6 +32,7 @@ import {
   DailyEvaluationTemplateFilterDto,
   DailyEvaluationTemplateListDto,
   EvaluationTemplateStatus,
+  TeacherEvaluationOptionDto,
 } from '../daily-evaluations.models';
 import { DailyEvaluationsNavService } from '../daily-evaluations-nav.service';
 import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evaluations.service';
@@ -93,11 +94,27 @@ export class DailyEvaluationsFormComponent implements OnInit {
   itemDrafts: Record<number, { score: number; comment: string }> = {};
   critById = new Map<number, { min: number; max: number; mandatory: boolean }>();
 
-  canCreate = this.perm.hasPermission(PagePermission.Evaluations.Create);
-  canUpdate = this.perm.hasPermission(PagePermission.Evaluations.Update);
-
   get isTeacherEvaluations(): boolean {
     return this.dailyEvalNav.isTeacherDailyEvaluationsRoute();
+  }
+
+  get isStudentDailyEvaluations(): boolean {
+    return this.dailyEvalNav.isStudentDailyEvaluationsRoute();
+  }
+
+  /** Teacher or student portal — session school/year, no Evaluations.* permission required. */
+  get isSessionPortalDailyEvaluations(): boolean {
+    return this.isTeacherEvaluations || this.isStudentDailyEvaluations;
+  }
+
+  get canCreateEvaluations(): boolean {
+    if (this.isSessionPortalDailyEvaluations) return true;
+    return this.perm.hasPermission(PagePermission.Evaluations.Create);
+  }
+
+  get canUpdateEvaluations(): boolean {
+    if (this.isSessionPortalDailyEvaluations) return true;
+    return this.perm.hasPermission(PagePermission.Evaluations.Update);
   }
 
   headerForm = this.fb.nonNullable.group({
@@ -112,20 +129,28 @@ export class DailyEvaluationsFormComponent implements OnInit {
   ngOnInit(): void {
     this.evaluationId = Number(this.route.snapshot.paramMap.get('evaluationId')) || null;
 
-    if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute()) {
+    if (this.isSessionPortalDailyEvaluations) {
       const opt = this.dailyEvalNav.teacherSessionSchoolOption();
       if (opt) {
         this.schools = [{ schoolID: opt.value, schoolName: opt.label } as School];
         this.schoolOptions = [opt];
       }
-      const yid = this.dailyEvalNav.teacherSessionYearId();
-      if (yid != null && !this.evaluationId) {
-        this.headerForm.patchValue({
-          schoolID: opt?.value ?? null,
-          academicYearID: yid,
-        });
-      } else if (opt && !this.evaluationId) {
-        this.headerForm.patchValue({ schoolID: opt.value });
+      if (!this.evaluationId) {
+        if (this.isStudentDailyEvaluations) {
+          if (opt) {
+            this.headerForm.patchValue({ schoolID: opt.value });
+          }
+        } else if (this.isTeacherEvaluations) {
+          const yid = this.dailyEvalNav.teacherSessionYearId();
+          if (yid != null) {
+            this.headerForm.patchValue({
+              schoolID: opt?.value ?? null,
+              academicYearID: yid,
+            });
+          } else if (opt) {
+            this.headerForm.patchValue({ schoolID: opt.value });
+          }
+        }
       }
     } else {
       this.schoolService.getAllSchools().subscribe({
@@ -141,25 +166,36 @@ export class DailyEvaluationsFormComponent implements OnInit {
       next: (y) => {
         this.years = y ?? [];
         this.rebuildYearOptions();
-        if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute() && !this.evaluationId) {
+        if (this.isStudentDailyEvaluations && !this.evaluationId) {
+          this.patchStudentActiveAcademicYear();
+          // Always load meta here — do not rely on academicYearID valueChanges (patch may not emit or yid may stay null).
           this.reloadEmployeesAndTemplates();
+          return;
+        }
+        if (this.isSessionPortalDailyEvaluations && !this.evaluationId) {
+          this.reloadEmployeesAndTemplates();
+        }
+      },
+      error: () => {
+        if (this.isStudentDailyEvaluations && !this.evaluationId) {
+          this.loadingMeta = false;
         }
       },
     });
 
     if (this.evaluationId) {
-      if (!this.canUpdate) {
+      if (!this.canUpdateEvaluations) {
         this.loadingMeta = false;
         return;
       }
       this.loadEdit(this.evaluationId);
     } else {
-      if (!this.canCreate) {
+      if (!this.canCreateEvaluations) {
         this.loadingMeta = false;
         return;
       }
       this.headerForm.patchValue({ evaluationDate: new Date() });
-      this.loadingMeta = this.isTeacherEvaluations;
+      this.loadingMeta = this.isSessionPortalDailyEvaluations;
     }
 
     this.headerForm.get('schoolID')?.valueChanges.subscribe(() => this.onSchoolChange());
@@ -233,18 +269,59 @@ export class DailyEvaluationsFormComponent implements OnInit {
     if (yid && !this.yearOptions.some((y) => y.value === yid)) {
       this.headerForm.patchValue({ academicYearID: null });
     }
+    if (this.isStudentDailyEvaluations && !this.evaluationId) {
+      this.patchStudentActiveAcademicYear();
+      this.reloadEmployeesAndTemplates();
+      return;
+    }
     if (!this.evaluationId) {
       this.reloadEmployeesAndTemplates();
+    }
+  }
+
+  private yearIsActive(y: Year): boolean {
+    const raw = y as unknown as { active?: boolean; Active?: boolean };
+    return !!(raw.active ?? raw.Active);
+  }
+
+  private yearSchoolId(y: Year): number {
+    const raw = y as unknown as { schoolID?: number; SchoolID?: number };
+    return raw.schoolID ?? raw.SchoolID ?? 0;
+  }
+
+  private yearIdNum(y: Year): number {
+    const raw = y as unknown as { yearID?: number; YearID?: number };
+    const n = raw.yearID ?? raw.YearID;
+    return typeof n === 'number' && !Number.isNaN(n) ? n : 0;
+  }
+
+  /** Same rules as backend GetActiveYearIdForSchoolAsync: Active for school, else latest YearID. */
+  private resolveActiveYearIdForSchool(schoolId: number | null): number | null {
+    if (schoolId == null || schoolId <= 0) return null;
+    const forSchool = this.years.filter((x) => this.yearSchoolId(x) === schoolId);
+    const actives = forSchool.filter((x) => this.yearIsActive(x)).sort((a, b) => this.yearIdNum(a) - this.yearIdNum(b));
+    if (actives.length) return this.yearIdNum(actives[0]);
+    const latest = [...forSchool].sort((a, b) => this.yearIdNum(b) - this.yearIdNum(a));
+    return latest.length ? this.yearIdNum(latest[0]) : null;
+  }
+
+  /** Student create: hidden year control — set active academic year for templates + API body. */
+  private patchStudentActiveAcademicYear(): void {
+    if (!this.isStudentDailyEvaluations || this.evaluationId) return;
+    const sid = this.headerForm.get('schoolID')?.value ?? null;
+    const yid = this.resolveActiveYearIdForSchool(sid);
+    if (yid != null) {
+      this.headerForm.patchValue({ academicYearID: yid }, { emitEvent: false });
     }
   }
 
   private rebuildYearOptions(): void {
     const sid = this.headerForm.get('schoolID')?.value ?? this.full?.schoolID;
     const filtered =
-      sid != null && sid > 0 ? this.years.filter((y) => y.schoolID === sid) : [...this.years];
+      sid != null && sid > 0 ? this.years.filter((y) => this.yearSchoolId(y) === sid) : [...this.years];
     this.yearOptions = filtered.map((y) => ({
-      label: `${y.yearID} — ${y.yearDateStart ? new Date(y.yearDateStart).toLocaleDateString() : ''}`,
-      value: y.yearID,
+      label: `${this.yearIdNum(y)} — ${y.yearDateStart ? new Date(y.yearDateStart).toLocaleDateString() : ''}`,
+      value: this.yearIdNum(y),
     }));
   }
 
@@ -276,10 +353,70 @@ export class DailyEvaluationsFormComponent implements OnInit {
       this.templates = [];
       this.employeeOptions = [];
       this.templateOptions = [];
-      if (this.isTeacherEvaluations && !this.evaluationId) {
+      if (this.isSessionPortalDailyEvaluations && !this.evaluationId) {
         this.loadingMeta = false;
       }
       done?.();
+      return;
+    }
+
+    if (this.isStudentDailyEvaluations) {
+      if (this.evaluationId) {
+        this.svc
+          .getTemplates(this.templateFilterForCreate(sid, yid))
+          .pipe(
+            finalize(() => {
+              if (!this.evaluationId) {
+                this.loadingMeta = false;
+              }
+              done?.();
+            }),
+          )
+          .subscribe({
+            next: (tpl) => this.applyTemplateList(tpl),
+            error: (err) => {
+              this.toastr.error(readDailyEvalHttpError(err));
+              this.applyTemplateList([]);
+              if (!this.evaluationId) {
+                this.loadingMeta = false;
+              }
+            },
+          });
+        return;
+      }
+
+      const tpl$ = this.svc.getTemplates(this.templateFilterForCreate(sid, yid)).pipe(
+        catchError((err) => {
+          this.toastr.error(readDailyEvalHttpError(err));
+          return of([] as DailyEvaluationTemplateListDto[]);
+        }),
+      );
+      const teachers$ = this.svc.getTeachersForStudentEvaluation(sid).pipe(
+        catchError((err) => {
+          this.toastr.error(readDailyEvalHttpError(err));
+          return of([] as TeacherEvaluationOptionDto[]);
+        }),
+      );
+
+      forkJoin({ tpl: tpl$, teachers: teachers$ })
+        .pipe(
+          finalize(() => {
+            if (!this.evaluationId) {
+              this.loadingMeta = false;
+            }
+            done?.();
+          }),
+        )
+        .subscribe({
+          next: ({ tpl, teachers }) => {
+            this.applyTemplateList(tpl);
+            this.employees = [];
+            this.employeeOptions = (teachers ?? []).map((r) => ({
+              label: r.displayName,
+              value: r.employeeProfileID,
+            }));
+          },
+        });
       return;
     }
 
@@ -361,7 +498,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
   }
 
   createEvaluation(): void {
-    if (this.headerForm.invalid || !this.canCreate) {
+    if (this.headerForm.invalid || !this.canCreateEvaluations) {
       this.headerForm.markAllAsTouched();
       return;
     }
@@ -388,7 +525,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
   }
 
   saveItemsAndNotes(): void {
-    if (!this.full || !this.canUpdate) return;
+    if (!this.full || !this.canUpdateEvaluations) return;
     if (this.full.isLocked) {
       this.toastr.error(this.translate.instant('dailyEvaluations.evaluations.readOnlyLocked'));
       return;
