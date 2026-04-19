@@ -1,5 +1,5 @@
 import { DatePipe, NgFor, NgIf } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -63,6 +63,12 @@ import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evalua
   styleUrl: './daily-evaluations-detail.component.scss',
 })
 export class DailyEvaluationsDetailComponent implements OnInit {
+  @Input() embedded = false;
+  @Input() evaluationIdInput: number | null = null;
+
+  @Output() closed = new EventEmitter<void>();
+  @Output() requestEdit = new EventEmitter<number>();
+
   private readonly svc = inject(DailyEvaluationsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -119,9 +125,14 @@ export class DailyEvaluationsDetailComponent implements OnInit {
   EvaluationOverrideActionType = EvaluationOverrideActionType;
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('evaluationId')) || 0;
+    const id = this.embedded
+      ? Number(this.evaluationIdInput) || 0
+      : Number(this.route.snapshot.paramMap.get('evaluationId')) || 0;
     if (!id || !this.canViewEvaluations) {
       this.loading = false;
+      if (this.embedded) {
+        this.closed.emit();
+      }
       return;
     }
     if (this.isSessionPortalDailyEvaluations) {
@@ -156,9 +167,30 @@ export class DailyEvaluationsDetailComponent implements OnInit {
         },
         error: (err) => {
           this.toastr.error(readDailyEvalHttpError(err));
-          this.router.navigate([this.dailyEvalNav.basePath()]).catch(() => undefined);
+          if (this.embedded) {
+            this.closed.emit();
+          } else {
+            this.router.navigate([this.dailyEvalNav.basePath()]).catch(() => undefined);
+          }
         },
       });
+  }
+
+  onBack(): void {
+    if (this.embedded) {
+      this.closed.emit();
+    } else {
+      this.router.navigate([this.dailyEvalNav.basePath()]).catch(() => undefined);
+    }
+  }
+
+  onEditClick(): void {
+    if (!this.full) return;
+    if (this.embedded) {
+      this.requestEdit.emit(this.full.dailyEvaluationID);
+    } else {
+      this.router.navigate([this.dailyEvalNav.basePath(), this.full.dailyEvaluationID, 'edit']).catch(() => undefined);
+    }
   }
 
   private resolveLabels(f: DailyEvaluationFullDto): void {

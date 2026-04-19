@@ -14,7 +14,7 @@
           *ngIf="canCreateEvaluations"
           [label]="'dailyEvaluations.evaluations.add' | translate"
           icon="pi pi-plus"
-          [routerLink]="[dailyEvalNav.basePath(), 'new']"
+          (onClick)="openEvalCreateDialog()"
         />
         <p-button
           *ngIf="canLock && !isSessionPortalDailyEvaluations"
@@ -155,7 +155,7 @@
               icon="pi pi-eye"
               [rounded]="true"
               [text]="true"
-              [routerLink]="[dailyEvalNav.basePath(), row.dailyEvaluationID]"
+              (onClick)="openEvalViewDialog(row)"
               [pTooltip]="'employeesHr.actions.view' | translate"
             />
             <p-button
@@ -163,7 +163,7 @@
               icon="pi pi-pencil"
               [rounded]="true"
               [text]="true"
-              [routerLink]="[dailyEvalNav.basePath(), row.dailyEvaluationID, 'edit']"
+              (onClick)="openEvalEditDialog(row)"
               [pTooltip]="'employeesHr.actions.edit' | translate"
             />
           </td>
@@ -176,6 +176,52 @@
 <div class="employees-hr-page" *ngIf="!canViewEvaluations">
   <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
 </div>
+
+<p-dialog
+  [(visible)]="evalFormDialogVisible"
+  [header]="
+    (evalFormEvaluationId == null ? 'dailyEvaluations.evaluations.createTitle' : 'dailyEvaluations.evaluations.editTitle') | translate
+  "
+  [modal]="true"
+  [style]="{ width: 'min(48rem, 96vw)' }"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [appendTo]="'body'"
+  styleClass="de-daily-eval-dialog de-eval-form-dialog"
+  (onHide)="closeEvalFormDialog()"
+>
+  <app-daily-evaluations-form
+    *ngIf="evalFormDialogVisible"
+    [embedded]="true"
+    [evaluationIdInput]="evalFormEvaluationId"
+    [presetSchoolId]="filter.schoolID ?? null"
+    [presetAcademicYearId]="filter.academicYearID ?? null"
+    (saved)="load()"
+    (closed)="closeEvalFormDialog()"
+  />
+</p-dialog>
+
+<p-dialog
+  [(visible)]="evalViewDialogVisible"
+  [header]="'dailyEvaluations.evaluations.detailTitle' | translate"
+  [modal]="true"
+  [style]="{ width: 'min(52rem, 96vw)' }"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [appendTo]="'body'"
+  styleClass="de-daily-eval-dialog de-eval-view-dialog"
+  (onHide)="closeEvalViewDialog()"
+>
+  <app-daily-evaluations-detail
+    *ngIf="evalViewDialogVisible && evalViewEvaluationId != null"
+    [embedded]="true"
+    [evaluationIdInput]="evalViewEvaluationId!"
+    (closed)="closeEvalViewDialog()"
+    (requestEdit)="onEvalDetailRequestEdit($event)"
+  />
+</p-dialog>
 
 <p-dialog
   [header]="'dailyEvaluations.lock.title' | translate"

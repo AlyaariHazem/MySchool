@@ -101,6 +101,17 @@ body {
   overflow: auto;
 }
 
+.p-dialog.de-eval-form-dialog .p-dialog-content {
+  max-height: min(85vh, 44rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.p-dialog.de-eval-view-dialog .p-dialog-content {
+  max-height: min(78vh, 40rem);
+  overflow: auto;
+}
+
 .p-dialog.de-criteria-subdialog .p-dialog-content {
   max-height: min(70vh, 28rem);
   overflow: auto;

@@ -40,6 +40,8 @@ import {
 } from '../daily-evaluations.models';
 import { DailyEvaluationsNavService } from '../daily-evaluations-nav.service';
 import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evaluations.service';
+import { DailyEvaluationsDetailComponent } from '../daily-evaluations-detail/daily-evaluations-detail.component';
+import { DailyEvaluationsFormComponent } from '../daily-evaluations-form/daily-evaluations-form.component';
 
 @Component({
   selector: 'app-daily-evaluations-list',
@@ -62,6 +64,8 @@ import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evalua
     DatePicker,
     InputTextModule,
     TextareaModule,
+    DailyEvaluationsFormComponent,
+    DailyEvaluationsDetailComponent,
   ],
   templateUrl: './daily-evaluations-list.component.html',
   styleUrl: './daily-evaluations-list.component.scss',
@@ -154,6 +158,13 @@ export class DailyEvaluationsListComponent implements OnInit {
   reopenForm: { reason: string; notes: string } = { reason: '', notes: '' };
   lockPreview: EvaluationLockReadDto | null = null;
   reopenLock: EvaluationLockReadDto | null = null;
+
+  /** List dialogs: create/edit evaluation form */
+  evalFormDialogVisible = false;
+  /** null = create, number = edit */
+  evalFormEvaluationId: number | null = null;
+  evalViewDialogVisible = false;
+  evalViewEvaluationId: number | null = null;
 
   ngOnInit(): void {
     this.statusOptions = [
@@ -531,6 +542,38 @@ export class DailyEvaluationsListComponent implements OnInit {
         next: (l) => (this.reopenLock = l),
         error: () => (this.reopenLock = null),
       });
+  }
+
+  openEvalCreateDialog(): void {
+    this.evalFormEvaluationId = null;
+    this.evalFormDialogVisible = true;
+  }
+
+  openEvalEditDialog(row: DailyEvaluationListDto): void {
+    this.evalFormEvaluationId = row.dailyEvaluationID;
+    this.evalFormDialogVisible = true;
+  }
+
+  closeEvalFormDialog(): void {
+    this.evalFormDialogVisible = false;
+    this.evalFormEvaluationId = null;
+  }
+
+  openEvalViewDialog(row: DailyEvaluationListDto): void {
+    this.evalViewEvaluationId = row.dailyEvaluationID;
+    this.evalViewDialogVisible = true;
+  }
+
+  closeEvalViewDialog(): void {
+    this.evalViewDialogVisible = false;
+    this.evalViewEvaluationId = null;
+  }
+
+  onEvalDetailRequestEdit(id: number): void {
+    this.evalViewDialogVisible = false;
+    this.evalViewEvaluationId = null;
+    this.evalFormEvaluationId = id;
+    this.evalFormDialogVisible = true;
   }
 
   submitReopen(): void {

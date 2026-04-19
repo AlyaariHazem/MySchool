@@ -1,5 +1,21 @@
 @use '../daily-evaluations-shared.scss';
 
+.de-eval-form--embedded {
+  padding: 0;
+  min-height: 0;
+}
+
+.de-eval-form-card--embedded {
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.de-eval-form-grid--embedded.de-eval-filters {
+  margin-bottom: 0;
+}
+
 /* Match daily-evaluations-list select styling (RTL / grid overlays). */
 :host ::ng-deep .de-filter-select {
   width: 100%;

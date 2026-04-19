@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -63,6 +63,17 @@ import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evalua
   styleUrl: './daily-evaluations-form.component.scss',
 })
 export class DailyEvaluationsFormComponent implements OnInit {
+  /** When true, driven by inputs/outputs instead of route params (e.g. list dialogs). */
+  @Input() embedded = false;
+  /** Create = null, edit = id. Used when `embedded` is true. */
+  @Input() evaluationIdInput: number | null = null;
+  /** Optional defaults from list filters (school HR). */
+  @Input() presetSchoolId: number | null = null;
+  @Input() presetAcademicYearId: number | null = null;
+
+  @Output() closed = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<void>();
+
   private readonly fb = inject(FormBuilder);
   private readonly svc = inject(DailyEvaluationsService);
   private readonly employeesHr = inject(EmployeesHrService);
@@ -144,7 +155,9 @@ export class DailyEvaluationsFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.evaluationId = Number(this.route.snapshot.paramMap.get('evaluationId')) || null;
+    this.evaluationId = this.embedded
+      ? this.evaluationIdInput ?? null
+      : Number(this.route.snapshot.paramMap.get('evaluationId')) || null;
 
     if (this.isSessionPortalDailyEvaluations) {
       const opt = this.dailyEvalNav.teacherSessionSchoolOption();
@@ -190,8 +203,17 @@ export class DailyEvaluationsFormComponent implements OnInit {
         this.years = y ?? [];
         this.rebuildYearOptions();
         if (!this.evaluationId) {
+          if (this.embedded && this.presetSchoolId != null && this.presetSchoolId > 0) {
+            this.headerForm.patchValue({ schoolID: this.presetSchoolId }, { emitEvent: false });
+            this.rebuildYearOptions();
+          }
           if (!this.isTeacherEvaluations) {
-            this.patchActiveYearForCurrentSchool();
+            if (!(this.embedded && this.presetAcademicYearId != null && this.presetAcademicYearId > 0)) {
+              this.patchActiveYearForCurrentSchool();
+            }
+          }
+          if (this.embedded && this.presetAcademicYearId != null && this.presetAcademicYearId > 0) {
+            this.headerForm.patchValue({ academicYearID: this.presetAcademicYearId }, { emitEvent: false });
           }
           this.reloadEmployeesAndTemplates();
         }
@@ -249,7 +271,11 @@ export class DailyEvaluationsFormComponent implements OnInit {
           );
           if (f.isLocked || f.status === DailyEvaluationStatus.Locked) {
             this.toastr.warning(this.translate.instant('dailyEvaluations.evaluations.readOnlyLocked'));
-            this.router.navigate([this.dailyEvalNav.basePath(), id]).catch(() => undefined);
+            if (this.embedded) {
+              this.closed.emit();
+            } else {
+              this.router.navigate([this.dailyEvalNav.basePath(), id]).catch(() => undefined);
+            }
             return;
           }
           this.headerForm.patchValue({
@@ -273,7 +299,11 @@ export class DailyEvaluationsFormComponent implements OnInit {
         },
         error: (err) => {
           this.toastr.error(readDailyEvalHttpError(err));
-          this.router.navigate([this.dailyEvalNav.basePath()]).catch(() => undefined);
+          if (this.embedded) {
+            this.closed.emit();
+          } else {
+            this.router.navigate([this.dailyEvalNav.basePath()]).catch(() => undefined);
+          }
         },
       });
   }
@@ -591,6 +621,10 @@ export class DailyEvaluationsFormComponent implements OnInit {
   }
 
   cancel(): void {
+    if (this.embedded) {
+      this.closed.emit();
+      return;
+    }
     this.router.navigate([this.dailyEvalNav.basePath()]).catch(() => undefined);
   }
 
@@ -615,7 +649,12 @@ export class DailyEvaluationsFormComponent implements OnInit {
       .subscribe({
         next: (row) => {
           this.toastr.success('dailyEvaluations.toast.evaluationCreated');
-          this.router.navigate([this.dailyEvalNav.basePath(), row.dailyEvaluationID, 'edit']).catch(() => undefined);
+          if (this.embedded) {
+            this.saved.emit();
+            this.closed.emit();
+          } else {
+            this.router.navigate([this.dailyEvalNav.basePath(), row.dailyEvaluationID, 'edit']).catch(() => undefined);
+          }
         },
         error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
       });
@@ -649,6 +688,9 @@ export class DailyEvaluationsFormComponent implements OnInit {
       .subscribe({
         next: () => {
           this.toastr.success('dailyEvaluations.toast.evaluationSaved');
+          if (this.embedded) {
+            this.saved.emit();
+          }
           this.loadEdit(this.full!.dailyEvaluationID);
         },
         error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
@@ -664,7 +706,12 @@ export class DailyEvaluationsFormComponent implements OnInit {
       .subscribe({
         next: () => {
           this.toastr.success('dailyEvaluations.toast.evaluationSubmitted');
-          this.router.navigate([this.dailyEvalNav.basePath(), this.full!.dailyEvaluationID]).catch(() => undefined);
+          if (this.embedded) {
+            this.saved.emit();
+            this.closed.emit();
+          } else {
+            this.router.navigate([this.dailyEvalNav.basePath(), this.full!.dailyEvaluationID]).catch(() => undefined);
+          }
         },
         error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
       });

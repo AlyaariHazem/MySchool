@@ -1,10 +1,10 @@
-<div class="employees-hr-page" *ngIf="canViewEvaluations">
+<div class="employees-hr-page" *ngIf="canViewEvaluations" [class.de-eval-detail--embedded]="embedded">
   <div *ngIf="loading" class="loading-wrap">
     <p-progressSpinner strokeWidth="3" />
   </div>
 
-  <div class="employees-hr-card" *ngIf="!loading && full">
-    <header class="employees-hr-header">
+  <div class="employees-hr-card" *ngIf="!loading && full" [class.de-eval-detail-card--embedded]="embedded">
+    <header class="employees-hr-header" *ngIf="!embedded">
       <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.detailTitle' | translate }}</h2>
       <div class="header-actions">
         <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" [routerLink]="dailyEvalNav.basePath()" />
@@ -31,6 +31,31 @@
         />
       </div>
     </header>
+
+    <div class="header-actions de-eval-detail-embedded-actions" *ngIf="embedded" style="margin-bottom: 0.75rem; flex-wrap: wrap">
+      <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" (onClick)="onBack()" />
+      <p-button
+        *ngIf="canUpdateEvaluations && !full.isLocked && full.status !== DailyEvaluationStatus.Locked"
+        [label]="'employeesHr.actions.edit' | translate"
+        icon="pi pi-pencil"
+        (onClick)="onEditClick()"
+      />
+      <p-button
+        *ngIf="canOverride && (full.isLocked || full.status === DailyEvaluationStatus.Locked)"
+        [label]="'dailyEvaluations.override.title' | translate"
+        icon="pi pi-exclamation-triangle"
+        severity="danger"
+        [outlined]="true"
+        (onClick)="openOverride()"
+      />
+      <p-button
+        *ngIf="canOverride"
+        [label]="'dailyEvaluations.override.logsTitle' | translate"
+        icon="pi pi-history"
+        [outlined]="true"
+        (onClick)="openLogs()"
+      />
+    </div>
 
     <div class="de-badges">
       <span *ngIf="full.isLocked || full.status === DailyEvaluationStatus.Locked" class="de-badge de-badge--locked">{{
