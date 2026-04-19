@@ -10,6 +10,7 @@ import { ShardModule } from '../../shared/shard.module';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -17,6 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [
     ShardModule,
+    MatFormFieldModule,
     PublicRecruitmentTopbarComponent,
     RouterLink,
     MatButtonModule,
@@ -33,6 +35,17 @@ export class LoginComponent {
 
   /** True while login HTTP request is in flight. */
   isLoading = false;
+
+  /** When true, password input is masked; toggle via suffix eye control. */
+  hidePassword = true;
+
+  togglePasswordVisibility(event?: Event): void {
+    event?.stopPropagation();
+    if (this.isLoading) {
+      return;
+    }
+    this.hidePassword = !this.hidePassword;
+  }
 
   // Define user types for the dropdown
   userTypes = [

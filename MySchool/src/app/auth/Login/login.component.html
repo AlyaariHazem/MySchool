@@ -40,28 +40,45 @@
             }
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="login-field">
-            <mat-label>كلمة السر</mat-label>
-            <input
-              matInput
-              placeholder="••••••••"
-              autocomplete="current-password"
-              ngModel
-              name="password"
-              type="password"
-              required
-              minlength="3"
-              maxlength="256"
-              #password="ngModel"
+          <div class="login-password-row">
+            <mat-form-field appearance="outline" class="login-field login-password-row__field">
+              <mat-label>كلمة السر</mat-label>
+              <input
+                matInput
+                placeholder="••••••••"
+                autocomplete="current-password"
+                ngModel
+                name="password"
+                [type]="hidePassword ? 'password' : 'text'"
+                required
+                minlength="3"
+                maxlength="256"
+                #password="ngModel"
+                [disabled]="isLoading"
+              />
+              @if (password.errors?.['required'] && password.touched) {
+                <mat-error>كلمة السر مطلوبة</mat-error>
+              }
+              @if (password.errors?.['minlength']) {
+                <mat-error>3 أحرف على الأقل</mat-error>
+              }
+            </mat-form-field>
+            <button
+              type="button"
+              mat-icon-button
+              class="login-password-toggle"
+              (click)="togglePasswordVisibility($event)"
               [disabled]="isLoading"
-            />
-            @if (password.errors?.['required'] && password.touched) {
-              <mat-error>كلمة السر مطلوبة</mat-error>
-            }
-            @if (password.errors?.['minlength']) {
-              <mat-error>3 أحرف على الأقل</mat-error>
-            }
-          </mat-form-field>
+              [attr.aria-label]="hidePassword ? 'إظهار كلمة السر' : 'إخفاء كلمة السر'"
+              [attr.aria-pressed]="!hidePassword"
+            >
+              @if (hidePassword) {
+                <mat-icon fontSet="material-icons">visibility</mat-icon>
+              } @else {
+                <mat-icon fontSet="material-icons">visibility_off</mat-icon>
+              }
+            </button>
+          </div>
 
           <mat-form-field appearance="outline" class="login-field">
             <mat-label>نوع المستخدم</mat-label>
@@ -108,7 +125,7 @@
             <mat-icon>help_outline</mat-icon>
             <span>هل نسيت كلمة السر؟</span>
           </a>
-          <a
+          <!-- <a
             class="footer-link"
             routerLink="/school/recruitment/job-postings"
             [class.footer-link--disabled]="isLoading"
@@ -116,7 +133,7 @@
           >
             <mat-icon>work_outline</mat-icon>
             <span>الوظائف الشاغرة</span>
-          </a>
+          </a> -->
           <a
             class="footer-link footer-link--accent"
             routerLink="/request-registration"
