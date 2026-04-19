@@ -106,6 +106,34 @@ public class DailyEvaluationController : ControllerBase
         return null;
     }
 
+    /// <summary>School managers are scoped to their <see cref="Models.Manager.SchoolID"/>; ignore client <see cref="DailyEvaluationFilterDto.SchoolID"/>.</summary>
+    private async Task ApplyManagerSchoolScopeToEvaluationFilterAsync(DailyEvaluationFilterDto filter, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(UserTypeClaim, "MANAGER", StringComparison.OrdinalIgnoreCase))
+            return;
+        filter.SchoolID = null;
+        var uid = CurrentUserId;
+        if (string.IsNullOrEmpty(uid))
+            return;
+        var sid = await _svc.GetSchoolIdForManagerUserAsync(uid, cancellationToken);
+        if (sid is int id && id > 0)
+            filter.SchoolID = id;
+    }
+
+    /// <summary>School managers are scoped to their <see cref="Models.Manager.SchoolID"/>; ignore client <see cref="DailyEvaluationTemplateFilterDto.SchoolID"/>.</summary>
+    private async Task ApplyManagerSchoolScopeToTemplateFilterAsync(DailyEvaluationTemplateFilterDto filter, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(UserTypeClaim, "MANAGER", StringComparison.OrdinalIgnoreCase))
+            return;
+        filter.SchoolID = null;
+        var uid = CurrentUserId;
+        if (string.IsNullOrEmpty(uid))
+            return;
+        var sid = await _svc.GetSchoolIdForManagerUserAsync(uid, cancellationToken);
+        if (sid is int id && id > 0)
+            filter.SchoolID = id;
+    }
+
     // --- Templates ---
 
     /// <summary>Paged template list (filter in body). <c>POST /templates</c> is reserved for create.</summary>
@@ -117,7 +145,10 @@ public class DailyEvaluationController : ControllerBase
         var response = new APIResponse();
         try
         {
-            response.Result = await _svc.GetTemplatesPageAsync(body ?? new DailyEvaluationTemplatesPageRequestDto(), cancellationToken);
+            body ??= new DailyEvaluationTemplatesPageRequestDto();
+            body.Filter ??= new DailyEvaluationTemplateFilterDto();
+            await ApplyManagerSchoolScopeToTemplateFilterAsync(body.Filter, cancellationToken);
+            response.Result = await _svc.GetTemplatesPageAsync(body, cancellationToken);
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
         }
@@ -302,6 +333,8 @@ public class DailyEvaluationController : ControllerBase
 
                 body.Filter.EvaluatorUserId = uid;
             }
+
+            await ApplyManagerSchoolScopeToEvaluationFilterAsync(body.Filter, cancellationToken);
 
             response.Result = await _svc.GetEvaluationsPageAsync(body, cancellationToken);
             response.statusCode = HttpStatusCode.OK;

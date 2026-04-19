@@ -1,3 +1,5 @@
+import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
+
 /** Mirrors backend enums (stored as int). */
 export enum EvaluationTemplateStatus {
   Draft = 1,
@@ -277,4 +279,23 @@ export interface EvaluationLockReadDto {
 export interface EvaluationReopenDto {
   reason: string;
   notes?: string | null;
+}
+
+/** POST paged list APIs: active year is server-side. MANAGER: school is server-side — omit IDs from payload. */
+export function dailyEvaluationsFilterForPageApi(f: DailyEvaluationFilterDto): DailyEvaluationFilterDto {
+  const out = { ...f };
+  delete out.academicYearID;
+  if (isSchoolManagerUser()) {
+    delete out.schoolID;
+  }
+  return out;
+}
+
+export function dailyEvalTemplatesFilterForPageApi(f: DailyEvaluationTemplateFilterDto): DailyEvaluationTemplateFilterDto {
+  const out = { ...f };
+  delete out.academicYearID;
+  if (isSchoolManagerUser()) {
+    delete out.schoolID;
+  }
+  return out;
 }

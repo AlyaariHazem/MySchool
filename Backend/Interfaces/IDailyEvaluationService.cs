@@ -25,6 +25,8 @@ public interface IDailyEvaluationService
     Task<DailyEvaluationReadDto?> GetEvaluationByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<DailyEvaluationFullDto> GetEvaluationFullAsync(int id, CancellationToken cancellationToken = default);
     Task<PagedResult<DailyEvaluationListDto>> GetEvaluationsPageAsync(DailyEvaluationsPageRequestDto request, CancellationToken cancellationToken = default);
+    /// <summary>Tenant <see cref="Models.Manager.SchoolID"/> for the given user, when the user is a school manager.</summary>
+    Task<int?> GetSchoolIdForManagerUserAsync(string? userId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<TeacherEvaluationOptionDto>> GetTeachersForStudentEvaluationAsync(
         int schoolId,
         string? studentUserId,

@@ -22,6 +22,7 @@ import { YearService } from 'app/core/services/year.service';
 import { Year } from 'app/core/models/year.model';
 import { School } from 'app/core/models/school.modul';
 import { selectLanguage } from 'app/core/store/language/language.selectors';
+import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
 import { ShardModule } from 'app/shared/shard.module';
 
 import {
@@ -127,6 +128,12 @@ export class DailyEvalTemplatesListComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.isSchoolManager) {
+      const sid = Number(typeof localStorage !== 'undefined' ? localStorage.getItem('schoolId') : '');
+      if (Number.isFinite(sid) && sid > 0) {
+        this.filter.schoolID = sid;
+      }
+    }
     this.yearLoading = true;
     this.schoolService.getAllSchools().subscribe({
       next: (list) => {
@@ -140,7 +147,6 @@ export class DailyEvalTemplatesListComponent implements OnInit, OnDestroy {
     this.yearService.getAllYears().subscribe({
       next: (list) => {
         this.years = list ?? [];
-        this.patchFilterActiveAcademicYear();
         this.yearLoading = false;
       },
       error: () => {
@@ -154,10 +160,13 @@ export class DailyEvalTemplatesListComponent implements OnInit, OnDestroy {
     return this.dailyEvalNav.isTeacherDailyEvaluationsRoute();
   }
 
+  get isSchoolManager(): boolean {
+    return isSchoolManagerUser();
+  }
+
   ngOnDestroy(): void {}
 
   onSchoolChange(): void {
-    this.patchFilterActiveAcademicYear();
     this.first = 0;
     this.load();
   }
@@ -176,38 +185,10 @@ export class DailyEvalTemplatesListComponent implements OnInit, OnDestroy {
     this.load();
   }
 
-  private yearSchoolId(y: Year): number {
-    const raw = y as unknown as { schoolID?: number; SchoolID?: number };
-    return raw.schoolID ?? raw.SchoolID ?? 0;
-  }
-
-  private yearIsActive(y: Year): boolean {
-    const raw = y as unknown as { active?: boolean; Active?: boolean };
-    return !!(raw.active ?? raw.Active);
-  }
-
   private yearIdNum(y: Year): number {
     const raw = y as unknown as { yearID?: number; YearID?: number };
     const n = raw.yearID ?? raw.YearID;
     return typeof n === 'number' && !Number.isNaN(n) ? n : 0;
-  }
-
-  /** Same rules as backend GetActiveYearIdForSchoolAsync. */
-  private resolveActiveYearIdForSchool(schoolId: number | null | undefined): number | null {
-    if (schoolId == null || schoolId <= 0) return null;
-    const forSchool = this.years.filter((x) => this.yearSchoolId(x) === schoolId);
-    const actives = forSchool.filter((x) => this.yearIsActive(x)).sort((a, b) => this.yearIdNum(a) - this.yearIdNum(b));
-    if (actives.length) return this.yearIdNum(actives[0]);
-    const latest = [...forSchool].sort((a, b) => this.yearIdNum(b) - this.yearIdNum(a));
-    return latest.length ? this.yearIdNum(latest[0]) : null;
-  }
-
-  /** School HR: no year filter — scope templates to active year for selected school (API also defaults year server-side). */
-  private patchFilterActiveAcademicYear(): void {
-    const yid = this.resolveActiveYearIdForSchool(this.filter.schoolID);
-    if (yid != null) {
-      this.filter.academicYearID = yid;
-    }
   }
 
   load(): void {

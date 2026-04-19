@@ -19,7 +19,7 @@
     </header>
 
     <div class="filters-toolbar filters-grid de-eval-filters" *ngIf="!isTeacherEvaluations">
-      <p-floatlabel class="filter-field">
+      <p-floatlabel *ngIf="!isSchoolManager" class="filter-field">
         <p-select
           inputId="de-tpl-school"
           styleClass="de-filter-select"

@@ -24,6 +24,7 @@ import { YearService } from 'app/core/services/year.service';
 import { Year } from 'app/core/models/year.model';
 import { School } from 'app/core/models/school.modul';
 import { selectLanguage } from 'app/core/store/language/language.selectors';
+import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
 import { ShardModule } from 'app/shared/shard.module';
 
 import { EmployeeProfileReadDto } from '../../employees-hr/employees-hr.models';
@@ -108,6 +109,11 @@ export class DailyEvaluationsListComponent implements OnInit {
     return this.isTeacherEvaluations || this.isStudentEvaluations;
   }
 
+  /** School portal manager: single school from login — no school picker. */
+  get isSchoolManager(): boolean {
+    return isSchoolManagerUser();
+  }
+
   get canViewEvaluations(): boolean {
     if (this.isSessionPortalDailyEvaluations) return true;
     return this.perm.hasPermission(PagePermission.Evaluations.View);
@@ -167,6 +173,12 @@ export class DailyEvaluationsListComponent implements OnInit {
         this.yearOptions = [{ label: yLabel ? `${yid} — ${yLabel}` : String(yid), value: yid }];
       }
     } else {
+      if (this.isSchoolManager) {
+        const sid = Number(typeof localStorage !== 'undefined' ? localStorage.getItem('schoolId') : '');
+        if (Number.isFinite(sid) && sid > 0) {
+          this.filter.schoolID = sid;
+        }
+      }
       this.yearLoading = true;
       this.schoolService.getAllSchools().subscribe({
         next: (list) => {
@@ -181,7 +193,6 @@ export class DailyEvaluationsListComponent implements OnInit {
         next: (list) => {
           this.years = list ?? [];
           this.rebuildYearOptions();
-          this.patchFilterActiveAcademicYear();
           this.loadTemplatesForFilter();
           this.loadEmployeesForFilter();
           if (this.isStudentEvaluations && this.filter.schoolID != null && this.filter.schoolID > 0) {
@@ -275,7 +286,6 @@ export class DailyEvaluationsListComponent implements OnInit {
 
   onSchoolChange(): void {
     this.rebuildYearOptions();
-    this.patchFilterActiveAcademicYear();
     this.loadTemplatesForFilter();
     if (!this.isTeacherEvaluations) {
       this.loadEmployeesForFilter();
@@ -322,15 +332,6 @@ export class DailyEvaluationsListComponent implements OnInit {
     if (actives.length) return this.yearIdNum(actives[0]);
     const latest = [...forSchool].sort((a, b) => this.yearIdNum(b) - this.yearIdNum(a));
     return latest.length ? this.yearIdNum(latest[0]) : null;
-  }
-
-  /** School HR list: no year filter UI — scope to active year for the selected school. */
-  private patchFilterActiveAcademicYear(): void {
-    if (this.isSessionPortalDailyEvaluations) return;
-    const yid = this.resolveActiveYearIdForSchool(this.filter.schoolID);
-    if (yid != null) {
-      this.filter.academicYearID = yid;
-    }
   }
 
   private rebuildYearOptions(): void {

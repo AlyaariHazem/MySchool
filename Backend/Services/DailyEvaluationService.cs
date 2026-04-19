@@ -132,14 +132,26 @@ public class DailyEvaluationService : IDailyEvaluationService
         CancellationToken cancellationToken)
     {
         filter ??= new DailyEvaluationTemplateFilterDto();
-        if (filter.SchoolID is int schoolForYear && filter.AcademicYearID is null)
+        // Academic year always comes from the school's active year (not the client).
+        if (filter.SchoolID is int schoolForYear)
         {
+            filter.AcademicYearID = null;
             var ay = await GetActiveYearIdForSchoolAsync(schoolForYear, cancellationToken);
             if (ay is int yDef && yDef > 0)
                 filter.AcademicYearID = yDef;
         }
 
         return filter;
+    }
+
+    public async Task<int?> GetSchoolIdForManagerUserAsync(string? userId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return null;
+        return await _db.Managers.AsNoTracking()
+            .Where(m => m.UserID == userId)
+            .Select(m => (int?)m.SchoolID)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     private static IQueryable<DailyEvaluationTemplate> ApplyTemplateFilters(
@@ -450,8 +462,10 @@ public class DailyEvaluationService : IDailyEvaluationService
         CancellationToken cancellationToken)
     {
         filter ??= new DailyEvaluationFilterDto();
-        if (filter.SchoolID is int schoolForYear && filter.AcademicYearID is null)
+        // Academic year always comes from the school's active year (not the client).
+        if (filter.SchoolID is int schoolForYear)
         {
+            filter.AcademicYearID = null;
             var ay = await GetActiveYearIdForSchoolAsync(schoolForYear, cancellationToken);
             if (ay is int yDef && yDef > 0)
                 filter.AcademicYearID = yDef;

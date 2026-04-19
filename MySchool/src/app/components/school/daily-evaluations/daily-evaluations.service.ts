@@ -25,6 +25,8 @@ import {
   DailyEvaluationTemplateReadDto,
   DailyEvaluationTemplateUpdateDto,
   DailyEvaluationUpdateDto,
+  dailyEvaluationsFilterForPageApi,
+  dailyEvalTemplatesFilterForPageApi,
   EvaluationLockCreateDto,
   EvaluationLockReadDto,
   EvaluationOverrideLogReadDto,
@@ -78,8 +80,12 @@ export class DailyEvaluationsService {
   getTemplatesPage(
     body: DailyEvaluationTemplatesPageRequestDto,
   ): Observable<PagedResultDto<DailyEvaluationTemplateListDto>> {
+    const payload: DailyEvaluationTemplatesPageRequestDto = {
+      ...body,
+      filter: dailyEvalTemplatesFilterForPageApi(body.filter ?? {}),
+    };
     return this.http
-      .post<ApiResponse<PagedResultDto<DailyEvaluationTemplateListDto>>>(this.root('/templates/page'), body)
+      .post<ApiResponse<PagedResultDto<DailyEvaluationTemplateListDto>>>(this.root('/templates/page'), payload)
       .pipe(map((r) => unwrap<PagedResultDto<DailyEvaluationTemplateListDto>>(r)));
   }
 
@@ -88,7 +94,7 @@ export class DailyEvaluationsService {
     return this.getTemplatesPage({
       pageIndex: 0,
       pageSize: 500,
-      filter: filter ?? null,
+      filter: filter ?? {},
     }).pipe(map((p) => p.data ?? []));
   }
 
@@ -177,8 +183,12 @@ export class DailyEvaluationsService {
 
   /** Paged evaluations (POST body: pageIndex, pageSize, filter). */
   getEvaluationsPage(body: DailyEvaluationsPageRequestDto): Observable<PagedResultDto<DailyEvaluationListDto>> {
+    const payload: DailyEvaluationsPageRequestDto = {
+      ...body,
+      filter: dailyEvaluationsFilterForPageApi(body.filter ?? {}),
+    };
     return this.http
-      .post<ApiResponse<PagedResultDto<DailyEvaluationListDto>>>(this.root('/page'), body)
+      .post<ApiResponse<PagedResultDto<DailyEvaluationListDto>>>(this.root('/page'), payload)
       .pipe(map((r) => unwrap<PagedResultDto<DailyEvaluationListDto>>(r)));
   }
 

@@ -35,7 +35,7 @@
     </header>
 
     <div class="filters-toolbar filters-grid de-eval-filters">
-      <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field">
+      <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations && !isSchoolManager" class="filter-field">
         <p-select
           inputId="de-ev-school"
           styleClass="de-filter-select"
