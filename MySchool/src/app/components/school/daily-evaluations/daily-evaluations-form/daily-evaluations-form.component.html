@@ -5,12 +5,21 @@
       <p-button [label]="'employeesHr.actions.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
     </header>
 
-    <form [formGroup]="headerForm" class="filters-grid" *ngIf="!loadingMeta">
-      <p-floatlabel class="filter-field">
+    <div *ngIf="loadingMeta" class="loading-wrap">
+      <p-progressSpinner strokeWidth="3" />
+    </div>
+
+    <form [formGroup]="headerForm" class="filters-toolbar filters-grid de-eval-filters" *ngIf="!loadingMeta">
+      <p-floatlabel class="filter-field" *ngIf="!isTeacherEvaluations">
         <p-select
           inputId="ev-cr-school"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="schoolOptions"
           formControlName="schoolID"
+          [emptyMessage]="'dailyEvaluations.select.empty' | translate"
+          [emptyFilterMessage]="'dailyEvaluations.select.emptyFilter' | translate"
           optionLabel="label"
           optionValue="value"
         />
@@ -19,19 +28,30 @@
       <p-floatlabel class="filter-field">
         <p-select
           inputId="ev-cr-year"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="yearOptions"
           formControlName="academicYearID"
+          [emptyMessage]="'dailyEvaluations.select.empty' | translate"
+          [emptyFilterMessage]="'dailyEvaluations.select.emptyFilter' | translate"
           optionLabel="label"
           optionValue="value"
         />
         <label for="ev-cr-year">{{ 'employeesHr.filter.year' | translate }} *</label>
       </p-floatlabel>
-      <p-floatlabel class="filter-field">
+      <p-floatlabel class="filter-field" *ngIf="!isTeacherEvaluations">
         <p-select
           inputId="ev-cr-emp"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="employeeOptions"
           formControlName="evaluatedEmployeeProfileID"
           [filter]="true"
+          [showClear]="true"
+          [emptyMessage]="'dailyEvaluations.select.empty' | translate"
+          [emptyFilterMessage]="'dailyEvaluations.select.emptyFilter' | translate"
           optionLabel="label"
           optionValue="value"
         />
@@ -40,8 +60,15 @@
       <p-floatlabel class="filter-field">
         <p-select
           inputId="ev-cr-tpl"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="templateOptions"
           formControlName="dailyEvaluationTemplateID"
+          [filter]="true"
+          [showClear]="true"
+          [emptyMessage]="'dailyEvaluations.select.empty' | translate"
+          [emptyFilterMessage]="'dailyEvaluations.select.emptyFilter' | translate"
           optionLabel="label"
           optionValue="value"
         />
@@ -78,7 +105,7 @@
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.editTitle' | translate }}</h2>
       <div class="header-actions">
-        <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" routerLink="/school/daily-evaluations" />
+        <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" [routerLink]="dailyEvalNav.basePath()" />
       </div>
     </header>
 

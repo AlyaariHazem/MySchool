@@ -35,6 +35,7 @@ import {
   EvaluationOverrideLogReadDto,
   EvaluationOverrideRequestDto,
 } from '../daily-evaluations.models';
+import { DailyEvaluationsNavService } from '../daily-evaluations-nav.service';
 import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evaluations.service';
 
 @Component({
@@ -71,6 +72,7 @@ export class DailyEvaluationsDetailComponent implements OnInit {
   private readonly schoolService = inject(SchoolService);
   private readonly yearService = inject(YearService);
   private readonly employeesHr = inject(EmployeesHrService);
+  readonly dailyEvalNav = inject(DailyEvaluationsNavService);
 
   loading = true;
   full: DailyEvaluationFullDto | null = null;
@@ -102,7 +104,12 @@ export class DailyEvaluationsDetailComponent implements OnInit {
       this.loading = false;
       return;
     }
-    this.schoolService.getAllSchools().subscribe({ next: (s) => (this.schools = s ?? []) });
+    if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute()) {
+      const opt = this.dailyEvalNav.teacherSessionSchoolOption();
+      this.schools = opt ? ([{ schoolID: opt.value, schoolName: opt.label }] as School[]) : [];
+    } else {
+      this.schoolService.getAllSchools().subscribe({ next: (s) => (this.schools = s ?? []) });
+    }
     this.yearService.getAllYears().subscribe({ next: (y) => (this.years = y ?? []) });
     this.load(id);
   }
@@ -129,7 +136,7 @@ export class DailyEvaluationsDetailComponent implements OnInit {
         },
         error: (err) => {
           this.toastr.error(readDailyEvalHttpError(err));
-          this.router.navigate(['/school/daily-evaluations']).catch(() => undefined);
+          this.router.navigate([this.dailyEvalNav.basePath()]).catch(() => undefined);
         },
       });
   }

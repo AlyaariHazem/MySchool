@@ -42,6 +42,27 @@ namespace Backend.Repository
                 .Select(t => (int?)t.TeacherID)
                 .FirstOrDefaultAsync(cancellationToken);
         }
+        public async Task<int?> GetEmployeeProfileIdForTeacherUserAsync(string userId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return null;
+
+            var byProfileUser = await _context.EmployeeProfiles.AsNoTracking()
+                .Where(ep => ep.UserId == userId)
+                .Select(ep => (int?)ep.EmployeeProfileID)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (byProfileUser.HasValue)
+                return byProfileUser;
+
+            var teacherId = await GetTeacherIdByUserIdAsync(userId, cancellationToken);
+            if (!teacherId.HasValue)
+                return null;
+
+            return await _context.EmployeeProfiles.AsNoTracking()
+                .Where(ep => ep.TeacherID == teacherId.Value)
+                .Select(ep => (int?)ep.EmployeeProfileID)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
 
         // Add a new Teacher
         public async Task<TeacherDTO> AddTeacherAsync(TeacherDTO teacher)

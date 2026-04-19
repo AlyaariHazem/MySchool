@@ -7,12 +7,12 @@
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.detailTitle' | translate }}</h2>
       <div class="header-actions">
-        <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" routerLink="/school/daily-evaluations" />
+        <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" [routerLink]="dailyEvalNav.basePath()" />
         <p-button
           *ngIf="canUpdate && !full.isLocked && full.status !== DailyEvaluationStatus.Locked"
           [label]="'employeesHr.actions.edit' | translate"
           icon="pi pi-pencil"
-          [routerLink]="['/school/daily-evaluations', full.dailyEvaluationID, 'edit']"
+          [routerLink]="[dailyEvalNav.basePath(), full.dailyEvaluationID, 'edit']"
         />
         <p-button
           *ngIf="canOverride && (full.isLocked || full.status === DailyEvaluationStatus.Locked)"

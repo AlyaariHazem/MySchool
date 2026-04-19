@@ -31,6 +31,7 @@ import { ShardModule } from 'app/shared/shard.module';
 import { EmployeeJobTypeDto } from '../../employees-hr/employees-hr.models';
 import { EmployeesHrService } from '../../employees-hr/employees-hr.service';
 import { DailyEvaluationTemplateCreateDto, DailyEvaluationTemplateUpdateDto } from '../daily-evaluations.models';
+import { DailyEvaluationsNavService } from '../daily-evaluations-nav.service';
 import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evaluations.service';
 
 @Component({
@@ -64,6 +65,7 @@ export class DailyEvalTemplateFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly toastr = inject(ToastrService);
   private readonly perm = inject(PermissionService);
+  private readonly dailyEvalNav = inject(DailyEvaluationsNavService);
 
   schools: School[] = [];
   years: Year[] = [];
@@ -77,6 +79,10 @@ export class DailyEvalTemplateFormComponent implements OnInit {
   editId: number | null = null;
 
   canManage = this.perm.hasPermission(PagePermission.Evaluations.Update);
+
+  get isTeacherEvaluations(): boolean {
+    return this.dailyEvalNav.isTeacherDailyEvaluationsRoute();
+  }
 
   form = this.fb.nonNullable.group(
     {
@@ -99,15 +105,28 @@ export class DailyEvalTemplateFormComponent implements OnInit {
       return;
     }
     this.editId = Number(this.route.snapshot.paramMap.get('templateId')) || null;
-    this.schoolService.getAllSchools().subscribe({
-      next: (s) => {
-        this.schools = s ?? [];
-        this.schoolOptions = this.schools
-          .filter((x): x is School & { schoolID: number } => x.schoolID != null && x.schoolID > 0)
-          .map((x) => ({ label: x.schoolName || String(x.schoolID), value: x.schoolID }));
-      },
-      error: () => this.toastr.error('employeesHr.errors.loadSchools'),
-    });
+    if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute()) {
+      const opt = this.dailyEvalNav.teacherSessionSchoolOption();
+      if (opt) {
+        this.schools = [{ schoolID: opt.value, schoolName: opt.label } as School];
+        this.schoolOptions = [opt];
+        this.form.patchValue({ schoolID: opt.value });
+      }
+      const yid = this.dailyEvalNav.teacherSessionYearId();
+      if (yid != null) {
+        this.form.patchValue({ academicYearID: yid });
+      }
+    } else {
+      this.schoolService.getAllSchools().subscribe({
+        next: (s) => {
+          this.schools = s ?? [];
+          this.schoolOptions = this.schools
+            .filter((x): x is School & { schoolID: number } => x.schoolID != null && x.schoolID > 0)
+            .map((x) => ({ label: x.schoolName || String(x.schoolID), value: x.schoolID }));
+        },
+        error: () => this.toastr.error('employeesHr.errors.loadSchools'),
+      });
+    }
     this.yearService.getAllYears().subscribe({
       next: (y) => {
         this.years = y ?? [];
@@ -187,7 +206,7 @@ export class DailyEvalTemplateFormComponent implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/school/daily-evaluations/templates']).catch(() => undefined);
+    this.router.navigate([this.dailyEvalNav.basePath(), 'templates']).catch(() => undefined);
   }
 
   submit(): void {
@@ -212,7 +231,7 @@ export class DailyEvalTemplateFormComponent implements OnInit {
         .subscribe({
           next: () => {
             this.toastr.success('dailyEvaluations.toast.templateSaved');
-            this.router.navigate(['/school/daily-evaluations/templates', this.editId]).catch(() => undefined);
+            this.router.navigate([this.dailyEvalNav.basePath(), 'templates', this.editId]).catch(() => undefined);
           },
           error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
         });
@@ -233,7 +252,7 @@ export class DailyEvalTemplateFormComponent implements OnInit {
         .subscribe({
           next: (row) => {
             this.toastr.success('dailyEvaluations.toast.templateCreated');
-            this.router.navigate(['/school/daily-evaluations/templates', row.dailyEvaluationTemplateID]).catch(() => undefined);
+            this.router.navigate([this.dailyEvalNav.basePath(), 'templates', row.dailyEvaluationTemplateID]).catch(() => undefined);
           },
           error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
         });

@@ -52,6 +52,14 @@
             <button type="button" class="btn btn-outline-primary m-1" (click)="go('/teacher/schedule')">
               {{ 'sidebar.schedule' | translate }}
             </button>
+            <button
+              *ngIf="canViewDailyEvaluations"
+              type="button"
+              class="btn btn-outline-primary m-1"
+              (click)="go('/teacher/daily-evaluations')"
+            >
+              {{ 'sidebar.staff_hr.dailyEvaluations' | translate }}
+            </button>
             <button type="button" class="btn btn-outline-primary m-1" (click)="go('/teacher/grades/month')">
               {{ 'sidebar.grades_sub.monthly' | translate }}
             </button>

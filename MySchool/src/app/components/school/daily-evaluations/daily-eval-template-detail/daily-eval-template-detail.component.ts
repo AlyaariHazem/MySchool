@@ -28,6 +28,7 @@ import {
   DailyEvaluationTemplateReadDto,
   EvaluationTemplateStatus,
 } from '../daily-evaluations.models';
+import { DailyEvaluationsNavService } from '../daily-evaluations-nav.service';
 import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evaluations.service';
 
 @Component({
@@ -64,6 +65,7 @@ export class DailyEvalTemplateDetailComponent implements OnInit {
   private readonly yearService = inject(YearService);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
+  readonly dailyEvalNav = inject(DailyEvaluationsNavService);
 
   template: DailyEvaluationTemplateReadDto | null = null;
   criteria: DailyEvaluationCriteriaReadDto[] = [];
@@ -97,10 +99,15 @@ export class DailyEvalTemplateDetailComponent implements OnInit {
   ngOnInit(): void {
     this.templateId = Number(this.route.snapshot.paramMap.get('templateId')) || 0;
     if (!this.templateId) {
-      this.router.navigate(['/school/daily-evaluations/templates']).catch(() => undefined);
+      this.router.navigate([this.dailyEvalNav.basePath(), 'templates']).catch(() => undefined);
       return;
     }
-    this.schoolService.getAllSchools().subscribe({ next: (s) => (this.schools = s ?? []) });
+    if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute()) {
+      const opt = this.dailyEvalNav.teacherSessionSchoolOption();
+      this.schools = opt ? ([{ schoolID: opt.value, schoolName: opt.label }] as School[]) : [];
+    } else {
+      this.schoolService.getAllSchools().subscribe({ next: (s) => (this.schools = s ?? []) });
+    }
     this.yearService.getAllYears().subscribe({ next: (y) => (this.years = y ?? []) });
     this.reload();
   }
@@ -121,7 +128,7 @@ export class DailyEvalTemplateDetailComponent implements OnInit {
         },
         error: (err) => {
           this.toastr.error(readDailyEvalHttpError(err));
-          this.router.navigate(['/school/daily-evaluations/templates']).catch(() => undefined);
+          this.router.navigate([this.dailyEvalNav.basePath(), 'templates']).catch(() => undefined);
         },
       });
   }

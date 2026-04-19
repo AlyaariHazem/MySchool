@@ -29,6 +29,7 @@ import {
   DailyEvaluationTemplateListDto,
   EvaluationTemplateStatus,
 } from '../daily-evaluations.models';
+import { DailyEvaluationsNavService } from '../daily-evaluations-nav.service';
 import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evaluations.service';
 
 @Component({
@@ -63,6 +64,11 @@ export class DailyEvalTemplatesListComponent implements OnInit, OnDestroy {
   private readonly translate = inject(TranslateService);
   private readonly perm = inject(PermissionService);
   private readonly store = inject(Store);
+  readonly dailyEvalNav = inject(DailyEvaluationsNavService);
+
+  readonly filterSelectPanelStyle: Record<string, string> = {
+    maxWidth: 'min(22rem, calc(100vw - 2rem))',
+  };
 
   readonly dir$ = this.store.select(selectLanguage).pipe(map((l) => (l === 'ar' ? 'rtl' : 'ltr')));
 
@@ -102,23 +108,45 @@ export class DailyEvalTemplatesListComponent implements OnInit, OnDestroy {
       { label: this.translate.instant('employeesHr.filter.activeOnly'), value: true },
       { label: this.translate.instant('employeesHr.filter.inactiveOnly'), value: false },
     ];
-    this.schoolService.getAllSchools().subscribe({
-      next: (list) => {
-        this.schools = list ?? [];
-        this.schoolOptions = this.schools
-          .filter((s): s is School & { schoolID: number } => s.schoolID != null && s.schoolID > 0)
-          .map((s) => ({ label: s.schoolName || String(s.schoolID), value: s.schoolID }));
-      },
-      error: () => this.toastr.error('employeesHr.errors.loadSchools'),
-    });
-    this.yearService.getAllYears().subscribe({
-      next: (list) => {
-        this.years = list ?? [];
-        this.rebuildYearOptions();
-      },
-      error: () => this.toastr.error('employeesHr.errors.loadYears'),
-    });
+    if (this.isTeacherEvaluations) {
+      const opt = this.dailyEvalNav.teacherSessionSchoolOption();
+      if (opt) {
+        this.filter.schoolID = opt.value;
+        this.schoolOptions = [opt];
+        this.schools = [{ schoolID: opt.value, schoolName: opt.label } as School];
+      }
+      const yid = this.dailyEvalNav.teacherSessionYearId();
+      if (yid != null) {
+        this.filter.academicYearID = yid;
+        const yLabel =
+          typeof localStorage !== 'undefined'
+            ? (localStorage.getItem('academicYear') ?? localStorage.getItem('studyYearName') ?? '').trim()
+            : '';
+        this.yearOptions = [{ label: yLabel ? `${yid} — ${yLabel}` : String(yid), value: yid }];
+      }
+    } else {
+      this.schoolService.getAllSchools().subscribe({
+        next: (list) => {
+          this.schools = list ?? [];
+          this.schoolOptions = this.schools
+            .filter((s): s is School & { schoolID: number } => s.schoolID != null && s.schoolID > 0)
+            .map((s) => ({ label: s.schoolName || String(s.schoolID), value: s.schoolID }));
+        },
+        error: () => this.toastr.error('employeesHr.errors.loadSchools'),
+      });
+      this.yearService.getAllYears().subscribe({
+        next: (list) => {
+          this.years = list ?? [];
+          this.rebuildYearOptions();
+        },
+        error: () => this.toastr.error('employeesHr.errors.loadYears'),
+      });
+    }
     this.load();
+  }
+
+  get isTeacherEvaluations(): boolean {
+    return this.dailyEvalNav.isTeacherDailyEvaluationsRoute();
   }
 
   ngOnDestroy(): void {}
@@ -167,7 +195,17 @@ export class DailyEvalTemplatesListComponent implements OnInit, OnDestroy {
 
   yearLabel(id: number): string {
     const y = this.years.find((x) => x.yearID === id);
-    return y ? String(y.yearID) : String(id);
+    if (y) {
+      return `${y.yearID} — ${y.yearDateStart ? new Date(y.yearDateStart).toLocaleDateString() : ''}`.trim();
+    }
+    if (this.isTeacherEvaluations) {
+      const raw =
+        typeof localStorage !== 'undefined'
+          ? (localStorage.getItem('academicYear') ?? localStorage.getItem('studyYearName') ?? '').trim()
+          : '';
+      return raw ? `${id} — ${raw}` : String(id);
+    }
+    return String(id);
   }
 
   statusLabelKey(s: EvaluationTemplateStatus): string {

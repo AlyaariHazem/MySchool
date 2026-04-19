@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ToastrService } from 'ngx-toastr';
 
 import { TeacherWorkspaceResult } from '../../../../core/models/teacher-workspace.model';
+import { PagePermission, PermissionService } from '../../../../core/services/permission.service';
 import { TeacherWorkspaceService } from '../../../../core/services/teacher-workspace.service';
 import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
@@ -20,8 +21,10 @@ export class TeacherWorkspaceComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
   private readonly store = inject(Store);
+  private readonly perm = inject(PermissionService);
 
   readonly dir$ = this.store.select(selectLanguage).pipe(map((l) => (l === 'ar' ? 'rtl' : 'ltr')));
+  readonly canViewDailyEvaluations = this.perm.hasPermission(PagePermission.Evaluations.View);
 
   isLoading = true;
   workspace: TeacherWorkspaceResult | null = null;

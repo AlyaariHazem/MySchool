@@ -54,6 +54,13 @@
           </a>
         </li>
 
+        <li *ngIf="canViewDailyEvaluations">
+          <a routerLink="/teacher/daily-evaluations" routerLinkActive="active" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-11.png" alt="icon" />
+            <span>{{ 'sidebar.staff_hr.dailyEvaluations' | translate }}</span>
+          </a>
+        </li>
+
         <li class="submenu" (click)="toggleSubmenu('grades')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-3.png" alt="icon" />

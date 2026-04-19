@@ -566,6 +566,10 @@
     }
   },
   "dailyEvaluations": {
+    "select": {
+      "empty": "No options available.",
+      "emptyFilter": "No results match your search."
+    },
     "errors": {
       "noPermission": "You do not have access to this section."
     },

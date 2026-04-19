@@ -12,7 +12,7 @@
     </div>
 
     <form *ngIf="!loadingEdit" [formGroup]="form" (ngSubmit)="submit()" class="filters-grid">
-      <p-floatlabel class="filter-field" *ngIf="!editId">
+      <p-floatlabel class="filter-field" *ngIf="!editId && !isTeacherEvaluations">
         <p-select
           inputId="dt-school"
           [options]="schoolOptions"

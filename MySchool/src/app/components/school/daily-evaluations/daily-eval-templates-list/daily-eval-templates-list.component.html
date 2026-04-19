@@ -7,21 +7,24 @@
           [label]="'dailyEvaluations.evaluations.title' | translate"
           icon="pi pi-list"
           [outlined]="true"
-          routerLink="/school/daily-evaluations"
+          [routerLink]="dailyEvalNav.basePath()"
         />
         <p-button
-          *ngIf="canManage"
+          *ngIf="canManage && !isTeacherEvaluations"
           [label]="'dailyEvaluations.templates.add' | translate"
           icon="pi pi-plus"
-          routerLink="/school/daily-evaluations/templates/new"
+          [routerLink]="[dailyEvalNav.basePath(), 'templates', 'new']"
         />
       </div>
     </header>
 
-    <div class="filters-toolbar filters-grid">
+    <div class="filters-toolbar filters-grid de-eval-filters" *ngIf="!isTeacherEvaluations">
       <p-floatlabel class="filter-field">
         <p-select
           inputId="de-tpl-school"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="schoolOptions"
           [(ngModel)]="filter.schoolID"
           (ngModelChange)="onSchoolChange()"
@@ -35,6 +38,9 @@
       <p-floatlabel class="filter-field">
         <p-select
           inputId="de-tpl-year"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="yearOptions"
           [(ngModel)]="filter.academicYearID"
           [showClear]="true"
@@ -46,6 +52,9 @@
       <p-floatlabel class="filter-field">
         <p-select
           inputId="de-tpl-status"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="statusOptions"
           [(ngModel)]="filter.status"
           [showClear]="true"
@@ -57,6 +66,9 @@
       <p-floatlabel class="filter-field">
         <p-select
           inputId="de-tpl-active"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="activeOptions"
           [(ngModel)]="filter.isActive"
           [showClear]="true"
@@ -86,14 +98,14 @@
     >
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="9">{{ 'dailyEvaluations.templates.empty' | translate }}</td>
+          <td [attr.colspan]="isTeacherEvaluations ? 5 : 7">{{ 'dailyEvaluations.templates.empty' | translate }}</td>
         </tr>
       </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th>{{ 'dailyEvaluations.templates.colName' | translate }}</th>
-          <th>{{ 'employeesHr.col.school' | translate }}</th>
-          <th>{{ 'employeesHr.col.year' | translate }}</th>
+          <th *ngIf="!isTeacherEvaluations">{{ 'employeesHr.col.school' | translate }}</th>
+          <th *ngIf="!isTeacherEvaluations">{{ 'employeesHr.col.year' | translate }}</th>
           <th>{{ 'dailyEvaluations.templates.colStatus' | translate }}</th>
           <th>{{ 'employeesHr.form.isActive' | translate }}</th>
           <th>{{ 'dailyEvaluations.templates.colUpdated' | translate }}</th>
@@ -103,8 +115,8 @@
       <ng-template pTemplate="body" let-row>
         <tr>
           <td>{{ row.name }}</td>
-          <td>{{ schoolName(row.schoolID) }}</td>
-          <td>{{ yearLabel(row.academicYearID) }}</td>
+          <td *ngIf="!isTeacherEvaluations">{{ schoolName(row.schoolID) }}</td>
+          <td *ngIf="!isTeacherEvaluations">{{ yearLabel(row.academicYearID) }}</td>
           <td>{{ 'dailyEvaluations.templateStatus.' + statusLabelKey(row.status) | translate }}</td>
           <td>{{ row.isActive ? ('employeesHr.yes' | translate) : ('employeesHr.no' | translate) }}</td>
           <td>{{ row.updatedAtUtc | date : 'short' }}</td>
@@ -113,19 +125,19 @@
               icon="pi pi-eye"
               [rounded]="true"
               [text]="true"
-              [routerLink]="['/school/daily-evaluations/templates', row.dailyEvaluationTemplateID]"
+              [routerLink]="[dailyEvalNav.basePath(), 'templates', row.dailyEvaluationTemplateID]"
               [pTooltip]="'employeesHr.actions.view' | translate"
             />
             <p-button
-              *ngIf="canManage"
+              *ngIf="canManage && !isTeacherEvaluations"
               icon="pi pi-pencil"
               [rounded]="true"
               [text]="true"
-              [routerLink]="['/school/daily-evaluations/templates', row.dailyEvaluationTemplateID, 'edit']"
+              [routerLink]="[dailyEvalNav.basePath(), 'templates', row.dailyEvaluationTemplateID, 'edit']"
               [pTooltip]="'employeesHr.actions.edit' | translate"
             />
             <p-button
-              *ngIf="canManage && row.status !== EvaluationTemplateStatus.Archived"
+              *ngIf="canManage && !isTeacherEvaluations && row.status !== EvaluationTemplateStatus.Archived"
               icon="pi pi-check"
               [rounded]="true"
               [text]="true"
@@ -134,7 +146,7 @@
               [pTooltip]="'dailyEvaluations.templates.activate' | translate"
             />
             <p-button
-              *ngIf="canManage && row.status !== EvaluationTemplateStatus.Archived"
+              *ngIf="canManage && !isTeacherEvaluations && row.status !== EvaluationTemplateStatus.Archived"
               icon="pi pi-pause"
               [rounded]="true"
               [text]="true"
@@ -142,7 +154,7 @@
               [pTooltip]="'dailyEvaluations.templates.deactivate' | translate"
             />
             <p-button
-              *ngIf="canManage && row.status !== EvaluationTemplateStatus.Archived"
+              *ngIf="canManage && !isTeacherEvaluations && row.status !== EvaluationTemplateStatus.Archived"
               icon="pi pi-folder"
               [rounded]="true"
               [text]="true"

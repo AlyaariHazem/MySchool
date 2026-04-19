@@ -567,6 +567,10 @@
     }
   },
   "dailyEvaluations": {
+    "select": {
+      "empty": "لا توجد خيارات.",
+      "emptyFilter": "لا توجد نتائج مطابقة لبحثك."
+    },
     "errors": {
       "noPermission": "لا تملك صلاحية الوصول لهذا القسم."
     },

@@ -15,13 +15,51 @@ namespace Backend.Controllers.School;
 public class DailyEvaluationController : ControllerBase
 {
     private readonly IDailyEvaluationService _svc;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DailyEvaluationController(IDailyEvaluationService svc)
+    public DailyEvaluationController(IDailyEvaluationService svc, IUnitOfWork unitOfWork)
     {
         _svc = svc;
+        _unitOfWork = unitOfWork;
     }
 
     private string? CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    private string? UserTypeClaim => User.FindFirstValue("UserType");
+
+    private bool IsPrivilegedAppUser =>
+        User.IsInRole("ADMIN") || User.IsInRole("MANAGER")
+        || string.Equals(UserTypeClaim, "ADMIN", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(UserTypeClaim, "MANAGER", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Teachers may only access evaluations tied to their own HR employee profile.</summary>
+    private async Task<(bool RestrictToOwnProfile, int? OwnEmployeeProfileId, ActionResult<APIResponse>? ErrorResponse)>
+        GetTeacherDailyEvalScopeAsync(CancellationToken cancellationToken)
+    {
+        if (IsPrivilegedAppUser)
+            return (false, null, null);
+
+        if (!string.Equals(UserTypeClaim, "TEACHER", StringComparison.OrdinalIgnoreCase))
+            return (false, null, null);
+
+        var userId = CurrentUserId;
+        if (string.IsNullOrEmpty(userId))
+        {
+            var r = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.Unauthorized };
+            r.ErrorMasseges.Add("User id not found on token.");
+            return (false, null, Unauthorized(r));
+        }
+
+        var empId = await _unitOfWork.Teachers.GetEmployeeProfileIdForTeacherUserAsync(userId, cancellationToken);
+        if (!empId.HasValue)
+        {
+            var r = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.Forbidden };
+            r.ErrorMasseges.Add("No employee profile is linked to this teacher account.");
+            return (false, null, StatusCode((int)HttpStatusCode.Forbidden, r));
+        }
+
+        return (true, empId, null);
+    }
 
     // --- Templates ---
 
@@ -32,6 +70,38 @@ public class DailyEvaluationController : ControllerBase
         try
         {
             response.Result = await _svc.GetTemplatesAsync(filter, cancellationToken);
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
+    /// <summary>Returns the current teacher user's HR employee profile id (for self-evaluations). Non-teachers receive 400.</summary>
+    [HttpGet("me/employee-profile-id")]
+    public async Task<ActionResult<APIResponse>> GetMyEmployeeProfileId(CancellationToken cancellationToken)
+    {
+        var response = new APIResponse();
+        try
+        {
+            var scope = await GetTeacherDailyEvalScopeAsync(cancellationToken);
+            if (scope.ErrorResponse != null)
+                return scope.ErrorResponse;
+
+            if (!scope.RestrictToOwnProfile || scope.OwnEmployeeProfileId is not int id)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.BadRequest;
+                response.ErrorMasseges.Add("This endpoint is only available for teacher accounts.");
+                return BadRequest(response);
+            }
+
+            response.Result = id;
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
         }
@@ -120,6 +190,14 @@ public class DailyEvaluationController : ControllerBase
         var response = new APIResponse();
         try
         {
+            var scope = await GetTeacherDailyEvalScopeAsync(cancellationToken);
+            if (scope.ErrorResponse != null)
+                return scope.ErrorResponse;
+
+            filter ??= new DailyEvaluationFilterDto();
+            if (scope.RestrictToOwnProfile && scope.OwnEmployeeProfileId is int ownId)
+                filter.EvaluatedEmployeeProfileID = ownId;
+
             response.Result = await _svc.GetEvaluationsAsync(filter, cancellationToken);
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
@@ -139,6 +217,10 @@ public class DailyEvaluationController : ControllerBase
         var response = new APIResponse();
         try
         {
+            var scope = await GetTeacherDailyEvalScopeAsync(cancellationToken);
+            if (scope.ErrorResponse != null)
+                return scope.ErrorResponse;
+
             var row = await _svc.GetEvaluationByIdAsync(id, cancellationToken);
             if (row == null)
             {
@@ -147,6 +229,15 @@ public class DailyEvaluationController : ControllerBase
                 response.ErrorMasseges.Add($"Evaluation {id} was not found.");
                 return NotFound(response);
             }
+
+            if (scope.RestrictToOwnProfile && scope.OwnEmployeeProfileId is int ownId && row.EvaluatedEmployeeProfileID != ownId)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.Forbidden;
+                response.ErrorMasseges.Add("You do not have access to this evaluation.");
+                return StatusCode((int)HttpStatusCode.Forbidden, response);
+            }
+
             response.Result = row;
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
@@ -161,12 +252,45 @@ public class DailyEvaluationController : ControllerBase
     }
 
     [HttpGet("{id:int}/full")]
-    public async Task<ActionResult<APIResponse>> GetEvaluationFull(int id, CancellationToken cancellationToken) =>
-        await RunAsync(() => _svc.GetEvaluationFullAsync(id, cancellationToken));
+    public async Task<ActionResult<APIResponse>> GetEvaluationFull(int id, CancellationToken cancellationToken)
+    {
+        var scope = await GetTeacherDailyEvalScopeAsync(cancellationToken);
+        if (scope.ErrorResponse != null)
+            return scope.ErrorResponse;
+
+        var summary = await _svc.GetEvaluationByIdAsync(id, cancellationToken);
+        if (summary == null)
+        {
+            var notFound = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.NotFound };
+            notFound.ErrorMasseges.Add($"Evaluation {id} was not found.");
+            return NotFound(notFound);
+        }
+
+        if (scope.RestrictToOwnProfile && scope.OwnEmployeeProfileId is int ownId && summary.EvaluatedEmployeeProfileID != ownId)
+        {
+            var forbidden = new APIResponse { IsSuccess = false, statusCode = HttpStatusCode.Forbidden };
+            forbidden.ErrorMasseges.Add("You do not have access to this evaluation.");
+            return StatusCode((int)HttpStatusCode.Forbidden, forbidden);
+        }
+
+        return await RunAsync(() => _svc.GetEvaluationFullAsync(id, cancellationToken));
+    }
 
     [HttpPost]
-    public async Task<ActionResult<APIResponse>> CreateEvaluation([FromBody] DailyEvaluationCreateDto body, CancellationToken cancellationToken) =>
-        await RunAsync(() => _svc.CreateEvaluationAsync(body, cancellationToken));
+    public async Task<ActionResult<APIResponse>> CreateEvaluation([FromBody] DailyEvaluationCreateDto body, CancellationToken cancellationToken)
+    {
+        var scope = await GetTeacherDailyEvalScopeAsync(cancellationToken);
+        if (scope.ErrorResponse != null)
+            return scope.ErrorResponse;
+
+        if (scope.RestrictToOwnProfile && scope.OwnEmployeeProfileId is int ownId)
+            body.EvaluatedEmployeeProfileID = ownId;
+
+        if (string.IsNullOrEmpty(body.EvaluatorUserId))
+            body.EvaluatorUserId = CurrentUserId;
+
+        return await RunAsync(() => _svc.CreateEvaluationAsync(body, cancellationToken));
+    }
 
     [HttpPut("{id:int}")]
     public async Task<ActionResult<APIResponse>> UpdateEvaluation(int id, [FromBody] DailyEvaluationUpdateDto body, CancellationToken cancellationToken) =>

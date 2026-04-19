@@ -7,16 +7,16 @@
           [label]="'dailyEvaluations.templates.listTitle' | translate"
           icon="pi pi-table"
           [outlined]="true"
-          routerLink="/school/daily-evaluations/templates"
+          [routerLink]="[dailyEvalNav.basePath(), 'templates']"
         />
         <p-button
           *ngIf="canCreate"
           [label]="'dailyEvaluations.evaluations.add' | translate"
           icon="pi pi-plus"
-          routerLink="/school/daily-evaluations/new"
+          [routerLink]="[dailyEvalNav.basePath(), 'new']"
         />
         <p-button
-          *ngIf="canLock"
+          *ngIf="canLock && !isTeacherEvaluations"
           [label]="'dailyEvaluations.lock.title' | translate"
           icon="pi pi-lock"
           severity="danger"
@@ -24,7 +24,7 @@
           (onClick)="openLockDialog()"
         />
         <p-button
-          *ngIf="canLock"
+          *ngIf="canLock && !isTeacherEvaluations"
           [label]="'dailyEvaluations.reopen.title' | translate"
           icon="pi pi-unlock"
           [outlined]="true"
@@ -33,10 +33,13 @@
       </div>
     </header>
 
-    <div class="filters-toolbar filters-grid">
-      <p-floatlabel class="filter-field">
+    <div class="filters-toolbar filters-grid de-eval-filters">
+      <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
         <p-select
           inputId="de-ev-school"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="schoolOptions"
           [(ngModel)]="filter.schoolID"
           (ngModelChange)="onSchoolChange()"
@@ -46,9 +49,12 @@
         />
         <label for="de-ev-school">{{ 'employeesHr.filter.school' | translate }}</label>
       </p-floatlabel>
-      <p-floatlabel class="filter-field">
+      <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
         <p-select
           inputId="de-ev-year"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="yearOptions"
           [(ngModel)]="filter.academicYearID"
           [showClear]="true"
@@ -57,9 +63,12 @@
         />
         <label for="de-ev-year">{{ 'employeesHr.filter.year' | translate }}</label>
       </p-floatlabel>
-      <p-floatlabel class="filter-field">
+      <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
         <p-select
           inputId="de-ev-emp"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="employeeOptions"
           [(ngModel)]="filter.evaluatedEmployeeProfileID"
           [showClear]="true"
@@ -69,9 +78,12 @@
         />
         <label for="de-ev-emp">{{ 'dailyEvaluations.evaluations.employee' | translate }}</label>
       </p-floatlabel>
-      <p-floatlabel class="filter-field">
+      <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
         <p-select
           inputId="de-ev-tpl"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="templateOptions"
           [(ngModel)]="filter.dailyEvaluationTemplateID"
           [showClear]="true"
@@ -83,6 +95,9 @@
       <p-floatlabel class="filter-field">
         <p-select
           inputId="de-ev-st"
+          styleClass="de-filter-select"
+          panelStyleClass="de-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
           [options]="statusOptions"
           [(ngModel)]="filter.status"
           [showClear]="true"
@@ -92,11 +107,11 @@
         <label for="de-ev-st">{{ 'dailyEvaluations.evaluations.colStatus' | translate }}</label>
       </p-floatlabel>
       <p-floatlabel class="filter-field">
-        <input pInputText id="de-from" [(ngModel)]="filter.fromDate" type="date" class="w-full" />
+        <input pInputText id="de-from" [(ngModel)]="filter.fromDate" type="date" class="w-full de-filter-date" />
         <label for="de-from">{{ 'dailyEvaluations.evaluations.fromDate' | translate }}</label>
       </p-floatlabel>
       <p-floatlabel class="filter-field">
-        <input pInputText id="de-to" [(ngModel)]="filter.toDate" type="date" class="w-full" />
+        <input pInputText id="de-to" [(ngModel)]="filter.toDate" type="date" class="w-full de-filter-date" />
         <label for="de-to">{{ 'dailyEvaluations.evaluations.toDate' | translate }}</label>
       </p-floatlabel>
       <div class="filter-actions">
@@ -118,13 +133,13 @@
     >
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="9">{{ 'dailyEvaluations.evaluations.empty' | translate }}</td>
+          <td [attr.colspan]="isTeacherEvaluations ? 6 : 7">{{ 'dailyEvaluations.evaluations.empty' | translate }}</td>
         </tr>
       </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th>{{ 'dailyEvaluations.evaluations.colDate' | translate }}</th>
-          <th>{{ 'dailyEvaluations.evaluations.employee' | translate }}</th>
+          <th *ngIf="!isTeacherEvaluations">{{ 'dailyEvaluations.evaluations.employee' | translate }}</th>
           <th>{{ 'dailyEvaluations.evaluations.template' | translate }}</th>
           <th>{{ 'dailyEvaluations.evaluations.totalScore' | translate }}</th>
           <th>{{ 'dailyEvaluations.evaluations.colStatus' | translate }}</th>
@@ -135,7 +150,7 @@
       <ng-template pTemplate="body" let-row>
         <tr>
           <td>{{ row.evaluationDate }}</td>
-          <td>{{ employeeName(row.evaluatedEmployeeProfileID) }}</td>
+          <td *ngIf="!isTeacherEvaluations">{{ employeeName(row.evaluatedEmployeeProfileID) }}</td>
           <td>{{ templateName(row.dailyEvaluationTemplateID) }}</td>
           <td>{{ row.totalScore }}</td>
           <td>{{ 'dailyEvaluations.status.' + statusLabelKey(row.status) | translate }}</td>
@@ -145,7 +160,7 @@
               icon="pi pi-eye"
               [rounded]="true"
               [text]="true"
-              [routerLink]="['/school/daily-evaluations', row.dailyEvaluationID]"
+              [routerLink]="[dailyEvalNav.basePath(), row.dailyEvaluationID]"
               [pTooltip]="'employeesHr.actions.view' | translate"
             />
             <p-button
@@ -153,7 +168,7 @@
               icon="pi pi-pencil"
               [rounded]="true"
               [text]="true"
-              [routerLink]="['/school/daily-evaluations', row.dailyEvaluationID, 'edit']"
+              [routerLink]="[dailyEvalNav.basePath(), row.dailyEvaluationID, 'edit']"
               [pTooltip]="'employeesHr.actions.edit' | translate"
             />
           </td>
@@ -175,7 +190,7 @@
   (onShow)="refreshLockPreview()"
 >
   <div class="filters-grid" *ngIf="lockDialog">
-    <p-floatlabel class="filter-field">
+    <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
       <p-select
         inputId="lk-school"
         [options]="schoolOptions"
@@ -235,7 +250,7 @@
   (onShow)="refreshReopenLock()"
 >
   <div class="filters-grid" *ngIf="reopenDialog">
-    <p-floatlabel class="filter-field">
+    <p-floatlabel *ngIf="!isTeacherEvaluations" class="filter-field">
       <p-select
         inputId="ro-school"
         [options]="schoolOptions"

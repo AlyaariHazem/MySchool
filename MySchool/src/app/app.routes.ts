@@ -29,10 +29,10 @@ export const routes: Routes = [
             import('./components/guardian/guardian.module').then((m) => m.GuardianModule),
         canMatch: [adminGuardGuard, guardianGuard],
     },
+    /// School module is public: no auth required to load routes (sensitive pages still use `permissionGuard` in `school-routing.module`).
     {
         path:'school',
         loadChildren: ()=> import('./components/school/school.module').then(m=> m.SchoolModule),
-        canMatch:[adminGuardGuard]
     },
     {
         path: 'teacher',

@@ -12,6 +12,9 @@ public interface ITeacherRepository
 {
     Task<int?> GetTeacherIdByUserIdAsync(string userId, CancellationToken cancellationToken = default);
 
+    /// <summary>Resolves the employee profile id for the signed-in teacher (profile <c>UserId</c> or linked <c>TeacherID</c>).</summary>
+    Task<int?> GetEmployeeProfileIdForTeacherUserAsync(string userId, CancellationToken cancellationToken = default);
+
     Task<TeacherDTO> AddTeacherAsync(TeacherDTO teacher);
     Task<List<TeacherDTO>> GetAllTeachersAsync();
     Task<(List<TeacherDTO> Items, int TotalCount)> GetTeachersPageAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);

@@ -1,5 +1,39 @@
 @use '../daily-evaluations-shared.scss';
 
+/* Match daily-evaluations-list select styling (RTL / grid overlays). */
+:host ::ng-deep .de-filter-select {
+  width: 100%;
+  min-height: 2.75rem;
+}
+
+:host ::ng-deep .de-filter-select .p-select-label,
+:host ::ng-deep .de-filter-select .p-select-dropdown {
+  min-height: 2.75rem;
+}
+
+:host ::ng-deep .de-filter-select:not(.p-disabled):hover {
+  border-color: #94a3b8;
+}
+
+:host ::ng-deep .de-filter-select.p-focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+:host ::ng-deep .de-filter-select-panel {
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.14);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  z-index: 1200;
+}
+
+.loading-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
 .eh-section {
   margin: 1.25rem 0 0.5rem;
   font-size: 1.1rem;

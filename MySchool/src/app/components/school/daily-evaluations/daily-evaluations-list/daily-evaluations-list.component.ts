@@ -32,10 +32,12 @@ import {
   DailyEvaluationFilterDto,
   DailyEvaluationListDto,
   DailyEvaluationStatus,
+  DailyEvaluationTemplateFilterDto,
   DailyEvaluationTemplateListDto,
   EvaluationLockReadDto,
   EvaluationLockStatus,
 } from '../daily-evaluations.models';
+import { DailyEvaluationsNavService } from '../daily-evaluations-nav.service';
 import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evaluations.service';
 
 @Component({
@@ -72,6 +74,12 @@ export class DailyEvaluationsListComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly perm = inject(PermissionService);
   private readonly store = inject(Store);
+  readonly dailyEvalNav = inject(DailyEvaluationsNavService);
+
+  /** Keeps PrimeNG select overlays from stretching full viewport width (RTL / grid). */
+  readonly filterSelectPanelStyle: Record<string, string> = {
+    maxWidth: 'min(22rem, calc(100vw - 2rem))',
+  };
 
   readonly dir$ = this.store.select(selectLanguage).pipe(map((l) => (l === 'ar' ? 'rtl' : 'ltr')));
 
@@ -120,25 +128,56 @@ export class DailyEvaluationsListComponent implements OnInit {
       { label: this.translate.instant('dailyEvaluations.status.submitted'), value: DailyEvaluationStatus.Submitted },
       { label: this.translate.instant('dailyEvaluations.status.locked'), value: DailyEvaluationStatus.Locked },
     ];
-    this.schoolService.getAllSchools().subscribe({
-      next: (list) => {
-        this.schools = list ?? [];
-        this.schoolOptions = this.schools
-          .filter((s): s is School & { schoolID: number } => s.schoolID != null && s.schoolID > 0)
-          .map((s) => ({ label: s.schoolName || String(s.schoolID), value: s.schoolID }));
-      },
-      error: () => this.toastr.error('employeesHr.errors.loadSchools'),
-    });
-    this.yearService.getAllYears().subscribe({
-      next: (list) => {
-        this.years = list ?? [];
-        this.rebuildYearOptions();
-      },
-      error: () => this.toastr.error('employeesHr.errors.loadYears'),
-    });
+    if (this.isTeacherEvaluations) {
+      this.applyTeacherSchoolContextFromSession();
+      const yid = this.dailyEvalNav.teacherSessionYearId();
+      if (yid != null) {
+        const yLabel =
+          typeof localStorage !== 'undefined'
+            ? (localStorage.getItem('academicYear') ?? localStorage.getItem('studyYearName') ?? '').trim()
+            : '';
+        this.yearOptions = [{ label: yLabel ? `${yid} — ${yLabel}` : String(yid), value: yid }];
+      }
+    } else {
+      this.schoolService.getAllSchools().subscribe({
+        next: (list) => {
+          this.schools = list ?? [];
+          this.schoolOptions = this.schools
+            .filter((s): s is School & { schoolID: number } => s.schoolID != null && s.schoolID > 0)
+            .map((s) => ({ label: s.schoolName || String(s.schoolID), value: s.schoolID }));
+        },
+        error: () => this.toastr.error('employeesHr.errors.loadSchools'),
+      });
+      this.yearService.getAllYears().subscribe({
+        next: (list) => {
+          this.years = list ?? [];
+          this.rebuildYearOptions();
+        },
+        error: () => this.toastr.error('employeesHr.errors.loadYears'),
+      });
+    }
     this.loadTemplatesForFilter();
-    this.loadEmployeesForFilter();
+    if (!this.isTeacherEvaluations) {
+      this.loadEmployeesForFilter();
+    }
     this.load();
+  }
+
+  get isTeacherEvaluations(): boolean {
+    return this.dailyEvalNav.isTeacherDailyEvaluationsRoute();
+  }
+
+  /** Teachers cannot call GET /api/School; scope filters to the school already on the session (same as rest of teacher UI). */
+  private applyTeacherSchoolContextFromSession(): void {
+    const opt = this.dailyEvalNav.teacherSessionSchoolOption();
+    if (opt) {
+      this.filter.schoolID = opt.value;
+      this.schoolOptions = [opt];
+    }
+    const yid = this.dailyEvalNav.teacherSessionYearId();
+    if (yid != null) {
+      this.filter.academicYearID = yid;
+    }
   }
 
   private hasManagerOrEvalUpdate(): boolean {
@@ -148,10 +187,23 @@ export class DailyEvaluationsListComponent implements OnInit {
   }
 
   private loadTemplatesForFilter(): void {
-    this.svc.getTemplates({}).subscribe({
+    let f: DailyEvaluationTemplateFilterDto = {};
+    if (this.isTeacherEvaluations) {
+      if (this.filter.schoolID != null && this.filter.schoolID > 0) {
+        f.schoolID = this.filter.schoolID;
+      }
+      if (this.filter.academicYearID != null && this.filter.academicYearID > 0) {
+        f.academicYearID = this.filter.academicYearID;
+      }
+    }
+    this.svc.getTemplates(f).subscribe({
       next: (rows) => {
         this.templates = rows ?? [];
-        this.templateOptions = this.templates.map((t) => ({ label: t.name, value: t.dailyEvaluationTemplateID }));
+        if (!this.isTeacherEvaluations) {
+          this.templateOptions = this.templates.map((t) => ({ label: t.name, value: t.dailyEvaluationTemplateID }));
+        } else {
+          this.templateOptions = [];
+        }
       },
     });
   }
@@ -174,7 +226,9 @@ export class DailyEvaluationsListComponent implements OnInit {
     ) {
       this.filter.academicYearID = undefined;
     }
-    this.loadEmployeesForFilter();
+    if (!this.isTeacherEvaluations) {
+      this.loadEmployeesForFilter();
+    }
   }
 
 

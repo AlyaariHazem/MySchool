@@ -94,6 +94,16 @@ export class DailyEvaluationsService {
     );
   }
 
+  /** Teacher-only: HR employee profile id for the signed-in user (self-evaluation target). */
+  getMyEmployeeProfileId(): Observable<number | null> {
+    return this.http.get<ApiResponse<number>>(this.root('/me/employee-profile-id')).pipe(
+      map((r) => {
+        const v = unwrap<number>(r);
+        return typeof v === 'number' && v > 0 ? v : null;
+      }),
+    );
+  }
+
   getTemplateById(id: number): Observable<DailyEvaluationTemplateReadDto> {
     return this.http.get<ApiResponse<DailyEvaluationTemplateReadDto>>(this.root(`/templates/${id}`)).pipe(
       map((r) => unwrap<DailyEvaluationTemplateReadDto>(r)),

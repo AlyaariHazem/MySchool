@@ -41,3 +41,31 @@
   border-radius: 8px;
   border: 1px solid #e2e8f0;
 }
+
+/* Shared filter strip for daily eval lists (school + teacher). */
+.de-eval-filters {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: visible;
+  position: relative;
+  z-index: 3;
+}
+
+.de-eval-filters .filter-field {
+  min-width: 180px;
+  position: relative;
+  overflow: visible;
+}
+
+/* PrimeNG overlay panel (panelStyleClass="de-filter-select-panel"); caps width when options are long. */
+.de-filter-select-panel {
+  max-width: min(22rem, calc(100vw - 2rem)) !important;
+  box-sizing: border-box;
+}
+
+.de-filter-select-panel .p-select-list {
+  max-width: 100%;
+}

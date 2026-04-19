@@ -7,13 +7,13 @@
           [label]="'dailyEvaluations.templates.listTitle' | translate"
           icon="pi pi-list"
           [outlined]="true"
-          routerLink="/school/daily-evaluations/templates"
+          [routerLink]="[dailyEvalNav.basePath(), 'templates']"
         />
         <p-button
           *ngIf="canManage"
           [label]="'employeesHr.actions.edit' | translate"
           icon="pi pi-pencil"
-          [routerLink]="['/school/daily-evaluations/templates', templateId, 'edit']"
+          [routerLink]="[dailyEvalNav.basePath(), 'templates', templateId, 'edit']"
         />
       </div>
     </header>

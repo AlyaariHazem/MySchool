@@ -13,7 +13,7 @@ import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, of } from 'rxjs';
-import { finalize, switchMap } from 'rxjs/operators';
+import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 
 import { PagePermission, PermissionService } from 'app/core/services/permission.service';
 import { SchoolService } from 'app/core/services/school.service';
@@ -29,9 +29,11 @@ import {
   DailyEvaluationFullDto,
   DailyEvaluationItemReadDto,
   DailyEvaluationStatus,
+  DailyEvaluationTemplateFilterDto,
   DailyEvaluationTemplateListDto,
   EvaluationTemplateStatus,
 } from '../daily-evaluations.models';
+import { DailyEvaluationsNavService } from '../daily-evaluations-nav.service';
 import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evaluations.service';
 
 @Component({
@@ -68,6 +70,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
   private readonly perm = inject(PermissionService);
+  readonly dailyEvalNav = inject(DailyEvaluationsNavService);
 
   schools: School[] = [];
   years: Year[] = [];
@@ -78,6 +81,11 @@ export class DailyEvaluationsFormComponent implements OnInit {
   employeeOptions: { label: string; value: number }[] = [];
   templateOptions: { label: string; value: number }[] = [];
 
+  /** Same as list page — keeps select overlays from stretching full width in RTL grids. */
+  readonly filterSelectPanelStyle: Record<string, string> = {
+    maxWidth: 'min(22rem, calc(100vw - 2rem))',
+  };
+
   loadingMeta = true;
   saving = false;
   evaluationId: number | null = null;
@@ -87,6 +95,10 @@ export class DailyEvaluationsFormComponent implements OnInit {
 
   canCreate = this.perm.hasPermission(PagePermission.Evaluations.Create);
   canUpdate = this.perm.hasPermission(PagePermission.Evaluations.Update);
+
+  get isTeacherEvaluations(): boolean {
+    return this.dailyEvalNav.isTeacherDailyEvaluationsRoute();
+  }
 
   headerForm = this.fb.nonNullable.group({
     schoolID: [null as number | null, Validators.required],
@@ -100,18 +112,38 @@ export class DailyEvaluationsFormComponent implements OnInit {
   ngOnInit(): void {
     this.evaluationId = Number(this.route.snapshot.paramMap.get('evaluationId')) || null;
 
-    this.schoolService.getAllSchools().subscribe({
-      next: (s) => {
-        this.schools = s ?? [];
-        this.schoolOptions = this.schools
-          .filter((x): x is School & { schoolID: number } => x.schoolID != null && x.schoolID > 0)
-          .map((x) => ({ label: x.schoolName || String(x.schoolID), value: x.schoolID }));
-      },
-    });
+    if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute()) {
+      const opt = this.dailyEvalNav.teacherSessionSchoolOption();
+      if (opt) {
+        this.schools = [{ schoolID: opt.value, schoolName: opt.label } as School];
+        this.schoolOptions = [opt];
+      }
+      const yid = this.dailyEvalNav.teacherSessionYearId();
+      if (yid != null && !this.evaluationId) {
+        this.headerForm.patchValue({
+          schoolID: opt?.value ?? null,
+          academicYearID: yid,
+        });
+      } else if (opt && !this.evaluationId) {
+        this.headerForm.patchValue({ schoolID: opt.value });
+      }
+    } else {
+      this.schoolService.getAllSchools().subscribe({
+        next: (s) => {
+          this.schools = s ?? [];
+          this.schoolOptions = this.schools
+            .filter((x): x is School & { schoolID: number } => x.schoolID != null && x.schoolID > 0)
+            .map((x) => ({ label: x.schoolName || String(x.schoolID), value: x.schoolID }));
+        },
+      });
+    }
     this.yearService.getAllYears().subscribe({
       next: (y) => {
         this.years = y ?? [];
         this.rebuildYearOptions();
+        if (this.dailyEvalNav.isTeacherDailyEvaluationsRoute() && !this.evaluationId) {
+          this.reloadEmployeesAndTemplates();
+        }
       },
     });
 
@@ -127,7 +159,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
         return;
       }
       this.headerForm.patchValue({ evaluationDate: new Date() });
-      this.loadingMeta = false;
+      this.loadingMeta = this.isTeacherEvaluations;
     }
 
     this.headerForm.get('schoolID')?.valueChanges.subscribe(() => this.onSchoolChange());
@@ -161,7 +193,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
           );
           if (f.isLocked || f.status === DailyEvaluationStatus.Locked) {
             this.toastr.warning(this.translate.instant('dailyEvaluations.evaluations.readOnlyLocked'));
-            this.router.navigate(['/school/daily-evaluations', id]).catch(() => undefined);
+            this.router.navigate([this.dailyEvalNav.basePath(), id]).catch(() => undefined);
             return;
           }
           this.headerForm.patchValue({
@@ -185,7 +217,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
         },
         error: (err) => {
           this.toastr.error(readDailyEvalHttpError(err));
-          this.router.navigate(['/school/daily-evaluations']).catch(() => undefined);
+          this.router.navigate([this.dailyEvalNav.basePath()]).catch(() => undefined);
         },
       });
   }
@@ -216,6 +248,26 @@ export class DailyEvaluationsFormComponent implements OnInit {
     }));
   }
 
+  /** Templates that the API allows for new evaluations (active + flagged active). */
+  private templateFilterForCreate(sid: number, yid: number): DailyEvaluationTemplateFilterDto {
+    return {
+      schoolID: sid,
+      academicYearID: yid,
+      status: EvaluationTemplateStatus.Active,
+      isActive: true,
+    };
+  }
+
+  private applyTemplateList(tpl: DailyEvaluationTemplateListDto[] | null): void {
+    this.templates = (tpl ?? []).filter(
+      (t) => t.status === EvaluationTemplateStatus.Active && t.isActive,
+    );
+    this.templateOptions = this.templates.map((t) => ({
+      label: t.name,
+      value: t.dailyEvaluationTemplateID,
+    }));
+  }
+
   reloadEmployeesAndTemplates(done?: () => void): void {
     const sid = this.headerForm.get('schoolID')?.value;
     const yid = this.headerForm.get('academicYearID')?.value;
@@ -224,23 +276,73 @@ export class DailyEvaluationsFormComponent implements OnInit {
       this.templates = [];
       this.employeeOptions = [];
       this.templateOptions = [];
+      if (this.isTeacherEvaluations && !this.evaluationId) {
+        this.loadingMeta = false;
+      }
       done?.();
       return;
     }
+
+    if (this.isTeacherEvaluations) {
+      this.svc
+        .getTemplates(this.templateFilterForCreate(sid, yid))
+        .pipe(
+          switchMap((tpl) => {
+            if (this.evaluationId) {
+              return of({ tpl, empId: null as number | null });
+            }
+            return this.svc.getMyEmployeeProfileId().pipe(
+              map((empId) => ({ tpl, empId })),
+              catchError((err) => {
+                this.toastr.error(readDailyEvalHttpError(err));
+                return of({ tpl, empId: null as number | null });
+              }),
+            );
+          }),
+          finalize(() => {
+            if (!this.evaluationId) {
+              this.loadingMeta = false;
+            }
+            done?.();
+          }),
+        )
+        .subscribe({
+          next: ({ tpl, empId }) => {
+            this.applyTemplateList(tpl);
+            this.employees = [];
+            this.employeeOptions = [];
+            if (!this.evaluationId && empId != null) {
+              this.headerForm.patchValue({ evaluatedEmployeeProfileID: empId });
+            }
+          },
+          error: (err) => {
+            this.toastr.error(readDailyEvalHttpError(err));
+            this.applyTemplateList([]);
+            if (!this.evaluationId) {
+              this.loadingMeta = false;
+            }
+          },
+        });
+      return;
+    }
+
     forkJoin({
-      em: this.employeesHr.getEmployees({ schoolID: sid, academicYearID: yid }),
-      tpl: this.svc.getTemplates({ schoolID: sid, academicYearID: yid, isActive: true }),
+      em: this.employeesHr
+        .getEmployees({ schoolID: sid, academicYearID: yid })
+        .pipe(catchError(() => of([] as EmployeeProfileReadDto[]))),
+      tpl: this.svc.getTemplates(this.templateFilterForCreate(sid, yid)).pipe(
+        catchError((err) => {
+          this.toastr.error(readDailyEvalHttpError(err));
+          return of([] as DailyEvaluationTemplateListDto[]);
+        }),
+      ),
     }).subscribe({
       next: ({ em, tpl }) => {
         this.employees = em ?? [];
-        this.templates = (tpl ?? []).filter((t) => t.status === EvaluationTemplateStatus.Active);
+        this.applyTemplateList(tpl);
         this.employeeOptions = this.employees.map((e) => ({
           label: this.displayName(e),
           value: e.employeeProfileID,
-        }));
-        this.templateOptions = this.templates.map((t) => ({
-          label: t.name,
-          value: t.dailyEvaluationTemplateID,
         }));
         done?.();
       },
@@ -255,7 +357,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/school/daily-evaluations']).catch(() => undefined);
+    this.router.navigate([this.dailyEvalNav.basePath()]).catch(() => undefined);
   }
 
   createEvaluation(): void {
@@ -279,7 +381,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
       .subscribe({
         next: (row) => {
           this.toastr.success('dailyEvaluations.toast.evaluationCreated');
-          this.router.navigate(['/school/daily-evaluations', row.dailyEvaluationID, 'edit']).catch(() => undefined);
+          this.router.navigate([this.dailyEvalNav.basePath(), row.dailyEvaluationID, 'edit']).catch(() => undefined);
         },
         error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
       });
@@ -328,7 +430,7 @@ export class DailyEvaluationsFormComponent implements OnInit {
       .subscribe({
         next: () => {
           this.toastr.success('dailyEvaluations.toast.evaluationSubmitted');
-          this.router.navigate(['/school/daily-evaluations', this.full!.dailyEvaluationID]).catch(() => undefined);
+          this.router.navigate([this.dailyEvalNav.basePath(), this.full!.dailyEvaluationID]).catch(() => undefined);
         },
         error: (err) => this.toastr.error(readDailyEvalHttpError(err)),
       });
