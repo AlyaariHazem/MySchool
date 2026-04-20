@@ -1,4 +1,5 @@
 using System.Threading;
+using Backend.Common;
 using Backend.DTOS.School.CoursePlan;
 using Backend.Models;
 
@@ -8,6 +9,7 @@ public interface ICoursePlanRepository
 {
     Task<CoursePlanDTO> AddAsync(CoursePlanDTO dto);
     Task<List<CoursePlanReturnDTO>> GetAllAsync();
+    Task<PagedResult<CoursePlanReturnDTO>> GetPageAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default);
     Task<List<SubjectCoursePlanDTO>> GetAllSubjectsAsync();
     Task<CoursePlanDTO?> GetByIdAsync(int yearID, int teacherID, int classID, int divisionID, int subjectID, int termID);
     Task UpdateAsync(CoursePlanDTO dto, int oldYearID, int oldTeacherID, int oldClassID, int oldDivisionID, int oldSubjectID, int oldTermID);

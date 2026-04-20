@@ -1,3 +1,4 @@
+using Backend.Common;
 using Backend.Models;
 
 namespace Backend.DTOS.School.DailyEvaluation;
@@ -13,11 +14,9 @@ public class DailyEvaluationTemplateFilterDto
     public bool? IsActive { get; set; }
 }
 
-/// <summary>Paged template list: <see cref="PageIndex"/> is zero-based.</summary>
-public class DailyEvaluationTemplatesPageRequestDto
+/// <summary>Paged template list.</summary>
+public class DailyEvaluationTemplatesPageRequestDto : PageRequestDto
 {
-    public int PageIndex { get; set; }
-    public int PageSize { get; set; }
     public DailyEvaluationTemplateFilterDto? Filter { get; set; }
 }
 
@@ -130,11 +129,9 @@ public class DailyEvaluationFilterDto
     public string? EvaluatorUserId { get; set; }
 }
 
-/// <summary>Paged evaluations list: <see cref="PageIndex"/> is zero-based.</summary>
-public class DailyEvaluationsPageRequestDto
+/// <summary>Paged evaluations list.</summary>
+public class DailyEvaluationsPageRequestDto : PageRequestDto
 {
-    public int PageIndex { get; set; }
-    public int PageSize { get; set; }
     public DailyEvaluationFilterDto? Filter { get; set; }
 }
 

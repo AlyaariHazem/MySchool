@@ -1,5 +1,7 @@
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using Backend.Common;
 using Backend.DTOS.School.Curriculms;
 using Backend.Interfaces;
 using Backend.Models;
@@ -62,6 +64,27 @@ namespace Backend.Controllers.School
             {
                 var result = await _unitOfWork.Curriculums.GetAllAsync();
                 response.Result = result;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (System.Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+        /// <summary>Paged curricula for the tenant's active academic year (same scope as <c>GET</c>).</summary>
+        [HttpPost("page")]
+        public async Task<ActionResult<APIResponse>> GetPage([FromBody] PageRequestDto? request, CancellationToken cancellationToken)
+        {
+            var response = new APIResponse();
+            try
+            {
+                request ??= new PageRequestDto();
+                response.Result = await _unitOfWork.Curriculums.GetPageAsync(request.PageIndex, request.PageSize, cancellationToken);
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
             }

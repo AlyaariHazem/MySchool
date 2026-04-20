@@ -6,9 +6,15 @@
         <div class="group group2">
             <div class="form-control">
                 <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
-                    <p-select class="w-full h-3rem inputError" [options]="classes" [checkmark]="true" formControlName="classID"
-                        optionLabel="className" optionValue="classID" [editable]="true" [showClear]="true"/>
-                    <label for="classID">اختر الصف</label>
+                    <app-dropdown-custom
+                        class="w-full h-3rem block"
+                        formControlName="classID"
+                        resource="class"
+                        inputId="plainClassSelect"
+                        [inputStyleClass]="'dropdown-custom__input p-inputtext p-component w-full h-3rem inputError'"
+                        [placeholder]="' '"
+                        [pageSize]="10" />
+                    <label for="plainClassSelect">اختر الصف</label>
                 </p-floatLabel>
             </div>
 
@@ -52,16 +58,6 @@
                 </p-floatLabel>
             </div>
 
-            <!-- السنة الدراسية -->
-            <div class="form-control">
-                <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
-                    <p-select class="w-full h-3rem inputError" [options]="years" formControlName="yearID"
-                        optionLabel="displayLabel" optionValue="yearID" [editable]="true" [showClear]="true">
-                    </p-select>
-                    <label for="yearID">اختر السنة الدراسية</label>
-                </p-floatLabel>
-            </div>
-
             <div class="form-control">
                 <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
                     <input pInputText type="number" min="0" max="40" class="w-full h-3rem inputError"
@@ -91,7 +87,6 @@
                         <th>الشعبة</th>
                         <th>اسم المعلم</th>
                         <th>الفصل الدراسي</th>
-                        <th>العام</th>
                         <th>حصص/أسبوع</th>
                         <th>العملية</th>
                     </tr>
@@ -99,12 +94,11 @@
                 <tbody>
                     @for (curriculum of curriculmsPlans; track $index; let i=$index) {
                     <tr>
-                        <td>{{ i + 1 }}</td>
+                        <td>{{ first + i + 1 }}</td>
                         <td>{{ curriculum.coursePlanName }}</td>
                         <td>{{ curriculum.divisionName }}</td>
                         <td>{{ curriculum.teacherName }}</td>
                         <td>{{ curriculum.termName }}</td>
-                        <td>{{ curriculum.year | date: 'yyyy-MM-dd' }}</td>
                         <td>{{ curriculum.periodsPerWeek ?? '—' }}</td>
                         <td>
                             <div class="col text-left">
@@ -137,7 +131,7 @@
             </table>
             <div [style.opacity]="isFetchingPlans ? '0.55' : null" [style.pointer-events]="isFetchingPlans ? 'none' : null">
             <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-                [totalRecords]="curriculmsPlan.length" [rowsPerPageOptions]="[4, 10, 20]">
+                [totalRecords]="totalCoursePlans" [rowsPerPageOptions]="[4, 10, 20]">
             </p-paginator>
             </div>
         </mat-card>

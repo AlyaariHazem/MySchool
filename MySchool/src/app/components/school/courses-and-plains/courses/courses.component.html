@@ -61,7 +61,7 @@
                 <tbody>
                     @for (curriculum of displayCurriculums; track $index;let i=$index) {
                     <tr>
-                        <td>{{ i + 1 }}</td>
+                        <td>{{ first + i + 1 }}</td>
                         <td>{{ curriculum.curriculumName }}</td>
                         <td>{{ curriculum.className }}</td>
                         <td>{{ curriculum.subjectName }}</td>
@@ -98,7 +98,7 @@
             </table>
             <div [style.opacity]="isFetchingCurriculums ? '0.55' : null" [style.pointer-events]="isFetchingCurriculums ? 'none' : null">
         <p-paginator dir="ltr" (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows"
-                [totalRecords]="curriculms.length" [rowsPerPageOptions]="[4, 10, 20]" />
+                [totalRecords]="totalCurriculums" [rowsPerPageOptions]="[4, 10, 20]" />
         </div>
         </mat-card>
     </div>

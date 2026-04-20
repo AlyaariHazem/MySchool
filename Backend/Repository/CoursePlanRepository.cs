@@ -24,17 +24,16 @@ public class CoursePlanRepository : ICoursePlanRepository
         if (dto == null)
             throw new ArgumentNullException(nameof(dto), "CoursePlanDTO cannot be null.");
 
-        // Validate that YearID is provided and exists
-        if (dto.YearID <= 0)
-            throw new ArgumentException("YearID must be provided and greater than 0.", nameof(dto));
-
         if (dto.TermID <= 0)
             throw new ArgumentException("TermID must be provided and greater than 0.", nameof(dto));
 
-        // Verify the year exists
-        var year = await _context.Years.FirstOrDefaultAsync(y => y.YearID == dto.YearID);
-        if (year == null)
-            throw new InvalidOperationException($"Year with ID {dto.YearID} not found. Please select a valid year.");
+        var activeYear = await _context.Years
+            .Where(y => y.Active)
+            .OrderBy(y => y.YearID)
+            .FirstOrDefaultAsync();
+        if (activeYear == null)
+            throw new InvalidOperationException("No active academic year is set. Activate a year before adding a course plan.");
+        dto.YearID = activeYear.YearID;
 
         await ValidateCoursePlanForeignKeysAsync(dto);
 
@@ -251,6 +250,59 @@ public class CoursePlanRepository : ICoursePlanRepository
             .ToListAsync();
         
         return list;
+    }
+
+    private const int MaxCoursePlanPageSize = 200;
+
+    public async Task<PagedResult<CoursePlanReturnDTO>> GetPageAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
+    {
+        pageIndex = Math.Max(0, pageIndex);
+        if (pageSize < 1)
+            pageSize = 20;
+        if (pageSize > MaxCoursePlanPageSize)
+            pageSize = MaxCoursePlanPageSize;
+
+        var activeYear = await _context.Years
+            .AsNoTracking()
+            .Where(y => y.Active)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (activeYear == null)
+            return new PagedResult<CoursePlanReturnDTO>(Array.Empty<CoursePlanReturnDTO>(), 1, pageSize, 0, 0);
+
+        var baseQuery = _context.CoursePlans
+            .AsNoTracking()
+            .Where(p => p.YearID == activeYear.YearID);
+
+        var totalCount = await baseQuery.CountAsync(cancellationToken);
+
+        var list = await baseQuery
+            .OrderBy(p => p.ClassID)
+            .ThenBy(p => p.SubjectID)
+            .ThenBy(p => p.DivisionID)
+            .ThenBy(p => p.TeacherID)
+            .ThenBy(p => p.TermID)
+            .Skip(pageIndex * pageSize)
+            .Take(pageSize)
+            .Select(item => new CoursePlanReturnDTO
+            {
+                CoursePlanName = $"{item.Subject.SubjectName}-{item.Class.ClassName}",
+                TeacherName = $"{item.Teacher.FullName.FirstName} {item.Teacher.FullName.MiddleName} {item.Teacher.FullName.LastName}",
+                DivisionName = $"{item.Division.DivisionName}",
+                TermName = $"{item.Term.Name}",
+                Year = $"{item.Year.YearDateStart.Year}-{item.Year.YearDateEnd!.Value.Year}",
+                SubjectID = item.SubjectID,
+                ClassID = item.ClassID,
+                DivisionID = item.DivisionID,
+                TeacherID = item.TeacherID,
+                TermID = item.TermID,
+                YearID = item.YearID,
+                PeriodsPerWeek = item.PeriodsPerWeek
+            })
+            .ToListAsync(cancellationToken);
+
+        var totalPages = pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+        return new PagedResult<CoursePlanReturnDTO>(list, pageIndex + 1, pageSize, totalCount, totalPages);
     }
 
     public async Task<CoursePlanDTO?> GetByIdAsync(int yearID, int teacherID, int classID, int divisionID, int subjectID, int termID)

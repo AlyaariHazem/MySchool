@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Backend.Common;
 using Backend.DTOS;
+using Backend.DTOS.School.Classes;
 using Backend.DTOS.School.Stages;
 using Backend.Interfaces;
 using Backend.Models;
@@ -9,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Threading;
 
 namespace Backend.Controllers.School
 {
@@ -130,6 +133,33 @@ namespace Backend.Controllers.School
                 var classes = await _unitOfWork.Classes.GetAllNamesAsync();
 
                 response.Result = classes;
+                response.statusCode = HttpStatusCode.OK;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+        /// <summary>Paged class names for the active academic year (same filter as <see cref="GetAllNameClasses"/>).</summary>
+        [HttpPost("GetAllNameClasses/page")]
+        public async Task<ActionResult<APIResponse>> GetAllNameClassesPage(
+            [FromBody] ClassNamesPageRequestDto? request,
+            CancellationToken cancellationToken)
+        {
+            var response = new APIResponse();
+            try
+            {
+                request ??= new ClassNamesPageRequestDto();
+                response.Result = await _unitOfWork.Classes.GetNamesPageAsync(
+                    request.PageIndex,
+                    request.PageSize,
+                    request.Search,
+                    cancellationToken);
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
             }

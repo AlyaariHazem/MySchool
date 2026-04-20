@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS;
 using Backend.DTOS.School.Classes;
@@ -65,6 +68,47 @@ namespace Backend.Repository.School
                 }).ToListAsync();
             return stageDictionary;
         }
+
+        private const int MaxClassNamesPageSize = 200;
+
+        public async Task<PagedResult<AllClassesDTO>> GetNamesPageAsync(
+            int pageIndex,
+            int pageSize,
+            string? search,
+            CancellationToken cancellationToken = default)
+        {
+            pageIndex = Math.Max(0, pageIndex);
+            if (pageSize < 1)
+                pageSize = 20;
+            if (pageSize > MaxClassNamesPageSize)
+                pageSize = MaxClassNamesPageSize;
+
+            var q = _db.Classes
+                .AsNoTracking()
+                .Include(c => c.Year)
+                .Include(c => c.Stage)
+                    .ThenInclude(s => s!.Year)
+                .Where(c => (c.Year != null && c.Year.Active) ||
+                            (c.Stage != null && c.Stage.Year != null && c.Stage.Year.Active));
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.Trim();
+                q = q.Where(c => c.ClassName.Contains(s));
+            }
+
+            var ordered = q.OrderBy(c => c.ClassName);
+            var totalCount = await ordered.CountAsync(cancellationToken);
+            var rows = await ordered
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .Select(c => new AllClassesDTO { ClassID = c.ClassID, ClassName = c.ClassName })
+                .ToListAsync(cancellationToken);
+
+            var totalPages = pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+            return new PagedResult<AllClassesDTO>(rows, pageIndex + 1, pageSize, totalCount, totalPages);
+        }
+
         public async Task Update(AddClassDTO model)
         {
             var existingClass = await _db.Classes.FirstOrDefaultAsync(c => c.ClassID == model.ClassID);

@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using Backend.Common;
 using Backend.DTOS.School.CoursePlan;
 using Backend.Interfaces;
 using Backend.Models;
@@ -91,6 +92,27 @@ public class CoursePlansController : ControllerBase
         {
             var result = await _unitOfWork.CoursePlans.GetAllAsync();
             response.Result = result;
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
+    /// <summary>Paged course plans for the tenant's active academic year (same scope as <see cref="GetAll"/>).</summary>
+    [HttpPost("page")]
+    public async Task<ActionResult<APIResponse>> GetPage([FromBody] PageRequestDto? request, CancellationToken cancellationToken)
+    {
+        var response = new APIResponse();
+        try
+        {
+            request ??= new PageRequestDto();
+            response.Result = await _unitOfWork.CoursePlans.GetPageAsync(request.PageIndex, request.PageSize, cancellationToken);
             response.statusCode = HttpStatusCode.OK;
             return Ok(response);
         }

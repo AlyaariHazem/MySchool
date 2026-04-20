@@ -8,7 +8,6 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs';
 
 import { SubjectService } from '../../core/services/subject.service';
-import { ClassNames } from '../../core/models/classes.model';
 import { Curriculms } from '../../core/models/Curriculms.model';
 import { CurriculmService } from '../../core/services/curriculm.service';
 import { divisions } from '../../core/models/division.model';
@@ -16,13 +15,10 @@ import { Teachers } from '../../core/models/teacher.model';
 import { Subjects } from '../../core/models/subjects.model';
 import { CurriculmsPlan, CurriculmsPlans } from '../../core/models/curriculmsPlans.model';
 import { CurriculmsPlanService } from '../../core/services/curriculms-plan.service';
-import { ClassService } from '../../core/services/class.service';
 import { DivisionService } from '../../core/services/division.service';
 import { Terms } from '../../core/models/term.model';
 import { TermService } from '../../core/services/term.service';
 import { TeacherService } from '../../core/services/teacher.service';
-import { YearService } from '../../../../core/services/year.service';
-import { Year } from '../../../../core/models/year.model';
 import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
 @Component({
@@ -37,17 +33,15 @@ import { selectLanguage } from '../../../../core/store/language/language.selecto
 export class PlainsComponent {
   form: FormGroup;
   subjects: Subjects[] = [];
-  classes: ClassNames[] | undefined;
   divisions: divisions[] = [];
   fiteredDivisions: divisions[] | undefined;
   teachers: Teachers[] | undefined;
   terms: Terms[] = [];
-  years: (Year & { displayLabel?: string })[] = [];
   ClassSubjects: Curriculms[] = [];
   filteredSubjects: Curriculms[] | undefined;
-  curriculmsPlan: CurriculmsPlans[] = [];
   first: number = 0;
   rows: number = 4;
+  totalCoursePlans = 0;
   curriculmsPlans: CurriculmsPlans[] = [];
   editMode: boolean = false;
   editingPlan: CurriculmsPlans | null = null;
@@ -73,11 +67,9 @@ export class PlainsComponent {
     private toastr: ToastrService,
     private divisionSerivce: DivisionService,
     private curriculmsPlanService: CurriculmsPlanService,
-    private classService: ClassService,
     private termService: TermService,
     private store:Store,
-    private teacherService: TeacherService,
-    private yearService: YearService
+    private teacherService: TeacherService
   ) {
     this.form = this.formBuilder.group({
       classID: [null, Validators.required],
@@ -85,32 +77,28 @@ export class PlainsComponent {
       divisionID: [null, Validators.required],
       teacherID: [null, Validators.required],
       termID: [null, Validators.required],
-      yearID: [null, Validators.required],
       periodsPerWeek: [3, [Validators.required, Validators.min(0), Validators.max(40)]]
     });
   }
 
   ngOnInit(): void {
     this.getAllSubjects();
-    this.getAllCurriculmPlan();
+    this.loadCoursePlansPage();
     this.getAllCurriculm();
-    this.getAllClasses();
     this.getAllDivision();
     this.getAllTerms();
     this.getAllTeachers();
-    this.getAllYears();
 
-    this.form.get('classID')?.valueChanges.subscribe((selectedClassID: number) => {
+    this.form.get('classID')?.valueChanges.subscribe((selectedClassID: number | null) => {
+      if (selectedClassID == null || selectedClassID <= 0) {
+        this.filteredSubjects = [...this.ClassSubjects];
+        this.fiteredDivisions = undefined;
+        return;
+      }
       this.filteredSubjects = this.ClassSubjects.filter(c => c.classID === selectedClassID);
       this.fiteredDivisions = this.divisions.filter(d => d.classID === selectedClassID);
       this.form.patchValue({ subjectID: null });
     });
-
-    // Set default year from localStorage if available
-    const yearFromLocal = localStorage.getItem('yearID');
-    if (yearFromLocal) {
-      this.form.patchValue({ yearID: Number(yearFromLocal) });
-    }
 
     this.form.reset();
   }
@@ -127,20 +115,27 @@ export class PlainsComponent {
     });
   }
 
-  getAllCurriculmPlan(): void {
+  loadCoursePlansPage(): void {
     this.isFetchingPlans = true;
-    this.curriculmsPlanService.getAllCurriculmPlan().pipe(
+    const pageIndex = this.rows > 0 ? Math.floor(this.first / this.rows) : 0;
+    this.curriculmsPlanService.getCurriculmPlanPage({ pageIndex, pageSize: this.rows }).pipe(
       finalize(() => {
         this.isFetchingPlans = false;
       }),
     ).subscribe({
       next: (res) => {
-        if (!res.isSuccess) {
+        if (!res.isSuccess || !res.result) {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculum plans');
           return;
         }
-        this.curriculmsPlan = res.result;
-        this.updatePaginatedData();
+        const p = res.result;
+        if (p.data.length === 0 && p.totalCount > 0 && pageIndex > 0) {
+          this.first = (pageIndex - 1) * this.rows;
+          this.loadCoursePlansPage();
+          return;
+        }
+        this.curriculmsPlans = p.data;
+        this.totalCoursePlans = p.totalCount;
       },
       error: () => this.toastr.error('Error fetching curriculum plans')
     });
@@ -155,22 +150,8 @@ export class PlainsComponent {
         }
         this.ClassSubjects = res.result;
         this.filteredSubjects = [...this.ClassSubjects];
-        this.updatePaginatedData();
       },
       error: () => this.toastr.error('Error fetching curriculum data')
-    });
-  }
-
-  getAllClasses(): void {
-    this.classService.GetAllNames().subscribe({
-      next: (res) => {
-        if (!res.isSuccess) {
-          this.toastr.warning(res.errorMasseges[0] || 'Failed to load classes.');
-          return;
-        }
-        this.classes = res.result;
-      },
-      error: () => this.toastr.error('Server error occurred')
     });
   }
 
@@ -213,28 +194,6 @@ export class PlainsComponent {
     });
   }
 
-  getAllYears(): void {
-    this.yearService.getAllYears().subscribe({
-      next: (years: Year[]) => {
-        // Add display property to each year for better dropdown display
-        this.years = years.map((year: Year) => ({
-          ...year,
-          displayLabel: this.getYearDisplay(year)
-        }));
-        // Set default to active year if no year is selected
-        if (!this.form.get('yearID')?.value && years.length > 0) {
-          const activeYear = years.find((y: Year) => y.active);
-          if (activeYear) {
-            this.form.patchValue({ yearID: activeYear.yearID });
-          } else {
-            this.form.patchValue({ yearID: years[0].yearID });
-          }
-        }
-      },
-      error: () => this.toastr.error('Error fetching years')
-    });
-  }
-
   Add(): void {
     if (this.isBusy) {
       return;
@@ -244,12 +203,7 @@ export class PlainsComponent {
       return;
     }
 
-    const { classID, subjectID, divisionID, teacherID, termID, yearID, periodsPerWeek } = this.form.value;
-
-    if (!yearID) {
-      this.toastr.warning('يرجى اختيار سنة دراسية');
-      return;
-    }
+    const { classID, subjectID, divisionID, teacherID, termID, periodsPerWeek } = this.form.value;
 
     const localCurriculm: CurriculmsPlan = {
       subjectID,
@@ -257,7 +211,6 @@ export class PlainsComponent {
       divisionID,
       teacherID,
       termID,
-      yearID: Number(yearID),
       periodsPerWeek: periodsPerWeek != null ? Number(periodsPerWeek) : 3,
     };
 
@@ -273,11 +226,12 @@ export class PlainsComponent {
           return;
         }
         this.toastr.success(res.result || 'Curriculum added successfully');
-        this.getAllCurriculmPlan();
+        this.loadCoursePlansPage();
         this.editMode = false;
         this.editingPlan = null;
-        this.form.reset();
-        this.form.patchValue({ periodsPerWeek: 3 });
+        this.form.patchValue({ subjectID: null, divisionID: null });
+        this.form.get('subjectID')?.markAsUntouched();
+        this.form.get('divisionID')?.markAsUntouched();
       },
       error: (err) => {
         const errorMessage = err?.error?.errorMasseges?.[0] || err?.error?.message || 'Server error occurred';
@@ -322,7 +276,6 @@ export class PlainsComponent {
           divisionID: planData.divisionID,
           teacherID: planData.teacherID,
           termID: planData.termID,
-          yearID: planData.yearID,
           periodsPerWeek: planData.periodsPerWeek ?? 3
         });
 
@@ -364,12 +317,7 @@ export class PlainsComponent {
       return;
     }
 
-    const { classID, subjectID, divisionID, teacherID, termID, yearID, periodsPerWeek } = this.form.value;
-
-    if (!yearID) {
-      this.toastr.warning('يرجى اختيار سنة دراسية');
-      return;
-    }
+    const { classID, subjectID, divisionID, teacherID, termID, periodsPerWeek } = this.form.value;
 
     const updatedPlan: CurriculmsPlan = {
       subjectID,
@@ -377,7 +325,6 @@ export class PlainsComponent {
       divisionID,
       teacherID,
       termID,
-      yearID: Number(yearID),
       periodsPerWeek: periodsPerWeek != null ? Number(periodsPerWeek) : 3,
     };
 
@@ -403,7 +350,7 @@ export class PlainsComponent {
           return;
         }
         this.toastr.success(res.result || 'Course plan updated successfully');
-        this.getAllCurriculmPlan();
+        this.loadCoursePlansPage();
         this.editMode = false;
         this.editingPlan = null;
         this.form.reset();
@@ -448,7 +395,7 @@ export class PlainsComponent {
           return;
         }
         this.toastr.success(res.result || 'Course plan deleted successfully');
-        this.getAllCurriculmPlan();
+        this.loadCoursePlansPage();
       },
       error: (err) => {
         const errorMessage = err?.error?.errorMasseges?.[0] || err?.error?.message || 'Error while deleting course plan';
@@ -457,27 +404,12 @@ export class PlainsComponent {
     });
   }
 
-  updatePaginatedData(): void {
-    const start = this.first;
-    const end = this.first + this.rows;
-    this.curriculmsPlans = this.curriculmsPlan.slice(start, end);
-  }
-
   onPageChange(event: PaginatorState): void {
     if (this.isFetchingPlans || this.isMutating) {
       return;
     }
-    this.first = event.first || 0;
-    this.rows = event.rows || 4;
-    this.updatePaginatedData();
-  }
-
-  getYearDisplay(year: Year): string {
-    if (!year || !year.yearDateStart || !year.yearDateEnd) {
-      return '';
-    }
-    const startYear = new Date(year.yearDateStart).getFullYear();
-    const endYear = new Date(year.yearDateEnd).getFullYear();
-    return `${startYear} - ${endYear}`;
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? 4;
+    this.loadCoursePlansPage();
   }
 }

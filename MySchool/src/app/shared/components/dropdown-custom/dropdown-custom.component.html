@@ -2,18 +2,18 @@
   #dropdownAutocomplete
   class="dropdown-custom"
   [inputId]="inputId"
-  [(ngModel)]="selectedStudent"
-  [suggestions]="filteredStudents"
-  (completeMethod)="onStudentSearch($event)"
+  [(ngModel)]="selectedPanel"
+  [suggestions]="filteredPanel"
+  (completeMethod)="onCompleteSearch($event)"
   (onFocus)="onInputFocus($event)"
-  (onSelect)="onStudentSelect($event)"
-  (onClear)="onStudentClear()"
+  (onSelect)="onRowSelect($event)"
+  (onClear)="onClearSelection()"
   (onKeyUp)="onSearchKeyUp($event)"
-  optionLabel="fullName"
+  [optionLabel]="optionLabelField"
   [dropdown]="false"
   [forceSelection]="true"
   [showClear]="true"
-  [minLength]="1"
+  [minLength]="minQueryLength"
   [delay]="searchDelayMs"
   [completeOnFocus]="false"
   [virtualScroll]="true"
@@ -25,9 +25,16 @@
   [placeholder]="placeholder"
   [disabled]="disabled">
   <ng-template let-item pTemplate="item">
-    <span class="dropdown-custom__item flex justify-between gap-3 w-full">
-      <span>{{ item.fullName }}</span>
-      <span class="text-gray-500 text-sm">#{{ item.studentID }}</span>
-    </span>
+    @if (resource === 'class') {
+      <span class="dropdown-custom__item flex justify-between gap-3 w-full">
+        <span>{{ item.className }}</span>
+        <span class="text-gray-500 text-sm">#{{ item.classID }}</span>
+      </span>
+    } @else {
+      <span class="dropdown-custom__item flex justify-between gap-3 w-full">
+        <span>{{ item.fullName }}</span>
+        <span class="text-gray-500 text-sm">#{{ item.studentID }}</span>
+      </span>
+    }
   </ng-template>
 </p-autocomplete>

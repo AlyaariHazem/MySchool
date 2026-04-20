@@ -2,8 +2,14 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
+import { PagedResultDto } from '../../../../core/models/students.model';
 import { Curriculms } from '../models/Curriculms.model';
 import { ApiResponse } from '../../../../core/models/response.model';
+
+export interface SimplePageRequestDto {
+  pageIndex: number;
+  pageSize: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +20,10 @@ export class CurriculmService {
 
   getAllCurriculm(): Observable<ApiResponse<Curriculms[]>> {
     return this.API.getRequest<Curriculms[]>("Curriculms");
+  }
+
+  getCurriculmPage(body: SimplePageRequestDto): Observable<ApiResponse<PagedResultDto<Curriculms>>> {
+    return this.API.postRequest<PagedResultDto<Curriculms>>('Curriculms/page', body);
   }
 
   getCurriculmById(id: number): Observable<ApiResponse<Curriculms>> {

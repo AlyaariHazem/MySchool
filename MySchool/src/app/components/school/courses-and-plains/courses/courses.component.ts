@@ -29,7 +29,8 @@ export class CoursesComponent implements OnInit {
 
   subjects: Subjects[] = [];
   classes: ClassNames[] = [];
-  curriculms: Curriculms[] = [];         // Entire array of curriculums
+  totalCurriculums = 0;
+  displayCurriculums: Curriculms[] = [];
 
   editMode: boolean = false; // Flag to check if in edit mode
   isLoading: boolean = true;
@@ -67,30 +68,38 @@ export class CoursesComponent implements OnInit {
   ngOnInit(): void {
     this.getAllClasses();
     this.getAllSubjects();
-    this.getAllCurriculm();
+    this.loadCurriculumsPage();
     this.form.reset();
   }
 
-  getAllCurriculm(): void {
+  loadCurriculumsPage(): void {
     this.isFetchingCurriculums = true;
-    this.curriculmsService.getAllCurriculm().pipe(
+    const pageIndex = this.rows > 0 ? Math.floor(this.first / this.rows) : 0;
+    this.curriculmsService.getCurriculmPage({ pageIndex, pageSize: this.rows }).pipe(
       finalize(() => {
         this.isFetchingCurriculums = false;
       }),
     ).subscribe({
       next: (res) => {
-        if (!res.isSuccess) {
+        if (!res.isSuccess || !res.result) {
           this.toastr.warning(res.errorMasseges[0] || 'Failed to load curriculums');
-          this.curriculms = [];
+          this.displayCurriculums = [];
+          this.totalCurriculums = 0;
           return;
         }
-
-        this.curriculms = res.result;
-        this.updatePaginatedData();
+        const p = res.result;
+        if (p.data.length === 0 && p.totalCount > 0 && pageIndex > 0) {
+          this.first = (pageIndex - 1) * this.rows;
+          this.loadCurriculumsPage();
+          return;
+        }
+        this.displayCurriculums = p.data;
+        this.totalCurriculums = p.totalCount;
       },
       error: () => {
         this.toastr.error('Server error while loading curriculums');
-        this.curriculms = [];
+        this.displayCurriculums = [];
+        this.totalCurriculums = 0;
       }
     });
   }
@@ -166,8 +175,7 @@ export class CoursesComponent implements OnInit {
 
         newCurriculm.subjectName = subjectName;
         newCurriculm.className = className;
-        this.curriculms.push(newCurriculm);
-        this.updatePaginatedData();
+        this.loadCurriculumsPage();
         this.form.reset();
         this.toastr.success('Curriculum added successfully');
       },
@@ -222,7 +230,7 @@ export class CoursesComponent implements OnInit {
         }
 
         this.toastr.success(res.result || 'Curriculum updated successfully');
-        this.getAllCurriculm();
+        this.loadCurriculumsPage();
         this.form.reset();
         this.editMode = false;
       },
@@ -247,26 +255,21 @@ export class CoursesComponent implements OnInit {
         }
 
         this.toastr.success(res.result || 'Curriculum deleted successfully');
-        this.getAllCurriculm();
+        this.loadCurriculumsPage();
       },
       error: () => this.toastr.error('Server error while deleting curriculum')
     });
   }
 
-  first: number = 0; // Current starting index for pagination
-  rows: number = 4; // Number of rows per page
-  displayCurriculums: Curriculms[] = [];
-  updatePaginatedData(): void {
-    const start = this.first;
-    const end = this.first + this.rows;
-    this.displayCurriculums = this.curriculms.slice(start, end);
-  }
+  first: number = 0;
+  rows: number = 4;
+
   onPageChange(event: PaginatorState): void {
     if (this.isFetchingCurriculums || this.isMutating) {
       return;
     }
-    this.first = event.first || 0;
-    this.rows = event.rows || 4;
-    this.updatePaginatedData();
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? 4;
+    this.loadCurriculumsPage();
   }
 }

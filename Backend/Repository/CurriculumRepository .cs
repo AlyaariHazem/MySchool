@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.Curriculms;
 using Backend.Interfaces;
@@ -48,6 +51,52 @@ namespace Backend.Repository.School
                 .ToListAsync();
 
             return _mapper.Map<List<CurriculumReturnDTO>>(list);
+        }
+
+        private const int MaxCurriculumPageSize = 200;
+
+        public async Task<PagedResult<CurriculumReturnDTO>> GetPageAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
+        {
+            pageIndex = Math.Max(0, pageIndex);
+            if (pageSize < 1)
+                pageSize = 20;
+            if (pageSize > MaxCurriculumPageSize)
+                pageSize = MaxCurriculumPageSize;
+
+            var activeYear = await _context.Years
+                .AsNoTracking()
+                .Where(y => y.Active)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (activeYear == null)
+                return new PagedResult<CurriculumReturnDTO>(Array.Empty<CurriculumReturnDTO>(), 1, pageSize, 0, 0);
+
+            var yearId = activeYear.YearID;
+
+            var baseQuery = _context.Curriculums
+                .AsNoTracking()
+                .Include(c => c.Subject)
+                .Include(c => c.Class)
+                    .ThenInclude(cl => cl!.Year)
+                .Include(c => c.Class)
+                    .ThenInclude(cl => cl!.Stage)
+                        .ThenInclude(s => s!.Year)
+                .Where(c => c.Class != null &&
+                            ((c.Class.Year != null && c.Class.Year.YearID == yearId) ||
+                             (c.Class.Stage != null && c.Class.Stage.Year != null && c.Class.Stage.Year.YearID == yearId)));
+
+            var totalCount = await baseQuery.CountAsync(cancellationToken);
+
+            var rows = await baseQuery
+                .OrderBy(c => c.ClassID)
+                .ThenBy(c => c.SubjectID)
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            var items = _mapper.Map<List<CurriculumReturnDTO>>(rows);
+            var totalPages = pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+            return new PagedResult<CurriculumReturnDTO>(items, pageIndex + 1, pageSize, totalCount, totalPages);
         }
 
         // Get curriculum by SubjectID and ClassID
