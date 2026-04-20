@@ -4,7 +4,7 @@
     formControlName="classID" id="term" class="term" placeholder="إختار صف" />
 
   <label for="className" class="className">اسـم الشبعة</label>
-  <input type="text" formControlName="divisionName" class="class" placeholder="إدخال اسم صـف جديد" />
+  <input #divisionNameInput type="text" formControlName="divisionName" class="class" placeholder="إدخال اسم صـف جديد" />
   <p-button variant="outlined" severity="success" class="showFee" [label]="isEditMode ? 'تحديث' : 'إضافة'"
     (click)="isEditMode ? updateDivision() : AddDivision()" [disabled]="!form.valid" />
 </form>

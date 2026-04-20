@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, Input, OnInit, viewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 
@@ -18,6 +18,8 @@ import { ConfirmDialogComponent } from '../../../../../shared/components/confirm
   ]
 })
 export class DivisionComponent implements OnInit {
+  private readonly divisionNameInput = viewChild<ElementRef<HTMLInputElement>>('divisionNameInput');
+
   divisions: Array<divisions> = [];
   PaginatedDivisions: Array<divisions> = [];
   @Input() classes: ClassDTO[] = [];
@@ -95,8 +97,9 @@ export class DivisionComponent implements OnInit {
         next: (res) => {
           if (res.isSuccess) {
             this.toastr.success(res.result);
-            this.form.reset();
+            this.form.get('divisionName')?.reset();
             this.getAllDivisions();
+            setTimeout(() => this.divisionNameInput()?.nativeElement?.focus(), 0);
           }
         },
         error: () => this.toastr.error('Failed to add Division')

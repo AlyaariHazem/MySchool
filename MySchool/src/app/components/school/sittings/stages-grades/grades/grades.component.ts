@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, Input, OnInit, viewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -17,6 +17,8 @@ import { DialogService } from 'primeng/dynamicdialog';
   ]
 })
 export class GradesComponent implements OnInit {
+  private readonly classNameInput = viewChild<ElementRef<HTMLInputElement>>('classNameInput');
+
   @Input() stages: Stage[] = [];
   paginatedGrade: ClassDTO[] = [];
   classes: ClassDTO[] = [];
@@ -93,8 +95,9 @@ export class GradesComponent implements OnInit {
 
         this.toastr.success('Class added successfully');
         this.getAllClasses();
-        this.form.reset();
+        this.form.get('className')?.reset();
         this.isEditMode = false;
+        setTimeout(() => this.classNameInput()?.nativeElement?.focus(), 0);
       },
       error: () => this.toastr.error('Something went wrong')
     });
