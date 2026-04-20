@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -25,7 +26,18 @@ import { School } from 'app/core/models/school.modul';
 import { selectLanguage } from 'app/core/store/language/language.selectors';
 import { ShardModule } from 'app/shared/shard.module';
 
-import { JobApplicationFilterDto, JobApplicationListDto, JobApplicationStatus } from '../recruitment.models';
+import {
+  JobApplicationCreateDto,
+  JobApplicationFilterDto,
+  JobApplicationFullDto,
+  JobApplicationListDto,
+  JobApplicationReadDto,
+  JobApplicationStatus,
+  JobApplicationUpdateDto,
+  JobPostingListDto,
+  JobPostingStatus,
+} from '../recruitment.models';
+import { JobApplicationFormComponent } from '../job-application-form/job-application-form.component';
 import { RecruitmentService, readRecruitmentHttpError } from '../recruitment.service';
 
 @Component({
@@ -41,12 +53,14 @@ import { RecruitmentService, readRecruitmentHttpError } from '../recruitment.ser
     TranslateModule,
     TableModule,
     ButtonModule,
+    DialogModule,
     Select,
     FloatLabelModule,
     InputTextModule,
     ProgressSpinnerModule,
     TooltipModule,
     TagModule,
+    JobApplicationFormComponent,
   ],
   templateUrl: './job-applications-list.component.html',
   styleUrl: './job-applications-list.component.scss',
@@ -78,6 +92,16 @@ export class JobApplicationsListComponent implements OnInit, OnDestroy {
   schoolOptions: { label: string; value: number }[] = [];
   yearOptions: { label: string; value: number }[] = [];
   statusOptions: { label: string; value: JobApplicationStatus }[] = [];
+  openPostings: JobPostingListDto[] = [];
+  showCreateDialog = false;
+  showEditDialog = false;
+  showWorkflowDialog = false;
+  dialogLoading = false;
+  formSubmitting = false;
+  dialogError: string | null = null;
+  selectedApplicationId: number | null = null;
+  selectedApplication: JobApplicationReadDto | null = null;
+  selectedWorkflow: JobApplicationFullDto | null = null;
 
   JobApplicationStatus = JobApplicationStatus;
 
@@ -113,6 +137,10 @@ export class JobApplicationsListComponent implements OnInit, OnDestroy {
         this.rebuildYearOptions();
       },
       error: () => this.toastr.error(this.translate.instant('employeesHr.errors.loadYears')),
+    });
+    this.recruitment.getJobPostings({ status: JobPostingStatus.Open, isActive: true }).subscribe({
+      next: (rows) => (this.openPostings = rows ?? []),
+      error: () => (this.openPostings = []),
     });
     this.qpSub = this.route.queryParamMap.subscribe((q) => {
       const jpid = q.get('jobPostingID');
@@ -198,5 +226,107 @@ export class JobApplicationsListComponent implements OnInit, OnDestroy {
       [JobApplicationStatus.Withdrawn]: 'withdrawn',
     };
     return m[s] ?? 'submitted';
+  }
+
+  postingStatusLabelKey(s: JobPostingStatus): string {
+    switch (s) {
+      case JobPostingStatus.Open:
+        return 'open';
+      case JobPostingStatus.Closed:
+        return 'closed';
+      case JobPostingStatus.Archived:
+        return 'archived';
+      default:
+        return 'draft';
+    }
+  }
+
+  openCreateDialog(): void {
+    this.dialogError = null;
+    this.showCreateDialog = true;
+  }
+
+  closeCreateDialog(): void {
+    if (this.formSubmitting) return;
+    this.showCreateDialog = false;
+  }
+
+  openEditDialog(id: number): void {
+    this.selectedApplicationId = id;
+    this.selectedApplication = null;
+    this.dialogError = null;
+    this.dialogLoading = true;
+    this.showEditDialog = true;
+    this.recruitment
+      .getJobApplicationById(id)
+      .pipe(finalize(() => (this.dialogLoading = false)))
+      .subscribe({
+        next: (row) => (this.selectedApplication = row),
+        error: (err) => {
+          this.dialogError = readRecruitmentHttpError(err);
+          this.selectedApplication = null;
+        },
+      });
+  }
+
+  closeEditDialog(): void {
+    if (this.formSubmitting) return;
+    this.showEditDialog = false;
+  }
+
+  openWorkflowDialog(id: number): void {
+    this.selectedApplicationId = id;
+    this.selectedWorkflow = null;
+    this.dialogError = null;
+    this.dialogLoading = true;
+    this.showWorkflowDialog = true;
+    this.recruitment
+      .getJobApplicationFull(id)
+      .pipe(finalize(() => (this.dialogLoading = false)))
+      .subscribe({
+        next: (row) => (this.selectedWorkflow = row),
+        error: (err) => {
+          this.dialogError = readRecruitmentHttpError(err);
+          this.selectedWorkflow = null;
+        },
+      });
+  }
+
+  closeWorkflowDialog(): void {
+    this.showWorkflowDialog = false;
+    this.selectedWorkflow = null;
+  }
+
+  createApplication(dto: JobApplicationCreateDto | Record<string, unknown>): void {
+    this.formSubmitting = true;
+    this.recruitment
+      .createJobApplication(dto as JobApplicationCreateDto)
+      .pipe(finalize(() => (this.formSubmitting = false)))
+      .subscribe({
+        next: (row) => {
+          this.toastr.success(this.translate.instant('recruitment.applications.created'));
+          this.showCreateDialog = false;
+          this.load();
+          this.openWorkflowDialog(row.jobApplicationID);
+        },
+        error: (err) => this.toastr.error(readRecruitmentHttpError(err)),
+      });
+  }
+
+  updateApplication(payload: JobApplicationUpdateDto | Record<string, unknown>): void {
+    if (!this.selectedApplicationId) return;
+    this.formSubmitting = true;
+    this.recruitment
+      .updateJobApplication(this.selectedApplicationId, payload as JobApplicationUpdateDto)
+      .pipe(finalize(() => (this.formSubmitting = false)))
+      .subscribe({
+        next: () => {
+          this.toastr.success(this.translate.instant('recruitment.applications.updated'));
+          this.showEditDialog = false;
+          this.load();
+          this.openWorkflowDialog(this.selectedApplicationId!);
+        },
+        error: (err) => this.toastr.error(readRecruitmentHttpError(err)),
+      });
   }
 }

@@ -92,3 +92,40 @@
 :host ::ng-deep .recruitment-table .p-datatable-tbody > tr:nth-child(odd) {
   background: #fff;
 }
+
+:host ::ng-deep .recruitment-dialog .p-dialog-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.25rem;
+}
+
+:host ::ng-deep .recruitment-dialog .p-dialog-content {
+  padding: 1.1rem 1.35rem 1.35rem;
+  background: #f8fafc;
+}
+
+:host ::ng-deep .recruitment-dialog-form .p-dialog-content {
+  max-height: min(78vh, 820px);
+  overflow: auto;
+}
+
+:host ::ng-deep .recruitment-dialog-view .p-dialog-content {
+  max-height: min(76vh, 760px);
+  overflow: auto;
+}
+
+.workflow-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.workflow-dialog-content .summary-cards {
+  margin-bottom: 0.2rem;
+}
+
+.workflow-dialog-content .detail-grid {
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  padding: 0.5rem 0.9rem;
+  background: #fff;
+}

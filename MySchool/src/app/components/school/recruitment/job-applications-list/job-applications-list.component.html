@@ -7,7 +7,7 @@
           *ngIf="canCreate"
           [label]="'recruitment.applications.add' | translate"
           icon="pi pi-plus"
-          routerLink="/school/recruitment/job-applications/create"
+          (onClick)="openCreateDialog()"
         />
         <p-button
           [label]="'employeesHr.list.refresh' | translate"
@@ -128,7 +128,7 @@
                 icon="pi pi-sitemap"
                 [rounded]="true"
                 [text]="true"
-                [routerLink]="['/school/recruitment/job-applications', row.jobApplicationID]"
+              (onClick)="openWorkflowDialog(row.jobApplicationID)"
                 [pTooltip]="'recruitment.applications.workflow' | translate"
               />
               <p-button
@@ -136,7 +136,7 @@
                 icon="pi pi-pencil"
                 [rounded]="true"
                 [text]="true"
-                [routerLink]="['/school/recruitment/job-applications', row.jobApplicationID, 'edit']"
+              (onClick)="openEditDialog(row.jobApplicationID)"
                 [pTooltip]="'employeesHr.actions.edit' | translate"
               />
             </td>
@@ -146,3 +146,221 @@
     </div>
   </div>
 </div>
+
+<p-dialog
+  [header]="'recruitment.applications.add' | translate"
+  [(visible)]="showCreateDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '72rem', maxWidth: '96vw' }"
+  styleClass="recruitment-dialog recruitment-dialog-form"
+  (onHide)="closeCreateDialog()"
+>
+  <app-job-application-form
+    [mode]="'create'"
+    [years]="years"
+    [openPostings]="openPostings"
+    [submitting]="formSubmitting"
+    [submitLabelKey]="'recruitment.applications.add'"
+    (submitted)="createApplication($event)"
+    (cancelled)="closeCreateDialog()"
+  />
+</p-dialog>
+
+<p-dialog
+  [header]="'employeesHr.actions.edit' | translate"
+  [(visible)]="showEditDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '72rem', maxWidth: '96vw' }"
+  styleClass="recruitment-dialog recruitment-dialog-form"
+  (onHide)="closeEditDialog()"
+>
+  <div *ngIf="dialogLoading" class="loading-wrap"><p-progressSpinner strokeWidth="3" /></div>
+  <div *ngIf="!dialogLoading && dialogError" class="error-block">{{ dialogError }}</div>
+  <app-job-application-form
+    *ngIf="!dialogLoading && selectedApplication"
+    [mode]="'edit'"
+    [years]="years"
+    [initial]="selectedApplication"
+    [submitting]="formSubmitting"
+    [submitLabelKey]="'recruitment.applications.save'"
+    (submitted)="updateApplication($event)"
+    (cancelled)="closeEditDialog()"
+  />
+</p-dialog>
+
+<p-dialog
+  [header]="'recruitment.applications.workflow' | translate"
+  [(visible)]="showWorkflowDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '56rem', maxWidth: '96vw' }"
+  styleClass="recruitment-dialog recruitment-dialog-view"
+  (onHide)="closeWorkflowDialog()"
+>
+  <div *ngIf="dialogLoading" class="loading-wrap"><p-progressSpinner strokeWidth="3" /></div>
+  <div *ngIf="!dialogLoading && dialogError" class="error-block">{{ dialogError }}</div>
+
+  <div *ngIf="!dialogLoading && selectedWorkflow as wf" class="workflow-dialog-content">
+    <div class="summary-cards">
+      <div class="card">
+        <div class="c-label">{{ 'recruitment.applications.status' | translate }}</div>
+        <div class="c-val">
+          <p-tag [value]="'recruitment.appStatus.' + appStatusLabelKey(wf.application.status) | translate" />
+        </div>
+      </div>
+      <div class="card" *ngIf="wf.application.convertedEmployeeProfileID">
+        <div class="c-label">{{ 'recruitment.workflow.convertedProfile' | translate }}</div>
+        <div class="c-val">
+          <a [routerLink]="['/school/employees-hr', wf.application.convertedEmployeeProfileID]">
+            #{{ wf.application.convertedEmployeeProfileID }}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="eh-section">{{ 'recruitment.applications.sectionApplicant' | translate }}</h3>
+    <div class="detail-grid">
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.applications.fieldName' | translate }}</span>
+        <span>{{ wf.application.applicantFirstName }} {{ wf.application.applicantLastName }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.applications.colEmail' | translate }}</span>
+        <span>{{ wf.application.email || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.applications.fieldPhone' | translate }}</span>
+        <span>{{ wf.application.phone || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.applications.colApplied' | translate }}</span>
+        <span>{{ wf.application.appliedAt | date: 'medium' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.applications.fieldNationalId' | translate }}</span>
+        <span>{{ wf.application.nationalID || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.applications.fieldQualification' | translate }}</span>
+        <span>{{ wf.application.highestQualification || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.applications.fieldSpecialization' | translate }}</span>
+        <span>{{ wf.application.specialization || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.applications.fieldYearsExp' | translate }}</span>
+        <span>{{ wf.application.yearsOfExperience ?? '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.applications.fieldCurrentEmployer' | translate }}</span>
+        <span>{{ wf.application.currentEmployer || '—' }}</span>
+      </div>
+    </div>
+
+    <h3 class="eh-section">{{ 'recruitment.postings.listTitle' | translate }}</h3>
+    <div class="detail-grid" *ngIf="wf.posting as p">
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldTitle' | translate }}</span>
+        <span>{{ p.title }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.colDepartment' | translate }}</span>
+        <span>{{ p.department || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.status' | translate }}</span>
+        <span>{{ 'recruitment.postingStatus.' + postingStatusLabelKey(p.status) | translate }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldEmploymentType' | translate }}</span>
+        <span>{{ p.employmentType || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldOpenings' | translate }}</span>
+        <span>{{ p.numberOfOpenings }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldClosingDate' | translate }}</span>
+        <span>{{ p.closingDate ? (p.closingDate | date: 'medium') : '—' }}</span>
+      </div>
+    </div>
+
+    <h3 class="eh-section">{{ 'recruitment.workflow.tabInterviews' | translate }}</h3>
+    <div class="table-wrap">
+      <p-table [value]="wf.interviews || []" styleClass="p-datatable-sm recruitment-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'recruitment.interviews.date' | translate }}</th>
+            <th>{{ 'recruitment.interviews.type' | translate }}</th>
+            <th>{{ 'recruitment.interviews.status' | translate }}</th>
+            <th>{{ 'employeesHr.form.notes' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.interviewDate | date: 'medium' }}</td>
+            <td>{{ row.interviewType || '—' }}</td>
+            <td>{{ row.status || '—' }}</td>
+            <td>{{ row.notes || '—' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <h3 class="eh-section">{{ 'recruitment.workflow.tabEvaluations' | translate }}</h3>
+    <div class="table-wrap">
+      <p-table [value]="wf.evaluations || []" styleClass="p-datatable-sm recruitment-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'recruitment.evaluations.overall' | translate }}</th>
+            <th>{{ 'recruitment.evaluations.recommendation' | translate }}</th>
+            <th>{{ 'recruitment.evaluations.evaluatedAt' | translate }}</th>
+            <th>{{ 'employeesHr.form.notes' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.overallScore ?? '—' }}</td>
+            <td>{{ row.recommendation ?? '—' }}</td>
+            <td>{{ row.evaluatedAt | date: 'medium' }}</td>
+            <td>{{ row.notes || '—' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <h3 class="eh-section">{{ 'recruitment.workflow.tabDecision' | translate }}</h3>
+    <div class="detail-grid" *ngIf="wf.decision; else noDecision">
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.decision.status' | translate }}</span>
+        <span>{{ wf.decision.decisionStatus || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.decision.offerJobType' | translate }}</span>
+        <span>{{ wf.decision.offerJobTypeName || wf.decision.offerJobTypeID || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.decision.reason' | translate }}</span>
+        <span>{{ wf.decision.reason || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'employeesHr.form.notes' | translate }}</span>
+        <span>{{ wf.decision.internalNotes || '—' }}</span>
+      </div>
+    </div>
+    <ng-template #noDecision>
+      <div class="detail-grid">
+        <div class="detail-row">
+          <span class="k">{{ 'recruitment.workflow.tabDecision' | translate }}</span>
+          <span>{{ 'recruitment.empty.none' | translate }}</span>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</p-dialog>
