@@ -1,144 +1,152 @@
-<form [formGroup]="form" (ngSubmit)="submit()" class="eh-form-grid">
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <p-select
-        inputId="jp-school"
-        formControlName="schoolID"
-        [options]="schoolOptions"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full"
-        class="w-full"
-        (onChange)="onSchoolChange()"
-      />
-      <label for="jp-school">{{ 'employeesHr.filter.school' | translate }} *</label>
-    </p-floatlabel>
+<form [formGroup]="form" (ngSubmit)="submit()" class="eh-form-grid posting-form-shell">
+  <section class="form-card">
+    <h3 class="section-title">{{ 'recruitment.postings.listTitle' | translate }}</h3>
+    <p class="section-subtitle">* Required fields</p>
 
-    <p-floatlabel variant="on" class="eh-field">
-      <p-select
-        inputId="jp-year"
-        formControlName="academicYearID"
-        [options]="yearOptions"
-        optionLabel="label"
-        optionValue="value"
-        [showClear]="true"
-        styleClass="w-full"
-        class="w-full"
-      />
-      <label for="jp-year">{{ 'employeesHr.filter.year' | translate }}</label>
-    </p-floatlabel>
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="jp-school">{{ 'employeesHr.filter.school' | translate }} *</label>
+        <p-select
+          inputId="jp-school"
+          formControlName="schoolID"
+          [options]="schoolOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          class="w-full"
+          (onChange)="onSchoolChange()"
+        />
+      </div>
 
-    <p-floatlabel variant="on" class="eh-field eh-job-type-field">
-      <p-select
-        inputId="jp-jobtype"
-        formControlName="employeeJobTypeID"
-        [options]="jobTypeOptions"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full"
-        class="w-full"
-        [disabled]="jobTypesLoading"
-      />
-      <p-progressSpinner *ngIf="jobTypesLoading" class="eh-job-type-spinner" strokeWidth="4" />
-      <label for="jp-jobtype">{{ 'employeesHr.filter.jobType' | translate }} *</label>
-    </p-floatlabel>
-  </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="jp-year">{{ 'employeesHr.filter.year' | translate }}</label>
+        <p-select
+          inputId="jp-year"
+          formControlName="academicYearID"
+          [options]="yearOptions"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          styleClass="w-full"
+          class="w-full"
+        />
+      </div>
 
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="jp-title" formControlName="title" class="w-full" autocomplete="off" />
-      <label for="jp-title">{{ 'recruitment.postings.fieldTitle' | translate }} *</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="jp-dept" formControlName="department" class="w-full" autocomplete="off" />
-      <label for="jp-dept">{{ 'recruitment.postings.fieldDepartment' | translate }}</label>
-    </p-floatlabel>
-  </div>
-
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="jp-emp-type" formControlName="employmentType" class="w-full" />
-      <label for="jp-emp-type">{{ 'recruitment.postings.fieldEmploymentType' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <p-inputNumber
-        inputId="jp-openings"
-        formControlName="numberOfOpenings"
-        [min]="1"
-        [max]="1000"
-        styleClass="w-full"
-        class="w-full"
-      />
-      <label for="jp-openings">{{ 'recruitment.postings.fieldOpenings' | translate }} *</label>
-    </p-floatlabel>
-  </div>
-
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <p-datepicker
-        inputId="jp-posting"
-        formControlName="postingDate"
-        dateFormat="yy-mm-dd"
-        [showIcon]="true"
-        styleClass="w-full"
-        class="w-full"
-      />
-      <label for="jp-posting">{{ 'recruitment.postings.fieldPostingDate' | translate }} *</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <p-datepicker
-        inputId="jp-closing"
-        formControlName="closingDate"
-        dateFormat="yy-mm-dd"
-        [showIcon]="true"
-        styleClass="w-full"
-        class="w-full"
-      />
-      <label for="jp-closing">{{ 'recruitment.postings.fieldClosingDate' | translate }}</label>
-    </p-floatlabel>
-  </div>
-  <small *ngIf="form.errors?.['closingBeforePosting']" class="error-block">{{ 'recruitment.postings.dateError' | translate }}</small>
-
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <p-select
-        inputId="jp-status"
-        formControlName="status"
-        [options]="statusOptions"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full"
-        class="w-full"
-      />
-      <label for="jp-status">{{ 'recruitment.postings.status' | translate }}</label>
-    </p-floatlabel>
-    <div class="eh-field eh-checkbox-wrap">
-      <label class="inline-check">
-        <p-inputSwitch formControlName="isActive" inputId="jp-active" />
-        <span>{{ 'recruitment.postings.fieldIsActive' | translate }}</span>
-      </label>
+      <div class="eh-field eh-job-type-field field-block">
+        <label class="field-label" for="jp-jobtype">{{ 'employeesHr.filter.jobType' | translate }} *</label>
+        <p-select
+          inputId="jp-jobtype"
+          formControlName="employeeJobTypeID"
+          [options]="jobTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          class="w-full"
+          [disabled]="jobTypesLoading"
+        />
+        <p-progressSpinner *ngIf="jobTypesLoading" class="eh-job-type-spinner" strokeWidth="4" />
+      </div>
     </div>
-  </div>
 
-  <h3 class="eh-section">{{ 'recruitment.postings.sectionText' | translate }}</h3>
-  <p-floatlabel variant="on" class="eh-field-full">
-    <textarea pTextarea id="jp-desc" formControlName="description" rows="4" class="w-full"></textarea>
-    <label for="jp-desc">{{ 'recruitment.postings.fieldDescription' | translate }}</label>
-  </p-floatlabel>
-  <p-floatlabel variant="on" class="eh-field-full">
-    <textarea pTextarea id="jp-req" formControlName="requirements" rows="3" class="w-full"></textarea>
-    <label for="jp-req">{{ 'recruitment.postings.fieldRequirements' | translate }}</label>
-  </p-floatlabel>
-  <p-floatlabel variant="on" class="eh-field-full">
-    <textarea pTextarea id="jp-resp" formControlName="responsibilities" rows="3" class="w-full"></textarea>
-    <label for="jp-resp">{{ 'recruitment.postings.fieldResponsibilities' | translate }}</label>
-  </p-floatlabel>
-  <p-floatlabel variant="on" class="eh-field-full">
-    <textarea pTextarea id="jp-notes" formControlName="notes" rows="2" class="w-full"></textarea>
-    <label for="jp-notes">{{ 'employeesHr.form.notes' | translate }}</label>
-  </p-floatlabel>
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="jp-title">{{ 'recruitment.postings.fieldTitle' | translate }} *</label>
+        <input pInputText id="jp-title" formControlName="title" class="w-full" autocomplete="off" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="jp-dept">{{ 'recruitment.postings.fieldDepartment' | translate }}</label>
+        <input pInputText id="jp-dept" formControlName="department" class="w-full" autocomplete="off" />
+      </div>
+    </div>
 
-  <div class="eh-actions">
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="jp-emp-type">{{ 'recruitment.postings.fieldEmploymentType' | translate }}</label>
+        <input pInputText id="jp-emp-type" formControlName="employmentType" class="w-full" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="jp-openings">{{ 'recruitment.postings.fieldOpenings' | translate }} *</label>
+        <p-inputNumber
+          inputId="jp-openings"
+          formControlName="numberOfOpenings"
+          [min]="1"
+          [max]="1000"
+          styleClass="w-full"
+          class="w-full"
+        />
+      </div>
+    </div>
+
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="jp-posting">{{ 'recruitment.postings.fieldPostingDate' | translate }} *</label>
+        <p-datepicker
+          inputId="jp-posting"
+          formControlName="postingDate"
+          dateFormat="yy-mm-dd"
+          [showIcon]="true"
+          styleClass="w-full"
+          class="w-full"
+        />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="jp-closing">{{ 'recruitment.postings.fieldClosingDate' | translate }}</label>
+        <p-datepicker
+          inputId="jp-closing"
+          formControlName="closingDate"
+          dateFormat="yy-mm-dd"
+          [showIcon]="true"
+          styleClass="w-full"
+          class="w-full"
+        />
+      </div>
+    </div>
+    <small *ngIf="form.errors?.['closingBeforePosting']" class="error-block">{{ 'recruitment.postings.dateError' | translate }}</small>
+
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="jp-status">{{ 'recruitment.postings.status' | translate }}</label>
+        <p-select
+          inputId="jp-status"
+          formControlName="status"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          class="w-full"
+        />
+      </div>
+      <div class="eh-field eh-checkbox-wrap status-active-wrap">
+        <label class="inline-check">
+          <p-inputSwitch formControlName="isActive" inputId="jp-active" />
+          <span>{{ 'recruitment.postings.fieldIsActive' | translate }}</span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-card form-card-text">
+    <h3 class="section-title">{{ 'recruitment.postings.sectionText' | translate }}</h3>
+
+    <div class="eh-field-full field-block">
+      <label class="field-label" for="jp-desc">{{ 'recruitment.postings.fieldDescription' | translate }}</label>
+      <textarea pTextarea id="jp-desc" formControlName="description" rows="4" class="w-full"></textarea>
+    </div>
+    <div class="eh-field-full field-block">
+      <label class="field-label" for="jp-req">{{ 'recruitment.postings.fieldRequirements' | translate }}</label>
+      <textarea pTextarea id="jp-req" formControlName="requirements" rows="3" class="w-full"></textarea>
+    </div>
+    <div class="eh-field-full field-block">
+      <label class="field-label" for="jp-resp">{{ 'recruitment.postings.fieldResponsibilities' | translate }}</label>
+      <textarea pTextarea id="jp-resp" formControlName="responsibilities" rows="3" class="w-full"></textarea>
+    </div>
+    <div class="eh-field-full field-block">
+      <label class="field-label" for="jp-notes">{{ 'employeesHr.form.notes' | translate }}</label>
+      <textarea pTextarea id="jp-notes" formControlName="notes" rows="2" class="w-full"></textarea>
+    </div>
+  </section>
+
+  <div class="eh-actions form-actions-sticky">
     <p-button type="button" [label]="'employeesHr.form.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
     <p-button type="submit" [label]="submitLabelKey | translate" [loading]="submitting" [disabled]="submitting" />
   </div>

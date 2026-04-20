@@ -7,6 +7,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
@@ -29,8 +30,9 @@ import { ShardModule } from 'app/shared/shard.module';
 
 import { EmployeeJobTypeDto } from '../../employees-hr/employees-hr.models';
 import { EmployeesHrService } from '../../employees-hr/employees-hr.service';
-import { JobPostingFilterDto, JobPostingListDto, JobPostingStatus } from '../recruitment.models';
+import { JobPostingCreateDto, JobPostingFilterDto, JobPostingListDto, JobPostingReadDto, JobPostingStatus } from '../recruitment.models';
 import { RecruitmentService, readRecruitmentHttpError } from '../recruitment.service';
+import { JobPostingFormComponent } from '../job-posting-form/job-posting-form.component';
 
 @Component({
   selector: 'app-job-postings-list',
@@ -51,7 +53,9 @@ import { RecruitmentService, readRecruitmentHttpError } from '../recruitment.ser
     ProgressSpinnerModule,
     TooltipModule,
     ConfirmDialogModule,
+    DialogModule,
     TagModule,
+    JobPostingFormComponent,
   ],
   providers: [ConfirmationService],
   templateUrl: './job-postings-list.component.html',
@@ -96,6 +100,15 @@ export class JobPostingsListComponent implements OnInit, OnDestroy {
   activeOptions: { label: string; value: boolean | null }[] = [];
 
   JobPostingStatus = JobPostingStatus;
+  selectedPosting: JobPostingReadDto | null = null;
+  selectedPostingId: number | null = null;
+  detailsLoading = false;
+  formSubmitting = false;
+  detailsError: string | null = null;
+  showDetailsDialog = false;
+  showCreateDialog = false;
+  showEditDialog = false;
+  private keepSelectionOnDetailsHide = false;
 
   ngOnInit(): void {
     this.statusOptions = [
@@ -298,6 +311,149 @@ export class JobPostingsListComponent implements OnInit, OnDestroy {
       accept: () =>
         this.recruitment.archiveJobPosting(row.jobPostingID).subscribe({
           next: () => {
+            this.toastr.success(this.translate.instant('recruitment.postings.archived'));
+            this.load();
+          },
+          error: (e) => this.toastr.error(readRecruitmentHttpError(e)),
+        }),
+    });
+  }
+
+  openCreateDialog(): void {
+    this.showCreateDialog = true;
+  }
+
+  openDetailsDialog(postingId: number): void {
+    this.showEditDialog = false;
+    this.loadPosting(postingId);
+    this.showDetailsDialog = true;
+  }
+
+  openEditDialog(postingId: number): void {
+    this.showDetailsDialog = false;
+    this.loadPosting(postingId);
+    this.showEditDialog = true;
+  }
+
+  private loadPosting(postingId: number): void {
+    this.selectedPosting = null;
+    this.selectedPostingId = postingId;
+    this.detailsError = null;
+    this.detailsLoading = true;
+    this.recruitment
+      .getJobPostingById(postingId)
+      .pipe(finalize(() => (this.detailsLoading = false)))
+      .subscribe({
+        next: (row) => (this.selectedPosting = row),
+        error: (err) => {
+          this.detailsError = readRecruitmentHttpError(err);
+          this.selectedPosting = null;
+        },
+      });
+  }
+
+  openEditDialogFromDetails(): void {
+    if (!this.selectedPostingId) return;
+    this.keepSelectionOnDetailsHide = true;
+    this.showDetailsDialog = false;
+    this.showEditDialog = true;
+  }
+
+  closeDetailsDialog(): void {
+    this.showDetailsDialog = false;
+    if (this.keepSelectionOnDetailsHide) {
+      this.keepSelectionOnDetailsHide = false;
+      return;
+    }
+    this.selectedPosting = null;
+    this.selectedPostingId = null;
+    this.detailsError = null;
+    this.detailsLoading = false;
+  }
+
+  closeCreateDialog(): void {
+    if (this.formSubmitting) return;
+    this.showCreateDialog = false;
+  }
+
+  closeEditDialog(): void {
+    if (this.formSubmitting) return;
+    this.showEditDialog = false;
+  }
+
+  createPosting(dto: JobPostingCreateDto): void {
+    this.formSubmitting = true;
+    this.recruitment
+      .createJobPosting(dto)
+      .pipe(finalize(() => (this.formSubmitting = false)))
+      .subscribe({
+        next: (row) => {
+          this.toastr.success(this.translate.instant('recruitment.postings.created'));
+          this.showCreateDialog = false;
+          this.load();
+          this.openDetailsDialog(row.jobPostingID);
+        },
+        error: (err) => this.toastr.error(readRecruitmentHttpError(err)),
+      });
+  }
+
+  updatePosting(dto: JobPostingCreateDto): void {
+    if (!this.selectedPostingId) return;
+    this.formSubmitting = true;
+    this.recruitment
+      .updateJobPosting(this.selectedPostingId, dto)
+      .pipe(finalize(() => (this.formSubmitting = false)))
+      .subscribe({
+        next: (row) => {
+          this.selectedPosting = row;
+          this.toastr.success(this.translate.instant('recruitment.postings.updated'));
+          this.showEditDialog = false;
+          this.load();
+        },
+        error: (err) => this.toastr.error(readRecruitmentHttpError(err)),
+      });
+  }
+
+  confirmOpenSelected(): void {
+    if (!this.selectedPosting) return;
+    this.confirm.confirm({
+      message: this.translate.instant('recruitment.postings.confirmOpen'),
+      accept: () =>
+        this.recruitment.openJobPosting(this.selectedPosting!.jobPostingID).subscribe({
+          next: (row) => {
+            this.selectedPosting = row;
+            this.toastr.success(this.translate.instant('recruitment.postings.opened'));
+            this.load();
+          },
+          error: (e) => this.toastr.error(readRecruitmentHttpError(e)),
+        }),
+    });
+  }
+
+  confirmCloseSelected(): void {
+    if (!this.selectedPosting) return;
+    this.confirm.confirm({
+      message: this.translate.instant('recruitment.postings.confirmClose'),
+      accept: () =>
+        this.recruitment.closeJobPosting(this.selectedPosting!.jobPostingID).subscribe({
+          next: (row) => {
+            this.selectedPosting = row;
+            this.toastr.success(this.translate.instant('recruitment.postings.closed'));
+            this.load();
+          },
+          error: (e) => this.toastr.error(readRecruitmentHttpError(e)),
+        }),
+    });
+  }
+
+  confirmArchiveSelected(): void {
+    if (!this.selectedPosting) return;
+    this.confirm.confirm({
+      message: this.translate.instant('recruitment.postings.confirmArchive'),
+      accept: () =>
+        this.recruitment.archiveJobPosting(this.selectedPosting!.jobPostingID).subscribe({
+          next: (row) => {
+            this.selectedPosting = row;
             this.toastr.success(this.translate.instant('recruitment.postings.archived'));
             this.load();
           },

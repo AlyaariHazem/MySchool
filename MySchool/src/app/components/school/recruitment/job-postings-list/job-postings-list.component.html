@@ -14,7 +14,7 @@
           *ngIf="canCreate"
           [label]="'recruitment.postings.add' | translate"
           icon="pi pi-plus"
-          routerLink="/school/recruitment/job-postings/create"
+          (onClick)="openCreateDialog()"
         />
         <p-button
           [label]="'employeesHr.list.refresh' | translate"
@@ -168,7 +168,7 @@
             [label]="'employeesHr.actions.view' | translate"
             icon="pi pi-eye"
             [outlined]="true"
-            [routerLink]="['/school/recruitment/job-postings', row.jobPostingID]"
+            (onClick)="openDetailsDialog(row.jobPostingID)"
           />
           <p-button
             *ngIf="canApplyToRow(row)"
@@ -223,7 +223,7 @@
                 icon="pi pi-eye"
                 [rounded]="true"
                 [text]="true"
-                [routerLink]="['/school/recruitment/job-postings', row.jobPostingID]"
+                (onClick)="openDetailsDialog(row.jobPostingID)"
                 [pTooltip]="'employeesHr.actions.view' | translate"
               />
               <p-button
@@ -231,7 +231,7 @@
                 icon="pi pi-pencil"
                 [rounded]="true"
                 [text]="true"
-                [routerLink]="['/school/recruitment/job-postings', row.jobPostingID, 'edit']"
+                (onClick)="openEditDialog(row.jobPostingID)"
                 [pTooltip]="'employeesHr.actions.edit' | translate"
               />
               <p-button
@@ -265,3 +265,146 @@
     </p-table>
   </div>
 </div>
+
+<p-dialog
+  [header]="'recruitment.postings.add' | translate"
+  styleClass="recruitment-dialog recruitment-dialog-form"
+  [(visible)]="showCreateDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '70rem', maxWidth: '95vw' }"
+  (onHide)="closeCreateDialog()"
+>
+  <app-job-posting-form
+    [schools]="schools"
+    [years]="years"
+    [submitting]="formSubmitting"
+    [submitLabelKey]="'recruitment.postings.add'"
+    (submitted)="createPosting($event)"
+    (cancelled)="closeCreateDialog()"
+  />
+</p-dialog>
+
+<p-dialog
+  [header]="'employeesHr.actions.edit' | translate"
+  styleClass="recruitment-dialog recruitment-dialog-form"
+  [(visible)]="showEditDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '70rem', maxWidth: '95vw' }"
+  (onHide)="closeEditDialog()"
+>
+  <div *ngIf="detailsLoading" class="loading-wrap">
+    <p-progressSpinner strokeWidth="3" />
+  </div>
+  <div *ngIf="!detailsLoading && detailsError" class="error-block">{{ detailsError }}</div>
+  <app-job-posting-form
+    *ngIf="!detailsLoading && selectedPosting"
+    [schools]="schools"
+    [years]="years"
+    [initial]="selectedPosting"
+    [submitting]="formSubmitting"
+    [submitLabelKey]="'recruitment.postings.save'"
+    (submitted)="updatePosting($event)"
+    (cancelled)="closeEditDialog()"
+  />
+</p-dialog>
+
+<p-dialog
+  [header]="'employeesHr.actions.view' | translate"
+  styleClass="recruitment-dialog recruitment-dialog-view"
+  [(visible)]="showDetailsDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '64rem', maxWidth: '95vw' }"
+  (onHide)="closeDetailsDialog()"
+>
+  <div *ngIf="detailsLoading" class="loading-wrap">
+    <p-progressSpinner strokeWidth="3" />
+  </div>
+  <div *ngIf="!detailsLoading && detailsError" class="error-block">{{ detailsError }}</div>
+
+  <div *ngIf="!detailsLoading && selectedPosting" class="job-posting-dialog-content">
+    <div class="detail-meta mb-3">
+      <p-tag
+        [value]="'recruitment.postingStatus.' + postingStatusLabelKey(selectedPosting.status) | translate"
+        [severity]="severityStatus(selectedPosting.status)"
+      />
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.colTitle' | translate }}</span>
+        <span>{{ selectedPosting.title }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'employeesHr.filter.school' | translate }}</span>
+        <span>{{ schoolName(selectedPosting.schoolID) }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'employeesHr.filter.jobType' | translate }}</span>
+        <span>{{ selectedPosting.jobTypeName || selectedPosting.jobTypeCode || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldDepartment' | translate }}</span>
+        <span>{{ selectedPosting.department || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldEmploymentType' | translate }}</span>
+        <span>{{ selectedPosting.employmentType || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldOpenings' | translate }}</span>
+        <span>{{ selectedPosting.numberOfOpenings }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldPostingDate' | translate }}</span>
+        <span>{{ selectedPosting.postingDate | date: 'medium' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldClosingDate' | translate }}</span>
+        <span>{{ selectedPosting.closingDate ? (selectedPosting.closingDate | date: 'medium') : '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="k">{{ 'recruitment.postings.fieldIsActive' | translate }}</span>
+        <span>{{ selectedPosting.isActive ? ('recruitment.yes' | translate) : ('recruitment.no' | translate) }}</span>
+      </div>
+    </div>
+
+    <h3 class="eh-section">{{ 'recruitment.postings.sectionText' | translate }}</h3>
+    <p class="pre-wrap" *ngIf="selectedPosting.description">{{ selectedPosting.description }}</p>
+    <p class="muted" *ngIf="!selectedPosting.description">{{ 'recruitment.empty.none' | translate }}</p>
+    <h4 class="eh-section">{{ 'recruitment.postings.fieldRequirements' | translate }}</h4>
+    <p class="pre-wrap" *ngIf="selectedPosting.requirements">{{ selectedPosting.requirements }}</p>
+    <h4 class="eh-section">{{ 'recruitment.postings.fieldResponsibilities' | translate }}</h4>
+    <p class="pre-wrap" *ngIf="selectedPosting.responsibilities">{{ selectedPosting.responsibilities }}</p>
+    <p *ngIf="selectedPosting.notes" class="mt-2">
+      <strong>{{ 'employeesHr.form.notes' | translate }}:</strong> {{ selectedPosting.notes }}
+    </p>
+
+    <div class="tab-toolbar mt-3" *ngIf="canUpdate">
+      <p-button [label]="'employeesHr.actions.edit' | translate" icon="pi pi-pencil" (onClick)="openEditDialogFromDetails()" />
+      <p-button
+        *ngIf="selectedPosting.status === JobPostingStatus.Draft || selectedPosting.status === JobPostingStatus.Closed"
+        [label]="'recruitment.postings.actionOpen' | translate"
+        icon="pi pi-unlock"
+        (onClick)="confirmOpenSelected()"
+      />
+      <p-button
+        *ngIf="selectedPosting.status === JobPostingStatus.Open"
+        [label]="'recruitment.postings.actionClose' | translate"
+        icon="pi pi-lock"
+        (onClick)="confirmCloseSelected()"
+      />
+      <p-button
+        [label]="'recruitment.postings.actionArchive' | translate"
+        icon="pi pi-folder"
+        [outlined]="true"
+        (onClick)="confirmArchiveSelected()"
+      />
+    </div>
+  </div>
+</p-dialog>
