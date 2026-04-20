@@ -53,6 +53,15 @@
   align-items: flex-end;
 }
 
+:host ::ng-deep .de-eval-filters .p-datepicker,
+:host ::ng-deep .de-eval-filters .p-floatlabel {
+  width: 100%;
+}
+
+:host ::ng-deep .de-eval-filters .p-datepicker .p-inputtext {
+  min-height: 2.75rem;
+}
+
 /* PrimeNG select + panel */
 :host ::ng-deep .de-filter-select {
   width: 100%;
@@ -72,19 +81,6 @@
 }
 
 :host ::ng-deep .de-filter-select.p-focus {
-  border-color: #009879;
-  box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.15);
-}
-
-.de-filter-date {
-  min-height: 2.75rem;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-}
-
-.de-filter-date:focus {
-  outline: none;
   border-color: #009879;
   box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.15);
 }

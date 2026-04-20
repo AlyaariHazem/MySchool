@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
+import { AsyncPipe, NgIf } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -8,7 +8,6 @@ import { ButtonModule } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
@@ -50,7 +49,6 @@ import { DailyEvaluationsFormComponent } from '../daily-evaluations-form/daily-e
     ShardModule,
     NgIf,
     AsyncPipe,
-    DatePipe,
     FormsModule,
     RouterLink,
     TranslateModule,
@@ -62,7 +60,6 @@ import { DailyEvaluationsFormComponent } from '../daily-evaluations-form/daily-e
     TooltipModule,
     DialogModule,
     DatePicker,
-    InputTextModule,
     TextareaModule,
     DailyEvaluationsFormComponent,
     DailyEvaluationsDetailComponent,
@@ -102,6 +99,10 @@ export class DailyEvaluationsListComponent implements OnInit {
   error: string | null = null;
 
   filter: DailyEvaluationFilterDto = {};
+
+  /** UI date pickers (filter still uses ISO yyyy-mm-dd strings for API). */
+  filterFromDate: Date | null = null;
+  filterToDate: Date | null = null;
 
   canLock = this.hasManagerOrEvalUpdate();
 
@@ -183,6 +184,7 @@ export class DailyEvaluationsListComponent implements OnInit {
             : '';
         this.yearOptions = [{ label: yLabel ? `${yid} — ${yLabel}` : String(yid), value: yid }];
       }
+      this.syncFilterDatePickersFromStrings();
     } else {
       if (this.isSchoolManager) {
         const sid = Number(typeof localStorage !== 'undefined' ? localStorage.getItem('schoolId') : '');
@@ -218,13 +220,13 @@ export class DailyEvaluationsListComponent implements OnInit {
             });
           }
           this.yearLoading = false;
+          this.syncFilterDatePickersFromStrings();
         },
         error: () => {
           this.yearLoading = false;
           this.toastr.error('employeesHr.errors.loadYears');
         },
       });
-      return;
     }
     this.loadTemplatesForFilter();
     if (this.isStudentEvaluations && this.filter.schoolID != null && this.filter.schoolID > 0) {
@@ -237,6 +239,66 @@ export class DailyEvaluationsListComponent implements OnInit {
         },
         error: () => undefined,
       });
+    }
+  }
+
+  private parseYmdToLocalDate(s?: string | null): Date | null {
+    const v = (s ?? '').trim();
+    if (!v) return null;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+    if (!m) return null;
+    const y = +m[1];
+    const mo = +m[2];
+    const d = +m[3];
+    if (!y || mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    return new Date(y, mo - 1, d);
+  }
+
+  private toYmdString(d: Date | null | undefined): string | undefined {
+    if (!d) return undefined;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  private syncFilterDatePickersFromStrings(): void {
+    this.filterFromDate = this.parseYmdToLocalDate(this.filter.fromDate);
+    this.filterToDate = this.parseYmdToLocalDate(this.filter.toDate);
+  }
+
+  onFilterFromDateChange(d: Date | null): void {
+    this.filterFromDate = d;
+    if (d) {
+      const ymd = this.toYmdString(d);
+      if (ymd) this.filter.fromDate = ymd;
+    } else {
+      delete this.filter.fromDate;
+    }
+    this.normalizeFilterDateRange();
+  }
+
+  onFilterToDateChange(d: Date | null): void {
+    this.filterToDate = d;
+    if (d) {
+      const ymd = this.toYmdString(d);
+      if (ymd) this.filter.toDate = ymd;
+    } else {
+      delete this.filter.toDate;
+    }
+    this.normalizeFilterDateRange();
+  }
+
+  private normalizeFilterDateRange(): void {
+    const a = this.parseYmdToLocalDate(this.filter.fromDate);
+    const b = this.parseYmdToLocalDate(this.filter.toDate);
+    if (a && b && a.getTime() > b.getTime()) {
+      this.filterFromDate = b;
+      this.filterToDate = a;
+      const y1 = this.toYmdString(b);
+      const y2 = this.toYmdString(a);
+      if (y1) this.filter.fromDate = y1;
+      if (y2) this.filter.toDate = y2;
     }
   }
 
@@ -307,6 +369,7 @@ export class DailyEvaluationsListComponent implements OnInit {
 
   applyFilters(): void {
     this.first = 0;
+    this.syncFilterDatePickersFromStrings();
     this.load();
   }
 

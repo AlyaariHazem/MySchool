@@ -94,11 +94,29 @@
         <label for="de-ev-st">{{ 'dailyEvaluations.evaluations.colStatus' | translate }}</label>
       </p-floatlabel>
       <p-floatlabel class="filter-field">
-        <input pInputText id="de-from" [(ngModel)]="filter.fromDate" type="date" class="w-full de-filter-date" />
+        <p-datepicker
+          inputId="de-from"
+          [ngModel]="filterFromDate"
+          (ngModelChange)="onFilterFromDateChange($event)"
+          [showIcon]="true"
+          dateFormat="yy-mm-dd"
+          appendTo="body"
+          panelStyleClass="de-lock-date-panel"
+          styleClass="w-full"
+        />
         <label for="de-from">{{ 'dailyEvaluations.evaluations.fromDate' | translate }}</label>
       </p-floatlabel>
       <p-floatlabel class="filter-field">
-        <input pInputText id="de-to" [(ngModel)]="filter.toDate" type="date" class="w-full de-filter-date" />
+        <p-datepicker
+          inputId="de-to"
+          [ngModel]="filterToDate"
+          (ngModelChange)="onFilterToDateChange($event)"
+          [showIcon]="true"
+          dateFormat="yy-mm-dd"
+          appendTo="body"
+          panelStyleClass="de-lock-date-panel"
+          styleClass="w-full"
+        />
         <label for="de-to">{{ 'dailyEvaluations.evaluations.toDate' | translate }}</label>
       </p-floatlabel>
       <div class="filter-actions">
