@@ -10,9 +10,10 @@
   (onClear)="onClearSelection()"
   (onKeyUp)="onSearchKeyUp($event)"
   [optionLabel]="optionLabelField"
-  [dropdown]="false"
+  [dropdown]="true"
+  dropdownIcon="pi pi-chevron-down"
   [forceSelection]="true"
-  [showClear]="true"
+  [showClear]="resource === 'student'"
   [minLength]="minQueryLength"
   [delay]="searchDelayMs"
   [completeOnFocus]="false"
@@ -29,6 +30,11 @@
       <span class="dropdown-custom__item flex justify-between gap-3 w-full">
         <span>{{ item.className }}</span>
         <span class="text-gray-500 text-sm">#{{ item.classID }}</span>
+      </span>
+    } @else if (resource === 'teacher') {
+      <span class="dropdown-custom__item flex justify-between gap-3 w-full">
+        <span>{{ item.fullName }}</span>
+        <span class="text-gray-500 text-sm">#{{ item.teacherID }}</span>
       </span>
     } @else {
       <span class="dropdown-custom__item flex justify-between gap-3 w-full">

@@ -42,6 +42,70 @@ public class TeacherController : ControllerBase
         }
     }
 
+    /// <summary>Paged teacher id + display name (active year scope when assignments are enabled).</summary>
+    [HttpPost("names/page")]
+    public async Task<ActionResult<APIResponse>> GetTeacherNamesPage(
+        [FromBody] TeacherNamesPageRequestDto? request,
+        CancellationToken cancellationToken)
+    {
+        var response = new APIResponse();
+        try
+        {
+            request ??= new TeacherNamesPageRequestDto();
+            const int maxPageSize = 200;
+            if (request.PageIndex < 0)
+                request.PageIndex = 0;
+            if (request.PageSize < 1)
+                request.PageSize = 20;
+            if (request.PageSize > maxPageSize)
+                request.PageSize = maxPageSize;
+
+            response.Result = await _unitOfWork.Teachers.GetTeacherNamesPageAsync(
+                request.PageIndex,
+                request.PageSize,
+                request.Search,
+                cancellationToken);
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
+    /// <summary>Minimal name row for hydrating a selected teacher id (not year-filtered).</summary>
+    [HttpGet("{id:int}/name-lookup")]
+    public async Task<ActionResult<APIResponse>> GetTeacherNameLookup(int id, CancellationToken cancellationToken)
+    {
+        var response = new APIResponse();
+        try
+        {
+            var row = await _unitOfWork.Teachers.GetTeacherNameLookupAsync(id, cancellationToken);
+            if (row == null)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.NotFound;
+                response.ErrorMasseges.Add("Teacher not found.");
+                return NotFound(response);
+            }
+
+            response.Result = row;
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
     [HttpPut("{id}")]
     public async Task<ActionResult<APIResponse>> UpdateTeacher(int id, [FromBody] TeacherDTO teacher)
     {

@@ -20,4 +20,10 @@ public interface ITeacherRepository
     Task<(List<TeacherDTO> Items, int TotalCount)> GetTeachersPageAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);
     Task<(List<TeacherDTO> Items, int TotalCount)> GetTeachersPageWithFiltersAsync(int pageNumber, int pageSize, Dictionary<string, FilterValue> filters, CancellationToken cancellationToken = default);
     Task<TeacherDTO> UpdateTeacherAsync(int id, TeacherDTO teacher);
+
+    /// <summary>Paged id + display name for teachers in the active year scope (same as list paging).</summary>
+    Task<PagedResult<TeacherNameLookupDto>> GetTeacherNamesPageAsync(int pageIndex, int pageSize, string? search, CancellationToken cancellationToken = default);
+
+    /// <summary>Display name for a teacher by id (not year-filtered) for hydrating existing selections.</summary>
+    Task<TeacherNameLookupDto?> GetTeacherNameLookupAsync(int teacherId, CancellationToken cancellationToken = default);
 }

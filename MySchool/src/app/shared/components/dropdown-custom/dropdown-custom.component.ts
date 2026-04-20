@@ -18,11 +18,13 @@ import { ToastrService } from 'ngx-toastr';
 import { StudentService } from '../../../core/services/student.service';
 import { StudentNameIdDTO, StudentNameIdSearchRequest } from '../../../core/models/students.model';
 import { ClassNameLookupRow, ClassService } from '../../../components/school/core/services/class.service';
+import { TeacherNameLookupRow, TeacherService } from '../../../components/school/core/services/teacher.service';
 
 /**
  * Searchable lazy dropdown:
  * - `student` (default): POST Students/names-ids, value = StudentNameIdDTO
  * - `class`: POST Classes/GetAllNameClasses/page, value = classID (number) for reactive forms
+ * - `teacher`: POST Teacher/names/page, value = teacherID (number) for reactive forms
  */
 @Component({
   selector: 'app-dropdown-custom',
@@ -43,8 +45,8 @@ export class DropdownCustomComponent implements ControlValueAccessor {
   @Input() inputId = 'dropdownCustomSearch';
   @Input() placeholder = '';
   @Input() disabled = false;
-  /** student: POST Students/names-ids; class: POST Classes/GetAllNameClasses/page */
-  @Input() resource: 'student' | 'class' = 'student';
+  /** student: POST Students/names-ids; class: POST Classes/GetAllNameClasses/page; teacher: POST Teacher/names/page */
+  @Input() resource: 'student' | 'class' | 'teacher' = 'student';
   @Input() pageSize = 5;
   @Input() searchDelayMs = 400;
   @Input() scrollHeight = '240px';
@@ -55,24 +57,27 @@ export class DropdownCustomComponent implements ControlValueAccessor {
 
   private studentService = inject(StudentService);
   private classService = inject(ClassService);
+  private teacherService = inject(TeacherService);
   private toastr = inject(ToastrService);
 
-  /** Panel model: student row or class row */
-  selectedPanel: StudentNameIdDTO | ClassNameLookupRow | null = null;
-  filteredPanel: Array<StudentNameIdDTO | ClassNameLookupRow> = [];
+  /** Panel model: student row, class row, or teacher row */
+  selectedPanel: StudentNameIdDTO | ClassNameLookupRow | TeacherNameLookupRow | null = null;
+  filteredPanel: Array<StudentNameIdDTO | ClassNameLookupRow | TeacherNameLookupRow> = [];
 
   get optionLabelField(): 'fullName' | 'className' {
     return this.resource === 'class' ? 'className' : 'fullName';
   }
 
   get minQueryLength(): number {
-    return this.resource === 'class' ? 0 : 1;
+    return this.resource === 'class' || this.resource === 'teacher' ? 0 : 1;
   }
 
   private lastStudentQuery: Pick<StudentNameIdSearchRequest, 'studentID' | 'fullName'> | null = null;
   private lastClassSearchNormalized: string | undefined = undefined;
   /** After first successful class search; cleared on reset so lazy-load does not fire with stale state. */
   private lastClassQueryReady = false;
+  private lastTeacherSearchNormalized: string | undefined = undefined;
+  private lastTeacherQueryReady = false;
   private loadedPage = 0;
   private totalPages = 0;
   private loadingMore = false;
@@ -110,6 +115,32 @@ export class DropdownCustomComponent implements ControlValueAccessor {
       return;
     }
 
+    if (this.resource === 'teacher') {
+      const id = typeof obj === 'number' && obj > 0 ? obj : null;
+      if (id == null) {
+        this.selectedPanel = null;
+        return;
+      }
+      this.selectedPanel = { teacherID: id, fullName: '' };
+      this.teacherService.getTeacherNameLookup(id).subscribe({
+        next: (res) => {
+          if (!res.isSuccess || !res.result) {
+            return;
+          }
+          const cur = this.selectedPanel as TeacherNameLookupRow | null;
+          if (!cur || cur.teacherID !== id) {
+            return;
+          }
+          this.selectedPanel = {
+            teacherID: id,
+            fullName: res.result.fullName
+          };
+        },
+        error: () => {}
+      });
+      return;
+    }
+
     this.selectedPanel = (obj as StudentNameIdDTO | null) ?? null;
   }
 
@@ -129,6 +160,8 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     const raw = (event.query || '').trim();
     if (this.resource === 'class') {
       this.loadClassSuggestionsFromQuery(raw, false);
+    } else if (this.resource === 'teacher') {
+      this.loadTeacherSuggestionsFromQuery(raw, false);
     } else {
       this.loadStudentSuggestionsFromQuery(raw, false);
     }
@@ -140,6 +173,8 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     }
     if (this.resource === 'class') {
       this.loadClassSuggestionsFromQuery('', true);
+    } else if (this.resource === 'teacher') {
+      this.loadTeacherSuggestionsFromQuery('', true);
     } else {
       this.loadStudentSuggestionsFromQuery('', true);
     }
@@ -229,12 +264,55 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     });
   }
 
+  private loadTeacherSuggestionsFromQuery(raw: string, showPanelAfterLoad: boolean): void {
+    const seq = ++this.requestSeq;
+    this.loadingMore = false;
+    this.loadedPage = 0;
+    this.totalPages = 0;
+    this.lastTeacherSearchNormalized = undefined;
+    this.lastTeacherQueryReady = false;
+    this.noScrollAppendDone = false;
+
+    const search = raw.length > 0 ? raw : undefined;
+
+    this.teacherService.getTeacherNamesPage({ pageIndex: 0, pageSize: this.pageSize, search }).subscribe({
+      next: (page) => {
+        if (seq !== this.requestSeq) {
+          return;
+        }
+        this.filteredPanel = page.data;
+        this.loadedPage = page.pageNumber;
+        this.totalPages = Math.max(1, page.totalPages);
+        this.lastTeacherSearchNormalized = search;
+        this.lastTeacherQueryReady = true;
+        if (showPanelAfterLoad) {
+          setTimeout(() => this.dropdownAutocomplete?.show(), 0);
+        }
+      },
+      error: () => {
+        if (seq !== this.requestSeq) {
+          return;
+        }
+        this.filteredPanel = [];
+        this.lastTeacherSearchNormalized = undefined;
+        this.lastTeacherQueryReady = false;
+        this.toastr.error('تعذّر تحميل المعلمين', 'خطأ');
+      }
+    });
+  }
+
   onLazyLoad(event: AutoCompleteLazyLoadEvent): void {
     if (this.resource === 'class') {
       this.onLazyLoadPaged(
         event,
         () => (this.lastClassQueryReady ? ({} as Record<string, never>) : null),
         () => this.loadNextClassPage()
+      );
+    } else if (this.resource === 'teacher') {
+      this.onLazyLoadPaged(
+        event,
+        () => (this.lastTeacherQueryReady ? ({} as Record<string, never>) : null),
+        () => this.loadNextTeacherPage()
       );
     } else {
       this.onLazyLoadPaged(event, () => this.lastStudentQuery, () => this.loadNextStudentPage());
@@ -371,11 +449,57 @@ export class DropdownCustomComponent implements ControlValueAccessor {
       });
   }
 
+  private loadNextTeacherPage(): void {
+    if (!this.lastTeacherQueryReady || this.loadingMore || this.loadedPage >= this.totalPages) {
+      return;
+    }
+
+    const seq = this.requestSeq;
+    const nextPageIndex = this.loadedPage;
+    this.loadingMore = true;
+
+    this.teacherService
+      .getTeacherNamesPage({
+        pageIndex: nextPageIndex,
+        pageSize: this.pageSize,
+        search: this.lastTeacherSearchNormalized
+      })
+      .subscribe({
+        next: (page) => {
+          this.loadingMore = false;
+          if (seq !== this.requestSeq) {
+            return;
+          }
+          const existing = new Set(
+            this.filteredPanel.map((t) => (t as TeacherNameLookupRow).teacherID)
+          );
+          const merged = [...this.filteredPanel] as TeacherNameLookupRow[];
+          for (const row of page.data) {
+            if (!existing.has(row.teacherID)) {
+              merged.push(row);
+              existing.add(row.teacherID);
+            }
+          }
+          this.filteredPanel = merged;
+          this.loadedPage = page.pageNumber;
+          this.totalPages = Math.max(this.totalPages, Math.max(1, page.totalPages));
+        },
+        error: () => {
+          this.loadingMore = false;
+          if (seq === this.requestSeq) {
+            this.toastr.error('تعذّر تحميل المزيد من المعلمين', 'خطأ');
+          }
+        }
+      });
+  }
+
   onClearSelection(): void {
     this.filteredPanel = [];
     this.lastStudentQuery = null;
     this.lastClassSearchNormalized = undefined;
     this.lastClassQueryReady = false;
+    this.lastTeacherSearchNormalized = undefined;
+    this.lastTeacherQueryReady = false;
     this.loadedPage = 0;
     this.totalPages = 0;
     this.loadingMore = false;
@@ -402,6 +526,8 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     if (!raw.length) {
       if (this.resource === 'class') {
         this.loadClassSuggestionsFromQuery('', false);
+      } else if (this.resource === 'teacher') {
+        this.loadTeacherSuggestionsFromQuery('', false);
       } else {
         this.filteredPanel = [];
       }
@@ -418,6 +544,17 @@ export class DropdownCustomComponent implements ControlValueAccessor {
       }
       this.skipKeyUpAfterSelect = true;
       this.onChange(row.classID);
+      this.onTouched();
+      return;
+    }
+
+    if (this.resource === 'teacher') {
+      const row = event.value as TeacherNameLookupRow;
+      if (!row?.teacherID) {
+        return;
+      }
+      this.skipKeyUpAfterSelect = true;
+      this.onChange(row.teacherID);
       this.onTouched();
       return;
     }

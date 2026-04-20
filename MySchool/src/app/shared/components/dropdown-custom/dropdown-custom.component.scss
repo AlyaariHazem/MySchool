@@ -1,19 +1,93 @@
 :host {
   display: block;
   width: 100%;
-  max-width: 26rem;
 }
 
 :host ::ng-deep .dropdown-custom {
   width: 100%;
 }
 
-:host ::ng-deep .dropdown-custom .p-autocomplete-input-multiple,
-:host ::ng-deep .dropdown-custom .p-inputtext {
+/* ----- Single “p-select” shell: one radius, one border, white fill (input + chevron) ----- */
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) {
+  display: flex;
+  align-items: stretch;
   width: 100%;
+  min-height: 3rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-:host ::ng-deep .dropdown-custom .p-inputtext {
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown):hover {
+  border-color: #94a3b8;
+}
+
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown):focus-within {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgb(34 197 94 / 0.2);
+}
+
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-inputwrapper,
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input-multiple {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Input sits inside the shell — no second box */
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-inputtext,
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input {
+  width: 100%;
+  height: 100%;
+  min-height: 3rem;
+  padding-inline: 0.75rem;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font-size: 0.875rem;
+}
+
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-inputtext:focus,
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Chevron: same white field, light divider only (like one control) */
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown,
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown.p-button {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: 2.75rem;
+  min-height: 3rem;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: #64748b !important;
+  border-inline-start: 1px solid #e2e8f0 !important;
+}
+
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown:hover,
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown.p-button:hover {
+  background: #f8fafc !important;
+  color: #334155 !important;
+}
+
+:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ----- Standalone input (no dropdown button, e.g. student-only layout) ----- */
+:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-inputtext,
+:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-autocomplete-input {
   height: 2.5rem;
   padding-inline: 0.75rem;
   border-radius: 10px;
@@ -25,14 +99,21 @@
     box-shadow 0.15s ease;
 }
 
-:host ::ng-deep .dropdown-custom .p-inputtext:hover {
+:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-inputtext:hover,
+:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-autocomplete-input:hover {
   border-color: #94a3b8;
 }
 
-:host ::ng-deep .dropdown-custom .p-inputtext:focus {
+:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-inputtext:focus,
+:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-autocomplete-input:focus {
   outline: none;
   border-color: #22c55e;
   box-shadow: 0 0 0 3px rgb(34 197 94 / 0.2);
+}
+
+:host ::ng-deep .dropdown-custom .p-autocomplete-input-multiple,
+:host ::ng-deep .dropdown-custom .p-inputtext {
+  width: 100%;
 }
 
 :host ::ng-deep .dropdown-custom .p-autocomplete-clear-icon {

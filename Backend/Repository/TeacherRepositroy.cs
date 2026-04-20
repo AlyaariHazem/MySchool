@@ -460,5 +460,76 @@ namespace Backend.Repository
 
             return query.Where(t => ids.Contains(t.TeacherID));
         }
+
+        private const int MaxTeacherNamesPageSize = 200;
+
+        /// <inheritdoc />
+        public async Task<PagedResult<TeacherNameLookupDto>> GetTeacherNamesPageAsync(
+            int pageIndex,
+            int pageSize,
+            string? search,
+            CancellationToken cancellationToken = default)
+        {
+            pageIndex = Math.Max(0, pageIndex);
+            if (pageSize < 1)
+                pageSize = 20;
+            if (pageSize > MaxTeacherNamesPageSize)
+                pageSize = MaxTeacherNamesPageSize;
+
+            var query = _context.Teachers.AsNoTracking().AsQueryable();
+            query = await ApplyTeacherYearScopeAsync(query, new Dictionary<string, FilterValue>(), cancellationToken);
+            query = query.Where(t => t.FullName != null);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.Trim();
+                query = query.Where(t =>
+                    (t.FullName!.FirstName != null && t.FullName.FirstName.Contains(s)) ||
+                    (t.FullName.LastName != null && t.FullName.LastName.Contains(s)) ||
+                    (t.FullName.MiddleName != null && t.FullName.MiddleName.Contains(s)));
+            }
+
+            var ordered = query
+                .OrderBy(t => t.FullName!.FirstName)
+                .ThenBy(t => t.FullName!.LastName);
+
+            var totalCount = await ordered.CountAsync(cancellationToken);
+            var rows = await ordered
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .Select(t => new TeacherNameLookupDto
+                {
+                    TeacherID = t.TeacherID,
+                    FullName = (
+                        (t.FullName!.FirstName ?? "") + " " +
+                        (t.FullName.MiddleName ?? "") + " " +
+                        (t.FullName.LastName ?? "")
+                    ).Trim()
+                })
+                .ToListAsync(cancellationToken);
+
+            var totalPages = pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+            return new PagedResult<TeacherNameLookupDto>(rows, pageIndex + 1, pageSize, totalCount, totalPages);
+        }
+
+        /// <inheritdoc />
+        public async Task<TeacherNameLookupDto?> GetTeacherNameLookupAsync(int teacherId, CancellationToken cancellationToken = default)
+        {
+            if (teacherId <= 0)
+                return null;
+
+            return await _context.Teachers.AsNoTracking()
+                .Where(t => t.TeacherID == teacherId && t.FullName != null)
+                .Select(t => new TeacherNameLookupDto
+                {
+                    TeacherID = t.TeacherID,
+                    FullName = (
+                        (t.FullName!.FirstName ?? "") + " " +
+                        (t.FullName.MiddleName ?? "") + " " +
+                        (t.FullName.LastName ?? "")
+                    ).Trim()
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+        }
     }
 }

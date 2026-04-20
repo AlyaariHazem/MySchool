@@ -11,14 +11,12 @@ import { SubjectService } from '../../core/services/subject.service';
 import { Curriculms } from '../../core/models/Curriculms.model';
 import { CurriculmService } from '../../core/services/curriculm.service';
 import { divisions } from '../../core/models/division.model';
-import { Teachers } from '../../core/models/teacher.model';
 import { Subjects } from '../../core/models/subjects.model';
 import { CurriculmsPlan, CurriculmsPlans } from '../../core/models/curriculmsPlans.model';
 import { CurriculmsPlanService } from '../../core/services/curriculms-plan.service';
 import { DivisionService } from '../../core/services/division.service';
 import { Terms } from '../../core/models/term.model';
 import { TermService } from '../../core/services/term.service';
-import { TeacherService } from '../../core/services/teacher.service';
 import { selectLanguage } from '../../../../core/store/language/language.selectors';
 
 @Component({
@@ -35,7 +33,6 @@ export class PlainsComponent {
   subjects: Subjects[] = [];
   divisions: divisions[] = [];
   fiteredDivisions: divisions[] | undefined;
-  teachers: Teachers[] | undefined;
   terms: Terms[] = [];
   ClassSubjects: Curriculms[] = [];
   filteredSubjects: Curriculms[] | undefined;
@@ -68,8 +65,7 @@ export class PlainsComponent {
     private divisionSerivce: DivisionService,
     private curriculmsPlanService: CurriculmsPlanService,
     private termService: TermService,
-    private store:Store,
-    private teacherService: TeacherService
+    private store:Store
   ) {
     this.form = this.formBuilder.group({
       classID: [null, Validators.required],
@@ -87,7 +83,6 @@ export class PlainsComponent {
     this.getAllCurriculm();
     this.getAllDivision();
     this.getAllTerms();
-    this.getAllTeachers();
 
     this.form.get('classID')?.valueChanges.subscribe((selectedClassID: number | null) => {
       if (selectedClassID == null || selectedClassID <= 0) {
@@ -176,19 +171,6 @@ export class PlainsComponent {
           return;
         }
         this.terms = res.result;
-      },
-      error: () => this.toastr.error('Server error occurred')
-    });
-  }
-
-  getAllTeachers(): void {
-    this.teacherService.getAllTeacher().subscribe({
-      next: (res) => {
-        if (!res.isSuccess) {
-          this.toastr.warning(res.errorMasseges[0] || 'Failed to load teachers.');
-          return;
-        }
-        this.teachers = res.result;
       },
       error: () => this.toastr.error('Server error occurred')
     });
