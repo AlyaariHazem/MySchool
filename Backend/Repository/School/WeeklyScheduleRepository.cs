@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Backend.Data;
@@ -329,6 +330,28 @@ namespace Backend.Repository.School
 
             await _db.WeeklySchedules.AddRangeAsync(newSchedules);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task<HashSet<(int TeacherId, int Day, int Period)>> GetTeacherBusySlotsAsync(
+            int yearId,
+            int termId,
+            int forClassId,
+            int? forDivisionId,
+            CancellationToken cancellationToken = default)
+        {
+            var q = _db.WeeklySchedules.AsNoTracking()
+                .Where(s => s.YearID == yearId && s.TermID == termId && s.TeacherID != null);
+
+            if (forDivisionId.HasValue)
+                q = q.Where(s => !(s.ClassID == forClassId && s.DivisionID == forDivisionId.Value));
+            else
+                q = q.Where(s => !(s.ClassID == forClassId));
+
+            var rows = await q
+                .Select(s => new ValueTuple<int, int, int>(s.TeacherID!.Value, s.DayOfWeek, s.PeriodNumber))
+                .ToListAsync(cancellationToken);
+
+            return rows.ToHashSet();
         }
 
         private WeeklyScheduleDTO MapToDTO(WeeklySchedule schedule)

@@ -4,6 +4,7 @@ using Backend.Data;
 using Backend.DTOS.School.CoursePlan;
 using Backend.Models;
 using Backend.Repository.School.Implements;
+using System.Threading;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository;
@@ -36,6 +37,9 @@ public class CoursePlanRepository : ICoursePlanRepository
             throw new InvalidOperationException($"Year with ID {dto.YearID} not found. Please select a valid year.");
 
         await ValidateCoursePlanForeignKeysAsync(dto);
+
+        if (dto.PeriodsPerWeek < 0 || dto.PeriodsPerWeek > 40)
+            throw new ArgumentException("PeriodsPerWeek must be between 0 and 40.", nameof(dto));
 
         var duplicate = await _context.CoursePlans.FindAsync(
             dto.YearID, dto.TeacherID, dto.ClassID, dto.DivisionID, dto.SubjectID, dto.TermID);
@@ -241,7 +245,8 @@ public class CoursePlanRepository : ICoursePlanRepository
                 DivisionID = item.DivisionID,
                 TeacherID = item.TeacherID,
                 TermID = item.TermID,
-                YearID = item.YearID
+                YearID = item.YearID,
+                PeriodsPerWeek = item.PeriodsPerWeek
             })
             .ToListAsync();
         
@@ -259,6 +264,9 @@ public class CoursePlanRepository : ICoursePlanRepository
         var entity = await _context.CoursePlans.FindAsync(oldYearID, oldTeacherID, oldClassID, oldDivisionID, oldSubjectID, oldTermID);
         if (entity == null)
             throw new KeyNotFoundException("Course plan not found.");
+
+        if (dto.PeriodsPerWeek < 0 || dto.PeriodsPerWeek > 40)
+            throw new ArgumentException("PeriodsPerWeek must be between 0 and 40.", nameof(dto));
 
         // Get the active year - if multiple active years exist, take the first one
         var activeYear = await _context.Years
@@ -308,10 +316,38 @@ public class CoursePlanRepository : ICoursePlanRepository
             }
             
             // Explicitly mark the entity as modified to ensure EF tracks the changes
+            entity.PeriodsPerWeek = dto.PeriodsPerWeek;
             _context.Entry(entity).Property(e => e.TermID).IsModified = true;
+            _context.Entry(entity).Property(e => e.PeriodsPerWeek).IsModified = true;
         }
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<CoursePlan>> GetByClassTermYearForSchedulingAsync(
+        int yearId,
+        int classId,
+        int termId,
+        int? divisionId,
+        CancellationToken cancellationToken = default)
+    {
+        var q = _context.CoursePlans.AsNoTracking()
+            .Where(p => p.YearID == yearId && p.ClassID == classId && p.TermID == termId);
+        if (divisionId.HasValue)
+            q = q.Where(p => p.DivisionID == divisionId.Value);
+        return await q.ToListAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<int, int>> GetTeacherCoursePlanCountsAsync(
+        int yearId,
+        int termId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.CoursePlans.AsNoTracking()
+            .Where(p => p.YearID == yearId && p.TermID == termId)
+            .GroupBy(p => p.TeacherID)
+            .Select(g => new { g.Key, Cnt = g.Count() })
+            .ToDictionaryAsync(x => x.Key, x => x.Cnt, cancellationToken);
     }
 
     public async Task DeleteAsync(int yearID, int teacherID, int classID, int divisionID, int subjectID, int termID)

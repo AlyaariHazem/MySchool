@@ -18,4 +18,5 @@ public class CoursePlanReturnDTO
     public int TeacherID { get; set; }
     public int TermID { get; set; }
     public int YearID { get; set; }
+    public int PeriodsPerWeek { get; set; }
 }

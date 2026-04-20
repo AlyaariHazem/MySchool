@@ -14,4 +14,7 @@ public class CoursePlanDTO
     public int TeacherID { get; set; }
     public int ClassID { get; set; }
     public int DivisionID { get; set; }
+
+    /// <summary>Weekly periods to schedule for this plan (non-negative).</summary>
+    public int PeriodsPerWeek { get; set; } = 1;
 }

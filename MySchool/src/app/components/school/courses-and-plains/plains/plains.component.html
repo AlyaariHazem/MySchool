@@ -62,6 +62,14 @@
                 </p-floatLabel>
             </div>
 
+            <div class="form-control">
+                <p-floatLabel class="w-full h-3rem mb-3 mt-2" variant="on">
+                    <input pInputText type="number" min="0" max="40" class="w-full h-3rem inputError"
+                        formControlName="periodsPerWeek" />
+                    <label for="periodsPerWeek">عدد الحصص الأسبوعية</label>
+                </p-floatLabel>
+            </div>
+
         </div>
 
         <!-- زر الحفظ -->
@@ -84,6 +92,7 @@
                         <th>اسم المعلم</th>
                         <th>الفصل الدراسي</th>
                         <th>العام</th>
+                        <th>حصص/أسبوع</th>
                         <th>العملية</th>
                     </tr>
                 </thead>
@@ -96,6 +105,7 @@
                         <td>{{ curriculum.teacherName }}</td>
                         <td>{{ curriculum.termName }}</td>
                         <td>{{ curriculum.year | date: 'yyyy-MM-dd' }}</td>
+                        <td>{{ curriculum.periodsPerWeek ?? '—' }}</td>
                         <td>
                             <div class="col text-left">
                                 <div class="mt-sm-0 mt-2">

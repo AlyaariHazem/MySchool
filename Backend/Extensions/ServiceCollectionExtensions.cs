@@ -72,6 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IWeeklyScheduleRepository, WeeklyScheduleRepository>();
         services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+        services.AddScoped<IAutomaticWeeklyScheduleService, AutomaticWeeklyScheduleService>();
 
         return services;
     }

@@ -8,7 +8,7 @@ namespace Backend.DTOS.School.WeeklySchedule
         public int DayOfWeek { get; set; } // 0 = Saturday, 1 = Sunday, etc.
         
         [Required]
-        [Range(1, 10)]
+        [Range(1, 14)]
         public int PeriodNumber { get; set; }
         
         [Required]

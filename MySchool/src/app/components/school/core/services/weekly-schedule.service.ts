@@ -2,7 +2,14 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BackendAspService } from '../../../../ASP.NET/backend-asp.service';
 import { ApiResponse } from '../../../../core/models/response.model';
-import { WeeklySchedule, AddWeeklySchedule, UpdateWeeklySchedule, WeeklyScheduleGrid } from '../models/weekly-schedule.model';
+import {
+  WeeklySchedule,
+  AddWeeklySchedule,
+  UpdateWeeklySchedule,
+  WeeklyScheduleGrid,
+  GenerateWeeklyScheduleRequest,
+  GenerateWeeklyScheduleResult
+} from '../models/weekly-schedule.model';
 
 @Injectable({
   providedIn: 'root'
@@ -52,6 +59,13 @@ export class WeeklyScheduleService {
   // Bulk update schedules (replace all for a class/term)
   BulkUpdate(schedules: AddWeeklySchedule[]): Observable<ApiResponse<any>> {
     return this.API.postRequest<any>("WeeklySchedule/bulk", schedules);
+  }
+
+  /** Builds the grid from course plans (PeriodsPerWeek). Replaces the schedule only when placement succeeds. */
+  GenerateFromCoursePlans(
+    body: GenerateWeeklyScheduleRequest
+  ): Observable<ApiResponse<GenerateWeeklyScheduleResult>> {
+    return this.API.postRequest<GenerateWeeklyScheduleResult>('WeeklySchedule/generate', body);
   }
 
   // Delete schedule

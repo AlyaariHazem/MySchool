@@ -348,6 +348,9 @@ namespace Backend.Migrations.Tenant
                     b.Property<int>("TermID")
                         .HasColumnType("int");
 
+                    b.Property<int>("PeriodsPerWeek")
+                        .HasColumnType("int");
+
                     b.HasKey("YearID", "TeacherID", "ClassID", "DivisionID", "SubjectID", "TermID");
 
                     b.HasIndex("ClassID");

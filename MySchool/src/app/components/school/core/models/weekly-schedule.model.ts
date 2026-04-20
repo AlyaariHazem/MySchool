@@ -62,3 +62,22 @@ export interface Period {
   startTime: string;
   endTime: string;
 }
+
+export interface GenerateWeeklyScheduleRequest {
+  classID: number;
+  termID: number;
+  divisionID?: number | null;
+  daysPerWeek?: number;
+  periodsPerDay?: number;
+  maxSameSubjectPerDay?: number;
+  randomSeed?: number | null;
+}
+
+export interface GenerateWeeklyScheduleResult {
+  success: boolean;
+  placedPeriods: number;
+  requiredPeriods: number;
+  gridSlots: number;
+  warnings: string[];
+  unplacedLines: string[];
+}

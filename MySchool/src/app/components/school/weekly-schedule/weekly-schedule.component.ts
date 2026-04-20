@@ -12,7 +12,12 @@ import { SubjectService } from '../core/services/subject.service';
 import { TeacherService } from '../core/services/teacher.service';
 import { CurriculmsPlanService } from '../core/services/curriculms-plan.service';
 import { DivisionService } from '../core/services/division.service';
-import { AddWeeklySchedule, WeeklySchedule, WeeklyScheduleGrid } from '../core/models/weekly-schedule.model';
+import {
+  AddWeeklySchedule,
+  GenerateWeeklyScheduleResult,
+  WeeklySchedule,
+  WeeklyScheduleGrid
+} from '../core/models/weekly-schedule.model';
 import { CLass } from '../core/models/class.model';
 import { Terms } from '../core/models/term.model';
 import { Subjects } from '../core/models/subjects.model';
@@ -645,6 +650,53 @@ export class WeeklyScheduleComponent implements OnInit {
     }
 
     this.hasChanges = true;
+  }
+
+  generateAutomaticSchedule(): void {
+    if (this.teacherPersonalSchedule) {
+      return;
+    }
+    if (!this.selectedClassId || !this.selectedTermId) {
+      this.toastr.warning('يرجى اختيار الصف والفصل الدراسي', 'تحذير');
+      return;
+    }
+    if (this.filteredDivisions.length > 0 && !this.selectedDivisionId) {
+      this.toastr.warning('يرجى اختيار القسم (الشعبة) لتوليد الجدول من خطط المقررات', 'تحذير');
+      return;
+    }
+
+    this.isLoading = true;
+    this.scheduleService
+      .GenerateFromCoursePlans({
+        classID: this.selectedClassId,
+        termID: this.selectedTermId,
+        divisionID: this.selectedDivisionId ?? undefined,
+        daysPerWeek: this.daysOfWeek.length,
+        periodsPerDay: this.periods.length,
+        maxSameSubjectPerDay: 2
+      })
+      .subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          const payload = res.result as GenerateWeeklyScheduleResult | undefined;
+          if (!res.isSuccess) {
+            const msg = res.errorMasseges?.[0] || payload?.warnings?.[0] || 'تعذر توليد الجدول';
+            this.toastr.error(msg, 'خطأ');
+            return;
+          }
+          this.toastr.success(
+            `تم توليد الجدول: ${payload?.placedPeriods ?? 0} حصة من ${payload?.requiredPeriods ?? 0}`,
+            'نجاح'
+          );
+          this.hasChanges = false;
+          this.loadSchedule();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          const errorMessage = err.error?.errorMasseges?.[0] || 'فشل في توليد الجدول';
+          this.toastr.error(errorMessage, 'خطأ');
+        }
+      });
   }
 
   saveChanges(): void {

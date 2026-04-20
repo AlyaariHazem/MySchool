@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Linq;
 using System.Security.Claims;
+using Backend.Services;
 
 namespace Backend.Controllers.School
 {
@@ -16,10 +17,12 @@ namespace Backend.Controllers.School
     public class WeeklyScheduleController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAutomaticWeeklyScheduleService _scheduleGenerator;
 
-        public WeeklyScheduleController(IUnitOfWork unitOfWork)
+        public WeeklyScheduleController(IUnitOfWork unitOfWork, IAutomaticWeeklyScheduleService scheduleGenerator)
         {
             _unitOfWork = unitOfWork;
+            _scheduleGenerator = scheduleGenerator;
         }
 
         // GET api/WeeklySchedule
@@ -230,6 +233,47 @@ namespace Backend.Controllers.School
                 response.Result = "Schedule updated successfully.";
                 response.statusCode = HttpStatusCode.OK;
                 return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMasseges.Add(ex.Message);
+                return StatusCode((int)HttpStatusCode.InternalServerError, response);
+            }
+        }
+
+        /// <summary>Builds a weekly grid from course plans (PeriodsPerWeek) and replaces the class/term (and optional division) schedule when a full placement is found.</summary>
+        [HttpPost("generate")]
+        public async Task<ActionResult<APIResponse>> GenerateFromCoursePlans(
+            [FromBody] GenerateWeeklyScheduleRequestDTO request,
+            CancellationToken cancellationToken)
+        {
+            var response = new APIResponse();
+            try
+            {
+                if (!ModelState.IsValid || request == null)
+                {
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.IsSuccess = false;
+                    response.ErrorMasseges.Add("Invalid request.");
+                    return BadRequest(response);
+                }
+
+                var result = await _scheduleGenerator.GenerateAsync(request, cancellationToken);
+                response.Result = result;
+                response.statusCode = HttpStatusCode.OK;
+                response.IsSuccess = result.Success;
+                if (result.Warnings.Count > 0)
+                    response.ErrorMasseges.AddRange(result.Warnings);
+                return Ok(response);
+            }
+            catch (InvalidOperationException ex)
+            {
+                response.IsSuccess = false;
+                response.statusCode = HttpStatusCode.BadRequest;
+                response.ErrorMasseges.Add(ex.Message);
+                return BadRequest(response);
             }
             catch (Exception ex)
             {

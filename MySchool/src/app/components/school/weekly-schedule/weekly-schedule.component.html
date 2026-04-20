@@ -55,6 +55,15 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
+          <p-button
+            *ngIf="!teacherPersonalSchedule"
+            label="توليد من خطط المقررات"
+            icon="pi pi-sparkles"
+            severity="help"
+            [disabled]="!selectedClassId || !selectedTermId || isLoading"
+            (click)="generateAutomaticSchedule()"
+            [loading]="isLoading">
+          </p-button>
           <p-button 
             *ngIf="!teacherPersonalSchedule"
             label="حفظ التغيرات" 

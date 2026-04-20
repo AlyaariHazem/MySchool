@@ -85,7 +85,8 @@ export class PlainsComponent {
       divisionID: [null, Validators.required],
       teacherID: [null, Validators.required],
       termID: [null, Validators.required],
-      yearID: [null, Validators.required]
+      yearID: [null, Validators.required],
+      periodsPerWeek: [3, [Validators.required, Validators.min(0), Validators.max(40)]]
     });
   }
 
@@ -243,7 +244,7 @@ export class PlainsComponent {
       return;
     }
 
-    const { classID, subjectID, divisionID, teacherID, termID, yearID } = this.form.value;
+    const { classID, subjectID, divisionID, teacherID, termID, yearID, periodsPerWeek } = this.form.value;
 
     if (!yearID) {
       this.toastr.warning('يرجى اختيار سنة دراسية');
@@ -257,6 +258,7 @@ export class PlainsComponent {
       teacherID,
       termID,
       yearID: Number(yearID),
+      periodsPerWeek: periodsPerWeek != null ? Number(periodsPerWeek) : 3,
     };
 
     this.isMutating = true;
@@ -275,6 +277,7 @@ export class PlainsComponent {
         this.editMode = false;
         this.editingPlan = null;
         this.form.reset();
+        this.form.patchValue({ periodsPerWeek: 3 });
       },
       error: (err) => {
         const errorMessage = err?.error?.errorMasseges?.[0] || err?.error?.message || 'Server error occurred';
@@ -319,7 +322,8 @@ export class PlainsComponent {
           divisionID: planData.divisionID,
           teacherID: planData.teacherID,
           termID: planData.termID,
-          yearID: planData.yearID
+          yearID: planData.yearID,
+          periodsPerWeek: planData.periodsPerWeek ?? 3
         });
 
         // Update filtered lists based on selected class
@@ -360,7 +364,7 @@ export class PlainsComponent {
       return;
     }
 
-    const { classID, subjectID, divisionID, teacherID, termID, yearID } = this.form.value;
+    const { classID, subjectID, divisionID, teacherID, termID, yearID, periodsPerWeek } = this.form.value;
 
     if (!yearID) {
       this.toastr.warning('يرجى اختيار سنة دراسية');
@@ -374,6 +378,7 @@ export class PlainsComponent {
       teacherID,
       termID,
       yearID: Number(yearID),
+      periodsPerWeek: periodsPerWeek != null ? Number(periodsPerWeek) : 3,
     };
 
     // Use the old composite key values from editingPlan (these are the actual values stored in DB)
@@ -402,6 +407,7 @@ export class PlainsComponent {
         this.editMode = false;
         this.editingPlan = null;
         this.form.reset();
+        this.form.patchValue({ periodsPerWeek: 3 });
       },
       error: (err) => {
         const errorMessage = err?.error?.errorMasseges?.[0] || err?.error?.message || 'Server error occurred';

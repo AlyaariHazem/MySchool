@@ -6,6 +6,8 @@ export interface CurriculmsPlan {
     classID?: number;
     teacherID: number;
     divisionID: number;
+    /** Weekly lesson count for automatic schedule generation (default 1 on server if omitted). */
+    periodsPerWeek?: number;
 }
 export interface CurriculmsPlans {
     coursePlanName?: string;
@@ -19,6 +21,7 @@ export interface CurriculmsPlans {
     teacherID: number;
     termID: number;
     yearID: number;
+    periodsPerWeek?: number;
 }
 export interface CurriculmsPlanSubject {
     subjectID: number;

@@ -28,4 +28,7 @@ public class CoursePlan
     public Class Class { get; set; }
     public int DivisionID { get; set; }
     public Division Division { get; set; }
+
+    /// <summary>Target weekly lesson count for this class/section/subject (used by automatic schedule generation).</summary>
+    public int PeriodsPerWeek { get; set; } = 1;
 }
