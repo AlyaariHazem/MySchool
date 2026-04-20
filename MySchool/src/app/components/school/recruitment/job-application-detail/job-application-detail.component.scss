@@ -27,3 +27,84 @@
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
 }
+
+.employees-hr-page.embedded-workflow {
+  padding: 0;
+  max-width: none;
+  margin: 0;
+}
+
+.employees-hr-page.embedded-workflow .employees-hr-card {
+  box-shadow: none;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  padding: 0.9rem 1rem 1rem;
+}
+
+:host ::ng-deep .workflow-subdialog .p-dialog {
+  width: min(42rem, 94vw) !important;
+}
+
+:host ::ng-deep .workflow-subdialog .p-dialog-header {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+:host ::ng-deep .workflow-subdialog .p-dialog-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+:host ::ng-deep .workflow-subdialog .p-dialog-content {
+  padding: 1rem;
+  max-height: min(72vh, 680px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #f8fafc;
+}
+
+:host ::ng-deep .workflow-subdialog .p-dialog-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.dialog-form .eh-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 0.9rem;
+}
+
+:host ::ng-deep .dialog-form .p-floatlabel,
+:host ::ng-deep .dialog-form .p-inputtext,
+:host ::ng-deep .dialog-form .p-select,
+:host ::ng-deep .dialog-form .p-inputnumber,
+:host ::ng-deep .dialog-form .p-datepicker,
+:host ::ng-deep .dialog-form .p-inputtextarea {
+  width: 100%;
+}
+
+:host ::ng-deep .dialog-form .p-inputtext,
+:host ::ng-deep .dialog-form .p-inputnumber-input,
+:host ::ng-deep .dialog-form .p-datepicker input.p-inputtext,
+:host ::ng-deep .dialog-form .p-select {
+  min-height: 2.6rem;
+}
+
+.dialog-form > p-button {
+  align-self: flex-end;
+}
+
+@media (max-width: 700px) {
+  .dialog-form .eh-row {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-form > p-button {
+    width: 100%;
+  }
+}

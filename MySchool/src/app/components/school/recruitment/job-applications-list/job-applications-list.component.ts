@@ -29,7 +29,6 @@ import { ShardModule } from 'app/shared/shard.module';
 import {
   JobApplicationCreateDto,
   JobApplicationFilterDto,
-  JobApplicationFullDto,
   JobApplicationListDto,
   JobApplicationReadDto,
   JobApplicationStatus,
@@ -37,6 +36,7 @@ import {
   JobPostingListDto,
   JobPostingStatus,
 } from '../recruitment.models';
+import { JobApplicationDetailComponent } from '../job-application-detail/job-application-detail.component';
 import { JobApplicationFormComponent } from '../job-application-form/job-application-form.component';
 import { RecruitmentService, readRecruitmentHttpError } from '../recruitment.service';
 
@@ -61,6 +61,7 @@ import { RecruitmentService, readRecruitmentHttpError } from '../recruitment.ser
     TooltipModule,
     TagModule,
     JobApplicationFormComponent,
+    JobApplicationDetailComponent,
   ],
   templateUrl: './job-applications-list.component.html',
   styleUrl: './job-applications-list.component.scss',
@@ -101,7 +102,6 @@ export class JobApplicationsListComponent implements OnInit, OnDestroy {
   dialogError: string | null = null;
   selectedApplicationId: number | null = null;
   selectedApplication: JobApplicationReadDto | null = null;
-  selectedWorkflow: JobApplicationFullDto | null = null;
 
   JobApplicationStatus = JobApplicationStatus;
 
@@ -228,19 +228,6 @@ export class JobApplicationsListComponent implements OnInit, OnDestroy {
     return m[s] ?? 'submitted';
   }
 
-  postingStatusLabelKey(s: JobPostingStatus): string {
-    switch (s) {
-      case JobPostingStatus.Open:
-        return 'open';
-      case JobPostingStatus.Closed:
-        return 'closed';
-      case JobPostingStatus.Archived:
-        return 'archived';
-      default:
-        return 'draft';
-    }
-  }
-
   openCreateDialog(): void {
     this.dialogError = null;
     this.showCreateDialog = true;
@@ -252,6 +239,7 @@ export class JobApplicationsListComponent implements OnInit, OnDestroy {
   }
 
   openEditDialog(id: number): void {
+    this.showWorkflowDialog = false;
     this.selectedApplicationId = id;
     this.selectedApplication = null;
     this.dialogError = null;
@@ -276,25 +264,12 @@ export class JobApplicationsListComponent implements OnInit, OnDestroy {
 
   openWorkflowDialog(id: number): void {
     this.selectedApplicationId = id;
-    this.selectedWorkflow = null;
-    this.dialogError = null;
-    this.dialogLoading = true;
     this.showWorkflowDialog = true;
-    this.recruitment
-      .getJobApplicationFull(id)
-      .pipe(finalize(() => (this.dialogLoading = false)))
-      .subscribe({
-        next: (row) => (this.selectedWorkflow = row),
-        error: (err) => {
-          this.dialogError = readRecruitmentHttpError(err);
-          this.selectedWorkflow = null;
-        },
-      });
   }
 
   closeWorkflowDialog(): void {
     this.showWorkflowDialog = false;
-    this.selectedWorkflow = null;
+    this.selectedApplicationId = null;
   }
 
   createApplication(dto: JobApplicationCreateDto | Record<string, unknown>): void {

@@ -1,5 +1,5 @@
 import { DatePipe, NgIf } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -76,7 +76,7 @@ import { EmploymentStatus } from '../../employees-hr/employees-hr.models';
   templateUrl: './job-application-detail.component.html',
   styleUrl: './job-application-detail.component.scss',
 })
-export class JobApplicationDetailComponent implements OnInit, OnDestroy {
+export class JobApplicationDetailComponent implements OnInit, OnDestroy, OnChanges {
   private readonly route = inject(ActivatedRoute);
   private readonly recruitment = inject(RecruitmentService);
   private readonly employeesHr = inject(EmployeesHrService);
@@ -86,6 +86,9 @@ export class JobApplicationDetailComponent implements OnInit, OnDestroy {
   private readonly perm = inject(PermissionService);
 
   private langSub?: Subscription;
+  @Input() applicationId: number | null = null;
+  @Input() embedded = false;
+  @Output() editRequested = new EventEmitter<number>();
 
   id = 0;
   full: JobApplicationFullDto | null = null;
@@ -140,8 +143,7 @@ export class JobApplicationDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.ngOnInitEvalLabels();
-    const p = this.route.snapshot.paramMap.get('id');
-    this.id = p ? +p : 0;
+    this.id = this.resolveId();
     this.loadJobTypes();
     this.langSub = this.translate.onLangChange.subscribe(() => {
       this.rebuildJobTypeLabels();
@@ -154,8 +156,21 @@ export class JobApplicationDetailComponent implements OnInit, OnDestroy {
     this.reload();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['applicationId'] && !changes['applicationId'].firstChange) {
+      this.id = this.resolveId();
+      if (this.id > 0 && this.canView) this.reload();
+    }
+  }
+
   ngOnDestroy(): void {
     this.langSub?.unsubscribe();
+  }
+
+  private resolveId(): number {
+    if (this.applicationId && this.applicationId > 0) return this.applicationId;
+    const p = this.route.snapshot.paramMap.get('id');
+    return p ? +p : 0;
   }
 
   private loadJobTypes(): void {

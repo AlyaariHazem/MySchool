@@ -1,4 +1,4 @@
-<div class="employees-hr-page" *ngIf="canView">
+<div class="employees-hr-page" [class.embedded-workflow]="embedded" *ngIf="canView">
   <p-confirmDialog [style]="{ width: '28rem' }" />
 
   <div *ngIf="loading" class="loading-wrap">
@@ -10,16 +10,23 @@
       <h2 class="employees-hr-title">{{ 'recruitment.workflow.title' | translate }}</h2>
       <div class="header-actions">
         <p-button
+          *ngIf="!embedded"
           [label]="'employeesHr.actions.backList' | translate"
           icon="pi pi-arrow-right"
           [outlined]="true"
           routerLink="/school/recruitment/job-applications"
         />
         <p-button
-          *ngIf="canUpdate"
+          *ngIf="canUpdate && !embedded"
           [label]="'employeesHr.actions.edit' | translate"
           icon="pi pi-pencil"
           [routerLink]="['/school/recruitment/job-applications', id, 'edit']"
+        />
+        <p-button
+          *ngIf="canUpdate && embedded"
+          [label]="'employeesHr.actions.edit' | translate"
+          icon="pi pi-pencil"
+          (onClick)="editRequested.emit(id)"
         />
         <p-button
           *ngIf="canUpdate"
@@ -243,6 +250,7 @@
   [header]="(interviewEdit ? 'recruitment.workflow.editInterview' : 'recruitment.workflow.addInterview') | translate"
   [(visible)]="showInterview"
   [modal]="true"
+  styleClass="workflow-subdialog"
   [style]="{ width: '32rem' }"
   (onHide)="showInterview = false"
 >
@@ -255,6 +263,7 @@
         dateFormat="yy-mm-dd"
         [showTime]="true"
         hourFormat="24"
+        appendTo="body"
         styleClass="w-full"
         class="w-full"
       />
@@ -285,6 +294,7 @@
   [header]="(evalEdit ? 'recruitment.workflow.editEvaluation' : 'recruitment.workflow.addEvaluation') | translate"
   [(visible)]="showEval"
   [modal]="true"
+  styleClass="workflow-subdialog"
   [style]="{ width: '34rem' }"
 >
   <div class="dialog-form" *ngIf="showEval">
@@ -319,6 +329,7 @@
         [options]="evalRecommendationOptions"
         optionLabel="label"
         optionValue="value"
+        appendTo="body"
         styleClass="w-full"
         class="w-full"
       />
@@ -337,6 +348,7 @@
   [header]="'recruitment.workflow.editDecision' | translate"
   [(visible)]="showDecision"
   [modal]="true"
+  styleClass="workflow-subdialog"
   [style]="{ width: '32rem' }"
 >
   <div class="dialog-form" *ngIf="showDecision">
@@ -347,6 +359,7 @@
         [options]="jobTypeOptions"
         optionLabel="label"
         optionValue="value"
+        appendTo="body"
         styleClass="w-full"
         class="w-full"
       />
@@ -365,7 +378,13 @@
 </p-dialog>
 
 <!-- Status dialog -->
-<p-dialog [header]="'recruitment.workflow.moveStatus' | translate" [(visible)]="showStatus" [modal]="true" [style]="{ width: '26rem' }">
+<p-dialog
+  [header]="'recruitment.workflow.moveStatus' | translate"
+  [(visible)]="showStatus"
+  [modal]="true"
+  styleClass="workflow-subdialog"
+  [style]="{ width: '26rem' }"
+>
   <div *ngIf="showStatus">
     <p-floatlabel variant="on" class="mb-3">
       <p-select
@@ -379,6 +398,7 @@
         ]"
         optionLabel="label"
         optionValue="value"
+        appendTo="body"
         styleClass="w-full"
         class="w-full"
       />
@@ -389,7 +409,13 @@
 </p-dialog>
 
 <!-- Convert dialog -->
-<p-dialog [header]="'recruitment.workflow.convert' | translate" [(visible)]="showConvert" [modal]="true" [style]="{ width: '28rem' }">
+<p-dialog
+  [header]="'recruitment.workflow.convert' | translate"
+  [(visible)]="showConvert"
+  [modal]="true"
+  styleClass="workflow-subdialog"
+  [style]="{ width: '28rem' }"
+>
   <div *ngIf="showConvert" class="dialog-form">
     <p-floatlabel variant="on" class="mb-3">
       <input pInputText id="cv-code" class="w-full" [(ngModel)]="convertDraft.employeeCode" />
@@ -403,6 +429,7 @@
         optionLabel="label"
         optionValue="value"
         [showClear]="true"
+        appendTo="body"
         styleClass="w-full"
         class="w-full"
       />
