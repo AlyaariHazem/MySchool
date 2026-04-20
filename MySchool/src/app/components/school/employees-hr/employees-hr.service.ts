@@ -70,11 +70,20 @@ export class EmployeesHrService {
     return this.jobTypes$;
   }
 
+  /** Full list (no pagination) — e.g. small filter pickers. For the HR table use `getEmployeesListPage`. */
   getEmployees(filter?: EmployeeProfileListFilterDto | null): Observable<EmployeeProfileReadDto[]> {
     const body = employeeProfileListFilterForPostApi(filter ?? {});
     return this.http
       .post<ApiResponse<EmployeeProfileReadDto[]>>(`${this.api.baseUrl}/employees/list`, body)
       .pipe(map((r) => unwrap<EmployeeProfileReadDto[]>(r) ?? []));
+  }
+
+  /** Paged HR list (full profile rows). Zero-based pageIndex. */
+  getEmployeesListPage(body: EmployeeProfilePageRequestDto): Observable<PagedResultDto<EmployeeProfileReadDto>> {
+    const payload = employeeProfilePageRequestForPostApi(body);
+    return this.http
+      .post<ApiResponse<PagedResultDto<EmployeeProfileReadDto>>>(`${this.api.baseUrl}/employees/list/page`, payload)
+      .pipe(map((r) => unwrap<PagedResultDto<EmployeeProfileReadDto>>(r)));
   }
 
   /** Paged employees (id + fullName). Zero-based pageIndex. */

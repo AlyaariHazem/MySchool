@@ -109,7 +109,7 @@ export interface EmployeeProfileListFilterDto {
   employmentStatus?: EmploymentStatus | null;
 }
 
-/** POST /employees/list: active year is server-side. MANAGER: school is server-side — omit from payload. */
+/** POST /employees/list (full array): active year is server-side. MANAGER: school is server-side — omit from payload. */
 export function employeeProfileListFilterForPostApi(f: EmployeeProfileListFilterDto): EmployeeProfileListFilterDto {
   const out = { ...f };
   delete out.academicYearID;
@@ -119,7 +119,7 @@ export function employeeProfileListFilterForPostApi(f: EmployeeProfileListFilter
   return out;
 }
 
-/** POST /employees/page — same filter rules as list. */
+/** POST /employees/page and POST /employees/list/page — same filter rules as list. */
 export interface EmployeeProfilePageRequestDto {
   pageIndex: number;
   pageSize: number;

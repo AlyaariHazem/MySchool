@@ -88,6 +88,30 @@ public class EmployeesController : ControllerBase
         }
     }
 
+    /// <summary>Paged HR list (full rows). Same manager school scoping as <see cref="List"/>.</summary>
+    [HttpPost("list/page")]
+    [Authorize(Roles = "ADMIN,MANAGER")]
+    public async Task<ActionResult<APIResponse>> ListPage([FromBody] EmployeeProfilePageRequestDto? request, CancellationToken cancellationToken)
+    {
+        var response = new APIResponse();
+        try
+        {
+            request ??= new EmployeeProfilePageRequestDto();
+            request.Filter ??= new EmployeeProfileListFilterDto();
+            await ApplyManagerSchoolScopeAsync(request.Filter, cancellationToken);
+            response.Result = await _employees.GetListPageAsync(request, cancellationToken);
+            response.statusCode = HttpStatusCode.OK;
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            response.IsSuccess = false;
+            response.statusCode = HttpStatusCode.InternalServerError;
+            response.ErrorMasseges.Add(ex.Message);
+            return StatusCode((int)HttpStatusCode.InternalServerError, response);
+        }
+    }
+
     [HttpGet("{id:int}")]
     [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<ActionResult<APIResponse>> GetById(int id, CancellationToken cancellationToken)

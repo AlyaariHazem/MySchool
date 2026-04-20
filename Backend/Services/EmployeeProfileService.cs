@@ -237,6 +237,33 @@ public class EmployeeProfileService : IEmployeeProfileService
         return new PagedResult<EmployeeProfileOptionDto>(items, pageIndex + 1, pageSize, totalCount, totalPages);
     }
 
+    public async Task<PagedResult<EmployeeProfileReadDto>> GetListPageAsync(
+        EmployeeProfilePageRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        request ??= new EmployeeProfilePageRequestDto();
+        var filter = request.Filter ?? new EmployeeProfileListFilterDto();
+
+        var pageIndex = Math.Max(0, request.PageIndex);
+        var pageSize = request.PageSize < 1 ? 20 : request.PageSize;
+        if (pageSize > MaxEmployeesPageSize)
+            pageSize = MaxEmployeesPageSize;
+
+        var q = await GetEmployeeProfilesFilteredQueryAsync(filter, cancellationToken);
+        var ordered = q.Include(e => e.JobType).OrderBy(e => e.SchoolID).ThenBy(e => e.EmployeeCode);
+
+        var totalCount = await ordered.CountAsync(cancellationToken);
+
+        var rows = await ordered
+            .Skip(pageIndex * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = rows.Select(MapToReadDtoFromEntity).ToList();
+        var totalPages = pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+        return new PagedResult<EmployeeProfileReadDto>(items, pageIndex + 1, pageSize, totalCount, totalPages);
+    }
+
     public async Task<EmployeeProfileReadDto> UpdateAsync(int id, EmployeeProfileUpdateDto dto, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(dto.FullName);

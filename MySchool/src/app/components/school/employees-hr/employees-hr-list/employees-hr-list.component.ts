@@ -11,7 +11,7 @@ import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
 import { map } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -87,6 +87,9 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
   schools: School[] = [];
   years: Year[] = [];
   rows: EmployeeProfileReadDto[] = [];
+  totalRecords = 0;
+  first = 0;
+  pageSize = 10;
   loading = false;
   error: string | null = null;
 
@@ -153,7 +156,7 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
       },
       error: () => this.toastr.error('employeesHr.errors.loadYears'),
     });
-    this.load();
+    /* Initial data load is driven by `p-table` lazy `onLazyLoad` when `canView`. */
   }
 
   ngOnDestroy(): void {
@@ -196,16 +199,43 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
     }
     this.loading = true;
     this.error = null;
+    const pageIndex = this.pageSize > 0 ? Math.floor(this.first / this.pageSize) : 0;
     this.employeesHr
-      .getEmployees(this.filter)
+      .getEmployeesListPage({
+        pageIndex,
+        pageSize: this.pageSize,
+        filter: this.filter,
+      })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (data) => (this.rows = data ?? []),
+        next: (page) => {
+          this.rows = page.data ?? [];
+          this.totalRecords = page.totalCount ?? 0;
+        },
         error: (err) => {
           this.error = readHttpError(err);
           this.toastr.error(this.error);
         },
       });
+  }
+
+  onLazyLoad(event: TableLazyLoadEvent): void {
+    this.first = event.first ?? 0;
+    const r = event.rows;
+    if (r != null && r > 0) {
+      this.pageSize = r;
+    }
+    this.load();
+  }
+
+  onSchoolFilterChange(): void {
+    this.first = 0;
+    this.load();
+  }
+
+  applyFilters(): void {
+    this.first = 0;
+    this.load();
   }
 
   openCreateDialog(): void {
@@ -227,6 +257,7 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
         next: () => {
           this.toastr.success('employeesHr.toast.created');
           this.createDialogVisible = false;
+          this.first = 0;
           this.load();
         },
         error: (err) => this.toastr.error(readHttpError(err)),
@@ -363,6 +394,7 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
     this.employeesHr.deactivateEmployee(id).subscribe({
       next: () => {
         this.toastr.success('employeesHr.toast.deactivated');
+        this.first = 0;
         this.load();
       },
       error: (err) => this.toastr.error(readHttpError(err)),

@@ -11,6 +11,8 @@ public interface IEmployeeProfileService
     Task<EmployeeProfileReadDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<EmployeeProfileReadDto>> GetAllAsync(EmployeeProfileListFilterDto? filter, CancellationToken cancellationToken = default);
     Task<PagedResult<EmployeeProfileOptionDto>> GetPageAsync(EmployeeProfilePageRequestDto request, CancellationToken cancellationToken = default);
+    /// <summary>Same filters as <see cref="GetAllAsync"/> but paged full <see cref="EmployeeProfileReadDto"/> rows (HR table).</summary>
+    Task<PagedResult<EmployeeProfileReadDto>> GetListPageAsync(EmployeeProfilePageRequestDto request, CancellationToken cancellationToken = default);
     Task<int?> GetSchoolIdForManagerUserAsync(string? userId, CancellationToken cancellationToken = default);
     Task<EmployeeProfileReadDto> UpdateAsync(int id, EmployeeProfileUpdateDto dto, CancellationToken cancellationToken = default);
     Task<bool> DeactivateAsync(int id, CancellationToken cancellationToken = default);

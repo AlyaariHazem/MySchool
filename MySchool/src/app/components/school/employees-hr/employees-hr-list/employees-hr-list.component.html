@@ -33,7 +33,7 @@
           optionLabel="label"
           optionValue="value"
           [showClear]="true"
-          (onChange)="load()"
+          (onChange)="onSchoolFilterChange()"
         />
         <label for="eh-filter-school">{{ 'employeesHr.filter.school' | translate }}</label>
       </p-floatlabel>
@@ -94,24 +94,29 @@
       {{ 'employeesHr.errors.noPermission' | translate }}
     </div>
 
-    <div *ngIf="loading && canView" class="loading-wrap">
-      <p-progressSpinner strokeWidth="4" />
-    </div>
-
     <div *ngIf="error && canView" class="error-block">{{ error }}</div>
 
-    <div *ngIf="!loading && canView && rows.length === 0" class="empty-block">
-      {{ 'employeesHr.list.empty' | translate }}
-    </div>
-
     <p-table
-      *ngIf="!loading && canView && rows.length > 0"
+      *ngIf="canView && !error"
       [value]="rows"
-      [paginator]="rows.length > 15"
-      [rows]="15"
+      [lazy]="true"
+      (onLazyLoad)="onLazyLoad($event)"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="pageSize"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [totalRecords]="totalRecords"
+      [first]="first"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} / {totalRecords}"
       styleClass="p-datatable-sm employees-hr-table"
       [rowHover]="true"
     >
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="9">{{ 'employeesHr.list.empty' | translate }}</td>
+        </tr>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th>{{ 'employeesHr.col.code' | translate }}</th>
