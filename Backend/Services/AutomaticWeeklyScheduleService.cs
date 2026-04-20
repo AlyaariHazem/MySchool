@@ -98,7 +98,8 @@ public class AutomaticWeeklyScheduleService : IAutomaticWeeklyScheduleService
             });
 
             var dayOrder = Enumerable.Range(0, days).OrderBy(_ => rng.Next()).ToList();
-            var periodOrder = Enumerable.Range(1, periodsPerDay).OrderBy(_ => rng.Next()).ToList();
+            // Ascending periods so a teacher's 2nd+ lesson on a day tends to fill the next slot (consecutive block).
+            var periodOrder = Enumerable.Range(1, periodsPerDay).ToList();
 
             var schedules = new List<AddWeeklyScheduleDTO>();
             var unplaced = new List<ScheduleNeed>(remaining);
@@ -112,7 +113,8 @@ public class AutomaticWeeklyScheduleService : IAutomaticWeeklyScheduleService
                         .Select((need, i) => (need, i))
                         .Where(x => !busy.Contains((x.need.TeacherID, day, period)) &&
                                     (maxPerDay <= 0 || SubjectDayCount(subjectDayCounts, x.need.SubjectID, day) < maxPerDay))
-                        .OrderByDescending(x => teacherLoad.GetValueOrDefault(x.need.TeacherID))
+                        .OrderByDescending(x => TeacherDayBlockScore(x.need.TeacherID, day, period, busy))
+                        .ThenByDescending(x => teacherLoad.GetValueOrDefault(x.need.TeacherID))
                         .ThenBy(_ => rng.Next())
                         .ToList();
 
@@ -176,6 +178,29 @@ public class AutomaticWeeklyScheduleService : IAutomaticWeeklyScheduleService
         await _unitOfWork.WeeklySchedules.BulkUpdateAsync(bestSchedules);
 
         return result;
+    }
+
+    /// <summary>
+    /// Higher = better. Prefer placing a teacher next to their existing slot on the same day (consecutive block);
+    /// prefer first lesson of the day before placing a "split" slot (same teacher, same day, not adjacent).
+    /// </summary>
+    private static int TeacherDayBlockScore(
+        int teacherId,
+        int day,
+        int period,
+        HashSet<(int TeacherId, int Day, int Period)> busy)
+    {
+        var touchesExisting = (period > 1 && busy.Contains((teacherId, day, period - 1)))
+                              || busy.Contains((teacherId, day, period + 1));
+        if (touchesExisting)
+            return 100;
+
+        var hasAnyThisDay = busy.Any(t => t.TeacherId == teacherId && t.Day == day);
+        if (!hasAnyThisDay)
+            return 50;
+
+        // Same teacher already teaches this day but not in an adjacent period — avoid until necessary.
+        return 0;
     }
 
     private static int SubjectDayCount(Dictionary<string, int> map, int subjectId, int day) =>
