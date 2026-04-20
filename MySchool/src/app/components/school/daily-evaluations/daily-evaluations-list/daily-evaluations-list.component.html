@@ -1,4 +1,4 @@
-<div class="employees-hr-page" *ngIf="canViewEvaluations" [attr.dir]="dir$ | async">
+<div class="employees-hr-page de-evaluations-page" *ngIf="canViewEvaluations" [attr.dir]="dir$ | async">
   <div class="employees-hr-card">
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.title' | translate }}</h2>
@@ -173,7 +173,7 @@
   </div>
 </div>
 
-<div class="employees-hr-page" *ngIf="!canViewEvaluations">
+<div class="employees-hr-page de-evaluations-page" *ngIf="!canViewEvaluations">
   <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
 </div>
 
@@ -228,57 +228,89 @@
   [(visible)]="lockDialog"
   [modal]="true"
   [style]="{ width: '28rem' }"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [appendTo]="'body'"
+  styleClass="de-daily-eval-dialog de-lock-dialog"
   (onShow)="refreshLockPreview()"
 >
-  <div class="filters-grid" *ngIf="lockDialog">
-    <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field">
+  <div class="filters-grid de-lock-grid" *ngIf="lockDialog">
+    <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field de-full-row-mobile">
       <p-select
         inputId="lk-school"
+        panelStyleClass="de-lock-select-panel"
+        [panelStyle]="filterSelectPanelStyle"
         [options]="schoolOptions"
         [(ngModel)]="lockForm.schoolID"
         (ngModelChange)="onLockFormSchoolChange()"
         optionLabel="label"
         optionValue="value"
+        appendTo="self"
+        styleClass="de-filter-select"
       />
       <label for="lk-school">{{ 'employeesHr.filter.school' | translate }}</label>
     </p-floatlabel>
     <p-floatlabel class="filter-field">
       <p-select
         inputId="lk-year"
+        panelStyleClass="de-lock-select-panel"
+        [panelStyle]="filterSelectPanelStyle"
         [options]="yearOptions"
         [(ngModel)]="lockForm.academicYearID"
         (ngModelChange)="refreshLockPreview()"
         optionLabel="label"
         optionValue="value"
+        appendTo="self"
+        styleClass="de-filter-select"
       />
       <label for="lk-year">{{ 'employeesHr.filter.year' | translate }}</label>
     </p-floatlabel>
     <p-floatlabel class="filter-field">
-      <p-datepicker [(ngModel)]="lockForm.lockDate" (ngModelChange)="refreshLockPreview()" [showIcon]="true" dateFormat="yy-mm-dd" />
-      <label>{{ 'dailyEvaluations.evaluations.colDate' | translate }}</label>
+      <p-datepicker
+        inputId="lk-date"
+        [(ngModel)]="lockForm.lockDate"
+        (ngModelChange)="refreshLockPreview()"
+        [showIcon]="true"
+        dateFormat="yy-mm-dd"
+        appendTo="body"
+        panelStyleClass="de-lock-date-panel"
+        styleClass="w-full"
+      />
+      <label for="lk-date">{{ 'dailyEvaluations.evaluations.colDate' | translate }}</label>
     </p-floatlabel>
     <p-floatlabel class="filter-field">
       <p-select
         inputId="lk-tpl"
+        panelStyleClass="de-lock-select-panel"
+        [panelStyle]="filterSelectPanelStyle"
         [options]="templateOptions"
         [(ngModel)]="lockForm.templateId"
         (ngModelChange)="refreshLockPreview()"
         [showClear]="true"
         optionLabel="label"
         optionValue="value"
+        appendTo="self"
+        styleClass="de-filter-select"
       />
       <label for="lk-tpl">{{ 'dailyEvaluations.lock.scopeTemplate' | translate }}</label>
     </p-floatlabel>
-    <p-floatlabel class="filter-field" style="grid-column: 1 / -1">
-      <textarea pTextarea [(ngModel)]="lockForm.notes" rows="2" class="w-full"></textarea>
-      <label>{{ 'employeesHr.form.notes' | translate }}</label>
+    <p-floatlabel class="filter-field de-full-row">
+      <textarea pTextarea id="de-lock-notes" [(ngModel)]="lockForm.notes" rows="2" class="w-full"></textarea>
+      <label for="de-lock-notes">{{ 'employeesHr.form.notes' | translate }}</label>
     </p-floatlabel>
-    <div *ngIf="lockPreview" class="muted" style="grid-column: 1 / -1">
+    <div *ngIf="lockPreview" class="muted de-full-row lock-preview-row">
       <span *ngIf="lockPreview.status === EvaluationLockStatus.Locked">{{ 'dailyEvaluations.lock.alreadyLocked' | translate }}</span>
       <span *ngIf="lockPreview.status !== EvaluationLockStatus.Locked">{{ 'dailyEvaluations.lock.previewOpen' | translate }}</span>
     </div>
-    <div class="filter-actions" style="grid-column: 1 / -1">
-      <p-button [label]="'dailyEvaluations.lock.submit' | translate" icon="pi pi-lock" (onClick)="submitLock()" [loading]="lockSaving" />
+    <div class="filter-actions de-full-row lock-actions">
+      <p-button
+        [label]="'dailyEvaluations.lock.submit' | translate"
+        icon="pi pi-lock"
+        (onClick)="submitLock()"
+        [loading]="lockSaving"
+        styleClass="lock-submit-btn"
+      />
     </div>
   </div>
 </p-dialog>
@@ -288,65 +320,92 @@
   [(visible)]="reopenDialog"
   [modal]="true"
   [style]="{ width: '28rem' }"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [appendTo]="'body'"
+  styleClass="de-daily-eval-dialog de-lock-dialog"
   (onShow)="refreshReopenLock()"
 >
-  <div class="filters-grid" *ngIf="reopenDialog">
-    <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field">
+  <div class="filters-grid de-lock-grid" *ngIf="reopenDialog">
+    <p-floatlabel *ngIf="!isSessionPortalDailyEvaluations" class="filter-field de-full-row-mobile">
       <p-select
         inputId="ro-school"
+        panelStyleClass="de-lock-select-panel"
+        [panelStyle]="filterSelectPanelStyle"
         [options]="schoolOptions"
         [(ngModel)]="lockForm.schoolID"
         (ngModelChange)="onLockFormSchoolChange()"
         optionLabel="label"
         optionValue="value"
+        appendTo="self"
+        styleClass="de-filter-select"
       />
       <label for="ro-school">{{ 'employeesHr.filter.school' | translate }}</label>
     </p-floatlabel>
     <p-floatlabel class="filter-field">
       <p-select
         inputId="ro-year"
+        panelStyleClass="de-lock-select-panel"
+        [panelStyle]="filterSelectPanelStyle"
         [options]="yearOptions"
         [(ngModel)]="lockForm.academicYearID"
         (ngModelChange)="refreshReopenLock()"
         optionLabel="label"
         optionValue="value"
+        appendTo="self"
+        styleClass="de-filter-select"
       />
       <label for="ro-year">{{ 'employeesHr.filter.year' | translate }}</label>
     </p-floatlabel>
     <p-floatlabel class="filter-field">
-      <p-datepicker [(ngModel)]="lockForm.lockDate" (ngModelChange)="refreshReopenLock()" [showIcon]="true" dateFormat="yy-mm-dd" />
-      <label>{{ 'dailyEvaluations.evaluations.colDate' | translate }}</label>
+      <p-datepicker
+        inputId="ro-date"
+        [(ngModel)]="lockForm.lockDate"
+        (ngModelChange)="refreshReopenLock()"
+        [showIcon]="true"
+        dateFormat="yy-mm-dd"
+        appendTo="body"
+        panelStyleClass="de-lock-date-panel"
+        styleClass="w-full"
+      />
+      <label for="ro-date">{{ 'dailyEvaluations.evaluations.colDate' | translate }}</label>
     </p-floatlabel>
     <p-floatlabel class="filter-field">
       <p-select
         inputId="ro-tpl"
+        panelStyleClass="de-lock-select-panel"
+        [panelStyle]="filterSelectPanelStyle"
         [options]="templateOptions"
         [(ngModel)]="lockForm.templateId"
         (ngModelChange)="refreshReopenLock()"
         [showClear]="true"
         optionLabel="label"
         optionValue="value"
+        appendTo="self"
+        styleClass="de-filter-select"
       />
       <label for="ro-tpl">{{ 'dailyEvaluations.lock.scopeTemplate' | translate }}</label>
     </p-floatlabel>
-    <p *ngIf="reopenLock && reopenLock.status !== EvaluationLockStatus.Locked" class="error-block" style="grid-column: 1 / -1">
+    <p *ngIf="reopenLock && reopenLock.status !== EvaluationLockStatus.Locked" class="error-block de-full-row">
       {{ 'dailyEvaluations.reopen.noLock' | translate }}
     </p>
-    <p-floatlabel class="filter-field" style="grid-column: 1 / -1">
-      <textarea pTextarea [(ngModel)]="reopenForm.reason" rows="2" class="w-full"></textarea>
-      <label>{{ 'dailyEvaluations.override.reason' | translate }} *</label>
+    <p-floatlabel class="filter-field de-full-row">
+      <textarea pTextarea id="de-reopen-reason" [(ngModel)]="reopenForm.reason" rows="2" class="w-full"></textarea>
+      <label for="de-reopen-reason">{{ 'dailyEvaluations.override.reason' | translate }} *</label>
     </p-floatlabel>
-    <p-floatlabel class="filter-field" style="grid-column: 1 / -1">
-      <textarea pTextarea [(ngModel)]="reopenForm.notes" rows="2" class="w-full"></textarea>
-      <label>{{ 'employeesHr.form.notes' | translate }}</label>
+    <p-floatlabel class="filter-field de-full-row">
+      <textarea pTextarea id="de-reopen-notes" [(ngModel)]="reopenForm.notes" rows="2" class="w-full"></textarea>
+      <label for="de-reopen-notes">{{ 'employeesHr.form.notes' | translate }}</label>
     </p-floatlabel>
-    <div class="filter-actions" style="grid-column: 1 / -1">
+    <div class="filter-actions de-full-row lock-actions">
       <p-button
         [label]="'dailyEvaluations.reopen.submit' | translate"
         icon="pi pi-unlock"
         (onClick)="submitReopen()"
         [loading]="reopenSaving"
         [disabled]="!reopenLock || reopenLock.status !== EvaluationLockStatus.Locked"
+        styleClass="lock-submit-btn"
       />
     </div>
   </div>

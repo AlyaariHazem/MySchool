@@ -1,1 +1,131 @@
 @use '../daily-evaluations-shared.scss';
+
+.de-templates-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.de-templates-page .employees-hr-card {
+  background: #fff;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
+  margin-bottom: 30px;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.de-templates-page .employees-hr-header {
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border, #e2e8f0);
+}
+
+.de-templates-page .employees-hr-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.de-eval-filters {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-50, #f8fafc);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: end;
+}
+
+.de-eval-filters .filter-field {
+  min-width: 0;
+}
+
+.de-eval-filters .filter-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+:host ::ng-deep .de-filter-select {
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+}
+
+:host ::ng-deep .de-filter-select .p-select-label {
+  line-height: 1.25;
+  padding-block: 0.45rem;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .de-filter-select .p-select-dropdown {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .employees-hr-table {
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+:host ::ng-deep .employees-hr-table .p-datatable-thead > tr > th {
+  background: #009879;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  border: 1px solid #007a63;
+}
+
+:host ::ng-deep .employees-hr-table .p-datatable-tbody > tr > td {
+  padding: 0.65rem 1rem;
+  border: 1px solid #dddddd;
+  text-align: start;
+}
+
+:host ::ng-deep .employees-hr-table .p-datatable-tbody > tr:nth-child(even) {
+  background: #f3f3f3;
+}
+
+:host ::ng-deep .employees-hr-table .p-datatable-tbody > tr:nth-child(odd) {
+  background: #fff;
+}
+
+:host ::ng-deep .employees-hr-table .p-paginator {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.5rem;
+}
+
+:host ::ng-deep .de-daily-eval-dialog .p-dialog-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.25rem;
+}
+
+:host ::ng-deep .de-daily-eval-dialog .p-dialog-content {
+  padding: 1.1rem 1.35rem 1.35rem;
+  background: #f8fafc;
+}
+
+:host ::ng-deep .de-template-form-dialog .p-dialog-content,
+:host ::ng-deep .de-template-view-dialog .p-dialog-content {
+  max-height: min(78vh, 820px);
+  overflow: auto;
+}
+
+@media (max-width: 900px) {
+  .de-templates-page .employees-hr-card {
+    padding: 1rem;
+  }
+
+  .de-eval-filters {
+    padding: 0.85rem 0.9rem;
+    gap: 0.8rem;
+  }
+}

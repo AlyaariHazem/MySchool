@@ -1,4 +1,4 @@
-<div class="employees-hr-page" *ngIf="canView" [attr.dir]="dir$ | async">
+<div class="employees-hr-page de-templates-page" *ngIf="canView" [attr.dir]="dir$ | async">
   <div class="employees-hr-card">
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'dailyEvaluations.templates.listTitle' | translate }}</h2>
@@ -160,7 +160,7 @@
   </div>
 </div>
 
-<div class="employees-hr-page" *ngIf="!canView">
+<div class="employees-hr-page de-templates-page" *ngIf="!canView">
   <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>
 </div>
 
