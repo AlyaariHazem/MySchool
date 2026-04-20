@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { StudentDetailsDTO } from '../models/students.model';
 
 export interface TableFilter {
@@ -39,7 +39,15 @@ export class StudentsDataService {
   });
   public pagination$ = this.paginationSubject.asObservable();
 
+  /** Emits when the students list should be re-fetched (e.g. after add from dialog). */
+  private readonly listRefreshSubject = new Subject<void>();
+  readonly listRefresh$ = this.listRefreshSubject.asObservable();
+
   constructor() {}
+
+  requestListRefresh(): void {
+    this.listRefreshSubject.next();
+  }
 
   // Set students data
   setStudents(students: StudentDetailsDTO[]): void {

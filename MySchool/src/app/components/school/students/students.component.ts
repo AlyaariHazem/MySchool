@@ -152,6 +152,10 @@ export class StudentsComponent implements OnInit, OnDestroy {
     this.paginatorService.first.set(0);
     this.paginatorService.rows.set(10);
     this.getAllStudents();
+
+    this.studentsDataService.listRefresh$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.getAllStudents());
   }
 
   ngOnDestroy(): void {
@@ -235,16 +239,10 @@ export class StudentsComponent implements OnInit, OnDestroy {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.width = '80%';
     dialogConfig.panelClass = 'custom-dialog-container';
+    dialogConfig.disableClose = true;
 
-    const dialogRef = this.dialog.open(NewStudentComponent, dialogConfig);
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.toastr.success('تم إضافة الطالب بنجاح');
-        // Reload students
-        this.getAllStudents();
-      }
-    });
+    this.dialog.open(NewStudentComponent, dialogConfig);
+    // Successful add triggers StudentsDataService.requestListRefresh() → listRefresh$ → getAllStudents()
   }
   deleteStudent(student: any): void {
     if (this.isBusy) {
@@ -289,20 +287,14 @@ export class StudentsComponent implements OnInit, OnDestroy {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.width = '80%';
         dialogConfig.panelClass = 'custom-dialog-container';
+        dialogConfig.disableClose = true;
 
         dialogConfig.data = {
           mode: 'edit',
           student: res,
         };
 
-        const dialogRef = this.dialog.open(NewStudentComponent, dialogConfig);
-
-        dialogRef.afterClosed().subscribe((result) => {
-          if (result && result.studentID) {
-            this.studentsDataService.updateStudent(result);
-            this.getAllStudents();
-          }
-        });
+        this.dialog.open(NewStudentComponent, dialogConfig);
       },
       error: () => {
         this.toastr.error('فشل تحميل بيانات الطالب', 'خطأ');

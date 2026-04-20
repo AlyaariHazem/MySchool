@@ -9,6 +9,7 @@ import {
 } from '../../../../core/models/students.model';
 import { FeeClasses } from '../../core/models/Fee.model';
 import { StudentService } from '../../../../core/services/student.service';
+import { StudentsDataService } from '../../../../core/services/students-data.service';
 import { WebcamImage } from 'ngx-webcam';
 import { StudentFormStoreService } from '../../core/store/student-form-store.service';
 import { FileStoreService } from '../../core/store/file-store.service';
@@ -46,6 +47,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
   /* ---------- DI ---------- */
   private toastr = inject(ToastrService);
   private studentService = inject(StudentService);
+  private studentsDataService = inject(StudentsDataService);
 
   /* ---------- ctor ---------- */
   constructor(
@@ -117,6 +119,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.toastr.success('Student Added Successfully! ', r.message);
         this.uploadImageAndFiles();
+        this.studentsDataService.requestListRefresh();
         this.generateStudentID();
       },
       error: () => {
@@ -166,8 +169,7 @@ export class NewStudentComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (res) => {
         this.toastr.success('Student updated successfully', res.message);
         this.uploadImageAndFiles();
-        this.formStore.resetForm();
-        this.dialogRef.close(payload);
+        this.studentsDataService.requestListRefresh();
       },
       error: () => {
         this.toastr.error('فشل تحديث بيانات الطالب', 'خطأ');
