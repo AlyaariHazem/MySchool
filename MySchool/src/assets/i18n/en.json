@@ -421,7 +421,11 @@
     "create": { "title": "Add employee (HR)", "submit": "Save and open details" },
     "edit": { "title": "Edit employee", "submit": "Save changes" },
     "detail": { "title": "Employee details" },
-    "fullProfile": { "title": "Full HR profile", "counts": "Qualifications / specializations / history / documents / leaves / summaries" },
+    "fullProfile": {
+      "title": "Full HR profile",
+      "counts": "Qualifications / specializations / history / documents / leaves / summaries",
+      "profileDetails": "Profile details"
+    },
     "tabs": {
       "overview": "Overview",
       "qualifications": "Qualifications",

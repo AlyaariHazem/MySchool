@@ -1,1 +1,201 @@
 @import '../employees-hr-shared.scss';
+
+:host {
+  display: block;
+}
+
+.eh-full-profile-shell--embedded .eh-full-profile-card {
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.eh-full-profile-shell--embedded .employees-hr-header {
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.65rem;
+}
+
+.eh-tab-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: min(52vh, 28rem);
+}
+
+.eh-muted-code {
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.summary-cards {
+  gap: 0.85rem;
+}
+
+.summary-cards .card {
+  border-radius: 10px;
+  border-color: #d5dbe1;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  padding: 0.85rem 1rem;
+}
+
+.eh-mini-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 0.65rem;
+}
+
+.eh-mini-stat {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.65rem 0.5rem;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+.eh-mini-stat-num {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #009879;
+  line-height: 1.2;
+}
+
+.eh-mini-stat-lbl {
+  display: block;
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 0.2rem;
+  line-height: 1.25;
+}
+
+.eh-overview-panel {
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  background: #fff;
+  padding: 1rem 1.15rem 1.1rem;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.eh-overview-title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.eh-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 0;
+}
+
+.eh-overview-row {
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 11rem) 1fr;
+  gap: 0.65rem 1rem;
+  align-items: start;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.eh-overview-row-span {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 520px) {
+  .eh-overview-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.eh-overview-k {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.eh-overview-v {
+  color: #0f172a;
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.eh-overview-mono {
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+}
+
+.eh-future-callout {
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.75rem 1rem;
+}
+
+.eh-future-callout-text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+:host ::ng-deep .eh-tabs .mat-mdc-tab-header {
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 0.25rem;
+}
+
+:host ::ng-deep .eh-tabs .mat-mdc-tab-labels {
+  gap: 0.15rem;
+}
+
+:host ::ng-deep .eh-tabs .mat-mdc-tab .mdc-tab__text-label {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+:host ::ng-deep .eh-full-profile-table {
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+:host ::ng-deep .eh-full-profile-table .p-datatable-thead > tr > th {
+  background: #009879;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #007a63;
+  font-size: 0.88rem;
+}
+
+:host ::ng-deep .eh-full-profile-table .p-datatable-tbody > tr > td {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  text-align: start;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+:host ::ng-deep .eh-full-profile-table .p-datatable-tbody > tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+:host ::ng-deep .eh-full-profile-table .p-datatable-tbody > tr:hover {
+  background: #e8f7f3 !important;
+}
+
+.tab-toolbar {
+  margin-bottom: 0.65rem;
+}
+
+.tab-pad {
+  padding-top: 0.35rem;
+}

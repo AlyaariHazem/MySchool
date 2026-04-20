@@ -187,6 +187,8 @@
   [appendTo]="'body'"
   [draggable]="false"
   [resizable]="false"
+  [dismissableMask]="true"
+  styleClass="eh-hr-profile-dialog eh-hr-profile-dialog-form"
 >
   <app-employees-hr-profile-form
     [schools]="schools"
@@ -206,6 +208,8 @@
   [appendTo]="'body'"
   [draggable]="false"
   [resizable]="false"
+  [dismissableMask]="true"
+  styleClass="eh-hr-profile-dialog eh-hr-profile-dialog-form"
 >
   <div *ngIf="editLoading" class="loading-wrap">
     <p-progressSpinner strokeWidth="4" />
@@ -244,6 +248,8 @@
   [draggable]="false"
   [resizable]="false"
   [maximizable]="true"
+  [dismissableMask]="true"
+  styleClass="eh-hr-full-profile-dialog"
   (onHide)="closeFullProfileDialog()"
 >
   <app-employees-hr-full-profile

@@ -1,4 +1,4 @@
-import { DatePipe, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -35,6 +35,7 @@ import {
   EmployeeProfileFullDto,
   EmployeeQualificationDto,
   EmployeeSpecializationDto,
+  EmploymentStatus,
   LeaveType,
 } from '../employees-hr.models';
 import { EmployeesHrService, readHttpError } from '../employees-hr.service';
@@ -57,7 +58,6 @@ import { EmployeesHrService, readHttpError } from '../employees-hr.service';
     FloatLabelModule,
     InputNumberModule,
     ProgressSpinnerModule,
-    DatePipe,
     MatTabsModule,
   ],
   templateUrl: './employees-hr-full-profile.component.html',
@@ -247,6 +247,36 @@ export class EmployeesHrFullProfileComponent implements OnInit, OnDestroy, OnCha
 
   schoolName(id: number): string {
     return this.schools.find((s) => s.schoolID === id)?.schoolName ?? String(id);
+  }
+
+  yearLabel(id: number): string {
+    const y = this.years.find((x) => x.yearID === id);
+    if (!y) return String(id);
+    return `${y.yearID}`;
+  }
+
+  employmentLabel(v: EmploymentStatus): string {
+    const m: Record<EmploymentStatus, string> = {
+      [EmploymentStatus.Active]: this.translate.instant('employeesHr.status.active'),
+      [EmploymentStatus.OnLeave]: this.translate.instant('employeesHr.status.onLeave'),
+      [EmploymentStatus.Suspended]: this.translate.instant('employeesHr.status.suspended'),
+      [EmploymentStatus.Terminated]: this.translate.instant('employeesHr.status.terminated'),
+    };
+    return m[v] ?? String(v);
+  }
+
+  /** yyyy-MM-dd; prefers API date prefix to avoid TZ shifts. */
+  dateYmd(v?: string | null): string {
+    const t = (v ?? '').trim();
+    if (!t) return '—';
+    const m = /^(\d{4}-\d{2}-\d{2})/.exec(t);
+    if (m) return m[1];
+    const d = new Date(t);
+    if (Number.isNaN(d.getTime())) return '—';
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${mo}-${day}`;
   }
 
   openQual(): void {

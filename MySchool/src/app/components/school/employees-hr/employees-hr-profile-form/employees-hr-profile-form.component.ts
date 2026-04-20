@@ -16,7 +16,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
-import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -46,7 +45,6 @@ import { EmployeesHrService } from '../employees-hr.service';
     InputTextModule,
     TextareaModule,
     Select,
-    FloatLabelModule,
     DatePicker,
     InputNumberModule,
     ProgressSpinnerModule,
@@ -58,6 +56,11 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
   private readonly employeesHr = inject(EmployeesHrService);
+
+  /** Keeps PrimeNG select panels from stretching full viewport width (RTL / modals). */
+  readonly selectPanelStyle: Record<string, string> = {
+    maxWidth: 'min(22rem, calc(100vw - 2rem))',
+  };
 
   @Input() schools: School[] = [];
   @Input() years: Year[] = [];

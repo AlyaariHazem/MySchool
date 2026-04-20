@@ -2,8 +2,8 @@
   <div class="employees-hr-page"><div class="empty-block muted">{{ 'employeesHr.errors.noPermission' | translate }}</div></div>
 </ng-container>
 
-<div class="employees-hr-page" *ngIf="canView">
-  <div class="employees-hr-card">
+<div class="employees-hr-page eh-full-profile-shell" [class.eh-full-profile-shell--embedded]="embedded" *ngIf="canView">
+  <div class="employees-hr-card eh-full-profile-card">
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'employeesHr.fullProfile.title' | translate }}</h2>
       <div class="header-actions" *ngIf="!embedded">
@@ -18,19 +18,77 @@
 
     <mat-tab-group *ngIf="data" animationDuration="0ms" class="eh-tabs">
       <mat-tab [label]="'employeesHr.tabs.overview' | translate">
-        <div class="tab-pad">
+        <div class="tab-pad eh-tab-overview">
           <div class="summary-cards">
-            <div class="card"><div class="c-label">{{ 'employeesHr.col.name' | translate }}</div><div class="c-val">{{ displayName() }}</div></div>
-            <div class="card"><div class="c-label">{{ 'employeesHr.col.code' | translate }}</div><div class="c-val">{{ data.profile.employeeCode }}</div></div>
-            <div class="card"><div class="c-label">{{ 'employeesHr.col.jobType' | translate }}</div><div class="c-val">{{ data.profile.jobTypeName }}</div></div>
-            <div class="card"><div class="c-label">{{ 'employeesHr.fullProfile.counts' | translate }}</div>
-              <div class="c-val small">
-                {{ data.qualifications.length }} / {{ data.specializations.length }} / {{ data.historyRecords.length }} /
-                {{ data.documents.length }} / {{ data.leaves.length }} / {{ data.performanceSummaries.length }}
-              </div>
+            <div class="card">
+              <div class="c-label">{{ 'employeesHr.col.name' | translate }}</div>
+              <div class="c-val">{{ displayName() }}</div>
+            </div>
+            <div class="card">
+              <div class="c-label">{{ 'employeesHr.col.code' | translate }}</div>
+              <div class="c-val">{{ data.profile.employeeCode }}</div>
+            </div>
+            <div class="card">
+              <div class="c-label">{{ 'employeesHr.col.jobType' | translate }}</div>
+              <div class="c-val">{{ data.profile.jobTypeName }} <span class="eh-muted-code" *ngIf="data.profile.jobTypeCode">({{ data.profile.jobTypeCode }})</span></div>
+            </div>
+            <div class="card">
+              <div class="c-label">{{ 'employeesHr.col.active' | translate }}</div>
+              <div class="c-val">{{ data.profile.isActive ? ('employeesHr.yes' | translate) : ('employeesHr.no' | translate) }}</div>
             </div>
           </div>
-          <p class="future-hint">{{ 'employeesHr.futureModules' | translate }}</p>
+
+          <div class="eh-mini-stats" [attr.aria-label]="'employeesHr.fullProfile.counts' | translate">
+            <div class="eh-mini-stat">
+              <span class="eh-mini-stat-num">{{ data.qualifications.length }}</span>
+              <span class="eh-mini-stat-lbl">{{ 'employeesHr.tabs.qualifications' | translate }}</span>
+            </div>
+            <div class="eh-mini-stat">
+              <span class="eh-mini-stat-num">{{ data.specializations.length }}</span>
+              <span class="eh-mini-stat-lbl">{{ 'employeesHr.tabs.specializations' | translate }}</span>
+            </div>
+            <div class="eh-mini-stat">
+              <span class="eh-mini-stat-num">{{ data.historyRecords.length }}</span>
+              <span class="eh-mini-stat-lbl">{{ 'employeesHr.tabs.history' | translate }}</span>
+            </div>
+            <div class="eh-mini-stat">
+              <span class="eh-mini-stat-num">{{ data.documents.length }}</span>
+              <span class="eh-mini-stat-lbl">{{ 'employeesHr.tabs.documents' | translate }}</span>
+            </div>
+            <div class="eh-mini-stat">
+              <span class="eh-mini-stat-num">{{ data.leaves.length }}</span>
+              <span class="eh-mini-stat-lbl">{{ 'employeesHr.tabs.leaves' | translate }}</span>
+            </div>
+            <div class="eh-mini-stat">
+              <span class="eh-mini-stat-num">{{ data.performanceSummaries.length }}</span>
+              <span class="eh-mini-stat-lbl">{{ 'employeesHr.tabs.performance' | translate }}</span>
+            </div>
+          </div>
+
+          <div class="eh-overview-panel" *ngIf="data.profile as p">
+            <h3 class="eh-overview-title">{{ 'employeesHr.fullProfile.profileDetails' | translate }}</h3>
+            <div class="eh-overview-grid">
+              <div class="eh-overview-row"><span class="eh-overview-k">{{ 'employeesHr.form.school' | translate }}</span><span class="eh-overview-v">{{ schoolName(p.schoolID) }}</span></div>
+              <div class="eh-overview-row"><span class="eh-overview-k">{{ 'employeesHr.form.year' | translate }}</span><span class="eh-overview-v">{{ yearLabel(p.currentAcademicYearID) }}</span></div>
+              <div class="eh-overview-row"><span class="eh-overview-k">{{ 'employeesHr.form.employmentStatus' | translate }}</span><span class="eh-overview-v">{{ employmentLabel(p.employmentStatus) }}</span></div>
+              <div class="eh-overview-row"><span class="eh-overview-k">{{ 'employeesHr.form.nationalId' | translate }}</span><span class="eh-overview-v">{{ p.nationalId?.trim() || '—' }}</span></div>
+              <div class="eh-overview-row"><span class="eh-overview-k">{{ 'employeesHr.form.dob' | translate }}</span><span class="eh-overview-v">{{ dateYmd(p.dateOfBirth) }}</span></div>
+              <div class="eh-overview-row"><span class="eh-overview-k">{{ 'employeesHr.form.gender' | translate }}</span><span class="eh-overview-v">{{ p.gender?.trim() || '—' }}</span></div>
+              <div class="eh-overview-row"><span class="eh-overview-k">{{ 'employeesHr.form.phone' | translate }}</span><span class="eh-overview-v">{{ p.phone?.trim() || '—' }}</span></div>
+              <div class="eh-overview-row"><span class="eh-overview-k">{{ 'employeesHr.form.email' | translate }}</span><span class="eh-overview-v">{{ p.email?.trim() || '—' }}</span></div>
+              <div class="eh-overview-row"><span class="eh-overview-k">{{ 'employeesHr.form.hireDate' | translate }}</span><span class="eh-overview-v">{{ dateYmd(p.hireDate) }}</span></div>
+              <div class="eh-overview-row eh-overview-row-span"><span class="eh-overview-k">{{ 'employeesHr.form.address' | translate }}</span><span class="eh-overview-v">{{ p.address?.trim() || '—' }}</span></div>
+              <div class="eh-overview-row eh-overview-row-span"><span class="eh-overview-k">{{ 'employeesHr.form.notes' | translate }}</span><span class="eh-overview-v">{{ p.notes?.trim() || '—' }}</span></div>
+              <div class="eh-overview-row" *ngIf="p.userId?.trim()"><span class="eh-overview-k">{{ 'employeesHr.form.userId' | translate }}</span><span class="eh-overview-v eh-overview-mono">{{ p.userId }}</span></div>
+              <div class="eh-overview-row" *ngIf="p.teacherID"><span class="eh-overview-k">{{ 'employeesHr.form.teacherId' | translate }}</span><span class="eh-overview-v">{{ p.teacherID }}</span></div>
+              <div class="eh-overview-row" *ngIf="p.managerID"><span class="eh-overview-k">{{ 'employeesHr.form.managerId' | translate }}</span><span class="eh-overview-v">{{ p.managerID }}</span></div>
+              <div class="eh-overview-row" *ngIf="p.schoolStaffID"><span class="eh-overview-k">{{ 'employeesHr.form.staffId' | translate }}</span><span class="eh-overview-v">{{ p.schoolStaffID }}</span></div>
+            </div>
+          </div>
+
+          <div class="eh-future-callout">
+            <p class="eh-future-callout-text">{{ 'employeesHr.futureModules' | translate }}</p>
+          </div>
         </div>
       </mat-tab>
 
@@ -39,7 +97,7 @@
           <div class="tab-toolbar">
             <p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openQual()" />
           </div>
-          <p-table [value]="data.qualifications" *ngIf="data.qualifications.length; else emptyQual">
+          <p-table [value]="data.qualifications" *ngIf="data.qualifications.length; else emptyQual" styleClass="p-datatable-sm eh-full-profile-table">
             <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.child.degree' | translate }}</th><th>{{ 'employeesHr.child.major' | translate }}</th><th>{{ 'employeesHr.child.institution' | translate }}</th></tr></ng-template>
             <ng-template pTemplate="body" let-r><tr><td>{{ r.degreeName }}</td><td>{{ r.major }}</td><td>{{ r.institution }}</td></tr></ng-template>
           </p-table>
@@ -50,7 +108,7 @@
       <mat-tab [label]="'employeesHr.tabs.specializations' | translate">
         <div class="tab-pad">
           <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openSpec()" /></div>
-          <p-table [value]="data.specializations" *ngIf="data.specializations.length; else emptySp">
+          <p-table [value]="data.specializations" *ngIf="data.specializations.length; else emptySp" styleClass="p-datatable-sm eh-full-profile-table">
             <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.child.name' | translate }}</th><th>{{ 'employeesHr.child.category' | translate }}</th><th>{{ 'employeesHr.child.level' | translate }}</th></tr></ng-template>
             <ng-template pTemplate="body" let-r><tr><td>{{ r.name }}</td><td>{{ r.category }}</td><td>{{ r.level }}</td></tr></ng-template>
           </p-table>
@@ -61,9 +119,9 @@
       <mat-tab [label]="'employeesHr.tabs.history' | translate">
         <div class="tab-pad">
           <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openHist()" /></div>
-          <p-table [value]="data.historyRecords" *ngIf="data.historyRecords.length; else emptyH">
+          <p-table [value]="data.historyRecords" *ngIf="data.historyRecords.length; else emptyH" styleClass="p-datatable-sm eh-full-profile-table">
             <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.form.year' | translate }}</th><th>{{ 'employeesHr.form.school' | translate }}</th><th>{{ 'employeesHr.col.jobType' | translate }}</th><th>{{ 'employeesHr.child.jobTitle' | translate }}</th><th>{{ 'employeesHr.child.start' | translate }}</th><th>{{ 'employeesHr.child.end' | translate }}</th></tr></ng-template>
-            <ng-template pTemplate="body" let-r><tr><td>{{ r.academicYearID }}</td><td>{{ r.schoolID }}</td><td>{{ jobTypeLabelForId(r.employeeJobTypeID) }}</td><td>{{ r.jobTitle }}</td><td>{{ r.startDate | date:'mediumDate' }}</td><td>{{ r.endDate | date:'mediumDate' }}</td></tr></ng-template>
+            <ng-template pTemplate="body" let-r><tr><td>{{ r.academicYearID }}</td><td>{{ schoolName(r.schoolID) }}</td><td>{{ jobTypeLabelForId(r.employeeJobTypeID) }}</td><td>{{ r.jobTitle }}</td><td>{{ dateYmd(r.startDate) }}</td><td>{{ dateYmd(r.endDate) }}</td></tr></ng-template>
           </p-table>
           <ng-template #emptyH><div class="empty-block">{{ 'employeesHr.empty.section' | translate }}</div></ng-template>
         </div>
@@ -72,7 +130,7 @@
       <mat-tab [label]="'employeesHr.tabs.documents' | translate">
         <div class="tab-pad">
           <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openDoc()" /></div>
-          <p-table [value]="data.documents" *ngIf="data.documents.length; else emptyD">
+          <p-table [value]="data.documents" *ngIf="data.documents.length; else emptyD" styleClass="p-datatable-sm eh-full-profile-table">
             <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.child.docType' | translate }}</th><th>{{ 'employeesHr.child.title' | translate }}</th><th>{{ 'employeesHr.child.fileUrl' | translate }}</th></tr></ng-template>
             <ng-template pTemplate="body" let-r><tr><td>{{ r.documentType }}</td><td>{{ r.title }}</td><td><a *ngIf="r.fileUrl" [href]="r.fileUrl" target="_blank" rel="noopener">{{ r.fileUrl }}</a></td></tr></ng-template>
           </p-table>
@@ -83,9 +141,9 @@
       <mat-tab [label]="'employeesHr.tabs.leaves' | translate">
         <div class="tab-pad">
           <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openLeave()" /></div>
-          <p-table [value]="data.leaves" *ngIf="data.leaves.length; else emptyL">
+          <p-table [value]="data.leaves" *ngIf="data.leaves.length; else emptyL" styleClass="p-datatable-sm eh-full-profile-table">
             <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.form.year' | translate }}</th><th>{{ 'employeesHr.child.leaveType' | translate }}</th><th>{{ 'employeesHr.child.start' | translate }}</th><th>{{ 'employeesHr.child.end' | translate }}</th><th>{{ 'employeesHr.child.days' | translate }}</th></tr></ng-template>
-            <ng-template pTemplate="body" let-r><tr><td>{{ r.academicYearID }}</td><td>{{ r.leaveType }}</td><td>{{ r.startDate | date:'mediumDate' }}</td><td>{{ r.endDate | date:'mediumDate' }}</td><td>{{ r.totalDays }}</td></tr></ng-template>
+            <ng-template pTemplate="body" let-r><tr><td>{{ r.academicYearID }}</td><td>{{ r.leaveType }}</td><td>{{ dateYmd(r.startDate) }}</td><td>{{ dateYmd(r.endDate) }}</td><td>{{ r.totalDays }}</td></tr></ng-template>
           </p-table>
           <ng-template #emptyL><div class="empty-block">{{ 'employeesHr.empty.section' | translate }}</div></ng-template>
         </div>
@@ -94,9 +152,9 @@
       <mat-tab [label]="'employeesHr.tabs.performance' | translate">
         <div class="tab-pad">
           <div class="tab-toolbar"><p-button *ngIf="canCreate" [label]="'employeesHr.actions.add' | translate" icon="pi pi-plus" (onClick)="openPerf()" /></div>
-          <p-table [value]="data.performanceSummaries" *ngIf="data.performanceSummaries.length; else emptyP">
+          <p-table [value]="data.performanceSummaries" *ngIf="data.performanceSummaries.length; else emptyP" styleClass="p-datatable-sm eh-full-profile-table">
             <ng-template pTemplate="header"><tr><th>{{ 'employeesHr.form.year' | translate }}</th><th>{{ 'employeesHr.col.jobType' | translate }}</th><th>{{ 'employeesHr.child.score' | translate }}</th><th>{{ 'employeesHr.child.generated' | translate }}</th></tr></ng-template>
-            <ng-template pTemplate="body" let-r><tr><td>{{ r.academicYearID }}</td><td>{{ jobTypeLabelForId(r.employeeJobTypeID) }}</td><td>{{ r.evaluationScore }}</td><td>{{ r.generatedAtUtc | date:'medium' }}</td></tr></ng-template>
+            <ng-template pTemplate="body" let-r><tr><td>{{ r.academicYearID }}</td><td>{{ jobTypeLabelForId(r.employeeJobTypeID) }}</td><td>{{ r.evaluationScore }}</td><td>{{ dateYmd(r.generatedAtUtc) }}</td></tr></ng-template>
           </p-table>
           <ng-template #emptyP><div class="empty-block">{{ 'employeesHr.empty.section' | translate }}</div></ng-template>
         </div>

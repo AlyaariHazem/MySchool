@@ -1,164 +1,198 @@
-<form [formGroup]="form" (ngSubmit)="emitSubmit()" class="eh-form-grid" novalidate>
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <p-select
-        inputId="eh-school"
-        formControlName="schoolID"
-        [options]="schoolOptions"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full"
-        class="w-full"
-        (onChange)="onSchoolChange()"
-      />
-      <label for="eh-school">{{ 'employeesHr.form.school' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <p-select
-        inputId="eh-year"
-        formControlName="currentAcademicYearID"
-        [options]="yearOptions"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full"
-        class="w-full"
-      />
-      <label for="eh-year">{{ 'employeesHr.form.year' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field eh-job-type-field">
-      <p-select
-        inputId="eh-job"
-        formControlName="employeeJobTypeID"
-        [options]="jobTypesForSelect"
-        optionLabel="label"
-        optionValue="employeeJobTypeID"
-        styleClass="w-full"
-        class="w-full"
-        [disabled]="jobTypesLoading"
-      />
-      <label for="eh-job">{{ 'employeesHr.form.jobType' | translate }}</label>
-      <p-progressSpinner *ngIf="jobTypesLoading" strokeWidth="4" styleClass="eh-job-type-spinner" />
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-code" class="w-full" formControlName="employeeCode" autocomplete="off" />
-      <label for="eh-code">{{ 'employeesHr.form.code' | translate }}</label>
-    </p-floatlabel>
+<form [formGroup]="form" (ngSubmit)="emitSubmit()" class="eh-profile-form-shell" novalidate>
+  <div class="eh-form-card">
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-school">{{ 'employeesHr.form.school' | translate }}</label>
+        <p-select
+          inputId="eh-school"
+          formControlName="schoolID"
+          [options]="schoolOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full eh-profile-control"
+          [panelStyle]="selectPanelStyle"
+          panelStyleClass="eh-profile-select-panel"
+          (onChange)="onSchoolChange()"
+        />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-year">{{ 'employeesHr.form.year' | translate }}</label>
+        <p-select
+          inputId="eh-year"
+          formControlName="currentAcademicYearID"
+          [options]="yearOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full eh-profile-control"
+          [panelStyle]="selectPanelStyle"
+          panelStyleClass="eh-profile-select-panel"
+        />
+      </div>
+      <div class="eh-field field-block eh-job-type-field">
+        <label class="field-label" for="eh-job">{{ 'employeesHr.form.jobType' | translate }}</label>
+        <p-select
+          inputId="eh-job"
+          formControlName="employeeJobTypeID"
+          [options]="jobTypesForSelect"
+          optionLabel="label"
+          optionValue="employeeJobTypeID"
+          styleClass="w-full eh-profile-control"
+          [panelStyle]="selectPanelStyle"
+          panelStyleClass="eh-profile-select-panel"
+          [disabled]="jobTypesLoading"
+        />
+        <p-progressSpinner *ngIf="jobTypesLoading" strokeWidth="4" styleClass="eh-job-type-spinner" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-code">{{ 'employeesHr.form.code' | translate }}</label>
+        <input pInputText id="eh-code" class="w-full" formControlName="employeeCode" autocomplete="off" />
+      </div>
+    </div>
   </div>
 
-  <h4 class="eh-section">{{ 'employeesHr.form.sectionNameAr' | translate }}</h4>
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-fn" class="w-full" formControlName="firstName" />
-      <label for="eh-fn">{{ 'employeesHr.form.firstName' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-mn" class="w-full" formControlName="middleName" />
-      <label for="eh-mn">{{ 'employeesHr.form.middleName' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-ln" class="w-full" formControlName="lastName" />
-      <label for="eh-ln">{{ 'employeesHr.form.lastName' | translate }}</label>
-    </p-floatlabel>
+  <div class="eh-form-card">
+    <h4 class="eh-section">{{ 'employeesHr.form.sectionNameAr' | translate }}</h4>
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-fn">{{ 'employeesHr.form.firstName' | translate }}</label>
+        <input pInputText id="eh-fn" class="w-full" formControlName="firstName" autocomplete="given-name" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-mn">{{ 'employeesHr.form.middleName' | translate }}</label>
+        <input pInputText id="eh-mn" class="w-full" formControlName="middleName" autocomplete="additional-name" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-ln">{{ 'employeesHr.form.lastName' | translate }}</label>
+        <input pInputText id="eh-ln" class="w-full" formControlName="lastName" autocomplete="family-name" />
+      </div>
+    </div>
   </div>
 
-  <h4 class="eh-section">{{ 'employeesHr.form.sectionNameEn' | translate }}</h4>
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-fne" class="w-full" formControlName="firstNameEng" />
-      <label for="eh-fne">{{ 'employeesHr.form.firstNameEn' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-mne" class="w-full" formControlName="middleNameEng" />
-      <label for="eh-mne">{{ 'employeesHr.form.middleNameEn' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-lne" class="w-full" formControlName="lastNameEng" />
-      <label for="eh-lne">{{ 'employeesHr.form.lastNameEn' | translate }}</label>
-    </p-floatlabel>
+  <div class="eh-form-card">
+    <h4 class="eh-section">{{ 'employeesHr.form.sectionNameEn' | translate }}</h4>
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-fne">{{ 'employeesHr.form.firstNameEn' | translate }}</label>
+        <input pInputText id="eh-fne" class="w-full" formControlName="firstNameEng" autocomplete="off" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-mne">{{ 'employeesHr.form.middleNameEn' | translate }}</label>
+        <input pInputText id="eh-mne" class="w-full" formControlName="middleNameEng" autocomplete="off" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-lne">{{ 'employeesHr.form.lastNameEn' | translate }}</label>
+        <input pInputText id="eh-lne" class="w-full" formControlName="lastNameEng" autocomplete="off" />
+      </div>
+    </div>
   </div>
 
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-nid" class="w-full" formControlName="nationalId" />
-      <label for="eh-nid">{{ 'employeesHr.form.nationalId' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <p-datepicker inputId="eh-dob" formControlName="dateOfBirth" [showIcon]="true" dateFormat="yy-mm-dd" />
-      <label for="eh-dob">{{ 'employeesHr.form.dob' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-gender" class="w-full" formControlName="gender" />
-      <label for="eh-gender">{{ 'employeesHr.form.gender' | translate }}</label>
-    </p-floatlabel>
+  <div class="eh-form-card">
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-nid">{{ 'employeesHr.form.nationalId' | translate }}</label>
+        <input pInputText id="eh-nid" class="w-full" formControlName="nationalId" autocomplete="off" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-dob">{{ 'employeesHr.form.dob' | translate }}</label>
+        <p-datepicker
+          inputId="eh-dob"
+          formControlName="dateOfBirth"
+          [showIcon]="true"
+          dateFormat="yy-mm-dd"
+          appendTo="body"
+          panelStyleClass="eh-profile-datepicker-panel"
+          styleClass="w-full eh-profile-datepicker"
+        />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-gender">{{ 'employeesHr.form.gender' | translate }}</label>
+        <input pInputText id="eh-gender" class="w-full" formControlName="gender" autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-phone">{{ 'employeesHr.form.phone' | translate }}</label>
+        <input pInputText id="eh-phone" class="w-full" formControlName="phone" autocomplete="tel" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-email">{{ 'employeesHr.form.email' | translate }}</label>
+        <input pInputText id="eh-email" class="w-full" formControlName="email" autocomplete="email" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-hire">{{ 'employeesHr.form.hireDate' | translate }}</label>
+        <p-datepicker
+          inputId="eh-hire"
+          formControlName="hireDate"
+          [showIcon]="true"
+          dateFormat="yy-mm-dd"
+          appendTo="body"
+          panelStyleClass="eh-profile-datepicker-panel"
+          styleClass="w-full eh-profile-datepicker"
+        />
+      </div>
+    </div>
+
+    <div class="eh-row eh-row-single">
+      <div class="eh-field field-block eh-field-full">
+        <label class="field-label" for="eh-addr">{{ 'employeesHr.form.address' | translate }}</label>
+        <input pInputText id="eh-addr" class="w-full" formControlName="address" autocomplete="street-address" />
+      </div>
+    </div>
+
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-empst">{{ 'employeesHr.form.employmentStatus' | translate }}</label>
+        <p-select
+          inputId="eh-empst"
+          formControlName="employmentStatus"
+          [options]="employmentStatusOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full eh-profile-control"
+          [panelStyle]="selectPanelStyle"
+          panelStyleClass="eh-profile-select-panel"
+        />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-user">{{ 'employeesHr.form.userId' | translate }}</label>
+        <input pInputText id="eh-user" class="w-full" formControlName="userId" autocomplete="off" />
+      </div>
+      <div class="eh-field field-block eh-field-checkbox">
+        <label class="field-label" for="eh-active">{{ 'employeesHr.form.isActive' | translate }}</label>
+        <div class="eh-checkbox-row">
+          <input type="checkbox" id="eh-active" formControlName="isActive" />
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-phone" class="w-full" formControlName="phone" />
-      <label for="eh-phone">{{ 'employeesHr.form.phone' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-email" class="w-full" formControlName="email" />
-      <label for="eh-email">{{ 'employeesHr.form.email' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <p-datepicker inputId="eh-hire" formControlName="hireDate" [showIcon]="true" dateFormat="yy-mm-dd" />
-      <label for="eh-hire">{{ 'employeesHr.form.hireDate' | translate }}</label>
-    </p-floatlabel>
+  <div class="eh-form-card">
+    <h4 class="eh-section">{{ 'employeesHr.form.sectionLegacy' | translate }}</h4>
+    <div class="eh-row">
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-tid">{{ 'employeesHr.form.teacherId' | translate }}</label>
+        <p-inputNumber inputId="eh-tid" formControlName="teacherID" [useGrouping]="false" styleClass="w-full eh-profile-control" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-mid">{{ 'employeesHr.form.managerId' | translate }}</label>
+        <p-inputNumber inputId="eh-mid" formControlName="managerID" [useGrouping]="false" styleClass="w-full eh-profile-control" />
+      </div>
+      <div class="eh-field field-block">
+        <label class="field-label" for="eh-sid">{{ 'employeesHr.form.staffId' | translate }}</label>
+        <p-inputNumber inputId="eh-sid" formControlName="schoolStaffID" [useGrouping]="false" styleClass="w-full eh-profile-control" />
+      </div>
+    </div>
   </div>
 
-  <p-floatlabel variant="on" class="eh-field eh-field-full">
-    <input pInputText id="eh-addr" class="w-full" formControlName="address" />
-    <label for="eh-addr">{{ 'employeesHr.form.address' | translate }}</label>
-  </p-floatlabel>
-
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <p-select
-        inputId="eh-empst"
-        formControlName="employmentStatus"
-        [options]="employmentStatusOptions"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full"
-        class="w-full"
-      />
-      <label for="eh-empst">{{ 'employeesHr.form.employmentStatus' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field eh-checkbox-wrap">
-      <label class="inline-check">
-        <input type="checkbox" formControlName="isActive" />
-        {{ 'employeesHr.form.isActive' | translate }}
-      </label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <input pInputText id="eh-user" class="w-full" formControlName="userId" />
-      <label for="eh-user">{{ 'employeesHr.form.userId' | translate }}</label>
-    </p-floatlabel>
+  <div class="eh-form-card">
+    <div class="eh-field field-block eh-field-full">
+      <label class="field-label" for="eh-notes">{{ 'employeesHr.form.notes' | translate }}</label>
+      <textarea pTextarea id="eh-notes" rows="4" class="w-full" formControlName="notes"></textarea>
+    </div>
   </div>
 
-  <h4 class="eh-section">{{ 'employeesHr.form.sectionLegacy' | translate }}</h4>
-  <div class="eh-row">
-    <p-floatlabel variant="on" class="eh-field">
-      <p-inputNumber inputId="eh-tid" formControlName="teacherID" [useGrouping]="false" styleClass="w-full" />
-      <label for="eh-tid">{{ 'employeesHr.form.teacherId' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <p-inputNumber inputId="eh-mid" formControlName="managerID" [useGrouping]="false" styleClass="w-full" />
-      <label for="eh-mid">{{ 'employeesHr.form.managerId' | translate }}</label>
-    </p-floatlabel>
-    <p-floatlabel variant="on" class="eh-field">
-      <p-inputNumber inputId="eh-sid" formControlName="schoolStaffID" [useGrouping]="false" styleClass="w-full" />
-      <label for="eh-sid">{{ 'employeesHr.form.staffId' | translate }}</label>
-    </p-floatlabel>
-  </div>
-
-  <p-floatlabel variant="on" class="eh-field eh-field-full">
-    <textarea pTextarea id="eh-notes" rows="3" class="w-full" formControlName="notes"></textarea>
-    <label for="eh-notes">{{ 'employeesHr.form.notes' | translate }}</label>
-  </p-floatlabel>
-
-  <div class="eh-actions">
+  <div class="eh-actions eh-actions-sticky">
     <p-button type="button" [label]="'employeesHr.actions.cancel' | translate" severity="secondary" (onClick)="cancelled.emit()" />
     <p-button type="submit" [label]="submitLabelKey | translate" icon="pi pi-check" [loading]="submitting" />
   </div>

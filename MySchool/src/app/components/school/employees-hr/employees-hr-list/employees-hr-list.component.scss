@@ -142,3 +142,31 @@
     gap: 0.8rem;
   }
 }
+
+/* Create / edit employee: same shell as recruitment dialogs */
+:host ::ng-deep .eh-hr-profile-dialog .p-dialog-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.25rem;
+}
+
+:host ::ng-deep .eh-hr-profile-dialog .p-dialog-content {
+  padding: 1.1rem 1.35rem 1.35rem;
+  background: #f8fafc;
+}
+
+:host ::ng-deep .eh-hr-profile-dialog-form .p-dialog-content {
+  max-height: min(82vh, 880px);
+  overflow: auto;
+}
+
+:host ::ng-deep .eh-hr-full-profile-dialog .p-dialog-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.25rem;
+}
+
+:host ::ng-deep .eh-hr-full-profile-dialog .p-dialog-content {
+  padding: 1rem 1.25rem 1.25rem;
+  background: #f8fafc;
+  max-height: calc(90vh - 7rem);
+  overflow: auto;
+}
