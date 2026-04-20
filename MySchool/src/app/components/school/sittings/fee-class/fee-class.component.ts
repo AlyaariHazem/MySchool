@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, viewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { PaginatorState } from 'primeng/paginator';
@@ -25,6 +25,9 @@ import { selectLanguage } from '../../../../core/store/language/language.selecto
   ]
 })
 export class FeeClassComponent implements OnInit {
+  private readonly classFeeFormRef = viewChild<NgForm>('classFeeForm');
+  private readonly feeClassAmountInput = viewChild<ElementRef<HTMLInputElement>>('feeClassAmountInput');
+
   // Model properties
   FeeClass: FeeClasses[] = [];
   FeeClassDTO: FeeClass = new FeeClass();
@@ -161,7 +164,6 @@ export class FeeClassComponent implements OnInit {
   onSubmitClassFee(classFeeForm: NgForm): void {
     if (classFeeForm.valid) {
       this.editModeClass ? this.updateFeeClass() : this.addFeeClass();
-      classFeeForm.resetForm();
     }
   }
 
@@ -172,7 +174,9 @@ export class FeeClassComponent implements OnInit {
         if (res.isSuccess) {
           this.toastr.success(res.result);
           this.getAllClassFees();
-          this.resetClassFeeForm();
+          this.FeeClassDTO.amount = undefined;
+          this.classFeeFormRef()?.controls['amount']?.reset();
+          setTimeout(() => this.feeClassAmountInput()?.nativeElement?.focus(), 0);
         }
       },
       error: () => this.toastr.error('حدث خطأ أثناء إضافة رسوم الصفوف'),
@@ -222,6 +226,10 @@ export class FeeClassComponent implements OnInit {
       next: (res) => {
         (this.FeeClass = res);
         this.paginatedClassFee = this.paginatorService.pageSlice(this.FeeClass);
+        const dto = this.FeeClassDTO;
+        if (dto.classID != null && dto.feeID != null) {
+          this.getFeeClassByID(dto.classID, dto.feeID);
+        }
       },
       error: () => this.toastr.error('Error fetching class fees'),
     });
