@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
@@ -27,11 +27,14 @@ import { EmployeesHrService, readHttpError } from '../employees-hr.service';
   templateUrl: './employees-hr-detail.component.html',
   styleUrl: './employees-hr-detail.component.scss',
 })
-export class EmployeesHrDetailComponent implements OnInit {
+export class EmployeesHrDetailComponent implements OnInit, OnChanges {
   private readonly route = inject(ActivatedRoute);
   private readonly employeesHr = inject(EmployeesHrService);
   private readonly toastr = inject(ToastrService);
   private readonly perm = inject(PermissionService);
+
+  @Input() employeeId: number | null = null;
+  @Input() embedded = false;
 
   id = 0;
   row: EmployeeProfileReadDto | null = null;
@@ -41,13 +44,34 @@ export class EmployeesHrDetailComponent implements OnInit {
   canUpdate = this.perm.hasPermission(PagePermission.Employees.Update);
   canDelete = this.perm.hasPermission(PagePermission.Employees.Delete);
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['employeeId'] && !changes['employeeId'].firstChange) {
+      const resolved = this.resolveId();
+      if (resolved !== this.id) {
+        this.id = resolved;
+        this.fetch();
+      }
+    }
+  }
+
   ngOnInit(): void {
+    this.id = this.resolveId();
+    this.fetch();
+  }
+
+  private resolveId(): number {
+    if (this.employeeId != null && this.employeeId > 0) return this.employeeId;
     const p = this.route.snapshot.paramMap.get('id');
-    this.id = p ? +p : 0;
+    return p ? +p : 0;
+  }
+
+  private fetch(): void {
     if (!this.id || !this.canView) {
       this.loading = false;
+      this.row = null;
       return;
     }
+    this.loading = true;
     this.employeesHr
       .getEmployeeById(this.id)
       .pipe(finalize(() => (this.loading = false)))

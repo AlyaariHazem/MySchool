@@ -1,13 +1,13 @@
-import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
+import { AsyncPipe, NgIf } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
@@ -27,11 +27,15 @@ import { selectLanguage } from 'app/core/store/language/language.selectors';
 import { ShardModule } from 'app/shared/shard.module';
 
 import {
+  EmployeeProfileCreateDto,
   EmployeeJobTypeDto,
   EmployeeProfileListFilterDto,
   EmployeeProfileReadDto,
   EmploymentStatus,
 } from '../employees-hr.models';
+import { EmployeesHrDetailComponent } from '../employees-hr-detail/employees-hr-detail.component';
+import { EmployeesHrFullProfileComponent } from '../employees-hr-full-profile/employees-hr-full-profile.component';
+import { EmployeesHrProfileFormComponent } from '../employees-hr-profile-form/employees-hr-profile-form.component';
 import { EmployeesHrService, readHttpError } from '../employees-hr.service';
 
 @Component({
@@ -41,9 +45,7 @@ import { EmployeesHrService, readHttpError } from '../employees-hr.service';
     ShardModule,
     NgIf,
     AsyncPipe,
-    DatePipe,
     FormsModule,
-    RouterLink,
     TranslateModule,
     TableModule,
     ButtonModule,
@@ -52,6 +54,10 @@ import { EmployeesHrService, readHttpError } from '../employees-hr.service';
     ProgressSpinnerModule,
     TooltipModule,
     ConfirmDialogModule,
+    DialogModule,
+    EmployeesHrProfileFormComponent,
+    EmployeesHrDetailComponent,
+    EmployeesHrFullProfileComponent,
   ],
   providers: [ConfirmationService],
   templateUrl: './employees-hr-list.component.html',
@@ -70,6 +76,11 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
   private readonly store = inject(Store);
 
   readonly dir$ = this.store.select(selectLanguage).pipe(map((l) => (l === 'ar' ? 'rtl' : 'ltr')));
+
+  /** Keeps PrimeNG select overlays from stretching full viewport width (RTL / grid). */
+  readonly filterSelectPanelStyle: Record<string, string> = {
+    maxWidth: 'min(22rem, calc(100vw - 2rem))',
+  };
 
   employmentOptions: { label: string; value: EmploymentStatus }[] = [];
 
@@ -94,6 +105,15 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
   jobTypeOptions: { label: string; value: number }[] = [];
   jobTypesLoading = false;
   activeOptions: { label: string; value: boolean | null }[] = [];
+
+  createDialogVisible = false;
+  editDialogVisible = false;
+  viewDialogVisible = false;
+  fullProfileDialogVisible = false;
+  dialogSubmitting = false;
+  editLoading = false;
+  editProfile: EmployeeProfileReadDto | null = null;
+  selectedEmployeeId: number | null = null;
 
   ngOnInit(): void {
     this.activeOptions = [
@@ -188,6 +208,95 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
       });
   }
 
+  openCreateDialog(): void {
+    if (!this.canCreate) return;
+    this.createDialogVisible = true;
+  }
+
+  closeCreateDialog(): void {
+    this.createDialogVisible = false;
+    this.dialogSubmitting = false;
+  }
+
+  submitCreate(dto: EmployeeProfileCreateDto): void {
+    this.dialogSubmitting = true;
+    this.employeesHr
+      .createEmployee(dto)
+      .pipe(finalize(() => (this.dialogSubmitting = false)))
+      .subscribe({
+        next: () => {
+          this.toastr.success('employeesHr.toast.created');
+          this.createDialogVisible = false;
+          this.load();
+        },
+        error: (err) => this.toastr.error(readHttpError(err)),
+      });
+  }
+
+  openEditDialog(row: EmployeeProfileReadDto): void {
+    if (!this.canUpdate || !row.employeeProfileID) return;
+    this.editProfile = null;
+    this.editDialogVisible = true;
+    this.editLoading = true;
+    this.employeesHr
+      .getEmployeeById(row.employeeProfileID)
+      .pipe(finalize(() => (this.editLoading = false)))
+      .subscribe({
+        next: (profile) => (this.editProfile = profile),
+        error: (err) => {
+          this.toastr.error(readHttpError(err));
+          this.editDialogVisible = false;
+        },
+      });
+  }
+
+  closeEditDialog(): void {
+    this.editDialogVisible = false;
+    this.dialogSubmitting = false;
+    this.editLoading = false;
+    this.editProfile = null;
+  }
+
+  submitEdit(dto: EmployeeProfileCreateDto): void {
+    const id = this.editProfile?.employeeProfileID;
+    if (!id) return;
+    this.dialogSubmitting = true;
+    this.employeesHr
+      .updateEmployee(id, dto)
+      .pipe(finalize(() => (this.dialogSubmitting = false)))
+      .subscribe({
+        next: () => {
+          this.toastr.success('employeesHr.toast.updated');
+          this.editDialogVisible = false;
+          this.editProfile = null;
+          this.load();
+        },
+        error: (err) => this.toastr.error(readHttpError(err)),
+      });
+  }
+
+  openViewDialog(row: EmployeeProfileReadDto): void {
+    if (!row.employeeProfileID) return;
+    this.selectedEmployeeId = row.employeeProfileID;
+    this.viewDialogVisible = true;
+  }
+
+  closeViewDialog(): void {
+    this.viewDialogVisible = false;
+    this.selectedEmployeeId = null;
+  }
+
+  openFullProfileDialog(row: EmployeeProfileReadDto): void {
+    if (!row.employeeProfileID) return;
+    this.selectedEmployeeId = row.employeeProfileID;
+    this.fullProfileDialogVisible = true;
+  }
+
+  closeFullProfileDialog(): void {
+    this.fullProfileDialogVisible = false;
+    this.selectedEmployeeId = null;
+  }
+
   displayName(row: EmployeeProfileReadDto): string {
     const n = row.fullName;
     if (!n) return '';
@@ -220,6 +329,20 @@ export class EmployeesHrListComponent implements OnInit, OnDestroy {
       [EmploymentStatus.Terminated]: this.translate.instant('employeesHr.status.terminated'),
     };
     return m[v] ?? String(v);
+  }
+
+  /** yyyy-MM-dd for list; prefers calendar date from API `yyyy-MM-dd` prefix to avoid TZ shifts. */
+  hireDateLabel(v?: string | null): string {
+    const t = (v ?? '').trim();
+    if (!t) return '—';
+    const m = /^(\d{4}-\d{2}-\d{2})/.exec(t);
+    if (m) return m[1];
+    const d = new Date(t);
+    if (Number.isNaN(d.getTime())) return '—';
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${mo}-${day}`;
   }
 
   confirmDeactivate(row: EmployeeProfileReadDto): void {

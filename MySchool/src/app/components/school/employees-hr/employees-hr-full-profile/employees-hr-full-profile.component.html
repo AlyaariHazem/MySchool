@@ -6,7 +6,7 @@
   <div class="employees-hr-card">
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'employeesHr.fullProfile.title' | translate }}</h2>
-      <div class="header-actions">
+      <div class="header-actions" *ngIf="!embedded">
         <p-button [label]="'employeesHr.actions.backDetail' | translate" icon="pi pi-user" [outlined]="true" [routerLink]="['/school/employees-hr', id]" />
         <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" routerLink="/school/employees-hr" />
       </div>

@@ -2,7 +2,7 @@
   <div class="employees-hr-card">
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'employeesHr.detail.title' | translate }}</h2>
-      <div class="header-actions" *ngIf="row">
+      <div class="header-actions" *ngIf="row && !embedded">
         <p-button [label]="'employeesHr.actions.backList' | translate" icon="pi pi-list" [outlined]="true" routerLink="/school/employees-hr" />
         <p-button
           *ngIf="canUpdate"

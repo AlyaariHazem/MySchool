@@ -1,5 +1,5 @@
 import { DatePipe, NgIf } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -63,7 +63,7 @@ import { EmployeesHrService, readHttpError } from '../employees-hr.service';
   templateUrl: './employees-hr-full-profile.component.html',
   styleUrl: './employees-hr-full-profile.component.scss',
 })
-export class EmployeesHrFullProfileComponent implements OnInit, OnDestroy {
+export class EmployeesHrFullProfileComponent implements OnInit, OnDestroy, OnChanges {
   private readonly route = inject(ActivatedRoute);
   private readonly employeesHr = inject(EmployeesHrService);
   private readonly schoolService = inject(SchoolService);
@@ -71,6 +71,9 @@ export class EmployeesHrFullProfileComponent implements OnInit, OnDestroy {
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
   private readonly perm = inject(PermissionService);
+
+  @Input() employeeId: number | null = null;
+  @Input() embedded = false;
 
   id = 0;
   data: EmployeeProfileFullDto | null = null;
@@ -129,14 +132,29 @@ export class EmployeesHrFullProfileComponent implements OnInit, OnDestroy {
     activityCount: 0,
   };
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['employeeId'] && !changes['employeeId'].firstChange) {
+      const resolved = this.resolveId();
+      if (resolved !== this.id) {
+        this.id = resolved;
+        this.reload();
+      }
+    }
+  }
+
   ngOnInit(): void {
-    const p = this.route.snapshot.paramMap.get('id');
-    this.id = p ? +p : 0;
+    this.id = this.resolveId();
     this.schoolService.getAllSchools().subscribe({ next: (s) => (this.schools = s ?? []) });
     this.yearService.getAllYears().subscribe({ next: (y) => (this.years = y ?? []) });
     this.loadJobTypes();
     this.langSub = this.translate.onLangChange.subscribe(() => this.rebuildJobTypeSelectOptions());
     this.reload();
+  }
+
+  private resolveId(): number {
+    if (this.employeeId != null && this.employeeId > 0) return this.employeeId;
+    const p = this.route.snapshot.paramMap.get('id');
+    return p ? +p : 0;
   }
 
   ngOnDestroy(): void {
