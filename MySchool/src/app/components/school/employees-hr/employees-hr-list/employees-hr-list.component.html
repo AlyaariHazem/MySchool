@@ -191,8 +191,6 @@
   styleClass="eh-hr-profile-dialog eh-hr-profile-dialog-form"
 >
   <app-employees-hr-profile-form
-    [schools]="schools"
-    [years]="years"
     [submitting]="dialogSubmitting"
     [submitLabelKey]="'employeesHr.actions.save'"
     (submitted)="submitCreate($event)"
@@ -216,8 +214,6 @@
   </div>
   <app-employees-hr-profile-form
     *ngIf="!editLoading && editProfile"
-    [schools]="schools"
-    [years]="years"
     [initial]="editProfile"
     [submitting]="dialogSubmitting"
     [submitLabelKey]="'employeesHr.actions.save'"

@@ -15,8 +15,6 @@
 
     <app-employees-hr-profile-form
       *ngIf="!loading && canUpdate && profile"
-      [schools]="schools"
-      [years]="years"
       [initial]="profile"
       [submitting]="submitting"
       [submitLabelKey]="'employeesHr.edit.submit'"

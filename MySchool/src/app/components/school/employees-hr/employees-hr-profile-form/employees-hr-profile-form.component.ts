@@ -23,9 +23,6 @@ import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { finalize } from 'rxjs/operators';
 
-import { Year } from 'app/core/models/year.model';
-import { School } from 'app/core/models/school.modul';
-
 import {
   EmployeeJobTypeDto,
   EmployeeProfileCreateDto,
@@ -62,8 +59,6 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
     maxWidth: 'min(22rem, calc(100vw - 2rem))',
   };
 
-  @Input() schools: School[] = [];
-  @Input() years: Year[] = [];
   @Input() initial: EmployeeProfileReadDto | null = null;
   @Input() submitting = false;
   @Input() submitLabelKey = 'employeesHr.form.save';
@@ -76,15 +71,11 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
   jobTypesLoading = false;
   private langSub?: Subscription;
   employmentStatusOptions: { label: string; value: EmploymentStatus }[] = [];
-
-  yearOptions: { label: string; value: number }[] = [];
-  schoolOptions: { label: string; value: number }[] = [];
+  /** Internal values for p-select; API receives Arabic strings via `selectValueToApiGender`. */
+  genderOptions: { label: string; value: 'male' | 'female' }[] = [];
 
   form = this.fb.nonNullable.group({
-    schoolID: [0, [Validators.required, Validators.min(1)]],
-    currentAcademicYearID: [0, [Validators.required, Validators.min(1)]],
     employeeJobTypeID: [0, [Validators.required, Validators.min(1)]],
-    employeeCode: ['', [Validators.required, Validators.maxLength(64)]],
     firstName: ['', Validators.required],
     middleName: [''],
     lastName: ['', Validators.required],
@@ -93,7 +84,7 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
     lastNameEng: [''],
     nationalId: [''],
     dateOfBirth: [null as Date | null],
-    gender: [''],
+    gender: [null as 'male' | 'female' | null],
     phone: [''],
     email: [''],
     address: [''],
@@ -114,8 +105,35 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
       { label: this.translate.instant('employeesHr.status.suspended'), value: EmploymentStatus.Suspended },
       { label: this.translate.instant('employeesHr.status.terminated'), value: EmploymentStatus.Terminated },
     ];
+    this.rebuildGenderOptions();
     this.loadJobTypes();
-    this.langSub = this.translate.onLangChange.subscribe(() => this.rebuildJobTypeSelectLabels());
+    this.langSub = this.translate.onLangChange.subscribe(() => {
+      this.rebuildJobTypeSelectLabels();
+      this.rebuildGenderOptions();
+    });
+  }
+
+  private rebuildGenderOptions(): void {
+    this.genderOptions = [
+      { label: this.translate.instant('employeesHr.form.genderMale'), value: 'male' },
+      { label: this.translate.instant('employeesHr.form.genderFemale'), value: 'female' },
+    ];
+  }
+
+  /** Map stored API / legacy strings to select value. */
+  private parseGenderToSelectValue(raw: string | null | undefined): 'male' | 'female' | null {
+    const s = (raw ?? '').trim();
+    if (!s) return null;
+    const lower = s.toLowerCase();
+    if (lower === 'male' || lower === 'm' || s === 'ذكر') return 'male';
+    if (lower === 'female' || lower === 'f' || s === 'أنثى' || s === 'انثى' || s === 'انثي') return 'female';
+    return null;
+  }
+
+  private selectValueToApiGender(key: 'male' | 'female' | null | undefined): string | null {
+    if (key === 'male') return 'ذكر';
+    if (key === 'female') return 'أنثى';
+    return null;
   }
 
   ngOnDestroy(): void {
@@ -152,46 +170,14 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['schools'] || changes['years']) {
-      this.rebuildSchoolOptions();
-      this.rebuildYearOptions();
-    }
     if (changes['initial'] && this.initial) {
       this.patchFromProfile(this.initial);
     }
   }
 
-  private rebuildSchoolOptions(): void {
-    this.schoolOptions = (this.schools ?? []).map((s) => ({
-      label: s.schoolName || String(s.schoolID),
-      value: s.schoolID ?? 0,
-    }));
-  }
-
-  private rebuildYearOptions(): void {
-    const sid = this.form.get('schoolID')?.value;
-    const filtered =
-      sid != null && sid > 0 ? (this.years ?? []).filter((y) => y.schoolID === sid) : [...(this.years ?? [])];
-    this.yearOptions = filtered.map((y) => ({
-      label: `${y.yearID}`,
-      value: y.yearID,
-    }));
-  }
-
-  onSchoolChange(): void {
-    this.rebuildYearOptions();
-    const yid = this.form.get('currentAcademicYearID')?.value;
-    if (yid && !this.yearOptions.some((o) => o.value === yid)) {
-      this.form.patchValue({ currentAcademicYearID: 0 });
-    }
-  }
-
   private patchFromProfile(p: EmployeeProfileReadDto): void {
     this.form.patchValue({
-      schoolID: p.schoolID,
-      currentAcademicYearID: p.currentAcademicYearID,
       employeeJobTypeID: p.employeeJobTypeID,
-      employeeCode: p.employeeCode,
       firstName: p.fullName?.firstName ?? '',
       middleName: p.fullName?.middleName ?? '',
       lastName: p.fullName?.lastName ?? '',
@@ -200,7 +186,7 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
       lastNameEng: p.fullNameAlis?.lastNameEng ?? '',
       nationalId: p.nationalId ?? '',
       dateOfBirth: p.dateOfBirth ? new Date(p.dateOfBirth) : null,
-      gender: p.gender ?? '',
+      gender: this.parseGenderToSelectValue(p.gender),
       phone: p.phone ?? '',
       email: p.email ?? '',
       address: p.address ?? '',
@@ -213,7 +199,6 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
       managerID: p.managerID ?? null,
       schoolStaffID: p.schoolStaffID ?? null,
     });
-    this.rebuildYearOptions();
   }
 
   private toIso(d: Date | null | undefined): string | undefined {
@@ -228,10 +213,10 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
     }
     const v = this.form.getRawValue();
     const dto: EmployeeProfileCreateDto = {
-      schoolID: v.schoolID,
-      currentAcademicYearID: v.currentAcademicYearID,
       employeeJobTypeID: v.employeeJobTypeID,
-      employeeCode: v.employeeCode.trim(),
+      ...(this.initial != null
+        ? { employeeCode: (this.initial.employeeCode ?? '').trim() }
+        : {}),
       fullName: {
         firstName: v.firstName.trim(),
         middleName: v.middleName?.trim() || null,
@@ -247,7 +232,7 @@ export class EmployeesHrProfileFormComponent implements OnChanges, OnInit, OnDes
           : null,
       nationalId: v.nationalId?.trim() || null,
       dateOfBirth: this.toIso(v.dateOfBirth ?? undefined),
-      gender: v.gender?.trim() || null,
+      gender: this.selectValueToApiGender(v.gender as 'male' | 'female' | null | undefined),
       phone: v.phone?.trim() || null,
       email: v.email?.trim() || null,
       address: v.address?.trim() || null,

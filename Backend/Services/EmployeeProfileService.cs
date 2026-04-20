@@ -1,9 +1,12 @@
+using System.Globalization;
+using System.Security.Claims;
 using Backend.Common;
 using Backend.Data;
 using Backend.DTOS.School.Employees;
 using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
@@ -15,15 +18,18 @@ public class EmployeeProfileService : IEmployeeProfileService
     private readonly TenantDbContext _db;
     private readonly IUserRepository _userRepository;
     private readonly IEmployeeYearAssignmentService _yearAssignments;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public EmployeeProfileService(
         TenantDbContext db,
         IUserRepository userRepository,
-        IEmployeeYearAssignmentService yearAssignments)
+        IEmployeeYearAssignmentService yearAssignments,
+        IHttpContextAccessor httpContextAccessor)
     {
         _db = db;
         _userRepository = userRepository;
         _yearAssignments = yearAssignments;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<IReadOnlyList<EmployeeJobTypeListDto>> GetJobTypesAsync(CancellationToken cancellationToken = default)
@@ -49,7 +55,14 @@ public class EmployeeProfileService : IEmployeeProfileService
     public async Task<EmployeeProfileReadDto> CreateAsync(EmployeeProfileCreateDto dto, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(dto.FullName);
+        var (schoolId, yearId) = await ResolveSchoolAndAcademicYearForCreateAsync(dto, cancellationToken);
+        dto.SchoolID = schoolId;
+        dto.CurrentAcademicYearID = yearId;
         await ValidateCoreReferencesAsync(dto.SchoolID, dto.CurrentAcademicYearID, dto.EmployeeJobTypeID, cancellationToken);
+        if (string.IsNullOrWhiteSpace(dto.EmployeeCode))
+            dto.EmployeeCode = await AllocateNextNumericEmployeeCodeAsync(dto.SchoolID, cancellationToken);
+        else
+            dto.EmployeeCode = dto.EmployeeCode.Trim();
         await EnsureEmployeeCodeUniqueAsync(dto.SchoolID, dto.EmployeeCode, excludeProfileId: null, cancellationToken);
 
         var teacherId = dto.TeacherID;
@@ -68,7 +81,7 @@ public class EmployeeProfileService : IEmployeeProfileService
             SchoolID = dto.SchoolID,
             CurrentAcademicYearID = dto.CurrentAcademicYearID,
             EmployeeJobTypeID = dto.EmployeeJobTypeID,
-            EmployeeCode = dto.EmployeeCode.Trim(),
+            EmployeeCode = dto.EmployeeCode!,
             FullName = MapName(dto.FullName),
             FullNameAlis = MapNameAlis(dto.FullNameAlis),
             NationalId = dto.NationalId,
@@ -95,6 +108,36 @@ public class EmployeeProfileService : IEmployeeProfileService
 
     public async Task<EmployeeProfileReadDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         await MapToReadDtoAsync(id, cancellationToken);
+
+    /// <summary>
+    /// Uses explicit <paramref name="dto"/> school/year when both are set (e.g. recruitment).
+    /// Otherwise, for a <c>MANAGER</c> caller, uses that manager's school and its active academic year.
+    /// </summary>
+    private async Task<(int SchoolId, int YearId)> ResolveSchoolAndAcademicYearForCreateAsync(
+        EmployeeProfileCreateDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (dto.SchoolID > 0 && dto.CurrentAcademicYearID > 0)
+            return (dto.SchoolID, dto.CurrentAcademicYearID);
+
+        var user = _httpContextAccessor.HttpContext?.User;
+        var userType = user?.FindFirstValue("UserType");
+        var userId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.Equals(userType, "MANAGER", StringComparison.OrdinalIgnoreCase))
+        {
+            var sid = await GetSchoolIdForManagerUserAsync(userId, cancellationToken);
+            if (sid is not > 0)
+                throw new ArgumentException("No school is linked to this manager account.");
+            var yid = await GetActiveYearIdForSchoolAsync(sid.Value, cancellationToken);
+            if (yid is not > 0)
+                throw new ArgumentException("No academic year is configured for this school.");
+            return (sid.Value, yid.Value);
+        }
+
+        throw new ArgumentException(
+            "SchoolID and CurrentAcademicYearID are required when not using a school manager account, or sign in as a school manager.");
+    }
 
     /// <summary>Active year for the school (<see cref="Year.Active"/>), else latest year id for that school.</summary>
     private async Task<int?> GetActiveYearIdForSchoolAsync(int schoolId, CancellationToken ct)
@@ -200,6 +243,16 @@ public class EmployeeProfileService : IEmployeeProfileService
         var entity = await _db.EmployeeProfiles.FirstOrDefaultAsync(e => e.EmployeeProfileID == id, cancellationToken)
                      ?? throw new KeyNotFoundException($"Employee profile {id} was not found.");
 
+        if (dto.SchoolID <= 0)
+            dto.SchoolID = entity.SchoolID;
+        if (dto.CurrentAcademicYearID <= 0)
+            dto.CurrentAcademicYearID = entity.CurrentAcademicYearID;
+
+        if (string.IsNullOrWhiteSpace(dto.EmployeeCode))
+            dto.EmployeeCode = entity.EmployeeCode;
+        else
+            dto.EmployeeCode = dto.EmployeeCode.Trim();
+
         await ValidateCoreReferencesAsync(dto.SchoolID, dto.CurrentAcademicYearID, dto.EmployeeJobTypeID, cancellationToken);
         await EnsureEmployeeCodeUniqueAsync(dto.SchoolID, dto.EmployeeCode, excludeProfileId: id, cancellationToken);
 
@@ -217,7 +270,7 @@ public class EmployeeProfileService : IEmployeeProfileService
         entity.SchoolID = dto.SchoolID;
         entity.CurrentAcademicYearID = dto.CurrentAcademicYearID;
         entity.EmployeeJobTypeID = dto.EmployeeJobTypeID;
-        entity.EmployeeCode = dto.EmployeeCode.Trim();
+        entity.EmployeeCode = dto.EmployeeCode!.Trim();
         entity.FullName = MapName(dto.FullName);
         entity.FullNameAlis = MapNameAlis(dto.FullNameAlis);
         entity.NationalId = dto.NationalId;
@@ -492,6 +545,35 @@ public class EmployeeProfileService : IEmployeeProfileService
     {
         if (!await _db.EmployeeJobTypes.AnyAsync(j => j.EmployeeJobTypeID == jobTypeId && j.IsActive, cancellationToken))
             throw new ArgumentException("EmployeeJobTypeID is invalid or inactive.");
+    }
+
+    /// <summary>Next numeric code for the school (max parsed integer + 1), skipping collisions with any existing string code.</summary>
+    private async Task<string> AllocateNextNumericEmployeeCodeAsync(int schoolId, CancellationToken cancellationToken)
+    {
+        var codes = await _db.EmployeeProfiles.AsNoTracking()
+            .Where(e => e.SchoolID == schoolId)
+            .Select(e => e.EmployeeCode)
+            .ToListAsync(cancellationToken);
+        var maxNum = 0;
+        foreach (var c in codes)
+        {
+            if (int.TryParse(c?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var n) && n > maxNum)
+                maxNum = n;
+        }
+
+        var candidate = maxNum + 1;
+        for (var guard = 0; guard < 10_000; guard++)
+        {
+            var codeStr = candidate.ToString(CultureInfo.InvariantCulture);
+            var taken = await _db.EmployeeProfiles.AsNoTracking().AnyAsync(
+                e => e.SchoolID == schoolId && e.EmployeeCode == codeStr,
+                cancellationToken);
+            if (!taken)
+                return codeStr;
+            candidate++;
+        }
+
+        throw new InvalidOperationException("Could not allocate a unique employee code for this school.");
     }
 
     private async Task EnsureEmployeeCodeUniqueAsync(int schoolId, string code, int? excludeProfileId, CancellationToken cancellationToken)

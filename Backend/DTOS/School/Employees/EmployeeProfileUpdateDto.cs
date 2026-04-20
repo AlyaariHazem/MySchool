@@ -5,18 +5,18 @@ namespace Backend.DTOS.School.Employees;
 
 public class EmployeeProfileUpdateDto
 {
-    [Required]
+    /// <summary>Omit or use 0 to keep the employee's existing school.</summary>
     public int SchoolID { get; set; }
 
-    [Required]
+    /// <summary>Omit or use 0 to keep the employee's existing academic year.</summary>
     public int CurrentAcademicYearID { get; set; }
 
     [Required]
     public int EmployeeJobTypeID { get; set; }
 
-    [Required]
+    /// <summary>Omit or whitespace to keep the existing employee code.</summary>
     [MaxLength(64)]
-    public string EmployeeCode { get; set; } = string.Empty;
+    public string? EmployeeCode { get; set; }
 
     [Required]
     public EmployeeNameDto FullName { get; set; } = null!;

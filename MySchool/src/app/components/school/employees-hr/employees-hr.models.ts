@@ -75,10 +75,12 @@ export interface EmployeeProfileReadDto {
 
 export interface EmployeeProfileCreateDto {
   userId?: string | null;
-  schoolID: number;
-  currentAcademicYearID: number;
+  /** Omitted for school managers — API resolves from the logged-in manager's school and active year. */
+  schoolID?: number;
+  currentAcademicYearID?: number;
   employeeJobTypeID: number;
-  employeeCode: string;
+  /** Omitted on create — API assigns next numeric code per school. Required on update when sending full body. */
+  employeeCode?: string;
   fullName: EmployeeNameDto;
   fullNameAlis?: EmployeeNameAlisDto | null;
   nationalId?: string | null;

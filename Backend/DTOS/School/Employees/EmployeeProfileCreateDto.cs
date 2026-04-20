@@ -8,18 +8,18 @@ public class EmployeeProfileCreateDto
     [MaxLength(450)]
     public string? UserId { get; set; }
 
-    [Required]
+    /// <summary>Optional when the caller is a school manager — resolved from the manager's school and active year.</summary>
     public int SchoolID { get; set; }
 
-    [Required]
+    /// <summary>Optional when the caller is a school manager — resolved from the manager's school and active year.</summary>
     public int CurrentAcademicYearID { get; set; }
 
     [Required]
     public int EmployeeJobTypeID { get; set; }
 
-    [Required]
+    /// <summary>When null or whitespace, the server assigns the next numeric code for the school.</summary>
     [MaxLength(64)]
-    public string EmployeeCode { get; set; } = string.Empty;
+    public string? EmployeeCode { get; set; }
 
     [Required]
     public EmployeeNameDto FullName { get; set; } = null!;

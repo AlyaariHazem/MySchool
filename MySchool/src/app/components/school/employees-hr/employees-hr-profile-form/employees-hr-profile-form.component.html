@@ -1,33 +1,6 @@
 <form [formGroup]="form" (ngSubmit)="emitSubmit()" class="eh-profile-form-shell" novalidate>
   <div class="eh-form-card">
     <div class="eh-row">
-      <div class="eh-field field-block">
-        <label class="field-label" for="eh-school">{{ 'employeesHr.form.school' | translate }}</label>
-        <p-select
-          inputId="eh-school"
-          formControlName="schoolID"
-          [options]="schoolOptions"
-          optionLabel="label"
-          optionValue="value"
-          styleClass="w-full eh-profile-control"
-          [panelStyle]="selectPanelStyle"
-          panelStyleClass="eh-profile-select-panel"
-          (onChange)="onSchoolChange()"
-        />
-      </div>
-      <div class="eh-field field-block">
-        <label class="field-label" for="eh-year">{{ 'employeesHr.form.year' | translate }}</label>
-        <p-select
-          inputId="eh-year"
-          formControlName="currentAcademicYearID"
-          [options]="yearOptions"
-          optionLabel="label"
-          optionValue="value"
-          styleClass="w-full eh-profile-control"
-          [panelStyle]="selectPanelStyle"
-          panelStyleClass="eh-profile-select-panel"
-        />
-      </div>
       <div class="eh-field field-block eh-job-type-field">
         <label class="field-label" for="eh-job">{{ 'employeesHr.form.jobType' | translate }}</label>
         <p-select
@@ -42,10 +15,6 @@
           [disabled]="jobTypesLoading"
         />
         <p-progressSpinner *ngIf="jobTypesLoading" strokeWidth="4" styleClass="eh-job-type-spinner" />
-      </div>
-      <div class="eh-field field-block">
-        <label class="field-label" for="eh-code">{{ 'employeesHr.form.code' | translate }}</label>
-        <input pInputText id="eh-code" class="w-full" formControlName="employeeCode" autocomplete="off" />
       </div>
     </div>
   </div>
@@ -106,7 +75,19 @@
       </div>
       <div class="eh-field field-block">
         <label class="field-label" for="eh-gender">{{ 'employeesHr.form.gender' | translate }}</label>
-        <input pInputText id="eh-gender" class="w-full" formControlName="gender" autocomplete="off" />
+        <p-select
+          inputId="eh-gender"
+          formControlName="gender"
+          [options]="genderOptions"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [placeholder]="'employeesHr.form.genderPlaceholder' | translate"
+          styleClass="w-full eh-profile-control"
+          [panelStyle]="selectPanelStyle"
+          panelStyleClass="eh-profile-select-panel"
+          appendTo="self"
+        />
       </div>
     </div>
 

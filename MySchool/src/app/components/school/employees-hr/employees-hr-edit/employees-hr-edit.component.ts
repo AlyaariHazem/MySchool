@@ -8,10 +8,6 @@ import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
 
 import { PagePermission, PermissionService } from 'app/core/services/permission.service';
-import { SchoolService } from 'app/core/services/school.service';
-import { YearService } from 'app/core/services/year.service';
-import { Year } from 'app/core/models/year.model';
-import { School } from 'app/core/models/school.modul';
 import { ShardModule } from 'app/shared/shard.module';
 
 import { EmployeeProfileCreateDto, EmployeeProfileReadDto } from '../employees-hr.models';
@@ -37,14 +33,10 @@ export class EmployeesHrEditComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   readonly router = inject(Router);
   private readonly employeesHr = inject(EmployeesHrService);
-  private readonly schoolService = inject(SchoolService);
-  private readonly yearService = inject(YearService);
   private readonly toastr = inject(ToastrService);
   private readonly perm = inject(PermissionService);
 
   id = 0;
-  schools: School[] = [];
-  years: Year[] = [];
   profile: EmployeeProfileReadDto | null = null;
   loading = true;
   submitting = false;
@@ -58,14 +50,6 @@ export class EmployeesHrEditComponent implements OnInit {
       this.loading = false;
       return;
     }
-    this.schoolService.getAllSchools().subscribe({
-      next: (s) => (this.schools = s ?? []),
-      error: () => this.toastr.error('employeesHr.errors.loadSchools'),
-    });
-    this.yearService.getAllYears().subscribe({
-      next: (y) => (this.years = y ?? []),
-      error: () => this.toastr.error('employeesHr.errors.loadYears'),
-    });
     this.employeesHr
       .getEmployeeById(this.id)
       .pipe(finalize(() => (this.loading = false)))
