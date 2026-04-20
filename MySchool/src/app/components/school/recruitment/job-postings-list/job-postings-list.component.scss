@@ -1,5 +1,28 @@
 @import '../recruitment-shared.scss';
 
+.recruitment-job-postings {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.recruitment-job-postings .employees-hr-card {
+  background: #fff;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
+  margin-bottom: 30px;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.recruitment-job-postings .employees-hr-header {
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border, #e2e8f0);
+}
+
 .recruitment-job-postings .p-tag {
   font-size: 0.8rem;
 }
@@ -12,6 +35,76 @@
 .job-board-subtitle {
   margin: 0.35rem 0 0;
   font-size: 0.95rem;
+}
+
+.filters-toolbar {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-50, #f8fafc);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 10px;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: end;
+}
+
+.filter-field {
+  min-width: 0;
+}
+
+:host ::ng-deep .recruitment-filter-control {
+  width: 100%;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+:host ::ng-deep .recruitment-filter-control .p-select-label {
+  line-height: 1.25;
+  padding-block: 0.45rem;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .recruitment-filter-control .p-select-dropdown {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #dddddd;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+:host ::ng-deep .recruitment-table .p-datatable-thead > tr > th {
+  background: #009879;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  border: 1px solid #007a63;
+}
+
+:host ::ng-deep .recruitment-table .p-datatable-tbody > tr > td {
+  padding: 0.65rem 1rem;
+  border: 1px solid #dddddd;
+  text-align: start;
+}
+
+:host ::ng-deep .recruitment-table .p-datatable-tbody > tr:nth-child(even) {
+  background: #f3f3f3;
+}
+
+:host ::ng-deep .recruitment-table .p-datatable-tbody > tr:nth-child(odd) {
+  background: #fff;
 }
 
 .empty-job-board {
@@ -139,4 +232,82 @@
   padding: 0.4rem 1rem;
   margin-bottom: 0.85rem;
   background: #ffffff;
+}
+
+.posting-view-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.posting-view-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.posting-view-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.posting-view-maincard {
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  padding: 0.5rem 0.9rem;
+}
+
+.posting-view-maincard .detail-grid {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.posting-view-textgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.posting-view-textcard {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.8rem 0.9rem;
+}
+
+.posting-view-textcard .eh-section {
+  margin: 0 0 0.5rem;
+}
+
+.posting-view-textcard .pre-wrap {
+  margin: 0;
+}
+
+.posting-view-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding-top: 0.75rem;
+  background: linear-gradient(to top, #f8fafc 78%, rgba(248, 250, 252, 0.82));
+  border-top: 1px solid #e2e8f0;
+}
+
+@media (max-width: 900px) {
+  .posting-view-textgrid {
+    grid-template-columns: 1fr;
+  }
+
+  .posting-view-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

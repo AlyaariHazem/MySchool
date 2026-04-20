@@ -1,1 +1,94 @@
 @import '../recruitment-shared.scss';
+
+.recruitment-job-applications {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.recruitment-job-applications .employees-hr-card {
+  background: #fff;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
+  margin-bottom: 30px;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.recruitment-job-applications .employees-hr-header {
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border, #e2e8f0);
+}
+
+.filters-toolbar {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-50, #f8fafc);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 10px;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: end;
+}
+
+.filter-field {
+  min-width: 0;
+}
+
+:host ::ng-deep .recruitment-filter-control {
+  width: 100%;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+:host ::ng-deep .recruitment-filter-control .p-select-label {
+  line-height: 1.25;
+  padding-block: 0.45rem;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .recruitment-filter-control .p-select-dropdown {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #dddddd;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+:host ::ng-deep .recruitment-table .p-datatable-thead > tr > th {
+  background: #009879;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  border: 1px solid #007a63;
+}
+
+:host ::ng-deep .recruitment-table .p-datatable-tbody > tr > td {
+  padding: 0.65rem 1rem;
+  border: 1px solid #dddddd;
+  text-align: start;
+}
+
+:host ::ng-deep .recruitment-table .p-datatable-tbody > tr:nth-child(even) {
+  background: #f3f3f3;
+}
+
+:host ::ng-deep .recruitment-table .p-datatable-tbody > tr:nth-child(odd) {
+  background: #fff;
+}

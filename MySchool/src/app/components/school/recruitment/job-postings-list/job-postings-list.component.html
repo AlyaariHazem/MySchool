@@ -32,7 +32,7 @@
           <p-select
             inputId="jp-filter-school"
             class="w-full"
-            styleClass="w-full"
+            styleClass="w-full recruitment-filter-control"
             size="small"
             [options]="schoolOptions"
             [(ngModel)]="filter.schoolID"
@@ -48,7 +48,7 @@
           <p-select
             inputId="jp-filter-year"
             class="w-full"
-            styleClass="w-full"
+            styleClass="w-full recruitment-filter-control"
             size="small"
             [options]="yearOptions"
             [(ngModel)]="filter.academicYearID"
@@ -63,7 +63,7 @@
           <p-select
             inputId="jp-filter-job"
             class="w-full"
-            styleClass="w-full"
+            styleClass="w-full recruitment-filter-control"
             size="small"
             [options]="jobTypeOptions"
             [(ngModel)]="filter.employeeJobTypeID"
@@ -79,7 +79,7 @@
           <p-select
             inputId="jp-filter-status"
             class="w-full"
-            styleClass="w-full"
+            styleClass="w-full recruitment-filter-control"
             size="small"
             [options]="statusOptions"
             [(ngModel)]="filter.status"
@@ -94,7 +94,7 @@
           <p-select
             inputId="jp-filter-active"
             class="w-full"
-            styleClass="w-full"
+            styleClass="w-full recruitment-filter-control"
             size="small"
             [options]="activeOptions"
             [(ngModel)]="filter.isActive"
@@ -182,11 +182,8 @@
     </div>
 
     <!-- HR: full table with workflow actions -->
-    <p-table
-      *ngIf="isHrUser && !loading && rows.length > 0"
-      [value]="rows"
-      styleClass="p-datatable-sm employees-hr-table"
-    >
+    <div *ngIf="isHrUser && !loading && rows.length > 0" class="table-wrap">
+      <p-table [value]="rows" styleClass="p-datatable-sm employees-hr-table recruitment-table">
       <ng-template pTemplate="header">
         <tr>
           <th>{{ 'recruitment.postings.colTitle' | translate }}</th>
@@ -262,7 +259,8 @@
           </td>
         </tr>
       </ng-template>
-    </p-table>
+      </p-table>
+    </div>
   </div>
 </div>
 
@@ -328,64 +326,83 @@
   <div *ngIf="!detailsLoading && detailsError" class="error-block">{{ detailsError }}</div>
 
   <div *ngIf="!detailsLoading && selectedPosting" class="job-posting-dialog-content">
-    <div class="detail-meta mb-3">
-      <p-tag
-        [value]="'recruitment.postingStatus.' + postingStatusLabelKey(selectedPosting.status) | translate"
-        [severity]="severityStatus(selectedPosting.status)"
-      />
+    <div class="posting-view-shell">
+      <div class="posting-view-head">
+        <h3 class="posting-view-title">{{ selectedPosting.title }}</h3>
+        <p-tag
+          [value]="'recruitment.postingStatus.' + postingStatusLabelKey(selectedPosting.status) | translate"
+          [severity]="severityStatus(selectedPosting.status)"
+        />
+      </div>
+
+      <div class="posting-view-maincard">
+        <div class="detail-grid">
+          <div class="detail-row">
+            <span class="k">{{ 'employeesHr.filter.school' | translate }}</span>
+            <span>{{ schoolName(selectedPosting.schoolID) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="k">{{ 'employeesHr.filter.year' | translate }}</span>
+            <span>{{ yearLabel(selectedPosting.academicYearID) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="k">{{ 'employeesHr.filter.jobType' | translate }}</span>
+            <span>{{ selectedPosting.jobTypeName || selectedPosting.jobTypeCode || '—' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="k">{{ 'recruitment.postings.fieldDepartment' | translate }}</span>
+            <span>{{ selectedPosting.department || '—' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="k">{{ 'recruitment.postings.fieldEmploymentType' | translate }}</span>
+            <span>{{ selectedPosting.employmentType || '—' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="k">{{ 'recruitment.postings.fieldOpenings' | translate }}</span>
+            <span>{{ selectedPosting.numberOfOpenings }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="k">{{ 'recruitment.postings.fieldPostingDate' | translate }}</span>
+            <span>{{ selectedPosting.postingDate | date: 'medium' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="k">{{ 'recruitment.postings.fieldClosingDate' | translate }}</span>
+            <span>{{ selectedPosting.closingDate ? (selectedPosting.closingDate | date: 'medium') : '—' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="k">{{ 'recruitment.postings.fieldIsActive' | translate }}</span>
+            <span>{{ selectedPosting.isActive ? ('recruitment.yes' | translate) : ('recruitment.no' | translate) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="posting-view-textgrid">
+        <section class="posting-view-textcard">
+          <h4 class="eh-section">{{ 'recruitment.postings.fieldDescription' | translate }}</h4>
+          <p class="pre-wrap" *ngIf="selectedPosting.description">{{ selectedPosting.description }}</p>
+          <p class="muted" *ngIf="!selectedPosting.description">{{ 'recruitment.empty.none' | translate }}</p>
+        </section>
+
+        <section class="posting-view-textcard">
+          <h4 class="eh-section">{{ 'recruitment.postings.fieldRequirements' | translate }}</h4>
+          <p class="pre-wrap" *ngIf="selectedPosting.requirements">{{ selectedPosting.requirements }}</p>
+          <p class="muted" *ngIf="!selectedPosting.requirements">{{ 'recruitment.empty.none' | translate }}</p>
+        </section>
+
+        <section class="posting-view-textcard">
+          <h4 class="eh-section">{{ 'recruitment.postings.fieldResponsibilities' | translate }}</h4>
+          <p class="pre-wrap" *ngIf="selectedPosting.responsibilities">{{ selectedPosting.responsibilities }}</p>
+          <p class="muted" *ngIf="!selectedPosting.responsibilities">{{ 'recruitment.empty.none' | translate }}</p>
+        </section>
+
+        <section class="posting-view-textcard" *ngIf="selectedPosting.notes">
+          <h4 class="eh-section">{{ 'employeesHr.form.notes' | translate }}</h4>
+          <p class="pre-wrap">{{ selectedPosting.notes }}</p>
+        </section>
+      </div>
     </div>
 
-    <div class="detail-grid">
-      <div class="detail-row">
-        <span class="k">{{ 'recruitment.postings.colTitle' | translate }}</span>
-        <span>{{ selectedPosting.title }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="k">{{ 'employeesHr.filter.school' | translate }}</span>
-        <span>{{ schoolName(selectedPosting.schoolID) }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="k">{{ 'employeesHr.filter.jobType' | translate }}</span>
-        <span>{{ selectedPosting.jobTypeName || selectedPosting.jobTypeCode || '—' }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="k">{{ 'recruitment.postings.fieldDepartment' | translate }}</span>
-        <span>{{ selectedPosting.department || '—' }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="k">{{ 'recruitment.postings.fieldEmploymentType' | translate }}</span>
-        <span>{{ selectedPosting.employmentType || '—' }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="k">{{ 'recruitment.postings.fieldOpenings' | translate }}</span>
-        <span>{{ selectedPosting.numberOfOpenings }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="k">{{ 'recruitment.postings.fieldPostingDate' | translate }}</span>
-        <span>{{ selectedPosting.postingDate | date: 'medium' }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="k">{{ 'recruitment.postings.fieldClosingDate' | translate }}</span>
-        <span>{{ selectedPosting.closingDate ? (selectedPosting.closingDate | date: 'medium') : '—' }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="k">{{ 'recruitment.postings.fieldIsActive' | translate }}</span>
-        <span>{{ selectedPosting.isActive ? ('recruitment.yes' | translate) : ('recruitment.no' | translate) }}</span>
-      </div>
-    </div>
-
-    <h3 class="eh-section">{{ 'recruitment.postings.sectionText' | translate }}</h3>
-    <p class="pre-wrap" *ngIf="selectedPosting.description">{{ selectedPosting.description }}</p>
-    <p class="muted" *ngIf="!selectedPosting.description">{{ 'recruitment.empty.none' | translate }}</p>
-    <h4 class="eh-section">{{ 'recruitment.postings.fieldRequirements' | translate }}</h4>
-    <p class="pre-wrap" *ngIf="selectedPosting.requirements">{{ selectedPosting.requirements }}</p>
-    <h4 class="eh-section">{{ 'recruitment.postings.fieldResponsibilities' | translate }}</h4>
-    <p class="pre-wrap" *ngIf="selectedPosting.responsibilities">{{ selectedPosting.responsibilities }}</p>
-    <p *ngIf="selectedPosting.notes" class="mt-2">
-      <strong>{{ 'employeesHr.form.notes' | translate }}:</strong> {{ selectedPosting.notes }}
-    </p>
-
-    <div class="tab-toolbar mt-3" *ngIf="canUpdate">
+    <div class="tab-toolbar mt-3 posting-view-actions" *ngIf="canUpdate">
       <p-button [label]="'employeesHr.actions.edit' | translate" icon="pi pi-pencil" (onClick)="openEditDialogFromDetails()" />
       <p-button
         *ngIf="selectedPosting.status === JobPostingStatus.Draft || selectedPosting.status === JobPostingStatus.Closed"
