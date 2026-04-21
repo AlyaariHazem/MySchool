@@ -1,5 +1,18 @@
 .sv-form-page {
   padding: 1rem 1.25rem;
+
+  &--embedded {
+    padding: 0;
+  }
+}
+
+.sv-form-header--embedded {
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+
+  h2 {
+    display: none;
+  }
 }
 
 .sv-form-spinner {

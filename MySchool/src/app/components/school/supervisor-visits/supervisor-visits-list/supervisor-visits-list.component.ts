@@ -1,6 +1,5 @@
 import { AsyncPipe, NgIf } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -11,6 +10,9 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
+import { DialogModule } from 'primeng/dialog';
+
+import { SupervisorVisitsFormComponent } from '../supervisor-visits-form/supervisor-visits-form.component';
 import { ConfirmationService } from 'primeng/api';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
@@ -43,7 +45,8 @@ import { SupervisorVisitsService, readSupervisorVisitHttpError } from '../superv
     ProgressSpinnerModule,
     TooltipModule,
     ConfirmDialogModule,
-    RouterLink,
+    DialogModule,
+    SupervisorVisitsFormComponent,
   ],
   providers: [ConfirmationService],
   templateUrl: './supervisor-visits-list.component.html',
@@ -73,6 +76,11 @@ export class SupervisorVisitsListComponent implements OnInit {
   schoolOptions: { label: string; value: number }[] = [];
   yearOptions: { label: string; value: number }[] = [];
 
+  /** Dialog for create / edit visit (same page). */
+  formDialogVisible = false;
+  /** null = new visit, number = edit. */
+  editingVisitId: number | null = null;
+
   get isSchoolManager(): boolean {
     return isSchoolManagerUser();
   }
@@ -91,6 +99,32 @@ export class SupervisorVisitsListComponent implements OnInit {
 
   get canDelete(): boolean {
     return this.perm.hasPermission(PagePermission.Employees.Delete);
+  }
+
+  get formDialogHeaderKey(): string {
+    return this.editingVisitId != null && this.editingVisitId > 0
+      ? 'supervisorVisits.form.titleEdit'
+      : 'supervisorVisits.form.titleNew';
+  }
+
+  openCreateDialog(): void {
+    this.editingVisitId = null;
+    this.formDialogVisible = true;
+  }
+
+  openEditDialog(id: number): void {
+    this.editingVisitId = id;
+    this.formDialogVisible = true;
+  }
+
+  closeFormDialog(): void {
+    this.formDialogVisible = false;
+    this.editingVisitId = null;
+  }
+
+  onFormSaved(): void {
+    this.closeFormDialog();
+    this.load();
   }
 
   ngOnInit(): void {

@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -70,6 +70,17 @@ interface SubjectOption {
   styleUrl: './supervisor-visits-form.component.scss',
 })
 export class SupervisorVisitsFormComponent implements OnInit {
+  /** When true, form is shown inside a dialog; use {@link visitIdInput} instead of the route. */
+  @Input() embedded = false;
+  /** Create = null, edit = id. Used when {@link embedded} is true. */
+  @Input() visitIdInput: number | null = null;
+  /** Optional defaults from list filters when opening “new” in a dialog. */
+  @Input() presetSchoolId: number | null = null;
+  @Input() presetAcademicYearId: number | null = null;
+
+  @Output() closed = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<void>();
+
   private readonly svc = inject(SupervisorVisitsService);
   private readonly employeesHr = inject(EmployeesHrService);
   private readonly schoolService = inject(SchoolService);
@@ -131,14 +142,21 @@ export class SupervisorVisitsFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.visitId = Number(this.route.snapshot.paramMap.get('id')) || null;
-    if (this.visitId && !this.perm.hasPermission(PagePermission.Employees.Update)) {
-      this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
-      return;
-    }
-    if (!this.visitId && !this.perm.hasPermission(PagePermission.Employees.Create)) {
-      this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
-      return;
+    this.visitId = this.embedded
+      ? this.visitIdInput != null && this.visitIdInput > 0
+        ? this.visitIdInput
+        : null
+      : Number(this.route.snapshot.paramMap.get('id')) || null;
+
+    if (!this.embedded) {
+      if (this.visitId && !this.perm.hasPermission(PagePermission.Employees.Update)) {
+        this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
+        return;
+      }
+      if (!this.visitId && !this.perm.hasPermission(PagePermission.Employees.Create)) {
+        this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
+        return;
+      }
     }
 
     this.statusOptions = [
@@ -172,6 +190,15 @@ export class SupervisorVisitsFormComponent implements OnInit {
       next: (years: Year[]) => {
         this.allYears = years ?? [];
         this.refreshYearOptions();
+        if (this.embedded && !this.visitId) {
+          if (this.presetSchoolId != null && this.presetSchoolId > 0) {
+            this.schoolID = this.presetSchoolId;
+            this.refreshYearOptions();
+          }
+          if (this.presetAcademicYearId != null && this.presetAcademicYearId > 0) {
+            this.academicYearID = this.presetAcademicYearId;
+          }
+        }
       },
       error: () => undefined,
     });
@@ -383,13 +410,15 @@ export class SupervisorVisitsFormComponent implements OnInit {
         },
         error: (e) => {
           this.toastr.error(readSupervisorVisitHttpError(e));
-          this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
+          if (this.embedded) this.closed.emit();
+          else this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
         },
       });
   }
 
   cancel(): void {
-    this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
+    if (this.embedded) this.closed.emit();
+    else this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
   }
 
   save(): void {
@@ -439,7 +468,8 @@ export class SupervisorVisitsFormComponent implements OnInit {
     req.pipe(finalize(() => (this.saving = false))).subscribe({
       next: () => {
         this.toastr.success(this.visitId ? 'supervisorVisits.toast.updated' : 'supervisorVisits.toast.created');
-        this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
+        if (this.embedded) this.saved.emit();
+        else this.router.navigate(['/school/supervisor-visits']).catch(() => undefined);
       },
       error: (e) => this.toastr.error(readSupervisorVisitHttpError(e)),
     });

@@ -311,21 +311,13 @@ const routes: Routes = [
         children: [
           {
             path: 'new',
-            loadComponent: () =>
-              import('./supervisor-visits/supervisor-visits-form/supervisor-visits-form.component').then(
-                (m) => m.SupervisorVisitsFormComponent,
-              ),
-            data: { breadcrumb: 'زيارة جديدة', permission: PagePermission.Employees.Create },
-            canMatch: [permissionGuard],
+            redirectTo: '',
+            pathMatch: 'full',
           },
           {
             path: ':id/edit',
-            loadComponent: () =>
-              import('./supervisor-visits/supervisor-visits-form/supervisor-visits-form.component').then(
-                (m) => m.SupervisorVisitsFormComponent,
-              ),
-            data: { breadcrumb: 'تعديل زيارة', permission: PagePermission.Employees.Update },
-            canMatch: [permissionGuard],
+            redirectTo: '',
+            pathMatch: 'full',
           },
           {
             path: '',

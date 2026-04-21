@@ -1,9 +1,22 @@
-<div class="sv-form-page">
+<div class="sv-form-page" [class.sv-form-page--embedded]="embedded">
   <p-progressSpinner *ngIf="loading" styleClass="sv-form-spinner" />
 
   <div class="sv-form-card" *ngIf="!loading">
-    <header class="sv-form-header">
+    <header class="sv-form-header" *ngIf="!embedded">
       <h2>{{ (isEdit ? 'supervisorVisits.form.titleEdit' : 'supervisorVisits.form.titleNew') | translate }}</h2>
+      <div class="sv-form-header-actions">
+        <p-button [label]="'supervisorVisits.actions.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
+        <p-button
+          *ngIf="canSubmit"
+          [label]="'supervisorVisits.form.save' | translate"
+          icon="pi pi-check"
+          (onClick)="save()"
+          [loading]="saving"
+        />
+      </div>
+    </header>
+
+    <header class="sv-form-header sv-form-header--embedded" *ngIf="embedded">
       <div class="sv-form-header-actions">
         <p-button [label]="'supervisorVisits.actions.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
         <p-button
@@ -259,7 +272,7 @@
       </div>
     </section>
 
-    <div class="sv-form-footer">
+    <div class="sv-form-footer" *ngIf="!embedded">
       <a routerLink="/school/supervisor-visits">{{ 'supervisorVisits.form.backToList' | translate }}</a>
     </div>
   </div>

@@ -5,9 +5,12 @@
     <header class="sv-header">
       <h2 class="sv-title">{{ 'supervisorVisits.list.title' | translate }}</h2>
       <div class="sv-header-actions">
-        <a *ngIf="canCreate" routerLink="/school/supervisor-visits/new">
-          <p-button [label]="'supervisorVisits.list.add' | translate" icon="pi pi-plus" />
-        </a>
+        <p-button
+          *ngIf="canCreate"
+          [label]="'supervisorVisits.list.add' | translate"
+          icon="pi pi-plus"
+          (onClick)="openCreateDialog()"
+        />
         <p-button
           [label]="'supervisorVisits.list.refresh' | translate"
           icon="pi pi-refresh"
@@ -80,9 +83,14 @@
           <td>{{ row.overallScoreOutOf100 }}</td>
           <td>{{ statusLabel(row.status) | translate }}</td>
           <td>
-            <a *ngIf="canUpdate" [routerLink]="['/school/supervisor-visits', row.supervisorVisitID, 'edit']">
-              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" [pTooltip]="'supervisorVisits.actions.edit' | translate" />
-            </a>
+            <p-button
+              *ngIf="canUpdate"
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              [pTooltip]="'supervisorVisits.actions.edit' | translate"
+              (onClick)="openEditDialog(row.supervisorVisitID)"
+            />
             <p-button
               *ngIf="canDelete"
               icon="pi pi-trash"
@@ -102,4 +110,28 @@
       </ng-template>
     </p-table>
   </div>
+
+  <p-dialog
+    [header]="formDialogHeaderKey | translate"
+    [(visible)]="formDialogVisible"
+    [modal]="true"
+    [style]="{ width: 'min(56rem, 96vw)' }"
+    [contentStyle]="{ 'max-height': 'min(78vh, 720px)', overflow: 'auto' }"
+    [appendTo]="'body'"
+    [draggable]="false"
+    [resizable]="false"
+    [dismissableMask]="true"
+    styleClass="sv-visit-form-dialog"
+    (onHide)="closeFormDialog()"
+  >
+    <app-supervisor-visits-form
+      *ngIf="formDialogVisible"
+      [embedded]="true"
+      [visitIdInput]="editingVisitId"
+      [presetSchoolId]="filter.schoolID ?? null"
+      [presetAcademicYearId]="filter.academicYearID ?? null"
+      (closed)="closeFormDialog()"
+      (saved)="onFormSaved()"
+    />
+  </p-dialog>
 </div>
