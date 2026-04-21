@@ -1,0 +1,53 @@
+<div class="tf-portal" [attr.dir]="dir$ | async">
+  <h1 class="tf-portal-title">{{ 'teacherFeedback.portal.title' | translate }}</h1>
+  <p class="tf-portal-desc">{{ 'teacherFeedback.portal.subtitle' | translate }}</p>
+
+  <div *ngIf="participant === 'guardian'" class="tf-portal-guardian-pick">
+    <p-floatlabel variant="on" class="tf-field">
+      <p-select
+        inputId="tf-portal-child"
+        styleClass="w-full"
+        [options]="childOptions"
+        [(ngModel)]="selectedStudentId"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+      />
+      <label for="tf-portal-child">{{ 'teacherFeedback.portal.selectChild' | translate }}</label>
+    </p-floatlabel>
+  </div>
+
+  <div *ngIf="loading" class="tf-portal-loading">
+    <p-progressSpinner strokeWidth="3" />
+  </div>
+
+  <div *ngIf="!loading && cycles.length === 0" class="tf-portal-empty">
+    {{ 'teacherFeedback.portal.empty' | translate }}
+  </div>
+
+  <div class="tf-portal-cards" *ngIf="!loading && cycles.length > 0">
+    <p-card *ngFor="let c of cycles" styleClass="tf-portal-card">
+      <div class="tf-card-body">
+        <h2 class="tf-card-title">{{ c.title }}</h2>
+        <p class="tf-card-meta">
+          {{ 'teacherFeedback.portal.teacher' | translate }}: {{ c.teacherName || '—' }}
+        </p>
+        <p class="tf-card-meta">
+          {{ 'teacherFeedback.portal.closes' | translate }}: {{ c.closesAtUtc | date: 'short' }}
+        </p>
+        <a
+          *ngIf="participant === 'student' || (participant === 'guardian' && selectedStudentId)"
+          pButton
+          type="button"
+          class="p-button-sm"
+          [routerLink]="linkFor(c)"
+          [queryParams]="guardianQueryParams() ?? {}"
+          [label]="'teacherFeedback.portal.openForm' | translate"
+        ></a>
+        <span *ngIf="participant === 'guardian' && !selectedStudentId" class="text-muted small">
+          {{ 'teacherFeedback.portal.pickChildFirst' | translate }}
+        </span>
+      </div>
+    </p-card>
+  </div>
+</div>

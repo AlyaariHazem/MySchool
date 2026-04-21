@@ -333,6 +333,23 @@ const routes: Routes = [
         ],
       },
       {
+        path: 'teacher-feedback',
+        data: { breadcrumb: 'تقييم المعلم' },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./teacher-feedback/teacher-feedback-list/teacher-feedback-list.component').then(
+                (m) => m.TeacherFeedbackListComponent,
+              ),
+            data: { breadcrumb: 'دورات التقييم', permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
+      {
         path: 'recruitment',
         data: { breadcrumb: 'التوظيف' },
         children: [

@@ -179,8 +179,11 @@
       "applicationAdd": "New application",
       "dailyEvaluations": "Daily evaluations",
       "dailyEvalTemplates": "Evaluation templates",
-      "supervisorVisits": "Supervisor visits"
+      "supervisorVisits": "Supervisor visits",
+      "teacherFeedback": "Teacher feedback (students & parents)"
     },
+    "studentTeacherFeedback": "Teacher feedback",
+    "guardianTeacherFeedback": "Teacher feedback",
     "teachers_sub": {
       "all": "All staff",
       "add": "Add employee",
@@ -651,6 +654,103 @@
       "created": "Visit saved.",
       "updated": "Visit updated.",
       "deleted": "Visit deleted."
+    }
+  },
+  "teacherFeedback": {
+    "list": {
+      "title": "Teacher feedback cycles",
+      "add": "New cycle",
+      "refresh": "Refresh",
+      "applyFilters": "Apply filters",
+      "empty": "No cycles found.",
+      "noPermission": "You do not have access to this list.",
+      "confirmHeader": "Confirm delete",
+      "confirmDelete": "Delete the cycle “{{title}}”?"
+    },
+    "filter": {
+      "school": "School",
+      "status": "Status"
+    },
+    "columns": {
+      "title": "Title",
+      "teacher": "Teacher",
+      "opens": "Opens (local)",
+      "closes": "Closes (local)",
+      "status": "Status",
+      "studentN": "Student responses",
+      "parentN": "Parent responses",
+      "actions": "Actions"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "recompute": "Recompute summaries"
+    },
+    "form": {
+      "titleNew": "New feedback cycle",
+      "titleEdit": "Edit feedback cycle",
+      "save": "Save",
+      "cancel": "Cancel",
+      "backToList": "Back to list",
+      "school": "School",
+      "year": "Academic year",
+      "teacher": "Teacher",
+      "title": "Title",
+      "description": "Description (optional)",
+      "opensAt": "Opens at",
+      "closesAt": "Closes at",
+      "status": "Status",
+      "questions": "Questions",
+      "addQuestion": "Add question",
+      "questionText": "Question text",
+      "questionType": "Type",
+      "audience": "Audience",
+      "required": "Required",
+      "validationSchool": "School context is missing.",
+      "validationRequired": "Please fill school (if shown), year, teacher, and title.",
+      "validationDates": "End date/time must be after start.",
+      "validationQuestions": "Every question must have text."
+    },
+    "questionType": {
+      "rating": "Rating (1–5)",
+      "text": "Text",
+      "yesNo": "Yes / No"
+    },
+    "audience": {
+      "students": "Students only",
+      "parents": "Parents only",
+      "both": "Students & parents"
+    },
+    "toast": {
+      "created": "Cycle saved.",
+      "updated": "Cycle updated.",
+      "deleted": "Cycle deleted.",
+      "summariesUpdated": "Summaries recomputed."
+    },
+    "portal": {
+      "title": "Teacher feedback",
+      "subtitle": "Open surveys for your teachers. Select a cycle to answer.",
+      "selectChild": "Child",
+      "teacher": "Teacher",
+      "closes": "Closes",
+      "openForm": "Fill survey",
+      "empty": "There are no open feedback cycles right now.",
+      "pickChildFirst": "Please select a child first."
+    },
+    "fill": {
+      "back": "Back to list",
+      "saveDraft": "Save draft",
+      "submit": "Submit",
+      "saved": "Saved successfully.",
+      "alreadySubmitted": "You have already submitted this survey. It cannot be changed.",
+      "yes": "Yes",
+      "no": "No"
     }
   },
   "dailyEvaluations": {

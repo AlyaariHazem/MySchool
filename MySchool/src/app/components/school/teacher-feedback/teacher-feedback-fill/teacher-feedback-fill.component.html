@@ -1,0 +1,66 @@
+<div class="tf-fill" [attr.dir]="dir$ | async">
+  <p-progressSpinner *ngIf="loading" styleClass="tf-fill-spinner" />
+
+  <div *ngIf="!loading && form">
+    <a [routerLink]="participant === 'guardian' ? ['/guardian', 'teacher-feedback'] : ['/students', 'teacher-feedback']" class="tf-fill-back">
+      ← {{ 'teacherFeedback.fill.back' | translate }}
+    </a>
+
+    <h1 class="tf-fill-title">{{ form.title }}</h1>
+    <p class="tf-fill-meta">{{ 'teacherFeedback.portal.teacher' | translate }}: {{ form.teacherName || '—' }}</p>
+    <p class="tf-fill-meta">{{ 'teacherFeedback.portal.closes' | translate }}: {{ form.closesAtUtc | date: 'short' }}</p>
+
+    <div *ngIf="isSubmitted" class="tf-fill-done">
+      {{ 'teacherFeedback.fill.alreadySubmitted' | translate }}
+    </div>
+
+    <div *ngIf="!isSubmitted" class="tf-fill-questions">
+      <div class="tf-fill-q" *ngFor="let q of form.questions">
+        <label class="tf-fill-qtext">{{ q.questionText }}<span *ngIf="q.isRequired" class="req">*</span></label>
+
+        <p-inputNumber
+          *ngIf="q.questionType === QuestionType.Rating1To5"
+          [(ngModel)]="answers[q.feedbackQuestionID].rating"
+          [min]="1"
+          [max]="5"
+          [showButtons]="true"
+          styleClass="w-full"
+        />
+
+        <textarea
+          *ngIf="q.questionType === QuestionType.Text"
+          pTextarea
+          class="w-full"
+          rows="3"
+          [(ngModel)]="answers[q.feedbackQuestionID].text"
+        ></textarea>
+
+        <p-select
+          *ngIf="q.questionType === QuestionType.YesNo"
+          styleClass="w-full"
+          [options]="yesNoOptions"
+          [(ngModel)]="answers[q.feedbackQuestionID].yesNo"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+      </div>
+    </div>
+
+    <div class="tf-fill-actions" *ngIf="!isSubmitted">
+      <p-button
+        [label]="'teacherFeedback.fill.saveDraft' | translate"
+        icon="pi pi-save"
+        [outlined]="true"
+        (onClick)="saveDraft()"
+        [loading]="saving"
+      />
+      <p-button
+        [label]="'teacherFeedback.fill.submit' | translate"
+        icon="pi pi-check"
+        (onClick)="submitFinal()"
+        [loading]="saving"
+      />
+    </div>
+  </div>
+</div>

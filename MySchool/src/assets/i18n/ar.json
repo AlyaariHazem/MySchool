@@ -180,8 +180,11 @@
       "applicationAdd": "طلب توظيف جديد",
       "dailyEvaluations": "التقييمات اليومية",
       "dailyEvalTemplates": "قوالب التقييم",
-      "supervisorVisits": "زيارات المشرف"
+      "supervisorVisits": "زيارات المشرف",
+      "teacherFeedback": "تقييم المعلم (طلاب وأولياء أمور)"
     },
+    "studentTeacherFeedback": "تقييم المعلم",
+    "guardianTeacherFeedback": "تقييم المعلم",
     "teachers_sub": {
       "all": "جميع الموظفين",
       "add": "إضافة موظف",
@@ -652,6 +655,103 @@
       "created": "تم حفظ الزيارة.",
       "updated": "تم تحديث الزيارة.",
       "deleted": "تم حذف الزيارة."
+    }
+  },
+  "teacherFeedback": {
+    "list": {
+      "title": "دورات تقييم المعلم",
+      "add": "دورة جديدة",
+      "refresh": "تحديث",
+      "applyFilters": "تطبيق التصفية",
+      "empty": "لا توجد دورات.",
+      "noPermission": "لا تملك صلاحية عرض هذه القائمة.",
+      "confirmHeader": "تأكيد الحذف",
+      "confirmDelete": "حذف الدورة «{{title}}»؟"
+    },
+    "filter": {
+      "school": "المدرسة",
+      "status": "الحالة"
+    },
+    "columns": {
+      "title": "العنوان",
+      "teacher": "المعلم",
+      "opens": "بداية الاستقبال",
+      "closes": "نهاية الاستقبال",
+      "status": "الحالة",
+      "studentN": "ردود الطلاب",
+      "parentN": "ردود أولياء الأمور",
+      "actions": "إجراءات"
+    },
+    "status": {
+      "draft": "مسودة",
+      "active": "نشطة",
+      "closed": "مغلقة"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف",
+      "cancel": "إلغاء",
+      "recompute": "إعادة حساب الملخصات"
+    },
+    "form": {
+      "titleNew": "دورة تقييم جديدة",
+      "titleEdit": "تعديل دورة التقييم",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "backToList": "العودة للقائمة",
+      "school": "المدرسة",
+      "year": "السنة الدراسية",
+      "teacher": "المعلم",
+      "title": "العنوان",
+      "description": "الوصف (اختياري)",
+      "opensAt": "يفتح في",
+      "closesAt": "يغلق في",
+      "status": "الحالة",
+      "questions": "الأسئلة",
+      "addQuestion": "إضافة سؤال",
+      "questionText": "نص السؤال",
+      "questionType": "النوع",
+      "audience": "الجمهور",
+      "required": "إلزامي",
+      "validationSchool": "لم يُعثر على سياق المدرسة.",
+      "validationRequired": "يرجى تعبئة المدرسة (إن ظهرت) والسنة والمعلم والعنوان.",
+      "validationDates": "تاريخ/وقت الإغلاق يجب أن يكون بعد البداية.",
+      "validationQuestions": "كل سؤال يجب أن يحتوي على نص."
+    },
+    "questionType": {
+      "rating": "تقييم (1–5)",
+      "text": "نص",
+      "yesNo": "نعم / لا"
+    },
+    "audience": {
+      "students": "طلاب فقط",
+      "parents": "أولياء أمور فقط",
+      "both": "طلاب وأولياء أمور"
+    },
+    "toast": {
+      "created": "تم حفظ الدورة.",
+      "updated": "تم تحديث الدورة.",
+      "deleted": "تم حذف الدورة.",
+      "summariesUpdated": "تم تحديث الملخصات."
+    },
+    "portal": {
+      "title": "تقييم المعلم",
+      "subtitle": "استبيانات مفتوحة للمعلمين. اختر دورة للإجابة.",
+      "selectChild": "الابن / الابنة",
+      "teacher": "المعلم",
+      "closes": "يغلق في",
+      "openForm": "فتح الاستبيان",
+      "empty": "لا توجد دورات مفتوحة حالياً.",
+      "pickChildFirst": "يرجى اختيار الطالب أولاً."
+    },
+    "fill": {
+      "back": "العودة للقائمة",
+      "saveDraft": "حفظ مسودة",
+      "submit": "إرسال نهائي",
+      "saved": "تم الحفظ بنجاح.",
+      "alreadySubmitted": "تم إرسال هذا الاستبيان مسبقاً ولا يمكن تعديله.",
+      "yes": "نعم",
+      "no": "لا"
     }
   },
   "dailyEvaluations": {

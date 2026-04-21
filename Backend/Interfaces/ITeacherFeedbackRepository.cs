@@ -23,4 +23,23 @@ public interface ITeacherFeedbackRepository
     Task UpsertStudentFeedbackAsync(int studentId, StudentFeedbackSubmitDto dto, CancellationToken cancellationToken = default);
 
     Task UpsertParentFeedbackAsync(int guardianId, ParentFeedbackSubmitDto dto, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<TeacherFeedbackOpenCycleDto>> ListOpenCyclesForStudentAsync(
+        int studentId,
+        CancellationToken cancellationToken = default);
+
+    Task<TeacherFeedbackParticipantFormDto?> GetStudentCycleFormAsync(
+        int studentId,
+        int cycleId,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<TeacherFeedbackOpenCycleDto>> ListOpenCyclesForGuardianAsync(
+        int guardianId,
+        CancellationToken cancellationToken = default);
+
+    Task<TeacherFeedbackParticipantFormDto?> GetParentCycleFormAsync(
+        int guardianId,
+        int cycleId,
+        int studentId,
+        CancellationToken cancellationToken = default);
 }

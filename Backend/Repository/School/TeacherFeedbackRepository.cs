@@ -464,4 +464,216 @@ public class TeacherFeedbackRepository : ITeacherFeedbackRepository
 
         await _db.SaveChangesAsync(cancellationToken);
     }
+
+    private static FeedbackQuestionDto MapQuestionDto(FeedbackQuestion q) => new()
+    {
+        FeedbackQuestionID = q.FeedbackQuestionID,
+        TeacherFeedbackCycleID = q.TeacherFeedbackCycleID,
+        SortOrder = q.SortOrder,
+        QuestionText = q.QuestionText,
+        QuestionType = (int)q.QuestionType,
+        Audience = (int)q.Audience,
+        IsRequired = q.IsRequired,
+    };
+
+    private async Task<int?> GetStudentSchoolIdAsync(int studentId, CancellationToken cancellationToken)
+    {
+        return await (
+            from st in _db.Students.AsNoTracking()
+            where st.StudentID == studentId
+            join d in _db.Divisions.AsNoTracking() on st.DivisionID equals d.DivisionID
+            join c in _db.Classes.AsNoTracking() on d.ClassID equals c.ClassID
+            join y in _db.Years.AsNoTracking() on c.YearID equals y.YearID
+            select (int?)y.SchoolID).FirstOrDefaultAsync(cancellationToken);
+    }
+
+    private async Task<List<int>> GetSchoolIdsForGuardianAsync(int guardianId, CancellationToken cancellationToken)
+    {
+        return await (
+            from st in _db.Students.AsNoTracking()
+            where st.GuardianID == guardianId
+            join d in _db.Divisions.AsNoTracking() on st.DivisionID equals d.DivisionID
+            join c in _db.Classes.AsNoTracking() on d.ClassID equals c.ClassID
+            join y in _db.Years.AsNoTracking() on c.YearID equals y.YearID
+            select y.SchoolID).Distinct().ToListAsync(cancellationToken);
+    }
+
+    private static bool CycleIsOpenForParticipant(TeacherFeedbackCycle c)
+    {
+        var now = DateTime.UtcNow;
+        return c.Status == TeacherFeedbackCycleStatus.Active && now >= c.OpensAtUtc && now <= c.ClosesAtUtc;
+    }
+
+    public async Task<IReadOnlyList<TeacherFeedbackOpenCycleDto>> ListOpenCyclesForStudentAsync(
+        int studentId,
+        CancellationToken cancellationToken = default)
+    {
+        var schoolId = await GetStudentSchoolIdAsync(studentId, cancellationToken);
+        if (schoolId is null or <= 0)
+            return Array.Empty<TeacherFeedbackOpenCycleDto>();
+
+        var now = DateTime.UtcNow;
+        var rows = await _db.TeacherFeedbackCycles.AsNoTracking()
+            .Where(c => c.SchoolID == schoolId && c.Status == TeacherFeedbackCycleStatus.Active
+                        && c.OpensAtUtc <= now && c.ClosesAtUtc >= now)
+            .OrderByDescending(c => c.TeacherFeedbackCycleID)
+            .Select(c => new
+            {
+                c.TeacherFeedbackCycleID,
+                c.Title,
+                Fn = c.Teacher.FullName.FirstName,
+                Mn = c.Teacher.FullName.MiddleName,
+                Ln = c.Teacher.FullName.LastName,
+                c.ClosesAtUtc,
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows.Select(c => new TeacherFeedbackOpenCycleDto
+        {
+            TeacherFeedbackCycleID = c.TeacherFeedbackCycleID,
+            Title = c.Title,
+            TeacherName = FormatTeacherName(new Name { FirstName = c.Fn, MiddleName = c.Mn, LastName = c.Ln }),
+            ClosesAtUtc = c.ClosesAtUtc,
+        }).ToList();
+    }
+
+    public async Task<TeacherFeedbackParticipantFormDto?> GetStudentCycleFormAsync(
+        int studentId,
+        int cycleId,
+        CancellationToken cancellationToken = default)
+    {
+        var schoolId = await GetStudentSchoolIdAsync(studentId, cancellationToken);
+        if (schoolId is null or <= 0) return null;
+        var sid = schoolId.Value;
+
+        var cycle = await _db.TeacherFeedbackCycles
+            .Include(c => c.Questions)
+            .Include(c => c.Teacher)
+            .FirstOrDefaultAsync(c => c.TeacherFeedbackCycleID == cycleId, cancellationToken);
+        if (cycle == null || cycle.SchoolID != sid || !CycleIsOpenForParticipant(cycle))
+            return null;
+
+        var questions = cycle.Questions
+            .Where(q => QuestionAppliesToStudent(q.Audience))
+            .OrderBy(q => q.SortOrder)
+            .ToList();
+
+        var row = await _db.StudentFeedbacks.AsNoTracking()
+            .FirstOrDefaultAsync(
+                s => s.TeacherFeedbackCycleID == cycleId && s.StudentID == studentId,
+                cancellationToken);
+
+        List<FeedbackResponseItemDto>? existing = null;
+        if (!string.IsNullOrWhiteSpace(row?.ResponsesJson))
+        {
+            try
+            {
+                existing = JsonSerializer.Deserialize<List<FeedbackResponseItemDto>>(row.ResponsesJson, JsonOpts);
+            }
+            catch
+            {
+                existing = null;
+            }
+        }
+
+        return new TeacherFeedbackParticipantFormDto
+        {
+            TeacherFeedbackCycleID = cycle.TeacherFeedbackCycleID,
+            Title = cycle.Title,
+            TeacherName = FormatTeacherName(cycle.Teacher.FullName),
+            ClosesAtUtc = cycle.ClosesAtUtc,
+            Questions = questions.Select(MapQuestionDto).ToList(),
+            ExistingResponses = existing,
+            SubmissionStatus = row == null ? 0 : (int)row.Status,
+        };
+    }
+
+    public async Task<IReadOnlyList<TeacherFeedbackOpenCycleDto>> ListOpenCyclesForGuardianAsync(
+        int guardianId,
+        CancellationToken cancellationToken = default)
+    {
+        var schoolIds = await GetSchoolIdsForGuardianAsync(guardianId, cancellationToken);
+        if (schoolIds.Count == 0)
+            return Array.Empty<TeacherFeedbackOpenCycleDto>();
+
+        var now = DateTime.UtcNow;
+        var rows = await _db.TeacherFeedbackCycles.AsNoTracking()
+            .Where(c => schoolIds.Contains(c.SchoolID) && c.Status == TeacherFeedbackCycleStatus.Active
+                        && c.OpensAtUtc <= now && c.ClosesAtUtc >= now)
+            .OrderByDescending(c => c.TeacherFeedbackCycleID)
+            .Select(c => new
+            {
+                c.TeacherFeedbackCycleID,
+                c.Title,
+                Fn = c.Teacher.FullName.FirstName,
+                Mn = c.Teacher.FullName.MiddleName,
+                Ln = c.Teacher.FullName.LastName,
+                c.ClosesAtUtc,
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows.Select(c => new TeacherFeedbackOpenCycleDto
+        {
+            TeacherFeedbackCycleID = c.TeacherFeedbackCycleID,
+            Title = c.Title,
+            TeacherName = FormatTeacherName(new Name { FirstName = c.Fn, MiddleName = c.Mn, LastName = c.Ln }),
+            ClosesAtUtc = c.ClosesAtUtc,
+        }).ToList();
+    }
+
+    public async Task<TeacherFeedbackParticipantFormDto?> GetParentCycleFormAsync(
+        int guardianId,
+        int cycleId,
+        int studentId,
+        CancellationToken cancellationToken = default)
+    {
+        var student = await _db.Students.AsNoTracking()
+            .FirstOrDefaultAsync(s => s.StudentID == studentId, cancellationToken);
+        if (student == null || student.GuardianID != guardianId)
+            return null;
+
+        var schoolIds = await GetSchoolIdsForGuardianAsync(guardianId, cancellationToken);
+        if (schoolIds.Count == 0) return null;
+
+        var cycle = await _db.TeacherFeedbackCycles
+            .Include(c => c.Questions)
+            .Include(c => c.Teacher)
+            .FirstOrDefaultAsync(c => c.TeacherFeedbackCycleID == cycleId, cancellationToken);
+        if (cycle == null || !schoolIds.Contains(cycle.SchoolID) || !CycleIsOpenForParticipant(cycle))
+            return null;
+
+        var questions = cycle.Questions
+            .Where(q => QuestionAppliesToParent(q.Audience))
+            .OrderBy(q => q.SortOrder)
+            .ToList();
+
+        var row = await _db.ParentFeedbacks.AsNoTracking()
+            .FirstOrDefaultAsync(
+                p => p.TeacherFeedbackCycleID == cycleId && p.GuardianID == guardianId && p.StudentID == studentId,
+                cancellationToken);
+
+        List<FeedbackResponseItemDto>? existing = null;
+        if (!string.IsNullOrWhiteSpace(row?.ResponsesJson))
+        {
+            try
+            {
+                existing = JsonSerializer.Deserialize<List<FeedbackResponseItemDto>>(row.ResponsesJson, JsonOpts);
+            }
+            catch
+            {
+                existing = null;
+            }
+        }
+
+        return new TeacherFeedbackParticipantFormDto
+        {
+            TeacherFeedbackCycleID = cycle.TeacherFeedbackCycleID,
+            Title = cycle.Title,
+            TeacherName = FormatTeacherName(cycle.Teacher.FullName),
+            ClosesAtUtc = cycle.ClosesAtUtc,
+            Questions = questions.Select(MapQuestionDto).ToList(),
+            ExistingResponses = existing,
+            SubmissionStatus = row == null ? 0 : (int)row.Status,
+        };
+    }
 }

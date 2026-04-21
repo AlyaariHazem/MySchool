@@ -1,0 +1,64 @@
+.tf-portal {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+}
+
+.tf-portal-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+
+.tf-portal-desc {
+  margin: 0 0 1.25rem;
+  color: #64748b;
+}
+
+.tf-portal-guardian-pick {
+  max-width: 24rem;
+  margin-bottom: 1.25rem;
+}
+
+.tf-portal-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.tf-portal-empty {
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.tf-portal-cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+}
+
+:host ::ng-deep .tf-portal-card .p-card-body {
+  padding: 1rem 1.15rem;
+}
+
+.tf-card-title {
+  font-size: 1.05rem;
+  margin: 0 0 0.5rem;
+}
+
+.tf-card-meta {
+  margin: 0 0 0.35rem;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.tf-field {
+  width: 100%;
+}
+
+:host ::ng-deep .tf-field .p-select {
+  width: 100%;
+}

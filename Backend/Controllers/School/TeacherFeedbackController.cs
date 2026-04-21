@@ -160,6 +160,68 @@ public class TeacherFeedbackController : ControllerBase
     }
 
     [Authorize(Roles = "STUDENT")]
+    [HttpGet("student/open-cycles")]
+    public async Task<ActionResult<APIResponse>> StudentOpenCycles(CancellationToken cancellationToken)
+    {
+        var uid = CurrentUserId;
+        if (string.IsNullOrEmpty(uid))
+            return Unauthorized(APIResponse.Fail("User id not found on token.", HttpStatusCode.Unauthorized));
+        var studentId = await _unitOfWork.Homework.GetStudentIdByUserIdAsync(uid, cancellationToken);
+        if (studentId is null or <= 0)
+            return StatusCode((int)HttpStatusCode.Forbidden, APIResponse.Fail("No student profile for this user.", HttpStatusCode.Forbidden));
+        var rows = await _unitOfWork.TeacherFeedback.ListOpenCyclesForStudentAsync(studentId.Value, cancellationToken);
+        return Ok(APIResponse.Success(rows));
+    }
+
+    [Authorize(Roles = "STUDENT")]
+    [HttpGet("student/cycles/{id:int}/form")]
+    public async Task<ActionResult<APIResponse>> StudentCycleForm(int id, CancellationToken cancellationToken)
+    {
+        var uid = CurrentUserId;
+        if (string.IsNullOrEmpty(uid))
+            return Unauthorized(APIResponse.Fail("User id not found on token.", HttpStatusCode.Unauthorized));
+        var studentId = await _unitOfWork.Homework.GetStudentIdByUserIdAsync(uid, cancellationToken);
+        if (studentId is null or <= 0)
+            return StatusCode((int)HttpStatusCode.Forbidden, APIResponse.Fail("No student profile for this user.", HttpStatusCode.Forbidden));
+        var form = await _unitOfWork.TeacherFeedback.GetStudentCycleFormAsync(studentId.Value, id, cancellationToken);
+        if (form == null)
+            return NotFound(APIResponse.Fail("Cycle not found or not open.", HttpStatusCode.NotFound));
+        return Ok(APIResponse.Success(form));
+    }
+
+    [Authorize(Roles = "GUARDIAN")]
+    [HttpGet("parent/open-cycles")]
+    public async Task<ActionResult<APIResponse>> ParentOpenCycles(CancellationToken cancellationToken)
+    {
+        var uid = CurrentUserId;
+        if (string.IsNullOrEmpty(uid))
+            return Unauthorized(APIResponse.Fail("User id not found on token.", HttpStatusCode.Unauthorized));
+        var guardianId = await _unitOfWork.Homework.GetGuardianIdByUserIdAsync(uid, cancellationToken);
+        if (guardianId is null or <= 0)
+            return StatusCode((int)HttpStatusCode.Forbidden, APIResponse.Fail("No guardian profile for this user.", HttpStatusCode.Forbidden));
+        var rows = await _unitOfWork.TeacherFeedback.ListOpenCyclesForGuardianAsync(guardianId.Value, cancellationToken);
+        return Ok(APIResponse.Success(rows));
+    }
+
+    [Authorize(Roles = "GUARDIAN")]
+    [HttpGet("parent/cycles/{id:int}/form")]
+    public async Task<ActionResult<APIResponse>> ParentCycleForm(int id, [FromQuery] int studentId, CancellationToken cancellationToken)
+    {
+        if (studentId <= 0)
+            return BadRequest(APIResponse.Fail("studentId query is required.", HttpStatusCode.BadRequest));
+        var uid = CurrentUserId;
+        if (string.IsNullOrEmpty(uid))
+            return Unauthorized(APIResponse.Fail("User id not found on token.", HttpStatusCode.Unauthorized));
+        var guardianId = await _unitOfWork.Homework.GetGuardianIdByUserIdAsync(uid, cancellationToken);
+        if (guardianId is null or <= 0)
+            return StatusCode((int)HttpStatusCode.Forbidden, APIResponse.Fail("No guardian profile for this user.", HttpStatusCode.Forbidden));
+        var form = await _unitOfWork.TeacherFeedback.GetParentCycleFormAsync(guardianId.Value, id, studentId, cancellationToken);
+        if (form == null)
+            return NotFound(APIResponse.Fail("Cycle not found, not open, or student is not linked to you.", HttpStatusCode.NotFound));
+        return Ok(APIResponse.Success(form));
+    }
+
+    [Authorize(Roles = "STUDENT")]
     [HttpPost("student/submit")]
     public async Task<ActionResult<APIResponse>> StudentSubmit([FromBody] StudentFeedbackSubmitDto? dto, CancellationToken cancellationToken)
     {

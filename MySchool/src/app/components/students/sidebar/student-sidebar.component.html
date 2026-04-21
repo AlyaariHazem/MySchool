@@ -62,6 +62,13 @@
           </a>
         </li>
 
+        <li>
+          <a routerLink="/students/teacher-feedback" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-3.png" alt="" />
+            <span>{{ 'sidebar.studentTeacherFeedback' | translate }}</span>
+          </a>
+        </li>
+
         <li class="submenu" (click)="toggleSubmenu('studentGrades')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-3.png" alt="" />

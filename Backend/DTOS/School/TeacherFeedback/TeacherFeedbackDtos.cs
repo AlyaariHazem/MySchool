@@ -100,3 +100,23 @@ public class ParentFeedbackSubmitDto
     public bool Submit { get; set; }
     public List<FeedbackResponseItemDto> Responses { get; set; } = new();
 }
+
+public class TeacherFeedbackOpenCycleDto
+{
+    public int TeacherFeedbackCycleID { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string? TeacherName { get; set; }
+    public DateTime ClosesAtUtc { get; set; }
+}
+
+/// <summary>Cycle + questions for a student or parent filling the form.</summary>
+public class TeacherFeedbackParticipantFormDto
+{
+    public int TeacherFeedbackCycleID { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string? TeacherName { get; set; }
+    public DateTime ClosesAtUtc { get; set; }
+    public List<FeedbackQuestionDto> Questions { get; set; } = new();
+    public List<FeedbackResponseItemDto>? ExistingResponses { get; set; }
+    public int SubmissionStatus { get; set; }
+}

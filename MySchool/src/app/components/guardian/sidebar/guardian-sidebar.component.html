@@ -48,6 +48,13 @@
           </a>
         </li>
 
+        <li>
+          <a routerLink="/guardian/teacher-feedback" (click)="cancel()">
+            <img src="assets/img/sidebar/icon-3.png" alt="" />
+            <span>{{ 'sidebar.guardianTeacherFeedback' | translate }}</span>
+          </a>
+        </li>
+
         <li class="submenu" (click)="toggleSubmenu('guardianGrades')">
           <a href="javascript:void(0);">
             <img src="assets/img/sidebar/icon-3.png" alt="" />

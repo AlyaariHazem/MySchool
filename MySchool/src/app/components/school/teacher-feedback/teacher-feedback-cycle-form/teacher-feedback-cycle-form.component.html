@@ -1,0 +1,179 @@
+<div class="tf-form" [attr.dir]="dir$ | async">
+  <p-progressSpinner *ngIf="loading" styleClass="tf-form-spinner" />
+
+  <div *ngIf="!loading" class="tf-form-grid">
+    <div class="tf-form-row tf-form-row--2" *ngIf="!isSchoolManager">
+      <p-floatlabel variant="on" class="tf-field">
+        <p-select
+          inputId="tf-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="schoolID"
+          (ngModelChange)="onSchoolChange()"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="tf-school">{{ 'teacherFeedback.form.school' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="tf-field">
+        <p-select
+          inputId="tf-year"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="yearOptions"
+          [(ngModel)]="academicYearID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="tf-year">{{ 'teacherFeedback.form.year' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="tf-form-row tf-form-row--2" *ngIf="isSchoolManager">
+      <p-floatlabel variant="on" class="tf-field">
+        <p-select
+          inputId="tf-year-m"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="yearOptions"
+          [(ngModel)]="academicYearID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="tf-year-m">{{ 'teacherFeedback.form.year' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="tf-form-row">
+      <p-floatlabel variant="on" class="tf-field">
+        <p-select
+          inputId="tf-teacher"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="teacherOptions"
+          [(ngModel)]="teacherID"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="true"
+          [showClear]="true"
+        />
+        <label for="tf-teacher">{{ 'teacherFeedback.form.teacher' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="tf-form-row">
+      <p-floatlabel variant="on" class="tf-field">
+        <input pInputText id="tf-title" class="w-full" [(ngModel)]="title" autocomplete="off" />
+        <label for="tf-title">{{ 'teacherFeedback.form.title' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="tf-form-row">
+      <p-floatlabel variant="on" class="tf-field">
+        <textarea pTextarea id="tf-desc" class="w-full" [(ngModel)]="description" rows="2"></textarea>
+        <label for="tf-desc">{{ 'teacherFeedback.form.description' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="tf-form-row tf-form-row--2">
+      <p-floatlabel variant="on" class="tf-field">
+        <p-datepicker
+          inputId="tf-opens"
+          [(ngModel)]="opensAt"
+          [showTime]="true"
+          hourFormat="24"
+          appendTo="body"
+          styleClass="w-full"
+        />
+        <label for="tf-opens">{{ 'teacherFeedback.form.opensAt' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="tf-field">
+        <p-datepicker
+          inputId="tf-closes"
+          [(ngModel)]="closesAt"
+          [showTime]="true"
+          hourFormat="24"
+          appendTo="body"
+          styleClass="w-full"
+        />
+        <label for="tf-closes">{{ 'teacherFeedback.form.closesAt' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="tf-form-row">
+      <p-floatlabel variant="on" class="tf-field">
+        <p-select
+          inputId="tf-status"
+          styleClass="w-full"
+          [options]="statusOptions"
+          [(ngModel)]="status"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="tf-status">{{ 'teacherFeedback.form.status' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="tf-questions-head">
+      <h3 class="tf-questions-title">{{ 'teacherFeedback.form.questions' | translate }}</h3>
+      <p-button [label]="'teacherFeedback.form.addQuestion' | translate" icon="pi pi-plus" [outlined]="true" (onClick)="addQuestion()" />
+    </div>
+
+    <div class="tf-question-card" *ngFor="let q of questions; let i = index">
+      <div class="tf-question-card-head">
+        <span>#{{ i + 1 }}</span>
+        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeQuestion(i)" />
+      </div>
+      <div class="tf-form-row">
+        <p-floatlabel variant="on" class="tf-field">
+          <textarea pTextarea [id]="'tf-qtext-' + q._key" class="w-full" [(ngModel)]="q.questionText" rows="2"></textarea>
+          <label [for]="'tf-qtext-' + q._key">{{ 'teacherFeedback.form.questionText' | translate }}</label>
+        </p-floatlabel>
+      </div>
+      <div class="tf-form-row tf-form-row--3">
+        <p-floatlabel variant="on" class="tf-field">
+          <p-select
+            [inputId]="'tf-qtype-' + q._key"
+            styleClass="w-full"
+            [options]="questionTypeOptions"
+            [(ngModel)]="q.questionType"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label [for]="'tf-qtype-' + q._key">{{ 'teacherFeedback.form.questionType' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="tf-field">
+          <p-select
+            [inputId]="'tf-qaud-' + q._key"
+            styleClass="w-full"
+            [options]="audienceOptions"
+            [(ngModel)]="q.audience"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label [for]="'tf-qaud-' + q._key">{{ 'teacherFeedback.form.audience' | translate }}</label>
+        </p-floatlabel>
+        <div class="tf-required-wrap">
+          <p-checkbox [(ngModel)]="q.isRequired" [binary]="true" [inputId]="'tf-qreq-' + q._key" />
+          <label [for]="'tf-qreq-' + q._key">{{ 'teacherFeedback.form.required' | translate }}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tf-form-actions" *ngIf="!loading">
+    <p-button
+      *ngIf="canSubmit"
+      [label]="'teacherFeedback.form.save' | translate"
+      icon="pi pi-check"
+      (onClick)="save()"
+      [loading]="saving"
+    />
+    <p-button [label]="'teacherFeedback.form.cancel' | translate" icon="pi pi-times" [outlined]="true" (onClick)="cancel()" />
+    <a *ngIf="!embedded" routerLink="/school/teacher-feedback" class="tf-back-link">{{ 'teacherFeedback.form.backToList' | translate }}</a>
+  </div>
+</div>

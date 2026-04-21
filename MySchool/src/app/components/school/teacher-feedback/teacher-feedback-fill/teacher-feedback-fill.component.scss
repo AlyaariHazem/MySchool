@@ -1,0 +1,67 @@
+.tf-fill {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+}
+
+.tf-fill-spinner {
+  display: block;
+  margin: 2rem auto;
+}
+
+.tf-fill-back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.tf-fill-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.tf-fill-meta {
+  margin: 0 0 0.25rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.tf-fill-done {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  border-radius: 10px;
+  color: #065f46;
+}
+
+.tf-fill-questions {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.tf-fill-qtext {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.tf-fill-qtext .req {
+  color: #dc2626;
+}
+
+.tf-fill-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+:host ::ng-deep .tf-fill-q .p-inputnumber,
+:host ::ng-deep .tf-fill-q .p-select {
+  width: 100%;
+  max-width: 16rem;
+}

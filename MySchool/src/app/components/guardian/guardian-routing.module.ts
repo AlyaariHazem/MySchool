@@ -50,6 +50,30 @@ const routes: Routes = [
         },
       },
       { path: 'attendance', component: GuardianAttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
+      {
+        path: 'teacher-feedback',
+        data: { breadcrumb: 'تقييم المعلم', tfParticipant: 'guardian' },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('../school/teacher-feedback/teacher-feedback-portal/teacher-feedback-portal.component').then(
+                (m) => m.TeacherFeedbackPortalComponent,
+              ),
+            data: { breadcrumb: 'الاستبيانات المفتوحة' },
+          },
+          {
+            path: 'fill/:cycleId',
+            loadComponent: () =>
+              import('../school/teacher-feedback/teacher-feedback-fill/teacher-feedback-fill.component').then(
+                (m) => m.TeacherFeedbackFillComponent,
+              ),
+            data: { breadcrumb: 'تعبئة الاستبيان' },
+          },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
       { path: 'not-found', component: PageNotFoundComponent },
       { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
     ],
