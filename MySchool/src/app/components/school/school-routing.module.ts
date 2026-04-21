@@ -333,6 +333,33 @@ const routes: Routes = [
         ],
       },
       {
+        path: 'achievements',
+        data: { breadcrumb: 'الإنجازات' },
+        children: [
+          {
+            path: 'new',
+            redirectTo: '',
+            pathMatch: 'full',
+          },
+          {
+            path: ':id/edit',
+            redirectTo: '',
+            pathMatch: 'full',
+          },
+          {
+            path: '',
+            loadComponent: () =>
+              import('./achievements/achievements-list/achievements-list.component').then(
+                (m) => m.AchievementsListComponent,
+              ),
+            data: { breadcrumb: 'طلبات الإنجاز', permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
+      {
         path: 'teacher-feedback',
         data: { breadcrumb: 'تقييم المعلم' },
         children: [

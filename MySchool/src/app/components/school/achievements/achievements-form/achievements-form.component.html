@@ -1,0 +1,173 @@
+<div class="ach-req-form-page" *ngIf="!loading || isEdit">
+  <div *ngIf="loading" class="loading-wrap">
+    <p-progressSpinner strokeWidth="3" />
+  </div>
+
+  <div *ngIf="!loading" class="ach-req-form-card">
+    <h3 class="ach-req-section-title">{{ 'achievementRequests.form.sectionMain' | translate }}</h3>
+
+    <div class="ach-req-form-grid">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="ach-field">
+        <p-select
+          inputId="ach-f-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [disabled]="isEdit"
+          (ngModelChange)="onSchoolChange()"
+        />
+        <label for="ach-f-school">{{ 'achievementRequests.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="ach-field">
+        <p-select
+          inputId="ach-f-emp"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="employeeOptions"
+          [(ngModel)]="employeeProfileID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+          [disabled]="isEdit"
+        />
+        <label for="ach-f-emp">{{ 'achievementRequests.form.employee' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="ach-field">
+        <p-select
+          inputId="ach-f-catalog"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="catalogOptions"
+          [(ngModel)]="catalogOrCustom"
+          optionLabel="label"
+          optionValue="value"
+          (ngModelChange)="onCatalogKindChange()"
+        />
+        <label for="ach-f-catalog">{{ 'achievementRequests.form.catalogOrCustom' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel *ngIf="catalogOrCustom === 0" variant="on" class="ach-field">
+        <input pInputText id="ach-f-custom-title" class="w-full" [(ngModel)]="customTitle" [maxlength]="256" />
+        <label for="ach-f-custom-title">{{ 'achievementRequests.form.customTitle' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="ach-field">
+        <p-select
+          inputId="ach-f-status"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="statusOptions"
+          [(ngModel)]="status"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="ach-f-status">{{ 'achievementRequests.form.status' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="ach-field ach-field-span2">
+        <textarea pTextarea id="ach-f-notes" class="w-full" rows="4" [(ngModel)]="notes" [maxlength]="4000"></textarea>
+        <label for="ach-f-notes">{{ 'achievementRequests.form.notes' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <ng-container *ngIf="isEdit && detail">
+      <h3 class="ach-req-section-title">{{ 'achievementRequests.form.sectionReadOnly' | translate }}: {{ displayTitle }}</h3>
+
+      <h4 class="ach-req-subtitle">{{ 'achievementRequests.form.approvals' | translate }}</h4>
+      <p-table [value]="detail.approvals" styleClass="p-datatable-sm ach-readonly-table" [tableStyle]="{ 'min-width': '100%' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'achievementRequests.columns.approver' | translate }}</th>
+            <th>{{ 'achievementRequests.columns.decision' | translate }}</th>
+            <th>{{ 'achievementRequests.columns.comment' | translate }}</th>
+            <th>{{ 'achievementRequests.columns.decidedAt' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.approverName }}</td>
+            <td>{{ approvalDecisionLabel(row.decision) }}</td>
+            <td>{{ row.comment || '—' }}</td>
+            <td>{{ row.decidedAtUtc ? (row.decidedAtUtc | date : 'short') : '—' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4">{{ 'achievementRequests.form.emptyApprovals' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <h4 class="ach-req-subtitle">{{ 'achievementRequests.form.attachments' | translate }}</h4>
+      <p-table [value]="detail.attachments" styleClass="p-datatable-sm ach-readonly-table" [tableStyle]="{ 'min-width': '100%' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'achievementRequests.columns.fileName' | translate }}</th>
+            <th>{{ 'achievementRequests.columns.uploadedAt' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.fileName }}</td>
+            <td>{{ row.uploadedAtUtc | date : 'short' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="2">{{ 'achievementRequests.form.emptyAttachments' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <h4 class="ach-req-subtitle">{{ 'achievementRequests.form.ledger' | translate }}</h4>
+      <p-table [value]="detail.ledgerEntries" styleClass="p-datatable-sm ach-readonly-table" [tableStyle]="{ 'min-width': '100%' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'achievementRequests.columns.points' | translate }}</th>
+            <th>{{ 'achievementRequests.columns.reason' | translate }}</th>
+            <th>{{ 'achievementRequests.columns.createdAt' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.deltaPoints }}</td>
+            <td>{{ row.reason }}</td>
+            <td>{{ row.createdAtUtc | date : 'short' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="3">{{ 'achievementRequests.form.emptyLedger' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </ng-container>
+
+    <div class="ach-req-actions" *ngIf="!embedded || !loading">
+      <p-button
+        *ngIf="canSubmit"
+        type="button"
+        [label]="'achievementRequests.form.save' | translate"
+        icon="pi pi-check"
+        (onClick)="save()"
+        [loading]="saving"
+      />
+      <p-button
+        type="button"
+        [label]="'achievementRequests.actions.cancel' | translate"
+        icon="pi pi-times"
+        [outlined]="true"
+        (onClick)="cancel()"
+        [disabled]="saving"
+      />
+      <a *ngIf="!embedded" routerLink="/school/achievements">{{ 'achievementRequests.form.backToList' | translate }}</a>
+    </div>
+  </div>
+</div>

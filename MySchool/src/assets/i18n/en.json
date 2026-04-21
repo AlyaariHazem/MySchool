@@ -180,6 +180,7 @@
       "dailyEvaluations": "Daily evaluations",
       "dailyEvalTemplates": "Evaluation templates",
       "supervisorVisits": "Supervisor visits",
+      "achievementRequests": "Achievement requests",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
     "studentTeacherFeedback": "Teacher feedback",
@@ -654,6 +655,86 @@
       "created": "Visit saved.",
       "updated": "Visit updated.",
       "deleted": "Visit deleted."
+    }
+  },
+  "achievementRequests": {
+    "list": {
+      "title": "Achievement requests",
+      "add": "New request",
+      "refresh": "Refresh",
+      "applyFilters": "Apply filters",
+      "empty": "No requests found.",
+      "noPermission": "You do not have access to this list.",
+      "confirmHeader": "Confirm delete",
+      "confirmDelete": "Delete the request “{{title}}” for {{name}}?"
+    },
+    "filter": {
+      "school": "School",
+      "year": "Academic year",
+      "status": "Status"
+    },
+    "columns": {
+      "submitted": "Submitted",
+      "employee": "Employee",
+      "title": "Achievement",
+      "status": "Status",
+      "resolved": "Resolved",
+      "actions": "Actions",
+      "approver": "Approver",
+      "decision": "Decision",
+      "comment": "Comment",
+      "decidedAt": "Decided",
+      "fileName": "File",
+      "uploadedAt": "Uploaded",
+      "points": "Points",
+      "reason": "Reason",
+      "createdAt": "When"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "inReview": "In review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "approval": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "skipped": "Skipped"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "titleNew": "New achievement request",
+      "titleEdit": "Edit achievement request",
+      "save": "Save",
+      "backToList": "Back to list",
+      "sectionMain": "Request details",
+      "sectionReadOnly": "Request",
+      "employee": "Employee (HR profile)",
+      "catalogOrCustom": "Catalog item or custom",
+      "customTitleOption": "Custom title (not in catalog)",
+      "customTitle": "Custom achievement title",
+      "status": "Status",
+      "notes": "Notes",
+      "approvals": "Approvals",
+      "attachments": "Attachments",
+      "ledger": "Points ledger",
+      "emptyApprovals": "No approval rows yet.",
+      "emptyAttachments": "No attachments.",
+      "emptyLedger": "No ledger entries for this request.",
+      "validationCore": "Please select school and employee.",
+      "validationCustom": "Enter a custom title, or pick a catalog item."
+    },
+    "toast": {
+      "created": "Request saved.",
+      "updated": "Request updated.",
+      "deleted": "Request deleted."
     }
   },
   "teacherFeedback": {

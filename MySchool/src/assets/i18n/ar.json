@@ -181,6 +181,7 @@
       "dailyEvaluations": "التقييمات اليومية",
       "dailyEvalTemplates": "قوالب التقييم",
       "supervisorVisits": "زيارات المشرف",
+      "achievementRequests": "طلبات الإنجاز",
       "teacherFeedback": "تقييم المعلمين"
     },
     "studentTeacherFeedback": "تقييم المعلم",
@@ -655,6 +656,86 @@
       "created": "تم حفظ الزيارة.",
       "updated": "تم تحديث الزيارة.",
       "deleted": "تم حذف الزيارة."
+    }
+  },
+  "achievementRequests": {
+    "list": {
+      "title": "طلبات الإنجاز",
+      "add": "طلب جديد",
+      "refresh": "تحديث",
+      "applyFilters": "تطبيق التصفية",
+      "empty": "لا توجد طلبات.",
+      "noPermission": "لا تملك صلاحية عرض هذه القائمة.",
+      "confirmHeader": "تأكيد الحذف",
+      "confirmDelete": "حذف الطلب «{{title}}» الخاص بـ {{name}}؟"
+    },
+    "filter": {
+      "school": "المدرسة",
+      "year": "السنة الدراسية",
+      "status": "الحالة"
+    },
+    "columns": {
+      "submitted": "تاريخ الإرسال",
+      "employee": "الموظف",
+      "title": "الإنجاز",
+      "status": "الحالة",
+      "resolved": "تاريخ الإغلاق",
+      "actions": "إجراءات",
+      "approver": "المعتمد",
+      "decision": "القرار",
+      "comment": "ملاحظة",
+      "decidedAt": "تاريخ القرار",
+      "fileName": "الملف",
+      "uploadedAt": "تاريخ الرفع",
+      "points": "النقاط",
+      "reason": "السبب",
+      "createdAt": "التاريخ"
+    },
+    "status": {
+      "draft": "مسودة",
+      "submitted": "مُرسل",
+      "inReview": "قيد المراجعة",
+      "approved": "مقبول",
+      "rejected": "مرفوض",
+      "cancelled": "ملغى"
+    },
+    "approval": {
+      "pending": "قيد الانتظار",
+      "approved": "موافقة",
+      "rejected": "رفض",
+      "skipped": "تم التخطي"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف",
+      "cancel": "إلغاء"
+    },
+    "form": {
+      "titleNew": "طلب إنجاز جديد",
+      "titleEdit": "تعديل طلب إنجاز",
+      "save": "حفظ",
+      "backToList": "العودة للقائمة",
+      "sectionMain": "بيانات الطلب",
+      "sectionReadOnly": "الطلب",
+      "employee": "الموظف (ملف موارد بشرية)",
+      "catalogOrCustom": "إنجاز من القائمة أو عنوان مخصص",
+      "customTitleOption": "عنوان مخصص (ليس في القائمة)",
+      "customTitle": "عنوان الإنجاز المخصص",
+      "status": "الحالة",
+      "notes": "ملاحظات",
+      "approvals": "الموافقات",
+      "attachments": "المرفقات",
+      "ledger": "سجل النقاط",
+      "emptyApprovals": "لا توجد خطوات موافقة بعد.",
+      "emptyAttachments": "لا توجد مرفقات.",
+      "emptyLedger": "لا توجد حركات نقاط لهذا الطلب.",
+      "validationCore": "يرجى اختيار المدرسة والموظف.",
+      "validationCustom": "أدخل عنواناً مخصصاً أو اختر عنصراً من القائمة."
+    },
+    "toast": {
+      "created": "تم حفظ الطلب.",
+      "updated": "تم تحديث الطلب.",
+      "deleted": "تم حذف الطلب."
     }
   },
   "teacherFeedback": {

@@ -1,0 +1,150 @@
+<div class="employees-hr-page ach-req-list-page" [attr.dir]="dir$ | async">
+  <p-confirmDialog [style]="{ width: '28rem' }" />
+
+  <div class="employees-hr-card ach-req-list-card">
+    <header class="employees-hr-header ach-req-list-header">
+      <h2 class="employees-hr-title">{{ 'achievementRequests.list.title' | translate }}</h2>
+      <div class="header-actions">
+        <p-button
+          *ngIf="canCreate"
+          [label]="'achievementRequests.list.add' | translate"
+          icon="pi pi-plus"
+          (onClick)="openCreateDialog()"
+        />
+        <p-button
+          [label]="'achievementRequests.list.refresh' | translate"
+          icon="pi pi-refresh"
+          [outlined]="true"
+          (onClick)="load()"
+          [loading]="loading"
+        />
+      </div>
+    </header>
+
+    <div class="filters-toolbar filters-grid ach-list-filters" *ngIf="canView">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+        <p-select
+          inputId="ach-filter-school"
+          styleClass="w-full ach-filter-select"
+          panelStyleClass="ach-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="filter.schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="ach-filter-school">{{ 'achievementRequests.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="filter-field">
+        <p-select
+          inputId="ach-filter-status"
+          styleClass="w-full ach-filter-select"
+          panelStyleClass="ach-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="statusOptions"
+          [(ngModel)]="filter.status"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="ach-filter-status">{{ 'achievementRequests.filter.status' | translate }}</label>
+      </p-floatlabel>
+
+      <div class="filter-actions">
+        <p-button [label]="'achievementRequests.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="load()" />
+      </div>
+    </div>
+
+    <div *ngIf="!canView" class="empty-block muted">{{ 'achievementRequests.list.noPermission' | translate }}</div>
+
+    <div *ngIf="loading && rows.length === 0" class="loading-wrap">
+      <p-progressSpinner strokeWidth="3" />
+    </div>
+
+    <p-table
+      *ngIf="canView"
+      [value]="rows"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} / {totalRecords}"
+      styleClass="p-datatable-sm employees-hr-table"
+      [rowHover]="true"
+      [tableStyle]="{ 'min-width': '52rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'achievementRequests.columns.submitted' | translate }}</th>
+          <th>{{ 'achievementRequests.columns.employee' | translate }}</th>
+          <th>{{ 'achievementRequests.columns.title' | translate }}</th>
+          <th>{{ 'achievementRequests.columns.status' | translate }}</th>
+          <th>{{ 'achievementRequests.columns.resolved' | translate }}</th>
+          <th class="ach-actions-col">{{ 'achievementRequests.columns.actions' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.submittedAtUtc | date : 'short' }}</td>
+          <td>{{ row.employeeName }}</td>
+          <td>{{ rowTitle(row) }}</td>
+          <td>{{ statusLabel(row.status) | translate }}</td>
+          <td>{{ row.resolvedAtUtc ? (row.resolvedAtUtc | date : 'short') : '—' }}</td>
+          <td>
+            <div class="action-btns">
+              <p-button
+                *ngIf="canUpdate"
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                [pTooltip]="'achievementRequests.actions.edit' | translate"
+                (onClick)="openEditDialog(row.achievementRequestID)"
+              />
+              <p-button
+                *ngIf="canDelete"
+                icon="pi pi-trash"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+                [pTooltip]="'achievementRequests.actions.delete' | translate"
+                (onClick)="confirmDelete(row)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6">{{ 'achievementRequests.list.empty' | translate }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog
+    [header]="formDialogHeaderKey | translate"
+    [(visible)]="formDialogVisible"
+    [modal]="true"
+    [focusOnShow]="false"
+    [style]="{ width: 'min(56rem, 96vw)' }"
+    [contentStyle]="{ 'max-height': 'min(78vh, 720px)', overflow: 'auto' }"
+    [appendTo]="'body'"
+    [draggable]="false"
+    [resizable]="false"
+    [dismissableMask]="true"
+    styleClass="ach-req-form-dialog"
+    (onHide)="closeFormDialog()"
+  >
+    <app-achievements-form
+      *ngIf="formDialogVisible"
+      [embedded]="true"
+      [requestIdInput]="editingRequestId"
+      [presetSchoolId]="filter.schoolID ?? null"
+      (closed)="closeFormDialog()"
+      (saved)="onFormSaved()"
+    />
+  </p-dialog>
+</div>
