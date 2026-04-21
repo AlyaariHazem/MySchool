@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -14,8 +14,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastrService } from 'ngx-toastr';
-import { HttpClient } from '@angular/common/http';
-import { catchError, finalize, map, of } from 'rxjs';
+import { finalize, map } from 'rxjs';
 
 import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
 import { PagePermission, PermissionService } from 'app/core/services/permission.service';
@@ -24,9 +23,6 @@ import { YearService } from 'app/core/services/year.service';
 import { School } from 'app/core/models/school.modul';
 import { Year } from 'app/core/models/year.model';
 import { ShardModule } from 'app/shared/shard.module';
-import { BackendAspService } from 'app/ASP.NET/backend-asp.service';
-import { ApiResponse } from 'app/core/models/response.model';
-import { PagedResultDto } from 'app/core/models/students.model';
 
 import {
   FeedbackQuestionAudience,
@@ -44,8 +40,6 @@ type QuestionRow = FeedbackQuestionWriteDto & { _key: number };
   standalone: true,
   imports: [
     ShardModule,
-    NgIf,
-    NgFor,
     FormsModule,
     TranslateModule,
     RouterLink,
@@ -57,7 +51,6 @@ type QuestionRow = FeedbackQuestionWriteDto & { _key: number };
     CheckboxModule,
     ProgressSpinnerModule,
     DatePicker,
-    DatePipe,
     AsyncPipe,
   ],
   templateUrl: './teacher-feedback-cycle-form.component.html',
@@ -74,8 +67,6 @@ export class TeacherFeedbackCycleFormComponent implements OnInit {
   private readonly svc = inject(TeacherFeedbackService);
   private readonly schoolService = inject(SchoolService);
   private readonly yearService = inject(YearService);
-  private readonly http = inject(HttpClient);
-  private readonly api = inject(BackendAspService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toastr = inject(ToastrService);
@@ -88,6 +79,10 @@ export class TeacherFeedbackCycleFormComponent implements OnInit {
   readonly filterSelectPanelStyle: Record<string, string> = {
     maxWidth: 'min(22rem, calc(100vw - 2rem))',
   };
+
+  /** Matches plains / shared teacher dropdown styling inside float labels. */
+  readonly teacherDropdownInputClass =
+    'dropdown-custom__input p-inputtext p-component w-full h-3rem';
 
   loading = false;
   saving = false;
@@ -103,8 +98,6 @@ export class TeacherFeedbackCycleFormComponent implements OnInit {
   status: TeacherFeedbackCycleStatus = TeacherFeedbackCycleStatus.Draft;
 
   schoolOptions: { label: string; value: number }[] = [];
-  yearOptions: { label: string; value: number }[] = [];
-  teacherOptions: { label: string; value: number }[] = [];
   allYears: Year[] = [];
 
   statusOptions: { label: string; value: number }[] = [];
@@ -180,12 +173,11 @@ export class TeacherFeedbackCycleFormComponent implements OnInit {
       next: (y) => {
         this.allYears = y ?? [];
         this.applyDefaultSchoolId();
-        this.refreshYearOptions();
+        if (!this.isEdit) this.patchActiveAcademicYearFromSchool();
       },
       error: () => undefined,
     });
 
-    this.loadTeachers();
     this.applyDefaultSchoolId();
     if (this.presetSchoolId != null && this.presetSchoolId > 0) this.schoolID = this.presetSchoolId;
 
@@ -206,46 +198,38 @@ export class TeacherFeedbackCycleFormComponent implements OnInit {
   }
 
   onSchoolChange(): void {
-    this.refreshYearOptions();
+    this.patchActiveAcademicYearFromSchool();
   }
 
-  private refreshYearOptions(): void {
-    const sid = this.schoolID;
-    const list =
-      sid != null && sid > 0 ? this.allYears.filter((y) => y.schoolID === sid) : [...this.allYears];
-    this.yearOptions = list
-      .slice()
-      .sort((a, b) => b.yearID - a.yearID)
-      .map((y) => ({
-        label: (y.active ? '● ' : '') + String(y.yearID),
-        value: y.yearID,
-      }));
+  /** Same rules as backend active year for a school: marked active, else latest YearID for that school. */
+  private yearIsActive(y: Year): boolean {
+    const raw = y as unknown as { active?: boolean; Active?: boolean };
+    return !!(raw.active ?? raw.Active);
   }
 
-  private loadTeachers(): void {
-    this.http
-      .post<ApiResponse<PagedResultDto<{ teacherID?: number; TeacherID?: number; fullName?: string; FullName?: string }>>>(
-        `${this.api.baseUrl}/Teacher/names/page`,
-        { pageIndex: 0, pageSize: 500, search: null },
-      )
-      .pipe(
-        map((r) => {
-          const b = r as unknown as Record<string, unknown>;
-          const ok = (b['isSuccess'] ?? b['IsSuccess']) !== false;
-          const errs = (b['errorMasseges'] ?? b['ErrorMasseges']) as string[] | undefined;
-          if (!ok && errs?.length) throw new Error(errs.join('; '));
-          const p = (b['result'] ?? b['Result']) as PagedResultDto<Record<string, unknown>>;
-          const rows = p?.data ?? [];
-          return rows.map((raw) => {
-            const o = raw as Record<string, unknown>;
-            const id = Number(o['teacherID'] ?? o['TeacherID']);
-            const name = String(o['fullName'] ?? o['FullName'] ?? '');
-            return { label: name || `#${id}`, value: id };
-          });
-        }),
-        catchError(() => of([] as { label: string; value: number }[])),
-      )
-      .subscribe((opts) => (this.teacherOptions = opts.filter((x) => x.value > 0)));
+  private yearSchoolId(y: Year): number {
+    const raw = y as unknown as { schoolID?: number; SchoolID?: number };
+    return raw.schoolID ?? raw.SchoolID ?? 0;
+  }
+
+  private yearIdNum(y: Year): number {
+    const raw = y as unknown as { yearID?: number; YearID?: number };
+    const n = raw.yearID ?? raw.YearID;
+    return typeof n === 'number' && !Number.isNaN(n) ? n : 0;
+  }
+
+  private resolveActiveYearIdForSchool(schoolId: number | null | undefined): number | null {
+    if (schoolId == null || schoolId <= 0) return null;
+    const forSchool = this.allYears.filter((x) => this.yearSchoolId(x) === schoolId);
+    const actives = forSchool.filter((x) => this.yearIsActive(x)).sort((a, b) => this.yearIdNum(a) - this.yearIdNum(b));
+    if (actives.length) return this.yearIdNum(actives[0]);
+    const latest = [...forSchool].sort((a, b) => this.yearIdNum(b) - this.yearIdNum(a));
+    return latest.length ? this.yearIdNum(latest[0]) : null;
+  }
+
+  /** Sets academic year from year API (active year for school, else latest); clears when school is missing. */
+  private patchActiveAcademicYearFromSchool(): void {
+    this.academicYearID = this.resolveActiveYearIdForSchool(this.schoolID);
   }
 
   private loadCycle(): void {
@@ -264,7 +248,6 @@ export class TeacherFeedbackCycleFormComponent implements OnInit {
           this.opensAt = d.opensAtUtc ? new Date(d.opensAtUtc) : new Date();
           this.closesAt = d.closesAtUtc ? new Date(d.closesAtUtc) : new Date();
           this.status = d.status as TeacherFeedbackCycleStatus;
-          this.refreshYearOptions();
           this.questions = (d.questions ?? []).map((q) => ({
             _key: this.nextQKey++,
             feedbackQuestionID: q.feedbackQuestionID,
@@ -316,8 +299,13 @@ export class TeacherFeedbackCycleFormComponent implements OnInit {
       this.toastr.warning(this.translate.instant('teacherFeedback.form.validationSchool'));
       return;
     }
-    if (!this.academicYearID || !this.teacherID || !this.title.trim()) {
+    if (!this.teacherID || !this.title.trim()) {
       this.toastr.warning(this.translate.instant('teacherFeedback.form.validationRequired'));
+      return;
+    }
+    if (!this.isEdit) this.patchActiveAcademicYearFromSchool();
+    if (!this.academicYearID || this.academicYearID <= 0) {
+      this.toastr.warning(this.translate.instant('teacherFeedback.form.validationNoActiveYear'));
       return;
     }
     if (!this.opensAt || !this.closesAt || this.closesAt < this.opensAt) {

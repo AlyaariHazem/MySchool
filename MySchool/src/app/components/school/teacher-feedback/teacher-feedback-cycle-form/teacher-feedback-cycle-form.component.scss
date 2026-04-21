@@ -40,6 +40,11 @@
   width: 100%;
 }
 
+:host ::ng-deep .tf-field--teacher-dropdown .dropdown-custom,
+:host ::ng-deep .tf-field--teacher-dropdown .tf-teacher-dropdown .p-autocomplete {
+  width: 100%;
+}
+
 .tf-questions-head {
   display: flex;
   flex-wrap: wrap;

@@ -8,6 +8,10 @@ import { selectLanguage } from '../../../core/store/language/language.selectors'
 import { Store } from '@ngrx/store';
 
 import { PagePermission, PermissionService } from '../../../core/services/permission.service';
+import {
+  resolveSchoolLogoSrc,
+  SCHOOL_LOGO_FALLBACK,
+} from '../../../core/utils/school-logo-url.util';
 
 @Component({
   selector: 'app-sidebar',
@@ -55,8 +59,16 @@ export class SidebarComponent {
   getSubmenuState(key: string) { return this.isSubmenuOpen[key] ? 'open' : 'closed'; }
 
   /* ---------- misc fields (logo, school name) ------- */
-  SchoolLogo  = localStorage.getItem('SchoolImageURL');
-  schoolName  = localStorage.getItem('schoolName');
+  schoolLogoSrc = resolveSchoolLogoSrc(
+    typeof localStorage !== 'undefined' ? localStorage.getItem('SchoolImageURL') : null,
+  );
+  schoolName = typeof localStorage !== 'undefined' ? localStorage.getItem('schoolName') : '';
+
+  onSchoolLogoImgError(): void {
+    if (this.schoolLogoSrc !== SCHOOL_LOGO_FALLBACK) {
+      this.schoolLogoSrc = SCHOOL_LOGO_FALLBACK;
+    }
+  }
 
   get isTeacher(): boolean {
     if (typeof window === 'undefined') {

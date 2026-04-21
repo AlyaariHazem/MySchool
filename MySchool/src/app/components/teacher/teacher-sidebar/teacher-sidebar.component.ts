@@ -5,6 +5,10 @@ import { Store } from '@ngrx/store';
 
 import { PagePermission, PermissionService } from '../../../core/services/permission.service';
 import { selectLanguage } from '../../../core/store/language/language.selectors';
+import {
+  resolveSchoolLogoSrc,
+  SCHOOL_LOGO_FALLBACK,
+} from '../../../core/utils/school-logo-url.util';
 
 @Component({
   selector: 'app-teacher-sidebar',
@@ -30,8 +34,16 @@ export class TeacherSidebarComponent {
   @Input() open = false;
   @Output() closed = new EventEmitter<void>();
 
-  SchoolLogo = localStorage.getItem('SchoolImageURL');
-  schoolName = localStorage.getItem('schoolName');
+  schoolLogoSrc = resolveSchoolLogoSrc(
+    typeof localStorage !== 'undefined' ? localStorage.getItem('SchoolImageURL') : null,
+  );
+  schoolName = typeof localStorage !== 'undefined' ? localStorage.getItem('schoolName') : '';
+
+  onSchoolLogoImgError(): void {
+    if (this.schoolLogoSrc !== SCHOOL_LOGO_FALLBACK) {
+      this.schoolLogoSrc = SCHOOL_LOGO_FALLBACK;
+    }
+  }
 
   isSubmenuOpen: Record<string, boolean> = {};
 

@@ -4,6 +4,10 @@ import { map } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import { selectLanguage } from '../../../core/store/language/language.selectors';
+import {
+  resolveSchoolLogoSrc,
+  SCHOOL_LOGO_FALLBACK,
+} from '../../../core/utils/school-logo-url.util';
 
 /**
  * Guardian-only navigation; same look-and-feel as the student sidebar (sideBar.css).
@@ -44,8 +48,16 @@ export class GuardianSidebarComponent {
     return this.isSubmenuOpen[key] ? 'open' : 'closed';
   }
 
-  SchoolLogo = typeof localStorage !== 'undefined' ? localStorage.getItem('SchoolImageURL') : null;
+  schoolLogoSrc = resolveSchoolLogoSrc(
+    typeof localStorage !== 'undefined' ? localStorage.getItem('SchoolImageURL') : null,
+  );
   schoolName = typeof localStorage !== 'undefined' ? localStorage.getItem('schoolName') : '';
+
+  onSchoolLogoImgError(): void {
+    if (this.schoolLogoSrc !== SCHOOL_LOGO_FALLBACK) {
+      this.schoolLogoSrc = SCHOOL_LOGO_FALLBACK;
+    }
+  }
 
   homePath(): string {
     return '/guardian/home';

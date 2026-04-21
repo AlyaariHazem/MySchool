@@ -52,6 +52,16 @@ export class DropdownCustomComponent implements ControlValueAccessor {
   @Input() scrollHeight = '240px';
   @Input() virtualScrollItemSize = 48;
   @Input() inputStyleClass = 'dropdown-custom__input p-inputtext p-component w-full';
+  /**
+   * When false, turns off PrimeNG virtual scroll + lazy loading for the suggestion list.
+   * Virtual + lazy inside overlays (e.g. p-dialog) can trigger repeated onLazyLoad and freeze the tab.
+   */
+  @Input() lazyVirtualScroll = true;
+  /**
+   * When true (default), first input focus loads suggestions then calls overlay.show() — in dialogs that can
+   * re-trigger focus and loop GET Teacher/names/page. Set false for dropdowns inside p-dialog / modals.
+   */
+  @Input() openSuggestionPanelOnFocus = true;
 
   @Output() selectionChange = new EventEmitter<StudentNameIdDTO>();
 
@@ -84,6 +94,8 @@ export class DropdownCustomComponent implements ControlValueAccessor {
   private requestSeq = 0;
   private noScrollAppendDone = false;
   private skipKeyUpAfterSelect = false;
+  /** Skips the next writeValue for this teacher id — parent ngModel echoes selection before panel state is stable. */
+  private pendingTeacherSelectEcho: number | null = null;
 
   private onChange: (v: StudentNameIdDTO | number | null) => void = () => {};
   private onTouched: () => void = () => {};
@@ -119,6 +131,14 @@ export class DropdownCustomComponent implements ControlValueAccessor {
       const id = typeof obj === 'number' && obj > 0 ? obj : null;
       if (id == null) {
         this.selectedPanel = null;
+        return;
+      }
+      if (this.pendingTeacherSelectEcho === id) {
+        return;
+      }
+      const existing = this.selectedPanel as TeacherNameLookupRow | null;
+      // Avoid clearing the label after onSelect — that re-triggers autocomplete + forceSelection and can freeze the UI.
+      if (existing?.teacherID === id && String(existing.fullName ?? '').trim() !== '') {
         return;
       }
       this.selectedPanel = { teacherID: id, fullName: '' };
@@ -171,10 +191,11 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     if (this.disabled) {
       return;
     }
+    const openPanel = this.openSuggestionPanelOnFocus;
     if (this.resource === 'class') {
-      this.loadClassSuggestionsFromQuery('', true);
+      this.loadClassSuggestionsFromQuery('', openPanel);
     } else if (this.resource === 'teacher') {
-      this.loadTeacherSuggestionsFromQuery('', true);
+      this.loadTeacherSuggestionsFromQuery('', openPanel);
     } else {
       this.loadStudentSuggestionsFromQuery('', true);
     }
@@ -302,6 +323,9 @@ export class DropdownCustomComponent implements ControlValueAccessor {
   }
 
   onLazyLoad(event: AutoCompleteLazyLoadEvent): void {
+    if (!this.lazyVirtualScroll) {
+      return;
+    }
     if (this.resource === 'class') {
       this.onLazyLoadPaged(
         event,
@@ -500,6 +524,7 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     this.lastClassQueryReady = false;
     this.lastTeacherSearchNormalized = undefined;
     this.lastTeacherQueryReady = false;
+    this.pendingTeacherSelectEcho = null;
     this.loadedPage = 0;
     this.totalPages = 0;
     this.loadingMore = false;
@@ -554,8 +579,27 @@ export class DropdownCustomComponent implements ControlValueAccessor {
         return;
       }
       this.skipKeyUpAfterSelect = true;
-      this.onChange(row.teacherID);
-      this.onTouched();
+      const id = row.teacherID;
+      this.pendingTeacherSelectEcho = id;
+      // Cancel in-flight suggestion requests so they cannot race with parent ngModel.
+      this.requestSeq++;
+      this.lastTeacherQueryReady = false;
+      this.filteredPanel = [];
+      this.selectedPanel = {
+        teacherID: id,
+        fullName: String(row.fullName ?? '').trim(),
+      };
+      // Defer parent update: avoids PrimeNG forceSelection / overlay + writeValue fighting in one CD turn.
+      setTimeout(() => {
+        this.dropdownAutocomplete?.hide(true);
+        this.onChange(id);
+        this.onTouched();
+        queueMicrotask(() => {
+          if (this.pendingTeacherSelectEcho === id) {
+            this.pendingTeacherSelectEcho = null;
+          }
+        });
+      }, 0);
       return;
     }
 

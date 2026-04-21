@@ -6,7 +6,7 @@
     <div id="sidebar-menu" class="sidebar-menu">
       <div class="header-left">
         <a [routerLink]="homePath()" class="logo">
-          <img [src]="SchoolLogo" width="40" height="40" alt="">
+          <img [src]="schoolLogoSrc" width="40" height="40" alt="" (error)="onSchoolLogoImgError()" />
           <span class="text-uppercase">{{schoolName}}</span>
         </a>
         <span (click)="cancel()" class="cancel">X</span>

@@ -713,7 +713,8 @@
       "audience": "Audience",
       "required": "Required",
       "validationSchool": "School context is missing.",
-      "validationRequired": "Please fill school (if shown), year, teacher, and title.",
+      "validationRequired": "Please fill school (if shown), teacher, and title.",
+      "validationNoActiveYear": "No active academic year was found for this school. Set an active year in school settings, then try again.",
       "validationDates": "End date/time must be after start.",
       "validationQuestions": "Every question must have text."
     },
