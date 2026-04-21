@@ -80,10 +80,6 @@ export class TeacherFeedbackCycleFormComponent implements OnInit {
     maxWidth: 'min(22rem, calc(100vw - 2rem))',
   };
 
-  /** Matches plains / shared teacher dropdown styling inside float labels. */
-  readonly teacherDropdownInputClass =
-    'dropdown-custom__input p-inputtext p-component w-full h-3rem';
-
   loading = false;
   saving = false;
   cycleId: number | null = null;

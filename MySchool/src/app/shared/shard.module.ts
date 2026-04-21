@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule,  ReactiveFormsModule } from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { AutoCompleteModule } from 'primeng/autocomplete';
+import { Select } from 'primeng/select';
+import { FloatLabelModule } from 'primeng/floatlabel';
 import {MatInputModule} from '@angular/material/input';
 import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
@@ -49,7 +50,8 @@ const modules=[
     ConfirmDialog,
     DynamicDialog,
     WebcamModule,
-    AutoCompleteModule
+    Select,
+    FloatLabelModule
 ]
 
 @NgModule({

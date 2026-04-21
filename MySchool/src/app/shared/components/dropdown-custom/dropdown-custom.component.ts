@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  OnDestroy,
   Output,
   Input,
   ViewChild,
@@ -8,12 +9,12 @@ import {
   inject
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { AutoComplete } from 'primeng/autocomplete';
+import { Select } from 'primeng/select';
 import {
-  AutoCompleteCompleteEvent,
-  AutoCompleteLazyLoadEvent,
-  AutoCompleteSelectEvent
-} from 'primeng/autocomplete';
+  SelectChangeEvent,
+  SelectFilterEvent,
+  SelectLazyLoadEvent
+} from 'primeng/select';
 import { ToastrService } from 'ngx-toastr';
 import { StudentService } from '../../../core/services/student.service';
 import { StudentNameIdDTO, StudentNameIdSearchRequest } from '../../../core/models/students.model';
@@ -21,7 +22,7 @@ import { ClassNameLookupRow, ClassService } from '../../../components/school/cor
 import { TeacherNameLookupRow, TeacherService } from '../../../components/school/core/services/teacher.service';
 
 /**
- * Searchable lazy dropdown:
+ * Searchable lazy dropdown (PrimeNG `p-select` + optional `p-floatlabel` like supervisor visits):
  * - `student` (default): POST Students/names-ids, value = StudentNameIdDTO
  * - `class`: POST Classes/GetAllNameClasses/page, value = classID (number) for reactive forms
  * - `teacher`: POST Teacher/names/page, value = teacherID (number) for reactive forms
@@ -38,20 +39,26 @@ import { TeacherNameLookupRow, TeacherService } from '../../../components/school
     }
   ]
 })
-export class DropdownCustomComponent implements ControlValueAccessor {
-  @ViewChild('dropdownAutocomplete')
-  dropdownAutocomplete?: AutoComplete;
+export class DropdownCustomComponent implements ControlValueAccessor, OnDestroy {
+  @ViewChild('dropdownSelect')
+  dropdownSelect?: Select;
 
   @Input() inputId = 'dropdownCustomSearch';
+  /** When set, wraps `p-select` in `p-floatlabel` + translated label (same pattern as supervisor visits). */
+  @Input() labelKey = '';
   @Input() placeholder = '';
   @Input() disabled = false;
+  /** Panel width cap; matches supervisor `filterSelectPanelStyle`. */
+  @Input() selectPanelStyle: Record<string, string> | null = null;
   /** student: POST Students/names-ids; class: POST Classes/GetAllNameClasses/page; teacher: POST Teacher/names/page */
   @Input() resource: 'student' | 'class' | 'teacher' = 'student';
   @Input() pageSize = 5;
   @Input() searchDelayMs = 400;
   @Input() scrollHeight = '240px';
-  @Input() virtualScrollItemSize = 48;
-  @Input() inputStyleClass = 'dropdown-custom__input p-inputtext p-component w-full';
+  /** Keep close to rendered `.dropdown-custom__item` row height when `lazyVirtualScroll` is true. */
+  @Input() virtualScrollItemSize = 40;
+  /** Applied as `p-select` `styleClass` (maps legacy `dropdown-custom__input` to the select shell). */
+  @Input() inputStyleClass = 'w-full';
   /**
    * When false, turns off PrimeNG virtual scroll + lazy loading for the suggestion list.
    * Virtual + lazy inside overlays (e.g. p-dialog) can trigger repeated onLazyLoad and freeze the tab.
@@ -82,6 +89,42 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     return this.resource === 'class' || this.resource === 'teacher' ? 0 : 1;
   }
 
+  /** PrimeNG option identity for virtual scroll / selection. */
+  get suggestionDataKey(): string {
+    if (this.resource === 'class') return 'classID';
+    if (this.resource === 'teacher') return 'teacherID';
+    return 'studentID';
+  }
+
+  suggestionRowId(row: StudentNameIdDTO | ClassNameLookupRow | TeacherNameLookupRow): number {
+    if (this.resource === 'class') return (row as ClassNameLookupRow).classID;
+    if (this.resource === 'teacher') return (row as TeacherNameLookupRow).teacherID;
+    return (row as StudentNameIdDTO).studentID;
+  }
+
+  suggestionRowLabel(row: StudentNameIdDTO | ClassNameLookupRow | TeacherNameLookupRow): string {
+    if (this.resource === 'class') return String((row as ClassNameLookupRow).className ?? '');
+    return String((row as TeacherNameLookupRow | StudentNameIdDTO).fullName ?? '');
+  }
+
+  get selectPanelStyleResolved(): Record<string, string> {
+    return this.selectPanelStyle ?? { maxWidth: 'min(22rem, calc(100vw - 2rem))' };
+  }
+
+  get selectControlStyleClass(): string {
+    const ic = (this.inputStyleClass || '').trim();
+    if (!ic) {
+      return 'dropdown-custom__select w-full';
+    }
+    const stripped = ic
+      .replace(/\bdropdown-custom__input\b/g, 'dropdown-custom__select')
+      .replace(/\bp-inputtext\b/g, '')
+      .replace(/\bp-component\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return [stripped, 'dropdown-custom__select'].filter(Boolean).join(' ');
+  }
+
   private lastStudentQuery: Pick<StudentNameIdSearchRequest, 'studentID' | 'fullName'> | null = null;
   private lastClassSearchNormalized: string | undefined = undefined;
   /** After first successful class search; cleared on reset so lazy-load does not fire with stale state. */
@@ -93,9 +136,9 @@ export class DropdownCustomComponent implements ControlValueAccessor {
   private loadingMore = false;
   private requestSeq = 0;
   private noScrollAppendDone = false;
-  private skipKeyUpAfterSelect = false;
   /** Skips the next writeValue for this teacher id — parent ngModel echoes selection before panel state is stable. */
   private pendingTeacherSelectEcho: number | null = null;
+  private filterDebounceHandle: ReturnType<typeof setTimeout> | undefined;
 
   private onChange: (v: StudentNameIdDTO | number | null) => void = () => {};
   private onTouched: () => void = () => {};
@@ -176,32 +219,63 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     this.disabled = isDisabled;
   }
 
-  onCompleteSearch(event: AutoCompleteCompleteEvent): void {
-    const raw = (event.query || '').trim();
-    if (this.resource === 'class') {
-      this.loadClassSuggestionsFromQuery(raw, false);
-    } else if (this.resource === 'teacher') {
-      this.loadTeacherSuggestionsFromQuery(raw, false);
-    } else {
-      this.loadStudentSuggestionsFromQuery(raw, false);
+  ngOnDestroy(): void {
+    if (this.filterDebounceHandle != null) {
+      clearTimeout(this.filterDebounceHandle);
+      this.filterDebounceHandle = undefined;
     }
   }
 
-  onInputFocus(_event: Event): void {
+  /** Prefetch when the closed control is focused (dialog / `openSuggestionPanelOnFocus=false` pattern). */
+  onSelectTriggerFocus(): void {
     if (this.disabled) {
       return;
     }
-    const openPanel = this.openSuggestionPanelOnFocus;
-    if (this.resource === 'class') {
-      this.loadClassSuggestionsFromQuery('', openPanel);
-    } else if (this.resource === 'teacher') {
-      this.loadTeacherSuggestionsFromQuery('', openPanel);
-    } else {
-      this.loadStudentSuggestionsFromQuery('', true);
+    if (!this.openSuggestionPanelOnFocus) {
+      if (this.resource === 'class') {
+        this.loadClassSuggestionsFromQuery('');
+      } else if (this.resource === 'teacher') {
+        this.loadTeacherSuggestionsFromQuery('');
+      } else {
+        this.loadStudentSuggestionsFromQuery('');
+      }
     }
   }
 
-  private loadStudentSuggestionsFromQuery(raw: string, showPanelAfterLoad: boolean): void {
+  onSelectShow(): void {
+    if (this.disabled) {
+      return;
+    }
+    if (this.resource === 'class') {
+      this.loadClassSuggestionsFromQuery('');
+    } else if (this.resource === 'teacher') {
+      this.loadTeacherSuggestionsFromQuery('');
+    } else {
+      this.loadStudentSuggestionsFromQuery('');
+    }
+  }
+
+  onSelectFilter(event: SelectFilterEvent): void {
+    if (this.filterDebounceHandle != null) {
+      clearTimeout(this.filterDebounceHandle);
+    }
+    const rawFilter = String(event.filter ?? '');
+    this.filterDebounceHandle = setTimeout(() => {
+      this.filterDebounceHandle = undefined;
+      const raw = rawFilter.trim();
+      if (this.resource === 'class') {
+        this.loadClassSuggestionsFromQuery(raw);
+      } else if (this.resource === 'teacher') {
+        this.loadTeacherSuggestionsFromQuery(raw);
+      } else if (raw.length === 0) {
+        this.filteredPanel = [];
+      } else {
+        this.loadStudentSuggestionsFromQuery(raw);
+      }
+    }, this.searchDelayMs);
+  }
+
+  private loadStudentSuggestionsFromQuery(raw: string): void {
     const req: StudentNameIdSearchRequest = {
       pageNumber: 1,
       pageSize: this.pageSize
@@ -233,9 +307,6 @@ export class DropdownCustomComponent implements ControlValueAccessor {
             : req.fullName != null && String(req.fullName).trim() !== ''
               ? { fullName: String(req.fullName).trim() }
               : {};
-        if (showPanelAfterLoad) {
-          setTimeout(() => this.dropdownAutocomplete?.show(), 0);
-        }
       },
       error: () => {
         if (seq !== this.requestSeq) {
@@ -248,7 +319,7 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     });
   }
 
-  private loadClassSuggestionsFromQuery(raw: string, showPanelAfterLoad: boolean): void {
+  private loadClassSuggestionsFromQuery(raw: string): void {
     const seq = ++this.requestSeq;
     this.loadingMore = false;
     this.loadedPage = 0;
@@ -269,9 +340,6 @@ export class DropdownCustomComponent implements ControlValueAccessor {
         this.totalPages = Math.max(1, page.totalPages);
         this.lastClassSearchNormalized = search;
         this.lastClassQueryReady = true;
-        if (showPanelAfterLoad) {
-          setTimeout(() => this.dropdownAutocomplete?.show(), 0);
-        }
       },
       error: () => {
         if (seq !== this.requestSeq) {
@@ -285,7 +353,7 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     });
   }
 
-  private loadTeacherSuggestionsFromQuery(raw: string, showPanelAfterLoad: boolean): void {
+  private loadTeacherSuggestionsFromQuery(raw: string): void {
     const seq = ++this.requestSeq;
     this.loadingMore = false;
     this.loadedPage = 0;
@@ -306,9 +374,6 @@ export class DropdownCustomComponent implements ControlValueAccessor {
         this.totalPages = Math.max(1, page.totalPages);
         this.lastTeacherSearchNormalized = search;
         this.lastTeacherQueryReady = true;
-        if (showPanelAfterLoad) {
-          setTimeout(() => this.dropdownAutocomplete?.show(), 0);
-        }
       },
       error: () => {
         if (seq !== this.requestSeq) {
@@ -322,7 +387,7 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     });
   }
 
-  onLazyLoad(event: AutoCompleteLazyLoadEvent): void {
+  onLazyLoad(event: SelectLazyLoadEvent): void {
     if (!this.lazyVirtualScroll) {
       return;
     }
@@ -344,7 +409,7 @@ export class DropdownCustomComponent implements ControlValueAccessor {
   }
 
   private onLazyLoadPaged(
-    event: AutoCompleteLazyLoadEvent,
+    event: SelectLazyLoadEvent,
     lastQuery: () => unknown,
     loadNext: () => void
   ): void {
@@ -518,6 +583,7 @@ export class DropdownCustomComponent implements ControlValueAccessor {
   }
 
   onClearSelection(): void {
+    this.dropdownSelect?.resetFilter();
     this.filteredPanel = [];
     this.lastStudentQuery = null;
     this.lastClassSearchNormalized = undefined;
@@ -535,63 +601,43 @@ export class DropdownCustomComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
-  onSearchKeyUp(event: KeyboardEvent): void {
-    if (event.key !== 'Enter' && event.key !== 'NumpadEnter') {
+  onPrimeSelectChange(event: SelectChangeEvent): void {
+    const v = event.value as StudentNameIdDTO | ClassNameLookupRow | TeacherNameLookupRow | null;
+    if (v == null) {
       return;
     }
-    if (this.skipKeyUpAfterSelect) {
-      this.skipKeyUpAfterSelect = false;
-      return;
-    }
-    const ac = this.dropdownAutocomplete;
-    if (!ac) {
-      return;
-    }
-    const raw = ((event.target as HTMLInputElement)?.value ?? '').trim();
-    if (!raw.length) {
-      if (this.resource === 'class') {
-        this.loadClassSuggestionsFromQuery('', false);
-      } else if (this.resource === 'teacher') {
-        this.loadTeacherSuggestionsFromQuery('', false);
-      } else {
-        this.filteredPanel = [];
-      }
-      return;
-    }
-    ac.search(event, raw, 'input');
+    this.handleRowSelected(v);
   }
 
-  onRowSelect(event: AutoCompleteSelectEvent): void {
+  private handleRowSelected(
+    row: StudentNameIdDTO | ClassNameLookupRow | TeacherNameLookupRow
+  ): void {
     if (this.resource === 'class') {
-      const row = event.value as ClassNameLookupRow;
-      if (!row?.classID) {
+      const r = row as ClassNameLookupRow;
+      if (!r?.classID) {
         return;
       }
-      this.skipKeyUpAfterSelect = true;
-      this.onChange(row.classID);
+      this.onChange(r.classID);
       this.onTouched();
       return;
     }
 
     if (this.resource === 'teacher') {
-      const row = event.value as TeacherNameLookupRow;
-      if (!row?.teacherID) {
+      const r = row as TeacherNameLookupRow;
+      if (!r?.teacherID) {
         return;
       }
-      this.skipKeyUpAfterSelect = true;
-      const id = row.teacherID;
+      const id = r.teacherID;
       this.pendingTeacherSelectEcho = id;
-      // Cancel in-flight suggestion requests so they cannot race with parent ngModel.
       this.requestSeq++;
       this.lastTeacherQueryReady = false;
       this.filteredPanel = [];
       this.selectedPanel = {
         teacherID: id,
-        fullName: String(row.fullName ?? '').trim(),
+        fullName: String(r.fullName ?? '').trim(),
       };
-      // Defer parent update: avoids PrimeNG forceSelection / overlay + writeValue fighting in one CD turn.
       setTimeout(() => {
-        this.dropdownAutocomplete?.hide(true);
+        this.dropdownSelect?.hide(true);
         this.onChange(id);
         this.onTouched();
         queueMicrotask(() => {
@@ -603,13 +649,12 @@ export class DropdownCustomComponent implements ControlValueAccessor {
       return;
     }
 
-    const row = event.value as StudentNameIdDTO;
-    if (!row?.studentID) {
+    const r = row as StudentNameIdDTO;
+    if (!r?.studentID) {
       return;
     }
-    this.skipKeyUpAfterSelect = true;
-    this.onChange(row);
+    this.onChange(r);
     this.onTouched();
-    this.selectionChange.emit(row);
+    this.selectionChange.emit(r);
   }
 }

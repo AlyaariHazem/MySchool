@@ -3,6 +3,11 @@
   margin: 2rem auto;
 }
 
+/* One control height for all single-line fields (PrimeNG float-label “on”). */
+.tf-form {
+  --tf-ctrl-h: 3.25rem;
+}
+
 .tf-form-grid {
   display: flex;
   flex-direction: column;
@@ -12,7 +17,7 @@
 .tf-form-row {
   display: grid;
   gap: 1rem;
-  align-items: end;
+  align-items: start;
 }
 
 .tf-form-row--2 {
@@ -21,6 +26,11 @@
 
 .tf-form-row--3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Meta row: three float-labels — stretch so checkbox column matches selects */
+.tf-form-row--question-meta {
+  align-items: stretch;
 }
 
 @media (max-width: 768px) {
@@ -34,15 +44,82 @@
   min-width: 0;
 }
 
-:host ::ng-deep .tf-field .p-select,
-:host ::ng-deep .tf-field .p-datepicker,
 :host ::ng-deep .tf-field .p-floatlabel {
   width: 100%;
 }
 
-:host ::ng-deep .tf-field--teacher-dropdown .dropdown-custom,
-:host ::ng-deep .tf-field--teacher-dropdown .tf-teacher-dropdown .p-autocomplete {
+/* --- Single-line text (title, etc.) — not inside teacher autocomplete --- */
+:host ::ng-deep .tf-form .tf-field:not(.tf-field--teacher-dropdown) .p-inputtext.p-component:not(textarea) {
+  min-height: var(--tf-ctrl-h);
+  height: var(--tf-ctrl-h);
+  box-sizing: border-box;
+}
+
+/* --- p-select (school, status, question type/audience) --- */
+:host ::ng-deep .tf-form .tf-field .p-select {
+  min-height: var(--tf-ctrl-h);
+  height: var(--tf-ctrl-h);
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .tf-form .tf-field .p-select .p-select-label {
+  line-height: calc(var(--tf-ctrl-h) - 2px);
+  display: flex;
+  align-items: center;
+  min-height: 100%;
+}
+
+/* --- p-datepicker --- */
+:host ::ng-deep .tf-form .tf-field .p-datepicker .p-inputtext,
+:host ::ng-deep .tf-form .tf-field .p-datepicker .p-datepicker-input {
+  min-height: var(--tf-ctrl-h);
+  height: var(--tf-ctrl-h);
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .tf-field .p-select,
+:host ::ng-deep .tf-field .p-datepicker {
   width: 100%;
+}
+
+/* --- Teacher dropdown (`app-dropdown-custom` = p-select + floatlabel) --- */
+:host ::ng-deep .tf-form .tf-field--teacher-dropdown app-dropdown-custom,
+:host ::ng-deep .tf-form .tf-field--teacher-dropdown .tf-teacher-dropdown {
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep .tf-form .tf-field--teacher-dropdown .p-select {
+  height: var(--tf-ctrl-h);
+  min-height: var(--tf-ctrl-h);
+  max-height: var(--tf-ctrl-h);
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .tf-form .tf-field--teacher-dropdown .p-select .p-select-label {
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+:host ::ng-deep .tf-form .tf-field--teacher-dropdown .p-select-dropdown {
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+/* Teacher + title row: stretch float-label columns so heights match visually */
+.tf-form-row--aligned-fields {
+  align-items: stretch;
+}
+
+:host ::ng-deep .tf-form-row--aligned-fields .tf-field.p-floatlabel,
+:host ::ng-deep .tf-form-row--aligned-fields .tf-field--teacher-dropdown .p-floatlabel {
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .tf-form-row--aligned-fields .tf-field--teacher-dropdown,
+:host ::ng-deep .tf-form-row--aligned-fields .tf-field:not(.tf-field--teacher-dropdown) {
+  flex: 1 1 0;
 }
 
 .tf-questions-head {
@@ -76,11 +153,23 @@
   color: #334155;
 }
 
-.tf-required-wrap {
+/* Checkbox + label inside same float-label pattern as selects */
+:host ::ng-deep .tf-form p-floatlabel.tf-field--checkbox-float {
   display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .tf-form p-floatlabel.tf-field--checkbox-float .p-checkbox {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding-bottom: 0.25rem;
+  min-height: var(--tf-ctrl-h);
+  height: var(--tf-ctrl-h);
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .tf-form p-floatlabel.tf-field--checkbox-float .p-checkbox .p-checkbox-box {
+  width: 1.375rem;
+  height: 1.375rem;
 }
 
 .tf-form-actions {

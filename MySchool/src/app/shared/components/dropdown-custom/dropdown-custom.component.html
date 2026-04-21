@@ -1,46 +1,48 @@
-<p-autocomplete
-  #dropdownAutocomplete
-  class="dropdown-custom"
-  [inputId]="inputId"
-  [(ngModel)]="selectedPanel"
-  [suggestions]="filteredPanel"
-  (completeMethod)="onCompleteSearch($event)"
-  (onFocus)="onInputFocus($event)"
-  (onSelect)="onRowSelect($event)"
-  (onClear)="onClearSelection()"
-  (onKeyUp)="onSearchKeyUp($event)"
-  [optionLabel]="optionLabelField"
-  [dropdown]="true"
-  dropdownIcon="pi pi-chevron-down"
-  [forceSelection]="resource === 'student'"
-  [showClear]="resource === 'student'"
-  [minLength]="minQueryLength"
-  [delay]="searchDelayMs"
-  [completeOnFocus]="false"
-  [virtualScroll]="lazyVirtualScroll"
-  [lazy]="lazyVirtualScroll"
-  [scrollHeight]="scrollHeight"
-  [virtualScrollItemSize]="virtualScrollItemSize"
-  (onLazyLoad)="onLazyLoad($event)"
-  [inputStyleClass]="inputStyleClass"
-  [placeholder]="placeholder"
-  [disabled]="disabled">
-  <ng-template let-item pTemplate="item">
-    @if (resource === 'class') {
-      <span class="dropdown-custom__item flex justify-between gap-3 w-full">
-        <span>{{ item.className }}</span>
-        <span class="text-gray-500 text-sm">#{{ item.classID }}</span>
+<ng-template #selectField>
+  <p-select
+    #dropdownSelect
+    [inputId]="inputId"
+    [styleClass]="selectControlStyleClass"
+    [panelStyle]="selectPanelStyleResolved"
+    [options]="filteredPanel"
+    [(ngModel)]="selectedPanel"
+    [ngModelOptions]="{ standalone: true }"
+    [optionLabel]="optionLabelField"
+    [dataKey]="suggestionDataKey"
+    [showClear]="true"
+    [filter]="true"
+    [resetFilterOnHide]="true"
+    [lazy]="lazyVirtualScroll"
+    [virtualScroll]="lazyVirtualScroll"
+    [virtualScrollItemSize]="virtualScrollItemSize"
+    [scrollHeight]="scrollHeight"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    variant="outlined"
+    [fluid]="true"
+    dropdownIcon="pi pi-chevron-down"
+    panelStyleClass="dropdown-custom__panel"
+    (onShow)="onSelectShow()"
+    (onFocus)="onSelectTriggerFocus()"
+    (onFilter)="onSelectFilter($event)"
+    (onLazyLoad)="onLazyLoad($event)"
+    (onChange)="onPrimeSelectChange($event)"
+    (onClear)="onClearSelection()"
+  >
+    <ng-template let-item pTemplate="item">
+      <span class="dropdown-custom__item">
+        <span class="dropdown-custom__id">#{{ suggestionRowId(item) }}</span>
+        <span class="dropdown-custom__label">{{ suggestionRowLabel(item) }}</span>
       </span>
-    } @else if (resource === 'teacher') {
-      <span class="dropdown-custom__item flex justify-between gap-3 w-full">
-        <span>{{ item.fullName }}</span>
-        <span class="text-gray-500 text-sm">#{{ item.teacherID }}</span>
-      </span>
-    } @else {
-      <span class="dropdown-custom__item flex justify-between gap-3 w-full">
-        <span>{{ item.fullName }}</span>
-        <span class="text-gray-500 text-sm">#{{ item.studentID }}</span>
-      </span>
-    }
-  </ng-template>
-</p-autocomplete>
+    </ng-template>
+  </p-select>
+</ng-template>
+
+@if (labelKey) {
+  <p-floatlabel variant="on" class="field dropdown-custom__float">
+    <ng-container *ngTemplateOutlet="selectField"></ng-container>
+    <label [for]="inputId">{{ labelKey | translate }}</label>
+  </p-floatlabel>
+} @else {
+  <ng-container *ngTemplateOutlet="selectField"></ng-container>
+}

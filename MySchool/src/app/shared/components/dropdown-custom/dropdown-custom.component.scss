@@ -3,123 +3,76 @@
   width: 100%;
 }
 
-:host ::ng-deep .dropdown-custom {
+:host ::ng-deep .dropdown-custom__select,
+:host ::ng-deep .dropdown-custom__select.p-select {
   width: 100%;
 }
 
-/* ----- Single “p-select” shell: one radius, one border, white fill (input + chevron) ----- */
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) {
-  display: flex;
-  align-items: stretch;
+:host ::ng-deep .dropdown-custom__float.p-floatlabel {
   width: 100%;
-  min-height: 3rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  background: #fff;
+}
+
+/* ----- Suggestion overlay (list density + selected / hover) ----- */
+:host ::ng-deep .p-select-overlay.dropdown-custom__panel {
+  margin-top: 0.25rem;
+  border-radius: var(--p-select-overlay-border-radius, var(--p-border-radius-md, 6px));
+  border: 1px solid #e2e8f0;
+  box-shadow:
+    0 10px 15px -3px rgb(15 23 42 / 0.08),
+    0 4px 6px -4px rgb(15 23 42 / 0.08);
   overflow: hidden;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  background: #fff;
 }
 
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown):hover {
-  border-color: #94a3b8;
+:host ::ng-deep .p-select-overlay.dropdown-custom__panel .p-select-list-container {
+  border-radius: 0 0 10px 10px;
 }
 
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown):focus-within {
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgb(34 197 94 / 0.2);
+:host ::ng-deep .p-select-overlay.dropdown-custom__panel .p-select-list {
+  padding: 0.25rem 0;
 }
 
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-inputwrapper,
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input-multiple {
+.dropdown-custom__item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  box-sizing: border-box;
+}
+
+.dropdown-custom__id {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+  font-weight: 500;
+  unicode-bidi: isolate;
+}
+
+.dropdown-custom__label {
   flex: 1 1 auto;
   min-width: 0;
+  text-align: start;
+  word-break: break-word;
 }
 
-/* Input sits inside the shell — no second box */
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-inputtext,
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input {
-  width: 100%;
-  height: 100%;
-  min-height: 3rem;
-  padding-inline: 0.75rem;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  font-size: 0.875rem;
+:host ::ng-deep .p-select-overlay.dropdown-custom__panel .p-select-option {
+  margin: 0 0.35rem;
+  border-radius: 8px;
 }
 
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-inputtext:focus,
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input:focus {
-  outline: none !important;
-  box-shadow: none !important;
+:host ::ng-deep .p-select-overlay.dropdown-custom__panel .p-select-option:not(.p-select-option-selected):hover {
+  background: #f1f5f9 !important;
 }
 
-/* Chevron: same white field, light divider only (like one control) */
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown,
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown.p-button {
-  flex: 0 0 auto;
-  align-self: stretch;
-  width: 2.75rem;
-  min-height: 3rem;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  color: #64748b !important;
-  border-inline-start: 1px solid #e2e8f0 !important;
+:host ::ng-deep .p-select-overlay.dropdown-custom__panel .p-select-option.p-select-option-selected {
+  background: rgb(34 197 94 / 0.12) !important;
+  color: #15803d !important;
 }
 
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown:hover,
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown.p-button:hover {
-  background: #f8fafc !important;
-  color: #334155 !important;
-}
-
-:host ::ng-deep .dropdown-custom.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-dropdown:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* ----- Standalone input (no dropdown button, e.g. student-only layout) ----- */
-:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-inputtext,
-:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-autocomplete-input {
-  height: 2.5rem;
-  padding-inline: 0.75rem;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  font-size: 0.875rem;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-inputtext:hover,
-:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-autocomplete-input:hover {
-  border-color: #94a3b8;
-}
-
-:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-inputtext:focus,
-:host ::ng-deep .dropdown-custom.p-autocomplete:not(:has(.p-autocomplete-dropdown)) .p-autocomplete-input:focus {
-  outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgb(34 197 94 / 0.2);
-}
-
-:host ::ng-deep .dropdown-custom .p-autocomplete-input-multiple,
-:host ::ng-deep .dropdown-custom .p-inputtext {
-  width: 100%;
-}
-
-:host ::ng-deep .dropdown-custom .p-autocomplete-clear-icon {
-  color: #64748b;
-}
-
-:host ::ng-deep .dropdown-custom.p-autocomplete-loading .p-autocomplete-loader {
-  color: #16a34a;
+:host ::ng-deep .p-select-overlay.dropdown-custom__panel .p-select-option.p-select-option-selected .dropdown-custom__id {
+  color: #15803d;
 }

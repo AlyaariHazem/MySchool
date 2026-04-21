@@ -24,21 +24,18 @@
         </div>
       }
 
-      <div class="tf-form-row tf-form-row--2">
-        <p-floatlabel variant="on" class="tf-field tf-field--teacher-dropdown">
-          <app-dropdown-custom
-            class="tf-teacher-dropdown w-full block"
-            [(ngModel)]="teacherID"
-            resource="teacher"
-            inputId="tf-teacher-dc"
-            [inputStyleClass]="teacherDropdownInputClass"
-            [placeholder]="' '"
-            [openSuggestionPanelOnFocus]="false"
-            [lazyVirtualScroll]="false"
-            [pageSize]="80"
-          />
-          <label for="tf-teacher-dc">{{ 'teacherFeedback.form.teacher' | translate }}</label>
-        </p-floatlabel>
+      <div class="tf-form-row tf-form-row--2 tf-form-row--aligned-fields">
+        <app-dropdown-custom
+          class="tf-field tf-field--teacher-dropdown tf-teacher-dropdown w-full block"
+          [(ngModel)]="teacherID"
+          resource="teacher"
+          inputId="tf-teacher-dc"
+          [labelKey]="'teacherFeedback.form.teacher'"
+          [placeholder]="' '"
+          [openSuggestionPanelOnFocus]="false"
+          [lazyVirtualScroll]="false"
+          [pageSize]="80"
+        />
         <p-floatlabel variant="on" class="tf-field">
           <input pInputText id="tf-title" class="w-full" [(ngModel)]="title" autocomplete="off" />
           <label for="tf-title">{{ 'teacherFeedback.form.title' | translate }}</label>
@@ -108,7 +105,7 @@
               <label [for]="'tf-qtext-' + q._key">{{ 'teacherFeedback.form.questionText' | translate }}</label>
             </p-floatlabel>
           </div>
-          <div class="tf-form-row tf-form-row--3">
+          <div class="tf-form-row tf-form-row--3 tf-form-row--question-meta">
             <p-floatlabel variant="on" class="tf-field">
               <p-select
                 [inputId]="'tf-qtype-' + q._key"
@@ -131,10 +128,10 @@
               />
               <label [for]="'tf-qaud-' + q._key">{{ 'teacherFeedback.form.audience' | translate }}</label>
             </p-floatlabel>
-            <div class="tf-required-wrap">
+            <p-floatlabel variant="on" class="tf-field tf-field--checkbox-float">
               <p-checkbox [(ngModel)]="q.isRequired" [binary]="true" [inputId]="'tf-qreq-' + q._key" />
               <label [for]="'tf-qreq-' + q._key">{{ 'teacherFeedback.form.required' | translate }}</label>
-            </div>
+            </p-floatlabel>
           </div>
         </div>
       }
