@@ -360,6 +360,31 @@ const routes: Routes = [
         ],
       },
       {
+        path: 'violations',
+        data: { breadcrumb: 'المخالفات' },
+        children: [
+          {
+            path: 'new',
+            redirectTo: '',
+            pathMatch: 'full',
+          },
+          {
+            path: ':id/edit',
+            redirectTo: '',
+            pathMatch: 'full',
+          },
+          {
+            path: '',
+            loadComponent: () =>
+              import('./violations/violations-list/violations-list.component').then((m) => m.ViolationsListComponent),
+            data: { breadcrumb: 'قائمة المخالفات', permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
+      {
         path: 'teacher-feedback',
         data: { breadcrumb: 'تقييم المعلم' },
         children: [

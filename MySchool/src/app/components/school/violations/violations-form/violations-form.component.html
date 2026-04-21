@@ -1,0 +1,321 @@
+<div class="vio-form-page" *ngIf="!loading || isEdit">
+  <div *ngIf="!loading" class="vio-form-card">
+    <h3 class="vio-section-title">{{ 'violations.form.sectionMain' | translate }}</h3>
+
+    <div class="vio-form-grid">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field">
+        <p-select
+          inputId="vio-f-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [disabled]="isEdit"
+          (ngModelChange)="onSchoolChange()"
+        />
+        <label for="vio-f-school">{{ 'violations.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="vio-f-subject"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="employeeOptions"
+          [(ngModel)]="subjectEmployeeProfileID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+          [disabled]="isEdit"
+        />
+        <label for="vio-f-subject">{{ 'violations.form.subject' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="vio-f-openedby"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="employeeOptions"
+          [(ngModel)]="openedByEmployeeProfileID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="vio-f-openedby">{{ 'violations.form.openedBy' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel *ngIf="!isEdit" variant="on" class="vio-field">
+        <p-select
+          inputId="vio-f-initial-type"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="initialTypeOptions"
+          [(ngModel)]="initialViolationTypeID"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="vio-f-initial-type">{{ 'violations.form.initialStep' | translate }}</label>
+      </p-floatlabel>
+
+      <div *ngIf="isEdit && detail" class="vio-field vio-readonly-step">
+        <span class="vio-readonly-label">{{ 'violations.form.currentStep' | translate }}</span>
+        <strong>{{ detail.violationTypeName }}</strong>
+        <span class="vio-readonly-kind muted">({{ kindLabel(detail.violationTypeKind) }})</span>
+      </div>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="vio-f-status"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="statusOptions"
+          [(ngModel)]="status"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="vio-f-status">{{ 'violations.form.status' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <input pInputText id="vio-f-title" class="w-full" [(ngModel)]="title" [maxlength]="512" />
+        <label for="vio-f-title">{{ 'violations.form.caseTitle' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="vio-f-details" class="w-full" rows="4" [(ngModel)]="details" [maxlength]="4000"></textarea>
+        <label for="vio-f-details">{{ 'violations.form.details' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <ng-container *ngIf="isEdit && detail">
+      <h3 class="vio-section-title">{{ 'violations.form.sectionActivity' | translate }}</h3>
+
+      <h4 class="vio-subtitle">{{ 'violations.form.addResponse' | translate }}</h4>
+      <div class="vio-form-grid vio-subform">
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <textarea pTextarea id="vio-r-body" class="w-full" rows="3" [(ngModel)]="newResponseBody" [maxlength]="4000"></textarea>
+          <label for="vio-r-body">{{ 'violations.form.responseBody' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            inputId="vio-r-author"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="newResponseAuthorId"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="vio-r-author">{{ 'violations.form.responseAuthor' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-inline-actions">
+          <p-button
+            type="button"
+            [label]="'violations.form.submitResponse' | translate"
+            icon="pi pi-send"
+            (onClick)="submitResponse()"
+            [loading]="submittingResponse"
+            [disabled]="!canSubmit"
+          />
+        </div>
+      </div>
+
+      <h4 class="vio-subtitle">{{ 'violations.form.addAction' | translate }}</h4>
+      <div class="vio-form-grid vio-subform">
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            inputId="vio-a-cat"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="actionCategoryOptions"
+            [(ngModel)]="newActionCategory"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label for="vio-a-cat">{{ 'violations.form.actionCategory' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            inputId="vio-a-perf"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="newActionPerformedById"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="vio-a-perf">{{ 'violations.form.performedBy' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <input pInputText id="vio-a-title" class="w-full" [(ngModel)]="newActionTitle" [maxlength]="512" />
+          <label for="vio-a-title">{{ 'violations.form.actionTitle' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <textarea pTextarea id="vio-a-notes" class="w-full" rows="2" [(ngModel)]="newActionNotes" [maxlength]="4000"></textarea>
+          <label for="vio-a-notes">{{ 'violations.form.actionNotes' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-inline-actions">
+          <p-button
+            type="button"
+            [label]="'violations.form.submitAction' | translate"
+            icon="pi pi-plus"
+            (onClick)="submitAction()"
+            [loading]="submittingAction"
+            [disabled]="!canSubmit"
+          />
+        </div>
+      </div>
+
+      <h4 class="vio-subtitle">{{ 'violations.form.escalate' | translate }}</h4>
+      <p class="vio-hint" *ngIf="!canEscalateFurther">{{ 'violations.form.escalateNone' | translate }}</p>
+      <div class="vio-form-grid vio-subform" *ngIf="canEscalateFurther">
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <p-select
+            inputId="vio-e-type"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="escalateTypeOptions"
+            [(ngModel)]="escalateNewTypeId"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="vio-e-type">{{ 'violations.form.newStep' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            inputId="vio-e-by"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="escalateChangedById"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="vio-e-by">{{ 'violations.form.changedBy' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <textarea pTextarea id="vio-e-reason" class="w-full" rows="2" [(ngModel)]="escalateReason" [maxlength]="2000"></textarea>
+          <label for="vio-e-reason">{{ 'violations.form.escalateReason' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-inline-actions">
+          <p-button
+            type="button"
+            [label]="'violations.form.submitEscalate' | translate"
+            icon="pi pi-arrow-up-right"
+            (onClick)="submitEscalate()"
+            [loading]="submittingEscalate"
+            [disabled]="!canSubmit"
+          />
+        </div>
+      </div>
+
+      <h4 class="vio-subtitle">{{ 'violations.form.responses' | translate }}</h4>
+      <p-table [value]="detail.responses" styleClass="p-datatable-sm vio-readonly-table" [tableStyle]="{ 'min-width': '100%' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'violations.columns.author' | translate }}</th>
+            <th>{{ 'violations.columns.body' | translate }}</th>
+            <th>{{ 'violations.columns.createdAt' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.authorName || '—' }}</td>
+            <td>{{ row.body }}</td>
+            <td>{{ row.createdAtUtc | date : 'short' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="3">{{ 'violations.form.emptyResponses' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <h4 class="vio-subtitle">{{ 'violations.form.actions' | translate }}</h4>
+      <p-table [value]="detail.actions" styleClass="p-datatable-sm vio-readonly-table" [tableStyle]="{ 'min-width': '100%' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'violations.form.actionCategory' | translate }}</th>
+            <th>{{ 'violations.form.actionTitle' | translate }}</th>
+            <th>{{ 'violations.form.performedBy' | translate }}</th>
+            <th>{{ 'violations.columns.performedAt' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ actionCategoryLabel(row.category) }}</td>
+            <td>{{ row.title }}</td>
+            <td>{{ row.performedByName }}</td>
+            <td>{{ row.performedAtUtc | date : 'short' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4">{{ 'violations.form.emptyActions' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <h4 class="vio-subtitle">{{ 'violations.form.escalationHistory' | translate }}</h4>
+      <p-table [value]="detail.escalationHistory" styleClass="p-datatable-sm vio-readonly-table" [tableStyle]="{ 'min-width': '100%' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'violations.columns.fromStep' | translate }}</th>
+            <th>{{ 'violations.columns.toStep' | translate }}</th>
+            <th>{{ 'violations.columns.reason' | translate }}</th>
+            <th>{{ 'violations.columns.changedBy' | translate }}</th>
+            <th>{{ 'violations.columns.changedAt' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.previousTypeName || '—' }}</td>
+            <td>{{ row.newTypeName }}</td>
+            <td>{{ row.reason || '—' }}</td>
+            <td>{{ row.changedByName }}</td>
+            <td>{{ row.changedAtUtc | date : 'short' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">{{ 'violations.form.emptyEscalation' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </ng-container>
+
+    <div class="vio-actions" *ngIf="!embedded || !loading">
+      <p-button
+        *ngIf="canSubmit"
+        type="button"
+        [label]="'violations.form.save' | translate"
+        icon="pi pi-check"
+        (onClick)="save()"
+        [loading]="saving"
+      />
+      <p-button
+        type="button"
+        [label]="'violations.actions.cancel' | translate"
+        icon="pi pi-times"
+        [outlined]="true"
+        (onClick)="cancel()"
+        [disabled]="saving"
+      />
+      <a *ngIf="!embedded" routerLink="/school/violations">{{ 'violations.form.backToList' | translate }}</a>
+    </div>
+  </div>
+</div>

@@ -181,6 +181,7 @@
       "dailyEvalTemplates": "Evaluation templates",
       "supervisorVisits": "Supervisor visits",
       "achievementRequests": "Achievement requests",
+      "violations": "Violations",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
     "studentTeacherFeedback": "Teacher feedback",
@@ -735,6 +736,115 @@
       "created": "Request saved.",
       "updated": "Request updated.",
       "deleted": "Request deleted."
+    }
+  },
+  "violations": {
+    "list": {
+      "title": "Violations",
+      "add": "New case",
+      "refresh": "Refresh",
+      "applyFilters": "Apply filters",
+      "empty": "No violation cases found.",
+      "noPermission": "You do not have access to this list.",
+      "confirmHeader": "Confirm delete",
+      "confirmDelete": "Delete the case “{{title}}” for {{name}}?"
+    },
+    "filter": {
+      "school": "School",
+      "status": "Status"
+    },
+    "columns": {
+      "opened": "Opened",
+      "subject": "Employee",
+      "title": "Title",
+      "step": "Current step",
+      "status": "Status",
+      "closed": "Closed",
+      "actions": "Actions",
+      "author": "Author",
+      "body": "Text",
+      "createdAt": "When",
+      "performedAt": "Performed",
+      "fromStep": "From",
+      "toStep": "To",
+      "reason": "Reason",
+      "changedBy": "Recorded by",
+      "changedAt": "When"
+    },
+    "status": {
+      "draft": "Draft",
+      "open": "Open",
+      "inProgress": "In progress",
+      "resolved": "Resolved",
+      "closed": "Closed",
+      "cancelled": "Cancelled"
+    },
+    "kind": {
+      "clarification": "Clarification",
+      "writtenWarning": "Written warning",
+      "attentionNotice": "Attention notice",
+      "finalWarning": "Final warning"
+    },
+    "actionCategory": {
+      "generalNote": "General note",
+      "meetingHeld": "Meeting held",
+      "formalDocumentation": "Formal documentation",
+      "other": "Other"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "titleNew": "New violation case",
+      "titleEdit": "Violation case",
+      "save": "Save",
+      "backToList": "Back to list",
+      "sectionMain": "Case details",
+      "sectionActivity": "Responses, actions & escalation",
+      "subject": "Employee concerned",
+      "openedBy": "Opened by (optional)",
+      "initialStep": "Starting step",
+      "initialTypeDefault": "Default — clarification",
+      "currentStep": "Current step",
+      "status": "Status",
+      "caseTitle": "Title",
+      "details": "Details",
+      "addResponse": "Add response",
+      "responseBody": "Response text",
+      "responseAuthor": "Author (optional)",
+      "submitResponse": "Add response",
+      "addAction": "Record action",
+      "actionCategory": "Category",
+      "actionTitle": "Title",
+      "actionNotes": "Notes",
+      "performedBy": "Performed by",
+      "submitAction": "Record action",
+      "escalate": "Escalate to next step",
+      "newStep": "Next step",
+      "changedBy": "Recorded by",
+      "escalateReason": "Reason (optional)",
+      "submitEscalate": "Apply escalation",
+      "escalateNone": "There is no higher step than the current one.",
+      "responses": "Responses",
+      "actions": "Actions",
+      "escalationHistory": "Escalation history",
+      "emptyResponses": "No responses yet.",
+      "emptyActions": "No actions recorded yet.",
+      "emptyEscalation": "No escalation events yet.",
+      "validationCore": "Please select school, employee, and enter a title.",
+      "validationResponseBody": "Enter response text.",
+      "validationAction": "Enter action title and who performed it.",
+      "validationEscalate": "Select the next step and who is recording the change."
+    },
+    "toast": {
+      "created": "Case saved.",
+      "updated": "Case updated.",
+      "deleted": "Case deleted.",
+      "responseAdded": "Response added.",
+      "actionAdded": "Action recorded.",
+      "escalated": "Escalation applied."
     }
   },
   "teacherFeedback": {

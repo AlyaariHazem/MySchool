@@ -182,6 +182,7 @@
       "dailyEvalTemplates": "قوالب التقييم",
       "supervisorVisits": "زيارات المشرف",
       "achievementRequests": "طلبات الإنجاز",
+      "violations": "المخالفات",
       "teacherFeedback": "تقييم المعلمين"
     },
     "studentTeacherFeedback": "تقييم المعلم",
@@ -736,6 +737,115 @@
       "created": "تم حفظ الطلب.",
       "updated": "تم تحديث الطلب.",
       "deleted": "تم حذف الطلب."
+    }
+  },
+  "violations": {
+    "list": {
+      "title": "المخالفات",
+      "add": "حالة جديدة",
+      "refresh": "تحديث",
+      "applyFilters": "تطبيق التصفية",
+      "empty": "لا توجد حالات مخالفات.",
+      "noPermission": "لا تملك صلاحية عرض هذه القائمة.",
+      "confirmHeader": "تأكيد الحذف",
+      "confirmDelete": "حذف الحالة «{{title}}» الخاصة بـ {{name}}؟"
+    },
+    "filter": {
+      "school": "المدرسة",
+      "status": "الحالة"
+    },
+    "columns": {
+      "opened": "تاريخ الفتح",
+      "subject": "الموظف",
+      "title": "العنوان",
+      "step": "الخطوة الحالية",
+      "status": "الحالة",
+      "closed": "الإغلاق",
+      "actions": "إجراءات",
+      "author": "المؤلف",
+      "body": "النص",
+      "createdAt": "التاريخ",
+      "performedAt": "تاريخ التنفيذ",
+      "fromStep": "من",
+      "toStep": "إلى",
+      "reason": "السبب",
+      "changedBy": "سجّلها",
+      "changedAt": "التاريخ"
+    },
+    "status": {
+      "draft": "مسودة",
+      "open": "مفتوحة",
+      "inProgress": "قيد المعالجة",
+      "resolved": "تم الحل",
+      "closed": "مغلقة",
+      "cancelled": "ملغاة"
+    },
+    "kind": {
+      "clarification": "استيضاح",
+      "writtenWarning": "تنبيه خطي",
+      "attentionNotice": "لفت نظر",
+      "finalWarning": "تنبيه نهائي"
+    },
+    "actionCategory": {
+      "generalNote": "ملاحظة عامة",
+      "meetingHeld": "اجتماع",
+      "formalDocumentation": "توثيق رسمي",
+      "other": "أخرى"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف",
+      "cancel": "إلغاء"
+    },
+    "form": {
+      "titleNew": "حالة مخالفة جديدة",
+      "titleEdit": "حالة مخالفة",
+      "save": "حفظ",
+      "backToList": "العودة للقائمة",
+      "sectionMain": "بيانات الحالة",
+      "sectionActivity": "الردود والإجراءات والتصعيد",
+      "subject": "الموظف المعني",
+      "openedBy": "فتحها (اختياري)",
+      "initialStep": "الخطوة الابتدائية",
+      "initialTypeDefault": "افتراضي — استيضاح",
+      "currentStep": "الخطوة الحالية",
+      "status": "الحالة",
+      "caseTitle": "العنوان",
+      "details": "التفاصيل",
+      "addResponse": "إضافة رد",
+      "responseBody": "نص الرد",
+      "responseAuthor": "المؤلف (اختياري)",
+      "submitResponse": "إضافة الرد",
+      "addAction": "تسجيل إجراء",
+      "actionCategory": "التصنيف",
+      "actionTitle": "العنوان",
+      "actionNotes": "ملاحظات",
+      "performedBy": "نفّذه",
+      "submitAction": "تسجيل الإجراء",
+      "escalate": "التصعيد للخطوة التالية",
+      "newStep": "الخطوة التالية",
+      "changedBy": "سجّل التغيير",
+      "escalateReason": "السبب (اختياري)",
+      "submitEscalate": "تطبيق التصعيد",
+      "escalateNone": "لا توجد خطوة أعلى من الحالية.",
+      "responses": "الردود",
+      "actions": "الإجراءات",
+      "escalationHistory": "سجل التصعيد",
+      "emptyResponses": "لا توجد ردود بعد.",
+      "emptyActions": "لا توجد إجراءات مسجّلة بعد.",
+      "emptyEscalation": "لا توجد أحداث تصعيد بعد.",
+      "validationCore": "يرجى اختيار المدرسة والموظف وإدخال عنوان للحالة.",
+      "validationResponseBody": "أدخل نص الرد.",
+      "validationAction": "أدخل عنوان الإجراء ومن نفّذه.",
+      "validationEscalate": "اختر الخطوة التالية ومن سجّل التغيير."
+    },
+    "toast": {
+      "created": "تم حفظ الحالة.",
+      "updated": "تم تحديث الحالة.",
+      "deleted": "تم حذف الحالة.",
+      "responseAdded": "تمت إضافة الرد.",
+      "actionAdded": "تم تسجيل الإجراء.",
+      "escalated": "تم تطبيق التصعيد."
     }
   },
   "teacherFeedback": {
