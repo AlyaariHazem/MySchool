@@ -97,6 +97,12 @@ namespace Backend.Data
         public DbSet<ParentFeedback> ParentFeedbacks { get; set; }
         public DbSet<FeedbackSummary> FeedbackSummaries { get; set; }
 
+        public DbSet<Achievement> Achievements { get; set; }
+        public DbSet<AchievementRequest> AchievementRequests { get; set; }
+        public DbSet<AchievementApproval> AchievementApprovals { get; set; }
+        public DbSet<AchievementAttachment> AchievementAttachments { get; set; }
+        public DbSet<AchievementPointsLedger> AchievementPointsLedgers { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -1597,6 +1603,127 @@ namespace Backend.Data
                 .WithMany(c => c.Summaries)
                 .HasForeignKey(s => s.TeacherFeedbackCycleID)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Achievements: catalog, requests, approvals, attachments, points ledger ---
+            modelBuilder.Entity<Achievement>()
+                .HasKey(a => a.AchievementID);
+            modelBuilder.Entity<Achievement>()
+                .Property(a => a.AchievementID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<Achievement>()
+                .HasIndex(a => new { a.SchoolID, a.Code })
+                .IsUnique();
+            modelBuilder.Entity<Achievement>()
+                .HasOne(a => a.School)
+                .WithMany()
+                .HasForeignKey(a => a.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Achievement>()
+                .HasOne(a => a.AcademicYear)
+                .WithMany()
+                .HasForeignKey(a => a.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AchievementRequest>()
+                .HasKey(r => r.AchievementRequestID);
+            modelBuilder.Entity<AchievementRequest>()
+                .Property(r => r.AchievementRequestID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<AchievementRequest>()
+                .Property(r => r.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<AchievementRequest>()
+                .HasIndex(r => new { r.SchoolID, r.AcademicYearID, r.EmployeeProfileID, r.Status });
+            modelBuilder.Entity<AchievementRequest>()
+                .HasOne(r => r.School)
+                .WithMany()
+                .HasForeignKey(r => r.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AchievementRequest>()
+                .HasOne(r => r.AcademicYear)
+                .WithMany()
+                .HasForeignKey(r => r.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AchievementRequest>()
+                .HasOne(r => r.EmployeeProfile)
+                .WithMany(p => p.AchievementRequests)
+                .HasForeignKey(r => r.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AchievementRequest>()
+                .HasOne(r => r.Achievement)
+                .WithMany(a => a.Requests)
+                .HasForeignKey(r => r.AchievementID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AchievementApproval>()
+                .HasKey(x => x.AchievementApprovalID);
+            modelBuilder.Entity<AchievementApproval>()
+                .Property(x => x.AchievementApprovalID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<AchievementApproval>()
+                .Property(x => x.Decision)
+                .HasConversion<int>();
+            modelBuilder.Entity<AchievementApproval>()
+                .HasIndex(x => new { x.AchievementRequestID, x.SortOrder });
+            modelBuilder.Entity<AchievementApproval>()
+                .HasOne(x => x.AchievementRequest)
+                .WithMany(r => r.Approvals)
+                .HasForeignKey(x => x.AchievementRequestID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<AchievementApproval>()
+                .HasOne(x => x.ApproverEmployeeProfile)
+                .WithMany(p => p.AchievementApprovalsAsApprover)
+                .HasForeignKey(x => x.ApproverEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AchievementAttachment>()
+                .HasKey(x => x.AchievementAttachmentID);
+            modelBuilder.Entity<AchievementAttachment>()
+                .Property(x => x.AchievementAttachmentID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<AchievementAttachment>()
+                .HasOne(x => x.AchievementRequest)
+                .WithMany(r => r.Attachments)
+                .HasForeignKey(x => x.AchievementRequestID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<AchievementAttachment>()
+                .HasOne(x => x.UploadedByEmployeeProfile)
+                .WithMany(p => p.AchievementAttachmentsUploaded)
+                .HasForeignKey(x => x.UploadedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AchievementPointsLedger>()
+                .HasKey(x => x.AchievementPointsLedgerID);
+            modelBuilder.Entity<AchievementPointsLedger>()
+                .Property(x => x.AchievementPointsLedgerID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<AchievementPointsLedger>()
+                .HasIndex(x => new { x.EmployeeProfileID, x.AcademicYearID, x.CreatedAtUtc });
+            modelBuilder.Entity<AchievementPointsLedger>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AchievementPointsLedger>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AchievementPointsLedger>()
+                .HasOne(x => x.EmployeeProfile)
+                .WithMany(p => p.AchievementPointsLedgerEntries)
+                .HasForeignKey(x => x.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AchievementPointsLedger>()
+                .HasOne(x => x.AchievementRequest)
+                .WithMany()
+                .HasForeignKey(x => x.AchievementRequestID)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<AchievementPointsLedger>()
+                .HasOne(x => x.CreatedByEmployeeProfile)
+                .WithMany(p => p.AchievementPointsLedgerEntriesCreated)
+                .HasForeignKey(x => x.CreatedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ExamType>().HasData(
                 new ExamType { ExamTypeID = 1, Name = "Midterm", SortOrder = 1, IsActive = true },

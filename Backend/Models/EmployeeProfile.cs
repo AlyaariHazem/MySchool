@@ -108,5 +108,15 @@ public class EmployeeProfile
 
     public ICollection<RecommendationFollowUp> RecommendationFollowUpsAuthored { get; set; } = new List<RecommendationFollowUp>();
 
-    // Future: Achievement, Violation, StaffRequest, Activity — link via EmployeeProfileID or Year-scoped tables (see module TODOs in service/docs).
+    public ICollection<AchievementRequest> AchievementRequests { get; set; } = new List<AchievementRequest>();
+
+    public ICollection<AchievementApproval> AchievementApprovalsAsApprover { get; set; } = new List<AchievementApproval>();
+
+    public ICollection<AchievementAttachment> AchievementAttachmentsUploaded { get; set; } = new List<AchievementAttachment>();
+
+    public ICollection<AchievementPointsLedger> AchievementPointsLedgerEntries { get; set; } = new List<AchievementPointsLedger>();
+
+    public ICollection<AchievementPointsLedger> AchievementPointsLedgerEntriesCreated { get; set; } = new List<AchievementPointsLedger>();
+
+    // Future: Violation, StaffRequest, Activity — link via EmployeeProfileID or Year-scoped tables (see module TODOs in service/docs).
 }
