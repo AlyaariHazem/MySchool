@@ -118,5 +118,13 @@ public class EmployeeProfile
 
     public ICollection<AchievementPointsLedger> AchievementPointsLedgerEntriesCreated { get; set; } = new List<AchievementPointsLedger>();
 
-    // Future: Violation, StaffRequest, Activity — link via EmployeeProfileID or Year-scoped tables (see module TODOs in service/docs).
+    public ICollection<Violation> ViolationsAsSubject { get; set; } = new List<Violation>();
+
+    public ICollection<Violation> ViolationsOpened { get; set; } = new List<Violation>();
+
+    public ICollection<ViolationResponse> ViolationResponses { get; set; } = new List<ViolationResponse>();
+
+    public ICollection<ViolationAction> ViolationActionsPerformed { get; set; } = new List<ViolationAction>();
+
+    public ICollection<ViolationEscalationHistory> ViolationEscalationsChanged { get; set; } = new List<ViolationEscalationHistory>();
 }

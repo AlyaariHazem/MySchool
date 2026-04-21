@@ -103,6 +103,12 @@ namespace Backend.Data
         public DbSet<AchievementAttachment> AchievementAttachments { get; set; }
         public DbSet<AchievementPointsLedger> AchievementPointsLedgers { get; set; }
 
+        public DbSet<ViolationType> ViolationTypes { get; set; }
+        public DbSet<Violation> Violations { get; set; }
+        public DbSet<ViolationResponse> ViolationResponses { get; set; }
+        public DbSet<ViolationAction> ViolationActions { get; set; }
+        public DbSet<ViolationEscalationHistory> ViolationEscalationHistories { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -1723,6 +1729,123 @@ namespace Backend.Data
                 .HasOne(x => x.CreatedByEmployeeProfile)
                 .WithMany(p => p.AchievementPointsLedgerEntriesCreated)
                 .HasForeignKey(x => x.CreatedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Violations (HR): types, case, responses, actions, escalation history ---
+            modelBuilder.Entity<ViolationType>()
+                .HasKey(x => x.ViolationTypeID);
+            modelBuilder.Entity<ViolationType>()
+                .Property(x => x.ViolationTypeID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ViolationType>()
+                .Property(x => x.Kind)
+                .HasConversion<int>();
+            modelBuilder.Entity<ViolationType>()
+                .HasIndex(x => new { x.SchoolID, x.Kind })
+                .IsUnique();
+            modelBuilder.Entity<ViolationType>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Violation>()
+                .HasKey(x => x.ViolationID);
+            modelBuilder.Entity<Violation>()
+                .Property(x => x.ViolationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<Violation>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<Violation>()
+                .HasIndex(x => new { x.SchoolID, x.SubjectEmployeeProfileID, x.Status });
+            modelBuilder.Entity<Violation>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Violation>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Violation>()
+                .HasOne(x => x.ViolationType)
+                .WithMany(t => t.Violations)
+                .HasForeignKey(x => x.ViolationTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Violation>()
+                .HasOne(x => x.SubjectEmployeeProfile)
+                .WithMany(p => p.ViolationsAsSubject)
+                .HasForeignKey(x => x.SubjectEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Violation>()
+                .HasOne(x => x.OpenedByEmployeeProfile)
+                .WithMany(p => p.ViolationsOpened)
+                .HasForeignKey(x => x.OpenedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ViolationResponse>()
+                .HasKey(x => x.ViolationResponseID);
+            modelBuilder.Entity<ViolationResponse>()
+                .Property(x => x.ViolationResponseID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ViolationResponse>()
+                .HasOne(x => x.Violation)
+                .WithMany(v => v.Responses)
+                .HasForeignKey(x => x.ViolationID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ViolationResponse>()
+                .HasOne(x => x.AuthorEmployeeProfile)
+                .WithMany(p => p.ViolationResponses)
+                .HasForeignKey(x => x.AuthorEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ViolationAction>()
+                .HasKey(x => x.ViolationActionID);
+            modelBuilder.Entity<ViolationAction>()
+                .Property(x => x.ViolationActionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ViolationAction>()
+                .Property(x => x.Category)
+                .HasConversion<int>();
+            modelBuilder.Entity<ViolationAction>()
+                .HasOne(x => x.Violation)
+                .WithMany(v => v.Actions)
+                .HasForeignKey(x => x.ViolationID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ViolationAction>()
+                .HasOne(x => x.PerformedByEmployeeProfile)
+                .WithMany(p => p.ViolationActionsPerformed)
+                .HasForeignKey(x => x.PerformedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ViolationEscalationHistory>()
+                .HasKey(x => x.ViolationEscalationHistoryID);
+            modelBuilder.Entity<ViolationEscalationHistory>()
+                .Property(x => x.ViolationEscalationHistoryID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ViolationEscalationHistory>()
+                .HasIndex(x => new { x.ViolationID, x.ChangedAtUtc });
+            modelBuilder.Entity<ViolationEscalationHistory>()
+                .HasOne(x => x.Violation)
+                .WithMany(v => v.EscalationHistory)
+                .HasForeignKey(x => x.ViolationID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ViolationEscalationHistory>()
+                .HasOne(x => x.PreviousViolationType)
+                .WithMany(t => t.EscalationHistoriesFrom)
+                .HasForeignKey(x => x.PreviousViolationTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ViolationEscalationHistory>()
+                .HasOne(x => x.NewViolationType)
+                .WithMany(t => t.EscalationHistoriesTo)
+                .HasForeignKey(x => x.NewViolationTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ViolationEscalationHistory>()
+                .HasOne(x => x.ChangedByEmployeeProfile)
+                .WithMany(p => p.ViolationEscalationsChanged)
+                .HasForeignKey(x => x.ChangedByEmployeeProfileID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ExamType>().HasData(

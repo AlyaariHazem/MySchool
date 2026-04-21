@@ -94,6 +94,7 @@ public class UnitOfWork : IUnitOfWork
         SupervisorVisits = new SupervisorVisitRepository(_tenantContext);
         AchievementRequests = new AchievementRequestRepository(_tenantContext);
         TeacherFeedback = new TeacherFeedbackRepository(_tenantContext);
+        Violations = new ViolationRepository(_tenantContext);
 
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
@@ -137,6 +138,7 @@ public class UnitOfWork : IUnitOfWork
     public ISupervisorVisitRepository SupervisorVisits { get; private set; }
     public IAchievementRequestRepository AchievementRequests { get; private set; }
     public ITeacherFeedbackRepository TeacherFeedback { get; private set; }
+    public IViolationRepository Violations { get; private set; }
 
     public async Task<int> CompleteAsync()
     {
