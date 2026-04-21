@@ -214,9 +214,6 @@
   [dismissableMask]="true"
   styleClass="eh-hr-profile-dialog eh-hr-profile-dialog-form"
 >
-  <div *ngIf="editLoading" class="loading-wrap">
-    <p-progressSpinner strokeWidth="4" />
-  </div>
   <app-employees-hr-profile-form
     *ngIf="!editLoading && editProfile"
     [initial]="editProfile"

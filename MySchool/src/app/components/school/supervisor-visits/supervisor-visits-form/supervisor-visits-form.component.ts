@@ -7,7 +7,6 @@ import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastrService } from 'ngx-toastr';
@@ -62,7 +61,6 @@ interface SubjectOption {
     InputTextModule,
     TextareaModule,
     InputNumberModule,
-    ProgressSpinnerModule,
   ],
   templateUrl: './supervisor-visits-form.component.html',
   styleUrl: './supervisor-visits-form.component.scss',

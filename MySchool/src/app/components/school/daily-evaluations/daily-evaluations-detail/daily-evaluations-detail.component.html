@@ -1,8 +1,4 @@
 <div class="employees-hr-page" *ngIf="canViewEvaluations" [class.de-eval-detail--embedded]="embedded">
-  <div *ngIf="loading" class="loading-wrap">
-    <p-progressSpinner strokeWidth="3" />
-  </div>
-
   <div class="employees-hr-card" *ngIf="!loading && full" [class.de-eval-detail-card--embedded]="embedded">
     <header class="employees-hr-header" *ngIf="!embedded">
       <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.detailTitle' | translate }}</h2>

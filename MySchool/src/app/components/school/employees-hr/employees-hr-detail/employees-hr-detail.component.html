@@ -21,10 +21,6 @@
 
     <div *ngIf="!canView" class="empty-block muted">{{ 'employeesHr.errors.noPermission' | translate }}</div>
 
-    <div *ngIf="loading && canView" class="loading-wrap">
-      <p-progressSpinner strokeWidth="4" />
-    </div>
-
     <div *ngIf="!loading && canView && !row" class="empty-block">{{ 'employeesHr.errors.notFound' | translate }}</div>
 
     <div *ngIf="row" class="detail-grid">

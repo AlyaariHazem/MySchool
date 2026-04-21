@@ -1,6 +1,4 @@
 <div class="sv-form-page" [class.sv-form-page--embedded]="embedded">
-  <p-progressSpinner *ngIf="loading" styleClass="sv-form-spinner" />
-
   <div class="sv-form-card" *ngIf="!loading">
     <header class="sv-form-header" *ngIf="!embedded">
       <h2>{{ (isEdit ? 'supervisorVisits.form.titleEdit' : 'supervisorVisits.form.titleNew') | translate }}</h2>

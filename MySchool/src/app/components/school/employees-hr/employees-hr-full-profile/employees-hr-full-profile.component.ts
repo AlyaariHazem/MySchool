@@ -9,7 +9,6 @@ import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
@@ -57,7 +56,6 @@ import { EmployeesHrService, readHttpError } from '../employees-hr.service';
     Select,
     FloatLabelModule,
     InputNumberModule,
-    ProgressSpinnerModule,
     MatTabsModule,
   ],
   templateUrl: './employees-hr-full-profile.component.html',

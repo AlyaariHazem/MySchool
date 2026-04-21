@@ -1,8 +1,4 @@
 <div class="tf-form" [attr.dir]="dir$ | async">
-  @if (loading) {
-    <p-progressSpinner styleClass="tf-form-spinner" />
-  }
-
   @if (!loading) {
     <div class="tf-form-grid">
       @if (!isSchoolManager) {

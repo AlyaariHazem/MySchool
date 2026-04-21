@@ -18,7 +18,6 @@ import { DatePicker } from 'primeng/datepicker';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 
@@ -52,7 +51,6 @@ function optionalEmail(control: AbstractControl): ValidationErrors | null {
     FloatLabelModule,
     DatePicker,
     InputNumberModule,
-    ProgressSpinnerModule,
   ],
   templateUrl: './job-application-form.component.html',
   styleUrl: './job-application-form.component.scss',

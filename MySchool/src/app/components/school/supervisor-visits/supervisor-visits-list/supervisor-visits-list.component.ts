@@ -6,7 +6,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
@@ -40,7 +39,6 @@ import { SupervisorVisitsService, readSupervisorVisitHttpError } from '../superv
     ButtonModule,
     Select,
     FloatLabelModule,
-    ProgressSpinnerModule,
     TooltipModule,
     ConfirmDialogModule,
     DialogModule,

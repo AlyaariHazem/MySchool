@@ -6,10 +6,6 @@
       </h2>
       <p-button [label]="'employeesHr.actions.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
     </header>
-    <div *ngIf="loadingEdit" class="loading-wrap">
-      <p-progressSpinner strokeWidth="3" />
-    </div>
-
     <form
       *ngIf="!loadingEdit"
       [formGroup]="form"

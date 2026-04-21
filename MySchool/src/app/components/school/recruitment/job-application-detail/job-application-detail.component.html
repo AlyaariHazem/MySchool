@@ -1,10 +1,6 @@
 <div class="employees-hr-page" [class.embedded-workflow]="embedded" *ngIf="canView">
   <p-confirmDialog [style]="{ width: '28rem' }" />
 
-  <div *ngIf="loading" class="loading-wrap">
-    <p-progressSpinner strokeWidth="4" />
-  </div>
-
   <div class="employees-hr-card" *ngIf="!loading && full">
     <header class="employees-hr-header">
       <h2 class="employees-hr-title">{{ 'recruitment.workflow.title' | translate }}</h2>

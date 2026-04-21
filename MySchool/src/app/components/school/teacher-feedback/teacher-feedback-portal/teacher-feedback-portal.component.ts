@@ -7,7 +7,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { map } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -33,7 +32,6 @@ import { readTeacherFeedbackHttpError, TeacherFeedbackService } from '../teacher
     CardModule,
     FloatLabelModule,
     Select,
-    ProgressSpinnerModule,
     DatePipe,
   ],
   templateUrl: './teacher-feedback-portal.component.html',

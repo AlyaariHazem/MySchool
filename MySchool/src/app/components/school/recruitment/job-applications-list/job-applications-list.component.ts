@@ -8,7 +8,6 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -57,7 +56,6 @@ import { RecruitmentService, readRecruitmentHttpError } from '../recruitment.ser
     Select,
     FloatLabelModule,
     InputTextModule,
-    ProgressSpinnerModule,
     TooltipModule,
     TagModule,
     JobApplicationFormComponent,

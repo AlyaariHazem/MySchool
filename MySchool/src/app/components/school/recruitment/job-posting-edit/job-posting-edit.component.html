@@ -12,10 +12,6 @@
 
     <div *ngIf="!canUpdate" class="empty-block muted">{{ 'employeesHr.errors.noPermission' | translate }}</div>
 
-    <div *ngIf="loadingRow && canUpdate" class="loading-wrap">
-      <p-progressSpinner strokeWidth="4" />
-    </div>
-
     <app-job-posting-form
       *ngIf="!loadingRow && canUpdate && initial"
       [schools]="schools"

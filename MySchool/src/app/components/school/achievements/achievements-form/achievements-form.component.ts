@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
@@ -46,7 +45,6 @@ import { AchievementsService, readAchievementHttpError } from '../achievements.s
     FloatLabelModule,
     InputTextModule,
     TextareaModule,
-    ProgressSpinnerModule,
     TableModule,
   ],
   templateUrl: './achievements-form.component.html',

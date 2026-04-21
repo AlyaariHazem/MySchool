@@ -30,10 +30,6 @@
       >
     </div>
 
-    <div *ngIf="loadingMeta && canCreate" class="loading-wrap">
-      <p-progressSpinner strokeWidth="4" />
-    </div>
-
     <app-job-application-form
       *ngIf="!loadingMeta && canCreate"
       [years]="years"

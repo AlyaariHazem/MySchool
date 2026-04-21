@@ -9,7 +9,6 @@ import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
@@ -51,7 +50,6 @@ import { EmployeesHrService, readHttpError } from '../employees-hr.service';
     ButtonModule,
     Select,
     FloatLabelModule,
-    ProgressSpinnerModule,
     TooltipModule,
     ConfirmDialogModule,
     DialogModule,

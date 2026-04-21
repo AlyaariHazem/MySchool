@@ -17,10 +17,6 @@
     </p-floatlabel>
   </div>
 
-  <div *ngIf="loading" class="tf-portal-loading">
-    <p-progressSpinner strokeWidth="3" />
-  </div>
-
   <div *ngIf="!loading && cycles.length === 0" class="tf-portal-empty">
     {{ 'teacherFeedback.portal.empty' | translate }}
   </div>

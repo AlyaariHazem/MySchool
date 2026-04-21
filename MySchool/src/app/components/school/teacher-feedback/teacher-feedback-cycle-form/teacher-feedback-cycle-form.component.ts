@@ -10,7 +10,6 @@ import { DatePicker } from 'primeng/datepicker';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastrService } from 'ngx-toastr';
@@ -49,7 +48,6 @@ type QuestionRow = FeedbackQuestionWriteDto & { _key: number };
     InputTextModule,
     TextareaModule,
     CheckboxModule,
-    ProgressSpinnerModule,
     DatePicker,
     AsyncPipe,
   ],

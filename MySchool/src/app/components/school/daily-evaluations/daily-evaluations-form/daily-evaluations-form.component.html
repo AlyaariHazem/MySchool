@@ -9,10 +9,6 @@
       <p-button [label]="'employeesHr.actions.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
     </header>
 
-    <div *ngIf="loadingMeta" class="loading-wrap">
-      <p-progressSpinner strokeWidth="3" />
-    </div>
-
     <form
       [formGroup]="headerForm"
       class="filters-toolbar filters-grid de-eval-filters"
@@ -126,10 +122,6 @@
   *ngIf="evaluationId && canUpdateEvaluations"
   [class.de-eval-form--embedded]="embedded"
 >
-  <div *ngIf="loadingMeta" class="loading-wrap">
-    <p-progressSpinner strokeWidth="3" />
-  </div>
-
   <div class="employees-hr-card" *ngIf="!loadingMeta && full" [class.de-eval-form-card--embedded]="embedded">
     <header class="employees-hr-header" *ngIf="!embedded">
       <h2 class="employees-hr-title">{{ 'dailyEvaluations.evaluations.editTitle' | translate }}</h2>

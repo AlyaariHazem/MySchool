@@ -44,10 +44,6 @@
 
     <div *ngIf="!canView" class="empty-block muted">{{ 'supervisorVisits.list.noPermission' | translate }}</div>
 
-    <div *ngIf="loading && rows.length === 0" class="loading-wrap">
-      <p-progressSpinner strokeWidth="3" />
-    </div>
-
     <p-table
       *ngIf="canView"
       [value]="rows"

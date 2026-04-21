@@ -113,10 +113,6 @@
 
     <div *ngIf="error" class="error-block">{{ error }}</div>
 
-    <div *ngIf="loading" class="loading-wrap">
-      <p-progressSpinner strokeWidth="3" />
-    </div>
-
     <div *ngIf="!loading && !error && rows.length === 0" class="empty-block empty-job-board">
       <i class="pi pi-inbox empty-job-board-icon" *ngIf="!isHrUser"></i>
       <p *ngIf="!isHrUser">{{ 'recruitment.jobBoard.emptyNoOpenVacancies' | translate }}</p>
@@ -294,9 +290,6 @@
   [style]="{ width: '70rem', maxWidth: '95vw' }"
   (onHide)="closeEditDialog()"
 >
-  <div *ngIf="detailsLoading" class="loading-wrap">
-    <p-progressSpinner strokeWidth="3" />
-  </div>
   <div *ngIf="!detailsLoading && detailsError" class="error-block">{{ detailsError }}</div>
   <app-job-posting-form
     *ngIf="!detailsLoading && selectedPosting"
@@ -320,9 +313,6 @@
   [style]="{ width: '64rem', maxWidth: '95vw' }"
   (onHide)="closeDetailsDialog()"
 >
-  <div *ngIf="detailsLoading" class="loading-wrap">
-    <p-progressSpinner strokeWidth="3" />
-  </div>
   <div *ngIf="!detailsLoading && detailsError" class="error-block">{{ detailsError }}</div>
 
   <div *ngIf="!detailsLoading && selectedPosting" class="job-posting-dialog-content">

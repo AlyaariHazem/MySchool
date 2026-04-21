@@ -6,7 +6,6 @@ import { Store } from '@ngrx/store';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { map } from 'rxjs';
@@ -40,7 +39,6 @@ import { readTeacherFeedbackHttpError, TeacherFeedbackService } from '../teacher
     Select,
     TextareaModule,
     InputNumberModule,
-    ProgressSpinnerModule,
     DatePipe,
   ],
   templateUrl: './teacher-feedback-fill.component.html',

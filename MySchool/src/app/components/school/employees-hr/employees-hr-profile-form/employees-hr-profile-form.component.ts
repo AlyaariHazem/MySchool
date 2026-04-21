@@ -18,7 +18,6 @@ import { ButtonModule } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { finalize } from 'rxjs/operators';
@@ -44,7 +43,6 @@ import { EmployeesHrService } from '../employees-hr.service';
     Select,
     DatePicker,
     InputNumberModule,
-    ProgressSpinnerModule,
   ],
   templateUrl: './employees-hr-profile-form.component.html',
   styleUrl: './employees-hr-profile-form.component.scss',

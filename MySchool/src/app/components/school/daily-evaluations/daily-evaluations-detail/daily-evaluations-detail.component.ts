@@ -8,7 +8,6 @@ import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
@@ -51,7 +50,6 @@ import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evalua
     TranslateModule,
     ButtonModule,
     TableModule,
-    ProgressSpinnerModule,
     DialogModule,
     FloatLabelModule,
     InputNumberModule,

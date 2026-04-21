@@ -8,7 +8,6 @@ import { ButtonModule } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
@@ -56,7 +55,6 @@ import { DailyEvaluationsFormComponent } from '../daily-evaluations-form/daily-e
     ButtonModule,
     Select,
     FloatLabelModule,
-    ProgressSpinnerModule,
     TooltipModule,
     DialogModule,
     DatePicker,

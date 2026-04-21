@@ -9,7 +9,6 @@ import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -50,7 +49,6 @@ import { JobPostingFormComponent } from '../job-posting-form/job-posting-form.co
     ButtonModule,
     Select,
     FloatLabelModule,
-    ProgressSpinnerModule,
     TooltipModule,
     ConfirmDialogModule,
     DialogModule,

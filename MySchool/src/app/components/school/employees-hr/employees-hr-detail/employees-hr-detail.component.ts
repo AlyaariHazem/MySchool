@@ -3,7 +3,6 @@ import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@ang
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
 
@@ -21,7 +20,6 @@ import { EmployeesHrService, readHttpError } from '../employees-hr.service';
     TranslateModule,
     ButtonModule,
     RouterLink,
-    ProgressSpinnerModule,
     DatePipe,
   ],
   templateUrl: './employees-hr-detail.component.html',

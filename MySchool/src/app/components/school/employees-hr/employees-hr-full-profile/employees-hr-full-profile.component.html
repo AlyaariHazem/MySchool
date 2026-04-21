@@ -12,8 +12,6 @@
       </div>
     </header>
 
-    <div *ngIf="loading" class="loading-wrap"><p-progressSpinner strokeWidth="4" /></div>
-
     <div *ngIf="!loading && !data" class="empty-block">{{ 'employeesHr.errors.notFound' | translate }}</div>
 
     <mat-tab-group *ngIf="data" animationDuration="0ms" class="eh-tabs">

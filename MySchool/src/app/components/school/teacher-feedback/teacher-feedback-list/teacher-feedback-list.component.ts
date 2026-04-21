@@ -7,7 +7,6 @@ import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
@@ -40,7 +39,6 @@ import { TeacherFeedbackCycleFormComponent } from '../teacher-feedback-cycle-for
     ButtonModule,
     Select,
     FloatLabelModule,
-    ProgressSpinnerModule,
     TooltipModule,
     ConfirmDialogModule,
     DialogModule,

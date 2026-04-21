@@ -80,10 +80,6 @@
 
     <div *ngIf="error" class="error-block">{{ error }}</div>
 
-    <div *ngIf="loading" class="loading-wrap">
-      <p-progressSpinner strokeWidth="3" />
-    </div>
-
     <div *ngIf="!loading && canView && rows.length === 0 && !error" class="empty-block">
       {{ 'recruitment.applications.empty' | translate }}
     </div>
@@ -178,7 +174,6 @@
   styleClass="recruitment-dialog recruitment-dialog-form"
   (onHide)="closeEditDialog()"
 >
-  <div *ngIf="dialogLoading" class="loading-wrap"><p-progressSpinner strokeWidth="3" /></div>
   <div *ngIf="!dialogLoading && dialogError" class="error-block">{{ dialogError }}</div>
   <app-job-application-form
     *ngIf="!dialogLoading && selectedApplication"

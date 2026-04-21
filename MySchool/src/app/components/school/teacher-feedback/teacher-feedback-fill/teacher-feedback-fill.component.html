@@ -1,6 +1,4 @@
 <div class="tf-fill" [attr.dir]="dir$ | async">
-  <p-progressSpinner *ngIf="loading" styleClass="tf-fill-spinner" />
-
   <div *ngIf="!loading && form">
     <a [routerLink]="participant === 'guardian' ? ['/guardian', 'teacher-feedback'] : ['/students', 'teacher-feedback']" class="tf-fill-back">
       ← {{ 'teacherFeedback.fill.back' | translate }}

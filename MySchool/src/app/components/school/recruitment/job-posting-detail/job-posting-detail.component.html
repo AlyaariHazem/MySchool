@@ -114,10 +114,6 @@
     </div>
   </div>
 
-  <div *ngIf="loading" class="loading-wrap">
-    <p-progressSpinner strokeWidth="4" />
-  </div>
-
   <div *ngIf="!loading && !row && loadError" class="employees-hr-card job-posting-unavailable">
     <div *ngIf="httpStatus === 404" class="rec-banner rec-banner-error" role="alert">
       <i class="pi pi-times-circle" aria-hidden="true"></i>

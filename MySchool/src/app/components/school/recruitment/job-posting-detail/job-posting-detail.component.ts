@@ -6,7 +6,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
@@ -27,7 +26,6 @@ import { RecruitmentService, readRecruitmentHttpError } from '../recruitment.ser
     TranslateModule,
     ButtonModule,
     RouterLink,
-    ProgressSpinnerModule,
     DatePipe,
     TagModule,
     ConfirmDialogModule,

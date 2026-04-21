@@ -8,7 +8,6 @@ import { DatePicker } from 'primeng/datepicker';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select, SelectLazyLoadEvent } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastrService } from 'ngx-toastr';
@@ -57,7 +56,6 @@ import { DailyEvaluationsService, readDailyEvalHttpError } from '../daily-evalua
     InputTextModule,
     TextareaModule,
     InputNumberModule,
-    ProgressSpinnerModule,
   ],
   templateUrl: './daily-evaluations-form.component.html',
   styleUrl: './daily-evaluations-form.component.scss',

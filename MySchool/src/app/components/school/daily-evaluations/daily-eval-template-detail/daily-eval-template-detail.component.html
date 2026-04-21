@@ -109,10 +109,6 @@
     />
   </div>
 
-  <div *ngIf="criteriaLoading" class="loading-wrap">
-    <p-progressSpinner strokeWidth="3" />
-  </div>
-
   <p-table *ngIf="!criteriaLoading" [value]="criteria" styleClass="p-datatable-sm employees-hr-table de-criteria-table">
     <ng-template pTemplate="emptymessage">
       <tr>
@@ -153,10 +149,6 @@
     </ng-template>
   </p-table>
 </ng-template>
-
-<div *ngIf="loading" class="employees-hr-page loading-wrap" [class.de-template-detail-loading--embedded]="embedded">
-  <p-progressSpinner strokeWidth="3" />
-</div>
 
 <div class="employees-hr-page" *ngIf="!canView && !embedded">
   <div class="employees-hr-card empty-block muted">{{ 'dailyEvaluations.errors.noPermission' | translate }}</div>

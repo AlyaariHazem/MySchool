@@ -12,7 +12,6 @@ import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Select } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -57,7 +56,6 @@ import { EmploymentStatus } from '../../employees-hr/employees-hr.models';
     TranslateModule,
     ButtonModule,
     RouterLink,
-    ProgressSpinnerModule,
     DatePipe,
     TagModule,
     MatTabsModule,
