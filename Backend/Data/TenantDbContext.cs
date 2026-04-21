@@ -86,6 +86,11 @@ namespace Backend.Data
         public DbSet<EvaluationLock> EvaluationLocks { get; set; }
         public DbSet<EvaluationOverrideLog> EvaluationOverrideLogs { get; set; }
 
+        public DbSet<SupervisorVisit> SupervisorVisits { get; set; }
+        public DbSet<VisitObservation> VisitObservations { get; set; }
+        public DbSet<VisitRecommendation> VisitRecommendations { get; set; }
+        public DbSet<RecommendationFollowUp> RecommendationFollowUps { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -1378,6 +1383,98 @@ namespace Backend.Data
                 .HasOne(x => x.AcademicYear)
                 .WithMany()
                 .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Supervisor visits (زيارات المشرف) ---
+            modelBuilder.Entity<SupervisorVisit>()
+                .HasKey(v => v.SupervisorVisitID);
+            modelBuilder.Entity<SupervisorVisit>()
+                .Property(v => v.SupervisorVisitID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<SupervisorVisit>()
+                .Property(v => v.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<SupervisorVisit>()
+                .Property(v => v.OverallScoreOutOf100)
+                .HasColumnType("decimal(5,2)");
+            modelBuilder.Entity<SupervisorVisit>()
+                .HasIndex(v => new { v.SchoolID, v.AcademicYearID, v.VisitedTeacherID, v.VisitDate });
+            modelBuilder.Entity<SupervisorVisit>()
+                .HasOne(v => v.School)
+                .WithMany()
+                .HasForeignKey(v => v.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<SupervisorVisit>()
+                .HasOne(v => v.AcademicYear)
+                .WithMany()
+                .HasForeignKey(v => v.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<SupervisorVisit>()
+                .HasOne(v => v.VisitedTeacher)
+                .WithMany(t => t.SupervisorVisitsReceived)
+                .HasForeignKey(v => v.VisitedTeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<SupervisorVisit>()
+                .HasOne(v => v.Class)
+                .WithMany()
+                .HasForeignKey(v => v.ClassID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<SupervisorVisit>()
+                .HasOne(v => v.Subject)
+                .WithMany()
+                .HasForeignKey(v => v.SubjectID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<SupervisorVisit>()
+                .HasOne(v => v.SupervisorEmployeeProfile)
+                .WithMany(p => p.SupervisorVisitsConducted)
+                .HasForeignKey(v => v.SupervisorEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VisitObservation>()
+                .HasKey(o => o.VisitObservationID);
+            modelBuilder.Entity<VisitObservation>()
+                .Property(o => o.VisitObservationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<VisitObservation>()
+                .HasIndex(o => new { o.SupervisorVisitID, o.SortOrder });
+            modelBuilder.Entity<VisitObservation>()
+                .HasOne(o => o.SupervisorVisit)
+                .WithMany(v => v.Observations)
+                .HasForeignKey(o => o.SupervisorVisitID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<VisitRecommendation>()
+                .HasKey(r => r.VisitRecommendationID);
+            modelBuilder.Entity<VisitRecommendation>()
+                .Property(r => r.VisitRecommendationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<VisitRecommendation>()
+                .Property(r => r.ImplementationStatus)
+                .HasConversion<int>();
+            modelBuilder.Entity<VisitRecommendation>()
+                .HasIndex(r => new { r.SupervisorVisitID, r.SortOrder });
+            modelBuilder.Entity<VisitRecommendation>()
+                .HasOne(r => r.SupervisorVisit)
+                .WithMany(v => v.Recommendations)
+                .HasForeignKey(r => r.SupervisorVisitID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RecommendationFollowUp>()
+                .HasKey(f => f.RecommendationFollowUpID);
+            modelBuilder.Entity<RecommendationFollowUp>()
+                .Property(f => f.RecommendationFollowUpID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<RecommendationFollowUp>()
+                .HasIndex(f => new { f.VisitRecommendationID, f.FollowUpDate, f.CreatedAtUtc });
+            modelBuilder.Entity<RecommendationFollowUp>()
+                .HasOne(f => f.VisitRecommendation)
+                .WithMany(r => r.FollowUps)
+                .HasForeignKey(f => f.VisitRecommendationID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<RecommendationFollowUp>()
+                .HasOne(f => f.FollowUpByEmployeeProfile)
+                .WithMany(p => p.RecommendationFollowUpsAuthored)
+                .HasForeignKey(f => f.FollowUpByEmployeeProfileID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ExamType>().HasData(

@@ -179,7 +179,8 @@
       "applications": "طلبات التوظيف",
       "applicationAdd": "طلب توظيف جديد",
       "dailyEvaluations": "التقييمات اليومية",
-      "dailyEvalTemplates": "قوالب التقييم"
+      "dailyEvalTemplates": "قوالب التقييم",
+      "supervisorVisits": "زيارات المشرف"
     },
     "teachers_sub": {
       "all": "جميع الموظفين",
@@ -572,6 +573,83 @@
       "updated": "تم تحديث البيانات.",
       "deactivated": "تم تعطيل الموظف.",
       "childSaved": "تمت الإضافة بنجاح."
+    }
+  },
+  "supervisorVisits": {
+    "list": {
+      "title": "زيارات المشرف",
+      "add": "زيارة جديدة",
+      "refresh": "تحديث",
+      "applyFilters": "تطبيق التصفية",
+      "empty": "لا توجد زيارات.",
+      "noPermission": "لا تملك صلاحية عرض هذه القائمة.",
+      "confirmHeader": "تأكيد الحذف",
+      "confirmDelete": "حذف زيارة {{name}} بتاريخ {{date}}؟"
+    },
+    "filter": {
+      "school": "المدرسة",
+      "year": "السنة الدراسية"
+    },
+    "columns": {
+      "visitDate": "تاريخ الزيارة",
+      "teacher": "المعلم",
+      "class": "الصف",
+      "subject": "المادة",
+      "supervisor": "المشرف",
+      "score": "الدرجة / 100",
+      "status": "الحالة"
+    },
+    "status": {
+      "draft": "مسودة",
+      "submitted": "مُرسلة",
+      "archived": "مؤرشفة"
+    },
+    "impl": {
+      "pending": "قيد الانتظار",
+      "inProgress": "قيد التنفيذ",
+      "completed": "مُنجزة",
+      "deferred": "مؤجلة",
+      "na": "لا تنطبق"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف",
+      "cancel": "إلغاء"
+    },
+    "form": {
+      "titleNew": "زيارة مشرف جديدة",
+      "titleEdit": "تعديل زيارة مشرف",
+      "save": "حفظ",
+      "backToList": "العودة للقائمة",
+      "sectionMain": "بيانات الزيارة",
+      "sectionObservations": "الملاحظات",
+      "sectionRecommendations": "التوصيات",
+      "visitedTeacher": "المعلم",
+      "supervisorProfile": "المشرف (ملف موارد بشرية)",
+      "classOptional": "الصف (اختياري)",
+      "subjectOptional": "المادة (اختياري)",
+      "visitDate": "تاريخ الزيارة",
+      "status": "الحالة",
+      "score": "الدرجة النهائية (0–100)",
+      "summary": "ملخص / ملاحظات",
+      "addObservation": "إضافة ملاحظة",
+      "observationCategory": "التصنيف",
+      "observationText": "الملاحظة",
+      "addRecommendation": "إضافة توصية",
+      "recommendationText": "نص التوصية",
+      "implStatus": "حالة تنفيذ التوصية",
+      "dueDate": "تاريخ الاستحقاق",
+      "followUps": "متابعات",
+      "addFollowUp": "إضافة متابعة",
+      "followUpDate": "التاريخ",
+      "followUpNote": "الملاحظة",
+      "followUpBy": "سجّلها (اختياري)",
+      "validationRequired": "يرجى اختيار المدرسة والسنة والمعلم والمشرف وتاريخ الزيارة."
+    },
+    "toast": {
+      "created": "تم حفظ الزيارة.",
+      "updated": "تم تحديث الزيارة.",
+      "deleted": "تم حذف الزيارة."
     }
   },
   "dailyEvaluations": {

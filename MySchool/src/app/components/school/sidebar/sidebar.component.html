@@ -72,21 +72,21 @@
                 <span>{{ 'sidebar.staff_hr.register' | translate }}</span>
               </a>
             </li>
-            <li *ngIf="canCreateEmployeesHrNav">
+            <!-- <li *ngIf="canCreateEmployeesHrNav">
               <a routerLink="/school/employees-hr/new" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.add' | translate }}</span>
               </a>
-            </li>
+            </li> -->
             <li *ngIf="canViewStaffHrSection">
               <a routerLink="/school/recruitment/job-postings" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.jobPostings' | translate }}</span>
               </a>
             </li>
-            <li *ngIf="canManageSchoolRecruitmentNav">
+            <!-- <li *ngIf="canManageSchoolRecruitmentNav">
               <a routerLink="/school/recruitment/job-postings/create" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.jobPostingAdd' | translate }}</span>
               </a>
-            </li>
+            </li> -->
             <li *ngIf="canManageSchoolRecruitmentNav">
               <a routerLink="/school/recruitment/job-applications" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.applications' | translate }}</span>
@@ -97,18 +97,23 @@
                 <span>{{ 'sidebar.staff_hr.dailyEvaluations' | translate }}</span>
               </a>
             </li>
-            <li *ngIf="canViewDailyEvaluationsNav">
+            <li *ngIf="canViewEmployeesNav">
+              <a routerLink="/school/supervisor-visits" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.supervisorVisits' | translate }}</span>
+              </a>
+            </li>
+            <!-- <li *ngIf="canViewDailyEvaluationsNav">
               <a routerLink="/school/daily-evaluations/templates" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.dailyEvalTemplates' | translate }}</span>
               </a>
-            </li>
-            <li *ngIf="canViewStaffHrSection">
+            </li> -->
+            <!-- <li *ngIf="canViewStaffHrSection">
               <a routerLink="/school/recruitment/job-applications/create" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.applicationAdd' | translate }}</span>
               </a>
-            </li>
+            </li> -->
             <li><a routerLink="/school/teacher" routerLinkActive="active" (click)="cancel()"><span>{{ 'sidebar.staff_hr.teacherDirectory' | translate }}</span></a></li>
-            <li><a routerLink="/school/teacher/action" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.add' | translate }}</span></a></li>
+            <!-- <li><a routerLink="/school/teacher/action" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.add' | translate }}</span></a></li> -->
             <!-- <li><a routerLink="/school/about-teachers" (click)="cancel()"><span>{{ 'sidebar.teachers_sub.about' | translate }}</span></a></li> -->
           </ul>
         </li>

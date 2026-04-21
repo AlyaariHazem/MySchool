@@ -1,0 +1,266 @@
+<div class="sv-form-page">
+  <p-progressSpinner *ngIf="loading" styleClass="sv-form-spinner" />
+
+  <div class="sv-form-card" *ngIf="!loading">
+    <header class="sv-form-header">
+      <h2>{{ (isEdit ? 'supervisorVisits.form.titleEdit' : 'supervisorVisits.form.titleNew') | translate }}</h2>
+      <div class="sv-form-header-actions">
+        <p-button [label]="'supervisorVisits.actions.cancel' | translate" [outlined]="true" (onClick)="cancel()" />
+        <p-button
+          *ngIf="canSubmit"
+          [label]="'supervisorVisits.form.save' | translate"
+          icon="pi pi-check"
+          (onClick)="save()"
+          [loading]="saving"
+        />
+      </div>
+    </header>
+
+    <section class="sv-form-section">
+      <h3>{{ 'supervisorVisits.form.sectionMain' | translate }}</h3>
+      <div class="sv-form-grid">
+        <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="field">
+          <p-select
+            inputId="sv-school"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="schoolOptions"
+            [(ngModel)]="schoolID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            (onChange)="onSchoolChange()"
+          />
+          <label for="sv-school">{{ 'supervisorVisits.filter.school' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="field">
+          <p-select
+            inputId="sv-year"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="yearOptions"
+            [(ngModel)]="academicYearID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+          />
+          <label for="sv-year">{{ 'supervisorVisits.filter.year' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="field">
+          <p-select
+            inputId="sv-teacher"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="teacherOptions"
+            [(ngModel)]="visitedTeacherID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="sv-teacher">{{ 'supervisorVisits.form.visitedTeacher' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="field">
+          <p-select
+            inputId="sv-supervisor"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="supervisorOptions"
+            [(ngModel)]="supervisorEmployeeProfileID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="sv-supervisor">{{ 'supervisorVisits.form.supervisorProfile' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="field">
+          <p-select
+            inputId="sv-class"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="classOptions"
+            [(ngModel)]="classID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="sv-class">{{ 'supervisorVisits.form.classOptional' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="field">
+          <p-select
+            inputId="sv-subject"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="subjectOptions"
+            [(ngModel)]="subjectID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="sv-subject">{{ 'supervisorVisits.form.subjectOptional' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="field">
+          <input pInputText id="sv-visit-date" class="w-full" type="date" [(ngModel)]="visitDate" autocomplete="off" />
+          <label for="sv-visit-date">{{ 'supervisorVisits.form.visitDate' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="field">
+          <p-select
+            inputId="sv-status"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="statusOptions"
+            [(ngModel)]="status"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label for="sv-status">{{ 'supervisorVisits.form.status' | translate }}</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on" class="field">
+          <p-inputNumber
+            inputId="sv-score"
+            styleClass="w-full"
+            [(ngModel)]="overallScoreOutOf100"
+            [min]="0"
+            [max]="100"
+            [maxFractionDigits]="2"
+            [useGrouping]="false"
+          />
+          <label for="sv-score">{{ 'supervisorVisits.form.score' | translate }}</label>
+        </p-floatlabel>
+      </div>
+
+      <p-floatlabel variant="on" class="field field-full">
+        <textarea
+          pTextarea
+          id="sv-summary"
+          class="w-full"
+          rows="3"
+          [(ngModel)]="summaryNotes"
+          [autoResize]="true"
+        ></textarea>
+        <label for="sv-summary">{{ 'supervisorVisits.form.summary' | translate }}</label>
+      </p-floatlabel>
+    </section>
+
+    <section class="sv-form-section">
+      <div class="sv-subsection-head">
+        <h3>{{ 'supervisorVisits.form.sectionObservations' | translate }}</h3>
+        <p-button [label]="'supervisorVisits.form.addObservation' | translate" [text]="true" icon="pi pi-plus" (onClick)="addObservation()" />
+      </div>
+      <div class="sv-repeat-block" *ngFor="let o of observations; let i = index">
+        <div class="sv-repeat-row">
+          <p-floatlabel variant="on" class="field flex-1">
+            <input pInputText [id]="'sv-obs-cat-' + i" class="w-full" [(ngModel)]="o.category" />
+            <label [for]="'sv-obs-cat-' + i">{{ 'supervisorVisits.form.observationCategory' | translate }}</label>
+          </p-floatlabel>
+          <p-button icon="pi pi-times" [rounded]="true" [text]="true" severity="danger" (onClick)="removeObservation(i)" />
+        </div>
+        <p-floatlabel variant="on" class="field field-full">
+          <textarea
+            pTextarea
+            [id]="'sv-obs-txt-' + i"
+            class="w-full"
+            rows="2"
+            [(ngModel)]="o.observationText"
+            [autoResize]="true"
+          ></textarea>
+          <label [for]="'sv-obs-txt-' + i">{{ 'supervisorVisits.form.observationText' | translate }}</label>
+        </p-floatlabel>
+      </div>
+    </section>
+
+    <section class="sv-form-section">
+      <div class="sv-subsection-head">
+        <h3>{{ 'supervisorVisits.form.sectionRecommendations' | translate }}</h3>
+        <p-button [label]="'supervisorVisits.form.addRecommendation' | translate" [text]="true" icon="pi pi-plus" (onClick)="addRecommendation()" />
+      </div>
+
+      <div class="sv-repeat-block sv-rec-block" *ngFor="let rec of recommendations; let ri = index">
+        <div class="sv-repeat-row">
+          <p-floatlabel variant="on" class="field flex-1">
+            <p-select
+              [inputId]="'sv-rec-impl-' + ri"
+              styleClass="w-full"
+              [panelStyle]="filterSelectPanelStyle"
+              [options]="implStatusOptions"
+              [(ngModel)]="rec.implementationStatus"
+              optionLabel="label"
+              optionValue="value"
+            />
+            <label [for]="'sv-rec-impl-' + ri">{{ 'supervisorVisits.form.implStatus' | translate }}</label>
+          </p-floatlabel>
+          <p-button icon="pi pi-times" [rounded]="true" [text]="true" severity="danger" (onClick)="removeRecommendation(ri)" />
+        </div>
+        <p-floatlabel variant="on" class="field field-full">
+          <textarea
+            pTextarea
+            [id]="'sv-rec-txt-' + ri"
+            class="w-full"
+            rows="2"
+            [(ngModel)]="rec.recommendationText"
+            [autoResize]="true"
+          ></textarea>
+          <label [for]="'sv-rec-txt-' + ri">{{ 'supervisorVisits.form.recommendationText' | translate }}</label>
+        </p-floatlabel>
+        <div class="sv-form-grid">
+          <p-floatlabel variant="on" class="field">
+            <input pInputText [id]="'sv-rec-due-' + ri" type="date" class="w-full" [(ngModel)]="rec.dueDate" />
+            <label [for]="'sv-rec-due-' + ri">{{ 'supervisorVisits.form.dueDate' | translate }}</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="sv-followups">
+          <div class="sv-subsection-head">
+            <h4>{{ 'supervisorVisits.form.followUps' | translate }}</h4>
+            <p-button
+              [label]="'supervisorVisits.form.addFollowUp' | translate"
+              [text]="true"
+              size="small"
+              icon="pi pi-plus"
+              (onClick)="addFollowUp(rec)"
+            />
+          </div>
+          <div class="sv-followup-row" *ngFor="let fu of rec.followUps; let fj = index">
+            <p-floatlabel variant="on" class="field">
+              <input pInputText type="date" class="w-full" [(ngModel)]="fu.followUpDate" />
+              <label>{{ 'supervisorVisits.form.followUpDate' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="field flex-1">
+              <input pInputText class="w-full" [(ngModel)]="fu.followUpNote" />
+              <label>{{ 'supervisorVisits.form.followUpNote' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="field">
+              <p-select
+                styleClass="w-full"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="supervisorOptions"
+                [(ngModel)]="fu.followUpByEmployeeProfileID"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                [filter]="true"
+              />
+              <label>{{ 'supervisorVisits.form.followUpBy' | translate }}</label>
+            </p-floatlabel>
+            <p-button icon="pi pi-times" [rounded]="true" [text]="true" (onClick)="removeFollowUp(rec, fj)" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="sv-form-footer">
+      <a routerLink="/school/supervisor-visits">{{ 'supervisorVisits.form.backToList' | translate }}</a>
+    </div>
+  </div>
+</div>

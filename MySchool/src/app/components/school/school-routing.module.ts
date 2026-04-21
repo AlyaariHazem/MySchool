@@ -306,6 +306,41 @@ const routes: Routes = [
         ],
       },
       {
+        path: 'supervisor-visits',
+        data: { breadcrumb: 'زيارات المشرف' },
+        children: [
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('./supervisor-visits/supervisor-visits-form/supervisor-visits-form.component').then(
+                (m) => m.SupervisorVisitsFormComponent,
+              ),
+            data: { breadcrumb: 'زيارة جديدة', permission: PagePermission.Employees.Create },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: ':id/edit',
+            loadComponent: () =>
+              import('./supervisor-visits/supervisor-visits-form/supervisor-visits-form.component').then(
+                (m) => m.SupervisorVisitsFormComponent,
+              ),
+            data: { breadcrumb: 'تعديل زيارة', permission: PagePermission.Employees.Update },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: '',
+            loadComponent: () =>
+              import('./supervisor-visits/supervisor-visits-list/supervisor-visits-list.component').then(
+                (m) => m.SupervisorVisitsListComponent,
+              ),
+            data: { breadcrumb: 'قائمة الزيارات', permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
+      {
         path: 'recruitment',
         data: { breadcrumb: 'التوظيف' },
         children: [

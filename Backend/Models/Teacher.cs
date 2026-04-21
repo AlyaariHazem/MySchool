@@ -28,5 +28,8 @@ namespace Backend.Models
      [JsonIgnore]
     public virtual ICollection<Class> Classes { get; set; } = new List<Class>();
 
+    [JsonIgnore]
+    public ICollection<SupervisorVisit> SupervisorVisitsReceived { get; set; } = new List<SupervisorVisit>();
+
   }
 }

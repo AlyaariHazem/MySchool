@@ -178,7 +178,8 @@
       "applications": "Job applications",
       "applicationAdd": "New application",
       "dailyEvaluations": "Daily evaluations",
-      "dailyEvalTemplates": "Evaluation templates"
+      "dailyEvalTemplates": "Evaluation templates",
+      "supervisorVisits": "Supervisor visits"
     },
     "teachers_sub": {
       "all": "All staff",
@@ -571,6 +572,83 @@
       "updated": "Employee updated.",
       "deactivated": "Employee deactivated.",
       "childSaved": "Record added."
+    }
+  },
+  "supervisorVisits": {
+    "list": {
+      "title": "Supervisor visits",
+      "add": "New visit",
+      "refresh": "Refresh",
+      "applyFilters": "Apply filters",
+      "empty": "No visits found.",
+      "noPermission": "You do not have access to this list.",
+      "confirmHeader": "Confirm delete",
+      "confirmDelete": "Delete the visit for {{name}} on {{date}}?"
+    },
+    "filter": {
+      "school": "School",
+      "year": "Academic year"
+    },
+    "columns": {
+      "visitDate": "Visit date",
+      "teacher": "Teacher",
+      "class": "Class",
+      "subject": "Subject",
+      "supervisor": "Supervisor",
+      "score": "Score / 100",
+      "status": "Status"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "archived": "Archived"
+    },
+    "impl": {
+      "pending": "Pending",
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "deferred": "Deferred",
+      "na": "Not applicable"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "titleNew": "New supervisor visit",
+      "titleEdit": "Edit supervisor visit",
+      "save": "Save",
+      "backToList": "Back to list",
+      "sectionMain": "Visit details",
+      "sectionObservations": "Observations",
+      "sectionRecommendations": "Recommendations",
+      "visitedTeacher": "Visited teacher",
+      "supervisorProfile": "Supervisor (HR profile)",
+      "classOptional": "Class (optional)",
+      "subjectOptional": "Subject (optional)",
+      "visitDate": "Visit date",
+      "status": "Status",
+      "score": "Final score (0–100)",
+      "summary": "Summary notes",
+      "addObservation": "Add observation",
+      "observationCategory": "Category",
+      "observationText": "Observation",
+      "addRecommendation": "Add recommendation",
+      "recommendationText": "Recommendation",
+      "implStatus": "Implementation status",
+      "dueDate": "Due date",
+      "followUps": "Follow-ups",
+      "addFollowUp": "Add follow-up",
+      "followUpDate": "Date",
+      "followUpNote": "Note",
+      "followUpBy": "Recorded by (optional)",
+      "validationRequired": "Please select school, year, teacher, supervisor, and visit date."
+    },
+    "toast": {
+      "created": "Visit saved.",
+      "updated": "Visit updated.",
+      "deleted": "Visit deleted."
     }
   },
   "dailyEvaluations": {

@@ -1,0 +1,105 @@
+<div class="sv-page" [attr.dir]="dir$ | async">
+  <p-confirmDialog [style]="{ width: '28rem' }" />
+
+  <div class="sv-card">
+    <header class="sv-header">
+      <h2 class="sv-title">{{ 'supervisorVisits.list.title' | translate }}</h2>
+      <div class="sv-header-actions">
+        <a *ngIf="canCreate" routerLink="/school/supervisor-visits/new">
+          <p-button [label]="'supervisorVisits.list.add' | translate" icon="pi pi-plus" />
+        </a>
+        <p-button
+          [label]="'supervisorVisits.list.refresh' | translate"
+          icon="pi pi-refresh"
+          [outlined]="true"
+          (onClick)="load()"
+          [loading]="loading"
+        />
+      </div>
+    </header>
+
+    <div class="sv-filters filters-grid" *ngIf="canView">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+        <p-select
+          inputId="sv-filter-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="filter.schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          (onChange)="onSchoolFilterChange()"
+        />
+        <label for="sv-filter-school">{{ 'supervisorVisits.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="filter-field">
+        <p-select
+          inputId="sv-filter-year"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="yearOptions"
+          [(ngModel)]="filter.academicYearID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="sv-filter-year">{{ 'supervisorVisits.filter.year' | translate }}</label>
+      </p-floatlabel>
+
+      <div class="filter-actions">
+        <p-button [label]="'supervisorVisits.list.applyFilters' | translate" (onClick)="load()" />
+      </div>
+    </div>
+
+    <div *ngIf="!canView" class="sv-muted">{{ 'supervisorVisits.list.noPermission' | translate }}</div>
+
+    <p-progressSpinner *ngIf="loading && rows.length === 0" styleClass="sv-spinner" />
+
+    <p-table *ngIf="canView" [value]="rows" [loading]="loading" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '52rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'supervisorVisits.columns.visitDate' | translate }}</th>
+          <th>{{ 'supervisorVisits.columns.teacher' | translate }}</th>
+          <th>{{ 'supervisorVisits.columns.class' | translate }}</th>
+          <th>{{ 'supervisorVisits.columns.subject' | translate }}</th>
+          <th>{{ 'supervisorVisits.columns.supervisor' | translate }}</th>
+          <th>{{ 'supervisorVisits.columns.score' | translate }}</th>
+          <th>{{ 'supervisorVisits.columns.status' | translate }}</th>
+          <th style="width: 8rem"></th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.visitDate }}</td>
+          <td>{{ row.visitedTeacherName }}</td>
+          <td>{{ row.className || '—' }}</td>
+          <td>{{ row.subjectName || '—' }}</td>
+          <td>{{ row.supervisorName }}</td>
+          <td>{{ row.overallScoreOutOf100 }}</td>
+          <td>{{ statusLabel(row.status) | translate }}</td>
+          <td>
+            <a *ngIf="canUpdate" [routerLink]="['/school/supervisor-visits', row.supervisorVisitID, 'edit']">
+              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" [pTooltip]="'supervisorVisits.actions.edit' | translate" />
+            </a>
+            <p-button
+              *ngIf="canDelete"
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              [pTooltip]="'supervisorVisits.actions.delete' | translate"
+              (onClick)="confirmDelete(row)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8">{{ 'supervisorVisits.list.empty' | translate }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

@@ -104,5 +104,9 @@ public class EmployeeProfile
 
     public ICollection<DailyEvaluation> DailyEvaluationsAsEvaluator { get; set; } = new List<DailyEvaluation>();
 
+    public ICollection<SupervisorVisit> SupervisorVisitsConducted { get; set; } = new List<SupervisorVisit>();
+
+    public ICollection<RecommendationFollowUp> RecommendationFollowUpsAuthored { get; set; } = new List<RecommendationFollowUp>();
+
     // Future: Achievement, Violation, StaffRequest, Activity — link via EmployeeProfileID or Year-scoped tables (see module TODOs in service/docs).
 }
