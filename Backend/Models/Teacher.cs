@@ -31,5 +31,8 @@ namespace Backend.Models
     [JsonIgnore]
     public ICollection<SupervisorVisit> SupervisorVisitsReceived { get; set; } = new List<SupervisorVisit>();
 
+    [JsonIgnore]
+    public ICollection<TeacherFeedbackCycle> TeacherFeedbackCycles { get; set; } = new List<TeacherFeedbackCycle>();
+
   }
 }

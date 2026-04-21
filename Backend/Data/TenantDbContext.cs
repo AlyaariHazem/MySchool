@@ -91,6 +91,12 @@ namespace Backend.Data
         public DbSet<VisitRecommendation> VisitRecommendations { get; set; }
         public DbSet<RecommendationFollowUp> RecommendationFollowUps { get; set; }
 
+        public DbSet<TeacherFeedbackCycle> TeacherFeedbackCycles { get; set; }
+        public DbSet<FeedbackQuestion> FeedbackQuestions { get; set; }
+        public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
+        public DbSet<ParentFeedback> ParentFeedbacks { get; set; }
+        public DbSet<FeedbackSummary> FeedbackSummaries { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -1476,6 +1482,121 @@ namespace Backend.Data
                 .WithMany(p => p.RecommendationFollowUpsAuthored)
                 .HasForeignKey(f => f.FollowUpByEmployeeProfileID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Teacher performance feedback (students & parents) ---
+            modelBuilder.Entity<TeacherFeedbackCycle>()
+                .HasKey(x => x.TeacherFeedbackCycleID);
+            modelBuilder.Entity<TeacherFeedbackCycle>()
+                .Property(x => x.TeacherFeedbackCycleID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<TeacherFeedbackCycle>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<TeacherFeedbackCycle>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.TeacherID, x.Status });
+            modelBuilder.Entity<TeacherFeedbackCycle>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TeacherFeedbackCycle>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TeacherFeedbackCycle>()
+                .HasOne(x => x.Teacher)
+                .WithMany(t => t.TeacherFeedbackCycles)
+                .HasForeignKey(x => x.TeacherID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FeedbackQuestion>()
+                .HasKey(q => q.FeedbackQuestionID);
+            modelBuilder.Entity<FeedbackQuestion>()
+                .Property(q => q.FeedbackQuestionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<FeedbackQuestion>()
+                .Property(q => q.QuestionType)
+                .HasConversion<int>();
+            modelBuilder.Entity<FeedbackQuestion>()
+                .Property(q => q.Audience)
+                .HasConversion<int>();
+            modelBuilder.Entity<FeedbackQuestion>()
+                .HasIndex(q => new { q.TeacherFeedbackCycleID, q.SortOrder });
+            modelBuilder.Entity<FeedbackQuestion>()
+                .HasOne(q => q.TeacherFeedbackCycle)
+                .WithMany(c => c.Questions)
+                .HasForeignKey(q => q.TeacherFeedbackCycleID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StudentFeedback>()
+                .HasKey(s => s.StudentFeedbackID);
+            modelBuilder.Entity<StudentFeedback>()
+                .Property(s => s.StudentFeedbackID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<StudentFeedback>()
+                .Property(s => s.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<StudentFeedback>()
+                .HasIndex(s => new { s.TeacherFeedbackCycleID, s.StudentID })
+                .IsUnique();
+            modelBuilder.Entity<StudentFeedback>()
+                .HasOne(s => s.TeacherFeedbackCycle)
+                .WithMany(c => c.StudentFeedbacks)
+                .HasForeignKey(s => s.TeacherFeedbackCycleID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<StudentFeedback>()
+                .HasOne(s => s.Student)
+                .WithMany(st => st.StudentFeedbacks)
+                .HasForeignKey(s => s.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ParentFeedback>()
+                .HasKey(p => p.ParentFeedbackID);
+            modelBuilder.Entity<ParentFeedback>()
+                .Property(p => p.ParentFeedbackID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ParentFeedback>()
+                .Property(p => p.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<ParentFeedback>()
+                .HasIndex(p => new { p.TeacherFeedbackCycleID, p.GuardianID, p.StudentID })
+                .IsUnique();
+            modelBuilder.Entity<ParentFeedback>()
+                .HasOne(p => p.TeacherFeedbackCycle)
+                .WithMany(c => c.ParentFeedbacks)
+                .HasForeignKey(p => p.TeacherFeedbackCycleID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ParentFeedback>()
+                .HasOne(p => p.Guardian)
+                .WithMany(g => g.ParentFeedbacks)
+                .HasForeignKey(p => p.GuardianID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ParentFeedback>()
+                .HasOne(p => p.Student)
+                .WithMany(st => st.ParentFeedbacksAsSubject)
+                .HasForeignKey(p => p.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FeedbackSummary>()
+                .HasKey(s => s.FeedbackSummaryID);
+            modelBuilder.Entity<FeedbackSummary>()
+                .Property(s => s.FeedbackSummaryID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<FeedbackSummary>()
+                .Property(s => s.Audience)
+                .HasConversion<int>();
+            modelBuilder.Entity<FeedbackSummary>()
+                .Property(s => s.AverageNumericScore)
+                .HasColumnType("decimal(6,3)");
+            modelBuilder.Entity<FeedbackSummary>()
+                .HasIndex(s => new { s.TeacherFeedbackCycleID, s.Audience })
+                .IsUnique();
+            modelBuilder.Entity<FeedbackSummary>()
+                .HasOne(s => s.TeacherFeedbackCycle)
+                .WithMany(c => c.Summaries)
+                .HasForeignKey(s => s.TeacherFeedbackCycleID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ExamType>().HasData(
                 new ExamType { ExamTypeID = 1, Name = "Midterm", SortOrder = 1, IsActive = true },

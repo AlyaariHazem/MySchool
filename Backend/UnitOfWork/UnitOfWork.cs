@@ -92,6 +92,7 @@ public class UnitOfWork : IUnitOfWork
         Exams = new ExamRepository(_tenantContext);
         Homework = new HomeworkRepository(_tenantContext);
         SupervisorVisits = new SupervisorVisitRepository(_tenantContext);
+        TeacherFeedback = new TeacherFeedbackRepository(_tenantContext);
 
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
@@ -133,6 +134,7 @@ public class UnitOfWork : IUnitOfWork
     public IExamRepository Exams { get; private set; }
     public IHomeworkRepository Homework { get; private set; }
     public ISupervisorVisitRepository SupervisorVisits { get; private set; }
+    public ITeacherFeedbackRepository TeacherFeedback { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

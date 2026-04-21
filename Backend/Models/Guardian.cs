@@ -18,6 +18,9 @@ namespace Backend.Models
         public DateTime? GuardianDOB { get; set; }=DateTime.Now;
         public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual ICollection<AccountStudentGuardian> AccountStudentGuardians { get; set; }
-        public ICollection<Student> Students { get; set; } // Navigation Property 
+        public ICollection<Student> Students { get; set; } // Navigation Property
+
+        [JsonIgnore]
+        public ICollection<ParentFeedback> ParentFeedbacks { get; set; } = new List<ParentFeedback>();
     }
 }

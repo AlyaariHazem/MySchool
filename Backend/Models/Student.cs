@@ -30,6 +30,11 @@ namespace Backend.Models
         public ICollection<TermlyGrade> TermlyGrades { get; set; }
         public virtual ICollection<AccountStudentGuardian> AccountStudentGuardians { get; set; }
         public virtual ICollection<StudentClassFees> StudentClassFees { get; set; }
-       
+
+        [JsonIgnore]
+        public ICollection<StudentFeedback> StudentFeedbacks { get; set; } = new List<StudentFeedback>();
+
+        [JsonIgnore]
+        public ICollection<ParentFeedback> ParentFeedbacksAsSubject { get; set; } = new List<ParentFeedback>();
     }
 }
