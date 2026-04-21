@@ -643,7 +643,8 @@
       "followUpDate": "Date",
       "followUpNote": "Note",
       "followUpBy": "Recorded by (optional)",
-      "validationRequired": "Please select school, year, teacher, supervisor, and visit date."
+      "validationRequired": "Please select teacher, supervisor, and visit date.",
+      "validationSchool": "Current school context was not found. Try signing in again, or pick a school from the list if available."
     },
     "toast": {
       "created": "Visit saved.",

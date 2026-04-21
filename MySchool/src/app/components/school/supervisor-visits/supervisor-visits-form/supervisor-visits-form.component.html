@@ -49,20 +49,6 @@
 
         <p-floatlabel variant="on" class="field">
           <p-select
-            inputId="sv-year"
-            styleClass="w-full"
-            [panelStyle]="filterSelectPanelStyle"
-            [options]="yearOptions"
-            [(ngModel)]="academicYearID"
-            optionLabel="label"
-            optionValue="value"
-            [showClear]="true"
-          />
-          <label for="sv-year">{{ 'supervisorVisits.filter.year' | translate }}</label>
-        </p-floatlabel>
-
-        <p-floatlabel variant="on" class="field">
-          <p-select
             inputId="sv-teacher"
             styleClass="w-full"
             [panelStyle]="filterSelectPanelStyle"

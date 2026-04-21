@@ -18,9 +18,7 @@ import { HttpClient } from '@angular/common/http';
 import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
 import { PagePermission, PermissionService } from 'app/core/services/permission.service';
 import { SchoolService } from 'app/core/services/school.service';
-import { YearService } from 'app/core/services/year.service';
 import { School } from 'app/core/models/school.modul';
-import { Year } from 'app/core/models/year.model';
 import { ShardModule } from 'app/shared/shard.module';
 import { BackendAspService } from 'app/ASP.NET/backend-asp.service';
 import { ApiResponse } from 'app/core/models/response.model';
@@ -76,7 +74,6 @@ export class SupervisorVisitsFormComponent implements OnInit {
   @Input() visitIdInput: number | null = null;
   /** Optional defaults from list filters when opening “new” in a dialog. */
   @Input() presetSchoolId: number | null = null;
-  @Input() presetAcademicYearId: number | null = null;
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
@@ -84,7 +81,6 @@ export class SupervisorVisitsFormComponent implements OnInit {
   private readonly svc = inject(SupervisorVisitsService);
   private readonly employeesHr = inject(EmployeesHrService);
   private readonly schoolService = inject(SchoolService);
-  private readonly yearService = inject(YearService);
   private readonly http = inject(HttpClient);
   private readonly api = inject(BackendAspService);
   private readonly route = inject(ActivatedRoute);
@@ -102,7 +98,6 @@ export class SupervisorVisitsFormComponent implements OnInit {
   visitId: number | null = null;
 
   schoolID: number | null = null;
-  academicYearID: number | null = null;
   visitedTeacherID: number | null = null;
   classID: number | null = null;
   subjectID: number | null = null;
@@ -116,7 +111,6 @@ export class SupervisorVisitsFormComponent implements OnInit {
   recommendations: VisitRecommendationWriteDto[] = [];
 
   schoolOptions: { label: string; value: number }[] = [];
-  yearOptions: { label: string; value: number }[] = [];
   teacherOptions: { label: string; value: number }[] = [];
   classOptions: { label: string; value: number }[] = [];
   subjectOptions: { label: string; value: number }[] = [];
@@ -124,8 +118,6 @@ export class SupervisorVisitsFormComponent implements OnInit {
 
   statusOptions: { label: string; value: number }[] = [];
   implStatusOptions: { label: string; value: number }[] = [];
-
-  private allYears: Year[] = [];
 
   get isSchoolManager(): boolean {
     return isSchoolManagerUser();
@@ -186,22 +178,7 @@ export class SupervisorVisitsFormComponent implements OnInit {
       });
     }
 
-    this.yearService.getAllYears().subscribe({
-      next: (years: Year[]) => {
-        this.allYears = years ?? [];
-        this.refreshYearOptions();
-        if (this.embedded && !this.visitId) {
-          if (this.presetSchoolId != null && this.presetSchoolId > 0) {
-            this.schoolID = this.presetSchoolId;
-            this.refreshYearOptions();
-          }
-          if (this.presetAcademicYearId != null && this.presetAcademicYearId > 0) {
-            this.academicYearID = this.presetAcademicYearId;
-          }
-        }
-      },
-      error: () => undefined,
-    });
+    this.applyDefaultSchoolId();
 
     this.loadTeachers();
     this.loadClasses();
@@ -216,17 +193,23 @@ export class SupervisorVisitsFormComponent implements OnInit {
   }
 
   onSchoolChange(): void {
-    this.refreshYearOptions();
     this.loadSupervisors();
   }
 
-  private refreshYearOptions(): void {
-    const sid = this.schoolID;
-    const list = !sid ? this.allYears : this.allYears.filter((y) => y.schoolID === sid);
-    this.yearOptions = list.map((y) => ({
-      label: String(y.yearID),
-      value: y.yearID,
-    }));
+  /**
+   * School dropdown is hidden for school managers; scope uses `localStorage` key `schoolId`
+   * (same pattern as daily evaluations / HR list).
+   */
+  private applyDefaultSchoolId(): void {
+    if (this.schoolID != null && this.schoolID > 0) return;
+    if (this.presetSchoolId != null && this.presetSchoolId > 0) {
+      this.schoolID = this.presetSchoolId;
+      return;
+    }
+    if (typeof localStorage === 'undefined') return;
+    const raw = localStorage.getItem('schoolId');
+    const n = raw != null && raw !== '' ? Number(raw) : NaN;
+    if (Number.isFinite(n) && n > 0) this.schoolID = n;
   }
 
   private unwrap<T>(body: ApiResponse<T> | Record<string, unknown>): T {
@@ -373,7 +356,6 @@ export class SupervisorVisitsFormComponent implements OnInit {
       .subscribe({
         next: (d) => {
           this.schoolID = d.schoolID;
-          this.academicYearID = d.academicYearID;
           this.visitedTeacherID = d.visitedTeacherID;
           this.classID = d.classID ?? null;
           this.subjectID = d.subjectID ?? null;
@@ -405,7 +387,6 @@ export class SupervisorVisitsFormComponent implements OnInit {
                   })),
                 }))
               : [this.emptyRecommendation()];
-          this.refreshYearOptions();
           this.loadSupervisors();
         },
         error: (e) => {
@@ -423,19 +404,24 @@ export class SupervisorVisitsFormComponent implements OnInit {
 
   save(): void {
     if (!this.canSubmit) return;
-    if (!this.schoolID || !this.academicYearID || !this.visitedTeacherID || !this.supervisorEmployeeProfileID || !this.visitDate) {
+    this.applyDefaultSchoolId();
+    const visitDateTrimmed = (this.visitDate ?? '').trim();
+    if (!this.schoolID || this.schoolID <= 0) {
+      this.toastr.warning(this.translate.instant('supervisorVisits.form.validationSchool'));
+      return;
+    }
+    if (!this.visitedTeacherID || !this.supervisorEmployeeProfileID || !visitDateTrimmed) {
       this.toastr.warning(this.translate.instant('supervisorVisits.form.validationRequired'));
       return;
     }
 
     const dto: SupervisorVisitWriteDto = {
       schoolID: this.schoolID,
-      academicYearID: this.academicYearID,
       visitedTeacherID: this.visitedTeacherID,
       classID: this.classID,
       subjectID: this.subjectID,
       supervisorEmployeeProfileID: this.supervisorEmployeeProfileID,
-      visitDate: this.visitDate,
+      visitDate: visitDateTrimmed,
       status: this.status,
       overallScoreOutOf100: this.overallScoreOutOf100,
       summaryNotes: this.summaryNotes || null,

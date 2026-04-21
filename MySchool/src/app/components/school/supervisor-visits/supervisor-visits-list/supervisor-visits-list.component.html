@@ -32,23 +32,8 @@
           optionLabel="label"
           optionValue="value"
           [showClear]="true"
-          (onChange)="onSchoolFilterChange()"
         />
         <label for="sv-filter-school">{{ 'supervisorVisits.filter.school' | translate }}</label>
-      </p-floatlabel>
-
-      <p-floatlabel variant="on" class="filter-field">
-        <p-select
-          inputId="sv-filter-year"
-          styleClass="w-full"
-          [panelStyle]="filterSelectPanelStyle"
-          [options]="yearOptions"
-          [(ngModel)]="filter.academicYearID"
-          optionLabel="label"
-          optionValue="value"
-          [showClear]="true"
-        />
-        <label for="sv-filter-year">{{ 'supervisorVisits.filter.year' | translate }}</label>
       </p-floatlabel>
 
       <div class="filter-actions">
@@ -115,6 +100,7 @@
     [header]="formDialogHeaderKey | translate"
     [(visible)]="formDialogVisible"
     [modal]="true"
+    [focusOnShow]="false"
     [style]="{ width: 'min(56rem, 96vw)' }"
     [contentStyle]="{ 'max-height': 'min(78vh, 720px)', overflow: 'auto' }"
     [appendTo]="'body'"
@@ -129,7 +115,6 @@
       [embedded]="true"
       [visitIdInput]="editingVisitId"
       [presetSchoolId]="filter.schoolID ?? null"
-      [presetAcademicYearId]="filter.academicYearID ?? null"
       (closed)="closeFormDialog()"
       (saved)="onFormSaved()"
     />

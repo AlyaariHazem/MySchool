@@ -20,9 +20,7 @@ import { map } from 'rxjs';
 import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
 import { PagePermission, PermissionService } from 'app/core/services/permission.service';
 import { SchoolService } from 'app/core/services/school.service';
-import { YearService } from 'app/core/services/year.service';
 import { School } from 'app/core/models/school.modul';
-import { Year } from 'app/core/models/year.model';
 import { selectLanguage } from 'app/core/store/language/language.selectors';
 import { ShardModule } from 'app/shared/shard.module';
 
@@ -55,7 +53,6 @@ import { SupervisorVisitsService, readSupervisorVisitHttpError } from '../superv
 export class SupervisorVisitsListComponent implements OnInit {
   private readonly svc = inject(SupervisorVisitsService);
   private readonly schoolService = inject(SchoolService);
-  private readonly yearService = inject(YearService);
   private readonly toastr = inject(ToastrService);
   private readonly confirm = inject(ConfirmationService);
   private readonly translate = inject(TranslateService);
@@ -74,7 +71,6 @@ export class SupervisorVisitsListComponent implements OnInit {
   filter: SupervisorVisitFilterDto = {};
 
   schoolOptions: { label: string; value: number }[] = [];
-  yearOptions: { label: string; value: number }[] = [];
 
   /** Dialog for create / edit visit (same page). */
   formDialogVisible = false;
@@ -142,30 +138,7 @@ export class SupervisorVisitsListComponent implements OnInit {
       });
     }
 
-    this.yearService.getAllYears().subscribe({
-      next: (years: Year[]) => {
-        this.allYears = years ?? [];
-        this.refreshYearOptions();
-      },
-      error: () => undefined,
-    });
-
     if (this.canView) this.load();
-  }
-
-  private allYears: Year[] = [];
-
-  onSchoolFilterChange(): void {
-    this.refreshYearOptions();
-  }
-
-  private refreshYearOptions(): void {
-    const sid = this.filter.schoolID;
-    const list = !sid ? this.allYears : this.allYears.filter((y) => y.schoolID === sid);
-    this.yearOptions = list.map((y) => ({
-      label: `${y.yearID}`,
-      value: y.yearID,
-    }));
   }
 
   load(): void {

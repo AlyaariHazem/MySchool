@@ -5,7 +5,6 @@ namespace Backend.DTOS.School.SupervisorVisit;
 public class SupervisorVisitFilterDto
 {
     public int? SchoolID { get; set; }
-    public int? AcademicYearID { get; set; }
     public int? VisitedTeacherID { get; set; }
     public DateOnly? FromDate { get; set; }
     public DateOnly? ToDate { get; set; }
@@ -111,9 +110,6 @@ public class SupervisorVisitWriteDto
 {
     [Required]
     public int SchoolID { get; set; }
-
-    [Required]
-    public int AcademicYearID { get; set; }
 
     [Required]
     public int VisitedTeacherID { get; set; }

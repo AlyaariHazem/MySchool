@@ -22,15 +22,36 @@ public class SupervisorVisitRepository : ISupervisorVisitRepository
             .Where(s => !string.IsNullOrWhiteSpace(s))).Trim();
     }
 
+    /// <summary>Active year for the school (<see cref="Year.Active"/>), else latest year id for that school.</summary>
+    private async Task<int?> GetActiveYearIdForSchoolAsync(int schoolId, CancellationToken cancellationToken = default)
+    {
+        var yid = await _db.Years.AsNoTracking()
+            .Where(y => y.SchoolID == schoolId && y.Active)
+            .OrderBy(y => y.YearID)
+            .Select(y => (int?)y.YearID)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (yid is > 0)
+            return yid;
+        return await _db.Years.AsNoTracking()
+            .Where(y => y.SchoolID == schoolId)
+            .OrderByDescending(y => y.YearID)
+            .Select(y => (int?)y.YearID)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<SupervisorVisitListItemDto>> ListAsync(SupervisorVisitFilterDto filter, CancellationToken cancellationToken = default)
     {
         filter ??= new SupervisorVisitFilterDto();
         var q = _db.SupervisorVisits.AsNoTracking().AsQueryable();
 
         if (filter.SchoolID is > 0)
+        {
             q = q.Where(v => v.SchoolID == filter.SchoolID);
-        if (filter.AcademicYearID is > 0)
-            q = q.Where(v => v.AcademicYearID == filter.AcademicYearID);
+            var activeYear = await GetActiveYearIdForSchoolAsync(filter.SchoolID.Value, cancellationToken);
+            if (activeYear is > 0)
+                q = q.Where(v => v.AcademicYearID == activeYear.Value);
+        }
+
         if (filter.VisitedTeacherID is > 0)
             q = q.Where(v => v.VisitedTeacherID == filter.VisitedTeacherID);
         if (filter.FromDate is { } fd)
@@ -163,11 +184,14 @@ public class SupervisorVisitRepository : ISupervisorVisitRepository
 
     public async Task<int> CreateAsync(SupervisorVisitWriteDto dto, CancellationToken cancellationToken = default)
     {
+        var yearId = await GetActiveYearIdForSchoolAsync(dto.SchoolID, cancellationToken)
+            ?? throw new InvalidOperationException("No academic year is configured for this school.");
+
         var now = DateTime.UtcNow;
         var visit = new SupervisorVisit
         {
             SchoolID = dto.SchoolID,
-            AcademicYearID = dto.AcademicYearID,
+            AcademicYearID = yearId,
             VisitedTeacherID = dto.VisitedTeacherID,
             ClassID = dto.ClassID,
             SubjectID = dto.SubjectID,
@@ -243,8 +267,14 @@ public class SupervisorVisitRepository : ISupervisorVisitRepository
         await _db.SaveChangesAsync(cancellationToken);
 
         var now = DateTime.UtcNow;
+        var previousSchoolId = visit.SchoolID;
         visit.SchoolID = dto.SchoolID;
-        visit.AcademicYearID = dto.AcademicYearID;
+        if (visit.SchoolID != previousSchoolId)
+        {
+            visit.AcademicYearID = await GetActiveYearIdForSchoolAsync(visit.SchoolID, cancellationToken)
+                ?? throw new InvalidOperationException("No academic year is configured for this school.");
+        }
+
         visit.VisitedTeacherID = dto.VisitedTeacherID;
         visit.ClassID = dto.ClassID;
         visit.SubjectID = dto.SubjectID;

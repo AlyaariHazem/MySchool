@@ -15,7 +15,6 @@ export enum RecommendationImplementationStatus {
 
 export interface SupervisorVisitFilterDto {
   schoolID?: number | null;
-  academicYearID?: number | null;
   visitedTeacherID?: number | null;
   fromDate?: string | null;
   toDate?: string | null;
@@ -101,7 +100,6 @@ export interface VisitRecommendationWriteDto {
 
 export interface SupervisorVisitWriteDto {
   schoolID: number;
-  academicYearID: number;
   visitedTeacherID: number;
   classID?: number | null;
   subjectID?: number | null;
@@ -117,7 +115,6 @@ export interface SupervisorVisitWriteDto {
 export function supervisorVisitFilterForApi(f: SupervisorVisitFilterDto): Record<string, unknown> {
   return {
     schoolID: f.schoolID ?? null,
-    academicYearID: f.academicYearID ?? null,
     visitedTeacherID: f.visitedTeacherID ?? null,
     fromDate: f.fromDate ?? null,
     toDate: f.toDate ?? null,
@@ -127,7 +124,6 @@ export function supervisorVisitFilterForApi(f: SupervisorVisitFilterDto): Record
 export function supervisorVisitWriteForApi(d: SupervisorVisitWriteDto): Record<string, unknown> {
   return {
     schoolID: d.schoolID,
-    academicYearID: d.academicYearID,
     visitedTeacherID: d.visitedTeacherID,
     classID: d.classID ?? null,
     subjectID: d.subjectID ?? null,
