@@ -1,10 +1,10 @@
-<div class="sv-page" [attr.dir]="dir$ | async">
+<div class="employees-hr-page sv-visits-list-page" [attr.dir]="dir$ | async">
   <p-confirmDialog [style]="{ width: '28rem' }" />
 
-  <div class="sv-card">
-    <header class="sv-header">
-      <h2 class="sv-title">{{ 'supervisorVisits.list.title' | translate }}</h2>
-      <div class="sv-header-actions">
+  <div class="employees-hr-card sv-visits-list-card">
+    <header class="employees-hr-header sv-visits-list-header">
+      <h2 class="employees-hr-title">{{ 'supervisorVisits.list.title' | translate }}</h2>
+      <div class="header-actions">
         <p-button
           *ngIf="canCreate"
           [label]="'supervisorVisits.list.add' | translate"
@@ -21,11 +21,12 @@
       </div>
     </header>
 
-    <div class="sv-filters filters-grid" *ngIf="canView">
+    <div class="filters-toolbar filters-grid sv-list-filters" *ngIf="canView">
       <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
         <p-select
           inputId="sv-filter-school"
-          styleClass="w-full"
+          styleClass="w-full sv-filter-select"
+          panelStyleClass="sv-filter-select-panel"
           [panelStyle]="filterSelectPanelStyle"
           [options]="schoolOptions"
           [(ngModel)]="filter.schoolID"
@@ -37,15 +38,29 @@
       </p-floatlabel>
 
       <div class="filter-actions">
-        <p-button [label]="'supervisorVisits.list.applyFilters' | translate" (onClick)="load()" />
+        <p-button [label]="'supervisorVisits.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="load()" />
       </div>
     </div>
 
-    <div *ngIf="!canView" class="sv-muted">{{ 'supervisorVisits.list.noPermission' | translate }}</div>
+    <div *ngIf="!canView" class="empty-block muted">{{ 'supervisorVisits.list.noPermission' | translate }}</div>
 
-    <p-progressSpinner *ngIf="loading && rows.length === 0" styleClass="sv-spinner" />
+    <div *ngIf="loading && rows.length === 0" class="loading-wrap">
+      <p-progressSpinner strokeWidth="3" />
+    </div>
 
-    <p-table *ngIf="canView" [value]="rows" [loading]="loading" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '52rem' }">
+    <p-table
+      *ngIf="canView"
+      [value]="rows"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} / {totalRecords}"
+      styleClass="p-datatable-sm employees-hr-table"
+      [rowHover]="true"
+      [tableStyle]="{ 'min-width': '52rem' }"
+    >
       <ng-template pTemplate="header">
         <tr>
           <th>{{ 'supervisorVisits.columns.visitDate' | translate }}</th>
@@ -55,7 +70,7 @@
           <th>{{ 'supervisorVisits.columns.supervisor' | translate }}</th>
           <th>{{ 'supervisorVisits.columns.score' | translate }}</th>
           <th>{{ 'supervisorVisits.columns.status' | translate }}</th>
-          <th style="width: 8rem"></th>
+          <th class="sv-actions-col">{{ 'supervisorVisits.columns.actions' | translate }}</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-row>
@@ -68,23 +83,25 @@
           <td>{{ row.overallScoreOutOf100 }}</td>
           <td>{{ statusLabel(row.status) | translate }}</td>
           <td>
-            <p-button
-              *ngIf="canUpdate"
-              icon="pi pi-pencil"
-              [rounded]="true"
-              [text]="true"
-              [pTooltip]="'supervisorVisits.actions.edit' | translate"
-              (onClick)="openEditDialog(row.supervisorVisitID)"
-            />
-            <p-button
-              *ngIf="canDelete"
-              icon="pi pi-trash"
-              [rounded]="true"
-              [text]="true"
-              severity="danger"
-              [pTooltip]="'supervisorVisits.actions.delete' | translate"
-              (onClick)="confirmDelete(row)"
-            />
+            <div class="action-btns">
+              <p-button
+                *ngIf="canUpdate"
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                [pTooltip]="'supervisorVisits.actions.edit' | translate"
+                (onClick)="openEditDialog(row.supervisorVisitID)"
+              />
+              <p-button
+                *ngIf="canDelete"
+                icon="pi pi-trash"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+                [pTooltip]="'supervisorVisits.actions.delete' | translate"
+                (onClick)="confirmDelete(row)"
+              />
+            </div>
           </td>
         </tr>
       </ng-template>

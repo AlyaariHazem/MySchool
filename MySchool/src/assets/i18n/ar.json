@@ -597,7 +597,8 @@
       "subject": "المادة",
       "supervisor": "المشرف",
       "score": "الدرجة / 100",
-      "status": "الحالة"
+      "status": "الحالة",
+      "actions": "إجراءات"
     },
     "status": {
       "draft": "مسودة",

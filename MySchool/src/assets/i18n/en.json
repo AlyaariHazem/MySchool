@@ -596,7 +596,8 @@
       "subject": "Subject",
       "supervisor": "Supervisor",
       "score": "Score / 100",
-      "status": "Status"
+      "status": "Status",
+      "actions": "Actions"
     },
     "status": {
       "draft": "Draft",
