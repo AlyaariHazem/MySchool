@@ -374,8 +374,13 @@ namespace Backend.Repository.School
                 SubjectID = schedule.SubjectID,
                 SubjectName = schedule.Subject?.SubjectName,
                 TeacherID = schedule.TeacherID,
-                TeacherName = schedule.Teacher != null 
-                    ? $"{schedule.Teacher.FullName?.FirstName} {schedule.Teacher.FullName?.LastName}".Trim()
+                TeacherName = schedule.Teacher?.FullName != null
+                    ? string.Join(" ", new[]
+                    {
+                        schedule.Teacher.FullName.FirstName,
+                        schedule.Teacher.FullName.MiddleName,
+                        schedule.Teacher.FullName.LastName
+                    }.Where(n => !string.IsNullOrWhiteSpace(n)))
                     : null,
                 YearID = schedule.YearID,
                 DivisionID = schedule.DivisionID,
