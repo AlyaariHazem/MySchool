@@ -66,8 +66,8 @@ public sealed class SchoolAiAssistantService
             var body = new JsonObject
             {
                 ["model"] = model,
-                ["messages"] = messages,
-                ["tools"] = tools,
+                ["messages"] = messages.DeepClone(),
+                ["tools"] = tools.DeepClone(),
                 ["temperature"] = 0.2
             };
 
