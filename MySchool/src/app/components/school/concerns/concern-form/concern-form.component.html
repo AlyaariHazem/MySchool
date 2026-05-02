@@ -19,7 +19,7 @@
         <label for="cn-f-school">{{ 'concerns.filter.school' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+      <p-floatlabel variant="on" class="vio-field">
         <p-select
           inputId="cn-f-category"
           styleClass="w-full"
@@ -34,7 +34,7 @@
         <label for="cn-f-category">{{ 'concerns.form.category' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+      <p-floatlabel variant="on" class="vio-field">
         <p-select
           inputId="cn-f-submitter"
           styleClass="w-full"
@@ -50,7 +50,7 @@
         <label for="cn-f-submitter">{{ 'concerns.form.submitter' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+      <p-floatlabel variant="on" class="vio-field">
         <p-select
           inputId="cn-f-assignee"
           styleClass="w-full"
@@ -65,17 +65,7 @@
         <label for="cn-f-assignee">{{ 'concerns.form.assignee' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
-        <input pInputText id="cn-f-title" class="w-full" [(ngModel)]="title" [maxlength]="512" />
-        <label for="cn-f-title">{{ 'concerns.form.title' | translate }}</label>
-      </p-floatlabel>
-
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
-        <textarea pTextarea id="cn-f-details" class="w-full" rows="4" [(ngModel)]="details" [maxlength]="4000"></textarea>
-        <label for="cn-f-details">{{ 'concerns.form.details' | translate }}</label>
-      </p-floatlabel>
-
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+      <p-floatlabel variant="on" class="vio-field">
         <p-select
           inputId="cn-f-status"
           styleClass="w-full"
@@ -86,6 +76,16 @@
           optionValue="value"
         />
         <label for="cn-f-status">{{ 'concerns.form.status' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <input pInputText id="cn-f-title" class="w-full" [(ngModel)]="title" [maxlength]="512" />
+        <label for="cn-f-title">{{ 'concerns.form.title' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="cn-f-details" class="w-full" rows="4" [(ngModel)]="details" [maxlength]="4000"></textarea>
+        <label for="cn-f-details">{{ 'concerns.form.details' | translate }}</label>
       </p-floatlabel>
     </div>
 

@@ -3,3 +3,77 @@
 :host {
   display: block;
 }
+
+.vio-form-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.vio-form-card {
+  background: #fff;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.vio-section-title {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.vio-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: end;
+}
+
+.vio-field-span2 {
+  grid-column: 1 / -1;
+}
+
+.vio-field {
+  min-width: 0;
+}
+
+:host ::ng-deep .vio-field .p-floatlabel,
+:host ::ng-deep .vio-field .p-select,
+:host ::ng-deep .vio-field .p-inputtext,
+:host ::ng-deep .vio-field textarea {
+  width: 100%;
+}
+
+:host ::ng-deep .vio-field textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.vio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--surface-border, #e2e8f0);
+}
+
+.vio-readonly-table {
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .vio-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vio-field-span2 {
+    grid-column: 1;
+  }
+}
