@@ -113,6 +113,16 @@
               </a>
             </li>
             <li *ngIf="canViewEmployeesNav">
+              <a routerLink="/school/concerns/complaints" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.complaints' | translate }}</span>
+              </a>
+            </li>
+            <li *ngIf="canViewEmployeesNav">
+              <a routerLink="/school/concerns/suggestions" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.suggestions' | translate }}</span>
+              </a>
+            </li>
+            <li *ngIf="canViewEmployeesNav">
               <a routerLink="/school/violations" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.violations' | translate }}</span>
               </a>

@@ -1,0 +1,174 @@
+@import '../employees-hr/employees-hr-shared.scss';
+
+:host {
+  display: block;
+}
+
+.cn-list-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.cn-list-page .cn-list-card {
+  background: #fff;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
+  margin-bottom: 30px;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.cn-list-page .cn-list-header {
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border, #e2e8f0);
+}
+
+.cn-list-page .employees-hr-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.cn-list-filters {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-50, #f8fafc);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: end;
+}
+
+.cn-list-filters .filter-field {
+  min-width: 0;
+}
+
+.cn-list-filters .filter-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+:host ::ng-deep .cn-list-filters .p-floatlabel,
+:host ::ng-deep .cn-list-filters .p-select {
+  width: 100%;
+}
+
+:host ::ng-deep .cn-filter-select {
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+}
+
+:host ::ng-deep .cn-filter-select .p-select-label,
+:host ::ng-deep .cn-filter-select .p-select-dropdown {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .cn-filter-select:not(.p-disabled):hover {
+  border-color: #94a3b8;
+}
+
+:host ::ng-deep .cn-filter-select.p-focus {
+  border-color: #009879;
+  box-shadow: 0 0 0 2px rgba(0, 152, 121, 0.15);
+}
+
+:host ::ng-deep .cn-filter-select-panel {
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.14);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  z-index: 1200;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.employees-hr-table {
+  margin-top: 0.5rem;
+}
+
+:host ::ng-deep .employees-hr-table {
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+:host ::ng-deep .employees-hr-table .p-datatable-thead > tr > th {
+  background: #009879;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  border: 1px solid #007a63;
+}
+
+:host ::ng-deep .employees-hr-table .p-datatable-tbody > tr > td {
+  padding: 0.65rem 1rem;
+  border: 1px solid #dddddd;
+  text-align: start;
+  vertical-align: middle;
+}
+
+:host ::ng-deep .employees-hr-table .p-datatable-tbody > tr:nth-child(even) {
+  background: #f3f3f3;
+}
+
+:host ::ng-deep .employees-hr-table .p-datatable-tbody > tr:nth-child(odd) {
+  background: #fff;
+}
+
+:host ::ng-deep .employees-hr-table .p-datatable-tbody > tr:hover {
+  background: #e8f7f3 !important;
+}
+
+:host ::ng-deep .employees-hr-table .p-paginator {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.5rem;
+}
+
+.cn-actions-col {
+  width: 10rem;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.action-btns {
+  display: inline-flex;
+  gap: 0.25rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.empty-block.muted {
+  color: #64748b;
+  padding: 1rem 0;
+}
+
+:host ::ng-deep .cn-form-dialog .p-dialog-content {
+  padding-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .cn-list-page .cn-list-card {
+    padding: 1rem;
+  }
+
+  .cn-list-filters {
+    padding: 0.85rem 0.9rem;
+    gap: 0.8rem;
+  }
+}

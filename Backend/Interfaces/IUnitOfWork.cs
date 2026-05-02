@@ -50,5 +50,6 @@ public interface IUnitOfWork : IDisposable
     ITeacherFeedbackRepository TeacherFeedback { get; }
     IViolationRepository Violations { get; }
     IEmployeeRequestRepository EmployeeRequests { get; }
+    IConcernRepository Concerns { get; }
     Task<int> CompleteAsync();
 }

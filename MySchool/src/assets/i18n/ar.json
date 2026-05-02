@@ -183,6 +183,8 @@
       "supervisorVisits": "زيارات المشرف",
       "achievementRequests": "طلبات الإنجاز",
       "employeeRequests": "طلبات الموظفين",
+      "complaints": "الشكاوى",
+      "suggestions": "المقترحات",
       "violations": "المخالفات",
       "teacherFeedback": "تقييم المعلمين"
     },
@@ -856,6 +858,81 @@
       "approvalDecided": "تم تسجيل قرار الموافقة.",
       "executionAdded": "تم تسجيل تحديث التنفيذ.",
       "summaryAdded": "تم حفظ الملخص اليومي."
+    }
+  },
+  "concerns": {
+    "complaints": {
+      "listTitle": "الشكاوى",
+      "formTitleNew": "شكوى جديدة",
+      "formTitleEdit": "شكوى"
+    },
+    "suggestions": {
+      "listTitle": "المقترحات",
+      "formTitleNew": "مقترح جديد",
+      "formTitleEdit": "مقترح"
+    },
+    "list": {
+      "add": "جديد",
+      "refresh": "تحديث",
+      "applyFilters": "تطبيق التصفية",
+      "empty": "لا توجد سجلات.",
+      "noPermission": "لا تملك صلاحية عرض هذه القائمة."
+    },
+    "filter": {
+      "school": "المدرسة",
+      "status": "الحالة"
+    },
+    "columns": {
+      "submitted": "تاريخ الإرسال",
+      "submitter": "المُرسِل",
+      "category": "التصنيف",
+      "title": "العنوان",
+      "status": "الحالة",
+      "actions": "إجراءات",
+      "logTime": "الوقت",
+      "actionKind": "الإجراء",
+      "oldStatus": "الحالة السابقة",
+      "newStatus": "الحالة الجديدة",
+      "actor": "من قام بالإجراء"
+    },
+    "status": {
+      "draft": "مسودة",
+      "submitted": "مُرسل",
+      "underReview": "قيد المراجعة",
+      "inProgress": "قيد المعالجة",
+      "resolved": "تم الحل",
+      "rejected": "مرفوض",
+      "closed": "مغلق",
+      "cancelled": "ملغى"
+    },
+    "actionKind": {
+      "created": "إنشاء",
+      "statusChanged": "تغيير الحالة",
+      "noteAdded": "ملاحظة",
+      "assigned": "تعيين",
+      "resolved": "حل",
+      "closed": "إغلاق",
+      "rejected": "رفض"
+    },
+    "form": {
+      "sectionMain": "بيانات السجل",
+      "sectionLogs": "سجل الإجراءات",
+      "category": "التصنيف",
+      "submitter": "المُرسِل",
+      "assignee": "المسؤول (اختياري)",
+      "title": "العنوان",
+      "details": "التفاصيل",
+      "status": "الحالة",
+      "save": "حفظ",
+      "validationCore": "يرجى اختيار المدرسة والتصنيف والمُرسِل وإدخال عنوان."
+    },
+    "actions": {
+      "edit": "تعديل",
+      "cancel": "إلغاء"
+    },
+    "toast": {
+      "created": "تم الحفظ.",
+      "updated": "تم التحديث."
     }
   },
   "violations": {

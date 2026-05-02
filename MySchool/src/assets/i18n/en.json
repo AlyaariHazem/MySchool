@@ -182,6 +182,8 @@
       "supervisorVisits": "Supervisor visits",
       "achievementRequests": "Achievement requests",
       "employeeRequests": "Employee requests",
+      "complaints": "Complaints",
+      "suggestions": "Suggestions",
       "violations": "Violations",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
@@ -855,6 +857,81 @@
       "approvalDecided": "Approval decision recorded.",
       "executionAdded": "Execution update saved.",
       "summaryAdded": "Daily summary saved."
+    }
+  },
+  "concerns": {
+    "complaints": {
+      "listTitle": "Complaints",
+      "formTitleNew": "New complaint",
+      "formTitleEdit": "Complaint"
+    },
+    "suggestions": {
+      "listTitle": "Suggestions",
+      "formTitleNew": "New suggestion",
+      "formTitleEdit": "Suggestion"
+    },
+    "list": {
+      "add": "New",
+      "refresh": "Refresh",
+      "applyFilters": "Apply filters",
+      "empty": "No records found.",
+      "noPermission": "You do not have access to this list."
+    },
+    "filter": {
+      "school": "School",
+      "status": "Status"
+    },
+    "columns": {
+      "submitted": "Submitted",
+      "submitter": "Submitter",
+      "category": "Category",
+      "title": "Title",
+      "status": "Status",
+      "actions": "Actions",
+      "logTime": "Time",
+      "actionKind": "Action",
+      "oldStatus": "Previous status",
+      "newStatus": "New status",
+      "actor": "Actor"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "underReview": "Under review",
+      "inProgress": "In progress",
+      "resolved": "Resolved",
+      "rejected": "Rejected",
+      "closed": "Closed",
+      "cancelled": "Cancelled"
+    },
+    "actionKind": {
+      "created": "Created",
+      "statusChanged": "Status changed",
+      "noteAdded": "Note",
+      "assigned": "Assigned",
+      "resolved": "Resolved",
+      "closed": "Closed",
+      "rejected": "Rejected"
+    },
+    "form": {
+      "sectionMain": "Details",
+      "sectionLogs": "Activity log",
+      "category": "Category",
+      "submitter": "Submitter",
+      "assignee": "Assignee (optional)",
+      "title": "Title",
+      "details": "Details",
+      "status": "Status",
+      "save": "Save",
+      "validationCore": "Please select school, category, submitter, and enter a title."
+    },
+    "actions": {
+      "edit": "Edit",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "created": "Saved.",
+      "updated": "Updated."
     }
   },
   "violations": {

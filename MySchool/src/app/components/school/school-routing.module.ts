@@ -402,6 +402,37 @@ const routes: Routes = [
         ],
       },
       {
+        path: 'concerns',
+        data: { breadcrumb: 'الشكاوى والمقترحات' },
+        children: [
+          {
+            path: 'complaints',
+            loadComponent: () =>
+              import('./concerns/concerns-list.component').then((m) => m.ConcernsListComponent),
+            data: {
+              breadcrumb: 'قائمة الشكاوى',
+              concernKind: 'complaint',
+              permission: PagePermission.Employees.View,
+            },
+            canMatch: [permissionGuard],
+          },
+          {
+            path: 'suggestions',
+            loadComponent: () =>
+              import('./concerns/concerns-list.component').then((m) => m.ConcernsListComponent),
+            data: {
+              breadcrumb: 'قائمة المقترحات',
+              concernKind: 'suggestion',
+              permission: PagePermission.Employees.View,
+            },
+            canMatch: [permissionGuard],
+          },
+          { path: '', pathMatch: 'full', redirectTo: 'complaints' },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
+      {
         path: 'teacher-feedback',
         data: { breadcrumb: 'تقييم المعلم' },
         children: [
