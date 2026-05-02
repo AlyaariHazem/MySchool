@@ -1,0 +1,20 @@
+@import '../meetings/meetings-list.component.scss';
+
+.org-plans-tabs {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+:host ::ng-deep .org-plans-tabs .p-tabs,
+:host ::ng-deep .org-plans-tabs .p-tabpanels,
+:host ::ng-deep .org-plans-tabs .p-tabpanel {
+  width: 100%;
+}
+
+:host ::ng-deep .org-plans-tabs .p-tabpanels {
+  padding-top: 1rem;
+}
+
+:host ::ng-deep .org-plans-tabs .p-tablist-tab-list {
+  width: 100%;
+}

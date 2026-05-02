@@ -186,6 +186,7 @@
       "suggestions": "Suggestions",
       "meetings": "Meetings",
       "activities": "Activities",
+      "organizationalPlans": "Plans & goals",
       "violations": "Violations",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
@@ -1126,6 +1127,137 @@
     "toast": {
       "created": "Activity request saved.",
       "updated": "Activity request updated."
+    }
+  },
+  "orgPlans": {
+    "pageTitle": "Strategic plans & goals",
+    "tabs": {
+      "strategic": "Strategic goals",
+      "annual": "Annual goals",
+      "department": "Department goals"
+    },
+    "list": {
+      "add": "New",
+      "refresh": "Refresh",
+      "noPermission": "You do not have access to this module.",
+      "emptyStrategic": "No strategic goals found.",
+      "emptyAnnual": "No annual goals found.",
+      "emptyDept": "No department goals found."
+    },
+    "filter": {
+      "school": "School",
+      "status": "Status"
+    },
+    "columns": {
+      "title": "Title",
+      "reference": "Reference",
+      "status": "Status",
+      "sort": "Sort",
+      "actions": "Actions",
+      "strategic": "Strategic goal",
+      "plans": "Operational plans",
+      "department": "Department"
+    },
+    "actions": {
+      "edit": "Edit"
+    },
+    "strategicStatus": {
+      "draft": "Draft",
+      "active": "Active",
+      "achieved": "Achieved",
+      "superseded": "Superseded",
+      "archived": "Archived",
+      "cancelled": "Cancelled"
+    },
+    "annualStatus": {
+      "draft": "Draft",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "opStatus": {
+      "draft": "Draft",
+      "active": "Active",
+      "onHold": "On hold",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "taskStatus": {
+      "notStarted": "Not started",
+      "inProgress": "In progress",
+      "blocked": "Blocked",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "deptStatus": {
+      "draft": "Draft",
+      "active": "Active",
+      "achieved": "Achieved",
+      "cancelled": "Cancelled"
+    },
+    "strategic": {
+      "newTitle": "New strategic goal",
+      "editTitle": "Strategic goal"
+    },
+    "annual": {
+      "newTitle": "New annual goal",
+      "editTitle": "Annual goal"
+    },
+    "dept": {
+      "newTitle": "New department goal",
+      "editTitle": "Department goal"
+    },
+    "form": {
+      "sectionMain": "Main",
+      "sectionPlans": "Operational plans & tasks",
+      "academicYear": "Academic year",
+      "academicYearOptional": "Academic year (optional)",
+      "strategicLink": "Strategic goal (optional)",
+      "annualLink": "Annual goal (optional)",
+      "referenceCode": "Reference code",
+      "title": "Title",
+      "details": "Details",
+      "status": "Status",
+      "sortOrder": "Sort order",
+      "effectiveFrom": "Effective from",
+      "effectiveTo": "Effective to",
+      "start": "Start",
+      "end": "End",
+      "owner": "Owner (optional)",
+      "assignee": "Assignee (optional)",
+      "dueAt": "Due",
+      "progressPercent": "Progress %",
+      "opStatus": "Plan status",
+      "taskStatus": "Task status",
+      "operationalPlan": "Operational plan",
+      "addOperationalPlan": "Add operational plan",
+      "tasks": "Tasks",
+      "task": "Task",
+      "addTask": "Add task",
+      "progressUpdates": "Progress updates",
+      "addProgressUpdate": "Add update",
+      "note": "Note",
+      "author": "Author",
+      "departmentName": "Department / unit",
+      "annual": {
+        "sectionMain": "Annual goal",
+        "sectionPlans": "Operational plans"
+      },
+      "validationSchool": "Please select a school.",
+      "validationYear": "Please select an academic year.",
+      "validationTitle": "Please enter a title.",
+      "validationDept": "Please enter department name and title.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "loading": "Loading…"
+    },
+    "toast": {
+      "strategicCreated": "Strategic goal saved.",
+      "strategicUpdated": "Strategic goal updated.",
+      "annualCreated": "Annual goal saved.",
+      "annualUpdated": "Annual goal updated.",
+      "deptCreated": "Department goal saved.",
+      "deptUpdated": "Department goal updated."
     }
   },
   "violations": {

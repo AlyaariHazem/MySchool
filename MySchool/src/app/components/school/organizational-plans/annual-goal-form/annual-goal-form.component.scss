@@ -1,0 +1,51 @@
+@import '../../meetings/meeting-form/meeting-form.component.scss';
+
+.ag-plans-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.ag-plan-card {
+  margin-bottom: 1.25rem;
+}
+
+.ag-plan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.ag-plan-label {
+  font-weight: 600;
+}
+
+.ag-tasks-head,
+.ag-task-head,
+.ag-updates-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.ag-task-card {
+  margin-bottom: 0.75rem;
+}
+
+.ag-update-row {
+  align-items: end;
+  margin-bottom: 0.5rem;
+}
+
+.mt-row-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}

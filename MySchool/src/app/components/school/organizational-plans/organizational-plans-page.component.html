@@ -1,0 +1,534 @@
+<div class="employees-hr-page cn-list-page org-plans-page" [attr.dir]="dir$ | async">
+  <div class="employees-hr-card cn-list-card">
+    <header class="employees-hr-header cn-list-header">
+      <h2 class="employees-hr-title">{{ 'orgPlans.pageTitle' | translate }}</h2>
+    </header>
+
+    <p-tabs [(value)]="activeTab" class="org-plans-tabs">
+      <p-tablist>
+        <p-tab value="0">{{ 'orgPlans.tabs.strategic' | translate }}</p-tab>
+        <p-tab value="1">{{ 'orgPlans.tabs.annual' | translate }}</p-tab>
+        <p-tab value="2">{{ 'orgPlans.tabs.department' | translate }}</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div *ngIf="canView" class="filters-toolbar filters-grid cn-list-filters">
+            <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+              <p-select
+                inputId="stf-school"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="schoolOptions"
+                [(ngModel)]="stratFilter.schoolID"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+              />
+              <label for="stf-school">{{ 'orgPlans.filter.school' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="filter-field">
+              <p-select
+                inputId="stf-status"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="stratStatusOptions"
+                [(ngModel)]="stratFilter.status"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+              />
+              <label for="stf-status">{{ 'orgPlans.filter.status' | translate }}</label>
+            </p-floatlabel>
+            <div class="filter-actions">
+              <p-button *ngIf="canCreate" [label]="'orgPlans.list.add' | translate" icon="pi pi-plus" (onClick)="openStrategicCreate()" />
+              <p-button [label]="'orgPlans.list.refresh' | translate" icon="pi pi-refresh" [outlined]="true" (onClick)="loadStrategic()" [loading]="stratLoading" />
+            </div>
+          </div>
+          <div *ngIf="!canView" class="empty-block muted">{{ 'orgPlans.list.noPermission' | translate }}</div>
+          <p-table
+            *ngIf="canView"
+            [value]="stratRows"
+            [loading]="stratLoading"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{first} – {last} / {totalRecords}"
+            styleClass="p-datatable-sm employees-hr-table"
+            [rowHover]="true"
+            [tableStyle]="{ 'min-width': '52rem' }"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'orgPlans.columns.title' | translate }}</th>
+                <th>{{ 'orgPlans.columns.reference' | translate }}</th>
+                <th>{{ 'orgPlans.columns.status' | translate }}</th>
+                <th>{{ 'orgPlans.columns.sort' | translate }}</th>
+                <th class="cn-actions-col">{{ 'orgPlans.columns.actions' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.title }}</td>
+                <td>{{ row.referenceCode || '—' }}</td>
+                <td>{{ strategicStatusLabel(row.status) }}</td>
+                <td>{{ row.sortOrder }}</td>
+                <td>
+                  <p-button
+                    *ngIf="canUpdate"
+                    icon="pi pi-pencil"
+                    [rounded]="true"
+                    [text]="true"
+                    [pTooltip]="'orgPlans.actions.edit' | translate"
+                    (onClick)="openStrategicEdit(row.strategicGoalID)"
+                  />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5">{{ 'orgPlans.list.emptyStrategic' | translate }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+
+        <p-tabpanel value="1">
+          <div *ngIf="canView" class="filters-toolbar filters-grid cn-list-filters">
+            <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+              <p-select
+                inputId="anf-school"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="schoolOptions"
+                [(ngModel)]="annualFilter.schoolID"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                (ngModelChange)="onAnnualFilterSchoolChange()"
+              />
+              <label for="anf-school">{{ 'orgPlans.filter.school' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="filter-field">
+              <p-select
+                inputId="anf-year"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="yearOptionsAnnual"
+                [(ngModel)]="annualFilter.academicYearID"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                [filter]="true"
+              />
+              <label for="anf-year">{{ 'orgPlans.form.academicYear' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="filter-field">
+              <p-select
+                inputId="anf-status"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="annualStatusOptions"
+                [(ngModel)]="annualFilter.status"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+              />
+              <label for="anf-status">{{ 'orgPlans.filter.status' | translate }}</label>
+            </p-floatlabel>
+            <div class="filter-actions">
+              <p-button *ngIf="canCreate" [label]="'orgPlans.list.add' | translate" icon="pi pi-plus" (onClick)="openAnnualCreate()" />
+              <p-button [label]="'orgPlans.list.refresh' | translate" icon="pi pi-refresh" [outlined]="true" (onClick)="loadAnnual()" [loading]="annualLoading" />
+            </div>
+          </div>
+          <div *ngIf="!canView" class="empty-block muted">{{ 'orgPlans.list.noPermission' | translate }}</div>
+          <p-table
+            *ngIf="canView"
+            [value]="annualRows"
+            [loading]="annualLoading"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{first} – {last} / {totalRecords}"
+            styleClass="p-datatable-sm employees-hr-table"
+            [rowHover]="true"
+            [tableStyle]="{ 'min-width': '52rem' }"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'orgPlans.columns.title' | translate }}</th>
+                <th>{{ 'orgPlans.columns.strategic' | translate }}</th>
+                <th>{{ 'orgPlans.columns.plans' | translate }}</th>
+                <th>{{ 'orgPlans.columns.status' | translate }}</th>
+                <th class="cn-actions-col">{{ 'orgPlans.columns.actions' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.title }}</td>
+                <td>{{ row.strategicGoalTitle || '—' }}</td>
+                <td>{{ row.operationalPlanCount }}</td>
+                <td>{{ annualStatusLabel(row.status) }}</td>
+                <td>
+                  <p-button
+                    *ngIf="canUpdate"
+                    icon="pi pi-pencil"
+                    [rounded]="true"
+                    [text]="true"
+                    [pTooltip]="'orgPlans.actions.edit' | translate"
+                    (onClick)="openAnnualEdit(row.annualGoalID)"
+                  />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5">{{ 'orgPlans.list.emptyAnnual' | translate }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+
+        <p-tabpanel value="2">
+          <div *ngIf="canView" class="filters-toolbar filters-grid cn-list-filters">
+            <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+              <p-select
+                inputId="dpf-school"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="schoolOptions"
+                [(ngModel)]="deptFilter.schoolID"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                (ngModelChange)="onDeptFilterSchoolChange()"
+              />
+              <label for="dpf-school">{{ 'orgPlans.filter.school' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="filter-field">
+              <p-select
+                inputId="dpf-year"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="yearOptionsDept"
+                [(ngModel)]="deptFilter.academicYearID"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                [filter]="true"
+              />
+              <label for="dpf-year">{{ 'orgPlans.form.academicYear' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="filter-field">
+              <p-select
+                inputId="dpf-status"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="deptStatusOptions"
+                [(ngModel)]="deptFilter.status"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+              />
+              <label for="dpf-status">{{ 'orgPlans.filter.status' | translate }}</label>
+            </p-floatlabel>
+            <div class="filter-actions">
+              <p-button *ngIf="canCreate" [label]="'orgPlans.list.add' | translate" icon="pi pi-plus" (onClick)="openDeptCreate()" />
+              <p-button [label]="'orgPlans.list.refresh' | translate" icon="pi pi-refresh" [outlined]="true" (onClick)="loadDept()" [loading]="deptLoading" />
+            </div>
+          </div>
+          <div *ngIf="!canView" class="empty-block muted">{{ 'orgPlans.list.noPermission' | translate }}</div>
+          <p-table
+            *ngIf="canView"
+            [value]="deptRows"
+            [loading]="deptLoading"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{first} – {last} / {totalRecords}"
+            styleClass="p-datatable-sm employees-hr-table"
+            [rowHover]="true"
+            [tableStyle]="{ 'min-width': '52rem' }"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'orgPlans.columns.department' | translate }}</th>
+                <th>{{ 'orgPlans.columns.title' | translate }}</th>
+                <th>{{ 'orgPlans.columns.status' | translate }}</th>
+                <th>{{ 'orgPlans.columns.sort' | translate }}</th>
+                <th class="cn-actions-col">{{ 'orgPlans.columns.actions' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.departmentName }}</td>
+                <td>{{ row.title }}</td>
+                <td>{{ deptStatusLabel(row.status) }}</td>
+                <td>{{ row.sortOrder }}</td>
+                <td>
+                  <p-button
+                    *ngIf="canUpdate"
+                    icon="pi pi-pencil"
+                    [rounded]="true"
+                    [text]="true"
+                    [pTooltip]="'orgPlans.actions.edit' | translate"
+                    (onClick)="openDeptEdit(row.departmentGoalID)"
+                  />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5">{{ 'orgPlans.list.emptyDept' | translate }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+
+  <!-- Strategic dialog -->
+  <p-dialog
+    [header]="(stratEditId != null && stratEditId > 0 ? 'orgPlans.strategic.editTitle' : 'orgPlans.strategic.newTitle') | translate"
+    [(visible)]="stratDialogVisible"
+    [modal]="true"
+    [style]="{ width: 'min(40rem, 96vw)' }"
+    [appendTo]="'body'"
+    [draggable]="false"
+    [dismissableMask]="true"
+    (onHide)="closeStrategicDialog()"
+  >
+    <div class="vio-form-grid" *ngIf="stratDialogVisible">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="st-d-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="stratSchoolId"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="st-d-school">{{ 'orgPlans.filter.school' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <input pInputText id="st-d-ref" class="w-full" [(ngModel)]="stratRefCode" autocomplete="off" />
+        <label for="st-d-ref">{{ 'orgPlans.form.referenceCode' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="st-d-st"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="stratStatusOptions"
+          [(ngModel)]="stratStatus"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="st-d-st">{{ 'orgPlans.form.status' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber inputId="st-d-sort" [(ngModel)]="stratSort" [useGrouping]="false" styleClass="w-full" />
+        <label for="st-d-sort">{{ 'orgPlans.form.sortOrder' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <input pInputText id="st-d-title" class="w-full" [(ngModel)]="stratTitle" autocomplete="off" />
+        <label for="st-d-title">{{ 'orgPlans.form.title' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="st-d-det" class="w-full" [(ngModel)]="stratDetails" rows="3"></textarea>
+        <label for="st-d-det">{{ 'orgPlans.form.details' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field mt-dt-field">
+        <p-datepicker
+          inputId="st-d-from"
+          [(ngModel)]="stratFrom"
+          [showIcon]="true"
+          iconDisplay="button"
+          [showTime]="true"
+          hourFormat="24"
+          [appendTo]="dtAppendTo"
+          panelStyleClass="mt-dt-panel"
+          [fluid]="true"
+          styleClass="w-full"
+          [showButtonBar]="true"
+          [showClear]="true"
+        />
+        <label for="st-d-from">{{ 'orgPlans.form.effectiveFrom' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field mt-dt-field">
+        <p-datepicker
+          inputId="st-d-to"
+          [(ngModel)]="stratTo"
+          [showIcon]="true"
+          iconDisplay="button"
+          [showTime]="true"
+          hourFormat="24"
+          [appendTo]="dtAppendTo"
+          panelStyleClass="mt-dt-panel"
+          [fluid]="true"
+          styleClass="w-full"
+          [showButtonBar]="true"
+          [showClear]="true"
+        />
+        <label for="st-d-to">{{ 'orgPlans.form.effectiveTo' | translate }}</label>
+      </p-floatlabel>
+    </div>
+    <ng-template pTemplate="footer">
+      <p-button [label]="'orgPlans.form.cancel' | translate" [text]="true" (onClick)="closeStrategicDialog()" />
+      <p-button *ngIf="canCreate || canUpdate" [label]="'orgPlans.form.save' | translate" icon="pi pi-check" (onClick)="saveStrategic()" [loading]="stratSaving" />
+    </ng-template>
+  </p-dialog>
+
+  <!-- Annual dialog -->
+  <p-dialog
+    [header]="(annualEditId != null && annualEditId > 0 ? 'orgPlans.annual.editTitle' : 'orgPlans.annual.newTitle') | translate"
+    [(visible)]="annualDialogVisible"
+    [modal]="true"
+    [style]="{ width: 'min(64rem, 96vw)' }"
+    [contentStyle]="{ 'max-height': 'min(86vh, 820px)', overflow: 'auto' }"
+    [appendTo]="'body'"
+    [draggable]="false"
+    [dismissableMask]="true"
+    (onHide)="closeAnnualDialog()"
+  >
+    <app-annual-goal-form
+      *ngIf="annualDialogVisible"
+      [embedded]="true"
+      [recordIdInput]="annualEditId"
+      [presetSchoolId]="annualFilter.schoolID ?? null"
+      (closed)="closeAnnualDialog()"
+      (saved)="onAnnualSaved()"
+    />
+  </p-dialog>
+
+  <!-- Department dialog -->
+  <p-dialog
+    [header]="(deptEditId != null && deptEditId > 0 ? 'orgPlans.dept.editTitle' : 'orgPlans.dept.newTitle') | translate"
+    [(visible)]="deptDialogVisible"
+    [modal]="true"
+    [style]="{ width: 'min(44rem, 96vw)' }"
+    [appendTo]="'body'"
+    [draggable]="false"
+    [dismissableMask]="true"
+    (onHide)="closeDeptDialog()"
+  >
+    <div class="vio-form-grid" *ngIf="deptDialogVisible">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="dp-d-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="deptSchoolId"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          (ngModelChange)="onDeptDialogSchoolChange()"
+        />
+        <label for="dp-d-school">{{ 'orgPlans.filter.school' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="dp-d-year"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="yearOptionsDeptDialog"
+          [(ngModel)]="deptYearId"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="dp-d-year">{{ 'orgPlans.form.academicYearOptional' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="dp-d-sg"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="strategicOptionsForDept"
+          [(ngModel)]="deptStrategicId"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="dp-d-sg">{{ 'orgPlans.form.strategicLink' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="dp-d-ag"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="annualOptionsForDept"
+          [(ngModel)]="deptAnnualId"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="dp-d-ag">{{ 'orgPlans.form.annualLink' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="dp-d-st"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="deptStatusOptions"
+          [(ngModel)]="deptStatus"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="dp-d-st">{{ 'orgPlans.form.status' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber inputId="dp-d-sort" [(ngModel)]="deptSort" [useGrouping]="false" styleClass="w-full" />
+        <label for="dp-d-sort">{{ 'orgPlans.form.sortOrder' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <input pInputText id="dp-d-dname" class="w-full" [(ngModel)]="deptName" autocomplete="off" />
+        <label for="dp-d-dname">{{ 'orgPlans.form.departmentName' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <input pInputText id="dp-d-title" class="w-full" [(ngModel)]="deptTitle" autocomplete="off" />
+        <label for="dp-d-title">{{ 'orgPlans.form.title' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="dp-d-det" class="w-full" [(ngModel)]="deptDetails" rows="2"></textarea>
+        <label for="dp-d-det">{{ 'orgPlans.form.details' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="dp-d-own"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="employeeOptionsDept"
+          [(ngModel)]="deptOwnerId"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="dp-d-own">{{ 'orgPlans.form.owner' | translate }}</label>
+      </p-floatlabel>
+    </div>
+    <ng-template pTemplate="footer">
+      <p-button [label]="'orgPlans.form.cancel' | translate" [text]="true" (onClick)="closeDeptDialog()" />
+      <p-button *ngIf="canCreate || canUpdate" [label]="'orgPlans.form.save' | translate" icon="pi pi-check" (onClick)="saveDept()" [loading]="deptSaving" />
+    </ng-template>
+  </p-dialog>
+</div>

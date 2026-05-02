@@ -1,0 +1,306 @@
+<div class="vio-form-page" *ngIf="!loading || isEdit">
+  <div *ngIf="!loading" class="vio-form-card">
+    <h3 class="vio-section-title">{{ 'orgPlans.form.annual.sectionMain' | translate }}</h3>
+    <div class="vio-form-grid">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="ag-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [disabled]="isEdit"
+          (ngModelChange)="onSchoolChange()"
+        />
+        <label for="ag-school">{{ 'orgPlans.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="ag-year"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="yearOptions"
+          [(ngModel)]="academicYearID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+          (ngModelChange)="onSchoolOrYearChange()"
+        />
+        <label for="ag-year">{{ 'orgPlans.form.academicYear' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="ag-strategic"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="strategicOptions"
+          [(ngModel)]="strategicGoalID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="ag-strategic">{{ 'orgPlans.form.strategicLink' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="ag-status"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="annualStatusOptions"
+          [(ngModel)]="status"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="ag-status">{{ 'orgPlans.form.status' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber inputId="ag-sort" [(ngModel)]="sortOrder" [useGrouping]="false" styleClass="w-full" />
+        <label for="ag-sort">{{ 'orgPlans.form.sortOrder' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <input pInputText id="ag-title" class="w-full" [(ngModel)]="title" autocomplete="off" />
+        <label for="ag-title">{{ 'orgPlans.form.title' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="ag-details" class="w-full" [(ngModel)]="details" rows="2"></textarea>
+        <label for="ag-details">{{ 'orgPlans.form.details' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="ag-plans-head">
+      <h3 class="vio-section-title">{{ 'orgPlans.form.annual.sectionPlans' | translate }}</h3>
+      <p-button [label]="'orgPlans.form.addOperationalPlan' | translate" icon="pi pi-plus" [outlined]="true" (onClick)="addPlanRow()" />
+    </div>
+
+    <div *ngFor="let plan of planRows; let pi = index" class="mt-task-card ag-plan-card">
+      <div class="ag-plan-head">
+        <span class="ag-plan-label">{{ 'orgPlans.form.operationalPlan' | translate }} {{ pi + 1 }}</span>
+        <p-button
+          icon="pi pi-trash"
+          [text]="true"
+          [rounded]="true"
+          severity="danger"
+          type="button"
+          (onClick)="removePlanRow(pi)"
+        />
+      </div>
+      <div class="vio-form-grid">
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <input pInputText [id]="'ag-p-title-' + pi" class="w-full" [(ngModel)]="plan.title" autocomplete="off" />
+          <label [for]="'ag-p-title-' + pi">{{ 'orgPlans.form.title' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            [inputId]="'ag-p-st-' + pi"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="opStatusOptions"
+            [(ngModel)]="plan.status"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label [for]="'ag-p-st-' + pi">{{ 'orgPlans.form.opStatus' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-inputNumber [inputId]="'ag-p-sort-' + pi" [(ngModel)]="plan.sortOrder" [useGrouping]="false" styleClass="w-full" />
+          <label [for]="'ag-p-sort-' + pi">{{ 'orgPlans.form.sortOrder' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <textarea pTextarea [id]="'ag-p-det-' + pi" class="w-full" [(ngModel)]="plan.details" rows="2"></textarea>
+          <label [for]="'ag-p-det-' + pi">{{ 'orgPlans.form.details' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field mt-dt-field">
+          <p-datepicker
+            [inputId]="'ag-p-start-' + pi"
+            [(ngModel)]="plan.startAt"
+            [showIcon]="true"
+            iconDisplay="button"
+            [showTime]="true"
+            hourFormat="24"
+            [showSeconds]="false"
+            dateFormat="dd/mm/yy"
+            [appendTo]="dtAppendTo"
+            panelStyleClass="mt-dt-panel"
+            [fluid]="true"
+            styleClass="w-full"
+            [showButtonBar]="true"
+            [showClear]="true"
+            [stepMinute]="1"
+            [numberOfMonths]="1"
+            [hideOnDateTimeSelect]="false"
+            timeSeparator=":"
+          />
+          <label [for]="'ag-p-start-' + pi">{{ 'orgPlans.form.start' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field mt-dt-field">
+          <p-datepicker
+            [inputId]="'ag-p-end-' + pi"
+            [(ngModel)]="plan.endAt"
+            [showIcon]="true"
+            iconDisplay="button"
+            [showTime]="true"
+            hourFormat="24"
+            [showSeconds]="false"
+            dateFormat="dd/mm/yy"
+            [appendTo]="dtAppendTo"
+            panelStyleClass="mt-dt-panel"
+            [fluid]="true"
+            styleClass="w-full"
+            [showButtonBar]="true"
+            [showClear]="true"
+            [stepMinute]="1"
+            [numberOfMonths]="1"
+            [hideOnDateTimeSelect]="false"
+            timeSeparator=":"
+          />
+          <label [for]="'ag-p-end-' + pi">{{ 'orgPlans.form.end' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <p-select
+            [inputId]="'ag-p-own-' + pi"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="plan.ownerEmployeeProfileID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label [for]="'ag-p-own-' + pi">{{ 'orgPlans.form.owner' | translate }}</label>
+        </p-floatlabel>
+      </div>
+
+      <div class="ag-tasks-head">
+        <strong>{{ 'orgPlans.form.tasks' | translate }}</strong>
+        <p-button [label]="'orgPlans.form.addTask' | translate" icon="pi pi-plus" [text]="true" type="button" (onClick)="addTaskRow(plan)" />
+      </div>
+
+      <div *ngFor="let task of plan.tasks; let ti = index" class="mt-attendee-card ag-task-card">
+        <div class="ag-task-head">
+          <span>{{ 'orgPlans.form.task' | translate }} {{ ti + 1 }}</span>
+          <p-button icon="pi pi-trash" [text]="true" severity="danger" type="button" (onClick)="removeTaskRow(plan, ti)" />
+        </div>
+        <div class="vio-form-grid">
+          <p-floatlabel variant="on" class="vio-field vio-field-span2">
+            <input pInputText [id]="'ag-t-ti-' + pi + '-' + ti" class="w-full" [(ngModel)]="task.title" autocomplete="off" />
+            <label [for]="'ag-t-ti-' + pi + '-' + ti">{{ 'orgPlans.form.title' | translate }}</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="vio-field">
+            <p-select
+              [inputId]="'ag-t-st-' + pi + '-' + ti"
+              styleClass="w-full"
+              [panelStyle]="filterSelectPanelStyle"
+              [options]="taskStatusOptions"
+              [(ngModel)]="task.status"
+              optionLabel="label"
+              optionValue="value"
+            />
+            <label [for]="'ag-t-st-' + pi + '-' + ti">{{ 'orgPlans.form.taskStatus' | translate }}</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="vio-field">
+            <p-inputNumber
+              [inputId]="'ag-t-pct-' + pi + '-' + ti"
+              [(ngModel)]="task.progressPercent"
+              [min]="0"
+              [max]="100"
+              [useGrouping]="false"
+              styleClass="w-full"
+            />
+            <label [for]="'ag-t-pct-' + pi + '-' + ti">{{ 'orgPlans.form.progressPercent' | translate }}</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="vio-field vio-field-span2">
+            <textarea pTextarea [id]="'ag-t-det-' + pi + '-' + ti" class="w-full" [(ngModel)]="task.details" rows="2"></textarea>
+            <label [for]="'ag-t-det-' + pi + '-' + ti">{{ 'orgPlans.form.details' | translate }}</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="vio-field mt-dt-field">
+            <p-datepicker
+              [inputId]="'ag-t-due-' + pi + '-' + ti"
+              [(ngModel)]="task.dueAt"
+              [showIcon]="true"
+              iconDisplay="button"
+              [showTime]="true"
+              hourFormat="24"
+              [showSeconds]="false"
+              dateFormat="dd/mm/yy"
+              [appendTo]="dtAppendTo"
+              panelStyleClass="mt-dt-panel"
+              [fluid]="true"
+              styleClass="w-full"
+              [showButtonBar]="true"
+              [showClear]="true"
+              [stepMinute]="1"
+              [numberOfMonths]="1"
+              [hideOnDateTimeSelect]="false"
+              timeSeparator=":"
+            />
+            <label [for]="'ag-t-due-' + pi + '-' + ti">{{ 'orgPlans.form.dueAt' | translate }}</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="vio-field vio-field-span2">
+            <p-select
+              [inputId]="'ag-t-asg-' + pi + '-' + ti"
+              styleClass="w-full"
+              [panelStyle]="filterSelectPanelStyle"
+              [options]="employeeOptions"
+              [(ngModel)]="task.assignedToEmployeeProfileID"
+              optionLabel="label"
+              optionValue="value"
+              [showClear]="true"
+              [filter]="true"
+            />
+            <label [for]="'ag-t-asg-' + pi + '-' + ti">{{ 'orgPlans.form.assignee' | translate }}</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="ag-updates-head">
+          <span>{{ 'orgPlans.form.progressUpdates' | translate }}</span>
+          <p-button [label]="'orgPlans.form.addProgressUpdate' | translate" icon="pi pi-plus" [text]="true" type="button" (onClick)="addUpdateRow(task)" />
+        </div>
+        <div *ngFor="let u of task.updates; let ui = index" class="ag-update-row vio-form-grid">
+          <p-floatlabel variant="on" class="vio-field vio-field-span2">
+            <input pInputText [id]="'ag-u-n-' + pi + '-' + ti + '-' + ui" class="w-full" [(ngModel)]="u.note" autocomplete="off" />
+            <label [for]="'ag-u-n-' + pi + '-' + ti + '-' + ui">{{ 'orgPlans.form.note' | translate }}</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="vio-field">
+            <p-inputNumber [inputId]="'ag-u-p-' + pi + '-' + ti + '-' + ui" [(ngModel)]="u.progressPercent" [min]="0" [max]="100" styleClass="w-full" />
+            <label [for]="'ag-u-p-' + pi + '-' + ti + '-' + ui">%</label>
+          </p-floatlabel>
+          <p-floatlabel variant="on" class="vio-field">
+            <p-select
+              [inputId]="'ag-u-a-' + pi + '-' + ti + '-' + ui"
+              styleClass="w-full"
+              [panelStyle]="filterSelectPanelStyle"
+              [options]="employeeOptions"
+              [(ngModel)]="u.authorEmployeeProfileID"
+              optionLabel="label"
+              optionValue="value"
+              [showClear]="true"
+              [filter]="true"
+            />
+            <label [for]="'ag-u-a-' + pi + '-' + ti + '-' + ui">{{ 'orgPlans.form.author' | translate }}</label>
+          </p-floatlabel>
+          <div class="vio-field mt-row-actions">
+            <p-button icon="pi pi-trash" [text]="true" severity="danger" type="button" (onClick)="removeUpdateRow(task, ui)" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="vio-form-actions">
+      <p-button [label]="'orgPlans.form.cancel' | translate" severity="secondary" [outlined]="true" (onClick)="cancel()" />
+      <p-button *ngIf="canSubmit" [label]="'orgPlans.form.save' | translate" icon="pi pi-check" (onClick)="save()" [loading]="saving" />
+    </div>
+  </div>
+  <div *ngIf="loading" class="vio-form-card muted">{{ 'orgPlans.form.loading' | translate }}</div>
+</div>

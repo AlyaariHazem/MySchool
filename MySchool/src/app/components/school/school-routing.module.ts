@@ -447,6 +447,15 @@ const routes: Routes = [
         canMatch: [permissionGuard],
       },
       {
+        path: 'organizational-plans',
+        loadComponent: () =>
+          import('./organizational-plans/organizational-plans-page.component').then(
+            (m) => m.OrganizationalPlansPageComponent,
+          ),
+        data: { breadcrumb: 'الخطط والأهداف', permission: PagePermission.Employees.View },
+        canMatch: [permissionGuard],
+      },
+      {
         path: 'teacher-feedback',
         data: { breadcrumb: 'تقييم المعلم' },
         children: [

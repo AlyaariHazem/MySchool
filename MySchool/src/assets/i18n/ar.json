@@ -187,6 +187,7 @@
       "suggestions": "المقترحات",
       "meetings": "الاجتماعات",
       "activities": "الأنشطة",
+      "organizationalPlans": "الخطط والأهداف",
       "violations": "المخالفات",
       "teacherFeedback": "تقييم المعلمين"
     },
@@ -1127,6 +1128,137 @@
     "toast": {
       "created": "تم حفظ طلب النشاط.",
       "updated": "تم تحديث طلب النشاط."
+    }
+  },
+  "orgPlans": {
+    "pageTitle": "الخطط والأهداف المؤسسية",
+    "tabs": {
+      "strategic": "أهداف استراتيجية",
+      "annual": "أهداف سنوية",
+      "department": "أهداف الأقسام"
+    },
+    "list": {
+      "add": "جديد",
+      "refresh": "تحديث",
+      "noPermission": "لا تملك صلاحية هذا القسم.",
+      "emptyStrategic": "لا توجد أهداف استراتيجية.",
+      "emptyAnnual": "لا توجد أهداف سنوية.",
+      "emptyDept": "لا توجد أهداف أقسام."
+    },
+    "filter": {
+      "school": "المدرسة",
+      "status": "الحالة"
+    },
+    "columns": {
+      "title": "العنوان",
+      "reference": "المرجع",
+      "status": "الحالة",
+      "sort": "الترتيب",
+      "actions": "إجراءات",
+      "strategic": "الهدف الاستراتيجي",
+      "plans": "خطط تشغيلية",
+      "department": "القسم"
+    },
+    "actions": {
+      "edit": "تعديل"
+    },
+    "strategicStatus": {
+      "draft": "مسودة",
+      "active": "نشط",
+      "achieved": "محقق",
+      "superseded": "مستبدل",
+      "archived": "مؤرشف",
+      "cancelled": "ملغى"
+    },
+    "annualStatus": {
+      "draft": "مسودة",
+      "active": "نشط",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "opStatus": {
+      "draft": "مسودة",
+      "active": "نشط",
+      "onHold": "معلّق",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "taskStatus": {
+      "notStarted": "لم يبدأ",
+      "inProgress": "قيد التنفيذ",
+      "blocked": "معطّل",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "deptStatus": {
+      "draft": "مسودة",
+      "active": "نشط",
+      "achieved": "محقق",
+      "cancelled": "ملغى"
+    },
+    "strategic": {
+      "newTitle": "هدف استراتيجي جديد",
+      "editTitle": "هدف استراتيجي"
+    },
+    "annual": {
+      "newTitle": "هدف سنوي جديد",
+      "editTitle": "هدف سنوي"
+    },
+    "dept": {
+      "newTitle": "هدف قسم جديد",
+      "editTitle": "هدف قسم"
+    },
+    "form": {
+      "sectionMain": "رئيسي",
+      "sectionPlans": "خطط تشغيلية ومهام",
+      "academicYear": "السنة الدراسية",
+      "academicYearOptional": "السنة الدراسية (اختياري)",
+      "strategicLink": "الهدف الاستراتيجي (اختياري)",
+      "annualLink": "الهدف السنوي (اختياري)",
+      "referenceCode": "رمز مرجعي",
+      "title": "العنوان",
+      "details": "التفاصيل",
+      "status": "الحالة",
+      "sortOrder": "ترتيب العرض",
+      "effectiveFrom": "ساري من",
+      "effectiveTo": "ساري إلى",
+      "start": "البداية",
+      "end": "النهاية",
+      "owner": "المالك (اختياري)",
+      "assignee": "المكلف (اختياري)",
+      "dueAt": "الاستحقاق",
+      "progressPercent": "نسبة الإنجاز %",
+      "opStatus": "حالة الخطة",
+      "taskStatus": "حالة المهمة",
+      "operationalPlan": "خطة تشغيلية",
+      "addOperationalPlan": "إضافة خطة تشغيلية",
+      "tasks": "المهام",
+      "task": "مهمة",
+      "addTask": "إضافة مهمة",
+      "progressUpdates": "تحديثات التقدم",
+      "addProgressUpdate": "إضافة تحديث",
+      "note": "ملاحظة",
+      "author": "المؤلف",
+      "departmentName": "القسم / الوحدة",
+      "annual": {
+        "sectionMain": "الهدف السنوي",
+        "sectionPlans": "الخطط التشغيلية"
+      },
+      "validationSchool": "يرجى اختيار المدرسة.",
+      "validationYear": "يرجى اختيار السنة الدراسية.",
+      "validationTitle": "يرجى إدخال عنوان.",
+      "validationDept": "يرجى إدخال اسم القسم والعنوان.",
+      "cancel": "إلغاء",
+      "save": "حفظ",
+      "loading": "جاري التحميل…"
+    },
+    "toast": {
+      "strategicCreated": "تم حفظ الهدف الاستراتيجي.",
+      "strategicUpdated": "تم تحديث الهدف الاستراتيجي.",
+      "annualCreated": "تم حفظ الهدف السنوي.",
+      "annualUpdated": "تم تحديث الهدف السنوي.",
+      "deptCreated": "تم حفظ هدف القسم.",
+      "deptUpdated": "تم تحديث هدف القسم."
     }
   },
   "violations": {
