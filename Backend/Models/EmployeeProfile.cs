@@ -135,4 +135,14 @@ public class EmployeeProfile
     public ICollection<ViolationAction> ViolationActionsPerformed { get; set; } = new List<ViolationAction>();
 
     public ICollection<ViolationEscalationHistory> ViolationEscalationsChanged { get; set; } = new List<ViolationEscalationHistory>();
+
+    public ICollection<Complaint> ComplaintsSubmitted { get; set; } = new List<Complaint>();
+
+    public ICollection<Complaint> ComplaintsAssignedTo { get; set; } = new List<Complaint>();
+
+    public ICollection<Suggestion> SuggestionsSubmitted { get; set; } = new List<Suggestion>();
+
+    public ICollection<Suggestion> SuggestionsAssignedTo { get; set; } = new List<Suggestion>();
+
+    public ICollection<ConcernActionLog> ConcernActionLogsAsActor { get; set; } = new List<ConcernActionLog>();
 }

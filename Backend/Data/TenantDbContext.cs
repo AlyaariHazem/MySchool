@@ -115,6 +115,14 @@ namespace Backend.Data
         public DbSet<ViolationAction> ViolationActions { get; set; }
         public DbSet<ViolationEscalationHistory> ViolationEscalationHistories { get; set; }
 
+        public DbSet<ConcernCategory> ConcernCategories { get; set; }
+
+        public DbSet<Complaint> Complaints { get; set; }
+
+        public DbSet<Suggestion> Suggestions { get; set; }
+
+        public DbSet<ConcernActionLog> ConcernActionLogs { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -1736,6 +1744,138 @@ namespace Backend.Data
                 .HasOne(x => x.CreatedByEmployeeProfile)
                 .WithMany(p => p.RequestDailySummariesAuthored)
                 .HasForeignKey(x => x.CreatedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Complaints & suggestions (concerns) ---
+            modelBuilder.Entity<ConcernCategory>()
+                .ToTable("StaffConcernCategories");
+            modelBuilder.Entity<ConcernCategory>()
+                .HasKey(x => x.ConcernCategoryID);
+            modelBuilder.Entity<ConcernCategory>()
+                .Property(x => x.ConcernCategoryID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ConcernCategory>()
+                .Property(x => x.CategoryKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<ConcernCategory>()
+                .HasIndex(x => new { x.SchoolID, x.Code })
+                .IsUnique();
+            modelBuilder.Entity<ConcernCategory>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Complaint>()
+                .ToTable("StaffComplaints");
+            modelBuilder.Entity<Complaint>()
+                .HasKey(x => x.ComplaintID);
+            modelBuilder.Entity<Complaint>()
+                .Property(x => x.ComplaintID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<Complaint>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<Complaint>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.Status });
+            modelBuilder.Entity<Complaint>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Complaint>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Complaint>()
+                .HasOne(x => x.ConcernCategory)
+                .WithMany(c => c.Complaints)
+                .HasForeignKey(x => x.ConcernCategoryID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Complaint>()
+                .HasOne(x => x.SubmitterEmployeeProfile)
+                .WithMany(p => p.ComplaintsSubmitted)
+                .HasForeignKey(x => x.SubmitterEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Complaint>()
+                .HasOne(x => x.AssignedToEmployeeProfile)
+                .WithMany(p => p.ComplaintsAssignedTo)
+                .HasForeignKey(x => x.AssignedToEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Suggestion>()
+                .ToTable("StaffSuggestions");
+            modelBuilder.Entity<Suggestion>()
+                .HasKey(x => x.SuggestionID);
+            modelBuilder.Entity<Suggestion>()
+                .Property(x => x.SuggestionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<Suggestion>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<Suggestion>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.Status });
+            modelBuilder.Entity<Suggestion>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Suggestion>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Suggestion>()
+                .HasOne(x => x.ConcernCategory)
+                .WithMany(c => c.Suggestions)
+                .HasForeignKey(x => x.ConcernCategoryID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Suggestion>()
+                .HasOne(x => x.SubmitterEmployeeProfile)
+                .WithMany(p => p.SuggestionsSubmitted)
+                .HasForeignKey(x => x.SubmitterEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Suggestion>()
+                .HasOne(x => x.AssignedToEmployeeProfile)
+                .WithMany(p => p.SuggestionsAssignedTo)
+                .HasForeignKey(x => x.AssignedToEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConcernActionLog>()
+                .ToTable("StaffConcernActionLogs");
+            modelBuilder.Entity<ConcernActionLog>()
+                .HasKey(x => x.ConcernActionLogID);
+            modelBuilder.Entity<ConcernActionLog>()
+                .Property(x => x.ConcernActionLogID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ConcernActionLog>()
+                .Property(x => x.ActionKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<ConcernActionLog>()
+                .Property(x => x.OldStatus)
+                .HasConversion<int?>();
+            modelBuilder.Entity<ConcernActionLog>()
+                .Property(x => x.NewStatus)
+                .HasConversion<int?>();
+            modelBuilder.Entity<ConcernActionLog>()
+                .HasIndex(x => x.ComplaintID);
+            modelBuilder.Entity<ConcernActionLog>()
+                .HasIndex(x => x.SuggestionID);
+            modelBuilder.Entity<ConcernActionLog>()
+                .HasOne(x => x.Complaint)
+                .WithMany(c => c.ActionLogs)
+                .HasForeignKey(x => x.ComplaintID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ConcernActionLog>()
+                .HasOne(x => x.Suggestion)
+                .WithMany(s => s.ActionLogs)
+                .HasForeignKey(x => x.SuggestionID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ConcernActionLog>()
+                .HasOne(x => x.ActorEmployeeProfile)
+                .WithMany(p => p.ConcernActionLogsAsActor)
+                .HasForeignKey(x => x.ActorEmployeeProfileID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- Achievements: catalog, requests, approvals, attachments, points ledger ---
