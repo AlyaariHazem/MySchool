@@ -61,13 +61,47 @@
         <label for="mt-f-loc">{{ 'meetings.form.location' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field">
-        <input type="datetime-local" id="mt-f-start" class="w-full p-inputtext p-component" [(ngModel)]="startAtLocal" />
+      <p-floatlabel variant="on" class="vio-field mt-dt-field">
+        <p-datepicker
+          inputId="mt-f-start"
+          [(ngModel)]="startAt"
+          [showIcon]="true"
+          iconDisplay="button"
+          [showTime]="true"
+          hourFormat="24"
+          [showSeconds]="false"
+          dateFormat="dd/mm/yy"
+          [appendTo]="meetingDatePickerAppendTo"
+          panelStyleClass="mt-dt-panel"
+          [fluid]="true"
+          styleClass="w-full"
+          [showButtonBar]="true"
+          [showClear]="true"
+          [stepMinute]="1"
+          [numberOfMonths]="1"
+        />
         <label for="mt-f-start">{{ 'meetings.form.start' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field">
-        <input type="datetime-local" id="mt-f-end" class="w-full p-inputtext p-component" [(ngModel)]="endAtLocal" />
+      <p-floatlabel variant="on" class="vio-field mt-dt-field">
+        <p-datepicker
+          inputId="mt-f-end"
+          [(ngModel)]="endAt"
+          [showIcon]="true"
+          iconDisplay="button"
+          [showTime]="true"
+          hourFormat="24"
+          [showSeconds]="false"
+          dateFormat="dd/mm/yy"
+          [appendTo]="meetingDatePickerAppendTo"
+          panelStyleClass="mt-dt-panel"
+          [fluid]="true"
+          styleClass="w-full"
+          [showButtonBar]="true"
+          [showClear]="true"
+          [stepMinute]="1"
+          [numberOfMonths]="1"
+        />
         <label for="mt-f-end">{{ 'meetings.form.end' | translate }}</label>
       </p-floatlabel>
     </div>
@@ -165,8 +199,25 @@
         />
         <label for="mt-min-appr">{{ 'meetings.form.minutesApprovedBy' | translate }}</label>
       </p-floatlabel>
-      <p-floatlabel variant="on" class="vio-field">
-        <input type="datetime-local" id="mt-min-appr-at" class="w-full p-inputtext p-component" [(ngModel)]="minutesApprovedAtLocal" />
+      <p-floatlabel variant="on" class="vio-field mt-dt-field">
+        <p-datepicker
+          inputId="mt-min-appr-at"
+          [(ngModel)]="minutesApprovedAt"
+          [showIcon]="true"
+          iconDisplay="button"
+          [showTime]="true"
+          hourFormat="24"
+          [showSeconds]="false"
+          dateFormat="dd/mm/yy"
+          [appendTo]="meetingDatePickerAppendTo"
+          panelStyleClass="mt-dt-panel"
+          [fluid]="true"
+          styleClass="w-full"
+          [showButtonBar]="true"
+          [showClear]="true"
+          [stepMinute]="1"
+          [numberOfMonths]="1"
+        />
         <label for="mt-min-appr-at">{{ 'meetings.form.minutesApprovedAt' | translate }}</label>
       </p-floatlabel>
     </div>
@@ -199,8 +250,24 @@
           />
           <label>{{ 'meetings.form.taskAssignee' | translate }}</label>
         </p-floatlabel>
-        <p-floatlabel variant="on" class="vio-field">
-          <input type="datetime-local" class="w-full p-inputtext p-component" [(ngModel)]="task.dueAtLocal" />
+        <p-floatlabel variant="on" class="vio-field mt-dt-field">
+          <p-datepicker
+            [(ngModel)]="task.dueAt"
+            [showIcon]="true"
+            iconDisplay="button"
+            [showTime]="true"
+            hourFormat="24"
+            [showSeconds]="false"
+            dateFormat="dd/mm/yy"
+            [appendTo]="meetingDatePickerAppendTo"
+            panelStyleClass="mt-dt-panel"
+            [fluid]="true"
+            styleClass="w-full"
+            [showButtonBar]="true"
+            [showClear]="true"
+            [stepMinute]="1"
+            [numberOfMonths]="1"
+          />
           <label>{{ 'meetings.form.taskDue' | translate }}</label>
         </p-floatlabel>
         <p-floatlabel variant="on" class="vio-field">

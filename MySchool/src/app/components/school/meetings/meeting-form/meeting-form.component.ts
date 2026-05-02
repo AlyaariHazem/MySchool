@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
+import { DatePicker } from 'primeng/datepicker';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -30,8 +31,6 @@ import {
   MeetingTaskStatus,
   MeetingTaskWriteDto,
   MeetingWriteDto,
-  datetimeLocalToIsoUtc,
-  isoUtcToDatetimeLocal,
 } from '../meetings.models';
 import { MeetingsService, readMeetingHttpError } from '../meetings.service';
 
@@ -52,7 +51,7 @@ export interface TaskFormRow {
   title: string;
   details: string;
   assignedToEmployeeProfileID: number | null;
-  dueAtLocal: string;
+  dueAt: Date | null;
   status: MeetingTaskStatus;
   sortOrder: number;
   followUps: FollowUpFormRow[];
@@ -72,6 +71,7 @@ export interface TaskFormRow {
     FloatLabelModule,
     InputTextModule,
     TextareaModule,
+    DatePicker,
   ],
   templateUrl: './meeting-form.component.html',
   styleUrl: './meeting-form.component.scss',
@@ -95,6 +95,9 @@ export class MeetingFormComponent implements OnInit {
     maxWidth: 'min(22rem, calc(100vw - 2rem))',
   };
 
+  /** Shared PrimeNG datepicker options for meeting date-times (popup, no icon inside input). */
+  readonly meetingDatePickerAppendTo: 'body' = 'body';
+
   loading = false;
   saving = false;
   recordId: number | null = null;
@@ -104,8 +107,8 @@ export class MeetingFormComponent implements OnInit {
   title = '';
   description = '';
   location = '';
-  startAtLocal = '';
-  endAtLocal = '';
+  startAt: Date | null = null;
+  endAt: Date | null = null;
   status: MeetingStatus = MeetingStatus.Draft;
 
   schoolOptions: { label: string; value: number }[] = [];
@@ -119,7 +122,7 @@ export class MeetingFormComponent implements OnInit {
   minutesBody = '';
   minutesRecordedByEmployeeProfileID: number | null = null;
   minutesApprovedByEmployeeProfileID: number | null = null;
-  minutesApprovedAtLocal = '';
+  minutesApprovedAt: Date | null = null;
 
   taskRows: TaskFormRow[] = [];
 
@@ -258,8 +261,8 @@ export class MeetingFormComponent implements OnInit {
         this.title = d.title;
         this.description = d.description ?? '';
         this.location = d.location ?? '';
-        this.startAtLocal = isoUtcToDatetimeLocal(d.startAtUtc);
-        this.endAtLocal = d.endAtUtc ? isoUtcToDatetimeLocal(d.endAtUtc) : '';
+        this.startAt = d.startAtUtc ? new Date(d.startAtUtc) : null;
+        this.endAt = d.endAtUtc ? new Date(d.endAtUtc) : null;
         this.status = d.status as MeetingStatus;
         this.attendeeRows = (d.attendees ?? []).map((a) => ({
           employeeProfileID: a.employeeProfileID,
@@ -273,18 +276,18 @@ export class MeetingFormComponent implements OnInit {
           this.minutesBody = m.body;
           this.minutesRecordedByEmployeeProfileID = m.recordedByEmployeeProfileID;
           this.minutesApprovedByEmployeeProfileID = m.approvedByEmployeeProfileID ?? null;
-          this.minutesApprovedAtLocal = m.approvedAtUtc ? isoUtcToDatetimeLocal(m.approvedAtUtc) : '';
+          this.minutesApprovedAt = m.approvedAtUtc ? new Date(m.approvedAtUtc) : null;
         } else {
           this.minutesBody = '';
           this.minutesRecordedByEmployeeProfileID = this.organizerEmployeeProfileID;
           this.minutesApprovedByEmployeeProfileID = null;
-          this.minutesApprovedAtLocal = '';
+          this.minutesApprovedAt = null;
         }
         this.taskRows = (d.tasks ?? []).map((t) => ({
           title: t.title,
           details: t.details ?? '',
           assignedToEmployeeProfileID: t.assignedToEmployeeProfileID ?? null,
-          dueAtLocal: t.dueAtUtc ? isoUtcToDatetimeLocal(t.dueAtUtc) : '',
+          dueAt: t.dueAtUtc ? new Date(t.dueAtUtc) : null,
           status: t.status as MeetingTaskStatus,
           sortOrder: t.sortOrder,
           followUps: (t.followUps ?? []).map((f) => ({
@@ -316,7 +319,7 @@ export class MeetingFormComponent implements OnInit {
       title: '',
       details: '',
       assignedToEmployeeProfileID: null,
-      dueAtLocal: '',
+      dueAt: null,
       status: MeetingTaskStatus.Open,
       sortOrder: this.taskRows.length,
       followUps: [],
@@ -365,7 +368,7 @@ export class MeetingFormComponent implements OnInit {
       this.toastr.warning(this.translate.instant('meetings.form.validationTitle'));
       return null;
     }
-    if (!this.startAtLocal) {
+    if (!this.startAt) {
       this.toastr.warning(this.translate.instant('meetings.form.validationStart'));
       return null;
     }
@@ -376,8 +379,8 @@ export class MeetingFormComponent implements OnInit {
       title: this.title.trim(),
       description: this.description.trim() || null,
       location: this.location.trim() || null,
-      startAtUtc: datetimeLocalToIsoUtc(this.startAtLocal),
-      endAtUtc: this.endAtLocal ? datetimeLocalToIsoUtc(this.endAtLocal) : null,
+      startAtUtc: this.startAt.toISOString(),
+      endAtUtc: this.endAt ? this.endAt.toISOString() : null,
       status: this.status,
       attendees: this.buildAttendees(),
     };
@@ -394,7 +397,7 @@ export class MeetingFormComponent implements OnInit {
       body: this.minutesBody.trim(),
       recordedByEmployeeProfileID: rec,
       approvedByEmployeeProfileID: this.minutesApprovedByEmployeeProfileID,
-      approvedAtUtc: this.minutesApprovedAtLocal ? datetimeLocalToIsoUtc(this.minutesApprovedAtLocal) : null,
+      approvedAtUtc: this.minutesApprovedAt ? this.minutesApprovedAt.toISOString() : null,
     };
   }
 
@@ -417,7 +420,7 @@ export class MeetingFormComponent implements OnInit {
           title: t.title.trim(),
           details: t.details.trim() || null,
           assignedToEmployeeProfileID: t.assignedToEmployeeProfileID,
-          dueAtUtc: t.dueAtLocal ? datetimeLocalToIsoUtc(t.dueAtLocal) : null,
+          dueAtUtc: t.dueAt ? t.dueAt.toISOString() : null,
           status: t.status,
           sortOrder: Number.isFinite(so) ? so : 0,
           followUps,

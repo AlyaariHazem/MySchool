@@ -52,6 +52,66 @@ body {
   z-index: 13000 !important;
 }
 
+/* Meetings (and shared): datetime overlay — layout, RTL-safe time row, clearer chrome */
+.p-datepicker-panel.mt-dt-panel {
+  min-width: min(20.5rem, calc(100vw - 1.5rem));
+  max-width: calc(100vw - 1rem);
+  border-radius: 12px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.18);
+  border: 1px solid #e2e8f0;
+  padding: 0.35rem 0.25rem 0.5rem;
+  box-sizing: border-box;
+}
+
+.p-datepicker-panel.mt-dt-panel .p-datepicker-header {
+  padding: 0.35rem 0.45rem;
+}
+
+.p-datepicker-panel.mt-dt-panel .p-datepicker-calendar-container {
+  padding: 0.15rem 0.35rem 0.25rem;
+}
+
+.p-datepicker-panel.mt-dt-panel .p-datepicker-day {
+  border-radius: 8px;
+}
+
+.p-datepicker-panel.mt-dt-panel .p-datepicker-buttonbar {
+  padding: 0.45rem 0.6rem 0.35rem;
+  margin-top: 0.15rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.p-datepicker-panel.mt-dt-panel .p-datepicker-time-picker {
+  padding: 0.55rem 0.65rem 0.4rem;
+  margin-top: 0.2rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.55rem;
+  direction: ltr;
+}
+
+.p-datepicker-panel.mt-dt-panel .p-datepicker-time-picker > * {
+  flex: 0 0 auto;
+}
+
+.p-datepicker-panel.mt-dt-panel .p-datepicker-increment-button,
+.p-datepicker-panel.mt-dt-panel .p-datepicker-decrement-button {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: 8px;
+}
+
+[dir='rtl'] .p-datepicker-panel.mt-dt-panel .p-datepicker-calendar-container {
+  direction: rtl;
+}
+
 /* Attendance page: p-select overlay is often attached to body — keep option row height compact */
 .p-select-overlay.attendance-select-panel .p-select-option {
   padding-block: 0.4rem;

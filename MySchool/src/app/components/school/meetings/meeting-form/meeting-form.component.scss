@@ -1,5 +1,33 @@
 @import '../../concerns/concern-form/concern-form.component.scss';
 
+/* DatePicker + FloatLabel: icon as separate button (iconDisplay="button") avoids overlap with Arabic labels */
+.mt-dt-field {
+  min-width: 0;
+}
+
+:host ::ng-deep .mt-dt-field .p-datepicker {
+  width: 100%;
+  max-width: 100%;
+}
+
+:host ::ng-deep .mt-dt-field .p-datepicker.p-datepicker-fluid {
+  width: 100%;
+}
+
+:host ::ng-deep .mt-dt-field .p-datepicker .p-inputtext {
+  min-height: 2.75rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .mt-dt-field .p-datepicker .p-datepicker-dropdown {
+  border-radius: 0 8px 8px 0;
+}
+
+[dir='rtl'] :host ::ng-deep .mt-dt-field .p-datepicker .p-datepicker-dropdown {
+  border-radius: 8px 0 0 8px;
+}
+
 .mt-section {
   margin-top: 1.75rem;
 }
