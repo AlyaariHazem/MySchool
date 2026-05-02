@@ -3,7 +3,7 @@
     <h3 class="vio-section-title">{{ 'employeeRequests.form.sectionMain' | translate }}</h3>
 
     <div class="vio-form-grid">
-      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
         <p-select
           inputId="er-f-school"
           styleClass="w-full"
@@ -19,7 +19,22 @@
         <label for="er-f-school">{{ 'employeeRequests.filter.school' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field">
+      <p-floatlabel variant="on" class="vio-field vio-field-span1">
+        <p-select
+          inputId="er-f-type"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="typeOptions"
+          [(ngModel)]="requestTypeID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="er-f-type">{{ 'employeeRequests.form.requestType' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span1">
         <p-select
           inputId="er-f-employee"
           styleClass="w-full"
@@ -36,31 +51,13 @@
       </p-floatlabel>
 
       <p-floatlabel variant="on" class="vio-field vio-field-span2">
-        <p-select
-          inputId="er-f-type"
-          styleClass="w-full"
-          [panelStyle]="filterSelectPanelStyle"
-          [options]="typeOptions"
-          [(ngModel)]="requestTypeID"
-          optionLabel="label"
-          optionValue="value"
-          [showClear]="true"
-          [filter]="true"
-        />
-        <label for="er-f-type">{{ 'employeeRequests.form.requestType' | translate }}</label>
+        <input pInputText id="er-f-title" class="w-full" [(ngModel)]="title" [maxlength]="256" />
+        <label for="er-f-title">{{ 'employeeRequests.form.title' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field">
-        <p-select
-          inputId="er-f-status"
-          styleClass="w-full"
-          [panelStyle]="filterSelectPanelStyle"
-          [options]="statusOptions"
-          [(ngModel)]="status"
-          optionLabel="label"
-          optionValue="value"
-        />
-        <label for="er-f-status">{{ 'employeeRequests.form.status' | translate }}</label>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="er-f-details" class="w-full" rows="4" [(ngModel)]="details" [maxlength]="4000"></textarea>
+        <label for="er-f-details">{{ 'employeeRequests.form.details' | translate }}</label>
       </p-floatlabel>
 
       <p-floatlabel variant="on" class="vio-field">
@@ -76,14 +73,17 @@
         <label for="er-f-amount">{{ 'employeeRequests.form.requestedAmount' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
-        <input pInputText id="er-f-title" class="w-full" [(ngModel)]="title" [maxlength]="256" />
-        <label for="er-f-title">{{ 'employeeRequests.form.title' | translate }}</label>
-      </p-floatlabel>
-
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
-        <textarea pTextarea id="er-f-details" class="w-full" rows="4" [(ngModel)]="details" [maxlength]="4000"></textarea>
-        <label for="er-f-details">{{ 'employeeRequests.form.details' | translate }}</label>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="er-f-status"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="statusOptions"
+          [(ngModel)]="status"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="er-f-status">{{ 'employeeRequests.form.status' | translate }}</label>
       </p-floatlabel>
     </div>
 
