@@ -385,6 +385,23 @@ const routes: Routes = [
         ],
       },
       {
+        path: 'employee-requests',
+        data: { breadcrumb: 'طلبات الموظفين' },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./employee-requests/employee-requests-list/employee-requests-list.component').then(
+                (m) => m.EmployeeRequestsListComponent,
+              ),
+            data: { breadcrumb: 'قائمة الطلبات', permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+          { path: 'not-found', component: PageNotFoundComponent },
+          { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+        ],
+      },
+      {
         path: 'teacher-feedback',
         data: { breadcrumb: 'تقييم المعلم' },
         children: [

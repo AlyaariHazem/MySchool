@@ -97,6 +97,12 @@ namespace Backend.Data
         public DbSet<ParentFeedback> ParentFeedbacks { get; set; }
         public DbSet<FeedbackSummary> FeedbackSummaries { get; set; }
 
+        public DbSet<RequestType> RequestTypes { get; set; }
+        public DbSet<EmployeeRequest> EmployeeRequests { get; set; }
+        public DbSet<RequestApprovalStep> RequestApprovalSteps { get; set; }
+        public DbSet<RequestExecution> RequestExecutions { get; set; }
+        public DbSet<RequestDailySummary> RequestDailySummaries { get; set; }
+
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<AchievementRequest> AchievementRequests { get; set; }
         public DbSet<AchievementApproval> AchievementApprovals { get; set; }
@@ -1609,6 +1615,128 @@ namespace Backend.Data
                 .WithMany(c => c.Summaries)
                 .HasForeignKey(s => s.TeacherFeedbackCycleID)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Employee requests: type, request, approvals, execution updates, daily summaries ---
+            modelBuilder.Entity<RequestType>()
+                .ToTable("EmployeeRequestTypes");
+            modelBuilder.Entity<RequestType>()
+                .HasKey(x => x.RequestTypeID);
+            modelBuilder.Entity<RequestType>()
+                .Property(x => x.RequestTypeID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<RequestType>()
+                .Property(x => x.Category)
+                .HasConversion<int>();
+            modelBuilder.Entity<RequestType>()
+                .HasIndex(x => new { x.SchoolID, x.Code })
+                .IsUnique();
+            modelBuilder.Entity<RequestType>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeRequest>()
+                .ToTable("StaffEmployeeRequests");
+            modelBuilder.Entity<EmployeeRequest>()
+                .HasKey(x => x.EmployeeRequestID);
+            modelBuilder.Entity<EmployeeRequest>()
+                .Property(x => x.EmployeeRequestID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<EmployeeRequest>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<EmployeeRequest>()
+                .Property(x => x.RequestedAmount)
+                .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<EmployeeRequest>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.EmployeeProfileID, x.Status });
+            modelBuilder.Entity<EmployeeRequest>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeRequest>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeRequest>()
+                .HasOne(x => x.EmployeeProfile)
+                .WithMany(p => p.EmployeeRequests)
+                .HasForeignKey(x => x.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeRequest>()
+                .HasOne(x => x.RequestType)
+                .WithMany(t => t.EmployeeRequests)
+                .HasForeignKey(x => x.RequestTypeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RequestApprovalStep>()
+                .ToTable("StaffRequestApprovalSteps");
+            modelBuilder.Entity<RequestApprovalStep>()
+                .HasKey(x => x.RequestApprovalStepID);
+            modelBuilder.Entity<RequestApprovalStep>()
+                .Property(x => x.RequestApprovalStepID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<RequestApprovalStep>()
+                .Property(x => x.Decision)
+                .HasConversion<int>();
+            modelBuilder.Entity<RequestApprovalStep>()
+                .HasIndex(x => new { x.EmployeeRequestID, x.StepOrder });
+            modelBuilder.Entity<RequestApprovalStep>()
+                .HasOne(x => x.EmployeeRequest)
+                .WithMany(r => r.ApprovalSteps)
+                .HasForeignKey(x => x.EmployeeRequestID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<RequestApprovalStep>()
+                .HasOne(x => x.ApproverEmployeeProfile)
+                .WithMany(p => p.RequestApprovalStepsAsApprover)
+                .HasForeignKey(x => x.ApproverEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RequestExecution>()
+                .ToTable("StaffRequestExecutions");
+            modelBuilder.Entity<RequestExecution>()
+                .HasKey(x => x.RequestExecutionID);
+            modelBuilder.Entity<RequestExecution>()
+                .Property(x => x.RequestExecutionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<RequestExecution>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<RequestExecution>()
+                .HasIndex(x => new { x.EmployeeRequestID, x.UpdatedAtUtc });
+            modelBuilder.Entity<RequestExecution>()
+                .HasOne(x => x.EmployeeRequest)
+                .WithMany(r => r.Executions)
+                .HasForeignKey(x => x.EmployeeRequestID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<RequestExecution>()
+                .HasOne(x => x.ResponsibleEmployeeProfile)
+                .WithMany(p => p.RequestExecutionsAsResponsible)
+                .HasForeignKey(x => x.ResponsibleEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RequestDailySummary>()
+                .ToTable("StaffRequestDailySummaries");
+            modelBuilder.Entity<RequestDailySummary>()
+                .HasKey(x => x.RequestDailySummaryID);
+            modelBuilder.Entity<RequestDailySummary>()
+                .Property(x => x.RequestDailySummaryID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<RequestDailySummary>()
+                .HasIndex(x => new { x.EmployeeRequestID, x.SummaryDate, x.CreatedAtUtc });
+            modelBuilder.Entity<RequestDailySummary>()
+                .HasOne(x => x.EmployeeRequest)
+                .WithMany(r => r.DailySummaries)
+                .HasForeignKey(x => x.EmployeeRequestID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<RequestDailySummary>()
+                .HasOne(x => x.CreatedByEmployeeProfile)
+                .WithMany(p => p.RequestDailySummariesAuthored)
+                .HasForeignKey(x => x.CreatedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // --- Achievements: catalog, requests, approvals, attachments, points ledger ---
             modelBuilder.Entity<Achievement>()

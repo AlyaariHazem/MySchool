@@ -182,6 +182,7 @@
       "dailyEvalTemplates": "قوالب التقييم",
       "supervisorVisits": "زيارات المشرف",
       "achievementRequests": "طلبات الإنجاز",
+      "employeeRequests": "طلبات الموظفين",
       "violations": "المخالفات",
       "teacherFeedback": "تقييم المعلمين"
     },
@@ -737,6 +738,124 @@
       "created": "تم حفظ الطلب.",
       "updated": "تم تحديث الطلب.",
       "deleted": "تم حذف الطلب."
+    }
+  },
+  "employeeRequests": {
+    "list": {
+      "title": "طلبات الموظفين",
+      "add": "طلب جديد",
+      "refresh": "تحديث",
+      "applyFilters": "تطبيق التصفية",
+      "empty": "لا توجد طلبات.",
+      "noPermission": "لا تملك صلاحية عرض هذه القائمة."
+    },
+    "filter": {
+      "school": "المدرسة",
+      "status": "الحالة"
+    },
+    "columns": {
+      "submitted": "تاريخ الإرسال",
+      "employee": "الموظف",
+      "type": "نوع الطلب",
+      "title": "العنوان",
+      "amount": "المبلغ",
+      "status": "الحالة",
+      "actions": "إجراءات",
+      "stepOrder": "الترتيب",
+      "approver": "المعتمد",
+      "approvalDecision": "القرار",
+      "decidedAt": "تاريخ القرار",
+      "updated": "آخر تحديث",
+      "execStatus": "حالة التنفيذ",
+      "progress": "الإنجاز %",
+      "responsible": "المسؤول",
+      "notes": "ملاحظات",
+      "summaryDate": "اليوم",
+      "summary": "الملخص",
+      "author": "سجّله"
+    },
+    "category": {
+      "tools": "أدوات",
+      "advance": "سلفة",
+      "support": "دعم"
+    },
+    "status": {
+      "draft": "مسودة",
+      "submitted": "مُرسل",
+      "inApproval": "قيد الموافقة",
+      "approved": "معتمد",
+      "rejected": "مرفوض",
+      "inExecution": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "approval": {
+      "pending": "قيد الانتظار",
+      "approved": "موافقة",
+      "rejected": "رفض",
+      "skipped": "تم التخطي"
+    },
+    "execStatus": {
+      "pending": "معلق",
+      "inProgress": "جاري",
+      "waitingExternal": "بانتظار جهة خارجية",
+      "completed": "مكتمل",
+      "blocked": "متوقف",
+      "cancelled": "ملغى"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "cancel": "إلغاء"
+    },
+    "form": {
+      "titleNew": "طلب موظف جديد",
+      "titleEdit": "طلب موظف",
+      "save": "حفظ",
+      "sectionMain": "بيانات الطلب",
+      "sectionApprovals": "الموافقات",
+      "sectionExecution": "متابعة التنفيذ",
+      "sectionSummaries": "الملخص اليومي",
+      "employee": "الموظف",
+      "requestType": "نوع الطلب (أدوات / سلفة / دعم)",
+      "status": "الحالة",
+      "requestedAmount": "المبلغ المطلوب (اختياري)",
+      "title": "عنوان الطلب",
+      "details": "التفاصيل",
+      "addApprovalStep": "إضافة خطوة موافقة",
+      "approver": "المعتمد",
+      "stepOrderHint": "ترتيب الخطوة (0 = تلقائي)",
+      "submitApprovalStep": "إضافة الخطوة",
+      "approve": "موافقة",
+      "reject": "رفض",
+      "emptyApprovals": "لا توجد خطوات موافقة بعد.",
+      "addExecution": "تسجيل تحديث تنفيذ",
+      "execStatus": "حالة التنفيذ",
+      "progress": "نسبة الإنجاز",
+      "execNotes": "ملاحظات",
+      "dueAt": "موعد استحقاق (اختياري)",
+      "responsible": "المسؤول (اختياري)",
+      "submitExecution": "حفظ التحديث",
+      "emptyExecutions": "لا توجد تحديثات تنفيذ بعد.",
+      "addSummary": "إضافة ملخص يومي",
+      "summaryDate": "تاريخ اليوم",
+      "progressOptional": "نسبة الإنجاز (اختياري)",
+      "summaryText": "نص الملخص",
+      "summaryAuthor": "سجّله (اختياري)",
+      "summaryFinal": "إغلاق ملخص اليوم",
+      "submitSummary": "حفظ الملخص",
+      "emptySummaries": "لا توجد ملخصات بعد.",
+      "validationCore": "يرجى اختيار المدرسة والموظف ونوع الطلب وإدخال عنوان.",
+      "validationApprover": "اختر المعتمد.",
+      "validationSummary": "أدخل نص الملخص.",
+      "validationSummaryDate": "اختر تاريخ الملخص."
+    },
+    "toast": {
+      "created": "تم حفظ الطلب.",
+      "updated": "تم تحديث الطلب.",
+      "approvalStepAdded": "تمت إضافة خطوة الموافقة.",
+      "approvalDecided": "تم تسجيل قرار الموافقة.",
+      "executionAdded": "تم تسجيل تحديث التنفيذ.",
+      "summaryAdded": "تم حفظ الملخص اليومي."
     }
   },
   "violations": {

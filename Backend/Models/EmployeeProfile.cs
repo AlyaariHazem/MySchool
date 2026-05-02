@@ -108,6 +108,14 @@ public class EmployeeProfile
 
     public ICollection<RecommendationFollowUp> RecommendationFollowUpsAuthored { get; set; } = new List<RecommendationFollowUp>();
 
+    public ICollection<EmployeeRequest> EmployeeRequests { get; set; } = new List<EmployeeRequest>();
+
+    public ICollection<RequestApprovalStep> RequestApprovalStepsAsApprover { get; set; } = new List<RequestApprovalStep>();
+
+    public ICollection<RequestExecution> RequestExecutionsAsResponsible { get; set; } = new List<RequestExecution>();
+
+    public ICollection<RequestDailySummary> RequestDailySummariesAuthored { get; set; } = new List<RequestDailySummary>();
+
     public ICollection<AchievementRequest> AchievementRequests { get; set; } = new List<AchievementRequest>();
 
     public ICollection<AchievementApproval> AchievementApprovalsAsApprover { get; set; } = new List<AchievementApproval>();

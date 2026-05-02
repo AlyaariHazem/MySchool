@@ -1,0 +1,137 @@
+<div class="employees-hr-page er-list-page" [attr.dir]="dir$ | async">
+  <div class="employees-hr-card er-list-card">
+    <header class="employees-hr-header er-list-header">
+      <h2 class="employees-hr-title">{{ 'employeeRequests.list.title' | translate }}</h2>
+      <div class="header-actions">
+        <p-button
+          *ngIf="canCreate"
+          [label]="'employeeRequests.list.add' | translate"
+          icon="pi pi-plus"
+          (onClick)="openCreateDialog()"
+        />
+        <p-button
+          [label]="'employeeRequests.list.refresh' | translate"
+          icon="pi pi-refresh"
+          [outlined]="true"
+          (onClick)="load()"
+          [loading]="loading"
+        />
+      </div>
+    </header>
+
+    <div class="filters-toolbar filters-grid er-list-filters" *ngIf="canView">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+        <p-select
+          inputId="er-filter-school"
+          styleClass="w-full er-filter-select"
+          panelStyleClass="er-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="filter.schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="er-filter-school">{{ 'employeeRequests.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="filter-field">
+        <p-select
+          inputId="er-filter-status"
+          styleClass="w-full er-filter-select"
+          panelStyleClass="er-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="statusOptions"
+          [(ngModel)]="filter.status"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="er-filter-status">{{ 'employeeRequests.filter.status' | translate }}</label>
+      </p-floatlabel>
+
+      <div class="filter-actions">
+        <p-button [label]="'employeeRequests.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="load()" />
+      </div>
+    </div>
+
+    <div *ngIf="!canView" class="empty-block muted">{{ 'employeeRequests.list.noPermission' | translate }}</div>
+
+    <p-table
+      *ngIf="canView"
+      [value]="rows"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} / {totalRecords}"
+      styleClass="p-datatable-sm employees-hr-table"
+      [rowHover]="true"
+      [tableStyle]="{ 'min-width': '52rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'employeeRequests.columns.submitted' | translate }}</th>
+          <th>{{ 'employeeRequests.columns.employee' | translate }}</th>
+          <th>{{ 'employeeRequests.columns.type' | translate }}</th>
+          <th>{{ 'employeeRequests.columns.title' | translate }}</th>
+          <th>{{ 'employeeRequests.columns.amount' | translate }}</th>
+          <th>{{ 'employeeRequests.columns.status' | translate }}</th>
+          <th class="er-actions-col">{{ 'employeeRequests.columns.actions' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.submittedAtUtc | date : 'short' }}</td>
+          <td>{{ row.employeeName }}</td>
+          <td>{{ typeLabel(row) }}</td>
+          <td>{{ row.title }}</td>
+          <td>{{ row.requestedAmount != null ? row.requestedAmount : '—' }}</td>
+          <td>{{ statusLabel(row.status) }}</td>
+          <td>
+            <div class="action-btns">
+              <p-button
+                *ngIf="canUpdate"
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                [pTooltip]="'employeeRequests.actions.edit' | translate"
+                (onClick)="openEditDialog(row.employeeRequestID)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">{{ 'employeeRequests.list.empty' | translate }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog
+    [header]="formDialogHeaderKey | translate"
+    [(visible)]="formDialogVisible"
+    [modal]="true"
+    [focusOnShow]="false"
+    [style]="{ width: 'min(58rem, 96vw)' }"
+    [contentStyle]="{ 'max-height': 'min(82vh, 760px)', overflow: 'auto' }"
+    [appendTo]="'body'"
+    [draggable]="false"
+    [resizable]="false"
+    [dismissableMask]="true"
+    styleClass="er-form-dialog"
+    (onHide)="closeFormDialog()"
+  >
+    <app-employee-request-form
+      *ngIf="formDialogVisible"
+      [embedded]="true"
+      [requestIdInput]="editingRequestId"
+      [presetSchoolId]="filter.schoolID ?? null"
+      (closed)="closeFormDialog()"
+      (saved)="onFormSaved()"
+    />
+  </p-dialog>
+</div>

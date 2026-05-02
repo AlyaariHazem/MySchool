@@ -1,0 +1,349 @@
+<div class="vio-form-page" *ngIf="!loading || isEdit">
+  <div *ngIf="!loading" class="vio-form-card">
+    <h3 class="vio-section-title">{{ 'employeeRequests.form.sectionMain' | translate }}</h3>
+
+    <div class="vio-form-grid">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field">
+        <p-select
+          inputId="er-f-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [disabled]="isEdit"
+          (ngModelChange)="onSchoolChange()"
+        />
+        <label for="er-f-school">{{ 'employeeRequests.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="er-f-employee"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="employeeOptions"
+          [(ngModel)]="employeeProfileID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+          [disabled]="isEdit"
+        />
+        <label for="er-f-employee">{{ 'employeeRequests.form.employee' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="er-f-type"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="typeOptions"
+          [(ngModel)]="requestTypeID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="er-f-type">{{ 'employeeRequests.form.requestType' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="er-f-status"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="statusOptions"
+          [(ngModel)]="status"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="er-f-status">{{ 'employeeRequests.form.status' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber
+          inputId="er-f-amount"
+          styleClass="w-full"
+          [(ngModel)]="requestedAmount"
+          mode="decimal"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="2"
+          [min]="0"
+        />
+        <label for="er-f-amount">{{ 'employeeRequests.form.requestedAmount' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <input pInputText id="er-f-title" class="w-full" [(ngModel)]="title" [maxlength]="256" />
+        <label for="er-f-title">{{ 'employeeRequests.form.title' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="er-f-details" class="w-full" rows="4" [(ngModel)]="details" [maxlength]="4000"></textarea>
+        <label for="er-f-details">{{ 'employeeRequests.form.details' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <ng-container *ngIf="isEdit && detail">
+      <h3 class="vio-section-title">{{ 'employeeRequests.form.sectionApprovals' | translate }}</h3>
+      <p-table
+        [value]="detail.approvalSteps"
+        styleClass="p-datatable-sm vio-readonly-table"
+        [tableStyle]="{ 'min-width': '100%' }"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'employeeRequests.columns.stepOrder' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.approver' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.approvalDecision' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.decidedAt' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.actions' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.stepOrder }}</td>
+            <td>{{ row.approverName }}</td>
+            <td>{{ approvalDecisionLabel(row.decision) }}</td>
+            <td>{{ row.decidedAtUtc ? (row.decidedAtUtc | date : 'short') : '—' }}</td>
+            <td>
+              <div class="vio-inline-actions" *ngIf="row.decision === RequestApprovalDecision.Pending">
+                <p-button
+                  [label]="'employeeRequests.form.approve' | translate"
+                  size="small"
+                  (onClick)="decideStep(row.requestApprovalStepID, RequestApprovalDecision.Approved)"
+                />
+                <p-button
+                  [label]="'employeeRequests.form.reject' | translate"
+                  size="small"
+                  severity="danger"
+                  [outlined]="true"
+                  (onClick)="decideStep(row.requestApprovalStepID, RequestApprovalDecision.Rejected)"
+                />
+              </div>
+              <span *ngIf="row.decision !== RequestApprovalDecision.Pending" class="muted">—</span>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">{{ 'employeeRequests.form.emptyApprovals' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <h4 class="vio-subtitle">{{ 'employeeRequests.form.addApprovalStep' | translate }}</h4>
+      <div class="vio-form-grid vio-subform">
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            inputId="er-f-appr"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="newApprovalApproverId"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="er-f-appr">{{ 'employeeRequests.form.approver' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-inputNumber inputId="er-f-step-order" styleClass="w-full" [(ngModel)]="newApprovalStepOrder" [min]="0" />
+          <label for="er-f-step-order">{{ 'employeeRequests.form.stepOrderHint' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-inline-actions">
+          <p-button
+            [label]="'employeeRequests.form.submitApprovalStep' | translate"
+            icon="pi pi-plus"
+            [loading]="submittingApproval"
+            (onClick)="submitApprovalStep()"
+          />
+        </div>
+      </div>
+
+      <h3 class="vio-section-title">{{ 'employeeRequests.form.sectionExecution' | translate }}</h3>
+      <p-table
+        [value]="detail.executions"
+        styleClass="p-datatable-sm vio-readonly-table"
+        [tableStyle]="{ 'min-width': '100%' }"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'employeeRequests.columns.updated' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.execStatus' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.progress' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.responsible' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.notes' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.updatedAtUtc | date : 'short' }}</td>
+            <td>{{ execStatusLabel(row.status) }}</td>
+            <td>{{ row.progressPercent }}%</td>
+            <td>{{ row.responsibleName ?? '—' }}</td>
+            <td>{{ row.notes ?? '—' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">{{ 'employeeRequests.form.emptyExecutions' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <h4 class="vio-subtitle">{{ 'employeeRequests.form.addExecution' | translate }}</h4>
+      <div class="vio-form-grid vio-subform">
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            inputId="er-f-ex-st"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="executionStatusOptions"
+            [(ngModel)]="newExecStatus"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label for="er-f-ex-st">{{ 'employeeRequests.form.execStatus' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-inputNumber
+            inputId="er-f-ex-pr"
+            styleClass="w-full"
+            [(ngModel)]="newExecProgress"
+            [min]="0"
+            [max]="100"
+          />
+          <label for="er-f-ex-pr">{{ 'employeeRequests.form.progress' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <textarea pTextarea id="er-f-ex-notes" class="w-full" rows="2" [(ngModel)]="newExecNotes"></textarea>
+          <label for="er-f-ex-notes">{{ 'employeeRequests.form.execNotes' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <input pInputText id="er-f-ex-due" type="datetime-local" class="w-full" [(ngModel)]="newExecDue" />
+          <label for="er-f-ex-due">{{ 'employeeRequests.form.dueAt' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            inputId="er-f-ex-resp"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="newExecResponsibleId"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="er-f-ex-resp">{{ 'employeeRequests.form.responsible' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-inline-actions">
+          <p-button
+            [label]="'employeeRequests.form.submitExecution' | translate"
+            icon="pi pi-check"
+            [loading]="submittingExec"
+            (onClick)="submitExecution()"
+          />
+        </div>
+      </div>
+
+      <h3 class="vio-section-title">{{ 'employeeRequests.form.sectionSummaries' | translate }}</h3>
+      <p-table
+        [value]="detail.dailySummaries"
+        styleClass="p-datatable-sm vio-readonly-table"
+        [tableStyle]="{ 'min-width': '100%' }"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>{{ 'employeeRequests.columns.summaryDate' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.summary' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.progress' | translate }}</th>
+            <th>{{ 'employeeRequests.columns.author' | translate }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.summaryDate | date : 'mediumDate' }}</td>
+            <td>{{ row.summary }}</td>
+            <td>{{ row.progressPercent != null ? row.progressPercent + '%' : '—' }}</td>
+            <td>{{ row.createdByName ?? '—' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4">{{ 'employeeRequests.form.emptySummaries' | translate }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <h4 class="vio-subtitle">{{ 'employeeRequests.form.addSummary' | translate }}</h4>
+      <div class="vio-form-grid vio-subform">
+        <p-floatlabel variant="on" class="vio-field">
+          <input pInputText id="er-f-sum-d" type="date" class="w-full" [(ngModel)]="summaryDateStr" />
+          <label for="er-f-sum-d">{{ 'employeeRequests.form.summaryDate' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-inputNumber
+            inputId="er-f-sum-pr"
+            styleClass="w-full"
+            [(ngModel)]="newSummaryProgress"
+            [min]="0"
+            [max]="100"
+          />
+          <label for="er-f-sum-pr">{{ 'employeeRequests.form.progressOptional' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <textarea pTextarea id="er-f-sum-t" class="w-full" rows="3" [(ngModel)]="newSummaryText"></textarea>
+          <label for="er-f-sum-t">{{ 'employeeRequests.form.summaryText' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            inputId="er-f-sum-auth"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="newSummaryAuthorId"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label for="er-f-sum-auth">{{ 'employeeRequests.form.summaryAuthor' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-field vio-field-span2 flex align-items-center gap-2">
+          <p-checkbox [(ngModel)]="newSummaryFinal" [binary]="true" inputId="er-f-sum-final" />
+          <label for="er-f-sum-final" class="m-0">{{ 'employeeRequests.form.summaryFinal' | translate }}</label>
+        </div>
+        <div class="vio-inline-actions">
+          <p-button
+            [label]="'employeeRequests.form.submitSummary' | translate"
+            icon="pi pi-save"
+            [loading]="submittingSummary"
+            (onClick)="submitSummary()"
+          />
+        </div>
+      </div>
+    </ng-container>
+
+    <div class="vio-actions">
+      <p-button
+        *ngIf="canSubmit"
+        [label]="'employeeRequests.form.save' | translate"
+        icon="pi pi-save"
+        [loading]="saving"
+        (onClick)="save()"
+      />
+      <p-button
+        *ngIf="embedded"
+        [label]="'employeeRequests.actions.cancel' | translate"
+        [outlined]="true"
+        (onClick)="cancel()"
+      />
+    </div>
+  </div>
+</div>
