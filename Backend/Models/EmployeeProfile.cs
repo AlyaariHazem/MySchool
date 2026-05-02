@@ -145,4 +145,16 @@ public class EmployeeProfile
     public ICollection<Suggestion> SuggestionsAssignedTo { get; set; } = new List<Suggestion>();
 
     public ICollection<ConcernActionLog> ConcernActionLogsAsActor { get; set; } = new List<ConcernActionLog>();
+
+    public ICollection<Meeting> MeetingsOrganized { get; set; } = new List<Meeting>();
+
+    public ICollection<MeetingAttendee> MeetingAttendances { get; set; } = new List<MeetingAttendee>();
+
+    public ICollection<MeetingMinutes> MeetingMinutesRecorded { get; set; } = new List<MeetingMinutes>();
+
+    public ICollection<MeetingMinutes> MeetingMinutesApproved { get; set; } = new List<MeetingMinutes>();
+
+    public ICollection<MeetingTask> MeetingTasksAssigned { get; set; } = new List<MeetingTask>();
+
+    public ICollection<MeetingTaskFollowUp> MeetingTaskFollowUpsAuthored { get; set; } = new List<MeetingTaskFollowUp>();
 }

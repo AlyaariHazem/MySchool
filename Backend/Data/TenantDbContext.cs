@@ -123,6 +123,12 @@ namespace Backend.Data
 
         public DbSet<ConcernActionLog> ConcernActionLogs { get; set; }
 
+        public DbSet<Meeting> Meetings { get; set; }
+        public DbSet<MeetingAttendee> MeetingAttendees { get; set; }
+        public DbSet<MeetingMinutes> MeetingMinutes { get; set; }
+        public DbSet<MeetingTask> MeetingTasks { get; set; }
+        public DbSet<MeetingTaskFollowUp> MeetingTaskFollowUps { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -1876,6 +1882,133 @@ namespace Backend.Data
                 .HasOne(x => x.ActorEmployeeProfile)
                 .WithMany(p => p.ConcernActionLogsAsActor)
                 .HasForeignKey(x => x.ActorEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Meetings ---
+            modelBuilder.Entity<Meeting>()
+                .ToTable("StaffMeetings");
+            modelBuilder.Entity<Meeting>()
+                .HasKey(x => x.MeetingID);
+            modelBuilder.Entity<Meeting>()
+                .Property(x => x.MeetingID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<Meeting>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<Meeting>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.Status });
+            modelBuilder.Entity<Meeting>()
+                .HasIndex(x => new { x.SchoolID, x.StartAtUtc });
+            modelBuilder.Entity<Meeting>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Meeting>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Meeting>()
+                .HasOne(x => x.OrganizerEmployeeProfile)
+                .WithMany(p => p.MeetingsOrganized)
+                .HasForeignKey(x => x.OrganizerEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MeetingAttendee>()
+                .ToTable("StaffMeetingAttendees");
+            modelBuilder.Entity<MeetingAttendee>()
+                .HasKey(x => x.MeetingAttendeeID);
+            modelBuilder.Entity<MeetingAttendee>()
+                .Property(x => x.MeetingAttendeeID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<MeetingAttendee>()
+                .Property(x => x.Role)
+                .HasConversion<int>();
+            modelBuilder.Entity<MeetingAttendee>()
+                .Property(x => x.Response)
+                .HasConversion<int>();
+            modelBuilder.Entity<MeetingAttendee>()
+                .HasIndex(x => new { x.MeetingID, x.EmployeeProfileID })
+                .IsUnique();
+            modelBuilder.Entity<MeetingAttendee>()
+                .HasOne(x => x.Meeting)
+                .WithMany(m => m.Attendees)
+                .HasForeignKey(x => x.MeetingID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<MeetingAttendee>()
+                .HasOne(x => x.EmployeeProfile)
+                .WithMany(p => p.MeetingAttendances)
+                .HasForeignKey(x => x.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MeetingMinutes>()
+                .ToTable("StaffMeetingMinutes");
+            modelBuilder.Entity<MeetingMinutes>()
+                .HasKey(x => x.MeetingMinutesID);
+            modelBuilder.Entity<MeetingMinutes>()
+                .Property(x => x.MeetingMinutesID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<MeetingMinutes>()
+                .HasIndex(x => x.MeetingID)
+                .IsUnique();
+            modelBuilder.Entity<MeetingMinutes>()
+                .HasOne(x => x.Meeting)
+                .WithOne(m => m.Minutes)
+                .HasForeignKey<MeetingMinutes>(x => x.MeetingID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<MeetingMinutes>()
+                .HasOne(x => x.RecordedByEmployeeProfile)
+                .WithMany(p => p.MeetingMinutesRecorded)
+                .HasForeignKey(x => x.RecordedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<MeetingMinutes>()
+                .HasOne(x => x.ApprovedByEmployeeProfile)
+                .WithMany(p => p.MeetingMinutesApproved)
+                .HasForeignKey(x => x.ApprovedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MeetingTask>()
+                .ToTable("StaffMeetingTasks");
+            modelBuilder.Entity<MeetingTask>()
+                .HasKey(x => x.MeetingTaskID);
+            modelBuilder.Entity<MeetingTask>()
+                .Property(x => x.MeetingTaskID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<MeetingTask>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<MeetingTask>()
+                .HasIndex(x => new { x.MeetingID, x.SortOrder });
+            modelBuilder.Entity<MeetingTask>()
+                .HasOne(x => x.Meeting)
+                .WithMany(m => m.Tasks)
+                .HasForeignKey(x => x.MeetingID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<MeetingTask>()
+                .HasOne(x => x.AssignedToEmployeeProfile)
+                .WithMany(p => p.MeetingTasksAssigned)
+                .HasForeignKey(x => x.AssignedToEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MeetingTaskFollowUp>()
+                .ToTable("StaffMeetingTaskFollowUps");
+            modelBuilder.Entity<MeetingTaskFollowUp>()
+                .HasKey(x => x.MeetingTaskFollowUpID);
+            modelBuilder.Entity<MeetingTaskFollowUp>()
+                .Property(x => x.MeetingTaskFollowUpID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<MeetingTaskFollowUp>()
+                .HasIndex(x => new { x.MeetingTaskID, x.CreatedAtUtc });
+            modelBuilder.Entity<MeetingTaskFollowUp>()
+                .HasOne(x => x.MeetingTask)
+                .WithMany(t => t.FollowUps)
+                .HasForeignKey(x => x.MeetingTaskID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<MeetingTaskFollowUp>()
+                .HasOne(x => x.AuthorEmployeeProfile)
+                .WithMany(p => p.MeetingTaskFollowUpsAuthored)
+                .HasForeignKey(x => x.AuthorEmployeeProfileID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- Achievements: catalog, requests, approvals, attachments, points ledger ---
