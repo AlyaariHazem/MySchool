@@ -98,6 +98,7 @@ public class UnitOfWork : IUnitOfWork
         EmployeeRequests = new EmployeeRequestRepository(_tenantContext);
         Concerns = new ConcernRepository(_tenantContext);
         Meetings = new MeetingRepository(_tenantContext);
+        Activities = new ActivityRepository(_tenantContext);
 
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
@@ -145,6 +146,7 @@ public class UnitOfWork : IUnitOfWork
     public IEmployeeRequestRepository EmployeeRequests { get; private set; }
     public IConcernRepository Concerns { get; private set; }
     public IMeetingRepository Meetings { get; private set; }
+    public IActivityRepository Activities { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

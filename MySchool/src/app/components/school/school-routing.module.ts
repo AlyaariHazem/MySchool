@@ -440,6 +440,13 @@ const routes: Routes = [
         canMatch: [permissionGuard],
       },
       {
+        path: 'activities',
+        loadComponent: () =>
+          import('./activities/activities-list.component').then((m) => m.ActivitiesListComponent),
+        data: { breadcrumb: 'الأنشطة', permission: PagePermission.Employees.View },
+        canMatch: [permissionGuard],
+      },
+      {
         path: 'teacher-feedback',
         data: { breadcrumb: 'تقييم المعلم' },
         children: [

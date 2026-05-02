@@ -1,0 +1,345 @@
+<div class="vio-form-page" *ngIf="!loading || isEdit">
+  <div *ngIf="!loading" class="vio-form-card">
+    <h3 class="vio-section-title">{{ 'activities.form.sectionMain' | translate }}</h3>
+    <div class="vio-form-grid">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="act-f-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [disabled]="isEdit"
+          (ngModelChange)="onSchoolChange()"
+        />
+        <label for="act-f-school">{{ 'activities.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="act-f-employee"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="employeeOptions"
+          [(ngModel)]="employeeProfileID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="act-f-employee">{{ 'activities.form.employee' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="act-f-status"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="requestStatusOptions"
+          [(ngModel)]="status"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="act-f-status">{{ 'activities.form.status' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <input pInputText id="act-f-title" class="w-full" [(ngModel)]="title" autocomplete="off" />
+        <label for="act-f-title">{{ 'activities.form.title' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="act-f-details" class="w-full" [(ngModel)]="details" rows="3"></textarea>
+        <label for="act-f-details">{{ 'activities.form.details' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <h3 class="vio-section-title act-mt-section">{{ 'activities.form.sectionApprovals' | translate }}</h3>
+    <div class="act-toolbar">
+      <p-button [label]="'activities.form.addApproval' | translate" icon="pi pi-plus" [outlined]="true" (onClick)="addApprovalRow()" />
+    </div>
+    <div *ngFor="let row of approvalRows; let i = index" class="mt-attendee-card act-child-card">
+      <div class="vio-form-grid mt-attendee-grid">
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            [inputId]="'act-appr-emp-' + i"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="row.approverEmployeeProfileID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label [for]="'act-appr-emp-' + i">{{ 'activities.form.approver' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            [inputId]="'act-appr-dec-' + i"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="approvalDecisionOptions"
+            [(ngModel)]="row.decision"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label [for]="'act-appr-dec-' + i">{{ 'activities.form.decision' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <input pInputText [id]="'act-appr-cmt-' + i" class="w-full" [(ngModel)]="row.comment" autocomplete="off" />
+          <label [for]="'act-appr-cmt-' + i">{{ 'activities.form.comment' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field mt-dt-field">
+          <p-datepicker
+            [inputId]="'act-appr-decided-' + i"
+            [(ngModel)]="row.decidedAt"
+            [showIcon]="true"
+            iconDisplay="button"
+            [showTime]="true"
+            hourFormat="24"
+            [showSeconds]="false"
+            dateFormat="dd/mm/yy"
+            [appendTo]="activityDatePickerAppendTo"
+            panelStyleClass="mt-dt-panel"
+            [fluid]="true"
+            styleClass="w-full"
+            [showButtonBar]="true"
+            [showClear]="true"
+            [stepMinute]="1"
+            [numberOfMonths]="1"
+            [hideOnDateTimeSelect]="false"
+            timeSeparator=":"
+          />
+          <label [for]="'act-appr-decided-' + i">{{ 'activities.form.decidedAt' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-field mt-row-actions">
+          <p-button
+            type="button"
+            icon="pi pi-trash"
+            [text]="true"
+            [rounded]="true"
+            severity="danger"
+            (onClick)="removeApprovalRow(i)"
+            [attr.aria-label]="'activities.form.removeApproval' | translate"
+          />
+        </div>
+      </div>
+    </div>
+
+    <h3 class="vio-section-title act-mt-section">{{ 'activities.form.sectionExecutions' | translate }}</h3>
+    <div class="act-toolbar">
+      <p-button [label]="'activities.form.addExecution' | translate" icon="pi pi-plus" [outlined]="true" (onClick)="addExecutionRow()" />
+    </div>
+    <div *ngFor="let row of executionRows; let i = index" class="mt-task-card act-child-card">
+      <div class="vio-form-grid">
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            [inputId]="'act-ex-st-' + i"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="executionStatusOptions"
+            [(ngModel)]="row.status"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label [for]="'act-ex-st-' + i">{{ 'activities.form.executionStatus' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-inputNumber
+            [inputId]="'act-ex-pct-' + i"
+            [(ngModel)]="row.progressPercent"
+            [min]="0"
+            [max]="100"
+            [useGrouping]="false"
+            styleClass="w-full"
+          />
+          <label [for]="'act-ex-pct-' + i">{{ 'activities.form.progressPercent' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <p-select
+            [inputId]="'act-ex-resp-' + i"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="row.responsibleEmployeeProfileID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label [for]="'act-ex-resp-' + i">{{ 'activities.form.responsible' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <textarea pTextarea [id]="'act-ex-notes-' + i" class="w-full" [(ngModel)]="row.notes" rows="2"></textarea>
+          <label [for]="'act-ex-notes-' + i">{{ 'activities.form.notes' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field mt-dt-field">
+          <p-datepicker
+            [inputId]="'act-ex-due-' + i"
+            [(ngModel)]="row.dueAt"
+            [showIcon]="true"
+            iconDisplay="button"
+            [showTime]="true"
+            hourFormat="24"
+            [showSeconds]="false"
+            dateFormat="dd/mm/yy"
+            [appendTo]="activityDatePickerAppendTo"
+            panelStyleClass="mt-dt-panel"
+            [fluid]="true"
+            styleClass="w-full"
+            [showButtonBar]="true"
+            [showClear]="true"
+            [stepMinute]="1"
+            [numberOfMonths]="1"
+            [hideOnDateTimeSelect]="false"
+            timeSeparator=":"
+          />
+          <label [for]="'act-ex-due-' + i">{{ 'activities.form.dueAt' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field mt-dt-field">
+          <p-datepicker
+            [inputId]="'act-ex-exec-' + i"
+            [(ngModel)]="row.executedAt"
+            [showIcon]="true"
+            iconDisplay="button"
+            [showTime]="true"
+            hourFormat="24"
+            [showSeconds]="false"
+            dateFormat="dd/mm/yy"
+            [appendTo]="activityDatePickerAppendTo"
+            panelStyleClass="mt-dt-panel"
+            [fluid]="true"
+            styleClass="w-full"
+            [showButtonBar]="true"
+            [showClear]="true"
+            [stepMinute]="1"
+            [numberOfMonths]="1"
+            [hideOnDateTimeSelect]="false"
+            timeSeparator=":"
+          />
+          <label [for]="'act-ex-exec-' + i">{{ 'activities.form.executedAt' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-field mt-row-actions">
+          <p-button
+            type="button"
+            icon="pi pi-trash"
+            [text]="true"
+            [rounded]="true"
+            severity="danger"
+            (onClick)="removeExecutionRow(i)"
+            [attr.aria-label]="'activities.form.removeExecution' | translate"
+          />
+        </div>
+      </div>
+    </div>
+
+    <h3 class="vio-section-title act-mt-section">{{ 'activities.form.sectionEvaluations' | translate }}</h3>
+    <div class="act-toolbar">
+      <p-button [label]="'activities.form.addEvaluation' | translate" icon="pi pi-plus" [outlined]="true" (onClick)="addEvaluationRow()" />
+    </div>
+    <div *ngFor="let row of evaluationRows; let i = index" class="mt-attendee-card act-child-card">
+      <div class="vio-form-grid mt-attendee-grid">
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            [inputId]="'act-ev-emp-' + i"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="row.evaluatorEmployeeProfileID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label [for]="'act-ev-emp-' + i">{{ 'activities.form.evaluator' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            [inputId]="'act-ev-score-' + i"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="scoreOptions"
+            [(ngModel)]="row.score"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label [for]="'act-ev-score-' + i">{{ 'activities.form.score' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <textarea pTextarea [id]="'act-ev-fb-' + i" class="w-full" [(ngModel)]="row.feedback" rows="2"></textarea>
+          <label [for]="'act-ev-fb-' + i">{{ 'activities.form.feedback' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-field mt-row-actions">
+          <p-button
+            type="button"
+            icon="pi pi-trash"
+            [text]="true"
+            [rounded]="true"
+            severity="danger"
+            (onClick)="removeEvaluationRow(i)"
+            [attr.aria-label]="'activities.form.removeEvaluation' | translate"
+          />
+        </div>
+      </div>
+    </div>
+
+    <h3 class="vio-section-title act-mt-section">{{ 'activities.form.sectionPoints' | translate }}</h3>
+    <div class="act-toolbar">
+      <p-button [label]="'activities.form.addPoints' | translate" icon="pi pi-plus" [outlined]="true" (onClick)="addPointsRow()" />
+    </div>
+    <div *ngFor="let row of pointsRows; let i = index" class="mt-attendee-card act-child-card">
+      <div class="vio-form-grid mt-attendee-grid">
+        <p-floatlabel variant="on" class="vio-field">
+          <p-inputNumber [inputId]="'act-pt-pts-' + i" [(ngModel)]="row.points" [useGrouping]="false" styleClass="w-full" />
+          <label [for]="'act-pt-pts-' + i">{{ 'activities.form.points' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <input pInputText [id]="'act-pt-reason-' + i" class="w-full" [(ngModel)]="row.reason" autocomplete="off" />
+          <label [for]="'act-pt-reason-' + i">{{ 'activities.form.pointsReason' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <p-select
+            [inputId]="'act-pt-by-' + i"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="row.awardedByEmployeeProfileID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label [for]="'act-pt-by-' + i">{{ 'activities.form.awardedBy' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-field mt-row-actions">
+          <p-button
+            type="button"
+            icon="pi pi-trash"
+            [text]="true"
+            [rounded]="true"
+            severity="danger"
+            (onClick)="removePointsRow(i)"
+            [attr.aria-label]="'activities.form.removePoints' | translate"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="vio-form-actions">
+      <p-button [label]="'activities.form.cancel' | translate" severity="secondary" [outlined]="true" (onClick)="cancel()" />
+      <p-button
+        *ngIf="canSubmit"
+        [label]="'activities.form.save' | translate"
+        icon="pi pi-check"
+        (onClick)="save()"
+        [loading]="saving"
+      />
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="vio-form-card muted">{{ 'activities.form.loading' | translate }}</div>
+</div>

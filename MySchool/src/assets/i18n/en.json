@@ -185,6 +185,7 @@
       "complaints": "Complaints",
       "suggestions": "Suggestions",
       "meetings": "Meetings",
+      "activities": "Activities",
       "violations": "Violations",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
@@ -1030,6 +1031,101 @@
     "toast": {
       "created": "Meeting saved.",
       "updated": "Meeting updated."
+    }
+  },
+  "activities": {
+    "listTitle": "Staff activities",
+    "formTitleNew": "New activity request",
+    "formTitleEdit": "Activity request",
+    "list": {
+      "add": "New",
+      "refresh": "Refresh",
+      "applyFilters": "Apply filters",
+      "empty": "No activity requests found.",
+      "noPermission": "You do not have access to this list."
+    },
+    "filter": {
+      "school": "School",
+      "status": "Status"
+    },
+    "columns": {
+      "submitted": "Submitted",
+      "title": "Title",
+      "employee": "Employee",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "inReview": "In review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "approvalDecision": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "skipped": "Skipped"
+    },
+    "executionStatus": {
+      "pending": "Pending",
+      "inProgress": "In progress",
+      "waitingExternal": "Waiting (external)",
+      "completed": "Completed",
+      "blocked": "Blocked",
+      "cancelled": "Cancelled"
+    },
+    "form": {
+      "sectionMain": "Request details",
+      "sectionApprovals": "Approvals",
+      "sectionExecutions": "Execution",
+      "sectionEvaluations": "Evaluations",
+      "sectionPoints": "Points",
+      "employee": "Employee (requester)",
+      "title": "Title",
+      "details": "Details",
+      "status": "Status",
+      "addApproval": "Add approval step",
+      "removeApproval": "Remove approval step",
+      "approver": "Approver",
+      "decision": "Decision",
+      "comment": "Comment",
+      "decidedAt": "Decided at",
+      "addExecution": "Add execution row",
+      "removeExecution": "Remove execution row",
+      "executionStatus": "Execution status",
+      "progressPercent": "Progress %",
+      "responsible": "Responsible (optional)",
+      "notes": "Notes",
+      "dueAt": "Due",
+      "executedAt": "Executed at",
+      "addEvaluation": "Add evaluation",
+      "removeEvaluation": "Remove evaluation",
+      "evaluator": "Evaluator",
+      "score": "Score (1–5)",
+      "feedback": "Feedback",
+      "addPoints": "Add points entry",
+      "removePoints": "Remove points entry",
+      "points": "Points",
+      "pointsReason": "Reason",
+      "awardedBy": "Awarded by",
+      "save": "Save",
+      "cancel": "Cancel",
+      "loading": "Loading…",
+      "validationSchool": "Please select a school.",
+      "validationEmployee": "Please select the employee (requester).",
+      "validationTitle": "Please enter a title."
+    },
+    "actions": {
+      "edit": "Edit"
+    },
+    "toast": {
+      "created": "Activity request saved.",
+      "updated": "Activity request updated."
     }
   },
   "violations": {

@@ -128,6 +128,11 @@
               </a>
             </li>
             <li *ngIf="canViewEmployeesNav">
+              <a routerLink="/school/activities" routerLinkActive="active" (click)="cancel()">
+                <span>{{ 'sidebar.staff_hr.activities' | translate }}</span>
+              </a>
+            </li>
+            <li *ngIf="canViewEmployeesNav">
               <a routerLink="/school/violations" routerLinkActive="active" (click)="cancel()">
                 <span>{{ 'sidebar.staff_hr.violations' | translate }}</span>
               </a>

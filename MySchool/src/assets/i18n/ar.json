@@ -186,6 +186,7 @@
       "complaints": "الشكاوى",
       "suggestions": "المقترحات",
       "meetings": "الاجتماعات",
+      "activities": "الأنشطة",
       "violations": "المخالفات",
       "teacherFeedback": "تقييم المعلمين"
     },
@@ -1031,6 +1032,101 @@
     "toast": {
       "created": "تم حفظ الاجتماع.",
       "updated": "تم تحديث الاجتماع."
+    }
+  },
+  "activities": {
+    "listTitle": "أنشطة الموظفين",
+    "formTitleNew": "طلب نشاط جديد",
+    "formTitleEdit": "طلب نشاط",
+    "list": {
+      "add": "جديد",
+      "refresh": "تحديث",
+      "applyFilters": "تطبيق التصفية",
+      "empty": "لا توجد طلبات أنشطة.",
+      "noPermission": "لا تملك صلاحية عرض هذه القائمة."
+    },
+    "filter": {
+      "school": "المدرسة",
+      "status": "الحالة"
+    },
+    "columns": {
+      "submitted": "تاريخ الإرسال",
+      "title": "العنوان",
+      "employee": "الموظف",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    },
+    "status": {
+      "draft": "مسودة",
+      "submitted": "مُرسل",
+      "inReview": "قيد المراجعة",
+      "approved": "موافق",
+      "rejected": "مرفوض",
+      "inProgress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "approvalDecision": {
+      "pending": "قيد الانتظار",
+      "approved": "موافقة",
+      "rejected": "رفض",
+      "skipped": "تم التخطي"
+    },
+    "executionStatus": {
+      "pending": "قيد الانتظار",
+      "inProgress": "قيد التنفيذ",
+      "waitingExternal": "بانتظار جهة خارجية",
+      "completed": "مكتمل",
+      "blocked": "معطّل",
+      "cancelled": "ملغى"
+    },
+    "form": {
+      "sectionMain": "بيانات الطلب",
+      "sectionApprovals": "الموافقات",
+      "sectionExecutions": "التنفيذ",
+      "sectionEvaluations": "التقييمات",
+      "sectionPoints": "النقاط",
+      "employee": "الموظف (صاحب الطلب)",
+      "title": "العنوان",
+      "details": "التفاصيل",
+      "status": "الحالة",
+      "addApproval": "إضافة خطوة موافقة",
+      "removeApproval": "إزالة خطوة موافقة",
+      "approver": "المعتمد",
+      "decision": "القرار",
+      "comment": "تعليق",
+      "decidedAt": "تاريخ القرار",
+      "addExecution": "إضافة صف تنفيذ",
+      "removeExecution": "إزالة صف تنفيذ",
+      "executionStatus": "حالة التنفيذ",
+      "progressPercent": "نسبة الإنجاز %",
+      "responsible": "المسؤول (اختياري)",
+      "notes": "ملاحظات",
+      "dueAt": "الاستحقاق",
+      "executedAt": "تاريخ التنفيذ",
+      "addEvaluation": "إضافة تقييم",
+      "removeEvaluation": "إزالة تقييم",
+      "evaluator": "المقيّم",
+      "score": "الدرجة (1–5)",
+      "feedback": "الملاحظات",
+      "addPoints": "إضافة سجل نقاط",
+      "removePoints": "إزالة سجل نقاط",
+      "points": "النقاط",
+      "pointsReason": "السبب",
+      "awardedBy": "من قام بالمنح",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "loading": "جاري التحميل…",
+      "validationSchool": "يرجى اختيار المدرسة.",
+      "validationEmployee": "يرجى اختيار الموظف (صاحب الطلب).",
+      "validationTitle": "يرجى إدخال عنوان."
+    },
+    "actions": {
+      "edit": "تعديل"
+    },
+    "toast": {
+      "created": "تم حفظ طلب النشاط.",
+      "updated": "تم تحديث طلب النشاط."
     }
   },
   "violations": {
