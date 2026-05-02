@@ -167,4 +167,12 @@ public class EmployeeProfile
     public ICollection<ActivityEvaluation> ActivityEvaluationsAsEvaluator { get; set; } = new List<ActivityEvaluation>();
 
     public ICollection<ActivityPoints> ActivityPointsAwarded { get; set; } = new List<ActivityPoints>();
+
+    public ICollection<OperationalPlan> OperationalPlansOwned { get; set; } = new List<OperationalPlan>();
+
+    public ICollection<PlanTask> PlanTasksAssigned { get; set; } = new List<PlanTask>();
+
+    public ICollection<PlanProgressUpdate> PlanProgressUpdatesAuthored { get; set; } = new List<PlanProgressUpdate>();
+
+    public ICollection<DepartmentGoal> DepartmentGoalsOwned { get; set; } = new List<DepartmentGoal>();
 }

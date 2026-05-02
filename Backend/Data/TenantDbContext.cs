@@ -135,6 +135,13 @@ namespace Backend.Data
         public DbSet<ActivityEvaluation> ActivityEvaluations { get; set; }
         public DbSet<ActivityPoints> ActivityPoints { get; set; }
 
+        public DbSet<StrategicGoal> StrategicGoals { get; set; }
+        public DbSet<AnnualGoal> AnnualGoals { get; set; }
+        public DbSet<OperationalPlan> OperationalPlans { get; set; }
+        public DbSet<PlanTask> PlanTasks { get; set; }
+        public DbSet<PlanProgressUpdate> PlanProgressUpdates { get; set; }
+        public DbSet<DepartmentGoal> DepartmentGoals { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -2130,6 +2137,165 @@ namespace Backend.Data
                 .HasOne(x => x.AwardedByEmployeeProfile)
                 .WithMany(p => p.ActivityPointsAwarded)
                 .HasForeignKey(x => x.AwardedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Organizational plans & goals (strategic / annual / operational / department) ---
+            modelBuilder.Entity<StrategicGoal>()
+                .ToTable("StaffStrategicGoals");
+            modelBuilder.Entity<StrategicGoal>()
+                .HasKey(x => x.StrategicGoalID);
+            modelBuilder.Entity<StrategicGoal>()
+                .Property(x => x.StrategicGoalID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<StrategicGoal>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<StrategicGoal>()
+                .HasIndex(x => new { x.SchoolID, x.Status });
+            modelBuilder.Entity<StrategicGoal>()
+                .HasIndex(x => new { x.SchoolID, x.SortOrder });
+            modelBuilder.Entity<StrategicGoal>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnnualGoal>()
+                .ToTable("StaffAnnualGoals");
+            modelBuilder.Entity<AnnualGoal>()
+                .HasKey(x => x.AnnualGoalID);
+            modelBuilder.Entity<AnnualGoal>()
+                .Property(x => x.AnnualGoalID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<AnnualGoal>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<AnnualGoal>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.Status });
+            modelBuilder.Entity<AnnualGoal>()
+                .HasIndex(x => new { x.StrategicGoalID, x.SortOrder });
+            modelBuilder.Entity<AnnualGoal>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AnnualGoal>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AnnualGoal>()
+                .HasOne(x => x.StrategicGoal)
+                .WithMany(g => g.AnnualGoals)
+                .HasForeignKey(x => x.StrategicGoalID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OperationalPlan>()
+                .ToTable("StaffOperationalPlans");
+            modelBuilder.Entity<OperationalPlan>()
+                .HasKey(x => x.OperationalPlanID);
+            modelBuilder.Entity<OperationalPlan>()
+                .Property(x => x.OperationalPlanID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<OperationalPlan>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<OperationalPlan>()
+                .HasIndex(x => new { x.AnnualGoalID, x.SortOrder });
+            modelBuilder.Entity<OperationalPlan>()
+                .HasOne(x => x.AnnualGoal)
+                .WithMany(a => a.OperationalPlans)
+                .HasForeignKey(x => x.AnnualGoalID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OperationalPlan>()
+                .HasOne(x => x.OwnerEmployeeProfile)
+                .WithMany(p => p.OperationalPlansOwned)
+                .HasForeignKey(x => x.OwnerEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PlanTask>()
+                .ToTable("StaffPlanTasks");
+            modelBuilder.Entity<PlanTask>()
+                .HasKey(x => x.PlanTaskID);
+            modelBuilder.Entity<PlanTask>()
+                .Property(x => x.PlanTaskID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<PlanTask>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<PlanTask>()
+                .HasIndex(x => new { x.OperationalPlanID, x.DueAtUtc });
+            modelBuilder.Entity<PlanTask>()
+                .HasIndex(x => new { x.OperationalPlanID, x.SortOrder });
+            modelBuilder.Entity<PlanTask>()
+                .HasOne(x => x.OperationalPlan)
+                .WithMany(o => o.Tasks)
+                .HasForeignKey(x => x.OperationalPlanID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PlanTask>()
+                .HasOne(x => x.AssignedToEmployeeProfile)
+                .WithMany(p => p.PlanTasksAssigned)
+                .HasForeignKey(x => x.AssignedToEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PlanProgressUpdate>()
+                .ToTable("StaffPlanProgressUpdates");
+            modelBuilder.Entity<PlanProgressUpdate>()
+                .HasKey(x => x.PlanProgressUpdateID);
+            modelBuilder.Entity<PlanProgressUpdate>()
+                .Property(x => x.PlanProgressUpdateID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<PlanProgressUpdate>()
+                .HasIndex(x => new { x.PlanTaskID, x.CreatedAtUtc });
+            modelBuilder.Entity<PlanProgressUpdate>()
+                .HasOne(x => x.PlanTask)
+                .WithMany(t => t.ProgressUpdates)
+                .HasForeignKey(x => x.PlanTaskID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PlanProgressUpdate>()
+                .HasOne(x => x.AuthorEmployeeProfile)
+                .WithMany(p => p.PlanProgressUpdatesAuthored)
+                .HasForeignKey(x => x.AuthorEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DepartmentGoal>()
+                .ToTable("StaffDepartmentGoals");
+            modelBuilder.Entity<DepartmentGoal>()
+                .HasKey(x => x.DepartmentGoalID);
+            modelBuilder.Entity<DepartmentGoal>()
+                .Property(x => x.DepartmentGoalID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<DepartmentGoal>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<DepartmentGoal>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.Status });
+            modelBuilder.Entity<DepartmentGoal>()
+                .HasIndex(x => new { x.SchoolID, x.DepartmentName });
+            modelBuilder.Entity<DepartmentGoal>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DepartmentGoal>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DepartmentGoal>()
+                .HasOne(x => x.StrategicGoal)
+                .WithMany(g => g.DepartmentGoals)
+                .HasForeignKey(x => x.StrategicGoalID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DepartmentGoal>()
+                .HasOne(x => x.AnnualGoal)
+                .WithMany(a => a.DepartmentGoals)
+                .HasForeignKey(x => x.AnnualGoalID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DepartmentGoal>()
+                .HasOne(x => x.OwnerEmployeeProfile)
+                .WithMany(p => p.DepartmentGoalsOwned)
+                .HasForeignKey(x => x.OwnerEmployeeProfileID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- Achievements: catalog, requests, approvals, attachments, points ledger ---
