@@ -1,0 +1,72 @@
+@import '../../concerns/concern-form/concern-form.component.scss';
+
+.mt-section {
+  margin-top: 1.75rem;
+}
+
+.mt-attendee-toolbar,
+.mt-attendee-card {
+  margin-bottom: 0.75rem;
+}
+
+.mt-attendee-card,
+.mt-task-card {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 10px;
+  background: var(--surface-50, #f8fafc);
+}
+
+.mt-attendee-grid {
+  align-items: end;
+}
+
+.mt-row-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.mt-task-card {
+  margin-bottom: 1rem;
+}
+
+.mt-followups {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--surface-border, #e2e8f0);
+}
+
+.mt-follow-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.mt-fu-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mt-fu-note {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.mt-fu-pct {
+  width: 5rem;
+}
+
+:host ::ng-deep .mt-fu-author {
+  flex: 1 1 10rem;
+  min-width: 0;
+}

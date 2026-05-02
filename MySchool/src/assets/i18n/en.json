@@ -184,6 +184,7 @@
       "employeeRequests": "Employee requests",
       "complaints": "Complaints",
       "suggestions": "Suggestions",
+      "meetings": "Meetings",
       "violations": "Violations",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
@@ -932,6 +933,103 @@
     "toast": {
       "created": "Saved.",
       "updated": "Updated."
+    }
+  },
+  "meetings": {
+    "listTitle": "Meetings",
+    "formTitleNew": "New meeting",
+    "formTitleEdit": "Meeting",
+    "list": {
+      "add": "New",
+      "refresh": "Refresh",
+      "applyFilters": "Apply filters",
+      "empty": "No meetings found.",
+      "noPermission": "You do not have access to this list."
+    },
+    "filter": {
+      "school": "School",
+      "status": "Status"
+    },
+    "columns": {
+      "start": "Start",
+      "title": "Title",
+      "organizer": "Organizer",
+      "attendees": "Attendees",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "attendeeRole": {
+      "required": "Required",
+      "optional": "Optional"
+    },
+    "attendeeResponse": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "tentative": "Tentative"
+    },
+    "taskStatus": {
+      "open": "Open",
+      "inProgress": "In progress",
+      "done": "Done",
+      "cancelled": "Cancelled"
+    },
+    "form": {
+      "sectionMain": "Meeting details",
+      "sectionAttendees": "Attendees",
+      "sectionMinutes": "Minutes",
+      "sectionTasks": "Action items",
+      "organizer": "Organizer",
+      "title": "Title",
+      "description": "Description",
+      "location": "Location / link",
+      "start": "Start",
+      "end": "End (optional)",
+      "status": "Status",
+      "addAttendee": "Add attendee",
+      "removeAttendee": "Remove attendee",
+      "attendee": "Employee",
+      "attendeeRole": "Role",
+      "attendeeResponse": "Response",
+      "attendeeNotes": "Notes",
+      "minutesBody": "Minutes text",
+      "minutesRecordedBy": "Recorded by",
+      "minutesApprovedBy": "Approved by (optional)",
+      "minutesApprovedAt": "Approved at (optional)",
+      "addTask": "Add action item",
+      "taskTitle": "Task title",
+      "taskDetails": "Details",
+      "taskAssignee": "Assignee (optional)",
+      "taskDue": "Due (optional)",
+      "taskStatus": "Task status",
+      "taskSort": "Sort order",
+      "followUps": "Follow-ups",
+      "addFollowUp": "Add follow-up",
+      "followUpNote": "Note",
+      "followUpPct": "%",
+      "followUpAuthor": "Author",
+      "save": "Save",
+      "cancel": "Cancel",
+      "loading": "Loading…",
+      "validationSchool": "Please select a school.",
+      "validationOrganizer": "Please select an organizer.",
+      "validationTitle": "Please enter a title.",
+      "validationStart": "Please set a start date and time.",
+      "validationMinutesRecorder": "Select who recorded the minutes."
+    },
+    "actions": {
+      "edit": "Edit"
+    },
+    "toast": {
+      "created": "Meeting saved.",
+      "updated": "Meeting updated."
     }
   },
   "violations": {

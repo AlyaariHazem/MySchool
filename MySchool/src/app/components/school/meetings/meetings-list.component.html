@@ -1,0 +1,135 @@
+<div class="employees-hr-page cn-list-page" [attr.dir]="dir$ | async">
+  <div class="employees-hr-card cn-list-card">
+    <header class="employees-hr-header cn-list-header">
+      <h2 class="employees-hr-title">{{ 'meetings.listTitle' | translate }}</h2>
+      <div class="header-actions">
+        <p-button
+          *ngIf="canCreate"
+          [label]="'meetings.list.add' | translate"
+          icon="pi pi-plus"
+          (onClick)="openCreateDialog()"
+        />
+        <p-button
+          [label]="'meetings.list.refresh' | translate"
+          icon="pi pi-refresh"
+          [outlined]="true"
+          (onClick)="load()"
+          [loading]="loading"
+        />
+      </div>
+    </header>
+
+    <div class="filters-toolbar filters-grid cn-list-filters" *ngIf="canView">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+        <p-select
+          inputId="mt-filter-school"
+          styleClass="w-full cn-filter-select"
+          panelStyleClass="cn-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="filter.schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="mt-filter-school">{{ 'meetings.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="filter-field">
+        <p-select
+          inputId="mt-filter-status"
+          styleClass="w-full cn-filter-select"
+          panelStyleClass="cn-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="statusOptions"
+          [(ngModel)]="filter.status"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="mt-filter-status">{{ 'meetings.filter.status' | translate }}</label>
+      </p-floatlabel>
+
+      <div class="filter-actions">
+        <p-button [label]="'meetings.list.applyFilters' | translate" icon="pi pi-filter" (onClick)="load()" />
+      </div>
+    </div>
+
+    <div *ngIf="!canView" class="empty-block muted">{{ 'meetings.list.noPermission' | translate }}</div>
+
+    <p-table
+      *ngIf="canView"
+      [value]="rows"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} / {totalRecords}"
+      styleClass="p-datatable-sm employees-hr-table"
+      [rowHover]="true"
+      [tableStyle]="{ 'min-width': '52rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'meetings.columns.start' | translate }}</th>
+          <th>{{ 'meetings.columns.title' | translate }}</th>
+          <th>{{ 'meetings.columns.organizer' | translate }}</th>
+          <th>{{ 'meetings.columns.attendees' | translate }}</th>
+          <th>{{ 'meetings.columns.status' | translate }}</th>
+          <th class="cn-actions-col">{{ 'meetings.columns.actions' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>{{ row.startAtUtc | date : 'short' }}</td>
+          <td>{{ row.title }}</td>
+          <td>{{ row.organizerName }}</td>
+          <td>{{ row.attendeeCount }}</td>
+          <td>{{ statusLabel(row.status) }}</td>
+          <td>
+            <div class="action-btns">
+              <p-button
+                *ngIf="canUpdate"
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                [pTooltip]="'meetings.actions.edit' | translate"
+                (onClick)="openEditDialog(row.meetingID)"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6">{{ 'meetings.list.empty' | translate }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog
+    [header]="(editingRecordId != null && editingRecordId > 0 ? 'meetings.formTitleEdit' : 'meetings.formTitleNew') | translate"
+    [(visible)]="formDialogVisible"
+    [modal]="true"
+    [focusOnShow]="false"
+    [style]="{ width: 'min(64rem, 96vw)' }"
+    [contentStyle]="{ 'max-height': 'min(86vh, 820px)', overflow: 'auto' }"
+    [appendTo]="'body'"
+    [draggable]="false"
+    [resizable]="false"
+    [dismissableMask]="true"
+    styleClass="cn-form-dialog"
+    (onHide)="closeFormDialog()"
+  >
+    <app-meeting-form
+      *ngIf="formDialogVisible"
+      [embedded]="true"
+      [recordIdInput]="editingRecordId"
+      [presetSchoolId]="filter.schoolID ?? null"
+      (closed)="closeFormDialog()"
+      (saved)="onFormSaved()"
+    />
+  </p-dialog>
+</div>

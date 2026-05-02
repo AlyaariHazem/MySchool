@@ -185,6 +185,7 @@
       "employeeRequests": "طلبات الموظفين",
       "complaints": "الشكاوى",
       "suggestions": "المقترحات",
+      "meetings": "الاجتماعات",
       "violations": "المخالفات",
       "teacherFeedback": "تقييم المعلمين"
     },
@@ -933,6 +934,103 @@
     "toast": {
       "created": "تم الحفظ.",
       "updated": "تم التحديث."
+    }
+  },
+  "meetings": {
+    "listTitle": "الاجتماعات",
+    "formTitleNew": "اجتماع جديد",
+    "formTitleEdit": "اجتماع",
+    "list": {
+      "add": "جديد",
+      "refresh": "تحديث",
+      "applyFilters": "تطبيق التصفية",
+      "empty": "لا توجد اجتماعات.",
+      "noPermission": "لا تملك صلاحية عرض هذه القائمة."
+    },
+    "filter": {
+      "school": "المدرسة",
+      "status": "الحالة"
+    },
+    "columns": {
+      "start": "البداية",
+      "title": "العنوان",
+      "organizer": "المنظم",
+      "attendees": "الحضور",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    },
+    "status": {
+      "draft": "مسودة",
+      "scheduled": "مجدول",
+      "inProgress": "جاري",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "attendeeRole": {
+      "required": "إلزامي",
+      "optional": "اختياري"
+    },
+    "attendeeResponse": {
+      "pending": "قيد الرد",
+      "accepted": "مقبول",
+      "declined": "مرفوض",
+      "tentative": "مبدئي"
+    },
+    "taskStatus": {
+      "open": "مفتوح",
+      "inProgress": "قيد التنفيذ",
+      "done": "منجز",
+      "cancelled": "ملغى"
+    },
+    "form": {
+      "sectionMain": "بيانات الاجتماع",
+      "sectionAttendees": "الحضور",
+      "sectionMinutes": "المحضر",
+      "sectionTasks": "بنود العمل",
+      "organizer": "المنظم",
+      "title": "العنوان",
+      "description": "الوصف",
+      "location": "المكان / الرابط",
+      "start": "البداية",
+      "end": "النهاية (اختياري)",
+      "status": "الحالة",
+      "addAttendee": "إضافة مدعو",
+      "removeAttendee": "إزالة مدعو",
+      "attendee": "الموظف",
+      "attendeeRole": "الدور",
+      "attendeeResponse": "الرد",
+      "attendeeNotes": "ملاحظات",
+      "minutesBody": "نص المحضر",
+      "minutesRecordedBy": "سجّله",
+      "minutesApprovedBy": "اعتمد بواسطة (اختياري)",
+      "minutesApprovedAt": "تاريخ الاعتماد (اختياري)",
+      "addTask": "إضافة بند عمل",
+      "taskTitle": "عنوان البند",
+      "taskDetails": "التفاصيل",
+      "taskAssignee": "المكلف (اختياري)",
+      "taskDue": "الاستحقاق (اختياري)",
+      "taskStatus": "حالة البند",
+      "taskSort": "ترتيب العرض",
+      "followUps": "متابعات",
+      "addFollowUp": "إضافة متابعة",
+      "followUpNote": "ملاحظة",
+      "followUpPct": "٪",
+      "followUpAuthor": "الكاتب",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "loading": "جاري التحميل…",
+      "validationSchool": "يرجى اختيار المدرسة.",
+      "validationOrganizer": "يرجى اختيار المنظم.",
+      "validationTitle": "يرجى إدخال عنوان.",
+      "validationStart": "يرجى تحديد تاريخ ووقت البداية.",
+      "validationMinutesRecorder": "اختر من سجّل المحضر."
+    },
+    "actions": {
+      "edit": "تعديل"
+    },
+    "toast": {
+      "created": "تم حفظ الاجتماع.",
+      "updated": "تم تحديث الاجتماع."
     }
   },
   "violations": {

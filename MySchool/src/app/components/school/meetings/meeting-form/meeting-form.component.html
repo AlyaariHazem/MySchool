@@ -1,0 +1,255 @@
+<div class="vio-form-page" *ngIf="!loading || isEdit">
+  <div *ngIf="!loading" class="vio-form-card">
+    <h3 class="vio-section-title">{{ 'meetings.form.sectionMain' | translate }}</h3>
+    <div class="vio-form-grid">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="mt-f-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [disabled]="isEdit"
+          (ngModelChange)="onSchoolChange()"
+        />
+        <label for="mt-f-school">{{ 'meetings.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="mt-f-organizer"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="employeeOptions"
+          [(ngModel)]="organizerEmployeeProfileID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="mt-f-organizer">{{ 'meetings.form.organizer' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="mt-f-status"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="statusOptions"
+          [(ngModel)]="status"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="mt-f-status">{{ 'meetings.form.status' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <input pInputText id="mt-f-title" class="w-full" [(ngModel)]="title" autocomplete="off" />
+        <label for="mt-f-title">{{ 'meetings.form.title' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="mt-f-desc" class="w-full" [(ngModel)]="description" rows="3"></textarea>
+        <label for="mt-f-desc">{{ 'meetings.form.description' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <input pInputText id="mt-f-loc" class="w-full" [(ngModel)]="location" autocomplete="off" />
+        <label for="mt-f-loc">{{ 'meetings.form.location' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <input type="datetime-local" id="mt-f-start" class="w-full p-inputtext p-component" [(ngModel)]="startAtLocal" />
+        <label for="mt-f-start">{{ 'meetings.form.start' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="vio-field">
+        <input type="datetime-local" id="mt-f-end" class="w-full p-inputtext p-component" [(ngModel)]="endAtLocal" />
+        <label for="mt-f-end">{{ 'meetings.form.end' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <h3 class="vio-section-title mt-section">{{ 'meetings.form.sectionAttendees' | translate }}</h3>
+    <div class="mt-attendee-toolbar">
+      <p-button [label]="'meetings.form.addAttendee' | translate" icon="pi pi-plus" [outlined]="true" (onClick)="addAttendeeRow()" />
+    </div>
+    <div class="mt-attendee-card" *ngFor="let row of attendeeRows; let i = index">
+      <div class="vio-form-grid mt-attendee-grid">
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            [inputId]="'mt-att-emp-' + i"
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="row.employeeProfileID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label [for]="'mt-att-emp-' + i">{{ 'meetings.form.attendee' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            [inputId]="'mt-att-role-' + i"
+            styleClass="w-full"
+            [options]="attendeeRoleOptions"
+            [(ngModel)]="row.role"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label [for]="'mt-att-role-' + i">{{ 'meetings.form.attendeeRole' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            [inputId]="'mt-att-resp-' + i"
+            styleClass="w-full"
+            [options]="attendeeResponseOptions"
+            [(ngModel)]="row.response"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label [for]="'mt-att-resp-' + i">{{ 'meetings.form.attendeeResponse' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <input pInputText [id]="'mt-att-notes-' + i" class="w-full" [(ngModel)]="row.notes" />
+          <label [for]="'mt-att-notes-' + i">{{ 'meetings.form.attendeeNotes' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-field mt-row-actions">
+          <p-button
+            icon="pi pi-trash"
+            [rounded]="true"
+            [text]="true"
+            severity="danger"
+            (onClick)="removeAttendeeRow(i)"
+            [attr.aria-label]="'meetings.form.removeAttendee' | translate"
+          />
+        </div>
+      </div>
+    </div>
+
+    <h3 class="vio-section-title mt-section">{{ 'meetings.form.sectionMinutes' | translate }}</h3>
+    <div class="vio-form-grid">
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="mt-min-body" class="w-full" [(ngModel)]="minutesBody" rows="6"></textarea>
+        <label for="mt-min-body">{{ 'meetings.form.minutesBody' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="mt-min-rec"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="employeeOptions"
+          [(ngModel)]="minutesRecordedByEmployeeProfileID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="mt-min-rec">{{ 'meetings.form.minutesRecordedBy' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select
+          inputId="mt-min-appr"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="employeeOptions"
+          [(ngModel)]="minutesApprovedByEmployeeProfileID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [filter]="true"
+        />
+        <label for="mt-min-appr">{{ 'meetings.form.minutesApprovedBy' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <input type="datetime-local" id="mt-min-appr-at" class="w-full p-inputtext p-component" [(ngModel)]="minutesApprovedAtLocal" />
+        <label for="mt-min-appr-at">{{ 'meetings.form.minutesApprovedAt' | translate }}</label>
+      </p-floatlabel>
+    </div>
+
+    <h3 class="vio-section-title mt-section">{{ 'meetings.form.sectionTasks' | translate }}</h3>
+    <div class="mt-attendee-toolbar">
+      <p-button [label]="'meetings.form.addTask' | translate" icon="pi pi-plus" [outlined]="true" (onClick)="addTaskRow()" />
+    </div>
+
+    <div class="mt-task-card" *ngFor="let task of taskRows; let ti = index">
+      <div class="vio-form-grid">
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <input pInputText class="w-full" [(ngModel)]="task.title" />
+          <label>{{ 'meetings.form.taskTitle' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <textarea pTextarea class="w-full" [(ngModel)]="task.details" rows="2"></textarea>
+          <label>{{ 'meetings.form.taskDetails' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            styleClass="w-full"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="task.assignedToEmployeeProfileID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+          />
+          <label>{{ 'meetings.form.taskAssignee' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <input type="datetime-local" class="w-full p-inputtext p-component" [(ngModel)]="task.dueAtLocal" />
+          <label>{{ 'meetings.form.taskDue' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <p-select
+            styleClass="w-full"
+            [options]="taskStatusOptions"
+            [(ngModel)]="task.status"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label>{{ 'meetings.form.taskStatus' | translate }}</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on" class="vio-field">
+          <input pInputText type="number" class="w-full" [(ngModel)]="task.sortOrder" />
+          <label>{{ 'meetings.form.taskSort' | translate }}</label>
+        </p-floatlabel>
+        <div class="vio-field mt-row-actions">
+          <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="removeTaskRow(ti)" />
+        </div>
+      </div>
+      <div class="mt-followups">
+        <div class="mt-follow-head">
+          <span>{{ 'meetings.form.followUps' | translate }}</span>
+          <p-button [label]="'meetings.form.addFollowUp' | translate" size="small" [text]="true" (onClick)="addFollowUp(task)" />
+        </div>
+        <div class="mt-fu-row" *ngFor="let fu of task.followUps; let fi = index">
+          <input pInputText class="mt-fu-note" [(ngModel)]="fu.note" [placeholder]="'meetings.form.followUpNote' | translate" />
+          <input pInputText type="number" class="mt-fu-pct" [(ngModel)]="fu.progressPercent" [placeholder]="'meetings.form.followUpPct' | translate" />
+          <p-select
+            styleClass="mt-fu-author"
+            [panelStyle]="filterSelectPanelStyle"
+            [options]="employeeOptions"
+            [(ngModel)]="fu.authorEmployeeProfileID"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            [filter]="true"
+            [placeholder]="'meetings.form.followUpAuthor' | translate"
+          />
+          <p-button icon="pi pi-times" [rounded]="true" [text]="true" (onClick)="removeFollowUp(task, fi)" />
+        </div>
+      </div>
+    </div>
+
+    <div class="vio-actions">
+      <p-button [label]="'meetings.form.save' | translate" icon="pi pi-check" (onClick)="save()" [loading]="saving" [disabled]="!canSubmit" />
+      <p-button [label]="'meetings.form.cancel' | translate" icon="pi pi-times" [outlined]="true" (onClick)="cancel()" [disabled]="saving" />
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="vio-form-card muted">{{ 'meetings.form.loading' | translate }}</div>
+</div>

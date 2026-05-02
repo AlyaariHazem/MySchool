@@ -433,6 +433,13 @@ const routes: Routes = [
         ],
       },
       {
+        path: 'meetings',
+        loadComponent: () =>
+          import('./meetings/meetings-list.component').then((m) => m.MeetingsListComponent),
+        data: { breadcrumb: 'الاجتماعات', permission: PagePermission.Employees.View },
+        canMatch: [permissionGuard],
+      },
+      {
         path: 'teacher-feedback',
         data: { breadcrumb: 'تقييم المعلم' },
         children: [
