@@ -1,5 +1,35 @@
 @import '../meetings/meetings-list.component.scss';
 
+/*
+ * Dialog markup uses the same class names as meeting/concern forms, but this page's
+ * template is not inside those components — without these rules, vio-form-grid does
+ * nothing and every field stacks in one column.
+ */
+.vio-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1rem;
+  align-items: end;
+}
+
+.vio-field-span2 {
+  grid-column: 1 / -1;
+}
+
+.vio-field {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .vio-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vio-field-span2 {
+    grid-column: 1;
+  }
+}
+
 .org-plans-tabs {
   margin-top: 0.5rem;
   width: 100%;
@@ -17,4 +47,36 @@
 
 :host ::ng-deep .org-plans-tabs .p-tablist-tab-list {
   width: 100%;
+}
+
+:host ::ng-deep .org-plans-page .p-dialog .p-dialog-header {
+  padding-bottom: 0.5rem;
+}
+
+.org-dialog-form {
+  padding-top: 0.25rem;
+}
+
+:host ::ng-deep .org-dialog-form .p-floatlabel,
+:host ::ng-deep .org-dialog-form .p-select,
+:host ::ng-deep .org-dialog-form .p-inputtext,
+:host ::ng-deep .org-dialog-form textarea,
+:host ::ng-deep .org-dialog-form .p-inputnumber {
+  width: 100%;
+}
+
+:host ::ng-deep .org-dialog-form textarea {
+  min-height: 5.5rem;
+}
+
+.org-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+[dir='rtl'] .org-dialog-footer {
+  justify-content: flex-start;
 }

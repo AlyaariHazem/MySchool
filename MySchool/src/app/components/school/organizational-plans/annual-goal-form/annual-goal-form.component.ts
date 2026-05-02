@@ -16,9 +16,7 @@ import { of } from 'rxjs';
 import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
 import { PagePermission, PermissionService } from 'app/core/services/permission.service';
 import { SchoolService } from 'app/core/services/school.service';
-import { YearService } from 'app/core/services/year.service';
 import { School } from 'app/core/models/school.modul';
-import { Year } from 'app/core/models/year.model';
 import { ShardModule } from 'app/shared/shard.module';
 
 import { EmployeeProfileOptionDto, EmployeeProfilePageRequestDto } from '../../employees-hr/employees-hr.models';
@@ -90,7 +88,6 @@ export class AnnualGoalFormComponent implements OnInit {
   private readonly svc = inject(OrganizationalPlansService);
   private readonly employeesHr = inject(EmployeesHrService);
   private readonly schoolService = inject(SchoolService);
-  private readonly yearService = inject(YearService);
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
   private readonly perm = inject(PermissionService);
@@ -106,7 +103,6 @@ export class AnnualGoalFormComponent implements OnInit {
   recordId: number | null = null;
 
   schoolID: number | null = null;
-  academicYearID: number | null = null;
   strategicGoalID: number | null = null;
   title = '';
   details = '';
@@ -114,7 +110,6 @@ export class AnnualGoalFormComponent implements OnInit {
   sortOrder = 0;
 
   schoolOptions: { label: string; value: number }[] = [];
-  yearOptions: { label: string; value: number }[] = [];
   strategicOptions: { label: string; value: number }[] = [];
   employeeOptions: { label: string; value: number }[] = [];
   annualStatusOptions: { label: string; value: number }[] = [];
@@ -182,7 +177,7 @@ export class AnnualGoalFormComponent implements OnInit {
     if (this.recordId) {
       this.loadRecord();
     } else {
-      this.onSchoolOrYearChange();
+      this.onSchoolChange();
       this.addPlanRow();
     }
   }
@@ -196,34 +191,8 @@ export class AnnualGoalFormComponent implements OnInit {
   }
 
   onSchoolChange(): void {
-    this.loadYears();
     this.loadStrategicOptions();
     this.loadEmployees();
-  }
-
-  onSchoolOrYearChange(): void {
-    this.loadYears();
-    this.loadStrategicOptions();
-    this.loadEmployees();
-  }
-
-  private loadYears(): void {
-    const sid = this.schoolID;
-    if (sid == null || sid <= 0) {
-      this.yearOptions = [];
-      return;
-    }
-    this.yearService.getAllYears().subscribe({
-      next: (years: Year[]) => {
-        this.yearOptions = (years ?? [])
-          .filter((y) => y.schoolID === sid && y.yearID > 0)
-          .map((y) => ({
-            label: `${y.yearID}${y.active ? ' *' : ''}`,
-            value: y.yearID,
-          }));
-      },
-      error: () => (this.yearOptions = []),
-    });
   }
 
   private loadStrategicOptions(): void {
@@ -292,7 +261,6 @@ export class AnnualGoalFormComponent implements OnInit {
       .subscribe((d) => {
         if (!d) return;
         this.schoolID = d.schoolID;
-        this.academicYearID = d.academicYearID;
         this.strategicGoalID = d.strategicGoalID ?? null;
         this.title = d.title;
         this.details = d.details ?? '';
@@ -322,7 +290,7 @@ export class AnnualGoalFormComponent implements OnInit {
           })),
         }));
         if (this.planRows.length === 0) this.addPlanRow();
-        this.onSchoolOrYearChange();
+        this.onSchoolChange();
       });
   }
 
@@ -381,11 +349,6 @@ export class AnnualGoalFormComponent implements OnInit {
       this.toastr.warning(this.translate.instant('orgPlans.form.validationSchool'));
       return null;
     }
-    const yid = this.academicYearID;
-    if (yid == null || yid <= 0) {
-      this.toastr.warning(this.translate.instant('orgPlans.form.validationYear'));
-      return null;
-    }
     if (!this.title.trim()) {
       this.toastr.warning(this.translate.instant('orgPlans.form.validationTitle'));
       return null;
@@ -423,7 +386,6 @@ export class AnnualGoalFormComponent implements OnInit {
 
     return {
       schoolID: sid,
-      academicYearID: yid,
       strategicGoalID: this.strategicGoalID,
       title: this.title.trim(),
       details: this.details.trim() || null,

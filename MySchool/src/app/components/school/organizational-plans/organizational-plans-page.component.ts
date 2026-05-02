@@ -21,9 +21,7 @@ import { of } from 'rxjs';
 import { isSchoolManagerUser } from 'app/core/utils/school-role.util';
 import { PagePermission, PermissionService } from 'app/core/services/permission.service';
 import { SchoolService } from 'app/core/services/school.service';
-import { YearService } from 'app/core/services/year.service';
 import { School } from 'app/core/models/school.modul';
-import { Year } from 'app/core/models/year.model';
 import { selectLanguage } from 'app/core/store/language/language.selectors';
 import { ShardModule } from 'app/shared/shard.module';
 
@@ -76,7 +74,6 @@ import { OrganizationalPlansService, readOrganizationalPlanHttpError } from './o
 export class OrganizationalPlansPageComponent implements OnInit {
   private readonly svc = inject(OrganizationalPlansService);
   private readonly schoolService = inject(SchoolService);
-  private readonly yearService = inject(YearService);
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
   private readonly perm = inject(PermissionService);
@@ -111,9 +108,6 @@ export class OrganizationalPlansPageComponent implements OnInit {
 
   // --- Shared options ---
   schoolOptions: { label: string; value: number }[] = [];
-  yearOptionsAnnual: { label: string; value: number }[] = [];
-  yearOptionsDept: { label: string; value: number }[] = [];
-  yearOptionsDeptDialog: { label: string; value: number }[] = [];
   strategicOptionsForDept: { label: string; value: number }[] = [];
   annualOptionsForDept: { label: string; value: number }[] = [];
   employeeOptionsDept: { label: string; value: number }[] = [];
@@ -203,8 +197,6 @@ export class OrganizationalPlansPageComponent implements OnInit {
         this.stratFilter.schoolID = n;
         this.annualFilter.schoolID = n;
         this.deptFilter.schoolID = n;
-        this.loadYearOptionsAnnual(n);
-        this.loadYearOptionsDeptFilter(n);
       }
     }
 
@@ -215,57 +207,11 @@ export class OrganizationalPlansPageComponent implements OnInit {
     }
   }
 
-  private mapYearsForSchool(years: Year[] | null | undefined, schoolId: number): { label: string; value: number }[] {
-    return (years ?? [])
-      .filter((y) => y.schoolID === schoolId && y.yearID > 0)
-      .map((y) => ({
-        label: `${y.yearID}${y.active ? ' *' : ''}`,
-        value: y.yearID,
-      }));
-  }
-
-  private loadYearOptionsAnnual(schoolId: number | null): void {
-    if (schoolId == null || schoolId <= 0) {
-      this.yearOptionsAnnual = [];
-      return;
-    }
-    const sid = schoolId;
-    this.yearService.getAllYears().subscribe({
-      next: (years) => (this.yearOptionsAnnual = this.mapYearsForSchool(years, sid)),
-      error: () => (this.yearOptionsAnnual = []),
-    });
-  }
-
-  private loadYearOptionsDeptFilter(schoolId: number | null): void {
-    if (schoolId == null || schoolId <= 0) {
-      this.yearOptionsDept = [];
-      return;
-    }
-    const sid = schoolId;
-    this.yearService.getAllYears().subscribe({
-      next: (years) => (this.yearOptionsDept = this.mapYearsForSchool(years, sid)),
-      error: () => (this.yearOptionsDept = []),
-    });
-  }
-
-  private loadYearOptionsDeptDialog(schoolId: number | null): void {
-    if (schoolId == null || schoolId <= 0) {
-      this.yearOptionsDeptDialog = [];
-      return;
-    }
-    const sid = schoolId;
-    this.yearService.getAllYears().subscribe({
-      next: (years) => (this.yearOptionsDeptDialog = this.mapYearsForSchool(years, sid)),
-      error: () => (this.yearOptionsDeptDialog = []),
-    });
-  }
-
   onAnnualFilterSchoolChange(): void {
-    this.loadYearOptionsAnnual(this.annualFilter.schoolID ?? null);
+    // no-op: year is always active year from backend
   }
 
   onDeptFilterSchoolChange(): void {
-    this.loadYearOptionsDeptFilter(this.deptFilter.schoolID ?? null);
     this.refreshDeptLinkOptions(this.deptFilter.schoolID ?? null);
   }
 
@@ -465,7 +411,7 @@ export class OrganizationalPlansPageComponent implements OnInit {
   openDeptCreate(): void {
     this.deptEditId = null;
     this.deptSchoolId = this.deptFilter.schoolID ?? this.getManagerSchoolFromStorage();
-    this.deptYearId = this.deptFilter.academicYearID ?? null;
+    this.deptYearId = null;
     this.deptStrategicId = null;
     this.deptAnnualId = null;
     this.deptName = '';
@@ -475,7 +421,6 @@ export class OrganizationalPlansPageComponent implements OnInit {
     this.deptSort = 0;
     this.deptOwnerId = null;
     this.refreshDeptLinkOptions(this.deptSchoolId);
-    this.loadYearOptionsDeptDialog(this.deptSchoolId);
     this.loadDeptEmployees();
     this.deptDialogVisible = true;
   }
@@ -485,7 +430,7 @@ export class OrganizationalPlansPageComponent implements OnInit {
     this.svc.getDepartmentGoal(id).subscribe({
       next: (d: DepartmentGoalDetailDto) => {
         this.deptSchoolId = d.schoolID;
-        this.deptYearId = d.academicYearID ?? null;
+        this.deptYearId = null;
         this.deptStrategicId = d.strategicGoalID ?? null;
         this.deptAnnualId = d.annualGoalID ?? null;
         this.deptName = d.departmentName;
@@ -495,7 +440,6 @@ export class OrganizationalPlansPageComponent implements OnInit {
         this.deptSort = d.sortOrder;
         this.deptOwnerId = d.ownerEmployeeProfileID ?? null;
         this.refreshDeptLinkOptions(d.schoolID);
-        this.loadYearOptionsDeptDialog(d.schoolID);
         this.loadDeptEmployees();
         this.deptDialogVisible = true;
       },
@@ -504,7 +448,6 @@ export class OrganizationalPlansPageComponent implements OnInit {
   }
 
   onDeptDialogSchoolChange(): void {
-    this.loadYearOptionsDeptDialog(this.deptSchoolId);
     this.refreshDeptLinkOptions(this.deptSchoolId);
     this.loadDeptEmployees();
   }
@@ -554,7 +497,6 @@ export class OrganizationalPlansPageComponent implements OnInit {
     }
     const dto: DepartmentGoalWriteDto = {
       schoolID: sid,
-      academicYearID: this.deptYearId,
       strategicGoalID: this.deptStrategicId,
       annualGoalID: this.deptAnnualId,
       departmentName: this.deptName.trim(),

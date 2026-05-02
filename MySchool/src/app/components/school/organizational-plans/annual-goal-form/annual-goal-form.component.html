@@ -20,22 +20,6 @@
 
       <p-floatlabel variant="on" class="vio-field">
         <p-select
-          inputId="ag-year"
-          styleClass="w-full"
-          [panelStyle]="filterSelectPanelStyle"
-          [options]="yearOptions"
-          [(ngModel)]="academicYearID"
-          optionLabel="label"
-          optionValue="value"
-          [showClear]="true"
-          [filter]="true"
-          (ngModelChange)="onSchoolOrYearChange()"
-        />
-        <label for="ag-year">{{ 'orgPlans.form.academicYear' | translate }}</label>
-      </p-floatlabel>
-
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
-        <p-select
           inputId="ag-strategic"
           styleClass="w-full"
           [panelStyle]="filterSelectPanelStyle"
@@ -67,7 +51,7 @@
         <label for="ag-sort">{{ 'orgPlans.form.sortOrder' | translate }}</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+      <p-floatlabel variant="on" class="vio-field">
         <input pInputText id="ag-title" class="w-full" [(ngModel)]="title" autocomplete="off" />
         <label for="ag-title">{{ 'orgPlans.form.title' | translate }}</label>
       </p-floatlabel>
@@ -96,7 +80,7 @@
         />
       </div>
       <div class="vio-form-grid">
-        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <p-floatlabel variant="on" class="vio-field">
           <input pInputText [id]="'ag-p-title-' + pi" class="w-full" [(ngModel)]="plan.title" autocomplete="off" />
           <label [for]="'ag-p-title-' + pi">{{ 'orgPlans.form.title' | translate }}</label>
         </p-floatlabel>
@@ -166,7 +150,7 @@
           />
           <label [for]="'ag-p-end-' + pi">{{ 'orgPlans.form.end' | translate }}</label>
         </p-floatlabel>
-        <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <p-floatlabel variant="on" class="vio-field">
           <p-select
             [inputId]="'ag-p-own-' + pi"
             styleClass="w-full"
@@ -193,7 +177,7 @@
           <p-button icon="pi pi-trash" [text]="true" severity="danger" type="button" (onClick)="removeTaskRow(plan, ti)" />
         </div>
         <div class="vio-form-grid">
-          <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <p-floatlabel variant="on" class="vio-field">
             <input pInputText [id]="'ag-t-ti-' + pi + '-' + ti" class="w-full" [(ngModel)]="task.title" autocomplete="off" />
             <label [for]="'ag-t-ti-' + pi + '-' + ti">{{ 'orgPlans.form.title' | translate }}</label>
           </p-floatlabel>
@@ -247,7 +231,7 @@
             />
             <label [for]="'ag-t-due-' + pi + '-' + ti">{{ 'orgPlans.form.dueAt' | translate }}</label>
           </p-floatlabel>
-          <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <p-floatlabel variant="on" class="vio-field">
             <p-select
               [inputId]="'ag-t-asg-' + pi + '-' + ti"
               styleClass="w-full"
@@ -268,7 +252,7 @@
           <p-button [label]="'orgPlans.form.addProgressUpdate' | translate" icon="pi pi-plus" [text]="true" type="button" (onClick)="addUpdateRow(task)" />
         </div>
         <div *ngFor="let u of task.updates; let ui = index" class="ag-update-row vio-form-grid">
-          <p-floatlabel variant="on" class="vio-field vio-field-span2">
+          <p-floatlabel variant="on" class="vio-field">
             <input pInputText [id]="'ag-u-n-' + pi + '-' + ti + '-' + ui" class="w-full" [(ngModel)]="u.note" autocomplete="off" />
             <label [for]="'ag-u-n-' + pi + '-' + ti + '-' + ui">{{ 'orgPlans.form.note' | translate }}</label>
           </p-floatlabel>

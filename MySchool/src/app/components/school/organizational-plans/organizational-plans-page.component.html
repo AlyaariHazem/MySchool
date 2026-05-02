@@ -115,21 +115,6 @@
             </p-floatlabel>
             <p-floatlabel variant="on" class="filter-field">
               <p-select
-                inputId="anf-year"
-                styleClass="w-full cn-filter-select"
-                panelStyleClass="cn-filter-select-panel"
-                [panelStyle]="filterSelectPanelStyle"
-                [options]="yearOptionsAnnual"
-                [(ngModel)]="annualFilter.academicYearID"
-                optionLabel="label"
-                optionValue="value"
-                [showClear]="true"
-                [filter]="true"
-              />
-              <label for="anf-year">{{ 'orgPlans.form.academicYear' | translate }}</label>
-            </p-floatlabel>
-            <p-floatlabel variant="on" class="filter-field">
-              <p-select
                 inputId="anf-status"
                 styleClass="w-full cn-filter-select"
                 panelStyleClass="cn-filter-select-panel"
@@ -215,21 +200,6 @@
             </p-floatlabel>
             <p-floatlabel variant="on" class="filter-field">
               <p-select
-                inputId="dpf-year"
-                styleClass="w-full cn-filter-select"
-                panelStyleClass="cn-filter-select-panel"
-                [panelStyle]="filterSelectPanelStyle"
-                [options]="yearOptionsDept"
-                [(ngModel)]="deptFilter.academicYearID"
-                optionLabel="label"
-                optionValue="value"
-                [showClear]="true"
-                [filter]="true"
-              />
-              <label for="dpf-year">{{ 'orgPlans.form.academicYear' | translate }}</label>
-            </p-floatlabel>
-            <p-floatlabel variant="on" class="filter-field">
-              <p-select
                 inputId="dpf-status"
                 styleClass="w-full cn-filter-select"
                 panelStyleClass="cn-filter-select-panel"
@@ -310,7 +280,7 @@
     [dismissableMask]="true"
     (onHide)="closeStrategicDialog()"
   >
-    <div class="vio-form-grid" *ngIf="stratDialogVisible">
+    <div class="org-dialog-form vio-form-grid" *ngIf="stratDialogVisible">
       <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
         <p-select
           inputId="st-d-school"
@@ -388,8 +358,16 @@
       </p-floatlabel>
     </div>
     <ng-template pTemplate="footer">
-      <p-button [label]="'orgPlans.form.cancel' | translate" [text]="true" (onClick)="closeStrategicDialog()" />
-      <p-button *ngIf="canCreate || canUpdate" [label]="'orgPlans.form.save' | translate" icon="pi pi-check" (onClick)="saveStrategic()" [loading]="stratSaving" />
+      <div class="org-dialog-footer">
+        <p-button [label]="'orgPlans.form.cancel' | translate" [text]="true" (onClick)="closeStrategicDialog()" />
+        <p-button
+          *ngIf="canCreate || canUpdate"
+          [label]="'orgPlans.form.save' | translate"
+          icon="pi pi-check"
+          (onClick)="saveStrategic()"
+          [loading]="stratSaving"
+        />
+      </div>
     </ng-template>
   </p-dialog>
 
@@ -426,7 +404,7 @@
     [dismissableMask]="true"
     (onHide)="closeDeptDialog()"
   >
-    <div class="vio-form-grid" *ngIf="deptDialogVisible">
+    <div class="org-dialog-form org-dialog-form--dept vio-form-grid" *ngIf="deptDialogVisible">
       <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
         <p-select
           inputId="dp-d-school"
@@ -443,20 +421,6 @@
       </p-floatlabel>
       <p-floatlabel variant="on" class="vio-field">
         <p-select
-          inputId="dp-d-year"
-          styleClass="w-full"
-          [panelStyle]="filterSelectPanelStyle"
-          [options]="yearOptionsDeptDialog"
-          [(ngModel)]="deptYearId"
-          optionLabel="label"
-          optionValue="value"
-          [showClear]="true"
-          [filter]="true"
-        />
-        <label for="dp-d-year">{{ 'orgPlans.form.academicYearOptional' | translate }}</label>
-      </p-floatlabel>
-      <p-floatlabel variant="on" class="vio-field">
-        <p-select
           inputId="dp-d-sg"
           styleClass="w-full"
           [panelStyle]="filterSelectPanelStyle"
@@ -469,7 +433,7 @@
         />
         <label for="dp-d-sg">{{ 'orgPlans.form.strategicLink' | translate }}</label>
       </p-floatlabel>
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+      <p-floatlabel variant="on" class="vio-field">
         <p-select
           inputId="dp-d-ag"
           styleClass="w-full"
@@ -495,23 +459,7 @@
         />
         <label for="dp-d-st">{{ 'orgPlans.form.status' | translate }}</label>
       </p-floatlabel>
-      <p-floatlabel variant="on" class="vio-field">
-        <p-inputNumber inputId="dp-d-sort" [(ngModel)]="deptSort" [useGrouping]="false" styleClass="w-full" />
-        <label for="dp-d-sort">{{ 'orgPlans.form.sortOrder' | translate }}</label>
-      </p-floatlabel>
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
-        <input pInputText id="dp-d-dname" class="w-full" [(ngModel)]="deptName" autocomplete="off" />
-        <label for="dp-d-dname">{{ 'orgPlans.form.departmentName' | translate }}</label>
-      </p-floatlabel>
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
-        <input pInputText id="dp-d-title" class="w-full" [(ngModel)]="deptTitle" autocomplete="off" />
-        <label for="dp-d-title">{{ 'orgPlans.form.title' | translate }}</label>
-      </p-floatlabel>
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
-        <textarea pTextarea id="dp-d-det" class="w-full" [(ngModel)]="deptDetails" rows="2"></textarea>
-        <label for="dp-d-det">{{ 'orgPlans.form.details' | translate }}</label>
-      </p-floatlabel>
-      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <p-floatlabel variant="on" class="vio-field">
         <p-select
           inputId="dp-d-own"
           styleClass="w-full"
@@ -525,10 +473,35 @@
         />
         <label for="dp-d-own">{{ 'orgPlans.form.owner' | translate }}</label>
       </p-floatlabel>
+      
+      <p-floatlabel variant="on" class="vio-field">
+        <input pInputText id="dp-d-dname" class="w-full" [(ngModel)]="deptName" autocomplete="off" />
+        <label for="dp-d-dname">{{ 'orgPlans.form.departmentName' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <input pInputText id="dp-d-title" class="w-full" [(ngModel)]="deptTitle" autocomplete="off" />
+        <label for="dp-d-title">{{ 'orgPlans.form.title' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber inputId="dp-d-sort" [(ngModel)]="deptSort" [useGrouping]="false" styleClass="w-full" />
+        <label for="dp-d-sort">{{ 'orgPlans.form.sortOrder' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="dp-d-det" class="w-full" [(ngModel)]="deptDetails" rows="4"></textarea>
+        <label for="dp-d-det">{{ 'orgPlans.form.details' | translate }}</label>
+      </p-floatlabel>
     </div>
     <ng-template pTemplate="footer">
-      <p-button [label]="'orgPlans.form.cancel' | translate" [text]="true" (onClick)="closeDeptDialog()" />
-      <p-button *ngIf="canCreate || canUpdate" [label]="'orgPlans.form.save' | translate" icon="pi pi-check" (onClick)="saveDept()" [loading]="deptSaving" />
+      <div class="org-dialog-footer">
+        <p-button [label]="'orgPlans.form.cancel' | translate" [text]="true" (onClick)="closeDeptDialog()" />
+        <p-button
+          *ngIf="canCreate || canUpdate"
+          [label]="'orgPlans.form.save' | translate"
+          icon="pi pi-check"
+          (onClick)="saveDept()"
+          [loading]="deptSaving"
+        />
+      </div>
     </ng-template>
   </p-dialog>
 </div>

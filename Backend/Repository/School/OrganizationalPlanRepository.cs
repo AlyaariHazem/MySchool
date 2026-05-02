@@ -193,16 +193,10 @@ public class OrganizationalPlanRepository : IOrganizationalPlanRepository
         if (filter.SchoolID is > 0)
         {
             q = q.Where(x => x.SchoolID == filter.SchoolID);
-            if (filter.AcademicYearID is not > 0)
-            {
-                var y = await GetActiveYearIdForSchoolAsync(filter.SchoolID.Value, cancellationToken);
-                if (y is > 0)
-                    q = q.Where(x => x.AcademicYearID == y.Value);
-            }
+            var y = await GetActiveYearIdForSchoolAsync(filter.SchoolID.Value, cancellationToken);
+            if (y is > 0)
+                q = q.Where(x => x.AcademicYearID == y.Value);
         }
-
-        if (filter.AcademicYearID is > 0)
-            q = q.Where(x => x.AcademicYearID == filter.AcademicYearID);
         if (filter.StrategicGoalID is > 0)
             q = q.Where(x => x.StrategicGoalID == filter.StrategicGoalID);
         if (filter.Status is >= 0)
@@ -329,11 +323,6 @@ public class OrganizationalPlanRepository : IOrganizationalPlanRepository
         if (!schoolOk)
             throw new InvalidOperationException("School was not found.");
 
-        var yearOk = await _db.Years.AsNoTracking()
-            .AnyAsync(y => y.YearID == dto.AcademicYearID && y.SchoolID == dto.SchoolID, cancellationToken);
-        if (!yearOk)
-            throw new InvalidOperationException("Academic year does not belong to this school.");
-
         if (dto.StrategicGoalID is > 0)
         {
             var sgOk = await _db.StrategicGoals.AsNoTracking()
@@ -425,11 +414,13 @@ public class OrganizationalPlanRepository : IOrganizationalPlanRepository
     public async Task<int> CreateAnnualGoalAsync(AnnualGoalWriteDto dto, CancellationToken cancellationToken = default)
     {
         await ValidateAnnualGoalWriteAsync(dto, cancellationToken);
+        var activeYearId = await GetActiveYearIdForSchoolAsync(dto.SchoolID, cancellationToken)
+            ?? throw new InvalidOperationException("No academic year is configured for this school.");
         var now = DateTime.UtcNow;
         var e = new AnnualGoal
         {
             SchoolID = dto.SchoolID,
-            AcademicYearID = dto.AcademicYearID,
+            AcademicYearID = activeYearId,
             StrategicGoalID = dto.StrategicGoalID is > 0 ? dto.StrategicGoalID : null,
             Title = dto.Title,
             Details = dto.Details,
@@ -452,8 +443,10 @@ public class OrganizationalPlanRepository : IOrganizationalPlanRepository
             throw new InvalidOperationException("School mismatch for this annual goal.");
 
         await ValidateAnnualGoalWriteAsync(dto, cancellationToken);
+        var activeYearId = await GetActiveYearIdForSchoolAsync(dto.SchoolID, cancellationToken)
+            ?? throw new InvalidOperationException("No academic year is configured for this school.");
         var now = DateTime.UtcNow;
-        e.AcademicYearID = dto.AcademicYearID;
+        e.AcademicYearID = activeYearId;
         e.StrategicGoalID = dto.StrategicGoalID is > 0 ? dto.StrategicGoalID : null;
         e.Title = dto.Title;
         e.Details = dto.Details;
@@ -477,9 +470,12 @@ public class OrganizationalPlanRepository : IOrganizationalPlanRepository
         filter ??= new DepartmentGoalFilterDto();
         var q = _db.DepartmentGoals.AsNoTracking().AsQueryable();
         if (filter.SchoolID is > 0)
+        {
             q = q.Where(x => x.SchoolID == filter.SchoolID);
-        if (filter.AcademicYearID is > 0)
-            q = q.Where(x => x.AcademicYearID == filter.AcademicYearID);
+            var y = await GetActiveYearIdForSchoolAsync(filter.SchoolID.Value, cancellationToken);
+            if (y is > 0)
+                q = q.Where(x => x.AcademicYearID == y.Value);
+        }
         if (filter.Status is >= 0)
             q = q.Where(x => (int)x.Status == filter.Status);
 
@@ -548,14 +544,6 @@ public class OrganizationalPlanRepository : IOrganizationalPlanRepository
         if (!schoolOk)
             throw new InvalidOperationException("School was not found.");
 
-        if (dto.AcademicYearID is > 0)
-        {
-            var yOk = await _db.Years.AsNoTracking()
-                .AnyAsync(y => y.YearID == dto.AcademicYearID && y.SchoolID == dto.SchoolID, cancellationToken);
-            if (!yOk)
-                throw new InvalidOperationException("Academic year does not belong to this school.");
-        }
-
         if (dto.StrategicGoalID is > 0)
         {
             var sOk = await _db.StrategicGoals.AsNoTracking()
@@ -579,11 +567,13 @@ public class OrganizationalPlanRepository : IOrganizationalPlanRepository
     public async Task<int> CreateDepartmentGoalAsync(DepartmentGoalWriteDto dto, CancellationToken cancellationToken = default)
     {
         await ValidateDepartmentGoalWriteAsync(dto, cancellationToken);
+        var activeYearId = await GetActiveYearIdForSchoolAsync(dto.SchoolID, cancellationToken)
+            ?? throw new InvalidOperationException("No academic year is configured for this school.");
         var now = DateTime.UtcNow;
         var e = new DepartmentGoal
         {
             SchoolID = dto.SchoolID,
-            AcademicYearID = dto.AcademicYearID is > 0 ? dto.AcademicYearID : null,
+            AcademicYearID = activeYearId,
             StrategicGoalID = dto.StrategicGoalID is > 0 ? dto.StrategicGoalID : null,
             AnnualGoalID = dto.AnnualGoalID is > 0 ? dto.AnnualGoalID : null,
             DepartmentName = dto.DepartmentName,
@@ -608,8 +598,10 @@ public class OrganizationalPlanRepository : IOrganizationalPlanRepository
             throw new InvalidOperationException("School mismatch for this department goal.");
 
         await ValidateDepartmentGoalWriteAsync(dto, cancellationToken);
+        var activeYearId = await GetActiveYearIdForSchoolAsync(dto.SchoolID, cancellationToken)
+            ?? throw new InvalidOperationException("No academic year is configured for this school.");
         var now = DateTime.UtcNow;
-        e.AcademicYearID = dto.AcademicYearID is > 0 ? dto.AcademicYearID : null;
+        e.AcademicYearID = activeYearId;
         e.StrategicGoalID = dto.StrategicGoalID is > 0 ? dto.StrategicGoalID : null;
         e.AnnualGoalID = dto.AnnualGoalID is > 0 ? dto.AnnualGoalID : null;
         e.DepartmentName = dto.DepartmentName;

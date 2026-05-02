@@ -168,7 +168,6 @@ export interface OperationalPlanWriteDto {
 
 export interface AnnualGoalWriteDto {
   schoolID: number;
-  academicYearID: number;
   strategicGoalID?: number | null;
   title: string;
   details?: string | null;
@@ -205,7 +204,6 @@ export interface DepartmentGoalDetailDto extends DepartmentGoalListItemDto {
 
 export interface DepartmentGoalWriteDto {
   schoolID: number;
-  academicYearID?: number | null;
   strategicGoalID?: number | null;
   annualGoalID?: number | null;
   departmentName: string;
@@ -257,7 +255,6 @@ export function strategicGoalWriteForApi(d: StrategicGoalWriteDto): Record<strin
 export function annualGoalWriteForApi(d: AnnualGoalWriteDto): Record<string, unknown> {
   return {
     schoolID: d.schoolID,
-    academicYearID: d.academicYearID,
     strategicGoalID: d.strategicGoalID != null && d.strategicGoalID > 0 ? d.strategicGoalID : null,
     title: d.title,
     details: d.details ?? null,
@@ -292,7 +289,6 @@ export function annualGoalWriteForApi(d: AnnualGoalWriteDto): Record<string, unk
 export function departmentGoalWriteForApi(d: DepartmentGoalWriteDto): Record<string, unknown> {
   return {
     schoolID: d.schoolID,
-    academicYearID: d.academicYearID != null && d.academicYearID > 0 ? d.academicYearID : null,
     strategicGoalID: d.strategicGoalID != null && d.strategicGoalID > 0 ? d.strategicGoalID : null,
     annualGoalID: d.annualGoalID != null && d.annualGoalID > 0 ? d.annualGoalID : null,
     departmentName: d.departmentName,
