@@ -157,4 +157,14 @@ public class EmployeeProfile
     public ICollection<MeetingTask> MeetingTasksAssigned { get; set; } = new List<MeetingTask>();
 
     public ICollection<MeetingTaskFollowUp> MeetingTaskFollowUpsAuthored { get; set; } = new List<MeetingTaskFollowUp>();
+
+    public ICollection<ActivityRequest> ActivityRequests { get; set; } = new List<ActivityRequest>();
+
+    public ICollection<ActivityApproval> ActivityApprovalsAsApprover { get; set; } = new List<ActivityApproval>();
+
+    public ICollection<ActivityExecution> ActivityExecutionsAsResponsible { get; set; } = new List<ActivityExecution>();
+
+    public ICollection<ActivityEvaluation> ActivityEvaluationsAsEvaluator { get; set; } = new List<ActivityEvaluation>();
+
+    public ICollection<ActivityPoints> ActivityPointsAwarded { get; set; } = new List<ActivityPoints>();
 }

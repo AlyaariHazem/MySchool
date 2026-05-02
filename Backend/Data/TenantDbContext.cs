@@ -129,6 +129,12 @@ namespace Backend.Data
         public DbSet<MeetingTask> MeetingTasks { get; set; }
         public DbSet<MeetingTaskFollowUp> MeetingTaskFollowUps { get; set; }
 
+        public DbSet<ActivityRequest> ActivityRequests { get; set; }
+        public DbSet<ActivityApproval> ActivityApprovals { get; set; }
+        public DbSet<ActivityExecution> ActivityExecutions { get; set; }
+        public DbSet<ActivityEvaluation> ActivityEvaluations { get; set; }
+        public DbSet<ActivityPoints> ActivityPoints { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -2009,6 +2015,121 @@ namespace Backend.Data
                 .HasOne(x => x.AuthorEmployeeProfile)
                 .WithMany(p => p.MeetingTaskFollowUpsAuthored)
                 .HasForeignKey(x => x.AuthorEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Activities (requests, approvals, execution, evaluation, points) ---
+            modelBuilder.Entity<ActivityRequest>()
+                .ToTable("StaffActivityRequests");
+            modelBuilder.Entity<ActivityRequest>()
+                .HasKey(x => x.ActivityRequestID);
+            modelBuilder.Entity<ActivityRequest>()
+                .Property(x => x.ActivityRequestID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ActivityRequest>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<ActivityRequest>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.Status });
+            modelBuilder.Entity<ActivityRequest>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ActivityRequest>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ActivityRequest>()
+                .HasOne(x => x.EmployeeProfile)
+                .WithMany(p => p.ActivityRequests)
+                .HasForeignKey(x => x.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ActivityApproval>()
+                .ToTable("StaffActivityApprovals");
+            modelBuilder.Entity<ActivityApproval>()
+                .HasKey(x => x.ActivityApprovalID);
+            modelBuilder.Entity<ActivityApproval>()
+                .Property(x => x.ActivityApprovalID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ActivityApproval>()
+                .Property(x => x.Decision)
+                .HasConversion<int>();
+            modelBuilder.Entity<ActivityApproval>()
+                .HasIndex(x => new { x.ActivityRequestID, x.SortOrder });
+            modelBuilder.Entity<ActivityApproval>()
+                .HasOne(x => x.ActivityRequest)
+                .WithMany(r => r.Approvals)
+                .HasForeignKey(x => x.ActivityRequestID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ActivityApproval>()
+                .HasOne(x => x.ApproverEmployeeProfile)
+                .WithMany(p => p.ActivityApprovalsAsApprover)
+                .HasForeignKey(x => x.ApproverEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ActivityExecution>()
+                .ToTable("StaffActivityExecutions");
+            modelBuilder.Entity<ActivityExecution>()
+                .HasKey(x => x.ActivityExecutionID);
+            modelBuilder.Entity<ActivityExecution>()
+                .Property(x => x.ActivityExecutionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ActivityExecution>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<ActivityExecution>()
+                .HasIndex(x => new { x.ActivityRequestID, x.UpdatedAtUtc });
+            modelBuilder.Entity<ActivityExecution>()
+                .HasOne(x => x.ActivityRequest)
+                .WithMany(r => r.Executions)
+                .HasForeignKey(x => x.ActivityRequestID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ActivityExecution>()
+                .HasOne(x => x.ResponsibleEmployeeProfile)
+                .WithMany(p => p.ActivityExecutionsAsResponsible)
+                .HasForeignKey(x => x.ResponsibleEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ActivityEvaluation>()
+                .ToTable("StaffActivityEvaluations");
+            modelBuilder.Entity<ActivityEvaluation>()
+                .HasKey(x => x.ActivityEvaluationID);
+            modelBuilder.Entity<ActivityEvaluation>()
+                .Property(x => x.ActivityEvaluationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ActivityEvaluation>()
+                .HasIndex(x => new { x.ActivityRequestID, x.CreatedAtUtc });
+            modelBuilder.Entity<ActivityEvaluation>()
+                .HasOne(x => x.ActivityRequest)
+                .WithMany(r => r.Evaluations)
+                .HasForeignKey(x => x.ActivityRequestID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ActivityEvaluation>()
+                .HasOne(x => x.EvaluatorEmployeeProfile)
+                .WithMany(p => p.ActivityEvaluationsAsEvaluator)
+                .HasForeignKey(x => x.EvaluatorEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ActivityPoints>()
+                .ToTable("StaffActivityPoints");
+            modelBuilder.Entity<ActivityPoints>()
+                .HasKey(x => x.ActivityPointsID);
+            modelBuilder.Entity<ActivityPoints>()
+                .Property(x => x.ActivityPointsID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ActivityPoints>()
+                .HasIndex(x => new { x.ActivityRequestID, x.AwardedAtUtc });
+            modelBuilder.Entity<ActivityPoints>()
+                .HasOne(x => x.ActivityRequest)
+                .WithMany(r => r.Points)
+                .HasForeignKey(x => x.ActivityRequestID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ActivityPoints>()
+                .HasOne(x => x.AwardedByEmployeeProfile)
+                .WithMany(p => p.ActivityPointsAwarded)
+                .HasForeignKey(x => x.AwardedByEmployeeProfileID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- Achievements: catalog, requests, approvals, attachments, points ledger ---
