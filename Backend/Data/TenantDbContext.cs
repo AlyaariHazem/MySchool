@@ -148,6 +148,12 @@ namespace Backend.Data
         public DbSet<PointsLedger> PointsLedgers { get; set; }
         public DbSet<PointsBalanceSnapshot> PointsBalanceSnapshots { get; set; }
 
+        public DbSet<Award> Awards { get; set; }
+        public DbSet<AwardCriteria> AwardCriteria { get; set; }
+        public DbSet<AwardCycle> AwardCycles { get; set; }
+        public DbSet<AwardNomination> AwardNominations { get; set; }
+        public DbSet<AwardWinner> AwardWinners { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -2447,6 +2453,127 @@ namespace Backend.Data
                 .HasOne(x => x.LastPointsLedger)
                 .WithMany()
                 .HasForeignKey(x => x.LastPointsLedgerID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Awards (نجم الأسبوع / الشهر / الفصل / العام) ---
+            modelBuilder.Entity<Award>()
+                .ToTable("StaffAwards");
+            modelBuilder.Entity<Award>()
+                .HasKey(x => x.AwardID);
+            modelBuilder.Entity<Award>()
+                .Property(x => x.AwardID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<Award>()
+                .Property(x => x.CycleKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<Award>()
+                .HasIndex(x => new { x.SchoolID, x.Code })
+                .IsUnique();
+            modelBuilder.Entity<Award>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AwardCriteria>()
+                .ToTable("StaffAwardCriteria");
+            modelBuilder.Entity<AwardCriteria>()
+                .HasKey(x => x.AwardCriteriaID);
+            modelBuilder.Entity<AwardCriteria>()
+                .Property(x => x.AwardCriteriaID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<AwardCriteria>()
+                .HasIndex(x => new { x.AwardID, x.SortOrder });
+            modelBuilder.Entity<AwardCriteria>()
+                .HasOne(x => x.Award)
+                .WithMany(a => a.Criteria)
+                .HasForeignKey(x => x.AwardID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AwardCycle>()
+                .ToTable("StaffAwardCycles");
+            modelBuilder.Entity<AwardCycle>()
+                .HasKey(x => x.AwardCycleID);
+            modelBuilder.Entity<AwardCycle>()
+                .Property(x => x.AwardCycleID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<AwardCycle>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<AwardCycle>()
+                .HasIndex(x => new { x.AwardID, x.PeriodStartUtc, x.PeriodEndUtc });
+            modelBuilder.Entity<AwardCycle>()
+                .HasOne(x => x.Award)
+                .WithMany(a => a.Cycles)
+                .HasForeignKey(x => x.AwardID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AwardCycle>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AwardCycle>()
+                .HasOne(x => x.Term)
+                .WithMany()
+                .HasForeignKey(x => x.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AwardNomination>()
+                .ToTable("StaffAwardNominations");
+            modelBuilder.Entity<AwardNomination>()
+                .HasKey(x => x.AwardNominationID);
+            modelBuilder.Entity<AwardNomination>()
+                .Property(x => x.AwardNominationID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<AwardNomination>()
+                .Property(x => x.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<AwardNomination>()
+                .HasIndex(x => new { x.AwardCycleID, x.StudentID })
+                .IsUnique();
+            modelBuilder.Entity<AwardNomination>()
+                .HasOne(x => x.AwardCycle)
+                .WithMany(c => c.Nominations)
+                .HasForeignKey(x => x.AwardCycleID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<AwardNomination>()
+                .HasOne(x => x.Student)
+                .WithMany()
+                .HasForeignKey(x => x.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AwardNomination>()
+                .HasOne(x => x.NominatedByEmployeeProfile)
+                .WithMany()
+                .HasForeignKey(x => x.NominatedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AwardWinner>()
+                .ToTable("StaffAwardWinners");
+            modelBuilder.Entity<AwardWinner>()
+                .HasKey(x => x.AwardWinnerID);
+            modelBuilder.Entity<AwardWinner>()
+                .Property(x => x.AwardWinnerID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<AwardWinner>()
+                .HasIndex(x => new { x.AwardCycleID, x.StudentID })
+                .IsUnique();
+            modelBuilder.Entity<AwardWinner>()
+                .HasIndex(x => new { x.AwardCycleID, x.Rank })
+                .IsUnique();
+            modelBuilder.Entity<AwardWinner>()
+                .HasOne(x => x.AwardCycle)
+                .WithMany(c => c.Winners)
+                .HasForeignKey(x => x.AwardCycleID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<AwardWinner>()
+                .HasOne(x => x.Student)
+                .WithMany()
+                .HasForeignKey(x => x.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AwardWinner>()
+                .HasOne(x => x.SelectedByEmployeeProfile)
+                .WithMany()
+                .HasForeignKey(x => x.SelectedByEmployeeProfileID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- Achievements: catalog, requests, approvals, attachments, points ledger ---
