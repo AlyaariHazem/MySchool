@@ -1,0 +1,407 @@
+<div class="employees-hr-page cn-list-page central-points-page" [attr.dir]="dir$ | async">
+  <div class="employees-hr-card cn-list-card">
+    <header class="employees-hr-header cn-list-header">
+      <h2 class="employees-hr-title">{{ 'centralPoints.pageTitle' | translate }}</h2>
+    </header>
+
+    <p-tabs [(value)]="activeTab" class="cp-tabs">
+      <p-tablist>
+        <p-tab value="0">{{ 'centralPoints.tabs.ledger' | translate }}</p-tab>
+        <p-tab value="1" (click)="onRulesTabActivate()">{{ 'centralPoints.tabs.rules' | translate }}</p-tab>
+        <p-tab value="2" (click)="onPostTabActivate()">{{ 'centralPoints.tabs.post' | translate }}</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div *ngIf="canView" class="filters-toolbar filters-grid cn-list-filters">
+            <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+              <p-select
+                inputId="cp-led-school"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="schoolOptions"
+                [(ngModel)]="ledgerSchoolId"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                (ngModelChange)="onLedgerSchoolChange()"
+              />
+              <label for="cp-led-school">{{ 'centralPoints.filter.school' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="filter-field">
+              <p-select
+                inputId="cp-led-src"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="sourceOptions"
+                [(ngModel)]="ledgerSourceId"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+              />
+              <label for="cp-led-src">{{ 'centralPoints.filter.source' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="filter-field">
+              <p-select
+                inputId="cp-led-emp"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="employeeOptionsLedger"
+                [(ngModel)]="ledgerEmployeeId"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                [filter]="true"
+              />
+              <label for="cp-led-emp">{{ 'centralPoints.filter.employee' | translate }}</label>
+            </p-floatlabel>
+            <div class="filter-actions">
+              <p-button [label]="'centralPoints.list.apply' | translate" icon="pi pi-filter" (onClick)="applyLedgerFilters()" />
+              <p-button
+                [label]="'centralPoints.list.refresh' | translate"
+                icon="pi pi-refresh"
+                [outlined]="true"
+                (onClick)="loadLedger()"
+                [loading]="ledgerLoading"
+              />
+            </div>
+          </div>
+          <div *ngIf="!canView" class="empty-block muted">{{ 'centralPoints.list.noPermission' | translate }}</div>
+          <p-table
+            *ngIf="canView"
+            [value]="ledgerRows"
+            [lazy]="true"
+            (onLazyLoad)="onLedgerLazy($event)"
+            [loading]="ledgerLoading"
+            [paginator]="true"
+            [rows]="ledgerPageSize"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [totalRecords]="ledgerTotal"
+            [first]="ledgerFirst"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{first} – {last} / {totalRecords}"
+            styleClass="p-datatable-sm employees-hr-table"
+            [rowHover]="true"
+            [tableStyle]="{ 'min-width': '56rem' }"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'centralPoints.columns.when' | translate }}</th>
+                <th>{{ 'centralPoints.columns.employee' | translate }}</th>
+                <th>{{ 'centralPoints.columns.source' | translate }}</th>
+                <th>{{ 'centralPoints.columns.delta' | translate }}</th>
+                <th>{{ 'centralPoints.columns.correlation' | translate }}</th>
+                <th>{{ 'centralPoints.columns.memo' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.createdAtUtc | date : 'short' }}</td>
+                <td>{{ row.employeeDisplayName || row.employeeProfileID }}</td>
+                <td>{{ row.pointsSourceCode }}</td>
+                <td>{{ row.deltaPoints }}</td>
+                <td>
+                  <span *ngIf="row.correlationEntityType">{{ row.correlationEntityType }} #{{ row.correlationEntityID }}</span>
+                  <span *ngIf="!row.correlationEntityType">—</span>
+                </td>
+                <td>{{ row.memo || '—' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="6">{{ 'centralPoints.list.emptyLedger' | translate }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+
+        <p-tabpanel value="1">
+          <div *ngIf="canView" class="filters-toolbar filters-grid cn-list-filters">
+            <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+              <p-select
+                inputId="cp-rul-school"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="schoolOptions"
+                [(ngModel)]="rulesSchoolId"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+              />
+              <label for="cp-rul-school">{{ 'centralPoints.filter.school' | translate }}</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="filter-field">
+              <p-select
+                inputId="cp-rul-src"
+                styleClass="w-full cn-filter-select"
+                panelStyleClass="cn-filter-select-panel"
+                [panelStyle]="filterSelectPanelStyle"
+                [options]="sourceOptions"
+                [(ngModel)]="rulesSourceId"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+              />
+              <label for="cp-rul-src">{{ 'centralPoints.filter.source' | translate }}</label>
+            </p-floatlabel>
+            <div class="filter-field cp-checkbox-field">
+              <p-checkbox inputId="cp-rul-active" [(ngModel)]="rulesActiveOnly" [binary]="true" />
+              <label for="cp-rul-active" class="cp-checkbox-label">{{ 'centralPoints.filter.activeRulesOnly' | translate }}</label>
+            </div>
+            <div class="filter-actions">
+              <p-button *ngIf="canCreate" [label]="'centralPoints.rules.add' | translate" icon="pi pi-plus" (onClick)="openRuleCreate()" />
+              <p-button [label]="'centralPoints.list.refresh' | translate" icon="pi pi-refresh" [outlined]="true" (onClick)="loadRules()" [loading]="rulesLoading" />
+            </div>
+          </div>
+          <div *ngIf="!canView" class="empty-block muted">{{ 'centralPoints.list.noPermission' | translate }}</div>
+          <p-table
+            *ngIf="canView"
+            [value]="rulesRows"
+            [loading]="rulesLoading"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{first} – {last} / {totalRecords}"
+            styleClass="p-datatable-sm employees-hr-table"
+            [rowHover]="true"
+            [tableStyle]="{ 'min-width': '52rem' }"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'centralPoints.columns.source' | translate }}</th>
+                <th>{{ 'centralPoints.columns.ruleKey' | translate }}</th>
+                <th>{{ 'centralPoints.columns.delta' | translate }}</th>
+                <th>{{ 'centralPoints.columns.priority' | translate }}</th>
+                <th>{{ 'centralPoints.columns.school' | translate }}</th>
+                <th>{{ 'centralPoints.columns.year' | translate }}</th>
+                <th>{{ 'centralPoints.columns.active' | translate }}</th>
+                <th class="cn-actions-col">{{ 'centralPoints.columns.actions' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.pointsSourceCode }}</td>
+                <td>{{ row.ruleKey }}</td>
+                <td>{{ row.deltaPoints }}</td>
+                <td>{{ row.priority }}</td>
+                <td>{{ row.schoolID ?? '—' }}</td>
+                <td>{{ row.academicYearID ?? '—' }}</td>
+                <td>{{ row.isActive ? ('centralPoints.yes' | translate) : ('centralPoints.no' | translate) }}</td>
+                <td>
+                  <p-button
+                    *ngIf="canUpdate"
+                    icon="pi pi-pencil"
+                    [rounded]="true"
+                    [text]="true"
+                    [pTooltip]="'centralPoints.actions.editRule' | translate"
+                    (onClick)="openRuleEdit(row)"
+                  />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="8">{{ 'centralPoints.list.emptyRules' | translate }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+
+        <p-tabpanel value="2">
+          <div *ngIf="!canView" class="empty-block muted">{{ 'centralPoints.list.noPermission' | translate }}</div>
+          <div *ngIf="canView" class="cp-post-layout">
+            <section class="cp-card">
+              <h3 class="cp-section-title">{{ 'centralPoints.post.balanceTitle' | translate }}</h3>
+              <div class="vio-form-grid cp-mini-grid">
+                <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
+                  <p-select
+                    inputId="cp-bal-school"
+                    styleClass="w-full"
+                    [panelStyle]="filterSelectPanelStyle"
+                    [options]="schoolOptions"
+                    [(ngModel)]="postSchoolId"
+                    optionLabel="label"
+                    optionValue="value"
+                    [showClear]="true"
+                    (ngModelChange)="onPostSchoolChange()"
+                  />
+                  <label for="cp-bal-school">{{ 'centralPoints.filter.school' | translate }}</label>
+                </p-floatlabel>
+                <p-floatlabel variant="on" class="vio-field">
+                  <p-select
+                    inputId="cp-bal-emp"
+                    styleClass="w-full"
+                    [panelStyle]="filterSelectPanelStyle"
+                    [options]="employeeOptionsPost"
+                    [(ngModel)]="postEmployeeId"
+                    optionLabel="label"
+                    optionValue="value"
+                    [showClear]="true"
+                    [filter]="true"
+                  />
+                  <label for="cp-bal-emp">{{ 'centralPoints.filter.employee' | translate }}</label>
+                </p-floatlabel>
+              </div>
+              <div class="cp-actions">
+                <p-button [label]="'centralPoints.post.loadBalance' | translate" icon="pi pi-search" (onClick)="loadBalance()" [loading]="balanceLoading" />
+                <p-button
+                  *ngIf="isTenantAdmin"
+                  [label]="'centralPoints.post.rebuild' | translate"
+                  icon="pi pi-refresh"
+                  [outlined]="true"
+                  severity="secondary"
+                  (onClick)="rebuildBalance()"
+                  [loading]="rebuildSubmitting"
+                />
+              </div>
+              <p *ngIf="balanceSnapshot != null" class="cp-balance-result">
+                {{ 'centralPoints.post.balanceValue' | translate : { pts: balanceSnapshot.totalPoints } }}
+                <span *ngIf="balanceSnapshot.academicYearID" class="muted">
+                  — {{ 'centralPoints.post.activeYear' | translate : { id: balanceSnapshot.academicYearID } }}
+                </span>
+                <span class="muted"> — {{ balanceSnapshot.updatedAtUtc | date : 'short' }}</span>
+              </p>
+            </section>
+
+            <section class="cp-card">
+              <h3 class="cp-section-title">{{ 'centralPoints.post.postTitle' | translate }}</h3>
+              <div class="org-dialog-form vio-form-grid">
+                <p-floatlabel variant="on" class="vio-field vio-field-span2">
+                  <p-select
+                    inputId="cp-post-src"
+                    styleClass="w-full"
+                    [panelStyle]="filterSelectPanelStyle"
+                    [options]="postSourceCodeOptions"
+                    [(ngModel)]="postSourceCode"
+                    optionLabel="label"
+                    optionValue="value"
+                    [showClear]="true"
+                    [filter]="true"
+                  />
+                  <label for="cp-post-src">{{ 'centralPoints.post.source' | translate }}</label>
+                </p-floatlabel>
+                <p-floatlabel variant="on" class="vio-field">
+                  <input pInputText id="cp-post-key" class="w-full" [(ngModel)]="postRuleKey" autocomplete="off" />
+                  <label for="cp-post-key">{{ 'centralPoints.post.ruleKey' | translate }}</label>
+                </p-floatlabel>
+                <div class="vio-field cp-override-row">
+                  <p-checkbox inputId="cp-post-ov-en" [(ngModel)]="postOverrideEnabled" [binary]="true" />
+                  <label for="cp-post-ov-en" class="cp-inline-label">{{ 'centralPoints.post.override' | translate }}</label>
+                  <p-inputNumber
+                    *ngIf="postOverrideEnabled"
+                    inputId="cp-post-ov"
+                    [(ngModel)]="postOverrideValue"
+                    [useGrouping]="false"
+                    styleClass="w-full"
+                  />
+                </div>
+                <p-floatlabel variant="on" class="vio-field">
+                  <input pInputText id="cp-post-corr-t" class="w-full" [(ngModel)]="postCorrelationType" autocomplete="off" />
+                  <label for="cp-post-corr-t">{{ 'centralPoints.post.correlationType' | translate }}</label>
+                </p-floatlabel>
+                <p-floatlabel variant="on" class="vio-field">
+                  <p-inputNumber inputId="cp-post-corr-id" [(ngModel)]="postCorrelationId" [useGrouping]="false" styleClass="w-full" />
+                  <label for="cp-post-corr-id">{{ 'centralPoints.post.correlationId' | translate }}</label>
+                </p-floatlabel>
+                <p-floatlabel variant="on" class="vio-field vio-field-span2">
+                  <input pInputText id="cp-post-idem" class="w-full" [(ngModel)]="postIdempotency" autocomplete="off" />
+                  <label for="cp-post-idem">{{ 'centralPoints.post.idempotency' | translate }}</label>
+                </p-floatlabel>
+                <p-floatlabel variant="on" class="vio-field vio-field-span2">
+                  <textarea pTextarea id="cp-post-notes" class="w-full" [(ngModel)]="postNotes" rows="2"></textarea>
+                  <label for="cp-post-notes">{{ 'centralPoints.post.notes' | translate }}</label>
+                </p-floatlabel>
+                <p-floatlabel variant="on" class="vio-field vio-field-span2">
+                  <textarea pTextarea id="cp-post-memo" class="w-full" [(ngModel)]="postMemo" rows="2"></textarea>
+                  <label for="cp-post-memo">{{ 'centralPoints.post.memo' | translate }}</label>
+                </p-floatlabel>
+              </div>
+              <div class="cp-actions">
+                <p-button
+                  *ngIf="canCreate || canUpdate"
+                  [label]="'centralPoints.post.submit' | translate"
+                  icon="pi pi-check"
+                  (onClick)="submitPost()"
+                  [loading]="postSubmitting"
+                />
+              </div>
+            </section>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+
+  <p-dialog
+    [header]="(ruleEditId != null && ruleEditId > 0 ? 'centralPoints.ruleDialog.edit' : 'centralPoints.ruleDialog.new') | translate"
+    [(visible)]="ruleDialogVisible"
+    [modal]="true"
+    [style]="{ width: 'min(44rem, 96vw)' }"
+    [appendTo]="'body'"
+    [draggable]="false"
+    [dismissableMask]="true"
+    (onHide)="closeRuleDialog()"
+  >
+    <div class="org-dialog-form vio-form-grid" *ngIf="ruleDialogVisible">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="cp-dlg-school"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="ruleForm.schoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="cp-dlg-school">{{ 'centralPoints.ruleDialog.schoolHint' | translate }}</label>
+      </p-floatlabel>
+      <p class="vio-field vio-field-span2 cp-hint muted" *ngIf="ruleDialogVisible">
+        {{ 'centralPoints.ruleDialog.yearAuto' | translate }}
+      </p>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <p-select
+          inputId="cp-dlg-src"
+          styleClass="w-full"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="sourceOptions"
+          [(ngModel)]="ruleForm.pointsSourceID"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="cp-dlg-src">{{ 'centralPoints.filter.source' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <input pInputText id="cp-dlg-key" class="w-full" [(ngModel)]="ruleForm.ruleKey" autocomplete="off" />
+        <label for="cp-dlg-key">{{ 'centralPoints.columns.ruleKey' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber inputId="cp-dlg-delta" [(ngModel)]="ruleForm.deltaPoints" [useGrouping]="false" styleClass="w-full" />
+        <label for="cp-dlg-delta">{{ 'centralPoints.columns.delta' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber inputId="cp-dlg-pri" [(ngModel)]="ruleForm.priority" [useGrouping]="false" styleClass="w-full" />
+        <label for="cp-dlg-pri">{{ 'centralPoints.columns.priority' | translate }}</label>
+      </p-floatlabel>
+      <div class="vio-field vio-field-span2 cp-checkbox-field">
+        <p-checkbox inputId="cp-dlg-act" [(ngModel)]="ruleForm.isActive" [binary]="true" />
+        <label for="cp-dlg-act" class="cp-checkbox-label">{{ 'centralPoints.columns.active' | translate }}</label>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <p-button [label]="'centralPoints.ruleDialog.cancel' | translate" [text]="true" (onClick)="closeRuleDialog()" />
+      <p-button
+        [label]="'centralPoints.ruleDialog.save' | translate"
+        icon="pi pi-check"
+        (onClick)="saveRule()"
+        [loading]="ruleSaving"
+        [disabled]="(!canCreate && ruleEditId == null) || (!canUpdate && ruleEditId != null)"
+      />
+    </ng-template>
+  </p-dialog>
+</div>

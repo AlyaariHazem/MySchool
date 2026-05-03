@@ -456,6 +456,13 @@ const routes: Routes = [
         canMatch: [permissionGuard],
       },
       {
+        path: 'central-points',
+        loadComponent: () =>
+          import('./central-points/central-points-page.component').then((m) => m.CentralPointsPageComponent),
+        data: { breadcrumb: 'النقاط المركزية', permission: PagePermission.Employees.View },
+        canMatch: [permissionGuard],
+      },
+      {
         path: 'teacher-feedback',
         data: { breadcrumb: 'تقييم المعلم' },
         children: [

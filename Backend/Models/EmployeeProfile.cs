@@ -175,4 +175,10 @@ public class EmployeeProfile
     public ICollection<PlanProgressUpdate> PlanProgressUpdatesAuthored { get; set; } = new List<PlanProgressUpdate>();
 
     public ICollection<DepartmentGoal> DepartmentGoalsOwned { get; set; } = new List<DepartmentGoal>();
+
+    public ICollection<PointsTransaction> PointsTransactionsPosted { get; set; } = new List<PointsTransaction>();
+
+    public ICollection<PointsLedger> PointsLedgerLines { get; set; } = new List<PointsLedger>();
+
+    public ICollection<PointsBalanceSnapshot> PointsBalanceSnapshots { get; set; } = new List<PointsBalanceSnapshot>();
 }

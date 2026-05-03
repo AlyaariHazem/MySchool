@@ -142,6 +142,12 @@ namespace Backend.Data
         public DbSet<PlanProgressUpdate> PlanProgressUpdates { get; set; }
         public DbSet<DepartmentGoal> DepartmentGoals { get; set; }
 
+        public DbSet<PointsSource> PointsSources { get; set; }
+        public DbSet<PointsRule> PointsRules { get; set; }
+        public DbSet<PointsTransaction> PointsTransactions { get; set; }
+        public DbSet<PointsLedger> PointsLedgers { get; set; }
+        public DbSet<PointsBalanceSnapshot> PointsBalanceSnapshots { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -2296,6 +2302,151 @@ namespace Backend.Data
                 .HasOne(x => x.OwnerEmployeeProfile)
                 .WithMany(p => p.DepartmentGoalsOwned)
                 .HasForeignKey(x => x.OwnerEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Central points (ledger, rules, sources, transactions, snapshots) ---
+            modelBuilder.Entity<PointsSource>()
+                .ToTable("StaffPointsSources");
+            modelBuilder.Entity<PointsSource>()
+                .HasKey(x => x.PointsSourceID);
+            modelBuilder.Entity<PointsSource>()
+                .Property(x => x.PointsSourceID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<PointsSource>()
+                .HasIndex(x => x.Code)
+                .IsUnique();
+            modelBuilder.Entity<PointsSource>()
+                .Property(x => x.Code)
+                .HasMaxLength(64);
+            modelBuilder.Entity<PointsSource>()
+                .Property(x => x.DisplayName)
+                .HasMaxLength(256);
+
+            modelBuilder.Entity<PointsRule>()
+                .ToTable("StaffPointsRules");
+            modelBuilder.Entity<PointsRule>()
+                .HasKey(x => x.PointsRuleID);
+            modelBuilder.Entity<PointsRule>()
+                .Property(x => x.PointsRuleID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<PointsRule>()
+                .HasIndex(x => new { x.PointsSourceID, x.SchoolID, x.AcademicYearID, x.RuleKey, x.IsActive });
+            modelBuilder.Entity<PointsRule>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsRule>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsRule>()
+                .HasOne(x => x.PointsSource)
+                .WithMany(s => s.Rules)
+                .HasForeignKey(x => x.PointsSourceID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PointsTransaction>()
+                .ToTable("StaffPointsTransactions");
+            modelBuilder.Entity<PointsTransaction>()
+                .HasKey(x => x.PointsTransactionID);
+            modelBuilder.Entity<PointsTransaction>()
+                .Property(x => x.PointsTransactionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<PointsTransaction>()
+                .HasIndex(x => x.IdempotencyKey)
+                .IsUnique()
+                .HasFilter("[IdempotencyKey] IS NOT NULL");
+            modelBuilder.Entity<PointsTransaction>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.PostedAtUtc });
+            modelBuilder.Entity<PointsTransaction>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsTransaction>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsTransaction>()
+                .HasOne(x => x.PostedByEmployeeProfile)
+                .WithMany(p => p.PointsTransactionsPosted)
+                .HasForeignKey(x => x.PostedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PointsLedger>()
+                .ToTable("StaffPointsLedger");
+            modelBuilder.Entity<PointsLedger>()
+                .HasKey(x => x.PointsLedgerID);
+            modelBuilder.Entity<PointsLedger>()
+                .Property(x => x.PointsLedgerID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<PointsLedger>()
+                .HasIndex(x => new { x.EmployeeProfileID, x.AcademicYearID, x.CreatedAtUtc });
+            modelBuilder.Entity<PointsLedger>()
+                .HasIndex(x => new { x.SchoolID, x.AcademicYearID, x.PointsSourceID });
+            modelBuilder.Entity<PointsLedger>()
+                .HasOne(x => x.PointsTransaction)
+                .WithMany(t => t.LedgerLines)
+                .HasForeignKey(x => x.PointsTransactionID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PointsLedger>()
+                .HasOne(x => x.EmployeeProfile)
+                .WithMany(p => p.PointsLedgerLines)
+                .HasForeignKey(x => x.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsLedger>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsLedger>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsLedger>()
+                .HasOne(x => x.PointsSource)
+                .WithMany(s => s.LedgerLines)
+                .HasForeignKey(x => x.PointsSourceID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsLedger>()
+                .HasOne(x => x.PointsRule)
+                .WithMany(r => r.LedgerLines)
+                .HasForeignKey(x => x.PointsRuleID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PointsBalanceSnapshot>()
+                .ToTable("StaffPointsBalanceSnapshots");
+            modelBuilder.Entity<PointsBalanceSnapshot>()
+                .HasKey(x => x.PointsBalanceSnapshotID);
+            modelBuilder.Entity<PointsBalanceSnapshot>()
+                .Property(x => x.PointsBalanceSnapshotID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<PointsBalanceSnapshot>()
+                .HasIndex(x => new { x.EmployeeProfileID, x.SchoolID, x.AcademicYearID })
+                .IsUnique();
+            modelBuilder.Entity<PointsBalanceSnapshot>()
+                .HasOne(x => x.EmployeeProfile)
+                .WithMany(p => p.PointsBalanceSnapshots)
+                .HasForeignKey(x => x.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsBalanceSnapshot>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsBalanceSnapshot>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PointsBalanceSnapshot>()
+                .HasOne(x => x.LastPointsLedger)
+                .WithMany()
+                .HasForeignKey(x => x.LastPointsLedgerID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- Achievements: catalog, requests, approvals, attachments, points ledger ---

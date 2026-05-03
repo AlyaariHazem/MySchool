@@ -187,6 +187,7 @@
       "meetings": "Meetings",
       "activities": "Activities",
       "organizationalPlans": "Plans & goals",
+      "centralPoints": "Central points",
       "violations": "Violations",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
@@ -1127,6 +1128,93 @@
     "toast": {
       "created": "Activity request saved.",
       "updated": "Activity request updated."
+    }
+  },
+  "centralPoints": {
+    "pageTitle": "Central staff points",
+    "tabs": {
+      "ledger": "Ledger",
+      "rules": "Rules",
+      "post": "Post & balance"
+    },
+    "list": {
+      "apply": "Apply filters",
+      "refresh": "Refresh",
+      "noPermission": "You do not have access to this module.",
+      "emptyLedger": "No ledger lines found.",
+      "emptyRules": "No rules found."
+    },
+    "filter": {
+      "school": "School",
+      "year": "Academic year",
+      "source": "Source",
+      "employee": "Employee",
+      "activeRulesOnly": "Active rules only"
+    },
+    "columns": {
+      "when": "When",
+      "employee": "Employee",
+      "source": "Source",
+      "delta": "Points Δ",
+      "correlation": "Linked record",
+      "memo": "Memo",
+      "ruleKey": "Rule key",
+      "priority": "Priority",
+      "school": "School ID",
+      "year": "Year ID",
+      "active": "Active",
+      "actions": "Actions"
+    },
+    "yes": "Yes",
+    "no": "No",
+    "rules": {
+      "add": "New rule"
+    },
+    "actions": {
+      "editRule": "Edit rule"
+    },
+    "post": {
+      "balanceTitle": "Balance snapshot",
+      "loadBalance": "Load balance",
+      "rebuild": "Rebuild snapshot (admin)",
+      "balanceValue": "Total points: {{pts}}",
+      "activeYear": "Active year #{{id}}",
+      "postTitle": "Post points",
+      "source": "Points source",
+      "ruleKey": "Rule key (e.g. *)",
+      "override": "Override delta (manual)",
+      "correlationType": "Correlation type",
+      "correlationId": "Correlation id",
+      "idempotency": "Idempotency key",
+      "notes": "Transaction notes",
+      "memo": "Ledger memo",
+      "submit": "Post points"
+    },
+    "ruleDialog": {
+      "new": "New points rule",
+      "edit": "Edit points rule",
+      "schoolHint": "School (empty = all schools)",
+      "yearAuto": "For a selected school, the rule uses that school’s active academic year.",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "validation": {
+      "school": "Please select a school.",
+      "source": "Please select a points source.",
+      "sourceCode": "Please select a source.",
+      "override": "Enter an override points value.",
+      "balance": "Select school and employee.",
+      "post": "Select school and employee."
+    },
+    "balance": {
+      "none": "No balance row yet for this employee in the active academic year."
+    },
+    "toast": {
+      "ruleCreated": "Rule saved.",
+      "ruleUpdated": "Rule updated.",
+      "postOk": "Posted {{delta}} points. New balance: {{bal}}.",
+      "postIdempotent": "This event was already posted (idempotent).",
+      "rebuildOk": "Balance rebuilt. Total: {{total}}."
     }
   },
   "orgPlans": {
