@@ -188,6 +188,7 @@
       "activities": "Activities",
       "organizationalPlans": "Plans & goals",
       "centralPoints": "Central points",
+      "awards": "Awards",
       "violations": "Violations",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
@@ -1216,6 +1217,57 @@
       "postIdempotent": "This event was already posted (idempotent).",
       "rebuildOk": "Balance rebuilt. Total: {{total}}."
     }
+  },
+  "awards": {
+    "pageTitle": "Awards",
+    "tabs": { "awards": "Awards", "cycles": "Cycles", "nominations": "Nominations", "winners": "Winners" },
+    "filter": { "school": "School" },
+    "actions": {
+      "apply": "Apply",
+      "refresh": "Refresh",
+      "newAward": "New award",
+      "newCycle": "New cycle",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "columns": {
+      "code": "Code",
+      "title": "Title",
+      "cycle": "Cycle kind",
+      "active": "Active",
+      "actions": "Actions",
+      "award": "Award",
+      "period": "Period",
+      "status": "Status",
+      "student": "Student",
+      "createdAt": "Created",
+      "selectedAt": "Selected",
+      "rank": "Rank",
+      "sort": "Sort",
+      "description": "Description",
+      "awardId": "Award ID",
+      "yearId": "Year ID",
+      "start": "Start (UTC)",
+      "end": "End (UTC)"
+    },
+    "cycle": { "week": "Star of week", "month": "Star of month", "term": "Star of term", "year": "Star of year" },
+    "cycleStatus": { "draft": "Draft", "open": "Open", "nominationsClosed": "Nominations closed", "completed": "Completed" },
+    "nominationStatus": { "pending": "Pending", "shortlisted": "Shortlisted", "rejected": "Rejected", "withdrawn": "Withdrawn" },
+    "dialog": { "newAward": "New award", "editAward": "Edit award", "newCycle": "New cycle", "editCycle": "Edit cycle" },
+    "validation": {
+      "awardRequired": "School, code, and title are required.",
+      "cycleRequired": "Award, year, and period dates are required."
+    },
+    "toast": {
+      "created": "Award saved.",
+      "updated": "Award updated.",
+      "cycleCreated": "Cycle saved.",
+      "cycleUpdated": "Cycle updated."
+    },
+    "yes": "Yes",
+    "no": "No",
+    "empty": "No records found.",
+    "noPermission": "You do not have access to this module."
   },
   "orgPlans": {
     "pageTitle": "Strategic plans & goals",
