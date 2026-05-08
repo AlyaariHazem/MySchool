@@ -189,7 +189,6 @@
       "activities": "الأنشطة",
       "organizationalPlans": "الخطط والأهداف",
       "centralPoints": "النقاط المركزية",
-      "awards": "الجوائز",
       "violations": "المخالفات",
       "teacherFeedback": "تقييم المعلمين"
     },
@@ -1218,57 +1217,6 @@
       "postIdempotent": "تم تسجيل هذا الحدث مسبقاً (منع تكرار).",
       "rebuildOk": "تم إعادة بناء الرصيد. الإجمالي: {{total}}."
     }
-  },
-  "awards": {
-    "pageTitle": "الجوائز",
-    "tabs": { "awards": "الجوائز", "cycles": "الدورات", "nominations": "الترشيحات", "winners": "الفائزون" },
-    "filter": { "school": "المدرسة" },
-    "actions": {
-      "apply": "تطبيق",
-      "refresh": "تحديث",
-      "newAward": "جائزة جديدة",
-      "newCycle": "دورة جديدة",
-      "save": "حفظ",
-      "cancel": "إلغاء"
-    },
-    "columns": {
-      "code": "الرمز",
-      "title": "العنوان",
-      "cycle": "نوع الدورة",
-      "active": "نشط",
-      "actions": "إجراءات",
-      "award": "الجائزة",
-      "period": "الفترة",
-      "status": "الحالة",
-      "student": "الطالب",
-      "createdAt": "تاريخ الإنشاء",
-      "selectedAt": "تاريخ الاختيار",
-      "rank": "الترتيب",
-      "sort": "الترتيب",
-      "description": "الوصف",
-      "awardId": "معرّف الجائزة",
-      "yearId": "معرّف السنة",
-      "start": "البداية (UTC)",
-      "end": "النهاية (UTC)"
-    },
-    "cycle": { "week": "نجم الأسبوع", "month": "نجم الشهر", "term": "نجم الفصل", "year": "نجم العام" },
-    "cycleStatus": { "draft": "مسودة", "open": "مفتوحة", "nominationsClosed": "الترشيحات مغلقة", "completed": "مكتملة" },
-    "nominationStatus": { "pending": "قيد الانتظار", "shortlisted": "قائمة مختصرة", "rejected": "مرفوض", "withdrawn": "منسحب" },
-    "dialog": { "newAward": "جائزة جديدة", "editAward": "تعديل جائزة", "newCycle": "دورة جديدة", "editCycle": "تعديل دورة" },
-    "validation": {
-      "awardRequired": "المدرسة والرمز والعنوان مطلوبة.",
-      "cycleRequired": "الجائزة والسنة وتواريخ الفترة مطلوبة."
-    },
-    "toast": {
-      "created": "تم حفظ الجائزة.",
-      "updated": "تم تحديث الجائزة.",
-      "cycleCreated": "تم حفظ الدورة.",
-      "cycleUpdated": "تم تحديث الدورة."
-    },
-    "yes": "نعم",
-    "no": "لا",
-    "empty": "لا توجد بيانات.",
-    "noPermission": "لا تملك صلاحية هذا القسم."
   },
   "orgPlans": {
     "pageTitle": "الخطط والأهداف المؤسسية",

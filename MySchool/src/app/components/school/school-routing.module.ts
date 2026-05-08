@@ -463,12 +463,6 @@ const routes: Routes = [
         canMatch: [permissionGuard],
       },
       {
-        path: 'awards',
-        loadComponent: () => import('./awards/awards-page.component').then((m) => m.AwardsPageComponent),
-        data: { breadcrumb: 'الجوائز', permission: PagePermission.Employees.View },
-        canMatch: [permissionGuard],
-      },
-      {
         path: 'teacher-feedback',
         data: { breadcrumb: 'تقييم المعلم' },
         children: [
