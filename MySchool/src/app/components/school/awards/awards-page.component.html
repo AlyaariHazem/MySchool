@@ -1,0 +1,182 @@
+<div class="employees-hr-page cn-list-page awards-page" [attr.dir]="dir$ | async">
+  <div class="employees-hr-card cn-list-card">
+    <header class="employees-hr-header cn-list-header">
+      <h2 class="employees-hr-title">{{ 'awards.pageTitle' | translate }}</h2>
+    </header>
+
+    <div class="filters-toolbar filters-grid cn-list-filters" *ngIf="canView">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+        <p-select
+          inputId="awd-filter-school"
+          styleClass="w-full cn-filter-select"
+          panelStyleClass="cn-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="filterSchoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="awd-filter-school">{{ 'awards.filter.school' | translate }}</label>
+      </p-floatlabel>
+      <div class="filter-actions">
+        <p-button [label]="'awards.actions.apply' | translate" icon="pi pi-filter" (onClick)="loadAwards()" />
+      </div>
+    </div>
+
+    <div *ngIf="!canView" class="empty-block muted">{{ 'awards.noPermission' | translate }}</div>
+
+    <p-tabs *ngIf="canView" [(value)]="activeTab" class="cp-tabs">
+      <p-tablist>
+        <p-tab value="0" (click)="onTabChange('0')">{{ 'awards.tabs.awards' | translate }}</p-tab>
+        <p-tab value="1" (click)="onTabChange('1')">{{ 'awards.tabs.cycles' | translate }}</p-tab>
+        <p-tab value="2" (click)="onTabChange('2')">{{ 'awards.tabs.nominations' | translate }}</p-tab>
+        <p-tab value="3" (click)="onTabChange('3')">{{ 'awards.tabs.winners' | translate }}</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div class="cp-actions">
+            <p-button *ngIf="canCreate" [label]="'awards.actions.newAward' | translate" icon="pi pi-plus" (onClick)="openAwardCreate()" />
+            <p-button [label]="'awards.actions.refresh' | translate" icon="pi pi-refresh" [outlined]="true" [loading]="awardsLoading" (onClick)="loadAwards()" />
+          </div>
+          <p-table [value]="awardsRows" [loading]="awardsLoading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm employees-hr-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'awards.columns.code' | translate }}</th>
+                <th>{{ 'awards.columns.title' | translate }}</th>
+                <th>{{ 'awards.columns.cycle' | translate }}</th>
+                <th>{{ 'awards.columns.active' | translate }}</th>
+                <th class="cn-actions-col">{{ 'awards.columns.actions' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.code }}</td>
+                <td>{{ row.title }}</td>
+                <td>{{ cycleKindLabel(row.cycleKind) }}</td>
+                <td>{{ row.isActive ? ('awards.yes' | translate) : ('awards.no' | translate) }}</td>
+                <td>
+                  <p-button *ngIf="canUpdate" icon="pi pi-pencil" [rounded]="true" [text]="true" (onClick)="openAwardEdit(row)" />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="5">{{ 'awards.empty' | translate }}</td></tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+
+        <p-tabpanel value="1">
+          <div class="cp-actions">
+            <p-button *ngIf="canCreate" [label]="'awards.actions.newCycle' | translate" icon="pi pi-plus" (onClick)="openCycleCreate()" />
+            <p-button [label]="'awards.actions.refresh' | translate" icon="pi pi-refresh" [outlined]="true" [loading]="cyclesLoading" (onClick)="loadCycles()" />
+          </div>
+          <p-table [value]="cyclesRows" [loading]="cyclesLoading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm employees-hr-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'awards.columns.award' | translate }}</th>
+                <th>{{ 'awards.columns.period' | translate }}</th>
+                <th>{{ 'awards.columns.status' | translate }}</th>
+                <th class="cn-actions-col">{{ 'awards.columns.actions' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.awardTitle || row.awardID }}</td>
+                <td>{{ row.periodStartUtc | date : 'shortDate' }} - {{ row.periodEndUtc | date : 'shortDate' }}</td>
+                <td>{{ cycleStatusLabel(row.status) }}</td>
+                <td>
+                  <p-button *ngIf="canUpdate" icon="pi pi-pencil" [rounded]="true" [text]="true" (onClick)="openCycleEdit(row)" />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="4">{{ 'awards.empty' | translate }}</td></tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+
+        <p-tabpanel value="2">
+          <p-button [label]="'awards.actions.refresh' | translate" icon="pi pi-refresh" [outlined]="true" [loading]="nominationsLoading" (onClick)="loadNominations()" />
+          <p-table [value]="nominationsRows" [loading]="nominationsLoading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm employees-hr-table">
+            <ng-template pTemplate="header"><tr><th>{{ 'awards.columns.student' | translate }}</th><th>{{ 'awards.columns.status' | translate }}</th><th>{{ 'awards.columns.createdAt' | translate }}</th></tr></ng-template>
+            <ng-template pTemplate="body" let-row><tr><td>{{ row.studentName || row.studentID }}</td><td>{{ nominationStatusLabel(row.status) }}</td><td>{{ row.createdAtUtc | date : 'short' }}</td></tr></ng-template>
+            <ng-template pTemplate="emptymessage"><tr><td colspan="3">{{ 'awards.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+
+        <p-tabpanel value="3">
+          <p-button [label]="'awards.actions.refresh' | translate" icon="pi pi-refresh" [outlined]="true" [loading]="winnersLoading" (onClick)="loadWinners()" />
+          <p-table [value]="winnersRows" [loading]="winnersLoading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm employees-hr-table">
+            <ng-template pTemplate="header"><tr><th>{{ 'awards.columns.student' | translate }}</th><th>{{ 'awards.columns.rank' | translate }}</th><th>{{ 'awards.columns.selectedAt' | translate }}</th></tr></ng-template>
+            <ng-template pTemplate="body" let-row><tr><td>{{ row.studentName || row.studentID }}</td><td>{{ row.rank }}</td><td>{{ row.selectedAtUtc | date : 'short' }}</td></tr></ng-template>
+            <ng-template pTemplate="emptymessage"><tr><td colspan="3">{{ 'awards.empty' | translate }}</td></tr></ng-template>
+          </p-table>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+
+  <p-dialog [header]="(awardEditID ? 'awards.dialog.editAward' : 'awards.dialog.newAward') | translate" [(visible)]="awardDialogVisible" [modal]="true" [style]="{ width: 'min(42rem, 95vw)' }">
+    <div class="vio-form-grid">
+      <p-floatlabel variant="on" class="vio-field">
+        <input pInputText id="awd-code" class="w-full" [(ngModel)]="awardForm.code" />
+        <label for="awd-code">{{ 'awards.columns.code' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <input pInputText id="awd-title" class="w-full" [(ngModel)]="awardForm.title" />
+        <label for="awd-title">{{ 'awards.columns.title' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select inputId="awd-kind" styleClass="w-full" [panelStyle]="filterSelectPanelStyle" [options]="cycleKindOptions" [(ngModel)]="awardForm.cycleKind" optionLabel="label" optionValue="value" />
+        <label for="awd-kind">{{ 'awards.columns.cycle' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber inputId="awd-sort" styleClass="w-full" [useGrouping]="false" [(ngModel)]="awardForm.sortOrder" />
+        <label for="awd-sort">{{ 'awards.columns.sort' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field vio-field-span2">
+        <textarea pTextarea id="awd-desc" class="w-full" rows="2" [(ngModel)]="awardForm.description"></textarea>
+        <label for="awd-desc">{{ 'awards.columns.description' | translate }}</label>
+      </p-floatlabel>
+      <div class="vio-field vio-field-span2 cp-checkbox-field">
+        <p-checkbox inputId="awd-active" [(ngModel)]="awardForm.isActive" [binary]="true" />
+        <label for="awd-active">{{ 'awards.columns.active' | translate }}</label>
+      </div>
+    </div>
+    <div class="cp-actions">
+      <p-button [label]="'awards.actions.cancel' | translate" severity="secondary" [outlined]="true" (onClick)="awardDialogVisible=false" />
+      <p-button [label]="'awards.actions.save' | translate" (onClick)="saveAward()" [loading]="awardSaving" />
+    </div>
+  </p-dialog>
+
+  <p-dialog [header]="(cycleEditID ? 'awards.dialog.editCycle' : 'awards.dialog.newCycle') | translate" [(visible)]="cycleDialogVisible" [modal]="true" [style]="{ width: 'min(42rem, 95vw)' }">
+    <div class="vio-form-grid">
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber inputId="cy-award" styleClass="w-full" [useGrouping]="false" [(ngModel)]="cycleForm.awardID" />
+        <label for="cy-award">{{ 'awards.columns.awardId' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-inputNumber inputId="cy-year" styleClass="w-full" [useGrouping]="false" [(ngModel)]="cycleForm.academicYearID" />
+        <label for="cy-year">{{ 'awards.columns.yearId' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <input pInputText id="cy-start" class="w-full" [(ngModel)]="cycleForm.periodStartUtc" />
+        <label for="cy-start">{{ 'awards.columns.start' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <input pInputText id="cy-end" class="w-full" [(ngModel)]="cycleForm.periodEndUtc" />
+        <label for="cy-end">{{ 'awards.columns.end' | translate }}</label>
+      </p-floatlabel>
+      <p-floatlabel variant="on" class="vio-field">
+        <p-select inputId="cy-status" styleClass="w-full" [panelStyle]="filterSelectPanelStyle" [options]="cycleStatusOptions" [(ngModel)]="cycleForm.status" optionLabel="label" optionValue="value" />
+        <label for="cy-status">{{ 'awards.columns.status' | translate }}</label>
+      </p-floatlabel>
+    </div>
+    <div class="cp-actions">
+      <p-button [label]="'awards.actions.cancel' | translate" severity="secondary" [outlined]="true" (onClick)="cycleDialogVisible=false" />
+      <p-button [label]="'awards.actions.save' | translate" (onClick)="saveCycle()" [loading]="cycleSaving" />
+    </div>
+  </p-dialog>
+</div>
