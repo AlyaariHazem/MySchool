@@ -1,0 +1,53 @@
+@import '../meetings/meetings-list.component.scss';
+@import '../central-points/central-points-page.component.scss';
+
+.analytics-page {
+  .analytics-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .analytics-card {
+    border: 1px solid var(--surface-border, #e2e8f0);
+    border-radius: 10px;
+    background: var(--surface-50, #f8fafc);
+    padding: 0.8rem 0.9rem;
+  }
+
+  .analytics-card-title {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .analytics-card-value {
+    margin-top: 0.25rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .analytics-summaries {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .analytics-summary-card {
+    border: 1px solid var(--surface-border, #e2e8f0);
+    border-radius: 10px;
+    padding: 0.85rem;
+    background: #fff;
+  }
+
+  .analytics-summary-card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+}

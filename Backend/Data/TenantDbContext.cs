@@ -153,6 +153,12 @@ namespace Backend.Data
         public DbSet<AwardCycle> AwardCycles { get; set; }
         public DbSet<AwardNomination> AwardNominations { get; set; }
         public DbSet<AwardWinner> AwardWinners { get; set; }
+        public DbSet<KpiDefinition> KpiDefinitions { get; set; }
+        public DbSet<KpiSnapshot> KpiSnapshots { get; set; }
+        public DbSet<DepartmentAnalytics> DepartmentAnalytics { get; set; }
+        public DbSet<TeacherAnalytics> TeacherAnalytics { get; set; }
+        public DbSet<SchoolAnalytics> SchoolAnalytics { get; set; }
+        public DbSet<TrendAnalysis> TrendAnalyses { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -2574,6 +2580,186 @@ namespace Backend.Data
                 .HasOne(x => x.SelectedByEmployeeProfile)
                 .WithMany()
                 .HasForeignKey(x => x.SelectedByEmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- Institutional analytics & KPI dashboards ---
+            modelBuilder.Entity<KpiDefinition>()
+                .ToTable("KpiDefinitions");
+            modelBuilder.Entity<KpiDefinition>()
+                .HasKey(x => x.KpiDefinitionID);
+            modelBuilder.Entity<KpiDefinition>()
+                .Property(x => x.KpiDefinitionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<KpiDefinition>()
+                .HasIndex(x => new { x.SchoolID, x.Code })
+                .IsUnique();
+            modelBuilder.Entity<KpiDefinition>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<KpiSnapshot>()
+                .ToTable("KpiSnapshots");
+            modelBuilder.Entity<KpiSnapshot>()
+                .HasKey(x => x.KpiSnapshotID);
+            modelBuilder.Entity<KpiSnapshot>()
+                .Property(x => x.KpiSnapshotID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<KpiSnapshot>()
+                .Property(x => x.PeriodKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<KpiSnapshot>()
+                .HasIndex(x => new { x.KpiDefinitionID, x.SchoolID, x.PeriodStartUtc, x.PeriodEndUtc });
+            modelBuilder.Entity<KpiSnapshot>()
+                .HasOne(x => x.KpiDefinition)
+                .WithMany(d => d.Snapshots)
+                .HasForeignKey(x => x.KpiDefinitionID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<KpiSnapshot>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<KpiSnapshot>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<KpiSnapshot>()
+                .HasOne(x => x.Term)
+                .WithMany()
+                .HasForeignKey(x => x.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<KpiSnapshot>()
+                .HasOne(x => x.EmployeeProfile)
+                .WithMany()
+                .HasForeignKey(x => x.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DepartmentAnalytics>()
+                .ToTable("DepartmentAnalytics");
+            modelBuilder.Entity<DepartmentAnalytics>()
+                .HasKey(x => x.DepartmentAnalyticsID);
+            modelBuilder.Entity<DepartmentAnalytics>()
+                .Property(x => x.DepartmentAnalyticsID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<DepartmentAnalytics>()
+                .Property(x => x.PeriodKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<DepartmentAnalytics>()
+                .HasIndex(x => new { x.SchoolID, x.DepartmentName, x.PeriodStartUtc, x.PeriodEndUtc });
+            modelBuilder.Entity<DepartmentAnalytics>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DepartmentAnalytics>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DepartmentAnalytics>()
+                .HasOne(x => x.Term)
+                .WithMany()
+                .HasForeignKey(x => x.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TeacherAnalytics>()
+                .ToTable("TeacherAnalytics");
+            modelBuilder.Entity<TeacherAnalytics>()
+                .HasKey(x => x.TeacherAnalyticsID);
+            modelBuilder.Entity<TeacherAnalytics>()
+                .Property(x => x.TeacherAnalyticsID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<TeacherAnalytics>()
+                .Property(x => x.PeriodKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<TeacherAnalytics>()
+                .HasIndex(x => new { x.SchoolID, x.EmployeeProfileID, x.PeriodStartUtc, x.PeriodEndUtc });
+            modelBuilder.Entity<TeacherAnalytics>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TeacherAnalytics>()
+                .HasOne(x => x.EmployeeProfile)
+                .WithMany()
+                .HasForeignKey(x => x.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TeacherAnalytics>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TeacherAnalytics>()
+                .HasOne(x => x.Term)
+                .WithMany()
+                .HasForeignKey(x => x.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SchoolAnalytics>()
+                .ToTable("SchoolAnalytics");
+            modelBuilder.Entity<SchoolAnalytics>()
+                .HasKey(x => x.SchoolAnalyticsID);
+            modelBuilder.Entity<SchoolAnalytics>()
+                .Property(x => x.SchoolAnalyticsID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<SchoolAnalytics>()
+                .Property(x => x.PeriodKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<SchoolAnalytics>()
+                .HasIndex(x => new { x.SchoolID, x.PeriodStartUtc, x.PeriodEndUtc });
+            modelBuilder.Entity<SchoolAnalytics>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<SchoolAnalytics>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<SchoolAnalytics>()
+                .HasOne(x => x.Term)
+                .WithMany()
+                .HasForeignKey(x => x.TermID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TrendAnalysis>()
+                .ToTable("TrendAnalysis");
+            modelBuilder.Entity<TrendAnalysis>()
+                .HasKey(x => x.TrendAnalysisID);
+            modelBuilder.Entity<TrendAnalysis>()
+                .Property(x => x.TrendAnalysisID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<TrendAnalysis>()
+                .Property(x => x.PeriodKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<TrendAnalysis>()
+                .Property(x => x.DashboardAudience)
+                .HasConversion<int>();
+            modelBuilder.Entity<TrendAnalysis>()
+                .HasIndex(x => new { x.SchoolID, x.KpiDefinitionID, x.DashboardAudience, x.FromUtc, x.ToUtc });
+            modelBuilder.Entity<TrendAnalysis>()
+                .HasOne(x => x.School)
+                .WithMany()
+                .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TrendAnalysis>()
+                .HasOne(x => x.KpiDefinition)
+                .WithMany()
+                .HasForeignKey(x => x.KpiDefinitionID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TrendAnalysis>()
+                .HasOne(x => x.AcademicYear)
+                .WithMany()
+                .HasForeignKey(x => x.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<TrendAnalysis>()
+                .HasOne(x => x.EmployeeProfile)
+                .WithMany()
+                .HasForeignKey(x => x.EmployeeProfileID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- Achievements: catalog, requests, approvals, attachments, points ledger ---

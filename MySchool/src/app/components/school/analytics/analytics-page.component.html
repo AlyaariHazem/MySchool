@@ -1,0 +1,188 @@
+<div class="employees-hr-page cn-list-page analytics-page" [attr.dir]="dir$ | async">
+  <div class="employees-hr-card cn-list-card">
+    <header class="employees-hr-header cn-list-header">
+      <h2 class="employees-hr-title">{{ 'analytics.pageTitle' | translate }}</h2>
+    </header>
+
+    <div class="filters-toolbar filters-grid cn-list-filters" *ngIf="canView">
+      <p-floatlabel *ngIf="!isSchoolManager" variant="on" class="filter-field">
+        <p-select
+          inputId="an-filter-school"
+          styleClass="w-full cn-filter-select"
+          panelStyleClass="cn-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="schoolOptions"
+          [(ngModel)]="filterSchoolID"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+        />
+        <label for="an-filter-school">{{ 'analytics.filter.school' | translate }}</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="on" class="filter-field">
+        <p-select
+          inputId="an-filter-period"
+          styleClass="w-full cn-filter-select"
+          panelStyleClass="cn-filter-select-panel"
+          [panelStyle]="filterSelectPanelStyle"
+          [options]="periodKindOptions"
+          [(ngModel)]="filterPeriodKind"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label for="an-filter-period">{{ 'analytics.filter.period' | translate }}</label>
+      </p-floatlabel>
+
+      <div class="filter-actions">
+        <p-button [label]="'analytics.actions.apply' | translate" icon="pi pi-filter" (onClick)="applyFilters()" />
+        <p-button
+          [label]="'analytics.actions.refresh' | translate"
+          icon="pi pi-refresh"
+          [outlined]="true"
+          [loading]="loading"
+          (onClick)="applyFilters()"
+        />
+      </div>
+    </div>
+
+    <div *ngIf="!canView" class="empty-block muted">{{ 'analytics.noPermission' | translate }}</div>
+
+    <p-tabs *ngIf="canView" [(value)]="activeTab" class="cp-tabs">
+      <p-tablist>
+        <p-tab value="top" (click)="onTabChange('top')">{{ 'analytics.tabs.topManagement' | translate }}</p-tab>
+        <p-tab value="edu" (click)="onTabChange('edu')">{{ 'analytics.tabs.educationalSupervisor' | translate }}</p-tab>
+        <p-tab value="admin" (click)="onTabChange('admin')">{{ 'analytics.tabs.administrativeSupervisor' | translate }}</p-tab>
+        <p-tab value="self" (click)="onTabChange('self')">{{ 'analytics.tabs.employeeSelf' | translate }}</p-tab>
+        <p-tab value="school" (click)="onTabChange('school')">{{ 'analytics.tabs.school' | translate }}</p-tab>
+        <p-tab value="years" (click)="onTabChange('years')">{{ 'analytics.tabs.yearComparison' | translate }}</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel [value]="activeTab">
+          <div class="analytics-cards" *ngIf="cards.length > 0">
+            <article class="analytics-card" *ngFor="let card of cards">
+              <h4 class="analytics-card-title">{{ card.label || card.code }}</h4>
+              <div class="analytics-card-value">{{ card.value | number : '1.0-2' }}</div>
+              <small class="muted" *ngIf="card.target != null || card.trend != null">
+                <span *ngIf="card.target != null">{{ 'analytics.card.target' | translate }}: {{ card.target | number : '1.0-2' }}</span>
+                <span *ngIf="card.target != null && card.trend != null"> • </span>
+                <span *ngIf="card.trend != null">{{ 'analytics.card.trend' | translate }}: {{ card.trend | number : '1.0-2' }}</span>
+              </small>
+            </article>
+          </div>
+
+          <p-table [value]="snapshotRows" [loading]="loading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm employees-hr-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'analytics.columns.kpi' | translate }}</th>
+                <th>{{ 'analytics.columns.department' | translate }}</th>
+                <th>{{ 'analytics.columns.value' | translate }}</th>
+                <th>{{ 'analytics.columns.target' | translate }}</th>
+                <th>{{ 'analytics.columns.period' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.kpiTitle || row.kpiDefinitionID }}</td>
+                <td>{{ row.departmentName || '—' }}</td>
+                <td>{{ row.value | number : '1.0-2' }}</td>
+                <td>{{ row.targetValue != null ? (row.targetValue | number : '1.0-2') : '—' }}</td>
+                <td>{{ row.periodStartUtc | date : 'shortDate' }} - {{ row.periodEndUtc | date : 'shortDate' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="5">{{ 'analytics.empty' | translate }}</td></tr>
+            </ng-template>
+          </p-table>
+
+          <p-table [value]="trendRows" [loading]="loading" [paginator]="true" [rows]="10" styleClass="p-datatable-sm employees-hr-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'analytics.columns.kpi' | translate }}</th>
+                <th>{{ 'analytics.columns.baseline' | translate }}</th>
+                <th>{{ 'analytics.columns.current' | translate }}</th>
+                <th>{{ 'analytics.columns.delta' | translate }}</th>
+                <th>{{ 'analytics.columns.deltaPercent' | translate }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td>{{ row.kpiTitle || row.kpiDefinitionID }}</td>
+                <td>{{ row.baselineValue != null ? (row.baselineValue | number : '1.0-2') : '—' }}</td>
+                <td>{{ row.currentValue != null ? (row.currentValue | number : '1.0-2') : '—' }}</td>
+                <td>{{ row.deltaValue != null ? (row.deltaValue | number : '1.0-2') : '—' }}</td>
+                <td>{{ row.deltaPercent != null ? ((row.deltaPercent | number : '1.0-2') + '%') : '—' }}</td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="5">{{ 'analytics.empty' | translate }}</td></tr>
+            </ng-template>
+          </p-table>
+
+          <div class="analytics-summaries">
+            <section class="analytics-summary-card">
+              <h3>{{ 'analytics.sections.department' | translate }}</h3>
+              <p-table [value]="departmentRows" [loading]="loading" [paginator]="true" [rows]="5" styleClass="p-datatable-sm employees-hr-table">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>{{ 'analytics.columns.department' | translate }}</th>
+                    <th>{{ 'analytics.columns.averageScore' | translate }}</th>
+                    <th>{{ 'analytics.columns.targetAchievement' | translate }}</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-row>
+                  <tr>
+                    <td>{{ row.departmentName }}</td>
+                    <td>{{ row.averageScore != null ? (row.averageScore | number : '1.0-2') : '—' }}</td>
+                    <td>{{ row.targetAchievementPercent != null ? ((row.targetAchievementPercent | number : '1.0-2') + '%') : '—' }}</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </section>
+
+            <section class="analytics-summary-card">
+              <h3>{{ 'analytics.sections.teacher' | translate }}</h3>
+              <p-table [value]="teacherRows" [loading]="loading" [paginator]="true" [rows]="5" styleClass="p-datatable-sm employees-hr-table">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>{{ 'analytics.columns.teacher' | translate }}</th>
+                    <th>{{ 'analytics.columns.compositeScore' | translate }}</th>
+                    <th>{{ 'analytics.columns.targetAchievement' | translate }}</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-row>
+                  <tr>
+                    <td>{{ row.employeeName || row.employeeProfileID }}</td>
+                    <td>{{ row.compositeScore != null ? (row.compositeScore | number : '1.0-2') : '—' }}</td>
+                    <td>{{ row.targetAchievementPercent != null ? ((row.targetAchievementPercent | number : '1.0-2') + '%') : '—' }}</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </section>
+
+            <section class="analytics-summary-card">
+              <h3>{{ 'analytics.sections.school' | translate }}</h3>
+              <p-table [value]="schoolRows" [loading]="loading" [paginator]="true" [rows]="5" styleClass="p-datatable-sm employees-hr-table">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>{{ 'analytics.columns.period' | translate }}</th>
+                    <th>{{ 'analytics.columns.overallScore' | translate }}</th>
+                    <th>{{ 'analytics.columns.targetAchievement' | translate }}</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-row>
+                  <tr>
+                    <td>{{ row.periodStartUtc | date : 'shortDate' }} - {{ row.periodEndUtc | date : 'shortDate' }}</td>
+                    <td>{{ row.overallScore != null ? (row.overallScore | number : '1.0-2') : '—' }}</td>
+                    <td>{{ row.targetAchievementPercent != null ? ((row.targetAchievementPercent | number : '1.0-2') + '%') : '—' }}</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </section>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>

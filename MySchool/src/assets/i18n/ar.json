@@ -190,6 +190,7 @@
       "organizationalPlans": "الخطط والأهداف",
       "centralPoints": "النقاط المركزية",
       "awards": "الجوائز",
+      "analytics": "لوحات التحليلات",
       "violations": "المخالفات",
       "teacherFeedback": "تقييم المعلمين"
     },
@@ -1267,6 +1268,59 @@
     },
     "yes": "نعم",
     "no": "لا",
+    "empty": "لا توجد بيانات.",
+    "noPermission": "لا تملك صلاحية هذا القسم."
+  },
+  "analytics": {
+    "pageTitle": "لوحات تحليلات الأداء المؤسسي",
+    "tabs": {
+      "topManagement": "الإدارة العليا",
+      "educationalSupervisor": "المشرف التربوي",
+      "administrativeSupervisor": "المشرف الإداري",
+      "employeeSelf": "الموظف نفسه",
+      "school": "لوحة المدرسة",
+      "yearComparison": "مقارنة بين سنوات"
+    },
+    "actions": {
+      "apply": "تطبيق",
+      "refresh": "تحديث"
+    },
+    "filter": {
+      "school": "المدرسة",
+      "period": "الفترة"
+    },
+    "period": {
+      "daily": "يومي",
+      "weekly": "أسبوعي",
+      "monthly": "شهري",
+      "termly": "فصلي",
+      "yearly": "سنوي"
+    },
+    "card": {
+      "target": "المستهدف",
+      "trend": "الاتجاه"
+    },
+    "sections": {
+      "department": "تحليلات الأقسام",
+      "teacher": "تحليلات المعلمين",
+      "school": "تحليلات المدرسة"
+    },
+    "columns": {
+      "kpi": "مؤشر الأداء",
+      "department": "القسم",
+      "teacher": "المعلم",
+      "value": "القيمة",
+      "target": "المستهدف",
+      "period": "الفترة",
+      "baseline": "خط الأساس",
+      "current": "القيمة الحالية",
+      "delta": "الفارق",
+      "deltaPercent": "نسبة الفارق",
+      "averageScore": "متوسط الدرجة",
+      "compositeScore": "الدرجة المركبة",
+      "overallScore": "الدرجة الكلية",
+      "targetAchievement": "نسبة تحقيق المستهدف"
+    },
     "empty": "لا توجد بيانات.",
     "noPermission": "لا تملك صلاحية هذا القسم."
   },

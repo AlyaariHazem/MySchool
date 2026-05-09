@@ -189,6 +189,7 @@
       "organizationalPlans": "Plans & goals",
       "centralPoints": "Central points",
       "awards": "Awards",
+      "analytics": "Analytics dashboards",
       "violations": "Violations",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
@@ -1267,6 +1268,59 @@
     "yes": "Yes",
     "no": "No",
     "empty": "No records found.",
+    "noPermission": "You do not have access to this module."
+  },
+  "analytics": {
+    "pageTitle": "Performance analytics dashboards",
+    "tabs": {
+      "topManagement": "Top management",
+      "educationalSupervisor": "Educational supervisor",
+      "administrativeSupervisor": "Administrative supervisor",
+      "employeeSelf": "Employee self",
+      "school": "School",
+      "yearComparison": "Year comparison"
+    },
+    "actions": {
+      "apply": "Apply",
+      "refresh": "Refresh"
+    },
+    "filter": {
+      "school": "School",
+      "period": "Period"
+    },
+    "period": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "termly": "Termly",
+      "yearly": "Yearly"
+    },
+    "card": {
+      "target": "Target",
+      "trend": "Trend"
+    },
+    "sections": {
+      "department": "Department analytics",
+      "teacher": "Teacher analytics",
+      "school": "School analytics"
+    },
+    "columns": {
+      "kpi": "KPI",
+      "department": "Department",
+      "teacher": "Teacher",
+      "value": "Value",
+      "target": "Target",
+      "period": "Period",
+      "baseline": "Baseline",
+      "current": "Current",
+      "delta": "Delta",
+      "deltaPercent": "Delta %",
+      "averageScore": "Avg score",
+      "compositeScore": "Composite score",
+      "overallScore": "Overall score",
+      "targetAchievement": "Target achievement %"
+    },
+    "empty": "No data found.",
     "noPermission": "You do not have access to this module."
   },
   "orgPlans": {
