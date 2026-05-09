@@ -101,6 +101,7 @@ public class UnitOfWork : IUnitOfWork
         Activities = new ActivityRepository(_tenantContext);
         OrganizationalPlans = new OrganizationalPlanRepository(_tenantContext);
         CentralPoints = new CentralPointsRepository(_tenantContext);
+        Analytics = new AnalyticsRepository(_tenantContext);
 
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
@@ -151,6 +152,7 @@ public class UnitOfWork : IUnitOfWork
     public IActivityRepository Activities { get; private set; }
     public IOrganizationalPlanRepository OrganizationalPlans { get; private set; }
     public ICentralPointsRepository CentralPoints { get; private set; }
+    public IAnalyticsRepository Analytics { get; private set; }
 
     public async Task<int> CompleteAsync()
     {

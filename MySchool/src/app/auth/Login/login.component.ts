@@ -39,6 +39,10 @@ export class LoginComponent {
   /** When true, password input is masked; toggle via suffix eye control. */
   hidePassword = true;
 
+  constructor() {
+    this.logout();
+  }
+
   togglePasswordVisibility(event?: Event): void {
     event?.stopPropagation();
     if (this.isLoading) {
@@ -113,4 +117,6 @@ export class LoginComponent {
       timeOut: 5000,
     });
   }
+  
+  logout() { this.authService.logout().subscribe(); }
 }

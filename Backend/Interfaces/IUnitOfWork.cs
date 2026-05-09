@@ -55,5 +55,6 @@ public interface IUnitOfWork : IDisposable
     IActivityRepository Activities { get; }
     IOrganizationalPlanRepository OrganizationalPlans { get; }
     ICentralPointsRepository CentralPoints { get; }
+    IAnalyticsRepository Analytics { get; }
     Task<int> CompleteAsync();
 }
