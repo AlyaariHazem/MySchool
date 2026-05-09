@@ -97,13 +97,299 @@
             <div class="tc-section-card">
               <h3 class="tc-h3">{{ s.title }}</h3>
               <ng-container [ngSwitch]="s.sectionType">
-                <div *ngSwitchCase="3" class="tc-chips">
-                  <span class="tc-chip" *ngFor="let a of asAchievementRows(parseJson(s.dataJson))">{{ a }}</span>
+                <!-- 1: General info -->
+                <div *ngSwitchCase="1" class="tc-snap tc-snap-general">
+                  @let snapG = parseJson(s.dataJson);
+                  @let g = generalInfoVM(snapG);
+                  @let fn = fullNameLine(snapG);
+                  <div class="tc-gen-head">
+                    <p class="tc-gen-display" *ngIf="g.displayName">{{ g.displayName }}</p>
+                    <p class="tc-gen-fullname" *ngIf="fn && fn !== g.displayName">{{ fn }}</p>
+                  </div>
+                  <div class="tc-kv-grid">
+                    <div class="tc-kv" *ngIf="g.employeeCode">
+                      <span class="tc-k">{{ 'timeCapsule.snapshot.employeeCode' | translate }}</span>
+                      <span class="tc-v">{{ g.employeeCode }}</span>
+                    </div>
+                    <div class="tc-kv" *ngIf="g.jobType">
+                      <span class="tc-k">{{ 'timeCapsule.snapshot.jobType' | translate }}</span>
+                      <span class="tc-v">{{ g.jobType }}</span>
+                    </div>
+                    <div class="tc-kv" *ngIf="g.hireDate">
+                      <span class="tc-k">{{ 'timeCapsule.snapshot.hireDate' | translate }}</span>
+                      <span class="tc-v">{{ g.hireDate | date: 'mediumDate' }}</span>
+                    </div>
+                    <div class="tc-kv" *ngIf="g.employmentStatus">
+                      <span class="tc-k">{{ 'timeCapsule.snapshot.employmentStatus' | translate }}</span>
+                      <span class="tc-v">{{ g.employmentStatus }}</span>
+                    </div>
+                    <div class="tc-kv" *ngIf="g.email">
+                      <span class="tc-k">{{ 'timeCapsule.snapshot.email' | translate }}</span>
+                      <span class="tc-v"><a class="tc-link" [href]="'mailto:' + g.email">{{ g.email }}</a></span>
+                    </div>
+                    <div class="tc-kv" *ngIf="g.phone">
+                      <span class="tc-k">{{ 'timeCapsule.snapshot.phone' | translate }}</span>
+                      <span class="tc-v">{{ g.phone }}</span>
+                    </div>
+                  </div>
+                  <div class="tc-subblock" *ngIf="g.history.length">
+                    <h4 class="tc-h4">{{ 'timeCapsule.snapshot.historyTitle' | translate }}</h4>
+                    <ul class="tc-history-list">
+                      <li *ngFor="let h of g.history" class="tc-history-item">
+                        <span class="tc-history-title">{{ h.jobTitle || ('—') }}</span>
+                        <span class="tc-history-meta" *ngIf="h.department">{{ h.department }}</span>
+                        <span class="tc-history-dates" *ngIf="h.startDate || h.endDate">
+                          {{ h.startDate | date: 'mediumDate' }} — {{ (h.endDate | date: 'mediumDate') || '…' }}
+                        </span>
+                        <p class="tc-history-notes" *ngIf="h.notes">{{ h.notes }}</p>
+                      </li>
+                    </ul>
+                  </div>
+                  <p class="tc-empty-hint" *ngIf="!g.displayName && !g.employeeCode && !g.history.length">
+                    {{ 'timeCapsule.snapshot.empty' | translate }}
+                  </p>
                 </div>
-                <div *ngSwitchCase="4" class="tc-chips tc-chips-warn">
-                  <span class="tc-chip" *ngFor="let v of asViolationRows(parseJson(s.dataJson))">{{ v }}</span>
+
+                <!-- 2: Performance timeline (detail; chart is above) -->
+                <div *ngSwitchCase="2" class="tc-snap tc-snap-perf">
+                  @let perfData = parseJson(s.dataJson);
+                  @let years = performanceYearsVM(perfData);
+                  @let analytics = performanceAnalyticsVM(perfData);
+                  <p class="tc-snap-lead">{{ 'timeCapsule.snapshot.perfDetailTitle' | translate }}</p>
+                  <div class="tc-year-cards" *ngIf="years.length">
+                    <div class="tc-year-card" *ngFor="let y of years">
+                      <div class="tc-year-card-head">
+                        <span class="tc-year-label">{{ y.yearLabel }}</span>
+                        <span class="tc-year-badge" *ngIf="y.performanceLevel">{{ y.performanceLevel }}</span>
+                      </div>
+                      <div class="tc-year-metrics">
+                        <div class="tc-ym" *ngIf="y.evaluationScore != null">
+                          <span class="tc-ym-l">{{ 'timeCapsule.snapshot.evaluationScore' | translate }}</span>
+                          <span class="tc-ym-v">{{ y.evaluationScore | number: '1.0-2' }}</span>
+                        </div>
+                        <div class="tc-ym">
+                          <span class="tc-ym-l">{{ 'timeCapsule.snapshot.dailyEvalCount' | translate }}</span>
+                          <span class="tc-ym-v">{{ y.dailyEvaluationCount }}</span>
+                        </div>
+                        <div class="tc-ym" *ngIf="y.dailyEvaluationAverage != null">
+                          <span class="tc-ym-l">{{ 'timeCapsule.snapshot.dailyEvalAvg' | translate }}</span>
+                          <span class="tc-ym-v">{{ y.dailyEvaluationAverage | number: '1.0-2' }}</span>
+                        </div>
+                        <div class="tc-ym">
+                          <span class="tc-ym-l">{{ 'timeCapsule.snapshot.achvPts' | translate }}</span>
+                          <span class="tc-ym-v">{{ y.achievementPoints }}</span>
+                        </div>
+                        <div class="tc-ym">
+                          <span class="tc-ym-l">{{ 'timeCapsule.snapshot.violPts' | translate }}</span>
+                          <span class="tc-ym-v">{{ y.violationPoints }}</span>
+                        </div>
+                      </div>
+                      <p class="tc-year-blurb" *ngIf="y.strengthsSummary">
+                        <strong>{{ 'timeCapsule.snapshot.strengths' | translate }}:</strong> {{ y.strengthsSummary }}
+                      </p>
+                      <p class="tc-year-blurb" *ngIf="y.weaknessesSummary">
+                        <strong>{{ 'timeCapsule.snapshot.weaknesses' | translate }}:</strong> {{ y.weaknessesSummary }}
+                      </p>
+                    </div>
+                  </div>
+                  <p class="tc-empty-hint" *ngIf="!years.length">{{ 'timeCapsule.snapshot.noYears' | translate }}</p>
+                  <div class="tc-analytics-block" *ngIf="analytics.length">
+                    <h4 class="tc-h4">{{ 'timeCapsule.snapshot.analyticsSnapshots' | translate }}</h4>
+                    <div class="tc-table-wrap">
+                      <table class="tc-table">
+                        <thead>
+                          <tr>
+                            <th>{{ 'timeCapsule.snapshot.yearCol' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.periodKind' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.compositeScore' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.avgDailyEval' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.trend' | translate }}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let r of analytics">
+                            <td>{{ r.academicYearId ?? '—' }}</td>
+                            <td>{{ r.periodKind || '—' }}</td>
+                            <td>{{ r.compositeScore != null ? (r.compositeScore | number: '1.0-2') : '—' }}</td>
+                            <td>{{ r.averageDailyEvaluationScore != null ? (r.averageDailyEvaluationScore | number: '1.0-2') : '—' }}</td>
+                            <td>{{ r.trend || '—' }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-                <pre class="tc-json" *ngSwitchDefault>{{ stringify(parseJson(s.dataJson)) }}</pre>
+
+                <!-- 3: Achievements -->
+                <div *ngSwitchCase="3" class="tc-snap tc-snap-list">
+                  @let ach = achievementsList(parseJson(s.dataJson));
+                  <div class="tc-item-cards" *ngIf="ach.length">
+                    <div class="tc-item-card tc-item-card--ok" *ngFor="let a of ach">
+                      <div class="tc-item-card-main">
+                        <span class="tc-item-title">{{ a.title }}</span>
+                        <span class="tc-item-badge" *ngIf="a.status">{{ a.status }}</span>
+                      </div>
+                      <div class="tc-item-meta">
+                        <span *ngIf="a.academicYearId != null">{{ 'timeCapsule.snapshot.yearCol' | translate }}: {{ a.academicYearId }}</span>
+                        <span *ngIf="a.pointsHint != null">{{ 'timeCapsule.snapshot.achvPts' | translate }}: {{ a.pointsHint }}</span>
+                        <span *ngIf="a.submittedAtUtc">{{ 'timeCapsule.snapshot.submittedAt' | translate }}: {{ a.submittedAtUtc | date: 'short' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="tc-empty-hint" *ngIf="!ach.length">{{ 'timeCapsule.snapshot.empty' | translate }}</p>
+                </div>
+
+                <!-- 4: Violations -->
+                <div *ngSwitchCase="4" class="tc-snap tc-snap-list">
+                  @let viol = violationsList(parseJson(s.dataJson));
+                  <div class="tc-item-cards" *ngIf="viol.length">
+                    <div class="tc-item-card tc-item-card--warn" *ngFor="let v of viol">
+                      <div class="tc-item-card-main">
+                        <span class="tc-item-title">{{ v.title }}</span>
+                        <span class="tc-item-badge" *ngIf="v.status">{{ v.status }}</span>
+                      </div>
+                      <div class="tc-item-meta">
+                        <span *ngIf="v.typeName">{{ v.typeName }}</span>
+                        <span *ngIf="v.academicYearId != null">{{ 'timeCapsule.snapshot.yearCol' | translate }}: {{ v.academicYearId }}</span>
+                        <span *ngIf="v.openedAtUtc">{{ 'timeCapsule.snapshot.openedAt' | translate }}: {{ v.openedAtUtc | date: 'short' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="tc-empty-hint" *ngIf="!viol.length">{{ 'timeCapsule.snapshot.empty' | translate }}</p>
+                </div>
+
+                <!-- 5: Evaluations summary -->
+                <div *ngSwitchCase="5" class="tc-snap tc-snap-eval">
+                  @let ev = evalSummaryVM(parseJson(s.dataJson));
+                  <div class="tc-stat-row">
+                    <div class="tc-stat-pill">
+                      <span class="tc-stat-n">{{ ev.totalEvaluations }}</span>
+                      <span class="tc-stat-l">{{ 'timeCapsule.snapshot.evalTotal' | translate }}</span>
+                    </div>
+                    <div class="tc-stat-pill">
+                      <span class="tc-stat-n">{{ ev.averageScore != null ? (ev.averageScore | number: '1.0-2') : '—' }}</span>
+                      <span class="tc-stat-l">{{ 'timeCapsule.snapshot.evalAvg' | translate }}</span>
+                    </div>
+                  </div>
+                  <div class="tc-subblock" *ngIf="ev.byYear.length">
+                    <h4 class="tc-h4">{{ 'timeCapsule.snapshot.evalByYear' | translate }}</h4>
+                    <div class="tc-table-wrap">
+                      <table class="tc-table">
+                        <thead>
+                          <tr>
+                            <th>{{ 'timeCapsule.snapshot.yearCol' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.countCol' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.avgCol' | translate }}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let r of ev.byYear">
+                            <td>{{ r.academicYearId }}</td>
+                            <td>{{ r.count }}</td>
+                            <td>{{ r.average != null ? (r.average | number: '1.0-2') : '—' }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <p class="tc-empty-hint" *ngIf="!ev.totalEvaluations && !ev.byYear.length">{{ 'timeCapsule.snapshot.empty' | translate }}</p>
+                </div>
+
+                <!-- 6: Activities -->
+                <div *ngSwitchCase="6" class="tc-snap tc-snap-list">
+                  @let acts = activitiesList(parseJson(s.dataJson));
+                  <div class="tc-item-cards" *ngIf="acts.length">
+                    <div class="tc-item-card" *ngFor="let act of acts">
+                      <div class="tc-item-card-main">
+                        <span class="tc-item-title">{{ act.title }}</span>
+                        <span class="tc-item-badge" *ngIf="act.status">{{ act.status }}</span>
+                      </div>
+                      <div class="tc-item-meta">
+                        <span *ngIf="act.academicYearId != null">{{ 'timeCapsule.snapshot.yearCol' | translate }}: {{ act.academicYearId }}</span>
+                        <span *ngIf="act.submittedAtUtc">{{ 'timeCapsule.snapshot.submittedAt' | translate }}: {{ act.submittedAtUtc | date: 'short' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="tc-empty-hint" *ngIf="!acts.length">{{ 'timeCapsule.snapshot.empty' | translate }}</p>
+                </div>
+
+                <!-- 7: Reports / documents -->
+                <div *ngSwitchCase="7" class="tc-snap tc-snap-list">
+                  @let reps = reportsList(parseJson(s.dataJson));
+                  <div class="tc-item-cards" *ngIf="reps.length">
+                    <div class="tc-item-card tc-item-card--doc" *ngFor="let rep of reps">
+                      <div class="tc-item-card-main">
+                        <span class="tc-item-title">{{ rep.title }}</span>
+                      </div>
+                      <div class="tc-item-meta">
+                        <span *ngIf="rep.documentType">{{ 'timeCapsule.snapshot.documentType' | translate }}: {{ rep.documentType }}</span>
+                        <span *ngIf="rep.uploadedAtUtc">{{ 'timeCapsule.snapshot.uploadedAt' | translate }}: {{ rep.uploadedAtUtc | date: 'short' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="tc-empty-hint" *ngIf="!reps.length">{{ 'timeCapsule.snapshot.empty' | translate }}</p>
+                </div>
+
+                <!-- 8: Final summary -->
+                <div *ngSwitchCase="8" class="tc-snap tc-snap-final">
+                  @let fin = finalSummaryVM(parseJson(s.dataJson));
+                  <h4 class="tc-h4">{{ 'timeCapsule.snapshot.summaryKpis' | translate }}</h4>
+                  <div class="tc-kpi-grid">
+                    <div class="tc-kpi" *ngIf="fin.totals['yearsCovered'] != null">
+                      <span class="tc-kpi-n">{{ fin.totals['yearsCovered'] }}</span>
+                      <span class="tc-kpi-l">{{ 'timeCapsule.snapshot.yearsCovered' | translate }}</span>
+                    </div>
+                    <div class="tc-kpi" *ngIf="fin.totals['violationCount'] != null">
+                      <span class="tc-kpi-n">{{ fin.totals['violationCount'] }}</span>
+                      <span class="tc-kpi-l">{{ 'timeCapsule.snapshot.violationCount' | translate }}</span>
+                    </div>
+                    <div class="tc-kpi" *ngIf="fin.totals['achievementRequests'] != null">
+                      <span class="tc-kpi-n">{{ fin.totals['achievementRequests'] }}</span>
+                      <span class="tc-kpi-l">{{ 'timeCapsule.snapshot.achievementRequests' | translate }}</span>
+                    </div>
+                    <div class="tc-kpi" *ngIf="fin.totals['activityRequests'] != null">
+                      <span class="tc-kpi-n">{{ fin.totals['activityRequests'] }}</span>
+                      <span class="tc-kpi-l">{{ 'timeCapsule.snapshot.activityRequests' | translate }}</span>
+                    </div>
+                    <div class="tc-kpi" *ngIf="fin.totals['approvedAchievements'] != null">
+                      <span class="tc-kpi-n">{{ fin.totals['approvedAchievements'] }}</span>
+                      <span class="tc-kpi-l">{{ 'timeCapsule.snapshot.approvedAchievements' | translate }}</span>
+                    </div>
+                  </div>
+                  <div class="tc-subblock" *ngIf="fin.rollup.length">
+                    <h4 class="tc-h4">{{ 'timeCapsule.snapshot.rollupTitle' | translate }}</h4>
+                    <div class="tc-table-wrap">
+                      <table class="tc-table">
+                        <thead>
+                          <tr>
+                            <th>{{ 'timeCapsule.snapshot.yearCol' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.periodKind' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.compositeScore' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.avgDailyEval' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.achvPts' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.violPts' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.activityCount' | translate }}</th>
+                            <th>{{ 'timeCapsule.snapshot.trend' | translate }}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let r of fin.rollup">
+                            <td>{{ r.academicYearId ?? '—' }}</td>
+                            <td>{{ r.periodKind || '—' }}</td>
+                            <td>{{ r.compositeScore != null ? (r.compositeScore | number: '1.0-2') : '—' }}</td>
+                            <td>{{ r.averageDailyEvaluationScore != null ? (r.averageDailyEvaluationScore | number: '1.0-2') : '—' }}</td>
+                            <td>{{ r.achievementPoints != null ? r.achievementPoints : '—' }}</td>
+                            <td>{{ r.violationPoints != null ? r.violationPoints : '—' }}</td>
+                            <td>{{ r.activityCount != null ? r.activityCount : '—' }}</td>
+                            <td>{{ r.trend || '—' }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="tc-empty-hint" *ngSwitchDefault>{{ 'timeCapsule.snapshot.unknownSection' | translate }}</p>
               </ng-container>
             </div>
           </article>

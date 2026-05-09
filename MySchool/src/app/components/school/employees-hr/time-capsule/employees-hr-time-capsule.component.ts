@@ -1,4 +1,12 @@
-import { NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+import {
+  DatePipe,
+  DecimalPipe,
+  NgFor,
+  NgIf,
+  NgSwitch,
+  NgSwitchCase,
+  NgSwitchDefault,
+} from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +29,108 @@ import { firstValueFrom } from 'rxjs';
 import { TimeCapsuleDetailDto, TimeCapsuleStatusDto } from './time-capsule.models';
 import { TimeCapsuleService } from './time-capsule.service';
 
+function tcStr(v: unknown): string {
+  if (v == null) return '';
+  return String(v);
+}
+
+function tcNum(v: unknown): number | null {
+  if (v == null || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function asObj(v: unknown): Record<string, unknown> | null {
+  return v && typeof v === 'object' ? (v as Record<string, unknown>) : null;
+}
+
+interface TcHistoryRowVM {
+  academicYearId?: number;
+  jobTitle: string;
+  department: string;
+  startDate: string | null;
+  endDate: string | null;
+  notes: string;
+}
+
+interface TcGeneralInfoVM {
+  employeeCode: string;
+  displayName: string;
+  jobType: string;
+  hireDate: string | null;
+  employmentStatus: string;
+  email: string;
+  phone: string;
+  history: TcHistoryRowVM[];
+}
+
+interface TcPerfYearVM {
+  academicYearId: number;
+  yearLabel: string;
+  evaluationScore: number | null;
+  performanceLevel: string | null;
+  achievementPoints: number;
+  violationPoints: number;
+  dailyEvaluationCount: number;
+  dailyEvaluationAverage: number | null;
+  strengthsSummary: string | null;
+  weaknessesSummary: string | null;
+}
+
+interface TcAnalyticsVM {
+  academicYearId: number | null;
+  periodKind: string | null;
+  periodStartUtc: string | null;
+  periodEndUtc: string | null;
+  compositeScore: number | null;
+  averageDailyEvaluationScore: number | null;
+  achievementPoints: number | null;
+  violationPoints: number | null;
+  activityCount: number | null;
+  trend: string | null;
+}
+
+interface TcEvalYearVM {
+  academicYearId: number;
+  count: number;
+  average: number | null;
+}
+
+interface TcEvalSummaryVM {
+  totalEvaluations: number;
+  averageScore: number | null;
+  byYear: TcEvalYearVM[];
+}
+
+interface TcAchievementVM {
+  title: string;
+  status: string;
+  academicYearId: number | null;
+  pointsHint: number | null;
+  submittedAtUtc: string | null;
+}
+
+interface TcViolationVM {
+  title: string;
+  status: string;
+  typeName: string;
+  academicYearId: number | null;
+  openedAtUtc: string | null;
+}
+
+interface TcActivityVM {
+  title: string;
+  status: string;
+  academicYearId: number | null;
+  submittedAtUtc: string | null;
+}
+
+interface TcReportVM {
+  documentType: string;
+  title: string;
+  uploadedAtUtc: string | null;
+}
+
 @Component({
   selector: 'app-employees-hr-time-capsule',
   standalone: true,
@@ -30,6 +140,8 @@ import { TimeCapsuleService } from './time-capsule.service';
     NgSwitch,
     NgSwitchCase,
     NgSwitchDefault,
+    DatePipe,
+    DecimalPipe,
     FormsModule,
     TranslateModule,
     RouterLink,
@@ -159,30 +271,189 @@ export class EmployeesHrTimeCapsuleComponent implements OnInit, OnDestroy {
     }
   }
 
-  stringify(data: unknown): string {
-    try {
-      return JSON.stringify(data, null, 2);
-    } catch {
-      return '';
+  generalInfoVM(data: unknown): TcGeneralInfoVM {
+    const o = asObj(data);
+    const history: TcHistoryRowVM[] = [];
+    const histRaw = o?.['history'];
+    if (Array.isArray(histRaw)) {
+      for (const h of histRaw) {
+        const r = asObj(h);
+        if (!r) continue;
+        history.push({
+          academicYearId: tcNum(r['academicYearID'] ?? r['academicYearId']) ?? undefined,
+          jobTitle: tcStr(r['jobTitle']),
+          department: tcStr(r['department']),
+          startDate: r['startDate'] != null ? tcStr(r['startDate']) : null,
+          endDate: r['endDate'] != null ? tcStr(r['endDate']) : null,
+          notes: tcStr(r['notes']),
+        });
+      }
     }
+    return {
+      employeeCode: tcStr(o?.['employeeCode']),
+      displayName: tcStr(o?.['displayName']),
+      jobType: tcStr(o?.['jobType']),
+      hireDate: o?.['hireDate'] != null ? tcStr(o['hireDate']) : null,
+      employmentStatus: tcStr(o?.['employmentStatus']),
+      email: tcStr(o?.['email']),
+      phone: tcStr(o?.['phone']),
+      history,
+    };
   }
 
-  asAchievementRows(data: unknown): string[] {
+  fullNameLine(data: unknown): string {
+    const o = asObj(data);
+    const fn = asObj(o?.['fullName']);
+    if (!fn) return '';
+    const parts = [tcStr(fn['firstName']), tcStr(fn['middleName']), tcStr(fn['lastName'])].filter(Boolean);
+    return parts.join(' ');
+  }
+
+  performanceYearsVM(data: unknown): TcPerfYearVM[] {
+    const o = asObj(data);
+    const years = o?.['years'];
+    if (!Array.isArray(years)) return [];
+    const out: TcPerfYearVM[] = [];
+    for (const y of years) {
+      const r = asObj(y);
+      if (!r) continue;
+      out.push({
+        academicYearId: tcNum(r['academicYearId'] ?? r['academicYearID']) ?? 0,
+        yearLabel: tcStr(r['yearLabel']) || '—',
+        evaluationScore: tcNum(r['evaluationScore']),
+        performanceLevel: r['performanceLevel'] != null ? tcStr(r['performanceLevel']) : null,
+        achievementPoints: tcNum(r['achievementPoints']) ?? 0,
+        violationPoints: tcNum(r['violationPoints']) ?? 0,
+        dailyEvaluationCount: tcNum(r['dailyEvaluationCount']) ?? 0,
+        dailyEvaluationAverage: tcNum(r['dailyEvaluationAverage']),
+        strengthsSummary: r['strengthsSummary'] != null ? tcStr(r['strengthsSummary']) : null,
+        weaknessesSummary: r['weaknessesSummary'] != null ? tcStr(r['weaknessesSummary']) : null,
+      });
+    }
+    return out;
+  }
+
+  performanceAnalyticsVM(data: unknown): TcAnalyticsVM[] {
+    const o = asObj(data);
+    const a = o?.['analytics'];
+    return this.mapAnalyticsRows(a);
+  }
+
+  private mapAnalyticsRows(raw: unknown): TcAnalyticsVM[] {
+    if (!Array.isArray(raw)) return [];
+    const out: TcAnalyticsVM[] = [];
+    for (const row of raw) {
+      const r = asObj(row);
+      if (!r) continue;
+      out.push({
+        academicYearId: tcNum(r['academicYearID'] ?? r['academicYearId']),
+        periodKind: r['periodKind'] != null ? tcStr(r['periodKind']) : null,
+        periodStartUtc: r['periodStartUtc'] != null ? tcStr(r['periodStartUtc']) : null,
+        periodEndUtc: r['periodEndUtc'] != null ? tcStr(r['periodEndUtc']) : null,
+        compositeScore: tcNum(r['compositeScore']),
+        averageDailyEvaluationScore: tcNum(r['averageDailyEvaluationScore']),
+        achievementPoints: tcNum(r['achievementPoints']),
+        violationPoints: tcNum(r['violationPoints']),
+        activityCount: tcNum(r['activityCount']),
+        trend: r['trend'] != null ? tcStr(r['trend']) : null,
+      });
+    }
+    return out;
+  }
+
+  evalSummaryVM(data: unknown): TcEvalSummaryVM {
+    const o = asObj(data);
+    const byYear: TcEvalYearVM[] = [];
+    const by = o?.['byYear'];
+    if (Array.isArray(by)) {
+      for (const row of by) {
+        const r = asObj(row);
+        if (!r) continue;
+        byYear.push({
+          academicYearId: tcNum(r['academicYearId'] ?? r['academicYearID']) ?? 0,
+          count: tcNum(r['count']) ?? 0,
+          average: tcNum(r['average']),
+        });
+      }
+    }
+    return {
+      totalEvaluations: tcNum(o?.['totalEvaluations']) ?? 0,
+      averageScore: tcNum(o?.['averageScore']),
+      byYear,
+    };
+  }
+
+  achievementsList(data: unknown): TcAchievementVM[] {
     if (!Array.isArray(data)) return [];
-    return data.map((x: { title?: string; status?: string }) => {
-      const t = x?.title ?? '—';
-      const st = x?.status ? ` (${x.status})` : '';
-      return `${t}${st}`;
+    return data.map((x) => {
+      const r = asObj(x) ?? {};
+      return {
+        title: tcStr(r['title']) || '—',
+        status: tcStr(r['status']),
+        academicYearId: tcNum(r['academicYearID'] ?? r['academicYearId']),
+        pointsHint: tcNum(r['pointsHint']),
+        submittedAtUtc: r['submittedAtUtc'] != null ? tcStr(r['submittedAtUtc']) : null,
+      };
     });
   }
 
-  asViolationRows(data: unknown): string[] {
+  violationsList(data: unknown): TcViolationVM[] {
     if (!Array.isArray(data)) return [];
-    return data.map((x: { title?: string; typeName?: string }) => {
-      const t = x?.title ?? '—';
-      const ty = x?.typeName ? ` — ${x.typeName}` : '';
-      return `${t}${ty}`;
+    return data.map((x) => {
+      const r = asObj(x) ?? {};
+      return {
+        title: tcStr(r['title']) || '—',
+        status: tcStr(r['status']),
+        typeName: tcStr(r['typeName']),
+        academicYearId: tcNum(r['academicYearID'] ?? r['academicYearId']),
+        openedAtUtc: r['openedAtUtc'] != null ? tcStr(r['openedAtUtc']) : null,
+      };
     });
+  }
+
+  activitiesList(data: unknown): TcActivityVM[] {
+    if (!Array.isArray(data)) return [];
+    return data.map((x) => {
+      const r = asObj(x) ?? {};
+      return {
+        title: tcStr(r['Title'] ?? r['title']) || '—',
+        status: tcStr(r['status']),
+        academicYearId: tcNum(r['academicYearID'] ?? r['academicYearId']),
+        submittedAtUtc: r['submittedAtUtc'] != null ? tcStr(r['submittedAtUtc']) : null,
+      };
+    });
+  }
+
+  reportsList(data: unknown): TcReportVM[] {
+    if (!Array.isArray(data)) return [];
+    return data.map((x) => {
+      const r = asObj(x) ?? {};
+      return {
+        documentType: tcStr(r['documentType']),
+        title: tcStr(r['title']) || '—',
+        uploadedAtUtc: r['uploadedAtUtc'] != null ? tcStr(r['uploadedAtUtc']) : null,
+      };
+    });
+  }
+
+  finalSummaryVM(data: unknown): { totals: Record<string, number>; rollup: TcAnalyticsVM[] } {
+    const o = asObj(data);
+    const totals: Record<string, number> = {};
+    const tr = asObj(o?.['totals']);
+    if (tr) {
+      for (const key of [
+        'yearsCovered',
+        'violationCount',
+        'achievementRequests',
+        'activityRequests',
+        'approvedAchievements',
+      ]) {
+        const n = tcNum(tr[key]);
+        if (n != null) totals[key] = n;
+      }
+    }
+    const rollupRaw = o?.['analyticsRollup'];
+    return { totals, rollup: this.mapAnalyticsRows(rollupRaw) };
   }
 
   async submitResignation(): Promise<void> {
