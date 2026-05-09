@@ -1,21 +1,30 @@
-/* Light theme — aligned with school `.page-wrapper` (#eceff6) and white chrome */
+/* Light theme — full width; page background gradient as before */
 
 .tc-root {
+  width: 100%;
+  max-width: none;
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   background: linear-gradient(165deg, #f1f5f9 0%, #eceff6 42%, #e8edf5 100%);
   color: #0f172a;
 }
 
+/* Main shell card (matches `.employees-hr-card` on other school pages) */
 .tc-hero {
-  padding: 2.5rem 1.5rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
+  padding: 1.5rem 1.5rem 1.35rem;
+  margin: 0 0 1.25rem;
+  background: #fff;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
 }
 
 .tc-hero-inner {
-  max-width: 960px;
-  margin: 0 auto;
+  max-width: none;
+  width: 100%;
+  margin: 0;
 }
 
 .tc-kicker {
@@ -48,9 +57,11 @@
 }
 
 .tc-body {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 1.5rem 1.25rem 3.5rem;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 2rem;
+  box-sizing: border-box;
 }
 
 .tc-muted,
@@ -71,11 +82,11 @@
 
 .tc-panel {
   background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
   padding: 2rem 1.5rem;
   text-align: center;
-  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
 }
 
 .tc-lock-visual {
@@ -148,12 +159,13 @@
   gap: 1.5rem;
 }
 
+/* Primary content card — same white shell as other HR pages (not inner blocks/tables) */
 .tc-narrative {
-  background: linear-gradient(135deg, rgba(199, 162, 74, 0.12), rgba(99, 102, 241, 0.08));
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 1.5rem 1.25rem;
-  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.05);
+  background: #fff;
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  padding: 1.5rem 1.5rem;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
 }
 
 .tc-narrative-text {
@@ -165,10 +177,10 @@
 
 .tc-chart-card {
   background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 1rem 1rem 0.5rem;
-  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.05);
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  padding: 1.25rem 1.25rem 0.5rem;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
 }
 
 .tc-chart-wrap {
@@ -210,10 +222,10 @@
 
 .tc-section-card {
   background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+  border: 1px solid #d5dbe1;
+  border-radius: 10px;
+  padding: 1.25rem 1.35rem;
+  box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
 }
 
 /* Structured snapshot blocks */
