@@ -7,7 +7,7 @@
       'page-wrapper': (dir$ | async) === 'rtl'
     }"
   >
-    <div class="content container-fluid" dir="ltr">
+    <div class="content container-fluid" [attr.dir]="(dir$ | async) ?? 'rtl'">
       <app-breadcrumb />
       <router-outlet />
     </div>

@@ -12,7 +12,11 @@
       }"
       [attr.dir]="dir$ | async"
     >
-        <div class="content container-fluid" [class.content--public-job-board]="!showSchoolChrome" dir="ltr">
+        <div
+          class="content container-fluid"
+          [class.content--public-job-board]="!showSchoolChrome"
+          [attr.dir]="(dir$ | async) ?? 'rtl'"
+        >
             <app-breadcrumb *ngIf="showSchoolChrome"/>
             <router-outlet></router-outlet>
         </div>

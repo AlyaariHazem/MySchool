@@ -19,12 +19,13 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { Select } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { firstValueFrom, map, Subscription } from 'rxjs';
 
 import { YearService } from 'app/core/services/year.service';
 import { Year } from 'app/core/models/year.model';
 import { isSchoolHrManager } from 'app/core/utils/school-role.util';
-import { firstValueFrom } from 'rxjs';
+import { selectLanguage } from 'app/core/store/language/language.selectors';
 
 import { TimeCapsuleDetailDto, TimeCapsuleStatusDto } from './time-capsule.models';
 import { TimeCapsuleService } from './time-capsule.service';
@@ -160,6 +161,7 @@ export class EmployeesHrTimeCapsuleComponent implements OnInit, OnDestroy {
   private readonly capsuleApi = inject(TimeCapsuleService);
   private readonly yearsApi = inject(YearService);
   private readonly toastr = inject(ToastrService);
+  private readonly store = inject(Store);
 
   /** True when opened from `/teacher/time-capsule/:id` (teacher shell). */
   teacherShell = false;
@@ -181,18 +183,57 @@ export class EmployeesHrTimeCapsuleComponent implements OnInit, OnDestroy {
 
   perfChart: { labels: string[]; datasets: { label: string; data: number[]; borderColor?: string; backgroundColor?: string }[] } | null =
     null;
-  chartOpts = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom' as const } },
-    scales: { y: { beginAtZero: true } },
-  };
+
+  /** Text direction for Arabic (`rtl`) vs English (`ltr`). */
+  uiDir: 'ltr' | 'rtl' = 'rtl';
+
+  /** Back button: arrow points toward the logical “start” side. */
+  get backNavIcon(): string {
+    return this.uiDir === 'rtl' ? 'pi pi-arrow-right' : 'pi pi-arrow-left';
+  }
+
+  /** Chart.js options respect RTL (mirroring + Y-axis on the right in Arabic). */
+  get chartOptions(): Record<string, unknown> {
+    const rtl = this.uiDir === 'rtl';
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      rtl,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          rtl,
+          labels: { color: '#475569' },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: '#64748b' },
+          grid: { color: 'rgba(148, 163, 184, 0.25)' },
+        },
+        y: {
+          position: rtl ? 'right' : 'left',
+          beginAtZero: true,
+          ticks: { color: '#64748b' },
+          grid: { color: 'rgba(148, 163, 184, 0.25)' },
+        },
+      },
+    };
+  }
 
   private sub?: Subscription;
+  private langSub?: Subscription;
 
   ngOnInit(): void {
     this.hrActions = isSchoolHrManager();
     this.teacherShell = this.route.snapshot.data['timeCapsuleTeacherShell'] === true;
+
+    this.langSub = this.store
+      .select(selectLanguage)
+      .pipe(map((lang) => (lang === 'en' ? 'ltr' : 'rtl')))
+      .subscribe((dir) => {
+        this.uiDir = dir;
+      });
 
     this.sub = this.route.paramMap.subscribe((pm) => {
       const raw = pm.get('id');
@@ -206,6 +247,7 @@ export class EmployeesHrTimeCapsuleComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.langSub?.unsubscribe();
   }
 
   private async bootstrap(): Promise<void> {

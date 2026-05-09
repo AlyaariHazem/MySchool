@@ -1,4 +1,4 @@
-<div class="tc-root" *ngIf="id > 0">
+<div class="tc-root" *ngIf="id > 0" [attr.dir]="uiDir">
   <header class="tc-hero">
     <div class="tc-hero-inner">
       <p class="tc-kicker">{{ 'timeCapsule.kicker' | translate }}</p>
@@ -82,7 +82,7 @@
         <div class="tc-chart-card reveal" *ngIf="perfChart">
           <h3 class="tc-h3">{{ 'timeCapsule.chart.performance' | translate }}</h3>
           <div class="tc-chart-wrap">
-            <p-chart type="line" [data]="perfChart" [options]="chartOpts" />
+            <p-chart type="line" [data]="perfChart" [options]="chartOptions" />
           </div>
         </div>
 
