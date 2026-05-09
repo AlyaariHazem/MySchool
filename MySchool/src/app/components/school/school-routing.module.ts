@@ -204,6 +204,15 @@ const routes: Routes = [
             canMatch: [permissionGuard],
           },
           {
+            path: ':id/time-capsule',
+            loadComponent: () =>
+              import('./employees-hr/time-capsule/employees-hr-time-capsule.component').then(
+                (m) => m.EmployeesHrTimeCapsuleComponent,
+              ),
+            data: { breadcrumb: 'كبسولة الزمن', permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+          {
             path: ':id/profile',
             loadComponent: () =>
               import('./employees-hr/employees-hr-full-profile/employees-hr-full-profile.component').then(

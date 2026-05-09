@@ -1,0 +1,114 @@
+<div class="tc-root" *ngIf="id > 0">
+  <header class="tc-hero">
+    <div class="tc-hero-inner">
+      <p class="tc-kicker">{{ 'timeCapsule.kicker' | translate }}</p>
+      <h1 class="tc-title">{{ 'timeCapsule.title' | translate }}</h1>
+      <p class="tc-sub" *ngIf="status && !status.isUnlocked">{{ status.messageAr }}</p>
+      <div class="tc-hero-actions">
+        <p-button
+          [label]="(teacherShell ? 'timeCapsule.backWorkspace' : 'timeCapsule.backProfile') | translate"
+          icon="pi pi-arrow-right"
+          [outlined]="true"
+          styleClass="tc-btn-ghost"
+          [routerLink]="backLink"
+        />
+      </div>
+    </div>
+  </header>
+
+  <div class="tc-body">
+    <div *ngIf="loading" class="tc-muted">{{ 'timeCapsule.loading' | translate }}</div>
+    <div *ngIf="!loading && loadError" class="tc-error">{{ loadError }}</div>
+
+    <ng-container *ngIf="!loading && !loadError && status">
+      <!-- HR quick actions -->
+      <div class="tc-hr-bar" *ngIf="hrActions && !status.isUnlocked">
+        <ng-container *ngIf="status.phase === 'ResignationPending'">
+          <p-button [label]="'timeCapsule.hr.approveResignation' | translate" (onClick)="hrApproveResignation()" />
+          <p-button [label]="'timeCapsule.hr.rejectResignation' | translate" severity="danger" (onClick)="hrRejectResignation()" />
+        </ng-container>
+        <ng-container *ngIf="status.phase === 'UnlockPending'">
+          <p-button [label]="'timeCapsule.hr.approveUnlock' | translate" (onClick)="hrApproveUnlock()" />
+          <p-button [label]="'timeCapsule.hr.rejectUnlock' | translate" severity="danger" (onClick)="hrRejectUnlock()" />
+        </ng-container>
+      </div>
+
+      <!-- Locked / workflow -->
+      <section class="tc-panel reveal" *ngIf="!status.isUnlocked">
+        <div class="tc-lock-visual" aria-hidden="true">
+          <span class="tc-lock-ring"></span>
+          <i class="pi pi-lock tc-lock-icon"></i>
+        </div>
+        <p class="tc-panel-lead">{{ status.messageAr }}</p>
+
+        <div class="tc-resign" *ngIf="status.phase === 'LockedNoResignation' || status.phase === 'ResignationRejected'">
+          <h2 class="tc-h2">{{ 'timeCapsule.resign.title' | translate }}</h2>
+          <div class="tc-form-row">
+            <p-floatlabel variant="on">
+              <p-select
+                inputId="tcYear"
+                [options]="yearOptions()"
+                [(ngModel)]="resignYearId"
+                optionLabel="label"
+                optionValue="value"
+                styleClass="w-full"
+                [style]="{ minWidth: '220px' }"
+              />
+              <label for="tcYear">{{ 'timeCapsule.resign.year' | translate }}</label>
+            </p-floatlabel>
+          </div>
+          <div class="tc-form-row">
+            <p-floatlabel variant="on">
+              <textarea pTextarea inputId="tcReason" id="tcReason" [(ngModel)]="resignReason" rows="4" class="tc-textarea"></textarea>
+              <label for="tcReason">{{ 'timeCapsule.resign.reason' | translate }}</label>
+            </p-floatlabel>
+          </div>
+          <p-button
+            [label]="'timeCapsule.resign.submit' | translate"
+            icon="pi pi-send"
+            [loading]="submittingResign"
+            (onClick)="submitResignation()"
+          />
+        </div>
+      </section>
+
+      <!-- Unlocked storytelling -->
+      <section *ngIf="status.isUnlocked && detail" class="tc-story">
+        <article class="tc-narrative reveal">
+          <h2 class="tc-h2">{{ 'timeCapsule.narrative.title' | translate }}</h2>
+          <p class="tc-narrative-text">{{ detail.narrativeText }}</p>
+        </article>
+
+        <div class="tc-chart-card reveal" *ngIf="perfChart">
+          <h3 class="tc-h3">{{ 'timeCapsule.chart.performance' | translate }}</h3>
+          <div class="tc-chart-wrap">
+            <p-chart type="line" [data]="perfChart" [options]="chartOpts" />
+          </div>
+        </div>
+
+        <div class="tc-timeline">
+          <div class="tc-timeline-line" aria-hidden="true"></div>
+          <article
+            class="tc-section reveal"
+            *ngFor="let s of detail.sections; let i = index"
+            [style.animation-delay.ms]="i * 90"
+          >
+            <div class="tc-section-marker"></div>
+            <div class="tc-section-card">
+              <h3 class="tc-h3">{{ s.title }}</h3>
+              <ng-container [ngSwitch]="s.sectionType">
+                <div *ngSwitchCase="3" class="tc-chips">
+                  <span class="tc-chip" *ngFor="let a of asAchievementRows(parseJson(s.dataJson))">{{ a }}</span>
+                </div>
+                <div *ngSwitchCase="4" class="tc-chips tc-chips-warn">
+                  <span class="tc-chip" *ngFor="let v of asViolationRows(parseJson(s.dataJson))">{{ v }}</span>
+                </div>
+                <pre class="tc-json" *ngSwitchDefault>{{ stringify(parseJson(s.dataJson)) }}</pre>
+              </ng-container>
+            </div>
+          </article>
+        </div>
+      </section>
+    </ng-container>
+  </div>
+</div>

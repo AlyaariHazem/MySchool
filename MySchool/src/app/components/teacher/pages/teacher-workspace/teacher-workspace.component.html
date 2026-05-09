@@ -72,6 +72,14 @@
             <button type="button" class="btn btn-outline-primary m-1" (click)="go('/teacher/notifications')">
               {{ 'sidebar.notifications' | translate }}
             </button>
+            <button
+              *ngIf="workspace.employeeProfileId != null && workspace.employeeProfileId > 0"
+              type="button"
+              class="btn btn-outline-primary m-1"
+              (click)="go('/teacher/time-capsule/' + workspace.employeeProfileId)"
+            >
+              {{ 'sidebar.teacherTimeCapsule' | translate }}
+            </button>
           </div>
         </div>
       </div>

@@ -27,6 +27,22 @@ const routes: Routes = [
         component: TeacherWorkspaceComponent,
         data: { breadcrumb: 'مساحة المعلم' },
       },
+      {
+        path: 'time-capsule',
+        loadComponent: () =>
+          import('./pages/teacher-time-capsule-redirect/teacher-time-capsule-redirect.component').then(
+            (m) => m.TeacherTimeCapsuleRedirectComponent,
+          ),
+        data: { breadcrumb: 'كبسولة الزمن' },
+      },
+      {
+        path: 'time-capsule/:id',
+        loadComponent: () =>
+          import('../school/employees-hr/time-capsule/employees-hr-time-capsule.component').then(
+            (m) => m.EmployeesHrTimeCapsuleComponent,
+          ),
+        data: { breadcrumb: 'كبسولة الزمن', timeCapsuleTeacherShell: true },
+      },
       { path: 'attendance', component: AttendanceComponent, data: { breadcrumb: 'الحضور والغياب' } },
       {
         path: 'schedule',

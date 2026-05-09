@@ -19,17 +19,20 @@ public class EmployeeProfileService : IEmployeeProfileService
     private readonly IUserRepository _userRepository;
     private readonly IEmployeeYearAssignmentService _yearAssignments;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ITimeCapsuleService _timeCapsule;
 
     public EmployeeProfileService(
         TenantDbContext db,
         IUserRepository userRepository,
         IEmployeeYearAssignmentService yearAssignments,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        ITimeCapsuleService timeCapsule)
     {
         _db = db;
         _userRepository = userRepository;
         _yearAssignments = yearAssignments;
         _httpContextAccessor = httpContextAccessor;
+        _timeCapsule = timeCapsule;
     }
 
     public async Task<IReadOnlyList<EmployeeJobTypeListDto>> GetJobTypesAsync(CancellationToken cancellationToken = default)
@@ -103,6 +106,7 @@ public class EmployeeProfileService : IEmployeeProfileService
 
         _db.EmployeeProfiles.Add(entity);
         await _db.SaveChangesAsync(cancellationToken);
+        await _timeCapsule.EnsureCapsuleForEmployeeAsync(entity.EmployeeProfileID, entity.SchoolID, cancellationToken);
         return (await MapToReadDtoAsync(entity.EmployeeProfileID, cancellationToken))!;
     }
 

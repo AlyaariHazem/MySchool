@@ -150,7 +150,8 @@
     "colClass": "الصف",
     "colDivision": "الشعبة",
     "colDate": "التاريخ",
-    "noPlans": "لا توجد خطط مقررات مسجلة بعد."
+    "noPlans": "لا توجد خطط مقررات مسجلة بعد.",
+    "timeCapsuleNoProfile": "لا يوجد ملف موظف مرتبط بحسابك. تواصل مع الموارد البشرية لربط حسابك بملف الموظف."
   },
   "studentHome": {
     "title": "مرحباً {{name}}",
@@ -168,6 +169,7 @@
     "home": "الصفحة الرئيسية",
     "teacherHome": "رئيسية المعلم",
     "teacherHub": "أدوات المعلم",
+    "teacherTimeCapsule": "كبسولة الزمن",
     "teachers": "الموظفون",
     "staff_hr": {
       "title": "(HR) الموارد البشرية",
@@ -427,6 +429,27 @@
       "absence": "أظهر الطلاب ذوي الغياب المرتفع"
     }
   },
+  "timeCapsule": {
+    "kicker": "أرشيف رحلة الموظف",
+    "title": "كبسولة الزمن",
+    "loading": "جاري التحميل…",
+    "backProfile": "العودة للملف الكامل",
+    "backWorkspace": "العودة لمساحة المعلم",
+    "narrative": { "title": "كلمة الختام" },
+    "chart": { "performance": "منحنى الأداء عبر السنوات" },
+    "resign": {
+      "title": "طلب استقالة لفتح الكبسولة",
+      "year": "العام الدراسي",
+      "reason": "السبب (اختياري)",
+      "submit": "إرسال طلب الاستقالة"
+    },
+    "hr": {
+      "approveResignation": "الموافقة على الاستقالة",
+      "rejectResignation": "رفض الاستقالة",
+      "approveUnlock": "الموافقة على فتح الكبسولة",
+      "rejectUnlock": "رفض فتح الكبسولة"
+    }
+  },
   "employeesHr": {
     "yes": "نعم",
     "no": "لا",
@@ -541,6 +564,7 @@
       "fullProfile": "الملف الكامل",
       "backList": "القائمة",
       "backDetail": "التفاصيل",
+      "timeCapsule": "كبسولة الزمن",
       "add": "إضافة",
       "save": "حفظ",
       "cancel": "إلغاء"

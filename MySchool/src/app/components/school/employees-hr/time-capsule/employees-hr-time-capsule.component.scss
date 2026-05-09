@@ -1,0 +1,274 @@
+/* TODO: Layer in richer motion (staggered GSAP / View Transitions API) for a more cinematic reveal. */
+
+.tc-root {
+  min-height: 100vh;
+  background: radial-gradient(1200px 600px at 10% -10%, rgba(199, 162, 74, 0.18), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(72, 61, 139, 0.2), transparent 50%),
+    linear-gradient(165deg, #0f1118 0%, #151a24 40%, #0c0e14 100%);
+  color: #e8ecf1;
+}
+
+.tc-hero {
+  padding: 2.5rem 1.5rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(6px);
+}
+
+.tc-hero-inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.tc-kicker {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  opacity: 0.65;
+  margin: 0 0 0.35rem;
+}
+
+.tc-title {
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  background: linear-gradient(90deg, #f2e6c9, #c7a24a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tc-sub {
+  margin: 0;
+  opacity: 0.78;
+  max-width: 52ch;
+  line-height: 1.6;
+}
+
+.tc-hero-actions {
+  margin-top: 1.25rem;
+}
+
+.tc-body {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3.5rem;
+}
+
+.tc-muted,
+.tc-error {
+  opacity: 0.8;
+}
+
+.tc-error {
+  color: #ffb4b4;
+}
+
+.tc-hr-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.tc-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.tc-lock-visual {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 1.25rem;
+}
+
+.tc-lock-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(199, 162, 74, 0.45);
+  box-shadow: 0 0 40px rgba(199, 162, 74, 0.15);
+  animation: tc-pulse 3.2s ease-in-out infinite;
+}
+
+.tc-lock-icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  font-size: 2rem;
+  color: #c7a24a;
+  width: 2rem;
+  height: 2rem;
+}
+
+.tc-panel-lead {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  opacity: 0.88;
+  max-width: 42rem;
+  margin: 0 auto 1rem;
+}
+
+.tc-resign {
+  margin-top: 2rem;
+  text-align: start;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tc-h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+.tc-h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.tc-form-row {
+  margin-bottom: 1rem;
+}
+
+.tc-textarea {
+  width: 100%;
+}
+
+.tc-story {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tc-narrative {
+  background: linear-gradient(135deg, rgba(199, 162, 74, 0.12), rgba(72, 61, 139, 0.12));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem 1.25rem;
+}
+
+.tc-narrative-text {
+  margin: 0;
+  line-height: 1.85;
+  font-size: 1.05rem;
+  opacity: 0.92;
+}
+
+.tc-chart-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.tc-chart-wrap {
+  height: 260px;
+}
+
+.tc-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-left: 0.5rem;
+}
+
+.tc-timeline-line {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(199, 162, 74, 0.5), rgba(255, 255, 255, 0.08));
+}
+
+.tc-section {
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+.tc-section-marker {
+  position: absolute;
+  left: 3px;
+  top: 1.1rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #c7a24a;
+  box-shadow: 0 0 0 4px rgba(199, 162, 74, 0.2);
+}
+
+.tc-section-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+}
+
+.tc-json {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  opacity: 0.85;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.tc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tc-chip {
+  font-size: 0.82rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(199, 162, 74, 0.15);
+  border: 1px solid rgba(199, 162, 74, 0.35);
+}
+
+.tc-chips-warn .tc-chip {
+  background: rgba(220, 90, 90, 0.12);
+  border-color: rgba(220, 90, 90, 0.35);
+}
+
+.reveal {
+  animation: tc-fade-up 0.7s ease both;
+}
+
+@keyframes tc-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tc-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.75;
+  }
+}
+
+:host ::ng-deep .tc-btn-ghost.p-button {
+  color: #e8ecf1;
+  border-color: rgba(255, 255, 255, 0.35);
+}

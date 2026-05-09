@@ -17,4 +17,6 @@ export interface RecentCoursePlanRow {
 export interface TeacherWorkspaceResult {
   summary: TeacherWorkspaceSummary;
   recentCoursePlans: RecentCoursePlanRow[];
+  /** Set when the teacher account is linked to an HR employee profile (legacy Teacher row). */
+  employeeProfileId?: number | null;
 }

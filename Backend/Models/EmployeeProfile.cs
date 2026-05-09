@@ -181,4 +181,9 @@ public class EmployeeProfile
     public ICollection<PointsLedger> PointsLedgerLines { get; set; } = new List<PointsLedger>();
 
     public ICollection<PointsBalanceSnapshot> PointsBalanceSnapshots { get; set; } = new List<PointsBalanceSnapshot>();
+
+    [JsonIgnore]
+    public TimeCapsule? TimeCapsule { get; set; }
+
+    public ICollection<ResignationRequest> ResignationRequests { get; set; } = new List<ResignationRequest>();
 }

@@ -40,6 +40,9 @@ public class TeacherWorkspaceDTO
 {
     public TeacherWorkspaceSummaryDTO Summary { get; set; } = new();
     public List<RecentExamDTO> RecentCoursePlans { get; set; } = new();
+
+    /// <summary>HR employee profile id when this teacher is linked via <see cref="Models.EmployeeProfile.TeacherID"/>; used for teacher self-service (e.g. time capsule).</summary>
+    public int? EmployeeProfileId { get; set; }
 }
 
 public class TeacherWorkspaceSummaryDTO

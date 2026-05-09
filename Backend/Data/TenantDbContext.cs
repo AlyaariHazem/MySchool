@@ -160,6 +160,13 @@ namespace Backend.Data
         public DbSet<SchoolAnalytics> SchoolAnalytics { get; set; }
         public DbSet<TrendAnalysis> TrendAnalyses { get; set; }
 
+        public DbSet<TimeCapsule> TimeCapsules { get; set; }
+        public DbSet<TimeCapsuleSection> TimeCapsuleSections { get; set; }
+        public DbSet<ResignationRequest> ResignationRequests { get; set; }
+        public DbSet<CapsuleUnlockApproval> CapsuleUnlockApprovals { get; set; }
+        public DbSet<CapsuleNarrative> CapsuleNarratives { get; set; }
+        public DbSet<CapsuleAccessLog> CapsuleAccessLogs { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -1078,6 +1085,125 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<EmployeePerformanceSummary>()
                 .HasIndex(s => new { s.EmployeeProfileID, s.AcademicYearID, s.GeneratedAtUtc });
+
+            // --- Time Capsule (كبسولة الزمن) ---
+            modelBuilder.Entity<TimeCapsule>()
+                .HasKey(c => c.TimeCapsuleID);
+            modelBuilder.Entity<TimeCapsule>()
+                .Property(c => c.TimeCapsuleID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<TimeCapsule>()
+                .HasIndex(c => c.EmployeeProfileID)
+                .IsUnique();
+            modelBuilder.Entity<TimeCapsule>()
+                .HasIndex(c => c.SchoolID);
+            modelBuilder.Entity<TimeCapsule>()
+                .HasOne(c => c.EmployeeProfile)
+                .WithOne(p => p.TimeCapsule)
+                .HasForeignKey<TimeCapsule>(c => c.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<TimeCapsule>()
+                .HasOne(c => c.School)
+                .WithMany()
+                .HasForeignKey(c => c.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeCapsuleSection>()
+                .HasKey(s => s.TimeCapsuleSectionID);
+            modelBuilder.Entity<TimeCapsuleSection>()
+                .Property(s => s.TimeCapsuleSectionID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<TimeCapsuleSection>()
+                .Property(s => s.SectionType)
+                .HasConversion<int>();
+            modelBuilder.Entity<TimeCapsuleSection>()
+                .Property(s => s.DataJson)
+                .HasColumnType("nvarchar(max)");
+            modelBuilder.Entity<TimeCapsuleSection>()
+                .HasOne(s => s.TimeCapsule)
+                .WithMany(c => c.Sections)
+                .HasForeignKey(s => s.TimeCapsuleID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<TimeCapsuleSection>()
+                .HasIndex(s => new { s.TimeCapsuleID, s.SectionType })
+                .IsUnique();
+
+            modelBuilder.Entity<ResignationRequest>()
+                .HasKey(r => r.ResignationRequestID);
+            modelBuilder.Entity<ResignationRequest>()
+                .Property(r => r.ResignationRequestID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<ResignationRequest>()
+                .Property(r => r.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<ResignationRequest>()
+                .HasOne(r => r.EmployeeProfile)
+                .WithMany(p => p.ResignationRequests)
+                .HasForeignKey(r => r.EmployeeProfileID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ResignationRequest>()
+                .HasOne(r => r.School)
+                .WithMany()
+                .HasForeignKey(r => r.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ResignationRequest>()
+                .HasOne(r => r.AcademicYear)
+                .WithMany()
+                .HasForeignKey(r => r.AcademicYearID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ResignationRequest>()
+                .HasIndex(r => new { r.EmployeeProfileID, r.Status });
+
+            modelBuilder.Entity<CapsuleUnlockApproval>()
+                .HasKey(a => a.CapsuleUnlockApprovalID);
+            modelBuilder.Entity<CapsuleUnlockApproval>()
+                .Property(a => a.CapsuleUnlockApprovalID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<CapsuleUnlockApproval>()
+                .Property(a => a.Status)
+                .HasConversion<int>();
+            modelBuilder.Entity<CapsuleUnlockApproval>()
+                .HasOne(a => a.TimeCapsule)
+                .WithMany(c => c.UnlockApprovals)
+                .HasForeignKey(a => a.TimeCapsuleID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<CapsuleUnlockApproval>()
+                .HasOne(a => a.ResignationRequest)
+                .WithMany(r => r.CapsuleUnlockApprovals)
+                .HasForeignKey(a => a.ResignationRequestID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<CapsuleUnlockApproval>()
+                .HasIndex(a => new { a.TimeCapsuleID, a.Status });
+
+            modelBuilder.Entity<CapsuleNarrative>()
+                .HasKey(n => n.CapsuleNarrativeID);
+            modelBuilder.Entity<CapsuleNarrative>()
+                .Property(n => n.CapsuleNarrativeID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<CapsuleNarrative>()
+                .Property(n => n.GeneratedBy)
+                .HasConversion<int>();
+            modelBuilder.Entity<CapsuleNarrative>()
+                .HasOne(n => n.TimeCapsule)
+                .WithMany(c => c.Narratives)
+                .HasForeignKey(n => n.TimeCapsuleID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CapsuleAccessLog>()
+                .HasKey(l => l.CapsuleAccessLogID);
+            modelBuilder.Entity<CapsuleAccessLog>()
+                .Property(l => l.CapsuleAccessLogID)
+                .UseIdentityColumn();
+            modelBuilder.Entity<CapsuleAccessLog>()
+                .Property(l => l.ActionType)
+                .HasConversion<int>();
+            modelBuilder.Entity<CapsuleAccessLog>()
+                .HasOne(l => l.TimeCapsule)
+                .WithMany(c => c.AccessLogs)
+                .HasForeignKey(l => l.TimeCapsuleID)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<CapsuleAccessLog>()
+                .HasIndex(l => new { l.TimeCapsuleID, l.AccessedAtUtc });
 
             // --- Recruitment / hiring ---
             modelBuilder.Entity<JobPosting>()

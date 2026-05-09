@@ -149,7 +149,8 @@
     "colClass": "Class",
     "colDivision": "Division",
     "colDate": "Date",
-    "noPlans": "No course plans assigned yet."
+    "noPlans": "No course plans assigned yet.",
+    "timeCapsuleNoProfile": "No employee profile is linked to your account. Contact HR to link your account."
   },
   "studentHome": {
     "title": "Welcome, {{name}}",
@@ -167,6 +168,7 @@
     "home": "Home",
     "teacherHome": "Teacher home",
     "teacherHub": "Teacher tools",
+    "teacherTimeCapsule": "Time capsule",
     "teachers": "Staff",
     "staff_hr": {
       "title": "Staff & HR",
@@ -426,6 +428,27 @@
       "absence": "Show students with high absence"
     }
   },
+  "timeCapsule": {
+    "kicker": "Employee journey archive",
+    "title": "Time Capsule",
+    "loading": "Loading…",
+    "backProfile": "Back to full profile",
+    "backWorkspace": "Back to teacher workspace",
+    "narrative": { "title": "Closing words" },
+    "chart": { "performance": "Performance across years" },
+    "resign": {
+      "title": "Resignation request to open the capsule",
+      "year": "Academic year",
+      "reason": "Reason (optional)",
+      "submit": "Submit resignation request"
+    },
+    "hr": {
+      "approveResignation": "Approve resignation",
+      "rejectResignation": "Reject resignation",
+      "approveUnlock": "Approve capsule unlock",
+      "rejectUnlock": "Reject capsule unlock"
+    }
+  },
   "employeesHr": {
     "yes": "Yes",
     "no": "No",
@@ -540,6 +563,7 @@
       "fullProfile": "Full profile",
       "backList": "List",
       "backDetail": "Details",
+      "timeCapsule": "Time Capsule",
       "add": "Add",
       "save": "Save",
       "cancel": "Cancel"

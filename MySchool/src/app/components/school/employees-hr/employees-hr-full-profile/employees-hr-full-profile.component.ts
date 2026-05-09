@@ -69,7 +69,6 @@ export class EmployeesHrFullProfileComponent implements OnInit, OnDestroy, OnCha
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
   private readonly perm = inject(PermissionService);
-
   @Input() employeeId: number | null = null;
   @Input() embedded = false;
 

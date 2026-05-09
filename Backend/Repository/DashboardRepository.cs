@@ -373,8 +373,15 @@ public class DashboardRepository : IDashboardRepository
             ExamType = "C"
         }).ToList();
 
+        var employeeProfileId = await db.EmployeeProfiles
+            .AsNoTracking()
+            .Where(e => e.TeacherID == teacherId)
+            .Select(e => (int?)e.EmployeeProfileID)
+            .FirstOrDefaultAsync();
+
         return new TeacherWorkspaceDTO
         {
+            EmployeeProfileId = employeeProfileId,
             Summary = new TeacherWorkspaceSummaryDTO
             {
                 ClassCount = classIds.Count,
