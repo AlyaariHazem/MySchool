@@ -190,6 +190,11 @@
       "centralPoints": "Central points",
       "awards": "Awards",
       "analytics": "Analytics dashboards",
+      "analyticsExecutive": "Analytics — Executive",
+      "analyticsEducational": "Analytics — Educational supervisor",
+      "analyticsAdministrative": "Analytics — Administrative supervisor",
+      "analyticsSchool": "Analytics — School",
+      "analyticsYears": "Analytics — Year comparison",
       "violations": "Violations",
       "teacherFeedback": "Teacher feedback (students & parents)"
     },
@@ -1282,7 +1287,12 @@
     },
     "actions": {
       "apply": "Apply",
-      "refresh": "Refresh"
+      "refresh": "Refresh",
+      "generate": "Regenerate analytics"
+    },
+    "generate": {
+      "needSchool": "Select a school before regenerating analytics.",
+      "done": "Analytics snapshots were regenerated."
     },
     "filter": {
       "school": "School",

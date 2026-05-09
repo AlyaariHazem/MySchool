@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Backend.Models;
 
-/// <summary>Computed trend analysis result for a KPI and dashboard audience.</summary>
+/// <summary>Computed trend analysis result for a KPI, metric, or entity.</summary>
 public class TrendAnalysis
 {
     public int TrendAnalysisID { get; set; }
@@ -14,16 +14,22 @@ public class TrendAnalysis
     [JsonIgnore]
     public School School { get; set; } = null!;
 
-    [Required]
-    public int KpiDefinitionID { get; set; }
+    public int? KpiDefinitionID { get; set; }
 
     [JsonIgnore]
-    public KpiDefinition KpiDefinition { get; set; } = null!;
+    public KpiDefinition? KpiDefinition { get; set; }
 
     public int? AcademicYearID { get; set; }
 
     [JsonIgnore]
     public Year? AcademicYear { get; set; }
+
+    public AnalyticsEntityType EntityType { get; set; } = AnalyticsEntityType.None;
+
+    public int? EntityID { get; set; }
+
+    [MaxLength(128)]
+    public string? MetricCode { get; set; }
 
     [MaxLength(256)]
     public string? DepartmentName { get; set; }
@@ -51,8 +57,13 @@ public class TrendAnalysis
 
     public bool IsPositiveTrend { get; set; }
 
+    public AnalyticsTrendDirection TrendDirection { get; set; } = AnalyticsTrendDirection.Unknown;
+
     [MaxLength(64)]
     public string? TrendLabel { get; set; }
+
+    [MaxLength(4000)]
+    public string? Interpretation { get; set; }
 
     [MaxLength(4000)]
     public string? Notes { get; set; }

@@ -43,6 +43,14 @@
           [loading]="loading"
           (onClick)="applyFilters()"
         />
+        <p-button
+          *ngIf="canManageSnapshots"
+          [label]="'analytics.actions.generate' | translate"
+          icon="pi pi-bolt"
+          severity="secondary"
+          [loading]="generating"
+          (onClick)="generateSnapshots()"
+        />
       </div>
     </div>
 

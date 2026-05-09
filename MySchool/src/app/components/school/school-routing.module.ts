@@ -470,9 +470,18 @@ const routes: Routes = [
       },
       {
         path: 'analytics',
-        loadComponent: () => import('./analytics/analytics-page.component').then((m) => m.AnalyticsPageComponent),
         data: { breadcrumb: 'التحليلات', permission: PagePermission.Employees.View },
         canMatch: [permissionGuard],
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'top' },
+          {
+            path: ':tab',
+            loadComponent: () =>
+              import('./analytics/analytics-page.component').then((m) => m.AnalyticsPageComponent),
+            data: { permission: PagePermission.Employees.View },
+            canMatch: [permissionGuard],
+          },
+        ],
       },
       {
         path: 'teacher-feedback',

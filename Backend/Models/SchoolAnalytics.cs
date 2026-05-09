@@ -34,6 +34,24 @@ public class SchoolAnalytics
 
     public decimal? OverallScore { get; set; }
 
+    public decimal? AverageTeacherScore { get; set; }
+
+    public int TotalViolations { get; set; }
+
+    public int TotalAchievements { get; set; }
+
+    public int TotalActivities { get; set; }
+
+    public int TotalComplaints { get; set; }
+
+    public decimal? PlanCompletionPercent { get; set; }
+
+    public int EmployeeCount { get; set; }
+
+    public int ActiveTeacherCount { get; set; }
+
+    public AnalyticsRiskLevel RiskLevel { get; set; } = AnalyticsRiskLevel.Low;
+
     public decimal? TargetAchievementPercent { get; set; }
 
     [MaxLength(4000)]

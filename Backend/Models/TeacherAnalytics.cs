@@ -40,6 +40,35 @@ public class TeacherAnalytics
 
     public decimal? CompositeScore { get; set; }
 
+    public decimal? AverageDailyEvaluationScore { get; set; }
+
+    public decimal? SupervisorVisitAverage { get; set; }
+
+    public int AchievementPoints { get; set; }
+
+    public int ViolationPoints { get; set; }
+
+    public int ActivityCount { get; set; }
+
+    public int ComplaintCount { get; set; }
+
+    /// <summary>Reserved for attendance/discipline composite when a source exists.</summary>
+    public decimal? AttendanceOrDisciplineScore { get; set; }
+
+    public AnalyticsTrendDirection TrendDirection { get; set; } = AnalyticsTrendDirection.Unknown;
+
+    [MaxLength(64)]
+    public string? PerformanceLevel { get; set; }
+
+    [MaxLength(4000)]
+    public string? StrengthsSummary { get; set; }
+
+    [MaxLength(4000)]
+    public string? WeaknessesSummary { get; set; }
+
+    [MaxLength(4000)]
+    public string? Recommendations { get; set; }
+
     public decimal? TargetAchievementPercent { get; set; }
 
     [MaxLength(4000)]

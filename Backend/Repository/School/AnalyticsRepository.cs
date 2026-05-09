@@ -78,7 +78,10 @@ public class AnalyticsRepository : IAnalyticsRepository
                 TrendAnalysisID = x.TrendAnalysisID,
                 SchoolID = x.SchoolID,
                 KpiDefinitionID = x.KpiDefinitionID,
-                KpiTitle = x.KpiDefinition.Title,
+                KpiTitle = x.KpiDefinition != null ? x.KpiDefinition.Title : null,
+                MetricCode = x.MetricCode,
+                EntityType = x.EntityType,
+                EntityID = x.EntityID,
                 DashboardAudience = x.DashboardAudience,
                 PeriodKind = x.PeriodKind,
                 FromUtc = x.FromUtc,
@@ -88,7 +91,9 @@ public class AnalyticsRepository : IAnalyticsRepository
                 DeltaValue = x.DeltaValue,
                 DeltaPercent = x.DeltaPercent,
                 IsPositiveTrend = x.IsPositiveTrend,
-                TrendLabel = x.TrendLabel
+                TrendDirection = x.TrendDirection,
+                TrendLabel = x.TrendLabel,
+                Interpretation = x.Interpretation
             })
             .ToListAsync(cancellationToken);
 
@@ -99,6 +104,7 @@ public class AnalyticsRepository : IAnalyticsRepository
             {
                 DepartmentAnalyticsID = x.DepartmentAnalyticsID,
                 SchoolID = x.SchoolID,
+                EmployeeJobTypeID = x.EmployeeJobTypeID,
                 DepartmentName = x.DepartmentName,
                 PeriodKind = x.PeriodKind,
                 PeriodStartUtc = x.PeriodStartUtc,
@@ -106,6 +112,12 @@ public class AnalyticsRepository : IAnalyticsRepository
                 KpiCount = x.KpiCount,
                 AverageScore = x.AverageScore,
                 TargetAchievementPercent = x.TargetAchievementPercent,
+                ViolationCount = x.ViolationCount,
+                AchievementCount = x.AchievementCount,
+                ActivityCount = x.ActivityCount,
+                ComplaintCount = x.ComplaintCount,
+                EmployeeCount = x.EmployeeCount,
+                PerformanceLevel = x.PerformanceLevel,
                 ComputedAtUtc = x.ComputedAtUtc
             })
             .ToListAsync(cancellationToken);
@@ -124,6 +136,14 @@ public class AnalyticsRepository : IAnalyticsRepository
                 PeriodEndUtc = x.PeriodEndUtc,
                 KpiCount = x.KpiCount,
                 CompositeScore = x.CompositeScore,
+                AverageDailyEvaluationScore = x.AverageDailyEvaluationScore,
+                SupervisorVisitAverage = x.SupervisorVisitAverage,
+                AchievementPoints = x.AchievementPoints,
+                ViolationPoints = x.ViolationPoints,
+                ActivityCount = x.ActivityCount,
+                ComplaintCount = x.ComplaintCount,
+                TrendDirection = x.TrendDirection,
+                PerformanceLevel = x.PerformanceLevel,
                 TargetAchievementPercent = x.TargetAchievementPercent,
                 ComputedAtUtc = x.ComputedAtUtc
             })
@@ -141,6 +161,14 @@ public class AnalyticsRepository : IAnalyticsRepository
                 PeriodEndUtc = x.PeriodEndUtc,
                 KpiCount = x.KpiCount,
                 OverallScore = x.OverallScore,
+                AverageTeacherScore = x.AverageTeacherScore,
+                TotalViolations = x.TotalViolations,
+                TotalAchievements = x.TotalAchievements,
+                TotalActivities = x.TotalActivities,
+                TotalComplaints = x.TotalComplaints,
+                EmployeeCount = x.EmployeeCount,
+                ActiveTeacherCount = x.ActiveTeacherCount,
+                RiskLevel = x.RiskLevel,
                 TargetAchievementPercent = x.TargetAchievementPercent,
                 ComputedAtUtc = x.ComputedAtUtc
             })

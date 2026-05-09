@@ -54,8 +54,11 @@ public sealed class AnalyticsTrendRowDto
 {
     public int TrendAnalysisID { get; set; }
     public int SchoolID { get; set; }
-    public int KpiDefinitionID { get; set; }
+    public int? KpiDefinitionID { get; set; }
     public string? KpiTitle { get; set; }
+    public string? MetricCode { get; set; }
+    public AnalyticsEntityType EntityType { get; set; }
+    public int? EntityID { get; set; }
     public DashboardAudience DashboardAudience { get; set; }
     public AnalyticsPeriodKind PeriodKind { get; set; }
     public DateTime FromUtc { get; set; }
@@ -65,13 +68,16 @@ public sealed class AnalyticsTrendRowDto
     public decimal? DeltaValue { get; set; }
     public decimal? DeltaPercent { get; set; }
     public bool IsPositiveTrend { get; set; }
+    public AnalyticsTrendDirection TrendDirection { get; set; }
     public string? TrendLabel { get; set; }
+    public string? Interpretation { get; set; }
 }
 
 public sealed class AnalyticsDepartmentRowDto
 {
     public int DepartmentAnalyticsID { get; set; }
     public int SchoolID { get; set; }
+    public int? EmployeeJobTypeID { get; set; }
     public string? DepartmentName { get; set; }
     public AnalyticsPeriodKind PeriodKind { get; set; }
     public DateTime PeriodStartUtc { get; set; }
@@ -79,6 +85,12 @@ public sealed class AnalyticsDepartmentRowDto
     public int KpiCount { get; set; }
     public decimal? AverageScore { get; set; }
     public decimal? TargetAchievementPercent { get; set; }
+    public int ViolationCount { get; set; }
+    public int AchievementCount { get; set; }
+    public int ActivityCount { get; set; }
+    public int ComplaintCount { get; set; }
+    public int EmployeeCount { get; set; }
+    public string? PerformanceLevel { get; set; }
     public DateTime ComputedAtUtc { get; set; }
 }
 
@@ -93,6 +105,14 @@ public sealed class AnalyticsTeacherRowDto
     public DateTime PeriodEndUtc { get; set; }
     public int KpiCount { get; set; }
     public decimal? CompositeScore { get; set; }
+    public decimal? AverageDailyEvaluationScore { get; set; }
+    public decimal? SupervisorVisitAverage { get; set; }
+    public int AchievementPoints { get; set; }
+    public int ViolationPoints { get; set; }
+    public int ActivityCount { get; set; }
+    public int ComplaintCount { get; set; }
+    public AnalyticsTrendDirection TrendDirection { get; set; }
+    public string? PerformanceLevel { get; set; }
     public decimal? TargetAchievementPercent { get; set; }
     public DateTime ComputedAtUtc { get; set; }
 }
@@ -106,6 +126,14 @@ public sealed class AnalyticsSchoolRowDto
     public DateTime PeriodEndUtc { get; set; }
     public int KpiCount { get; set; }
     public decimal? OverallScore { get; set; }
+    public decimal? AverageTeacherScore { get; set; }
+    public int TotalViolations { get; set; }
+    public int TotalAchievements { get; set; }
+    public int TotalActivities { get; set; }
+    public int TotalComplaints { get; set; }
+    public int EmployeeCount { get; set; }
+    public int ActiveTeacherCount { get; set; }
+    public AnalyticsRiskLevel RiskLevel { get; set; }
     public decimal? TargetAchievementPercent { get; set; }
     public DateTime ComputedAtUtc { get; set; }
 }

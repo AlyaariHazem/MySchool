@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { ApiResponse } from 'app/core/models/response.model';
 import {
   AnalyticsDashboardDto,
   AnalyticsDashboardQuery,
+  AnalyticsGenerateRequest,
   DashboardCardDto,
   DepartmentAnalyticsDto,
   KpiSnapshotDto,
@@ -58,6 +59,27 @@ export class AnalyticsService {
         const raw = unwrap<Record<string, unknown>>(r) ?? {};
         return this.normDashboard(raw);
       }),
+    );
+  }
+
+  /** Uses GET executive dashboard endpoint (same payload shape as POST /dashboard). */
+  getExecutiveDashboardViaGet(filters: {
+    schoolID?: number | null;
+    periodKind?: number | null;
+    audience?: number | null;
+  }): Observable<AnalyticsDashboardDto> {
+    let params = new HttpParams();
+    if (filters.schoolID != null) params = params.set('schoolID', String(filters.schoolID));
+    if (filters.periodKind != null) params = params.set('periodKind', String(filters.periodKind));
+    if (filters.audience != null) params = params.set('audience', String(filters.audience));
+    return this.http.get<ApiResponse<unknown>>(this.url('/dashboards/executive'), { params }).pipe(
+      map((r) => this.normDashboard((unwrap(r) ?? {}) as Record<string, unknown>)),
+    );
+  }
+
+  generateSnapshots(body: AnalyticsGenerateRequest): Observable<Record<string, unknown>> {
+    return this.http.post<ApiResponse<unknown>>(this.url('/generate-snapshots'), body).pipe(
+      map((r) => (unwrap(r) ?? {}) as Record<string, unknown>),
     );
   }
 
@@ -112,8 +134,14 @@ export class AnalyticsService {
     return {
       trendAnalysisID: num(raw['trendAnalysisID'] ?? raw['TrendAnalysisID']),
       schoolID: num(raw['schoolID'] ?? raw['SchoolID']),
-      kpiDefinitionID: num(raw['kpiDefinitionID'] ?? raw['KpiDefinitionID']),
+      kpiDefinitionID:
+        raw['kpiDefinitionID'] != null || raw['KpiDefinitionID'] != null
+          ? num(raw['kpiDefinitionID'] ?? raw['KpiDefinitionID'])
+          : null,
       kpiTitle: (raw['kpiTitle'] ?? raw['KpiTitle']) as string | undefined,
+      metricCode: (raw['metricCode'] ?? raw['MetricCode']) as string | null | undefined,
+      entityType: raw['entityType'] != null ? num(raw['entityType'] ?? raw['EntityType']) : undefined,
+      entityID: raw['entityID'] != null ? num(raw['entityID'] ?? raw['EntityID']) : null,
       dashboardAudience: num(raw['dashboardAudience'] ?? raw['DashboardAudience']) as TrendAnalysisDto['dashboardAudience'],
       periodKind: num(raw['periodKind'] ?? raw['PeriodKind']) as TrendAnalysisDto['periodKind'],
       fromUtc: str(raw['fromUtc'] ?? raw['FromUtc']),
@@ -123,7 +151,9 @@ export class AnalyticsService {
       deltaValue: raw['deltaValue'] != null ? num(raw['deltaValue'] ?? raw['DeltaValue']) : null,
       deltaPercent: raw['deltaPercent'] != null ? num(raw['deltaPercent'] ?? raw['DeltaPercent']) : null,
       isPositiveTrend: Boolean(raw['isPositiveTrend'] ?? raw['IsPositiveTrend']),
+      trendDirection: raw['trendDirection'] != null ? num(raw['trendDirection'] ?? raw['TrendDirection']) : undefined,
       trendLabel: (raw['trendLabel'] ?? raw['TrendLabel']) as string | null | undefined,
+      interpretation: (raw['interpretation'] ?? raw['Interpretation']) as string | null | undefined,
     };
   }
 
@@ -131,6 +161,7 @@ export class AnalyticsService {
     return {
       departmentAnalyticsID: num(raw['departmentAnalyticsID'] ?? raw['DepartmentAnalyticsID']),
       schoolID: num(raw['schoolID'] ?? raw['SchoolID']),
+      employeeJobTypeID: raw['employeeJobTypeID'] != null ? num(raw['employeeJobTypeID'] ?? raw['EmployeeJobTypeID']) : null,
       departmentName: str(raw['departmentName'] ?? raw['DepartmentName']),
       periodKind: num(raw['periodKind'] ?? raw['PeriodKind']) as DepartmentAnalyticsDto['periodKind'],
       periodStartUtc: str(raw['periodStartUtc'] ?? raw['PeriodStartUtc']),
@@ -141,6 +172,12 @@ export class AnalyticsService {
         raw['targetAchievementPercent'] != null
           ? num(raw['targetAchievementPercent'] ?? raw['TargetAchievementPercent'])
           : null,
+      violationCount: raw['violationCount'] != null ? num(raw['violationCount'] ?? raw['ViolationCount']) : undefined,
+      achievementCount: raw['achievementCount'] != null ? num(raw['achievementCount'] ?? raw['AchievementCount']) : undefined,
+      activityCount: raw['activityCount'] != null ? num(raw['activityCount'] ?? raw['ActivityCount']) : undefined,
+      complaintCount: raw['complaintCount'] != null ? num(raw['complaintCount'] ?? raw['ComplaintCount']) : undefined,
+      employeeCount: raw['employeeCount'] != null ? num(raw['employeeCount'] ?? raw['EmployeeCount']) : undefined,
+      performanceLevel: (raw['performanceLevel'] ?? raw['PerformanceLevel']) as string | null | undefined,
       computedAtUtc: str(raw['computedAtUtc'] ?? raw['ComputedAtUtc']),
     };
   }
@@ -156,6 +193,20 @@ export class AnalyticsService {
       periodEndUtc: str(raw['periodEndUtc'] ?? raw['PeriodEndUtc']),
       kpiCount: num(raw['kpiCount'] ?? raw['KpiCount']),
       compositeScore: raw['compositeScore'] != null ? num(raw['compositeScore'] ?? raw['CompositeScore']) : null,
+      averageDailyEvaluationScore:
+        raw['averageDailyEvaluationScore'] != null
+          ? num(raw['averageDailyEvaluationScore'] ?? raw['AverageDailyEvaluationScore'])
+          : null,
+      supervisorVisitAverage:
+        raw['supervisorVisitAverage'] != null
+          ? num(raw['supervisorVisitAverage'] ?? raw['SupervisorVisitAverage'])
+          : null,
+      achievementPoints: raw['achievementPoints'] != null ? num(raw['achievementPoints'] ?? raw['AchievementPoints']) : undefined,
+      violationPoints: raw['violationPoints'] != null ? num(raw['violationPoints'] ?? raw['ViolationPoints']) : undefined,
+      activityCount: raw['activityCount'] != null ? num(raw['activityCount'] ?? raw['ActivityCount']) : undefined,
+      complaintCount: raw['complaintCount'] != null ? num(raw['complaintCount'] ?? raw['ComplaintCount']) : undefined,
+      trendDirection: raw['trendDirection'] != null ? num(raw['trendDirection'] ?? raw['TrendDirection']) : undefined,
+      performanceLevel: (raw['performanceLevel'] ?? raw['PerformanceLevel']) as string | null | undefined,
       targetAchievementPercent:
         raw['targetAchievementPercent'] != null
           ? num(raw['targetAchievementPercent'] ?? raw['TargetAchievementPercent'])
@@ -173,6 +224,15 @@ export class AnalyticsService {
       periodEndUtc: str(raw['periodEndUtc'] ?? raw['PeriodEndUtc']),
       kpiCount: num(raw['kpiCount'] ?? raw['KpiCount']),
       overallScore: raw['overallScore'] != null ? num(raw['overallScore'] ?? raw['OverallScore']) : null,
+      averageTeacherScore:
+        raw['averageTeacherScore'] != null ? num(raw['averageTeacherScore'] ?? raw['AverageTeacherScore']) : null,
+      totalViolations: raw['totalViolations'] != null ? num(raw['totalViolations'] ?? raw['TotalViolations']) : undefined,
+      totalAchievements: raw['totalAchievements'] != null ? num(raw['totalAchievements'] ?? raw['TotalAchievements']) : undefined,
+      totalActivities: raw['totalActivities'] != null ? num(raw['totalActivities'] ?? raw['TotalActivities']) : undefined,
+      totalComplaints: raw['totalComplaints'] != null ? num(raw['totalComplaints'] ?? raw['TotalComplaints']) : undefined,
+      employeeCount: raw['employeeCount'] != null ? num(raw['employeeCount'] ?? raw['EmployeeCount']) : undefined,
+      activeTeacherCount: raw['activeTeacherCount'] != null ? num(raw['activeTeacherCount'] ?? raw['ActiveTeacherCount']) : undefined,
+      riskLevel: raw['riskLevel'] != null ? num(raw['riskLevel'] ?? raw['RiskLevel']) : undefined,
       targetAchievementPercent:
         raw['targetAchievementPercent'] != null
           ? num(raw['targetAchievementPercent'] ?? raw['TargetAchievementPercent'])

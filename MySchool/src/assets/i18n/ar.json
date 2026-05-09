@@ -191,6 +191,11 @@
       "centralPoints": "النقاط المركزية",
       "awards": "الجوائز",
       "analytics": "لوحات التحليلات",
+      "analyticsExecutive": "التحليلات — الإدارة العليا",
+      "analyticsEducational": "التحليلات — المشرف التربوي",
+      "analyticsAdministrative": "التحليلات — المشرف الإداري",
+      "analyticsSchool": "التحليلات — المدرسة",
+      "analyticsYears": "التحليلات — مقارنة السنوات",
       "violations": "المخالفات",
       "teacherFeedback": "تقييم المعلمين"
     },
@@ -1283,7 +1288,12 @@
     },
     "actions": {
       "apply": "تطبيق",
-      "refresh": "تحديث"
+      "refresh": "تحديث",
+      "generate": "إعادة توليد التحليلات"
+    },
+    "generate": {
+      "needSchool": "اختر مدرسة قبل إعادة توليد التحليلات.",
+      "done": "تم تحديث لقطات التحليلات."
     },
     "filter": {
       "school": "المدرسة",

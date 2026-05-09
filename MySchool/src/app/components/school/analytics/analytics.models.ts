@@ -47,6 +47,7 @@ export interface KpiSnapshotDto {
 export interface DepartmentAnalyticsDto {
   departmentAnalyticsID: number;
   schoolID: number;
+  employeeJobTypeID?: number | null;
   departmentName: string;
   periodKind: AnalyticsPeriodKind;
   periodStartUtc: string;
@@ -54,6 +55,12 @@ export interface DepartmentAnalyticsDto {
   kpiCount: number;
   averageScore?: number | null;
   targetAchievementPercent?: number | null;
+  violationCount?: number;
+  achievementCount?: number;
+  activityCount?: number;
+  complaintCount?: number;
+  employeeCount?: number;
+  performanceLevel?: string | null;
   computedAtUtc: string;
 }
 
@@ -67,6 +74,14 @@ export interface TeacherAnalyticsDto {
   periodEndUtc: string;
   kpiCount: number;
   compositeScore?: number | null;
+  averageDailyEvaluationScore?: number | null;
+  supervisorVisitAverage?: number | null;
+  achievementPoints?: number;
+  violationPoints?: number;
+  activityCount?: number;
+  complaintCount?: number;
+  trendDirection?: number;
+  performanceLevel?: string | null;
   targetAchievementPercent?: number | null;
   computedAtUtc: string;
 }
@@ -79,6 +94,14 @@ export interface SchoolAnalyticsDto {
   periodEndUtc: string;
   kpiCount: number;
   overallScore?: number | null;
+  averageTeacherScore?: number | null;
+  totalViolations?: number;
+  totalAchievements?: number;
+  totalActivities?: number;
+  totalComplaints?: number;
+  employeeCount?: number;
+  activeTeacherCount?: number;
+  riskLevel?: number;
   targetAchievementPercent?: number | null;
   computedAtUtc: string;
 }
@@ -86,8 +109,11 @@ export interface SchoolAnalyticsDto {
 export interface TrendAnalysisDto {
   trendAnalysisID: number;
   schoolID: number;
-  kpiDefinitionID: number;
+  kpiDefinitionID?: number | null;
   kpiTitle?: string;
+  metricCode?: string | null;
+  entityType?: number;
+  entityID?: number | null;
   dashboardAudience: DashboardAudience;
   periodKind: AnalyticsPeriodKind;
   fromUtc: string;
@@ -97,7 +123,9 @@ export interface TrendAnalysisDto {
   deltaValue?: number | null;
   deltaPercent?: number | null;
   isPositiveTrend: boolean;
+  trendDirection?: number;
   trendLabel?: string | null;
+  interpretation?: string | null;
 }
 
 export interface DashboardCardDto {
@@ -121,4 +149,11 @@ export interface AnalyticsDashboardQuery {
   schoolID?: number | null;
   periodKind?: AnalyticsPeriodKind | null;
   audience: DashboardAudience;
+}
+
+export interface AnalyticsGenerateRequest {
+  schoolID: number;
+  academicYearID?: number | null;
+  periodKind: AnalyticsPeriodKind;
+  replaceExistingForPeriod?: boolean;
 }

@@ -2594,6 +2594,15 @@ namespace Backend.Data
                 .HasIndex(x => new { x.SchoolID, x.Code })
                 .IsUnique();
             modelBuilder.Entity<KpiDefinition>()
+                .Property(x => x.Category)
+                .HasConversion<int>();
+            modelBuilder.Entity<KpiDefinition>()
+                .Property(x => x.CalculationType)
+                .HasConversion<int>();
+            modelBuilder.Entity<KpiDefinition>()
+                .Property(x => x.TargetAudience)
+                .HasConversion<int>();
+            modelBuilder.Entity<KpiDefinition>()
                 .HasOne(x => x.School)
                 .WithMany()
                 .HasForeignKey(x => x.SchoolID)
@@ -2608,6 +2617,9 @@ namespace Backend.Data
                 .UseIdentityColumn();
             modelBuilder.Entity<KpiSnapshot>()
                 .Property(x => x.PeriodKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<KpiSnapshot>()
+                .Property(x => x.Status)
                 .HasConversion<int>();
             modelBuilder.Entity<KpiSnapshot>()
                 .HasIndex(x => new { x.KpiDefinitionID, x.SchoolID, x.PeriodStartUtc, x.PeriodEndUtc });
@@ -2650,9 +2662,16 @@ namespace Backend.Data
             modelBuilder.Entity<DepartmentAnalytics>()
                 .HasIndex(x => new { x.SchoolID, x.DepartmentName, x.PeriodStartUtc, x.PeriodEndUtc });
             modelBuilder.Entity<DepartmentAnalytics>()
+                .HasIndex(x => new { x.SchoolID, x.EmployeeJobTypeID, x.PeriodStartUtc, x.PeriodEndUtc });
+            modelBuilder.Entity<DepartmentAnalytics>()
                 .HasOne(x => x.School)
                 .WithMany()
                 .HasForeignKey(x => x.SchoolID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DepartmentAnalytics>()
+                .HasOne(x => x.EmployeeJobType)
+                .WithMany()
+                .HasForeignKey(x => x.EmployeeJobTypeID)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<DepartmentAnalytics>()
                 .HasOne(x => x.AcademicYear)
@@ -2674,6 +2693,9 @@ namespace Backend.Data
                 .UseIdentityColumn();
             modelBuilder.Entity<TeacherAnalytics>()
                 .Property(x => x.PeriodKind)
+                .HasConversion<int>();
+            modelBuilder.Entity<TeacherAnalytics>()
+                .Property(x => x.TrendDirection)
                 .HasConversion<int>();
             modelBuilder.Entity<TeacherAnalytics>()
                 .HasIndex(x => new { x.SchoolID, x.EmployeeProfileID, x.PeriodStartUtc, x.PeriodEndUtc });
@@ -2709,6 +2731,9 @@ namespace Backend.Data
                 .Property(x => x.PeriodKind)
                 .HasConversion<int>();
             modelBuilder.Entity<SchoolAnalytics>()
+                .Property(x => x.RiskLevel)
+                .HasConversion<int>();
+            modelBuilder.Entity<SchoolAnalytics>()
                 .HasIndex(x => new { x.SchoolID, x.PeriodStartUtc, x.PeriodEndUtc });
             modelBuilder.Entity<SchoolAnalytics>()
                 .HasOne(x => x.School)
@@ -2740,7 +2765,15 @@ namespace Backend.Data
                 .Property(x => x.DashboardAudience)
                 .HasConversion<int>();
             modelBuilder.Entity<TrendAnalysis>()
+                .Property(x => x.EntityType)
+                .HasConversion<int>();
+            modelBuilder.Entity<TrendAnalysis>()
+                .Property(x => x.TrendDirection)
+                .HasConversion<int>();
+            modelBuilder.Entity<TrendAnalysis>()
                 .HasIndex(x => new { x.SchoolID, x.KpiDefinitionID, x.DashboardAudience, x.FromUtc, x.ToUtc });
+            modelBuilder.Entity<TrendAnalysis>()
+                .HasIndex(x => new { x.SchoolID, x.MetricCode, x.PeriodKind, x.FromUtc, x.ToUtc });
             modelBuilder.Entity<TrendAnalysis>()
                 .HasOne(x => x.School)
                 .WithMany()
@@ -2750,6 +2783,7 @@ namespace Backend.Data
                 .HasOne(x => x.KpiDefinition)
                 .WithMany()
                 .HasForeignKey(x => x.KpiDefinitionID)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<TrendAnalysis>()
                 .HasOne(x => x.AcademicYear)
