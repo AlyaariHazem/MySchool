@@ -86,7 +86,8 @@
               "buildTarget": "MySchool:build:production"
             },
             "development": {
-              "buildTarget": "MySchool:build:development"
+              "buildTarget": "MySchool:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

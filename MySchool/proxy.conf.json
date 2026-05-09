@@ -1,0 +1,10 @@
+{
+  "/school-ai-support": {
+    "target": "http://localhost:5043",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/school-ai-support": ""
+    }
+  }
+}

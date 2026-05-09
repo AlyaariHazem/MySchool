@@ -3,7 +3,7 @@ import { ToastrService } from 'ngx-toastr';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AiAssistantService } from './ai-assistant.service';
-import type { AiChatMessage, AiUiMessage } from './ai-assistant.models';
+import type { AiUiMessage } from './ai-assistant.models';
 
 /**
  * Floating FAB + slide-up panel (not sidebar) — hosts the same chat flow as the former full page.
@@ -21,7 +21,9 @@ export class AiAssistantFloatingComponent implements OnInit {
 
   panelOpen = false;
 
-  apiHistory: AiChatMessage[] = [];
+  /** minimal-agent conversation id (server-side memory). */
+  supportConversationId: string | null = null;
+
   uiMessages: AiUiMessage[] = [];
   loading = false;
 
@@ -64,12 +66,12 @@ export class AiAssistantFloatingComponent implements OnInit {
     if (!trimmed || this.loading) return;
 
     this.uiMessages = [...this.uiMessages, { role: 'user', content: trimmed }];
-    this.apiHistory = [...this.apiHistory, { role: 'user', content: trimmed }];
     this.loading = true;
 
-    this.ai.chat({ messages: this.apiHistory }).subscribe({
+    this.ai.chat(trimmed, this.supportConversationId).subscribe({
       next: (res) => {
         this.loading = false;
+        if (res.conversationId) this.supportConversationId = res.conversationId;
         if (res.error && !res.reply) {
           this.toastr.error(res.error, this.translate.instant('aiAssistant.errorTitle'));
           this.uiMessages = [
@@ -80,7 +82,6 @@ export class AiAssistantFloatingComponent implements OnInit {
         }
 
         const reply = res.reply?.trim() ?? '';
-        this.apiHistory = [...this.apiHistory, { role: 'assistant', content: reply }];
         this.uiMessages = [
           ...this.uiMessages,
           {

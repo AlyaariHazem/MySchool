@@ -1,12 +1,22 @@
-/** Mirrors Backend.DTOS.Ai — keep aligned with C# models. */
+/** UI chat message (and optional tool trace from legacy backend). */
 export interface AiChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
 
-export interface AiChatRequest {
-  message?: string;
-  messages?: AiChatMessage[];
+/** minimal-agent POST /api/chat body (camelCase). */
+export type SchoolAiSupportUserRole = 'student' | 'teacher' | 'parent' | 'admin';
+
+export interface SchoolAiSupportChatRequest {
+  message: string;
+  userRole: SchoolAiSupportUserRole;
+  conversationId?: string | null;
+  userName?: string | null;
+}
+
+export interface SchoolAiSupportChatResponse {
+  conversationId: string;
+  response: string;
 }
 
 export interface AiToolStep {
@@ -19,6 +29,8 @@ export interface AiChatResponse {
   reply: string;
   toolSteps: AiToolStep[];
   error?: string | null;
+  /** Returned by minimal-agent for follow-up turns (server-side memory). */
+  conversationId?: string;
 }
 
 /** UI-only message (includes optional tool trace for display). */
