@@ -422,11 +422,14 @@
     "errorTitle": "المساعد الذكي",
     "networkError": "تعذر الاتصال بالخادم.",
     "examples": {
-      "details": "اعرض تفاصيل الطالب أحمد علي",
-      "report": "أنشئ استمارة تسجيل للطالب 2026110001",
-      "summarize": "لخّص ملف الطالب هذا (استخدم رقم الطالب بعد البحث)",
-      "parentMsg": "صغ رسالة لولي الأمر بسبب تكرار الغياب",
-      "absence": "أظهر الطلاب ذوي الغياب المرتفع"
+      "scheduleToday": "اعرض جدولي اليوم",
+      "assignmentsThisWeek": "ما هي واجباتي هذا الأسبوع؟",
+      "nextMathTest": "متى موعد اختبار الرياضيات القادم؟",
+      "currentSemesterGrades": "اعرض درجاتي في الفصل الحالي",
+      "absenceDaysThisMonth": "كم يوم غبت هذا الشهر؟",
+      "parentAbsenceMessage": "أرسل رسالة لولي الأمر بسبب كثرة الغياب",
+      "studentsHighAbsence": "أظهر الطلاب الذين لديهم غياب مرتفع",
+      "grade10PerformanceReport": "أعطني تقرير أداء الصف العاشر"
     }
   },
   "timeCapsule": {

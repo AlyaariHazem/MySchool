@@ -28,11 +28,14 @@ export class AiAssistantFloatingComponent implements OnInit {
   loading = false;
 
   readonly quickPrompts: { key: string }[] = [
-    { key: 'aiAssistant.examples.details' },
-    { key: 'aiAssistant.examples.report' },
-    { key: 'aiAssistant.examples.summarize' },
-    { key: 'aiAssistant.examples.parentMsg' },
-    { key: 'aiAssistant.examples.absence' },
+    { key: 'aiAssistant.examples.scheduleToday' },
+    { key: 'aiAssistant.examples.assignmentsThisWeek' },
+    { key: 'aiAssistant.examples.nextMathTest' },
+    { key: 'aiAssistant.examples.currentSemesterGrades' },
+    { key: 'aiAssistant.examples.absenceDaysThisMonth' },
+    { key: 'aiAssistant.examples.parentAbsenceMessage' },
+    { key: 'aiAssistant.examples.studentsHighAbsence' },
+    { key: 'aiAssistant.examples.grade10PerformanceReport' },
   ];
 
   inputPlaceholder = '';

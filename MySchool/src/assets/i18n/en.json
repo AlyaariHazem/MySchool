@@ -421,11 +421,14 @@
     "errorTitle": "AI Assistant",
     "networkError": "Could not reach the server.",
     "examples": {
-      "details": "Show student details for Ahmed Ali",
-      "report": "Generate registration report for student 2026110001",
-      "summarize": "Summarize this student profile (search by id first if needed)",
-      "parentMsg": "Draft a parent message for repeated absence",
-      "absence": "Show students with high absence"
+      "scheduleToday": "Show my schedule for today",
+      "assignmentsThisWeek": "What are my assignments this week?",
+      "nextMathTest": "When is the next math test?",
+      "currentSemesterGrades": "Show my grades for the current semester",
+      "absenceDaysThisMonth": "How many days was I absent this month?",
+      "parentAbsenceMessage": "Send a message to the parent due to excessive absences",
+      "studentsHighAbsence": "Show students with high absences",
+      "grade10PerformanceReport": "Give me the performance report for grade 10"
     }
   },
   "timeCapsule": {
