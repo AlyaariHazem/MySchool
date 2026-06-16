@@ -169,13 +169,21 @@ export class AuthAPIService {
 
   logout(): Observable<void> {
      return this.API.http.post<void>(`${this.API.baseUrl}/auth/logout`, {},
-      { withCredentials: true })               // what this will do?
+      { withCredentials: true })
       .pipe(
-        tap(() => {
-          ['token', 'tenantId', 'managerName', 'yearId', 'schoolName', 'userName', 'schoolId', 'userType', 'permissions', 'schoolRole'].forEach(item => localStorage.removeItem(item));
-          this.permissions.clear();
-          this.router.navigate(['/']);
+        tap(() => this.clearLocalSession()),
+        catchError(() => {
+          // Still clear client session if the server is unreachable or DB is down.
+          this.clearLocalSession();
+          return of(void 0);
         })
       );
+  }
+
+  private clearLocalSession(): void {
+    ['token', 'tenantId', 'managerName', 'yearId', 'schoolName', 'userName', 'schoolId', 'userType', 'permissions', 'schoolRole']
+      .forEach(item => localStorage.removeItem(item));
+    this.permissions.clear();
+    this.router.navigate(['/']);
   }
 }

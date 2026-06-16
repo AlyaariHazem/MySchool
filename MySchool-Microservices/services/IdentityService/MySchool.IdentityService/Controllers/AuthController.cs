@@ -25,19 +25,22 @@ public partial class AuthController : ControllerBase
     private readonly IConfiguration _config;
     private readonly IMonolithIntegrationClient _monolith;
     private readonly IPermissionClaimService _permissionClaimService;
+    private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         UserManager<ApplicationUser> userManager,
         IdentityDbContext db,
         IConfiguration config,
         IMonolithIntegrationClient monolith,
-        IPermissionClaimService permissionClaimService)
+        IPermissionClaimService permissionClaimService,
+        ILogger<AuthController> logger)
     {
         _userManager = userManager;
         _db = db;
         _config = config;
         _monolith = monolith;
         _permissionClaimService = permissionClaimService;
+        _logger = logger;
     }
 
     [HttpPost("Register")]
@@ -190,13 +193,32 @@ public partial class AuthController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var tokens = await _db.RefreshTokens.Where(t => t.UserId == userId).ToListAsync();
-        if (tokens.Count > 0)
-        {
-            _db.RefreshTokens.RemoveRange(tokens);
-            await _db.SaveChangesAsync();
-        }
+        await TryRevokeRefreshTokensAsync(userId);
+        ClearRefreshTokenCookie();
 
+        return Ok(new { message = "Logged out on all devices" });
+    }
+
+    private async Task TryRevokeRefreshTokensAsync(string userId)
+    {
+        try
+        {
+            var tokens = await _db.RefreshTokens.Where(t => t.UserId == userId).ToListAsync();
+            if (tokens.Count > 0)
+            {
+                _db.RefreshTokens.RemoveRange(tokens);
+                await _db.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Cookie + client token cleanup still succeed; DB may be offline during dev.
+            _logger.LogWarning(ex, "Could not revoke refresh tokens for user {UserId}.", userId);
+        }
+    }
+
+    private void ClearRefreshTokenCookie()
+    {
         Response.Cookies.Delete("refreshToken", new CookieOptions
         {
             HttpOnly = true,
@@ -204,8 +226,6 @@ public partial class AuthController : ControllerBase
             SameSite = SameSiteMode.None,
             Expires = DateTime.UnixEpoch
         });
-
-        return Ok(new { message = "Logged out on all devices" });
     }
 
     [HttpGet("my-tenants")]
