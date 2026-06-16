@@ -3,7 +3,7 @@
     "Name": "New Profile",
     "Projects": [
       {
-        "Path": "gateway\\MySchool.Gateway\\MySchool.Gateway.csproj",
+        "Path": "bff\\MySchool.WebBff\\MySchool.WebBff.csproj",
         "Action": "Start"
       },
       {

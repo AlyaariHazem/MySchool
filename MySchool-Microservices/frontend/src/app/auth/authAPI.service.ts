@@ -4,6 +4,7 @@ import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 
 import { User } from '../core/models/user.model';
 import { BackendAspService } from '../ASP.NET/backend-asp.service';
+import { environment } from '../../environments/environment';
 import { PermissionService } from '../core/services/permission.service';
 
 
@@ -13,6 +14,7 @@ import { PermissionService } from '../core/services/permission.service';
 export class AuthAPIService {
   private API = inject(BackendAspService);
   private permissions = inject(PermissionService);
+  private readonly bffUrl = environment.bffUrl ?? environment.baseUrl.replace(/\/api\/?$/, '/bff');
 
   constructor(public router: Router) { }
 
@@ -95,7 +97,7 @@ export class AuthAPIService {
    * so the next requests include TenantId (avoids 403 TenantRequired from TenantResolutionMiddleware).
    */
   login(user: User): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/auth/login`, user).pipe(
+    return this.API.http.post(`${this.bffUrl}/auth/login`, user).pipe(
       switchMap((response: any) => {
         if (response?.token) {
           localStorage.setItem('token', response.token);
@@ -161,14 +163,14 @@ export class AuthAPIService {
   }
 
   register(user: User): Observable<any> {
-    return this.API.http.post(`${this.API.baseUrl}/auth/register`, user, {
+    return this.API.http.post(`${this.bffUrl}/auth/register`, user, {
       responseType: 'json' // ✅ Ensures response is treated as JSON
     });
   }
 
 
   logout(): Observable<void> {
-     return this.API.http.post<void>(`${this.API.baseUrl}/auth/logout`, {},
+     return this.API.http.post<void>(`${this.bffUrl}/auth/logout`, {},
       { withCredentials: true })
       .pipe(
         tap(() => this.clearLocalSession()),

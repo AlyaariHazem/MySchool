@@ -6,4 +6,4 @@ Quick links:
 
 - Service: `services/IdentityService/MySchool.IdentityService/`
 - Shared contracts: `shared/MySchool.Contracts/`
-- Gateway routes: auth, users, roles, rolepermissions → Identity
+- Web BFF routes: `/bff/auth/*`, `/bff/users`, `/bff/roles` → IdentityService (gRPC)

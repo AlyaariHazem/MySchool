@@ -66,4 +66,4 @@ MySchool-Microservices/services/MonolithService/MySchool.MonolithService/bin/
 MySchool-Microservices/services/IdentityService/MySchool.IdentityService/bin/
 MySchool-Microservices/services/IdentityService/MySchool.IdentityService/wwwroot/
 MySchool-Microservices/services/IdentityService/MySchool.IdentityService/wwwroot/
-MySchool-Microservices/gateway/MySchool.Gateway/obj/
+MySchool-Microservices/bff/MySchool.WebBff/obj/

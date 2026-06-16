@@ -60,8 +60,8 @@ cd Backend && dotnet run
 # Terminal 3 — Identity (port 8082)
 cd MySchool-Microservices/services/IdentityService/MySchool.IdentityService && dotnet run
 
-# Terminal 4 — Gateway (port 5001)
-cd MySchool-Microservices/gateway/MySchool.Gateway && dotnet run
+# Terminal 4 — Web BFF (port 5001)
+cd MySchool-Microservices/bff/MySchool.WebBff && dotnet run
 
 # Terminal 5 — Frontend
 cd MySchool-Microservices/frontend && npx ng serve
@@ -77,7 +77,7 @@ From repository root:
 docker compose up -d --build
 ```
 
-Gateway: `http://localhost:8081/api/auth/login`
+Web BFF: `http://localhost:8081/bff/auth/login` (identity via gRPC); school APIs at `http://localhost:8081/api`
 
 ## Shared contracts
 

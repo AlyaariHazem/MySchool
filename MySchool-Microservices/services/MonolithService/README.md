@@ -21,8 +21,8 @@ Default URLs: `https://localhost:7258` / `http://localhost:5000`
 
 ## Docker
 
-`docker-compose.yml` builds the monolith from `../../Backend/Dockerfile`. The service name in Compose is `monolithservice`.
+`docker-compose.yml` builds the monolith from `../../Backend/Dockerfile`. The service name in Compose is `backend`.
 
-## API Gateway
+## Web BFF
 
-The Angular frontend and external clients should call **MySchool.Gateway** instead of the monolith directly. The gateway forwards all `/api/*` traffic to this service.
+The Angular frontend and external clients should call **MySchool.WebBff** instead of the monolith directly. The BFF forwards `/api/*` to this service (YARP) and handles identity at `/bff/*` via gRPC to IdentityService.

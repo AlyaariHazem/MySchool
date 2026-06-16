@@ -17,7 +17,7 @@ services:
       retries: 30
       start_period: 60s
 
-  identityservice:
+  myschool-identityservice:
     build:
       context: ./MySchool-Microservices
       dockerfile: services/IdentityService/MySchool.IdentityService/Dockerfile
@@ -26,24 +26,26 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
-      ASPNETCORE_URLS: "http://+:8080"
+      IdentityService__HttpPort: "8080"
+      IdentityService__GrpcPort: "8081"
       ConnectionStrings__SqlIdentityConnection: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
       JWT__SecretKey: "${JWT_SECRET_KEY:-asdadaqeq!@##3244343dsdfsfdiui989}"
       JWT__IssuerIP: "http://localhost:7258/"
       JWT__AudienceIP: "http://localhost:4200/"
-      MonolithService__BaseUrl: "http://monolithservice:8080"
+      MonolithService__BaseUrl: "http://backend:8080"
       InternalService__ApiKey: "${INTERNAL_SERVICE_API_KEY:-dev-internal-key-change-in-production}"
     expose:
       - "8080"
+      - "8081"
 
-  monolithservice:
+  backend:
     build:
       context: ./Backend
       dockerfile: Dockerfile
     depends_on:
       sqlserver:
         condition: service_healthy
-      identityservice:
+      myschool-identityservice:
         condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
@@ -56,26 +58,30 @@ services:
       JWT__SecretKey: "${JWT_SECRET_KEY:-asdadaqeq!@##3244343dsdfsfdiui989}"
       JWT__IssuerIP: "http://localhost:7258/"
       JWT__AudienceIP: "http://localhost:4200/"
-      IdentityService__BaseUrl: "http://identityservice:8080"
+      IdentityService__BaseUrl: "http://myschool-identityservice:8080"
       InternalService__ApiKey: "${INTERNAL_SERVICE_API_KEY:-dev-internal-key-change-in-production}"
     volumes:
       - sql_backups:/var/opt/mssql/backup
     expose:
       - "8080"
 
-  gateway:
+  myschool-webbff:
     build:
-      context: ./MySchool-Microservices/gateway/MySchool.Gateway
-      dockerfile: Dockerfile
+      context: ./MySchool-Microservices
+      dockerfile: bff/MySchool.WebBff/Dockerfile
     depends_on:
-      - identityservice
-      - monolithservice
+      - myschool-identityservice
+      - backend
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
       ASPNETCORE_URLS: "http://+:8080"
       Cors__AllowedOrigins__0: "http://localhost:4200"
-      ReverseProxy__Clusters__identity__Destinations__identityservice__Address: "http://identityservice:8080/"
-      ReverseProxy__Clusters__monolith__Destinations__monolithservice__Address: "http://monolithservice:8080/"
+      IdentityService__GrpcUrl: "http://myschool-identityservice:8081"
+      JWT__SecretKey: "${JWT_SECRET_KEY:-asdadaqeq!@##3244343dsdfsfdiui989}"
+      JWT__IssuerIP: "http://localhost:7258/"
+      JWT__AudienceIP: "http://localhost:4200/"
+      ReverseProxy__Clusters__backend__Destinations__backend__Address: "http://backend:8080/"
+      OpenApi__Services__backend: "http://backend:8080"
     ports:
       - "8081:8080"
 

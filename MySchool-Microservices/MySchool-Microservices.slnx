@@ -1,6 +1,6 @@
 <Solution>
-  <Folder Name="/gateway/">
-    <Project Path="gateway/MySchool.Gateway/MySchool.Gateway.csproj" />
+  <Folder Name="/bff/">
+    <Project Path="bff/MySchool.WebBff/MySchool.WebBff.csproj" />
   </Folder>
   <Folder Name="/services/" />
   <Folder Name="/services/IdentityService/">

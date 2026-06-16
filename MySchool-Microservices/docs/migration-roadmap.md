@@ -521,45 +521,41 @@ gantt
 
 ---
 
-## Phase 2 Completed: API Gateway Foundation
+## Phase 2 Completed: Web BFF Foundation
 
-**Status:** Implemented (June 2026)
+**Status:** Implemented (June 2026); **MySchool.Gateway removed** — `MySchool.WebBff` is the sole public entry point.
 
-The microservices folder structure and YARP API Gateway are in place. The monolith is **not** extracted; the gateway forwards all API traffic to the existing backend.
+The microservices folder structure and Web BFF (YARP + gRPC identity) are in place. School APIs are proxied to the backend; identity is exposed at `/bff/*` via gRPC to IdentityService.
 
 ### What was delivered
 
 | Item | Location |
 |------|----------|
 | Microservices layout | `MySchool-Microservices/` |
-| YARP Gateway | `MySchool-Microservices/gateway/MySchool.Gateway/` |
+| Web BFF | `MySchool-Microservices/bff/MySchool.WebBff/` |
 | Monolith boundary (logical) | `MySchool-Microservices/services/MonolithService/` → `Backend/` |
 | Angular frontend | `MySchool-Microservices/frontend/` (moved from `MySchool/`) |
-| Shared placeholders | `MySchool-Microservices/shared/MySchool.Contracts/`, `MySchool.BuildingBlocks/` |
-| Docker Compose stack | `docker-compose.yml` (gateway + monolithservice + sqlserver + frontend) |
-| Gateway documentation | `MySchool-Microservices/docs/gateway-setup.md` |
+| Shared contracts | `MySchool-Microservices/shared/MySchool.Contracts/`, `MySchool.BuildingBlocks/` |
+| Docker Compose stack | `docker-compose.yml` (myschool-webbff + backend + myschool-identityservice + sqlserver + frontend) |
+| BFF documentation | `MySchool-Microservices/docs/bff-grpc-identity.md` |
 
-### Gateway routing (current)
+### BFF routing (current)
 
-All routes forward to the monolith:
-
-- `/api/auth/*` → MonolithService
-- `/api/users/*` → MonolithService
-- `/api/roles/*` → MonolithService
-- `/api/*` → MonolithService
-- `/uploads/*`, `/swagger/*` → MonolithService (compatibility)
+- `/bff/auth/*`, `/bff/users`, `/bff/roles` → IdentityService (gRPC)
+- `/api/*`, `/uploads/*` → Backend (YARP, temporary)
 
 ### Frontend integration
 
-- **Local dev:** `environment.development.ts` → `http://localhost:5001/api` (gateway)
-- **Docker:** `environment.docker.ts` → `http://localhost:8081/api` (gateway on host)
+- **Local dev:** `environment.development.ts` → `http://localhost:5001/api` and `http://localhost:5001/bff`
+- **Docker:** `environment.docker.ts` → `http://localhost:8081/api` and `http://localhost:8081/bff`
 
 ### How to run
 
 ```bash
-# Local: monolith + gateway + frontend (three terminals)
+# Local: backend + identity + web bff + frontend
 cd Backend && dotnet run
-cd MySchool-Microservices/gateway/MySchool.Gateway && dotnet run
+cd MySchool-Microservices/services/IdentityService/MySchool.IdentityService && dotnet run
+cd MySchool-Microservices/bff/MySchool.WebBff && dotnet run
 cd MySchool-Microservices/frontend && npx ng serve
 
 # Docker
@@ -568,7 +564,7 @@ docker compose up -d --build
 
 ### Next phase
 
-Proceed with **Phase 1: Extract Identity Service** per the roadmap above, adding Identity routes to the gateway before the monolith catch-all.
+Proceed with further bounded-context extractions per the roadmap above; add BFF feature slices and gRPC RPCs as services are split.
 
 ---
 
@@ -576,5 +572,5 @@ Proceed with **Phase 1: Extract Identity Service** per the roadmap above, adding
 
 See [identity-service-extraction.md](./identity-service-extraction.md) and the repository root [docs/identity-service-extraction.md](../../docs/identity-service-extraction.md).
 
-Gateway now routes `/api/auth/*`, `/api/users/*`, `/api/roles/*`, and `/api/rolepermissions/*` to **Identity Service**; all other `/api/*` traffic goes to the monolith.
+IdentityService owns users, roles, JWT, and refresh tokens. Web BFF exposes identity to Angular at `/bff/*`; IdentityService is not called directly from the browser.
 

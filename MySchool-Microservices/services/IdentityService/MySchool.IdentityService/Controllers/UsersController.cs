@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MySchool.Contracts.Users;
 using MySchool.IdentityService.Entities;
+using MySchool.IdentityService.Features.Users.GetUsers;
 using MySchool.IdentityService.Mapping;
 
 namespace MySchool.IdentityService.Controllers;
@@ -12,10 +13,12 @@ namespace MySchool.IdentityService.Controllers;
 public sealed class UsersController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly GetUsersHandler _getUsersHandler;
 
-    public UsersController(UserManager<ApplicationUser> userManager)
+    public UsersController(UserManager<ApplicationUser> userManager, GetUsersHandler getUsersHandler)
     {
         _userManager = userManager;
+        _getUsersHandler = getUsersHandler;
     }
 
     [HttpPost]
@@ -82,8 +85,8 @@ public sealed class UsersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserAccountDto>>> GetAll()
     {
-        var users = await _userManager.Users.AsNoTracking().ToListAsync();
-        return Ok(users.Select(UserAccountMapper.ToDto));
+        var result = await _getUsersHandler.HandleAsync(new GetUsersQuery());
+        return Ok(result.Users);
     }
 
     [HttpGet("{id}")]

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.10" />
@@ -22,6 +23,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\MySchool.Contracts\MySchool.Contracts.csproj" />
     <ProjectReference Include="..\..\..\shared\MySchool.BuildingBlocks\MySchool.BuildingBlocks.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\identity.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "MySchool.Identity.Grpc";
+
+package identity;
+
+service IdentityGrpc {
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+  rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc GetCurrentUser (GetCurrentUserRequest) returns (GetCurrentUserResponse);
+  rpc GetUsers (GetUsersRequest) returns (GetUsersResponse);
+  rpc GetRoles (GetRolesRequest) returns (GetRolesResponse);
+}
+
+message LoginRequest {
+  string user_name = 1;
+  string password = 2;
+  string user_type = 3;
+  optional int32 tenant_id = 4;
+}
+
+message TenantSummary {
+  int32 tenant_id = 1;
+  string school_name = 2;
+  int32 tenant_role = 3;
+  bool is_default_suggestion = 4;
+}
+
+message LoginResponse {
+  bool success = 1;
+  string error_message = 2;
+  string user_name = 3;
+  string token = 4;
+  string expiration = 5;
+  repeated string permissions = 6;
+  string school_role = 7;
+  string school_name = 8;
+  string manager_name = 9;
+  int32 school_id = 10;
+  int32 year_id = 11;
+  int32 tenant_id = 12;
+  string tenant_database = 13;
+  repeated TenantSummary tenants = 14;
+  string refresh_token = 15;
+  google.protobuf.Timestamp refresh_token_expires = 16;
+}
+
+message RegisterRequest {
+  string user_name = 1;
+  string password = 2;
+  string email = 3;
+  string user_type = 4;
+}
+
+message RegisterResponse {
+  bool success = 1;
+  string error_message = 2;
+  string message = 3;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  bool success = 1;
+  string error_message = 2;
+  string token = 3;
+  string expiration = 4;
+  string refresh_token = 5;
+  google.protobuf.Timestamp refresh_token_expires = 6;
+}
+
+message GetCurrentUserRequest {
+  string user_id = 1;
+}
+
+message GetCurrentUserResponse {
+  bool success = 1;
+  string error_message = 2;
+  UserAccount user = 3;
+  repeated string roles = 4;
+}
+
+message GetUsersRequest {
+}
+
+message GetUsersResponse {
+  repeated UserAccount users = 1;
+}
+
+message GetRolesRequest {
+}
+
+message RoleItem {
+  string id = 1;
+  string name = 2;
+}
+
+message GetRolesResponse {
+  repeated RoleItem roles = 1;
+}
+
+message UserAccount {
+  string id = 1;
+  string user_name = 2;
+  string normalized_user_name = 3;
+  string email = 4;
+  string normalized_email = 5;
+  bool email_confirmed = 6;
+  string phone_number = 7;
+  string address = 8;
+  string gender = 9;
+  string date_of_birth = 10;
+  string phone_number_normalized = 11;
+  string hire_date = 12;
+  string user_type = 13;
+}

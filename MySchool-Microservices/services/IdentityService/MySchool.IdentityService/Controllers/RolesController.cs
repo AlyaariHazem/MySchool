@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MySchool.IdentityService.Features.Roles.GetRoles;
 
 namespace MySchool.IdentityService.Controllers;
 
@@ -9,19 +10,19 @@ namespace MySchool.IdentityService.Controllers;
 [Authorize(Roles = "ADMIN,MANAGER")]
 public sealed class RolesController : ControllerBase
 {
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly GetRolesHandler _getRolesHandler;
 
-    public RolesController(RoleManager<IdentityRole> roleManager)
+    public RolesController(GetRolesHandler getRolesHandler)
     {
-        _roleManager = roleManager;
+        _getRolesHandler = getRolesHandler;
     }
 
     [HttpGet]
-    public IActionResult List()
+    public async Task<IActionResult> List()
     {
-        var roles = _roleManager.Roles
-            .OrderBy(r => r.Name)
-            .Select(r => new { r.Id, r.Name })
+        var result = await _getRolesHandler.HandleAsync(new GetRolesQuery());
+        var roles = result.Roles
+            .Select(r => new { Id = r.Id, Name = r.Name })
             .ToList();
         return Ok(roles);
     }

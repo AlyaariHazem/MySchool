@@ -6,14 +6,15 @@ Foundation layout for migrating the MySchool monolith to microservices.
 
 ```
 MySchool-Microservices/
-├── gateway/MySchool.Gateway/     YARP API Gateway
+├── bff/MySchool.WebBff/          Public HTTP entry (BFF + YARP)
+├── services/IdentityService/     Identity, auth, users, roles (gRPC + internal HTTP)
 ├── services/MonolithService/     Logical boundary → ../../Backend (unchanged)
 ├── shared/
-│   ├── MySchool.Contracts/       Shared DTOs and contracts (placeholder)
-│   └── MySchool.BuildingBlocks/  Cross-cutting helpers (placeholder)
-├── frontend/                     Angular SPA (moved from repo root MySchool/)
-├── docs/                         Architecture and gateway documentation
-└── docker-compose.yml            sqlserver + monolithservice + gateway + frontend
+│   ├── MySchool.Contracts/       Shared DTOs and contracts
+│   └── MySchool.BuildingBlocks/  Cross-cutting helpers
+├── frontend/                     Angular SPA
+├── docs/                         Architecture documentation
+└── docker-compose.yml            sqlserver + identity + backend + webbff + frontend
 ```
 
 ## Quick start (local)
@@ -33,14 +34,14 @@ MySchool-Microservices/
    dotnet run
    ```
 
-4. Start the gateway:
+4. Start the Web BFF:
 
    ```bash
-   cd gateway/MySchool.Gateway
+   cd bff/MySchool.WebBff
    dotnet run
    ```
 
-5. Start the frontend (calls gateway at `http://localhost:5001/api`):
+5. Start the frontend (calls BFF at `http://localhost:5001`):
 
    ```bash
    cd frontend
@@ -58,11 +59,11 @@ docker compose up -d --build
 
 | Service | Host URL |
 |---------|----------|
-| Gateway | http://localhost:8081 |
-| Identity (direct, debug) | http://localhost:8082 |
+| Web BFF | http://localhost:8081 |
+| Identity (internal gRPC, debug HTTP) | http://localhost:8082 |
 | Frontend | http://localhost:4200 |
-| Swagger (via gateway → monolith) | http://localhost:8081/swagger |
+| Swagger (BFF) | http://localhost:8081/swagger |
 
 Set `MSSQL_SA_PASSWORD` in `.env` at the repository root.
 
-See [docs/gateway-setup.md](./docs/gateway-setup.md) for details.
+See [docs/bff-grpc-identity.md](./docs/bff-grpc-identity.md) for BFF routing and gRPC details.
