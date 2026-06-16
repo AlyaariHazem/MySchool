@@ -53,3 +53,17 @@ bin/
 .vscode
 .vs
 Backend/.vs
+/docs
+MySchool-Microservices/frontend/node_modules/
+MySchool-Microservices/frontend/dist/
+MySchool-Microservices/frontend/.angular/
+
+MySchool-Microservices/shared/MySchool.Contracts/obj/
+MySchool-Microservices/shared/MySchool.BuildingBlocks/obj/
+MySchool-Microservices/services/IdentityService/MySchool.IdentityService/obj/
+MySchool-Microservices/services/MonolithService/MySchool.MonolithService/obj/
+MySchool-Microservices/services/MonolithService/MySchool.MonolithService/bin/
+MySchool-Microservices/services/IdentityService/MySchool.IdentityService/bin/
+MySchool-Microservices/services/IdentityService/MySchool.IdentityService/wwwroot/
+MySchool-Microservices/services/IdentityService/MySchool.IdentityService/wwwroot/
+MySchool-Microservices/gateway/MySchool.Gateway/obj/

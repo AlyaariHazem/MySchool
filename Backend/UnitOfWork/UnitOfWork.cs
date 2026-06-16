@@ -12,7 +12,6 @@ using AutoMapper;
 using Backend.Services;
 using Backend.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity; // Assuming your DbContext is here
 using Microsoft.Extensions.Logging;
 
 public class UnitOfWork : IUnitOfWork
@@ -21,7 +20,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly DatabaseContext _adminContext; // For master DB (Tenants, AspNetUsers, etc.)
     private readonly IMapper _mapper;
     private readonly mangeFilesService _mangeFilesService;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IUserRepository _userRepository;
     private readonly ILogger<StudentRepository> _studentRepositoryLogger;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly HtmlSanitizationService _htmlSanitizer;
@@ -35,7 +34,7 @@ public class UnitOfWork : IUnitOfWork
         DatabaseContext adminContext,
         IMapper mapper,
         mangeFilesService mangeFilesService,
-        UserManager<ApplicationUser> userManager,
+        IUserRepository userRepository,
         ILogger<StudentRepository> studentRepositoryLogger,
         IHttpContextAccessor httpContextAccessor,
         HtmlSanitizationService htmlSanitizer,
@@ -49,7 +48,7 @@ public class UnitOfWork : IUnitOfWork
         _tenantInfo = tenantInfo;
         _mapper = mapper;
         _mangeFilesService = mangeFilesService;
-        _userManager = userManager;
+        _userRepository = userRepository;
         _studentRepositoryLogger = studentRepositoryLogger;
         _httpContextAccessor = httpContextAccessor;
         _htmlSanitizer = htmlSanitizer;
@@ -59,7 +58,7 @@ public class UnitOfWork : IUnitOfWork
 
         // Tenant-specific repositories use TenantDbContext
         // Initialize Users first since it's needed by Students, Teachers, and Employees
-        Users = new UsersRepository(_userManager);
+        Users = userRepository;
         Guardians = new GuardianRepository(_tenantContext, _mapper, Users);
         Subjects = new SubjectRepository(_tenantContext, _mapper);
         Years = new YearRepository(_tenantContext, _mapper);
@@ -105,7 +104,7 @@ public class UnitOfWork : IUnitOfWork
 
         // Master DB repositories use DatabaseContext
         Tenants = new TenantRepository(_adminContext, _mapper);
-        Managers = new ManagerRepository(_tenantContext, _adminContext, Users, Tenants, _userManager, _tenantInfo, _httpContextAccessor, _employeeYearAssignments);
+        Managers = new ManagerRepository(_tenantContext, _adminContext, Users, Tenants, _tenantInfo, _httpContextAccessor, _employeeYearAssignments);
     }
 
     public ISubjectsRepository Subjects { get; private set; }

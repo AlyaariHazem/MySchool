@@ -15,7 +15,6 @@ using Backend.Interfaces;
 using Backend.Models;
 using Backend.Repository.School.Implements;
 using Backend.Repository.School.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
@@ -26,7 +25,6 @@ public class StudentManagementService
     private readonly mangeFilesService _mangeFilesService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IAuditTrailService _auditTrail;
 
     public StudentManagementService(
@@ -34,7 +32,6 @@ public class StudentManagementService
         IMapper mapper,
         mangeFilesService mangeFilesService,
         IUnitOfWork unitOfWork,
-        UserManager<ApplicationUser> userManager,
         IAuditTrailService auditTrail)
 
     {
@@ -42,7 +39,6 @@ public class StudentManagementService
         _mapper = mapper;
         _mangeFilesService = mangeFilesService;
         _unitOfWork = unitOfWork;
-        _userManager = userManager;
         _auditTrail = auditTrail;
     }
 
@@ -282,7 +278,7 @@ public class StudentManagementService
                 throw new Exception("Student not found.");
 
             // **Update Student User** - Use UserID from student to find user in admin database
-            var studentUser = await _userManager.FindByIdAsync(student.UserID);
+            var studentUser = await _unitOfWork.Users.GetUserByIdAsync(student.UserID);
             if (studentUser is null)
                 throw new Exception("Student user not found.");
 
@@ -293,7 +289,7 @@ public class StudentManagementService
             if (request.HireDate.HasValue && request.HireDate.Value != default)
                 studentUser.HireDate = request.HireDate.Value;
 
-            await _userManager.UpdateAsync(studentUser); // Update via Identity manager
+            await _unitOfWork.Users.UpdateAsync(studentUser);
 
 
             student.FullName.FirstName = request.StudentFirstName ?? student.FullName.FirstName;
@@ -350,15 +346,14 @@ public class StudentManagementService
                         guardian.GuardianDOB = request.GuardianDOB != default ? request.GuardianDOB : guardian.GuardianDOB;
                         guardian.Type = request.GuardianType ?? guardian.Type;
 
-                        var guardianUser = await _userManager.Users
-                            .FirstOrDefaultAsync(u => u.Id == guardian.UserID);
+                        var guardianUser = await _unitOfWork.Users.GetUserByIdAsync(guardian.UserID);
                         if (guardianUser != null)
                         {
                             guardianUser.Email = request.GuardianEmail ?? guardianUser.Email;
                             guardianUser.PhoneNumber = request.GuardianPhone ?? guardianUser.PhoneNumber;
                             guardianUser.Address = request.GuardianAddress ?? guardianUser.Address;
 
-                            await _userManager.UpdateAsync(guardianUser); // update via Identity manager
+                            await _unitOfWork.Users.UpdateAsync(guardianUser);
                         }
 
                         await _tenantContext.SaveChangesAsync(); // save guardian changes
@@ -403,15 +398,14 @@ public class StudentManagementService
                     currentGuardian.GuardianDOB = request.GuardianDOB != default ? request.GuardianDOB : currentGuardian.GuardianDOB;
                     currentGuardian.Type = request.GuardianType ?? currentGuardian.Type;
 
-                    var guardianUser = await _userManager.Users
-                        .FirstOrDefaultAsync(u => u.Id == currentGuardian.UserID);
+                    var guardianUser = await _unitOfWork.Users.GetUserByIdAsync(currentGuardian.UserID);
                     if (guardianUser != null)
                     {
                         guardianUser.Email = request.GuardianEmail ?? guardianUser.Email;
                         guardianUser.PhoneNumber = request.GuardianPhone ?? guardianUser.PhoneNumber;
                         guardianUser.Address = request.GuardianAddress ?? guardianUser.Address;
 
-                        await _userManager.UpdateAsync(guardianUser);
+                        await _unitOfWork.Users.UpdateAsync(guardianUser);
                     }
 
                     await _tenantContext.SaveChangesAsync();

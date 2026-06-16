@@ -1,25 +1,23 @@
-# MySchool
+# Frontend (MySchool Angular)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.2.
+The Angular SPA was relocated from the repository root `MySchool/` folder to `MySchool-Microservices/frontend/` as part of the microservices foundation.
 
-This is a system for school management.
+## API base URL
 
-## Development server
+The app calls the **API Gateway**, not the monolith directly:
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+| Profile | `baseUrl` |
+|---------|-----------|
+| Development (`ng serve`) | `http://localhost:5001/api` |
+| Docker (`ng serve --configuration docker`) | `http://localhost:8081/api` |
+| Production | Set in `environment.ts` |
 
-## Code scaffolding
+## Commands
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```bash
+npm install
+npx ng serve                    # development → gateway :5001
+npx ng serve --configuration docker   # Docker Compose → gateway :8081
+```
 
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/) page.
+See [../docs/gateway-setup.md](../docs/gateway-setup.md) for full gateway documentation.

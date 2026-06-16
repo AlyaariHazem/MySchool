@@ -1,19 +1,15 @@
 using System.Security.Claims;
 using Backend.Common;
-using Backend.Data;
 using Backend.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
 public class PermissionClaimService : IPermissionClaimService
 {
-    private readonly DatabaseContext _db;
     private readonly ISchoolRoleResolver _resolver;
 
-    public PermissionClaimService(DatabaseContext db, ISchoolRoleResolver resolver)
+    public PermissionClaimService(ISchoolRoleResolver resolver)
     {
-        _db = db;
         _resolver = resolver;
     }
 
@@ -41,15 +37,6 @@ public class PermissionClaimService : IPermissionClaimService
             return list;
 
         list.Add(new Claim(PagePermissionNames.SchoolRoleClaimType, roleKey));
-
-        var names = await _db.RolePermissions.AsNoTracking()
-            .Where(rp => rp.RoleName == roleKey && rp.IsAllowed)
-            .Join(_db.Permissions.AsNoTracking(), rp => rp.PermissionId, p => p.Id, (_, p) => p.Name)
-            .ToListAsync(cancellationToken);
-
-        foreach (var n in names.Distinct(StringComparer.OrdinalIgnoreCase))
-            list.Add(new Claim(PagePermissionNames.ClaimType, n));
-
         return list;
     }
 }

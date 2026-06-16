@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Backend.Data;
 using Backend.Models;
 using Backend.Repository.School.Implements;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -24,18 +23,15 @@ public sealed class TenantDemoDataSeeder
 
     private readonly TenantDbContext _db;
     private readonly IUserRepository _users;
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IConfiguration _configuration;
 
     public TenantDemoDataSeeder(
         TenantDbContext db,
         IUserRepository users,
-        UserManager<ApplicationUser> userManager,
         IConfiguration configuration)
     {
         _db = db;
         _users = users;
-        _userManager = userManager;
         _configuration = configuration;
     }
 
@@ -126,7 +122,7 @@ public sealed class TenantDemoDataSeeder
                 return linked.UserName ?? DemoTeacherUserName;
         }
 
-        var existingByName = await _userManager.FindByNameAsync(DemoTeacherUserName);
+        var existingByName = await _users.GetUserByIdOrNameAsync(DemoTeacherUserName);
         if (existingByName != null)
         {
             hazem.UserID = existingByName.Id;

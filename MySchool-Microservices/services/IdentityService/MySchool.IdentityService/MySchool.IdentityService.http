@@ -1,0 +1,6 @@
+@MySchool.IdentityService_HostAddress = http://localhost:5182
+
+GET {{MySchool.IdentityService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

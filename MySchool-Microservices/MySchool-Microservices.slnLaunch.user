@@ -1,0 +1,19 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "gateway\\MySchool.Gateway\\MySchool.Gateway.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "services\\IdentityService\\MySchool.IdentityService\\MySchool.IdentityService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "..\\Backend\\Backend.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

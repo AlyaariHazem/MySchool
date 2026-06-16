@@ -1,18 +1,16 @@
 export const environment = {
     production: false,
-    baseUrl: 'https://localhost:7258/api',
+    /** API Gateway (YARP) — forwards to the monolith. Run: dotnet run --project MySchool-Microservices/gateway/MySchool.Gateway */
+    baseUrl: 'http://localhost:5001/api',
     /**
      * Dev: browser calls same origin `/school-ai-support/...` → `proxy.conf.json` forwards to minimal-agent at http://localhost:5043.
-     * Avoids TLS errors on https://localhost:7127 (untrusted dev cert) and CORS.
-     * Ensure minimal-agent is running (HTTP on 5043). To call it directly instead, use e.g. `http://localhost:5043`.
      */
     schoolAiSupportUrl: '/school-ai-support',
-    // When running with Docker Compose, backend is on port 8080
-    // baseUrl: 'http://localhost:8080/api'
+  /** Direct monolith (bypass gateway): `https://localhost:7258/api` or Docker monolith: `http://localhost:8080/api` */
+  /** Docker Compose gateway: `http://localhost:8081/api` (use `ng serve --configuration docker`) */
 
     /**
      * Sent as `X-Tenant-Id` on API calls when the user is not logged in (public job board).
-     * Must match a row in the admin `Tenants` table. Also set `PublicRecruitment:DefaultTenantId` in Backend appsettings as a fallback.
      */
     publicTenantId: 1,
 };

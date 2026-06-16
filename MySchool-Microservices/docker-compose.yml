@@ -1,0 +1,98 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD is required}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+      - sql_backups:/var/opt/mssql/backup
+    healthcheck:
+      test: ["CMD-SHELL", "if [ -x /opt/mssql-tools18/bin/sqlcmd ]; then /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; elif [ -x /opt/mssql-tools/bin/sqlcmd ]; then /opt/mssql-tools/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -d master -Q 'SELECT 1' -o /dev/null; else exit 1; fi"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  identityservice:
+    build:
+      context: .
+      dockerfile: services/IdentityService/MySchool.IdentityService/Dockerfile
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__SqlIdentityConnection: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
+      JWT__SecretKey: "${JWT_SECRET_KEY:-asdadaqeq!@##3244343dsdfsfdiui989}"
+      JWT__IssuerIP: "http://localhost:7258/"
+      JWT__AudienceIP: "http://localhost:4200/"
+      MonolithService__BaseUrl: "http://monolithservice:8080"
+      InternalService__ApiKey: "${INTERNAL_SERVICE_API_KEY:-dev-internal-key-change-in-production}"
+    expose:
+      - "8080"
+
+  monolithservice:
+    build:
+      context: ../Backend
+      dockerfile: Dockerfile
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      identityservice:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__SqlAdminConnection: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
+      ConnectionStrings__TenantDesignTime: "Server=sqlserver,1433;Database=MySchool;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
+      ASPNETCORE_URLS: "http://+:8080"
+      SqlRestore__HostBackupRoot: "/var/opt/mssql/backup"
+      SqlRestore__UseContainerPathForRestoreDisk: "false"
+      SqlRestore__SqlServerDataPath: "/var/opt/mssql/data/"
+      JWT__SecretKey: "${JWT_SECRET_KEY:-asdadaqeq!@##3244343dsdfsfdiui989}"
+      JWT__IssuerIP: "http://localhost:7258/"
+      JWT__AudienceIP: "http://localhost:4200/"
+      IdentityService__BaseUrl: "http://identityservice:8080"
+      InternalService__ApiKey: "${INTERNAL_SERVICE_API_KEY:-dev-internal-key-change-in-production}"
+    volumes:
+      - sql_backups:/var/opt/mssql/backup
+    expose:
+      - "8080"
+
+  gateway:
+    build:
+      context: ./gateway/MySchool.Gateway
+      dockerfile: Dockerfile
+    depends_on:
+      - identityservice
+      - monolithservice
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_URLS: "http://+:8080"
+      Cors__AllowedOrigins__0: "http://localhost:4200"
+      ReverseProxy__Clusters__identity__Destinations__identityservice__Address: "http://identityservice:8080/"
+      ReverseProxy__Clusters__monolith__Destinations__monolithservice__Address: "http://monolithservice:8080/"
+    ports:
+      - "8081:8080"
+
+  frontend:
+    image: node:20-bookworm
+    working_dir: /app
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    command: >
+      sh -c "npm install && npx ng serve --host 0.0.0.0 --port 4200 --configuration docker"
+
+volumes:
+  sql_data:
+  sql_backups:
+  frontend_node_modules:

@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/gateway/">
+    <Project Path="gateway/MySchool.Gateway/MySchool.Gateway.csproj" />
+  </Folder>
+  <Folder Name="/services/" />
+  <Folder Name="/services/IdentityService/">
+    <Project Path="services/IdentityService/MySchool.IdentityService/MySchool.IdentityService.csproj" />
+  </Folder>
+  <Folder Name="/services/MonolithService/">
+    <Project Path="../Backend/Backend.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <Project Path="shared/MySchool.BuildingBlocks/MySchool.BuildingBlocks.csproj" />
+    <Project Path="shared/MySchool.Contracts/MySchool.Contracts.csproj" />
+  </Folder>
+</Solution>

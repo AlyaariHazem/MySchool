@@ -41,7 +41,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IClassesRepository, ClassesRepository>();
         services.AddScoped<IDivisionRepository, DivisionRepository>();
-        services.AddScoped<IUserRepository, UsersRepository>();
         services.AddScoped<IStagesRepository, StagesRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IFeeClassRepository, FeeClassRepository>();
@@ -68,8 +67,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRecruitmentService, RecruitmentService>();
         services.AddScoped<IDailyEvaluationService, DailyEvaluationService>();
         services.AddScoped<ISchoolRoleResolver, SchoolRoleResolver>();
-        services.AddScoped<IPermissionClaimService, PermissionClaimService>();
-        services.AddScoped<IRolePermissionAdminService, RolePermissionAdminService>();
+        services.AddScoped<IMonolithAuthIntegrationService, MonolithAuthIntegrationService>();
+        services.AddHttpClient<IdentityUserApiClient>();
+        services.AddScoped<IUserRepository>(sp => sp.GetRequiredService<IdentityUserApiClient>());
         services.AddScoped<IAccountStudentGuardianRepository, AccountStudentGuardianRepository>();
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IWeeklyScheduleRepository, WeeklyScheduleRepository>();

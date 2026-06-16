@@ -1,12 +1,18 @@
-using System;
-using System.Collections.Generic;
-using Backend.Models.Master;
-using Microsoft.AspNetCore.Identity;
-
 namespace Backend.Models;
 
-public class ApplicationUser : IdentityUser
+public class ApplicationUser
 {
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public string? UserName { get; set; }
+    public string? NormalizedUserName { get; set; }
+    public string? Email { get; set; }
+    public string? NormalizedEmail { get; set; }
+    public bool EmailConfirmed { get; set; }
+    public string? PasswordHash { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? SecurityStamp { get; set; }
+    public string? ConcurrencyStamp { get; set; }
+
     public string? Address { get; set; }
     public string? Gender { get; set; } = string.Empty;
 
@@ -18,11 +24,6 @@ public class ApplicationUser : IdentityUser
 
     public DateTime HireDate { get; set; } = DateTime.Now;
 
-    /// <summary>Legacy coarse category; prefer <see cref="UserTenants"/> for per-school access.</summary>
+    /// <summary>Legacy coarse category; per-school access is tracked in master UserTenants.</summary>
     public string UserType { get; set; } = string.Empty;
-
-    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
-
-    /// <summary>Central mapping: which schools this login may access and with which tenant role.</summary>
-    public ICollection<UserTenant> UserTenants { get; set; } = new List<UserTenant>();
 }

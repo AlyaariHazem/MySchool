@@ -1,6 +1,6 @@
 param(
-    [string]$SwaggerUrl = "http://localhost:8080/swagger",
-    [string]$SwaggerJsonUrl = "http://localhost:8080/swagger/v1/swagger.json",
+    [string]$SwaggerUrl = "http://localhost:8081/swagger",
+    [string]$SwaggerJsonUrl = "http://localhost:8081/swagger/v1/swagger.json",
     [string]$AngularUrl = "http://localhost:4200"
 )
 
@@ -27,12 +27,12 @@ function Wait-ForHttp {
     return $false
 }
 
-Write-Host "Waiting for Swagger..."
+Write-Host "Waiting for API gateway (Swagger via YARP)..."
 if (Wait-ForHttp -Url $SwaggerJsonUrl -TimeoutSeconds 180) {
     Write-Host "Opening Swagger UI: $SwaggerUrl"
     Start-Process $SwaggerUrl | Out-Null
 } else {
-    Write-Host "Swagger not reachable in time. Check docker logs for backend."
+    Write-Host "Swagger not reachable in time. Check docker logs for gateway and monolithservice."
 }
 
 Write-Host "Opening Angular URL: $AngularUrl"

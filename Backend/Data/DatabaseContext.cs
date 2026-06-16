@@ -1,16 +1,15 @@
 using Backend.Models;
 using Backend.Models.Master;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Data;
 
 /// <summary>
-/// Master database only: Identity, tenants, user↔tenant membership, subscriptions, refresh tokens.
+/// Master database: tenants, user↔tenant membership, subscriptions, registration requests.
 /// School business entities live in <see cref="TenantDbContext"/> (per-tenant databases).
+/// Identity users are owned by the Identity service.
 /// </summary>
-public class DatabaseContext : IdentityDbContext<ApplicationUser>
+public class DatabaseContext : DbContext
 {
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
@@ -18,11 +17,8 @@ public class DatabaseContext : IdentityDbContext<ApplicationUser>
     public DbSet<UserTenant> UserTenants => Set<UserTenant>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<TenantSettings> TenantSettings => Set<TenantSettings>();
-    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<RegistrationRequest> RegistrationRequests => Set<RegistrationRequest>();
     public DbSet<RegistrationRequestAttachment> RegistrationRequestAttachments => Set<RegistrationRequestAttachment>();
-    public DbSet<Permission> Permissions => Set<Permission>();
-    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,10 +30,6 @@ public class DatabaseContext : IdentityDbContext<ApplicationUser>
         {
             e.HasKey(x => x.UserTenantId);
             e.Property(x => x.TenantRole).HasConversion<int>();
-            e.HasOne(x => x.User)
-                .WithMany(u => u.UserTenants)
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
             e.HasOne(x => x.Tenant)
                 .WithMany(t => t.UserTenants)
                 .HasForeignKey(x => x.TenantId)
@@ -60,17 +52,6 @@ public class DatabaseContext : IdentityDbContext<ApplicationUser>
             e.HasOne(x => x.Tenant)
                 .WithMany(t => t.TenantSettings)
                 .HasForeignKey(x => x.TenantId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<RefreshToken>(e =>
-        {
-            e.HasKey(t => t.Id);
-            e.HasIndex(t => t.TokenHash).IsUnique();
-            e.Property(t => t.TokenHash).HasMaxLength(88);
-            e.HasOne(t => t.User)
-                .WithMany(u => u.RefreshTokens)
-                .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -111,54 +92,5 @@ public class DatabaseContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(x => x.RegistrationRequestId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-
-        modelBuilder.Entity<ApplicationUser>(e =>
-        {
-            e.Property(u => u.PhoneNumberNormalized).HasMaxLength(32);
-            e.HasIndex(u => u.PhoneNumberNormalized)
-                .IsUnique()
-                .HasFilter("[PhoneNumberNormalized] IS NOT NULL");
-        });
-
-        modelBuilder.Entity<Permission>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.HasIndex(x => x.Name).IsUnique();
-        });
-
-        modelBuilder.Entity<RolePermission>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.HasIndex(x => new { x.RoleName, x.PermissionId }).IsUnique();
-            e.HasOne(x => x.Permission)
-                .WithMany()
-                .HasForeignKey(x => x.PermissionId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<IdentityRole>().HasData(
-            new IdentityRole { Id = "1", Name = "ADMIN", NormalizedName = "ADMIN" },
-            new IdentityRole { Id = "2", Name = "MANAGER", NormalizedName = "MANAGER" },
-            new IdentityRole { Id = "3", Name = "STUDENT", NormalizedName = "STUDENT" },
-            new IdentityRole { Id = "4", Name = "TEACHER", NormalizedName = "TEACHER" },
-            new IdentityRole { Id = "5", Name = "GUARDIAN", NormalizedName = "GUARDIAN" });
-
-        var passwordHasher = new PasswordHasher<ApplicationUser>();
-        var hashedPassword = passwordHasher.HashPassword(null!, "ADMIN");
-        modelBuilder.Entity<ApplicationUser>().HasData(
-            new ApplicationUser
-            {
-                Id = "007266f8-a4b4-4b9e-a8d2-3e0a6f9df5ec",
-                UserName = "ADMIN",
-                NormalizedUserName = "ADMIN",
-                Email = "ADMIN@GMAIL.COM",
-                NormalizedEmail = "ADMIN@GMAIL.COM",
-                PasswordHash = hashedPassword,
-                EmailConfirmed = true,
-                UserType = "ADMIN",
-                HireDate = DateTime.UtcNow,
-                SecurityStamp = "f9a7b3c2d1e04a5b9c8d7e6f5a4b3c2d",
-                ConcurrencyStamp = "a1b2c3d4e5f647899876543210fedcba"
-            });
     }
 }

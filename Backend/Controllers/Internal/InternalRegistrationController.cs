@@ -1,27 +1,28 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using Backend.Common;
+using Backend.Data;
 using Backend.DTOS;
 using Backend.DTOS.School.Accounts;
 using Backend.DTOS.School.Auth;
 using Backend.DTOS.School.Guardians;
 using Backend.DTOS.School.StudentClassFee;
-using Backend.Data;
+using Backend.Interfaces;
 using Backend.Models;
 using Backend.Models.Master;
+using Backend.Repository.School.Implements;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Backend.Controllers;
+namespace Backend.Controllers.Internal;
 
-public partial class AuthController
+[Route("api/internal/registration")]
+[ApiController]
+public sealed class InternalRegistrationController : ControllerBase
 {
     private const long MaxAttachmentBytes = 10 * 1024 * 1024;
     private const int MaxAttachmentsPerRequest = 12;
@@ -31,7 +32,33 @@ public partial class AuthController
     private static readonly HashSet<string> PublicRegistrationRoles =
         new(StringComparer.OrdinalIgnoreCase) { "STUDENT", "GUARDIAN" };
 
-    [HttpGet("PublicSchools")]
+    private readonly DatabaseContext _context;
+    private readonly IdentityUserApiClient _identityUsers;
+    private readonly IWebHostEnvironment _env;
+    private readonly IApiBaseUrlProvider _apiBase;
+    private readonly StudentManagementService _studentManagementService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IServiceProvider _serviceProvider;
+
+    public InternalRegistrationController(
+        DatabaseContext context,
+        IdentityUserApiClient identityUsers,
+        IWebHostEnvironment env,
+        IApiBaseUrlProvider apiBase,
+        StudentManagementService studentManagementService,
+        IUnitOfWork unitOfWork,
+        IServiceProvider serviceProvider)
+    {
+        _context = context;
+        _identityUsers = identityUsers;
+        _env = env;
+        _apiBase = apiBase;
+        _studentManagementService = studentManagementService;
+        _unitOfWork = unitOfWork;
+        _serviceProvider = serviceProvider;
+    }
+
+    [HttpGet("public-schools")]
     [AllowAnonymous]
     public async Task<IActionResult> PublicSchools()
     {
@@ -47,8 +74,7 @@ public partial class AuthController
         return Ok(list);
     }
 
-    /// <summary>Multipart: form fields + optional files named <c>attachments</c>.</summary>
-    [HttpPost("RequestRegistration")]
+    [HttpPost("request")]
     [AllowAnonymous]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(80 * 1024 * 1024)]
@@ -72,7 +98,7 @@ public partial class AuthController
         if (tenant == null)
             return BadRequest(new { message = "School not found." });
 
-        var normName = userManager.NormalizeName(dto.UserName);
+        var normName = IdentityNormalization.NormalizeName(dto.UserName);
         if (string.IsNullOrEmpty(normName))
             return BadRequest(new { message = "Invalid username." });
 
@@ -81,7 +107,7 @@ public partial class AuthController
             return BadRequest(new { message = "Enter a valid phone number." });
 
         var syntheticEmail = $"{normPhone}@phone.registration.local";
-        var normEmail = userManager.NormalizeEmail(syntheticEmail);
+        var normEmail = IdentityNormalization.NormalizeEmail(syntheticEmail);
         if (string.IsNullOrEmpty(normEmail))
             return BadRequest(new { message = "Could not build account email." });
 
@@ -95,10 +121,10 @@ public partial class AuthController
             dob = parsed.Date;
         }
 
-        if (await userManager.Users.AnyAsync(u => u.NormalizedUserName == normName || u.NormalizedEmail == normEmail))
+        if (await _identityUsers.ExistsByNormalizedUserNameOrEmailAsync(normName, normEmail))
             return Conflict(new { message = "Username or phone is already registered." });
 
-        if (await userManager.Users.AnyAsync(u => u.PhoneNumberNormalized == normPhone))
+        if (await _identityUsers.ExistsByNormalizedPhoneAsync(normPhone))
             return Conflict(new { message = "This phone number is already registered." });
 
         if (await _context.RegistrationRequests.AnyAsync(r =>
@@ -195,21 +221,7 @@ public partial class AuthController
         return Ok(new { message = "Your request is pending school approval." });
     }
 
-    private void TryDeleteRegistrationFolder(int requestId)
-    {
-        try
-        {
-            var dir = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads", "RegistrationRequests", requestId.ToString());
-            if (Directory.Exists(dir))
-                Directory.Delete(dir, recursive: true);
-        }
-        catch
-        {
-            // best effort
-        }
-    }
-
-    [HttpPost("PendingRequests")]
+    [HttpPost("pending-requests")]
     [Authorize(Roles = "ADMIN,MANAGER")]
     public async Task<IActionResult> PendingRequests([FromBody] PendingRegistrationRequestsFilterDto? filter)
     {
@@ -301,17 +313,35 @@ public partial class AuthController
         return Ok(list);
     }
 
-    [HttpPost("ApproveRequest/{id:int}")]
+    [HttpPost("approve/{id:int}")]
     [Authorize(Roles = "ADMIN,MANAGER")]
     public Task<IActionResult> ApproveRequest(int id, [FromBody] ApproveRegistrationRequestDto? body) =>
         ApproveOrRejectCoreAsync(id, approve: true, reason: null, approveBody: body);
 
-    [HttpPost("RejectRequest/{id:int}")]
+    [HttpPost("reject/{id:int}")]
     [Authorize(Roles = "ADMIN,MANAGER")]
     public Task<IActionResult> RejectRequest(int id, [FromBody] RejectRegistrationRequestDto? body) =>
         ApproveOrRejectCoreAsync(id, approve: false, reason: body?.Reason, approveBody: null);
 
-    private async Task<IActionResult> ApproveOrRejectCoreAsync(int id, bool approve, string? reason, ApproveRegistrationRequestDto? approveBody)
+    private void TryDeleteRegistrationFolder(int requestId)
+    {
+        try
+        {
+            var dir = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads", "RegistrationRequests", requestId.ToString());
+            if (Directory.Exists(dir))
+                Directory.Delete(dir, recursive: true);
+        }
+        catch
+        {
+            // best effort
+        }
+    }
+
+    private async Task<IActionResult> ApproveOrRejectCoreAsync(
+        int id,
+        bool approve,
+        string? reason,
+        ApproveRegistrationRequestDto? approveBody)
     {
         var reviewerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(reviewerId))
@@ -349,10 +379,11 @@ public partial class AuthController
                     return Ok(new { message = "Request rejected." });
                 }
 
-                if (await userManager.Users.AnyAsync(u =>
-                        u.NormalizedUserName == req.NormalizedUserName
-                        || (u.NormalizedEmail != null && u.NormalizedEmail == req.NormalizedEmail)
-                        || (u.PhoneNumberNormalized != null && u.PhoneNumberNormalized == req.NormalizedPhone)))
+                if (await _identityUsers.ExistsByNormalizedUserNameOrEmailAsync(
+                        req.NormalizedUserName,
+                        req.NormalizedEmail ?? string.Empty)
+                    || (!string.IsNullOrEmpty(req.NormalizedPhone)
+                        && await _identityUsers.ExistsByNormalizedPhoneAsync(req.NormalizedPhone)))
                 {
                     await tx.RollbackAsync();
                     return Conflict(new { message = "A user with this username or phone already exists." });
@@ -372,53 +403,31 @@ public partial class AuthController
                     HireDate = DateTime.UtcNow
                 };
 
-                var createResult = await userManager.CreateAsync(user);
-                if (!createResult.Succeeded)
+                ApplicationUser created;
+                try
                 {
-                    await tx.RollbackAsync();
-                    return BadRequest(new
-                    {
-                        message = "Could not create user.",
-                        errors = createResult.Errors.Select(e => e.Description)
-                    });
+                    created = await _identityUsers.CreateApprovedRegistrationUserAsync(
+                        user,
+                        req.PasswordHash,
+                        req.RequestedRole);
                 }
-
-                user.PasswordHash = req.PasswordHash;
-                var updateResult = await userManager.UpdateAsync(user);
-                if (!updateResult.Succeeded)
+                catch (HttpRequestException ex)
                 {
-                    await userManager.DeleteAsync(user);
                     await tx.RollbackAsync();
-                    return BadRequest(new
-                    {
-                        message = "Could not set password.",
-                        errors = updateResult.Errors.Select(e => e.Description)
-                    });
-                }
-
-                var roleResult = await userManager.AddToRoleAsync(user, req.RequestedRole);
-                if (!roleResult.Succeeded)
-                {
-                    await userManager.DeleteAsync(user);
-                    await tx.RollbackAsync();
-                    return BadRequest(new
-                    {
-                        message = "Could not assign role.",
-                        errors = roleResult.Errors.Select(e => e.Description)
-                    });
+                    return BadRequest(new { message = "Could not create user.", errors = new[] { ex.Message } });
                 }
 
                 var tenantRole = MapIdentityRoleToTenantRole(req.RequestedRole);
                 if (!tenantRole.HasValue)
                 {
-                    await userManager.DeleteAsync(user);
+                    await _identityUsers.DeleteAsync(created.Id);
                     await tx.RollbackAsync();
                     return BadRequest(new { message = "Invalid requested role." });
                 }
 
                 _context.UserTenants.Add(new UserTenant
                 {
-                    UserId = user.Id,
+                    UserId = created.Id,
                     TenantId = req.TenantId,
                     TenantRole = tenantRole.Value,
                     IsActive = true,
@@ -427,10 +436,10 @@ public partial class AuthController
 
                 if (string.Equals(req.RequestedRole, "STUDENT", StringComparison.OrdinalIgnoreCase))
                 {
-                    var enrollErr = await EnrollApprovedStudentInTenantAsync(req, user, approveBody);
+                    var enrollErr = await EnrollApprovedStudentInTenantAsync(req, created, approveBody);
                     if (enrollErr != null)
                     {
-                        await userManager.DeleteAsync(user);
+                        await _identityUsers.DeleteAsync(created.Id);
                         await tx.RollbackAsync();
                         return enrollErr;
                     }

@@ -1,19 +1,18 @@
-using Backend.DTOS.Permissions;
-using Backend.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MySchool.Contracts.Permissions;
+using MySchool.IdentityService.Services;
 
-namespace Backend.Controllers;
+namespace MySchool.IdentityService.Controllers;
 
-/// <summary>Matrix CRUD for page permissions per school role (<see cref="Common.SchoolUserRoleKeys"/>).</summary>
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(Roles = "ADMIN,MANAGER")]
-public class RolePermissionsController : ControllerBase
+public sealed class RolePermissionsController : ControllerBase
 {
-    private readonly IRolePermissionAdminService _service;
+    private readonly RolePermissionAdminService _service;
 
-    public RolePermissionsController(IRolePermissionAdminService service)
+    public RolePermissionsController(RolePermissionAdminService service)
     {
         _service = service;
     }
@@ -26,10 +25,13 @@ public class RolePermissionsController : ControllerBase
     }
 
     [HttpPut("matrix")]
-    public async Task<IActionResult> SaveMatrix([FromBody] RolePermissionMatrixUpdateDto body, CancellationToken cancellationToken)
+    public async Task<IActionResult> SaveMatrix(
+        [FromBody] RolePermissionMatrixUpdateDto body,
+        CancellationToken cancellationToken)
     {
         if (body?.Cells == null)
             return BadRequest(new { message = "Cells required." });
+
         try
         {
             await _service.SaveMatrixAsync(body, cancellationToken);
@@ -38,6 +40,7 @@ public class RolePermissionsController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+
         return NoContent();
     }
 }

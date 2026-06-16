@@ -11,7 +11,6 @@ using Backend.Repository.School.Interfaces;
 using Backend.Services;
 using FirstProjectWithMVC.Repository.School;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -147,32 +146,6 @@ builder.Services.AddSwaggerGen(swagger =>
     swagger.DocumentFilter<SwaggerServerDocumentFilter>();
 });
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 4;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-})
-.AddEntityFrameworkStores<DatabaseContext>()
-.AddDefaultTokenProviders();
-
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Events.OnRedirectToLogin = context =>
-    {
-        context.Response.StatusCode = StatusCodes.Status403Forbidden;
-        return Task.CompletedTask;
-    };
-
-    options.Events.OnRedirectToAccessDenied = context =>
-    {
-        context.Response.StatusCode = StatusCodes.Status403Forbidden;
-        return Task.CompletedTask;
-    };
-});
-
 var key = Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]!);
 
 builder.Services
@@ -289,19 +262,8 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    // Ensure the admin database exists and all migrations are applied before seeding roles.
     var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
     db.Database.Migrate();
-
-    await PermissionSeeder.SeedAsync(db);
-
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new[] { "ADMIN","GUARDIAN", "STUDENT", "TEACHER", "MANAGER" };
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
-    }
 }
 
 // Enable Swagger in all environments (or change to IsDevelopment() if you only want it in dev)
@@ -316,6 +278,7 @@ app.UseSwaggerUI(c =>
 app.UseStaticFiles();
 app.UseCors("MyPolicy");
 app.UseAuthentication();
+app.UseMiddleware<InternalServiceApiKeyMiddleware>();
 app.UseMiddleware<TenantResolutionMiddleware>(); // Resolve tenant from JWT before authorization
 // if (app.Environment.IsDevelopment())
 //     app.UseMiddleware<TenantDevAutoMigrateMiddleware>(); // Apply pending tenant EF migrations (e.g. JobPostings)

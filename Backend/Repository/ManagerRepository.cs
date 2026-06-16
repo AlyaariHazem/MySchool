@@ -12,7 +12,6 @@ using Backend.Models.Master;
 using Backend.Interfaces;
 using Backend.Repository.School.Implements;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +29,6 @@ public class ManagerRepository : IManagerRepository
     private readonly DatabaseContext _masterDb;
     private readonly IUserRepository _userRepository;
     private readonly ITenantRepository _tenantRepository;
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly TenantInfo _tenantInfo;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IEmployeeYearAssignmentService _employeeYearAssignments;
@@ -40,7 +38,6 @@ public class ManagerRepository : IManagerRepository
         DatabaseContext masterDb,
         IUserRepository userRepository,
         ITenantRepository tenantRepository,
-        UserManager<ApplicationUser> userManager,
         TenantInfo tenantInfo,
         IHttpContextAccessor httpContextAccessor,
         IEmployeeYearAssignmentService employeeYearAssignments)
@@ -49,7 +46,6 @@ public class ManagerRepository : IManagerRepository
         _masterDb = masterDb ?? throw new ArgumentNullException(nameof(masterDb));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
-        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _tenantInfo = tenantInfo ?? throw new ArgumentNullException(nameof(tenantInfo));
         _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         _employeeYearAssignments = employeeYearAssignments ?? throw new ArgumentNullException(nameof(employeeYearAssignments));
@@ -262,7 +258,7 @@ END";
             if (manager == null)
                 return null;
 
-            var appUser = await _userManager.FindByIdAsync(manager.UserID);
+            var appUser = await _userRepository.GetUserByIdAsync(manager.UserID);
             TenantDTO? tenantMeta = null;
             try
             {
@@ -286,7 +282,7 @@ END";
         if (managerRow == null)
             return null;
 
-        var user = await _userManager.FindByIdAsync(managerRow.UserID);
+        var user = await _userRepository.GetUserByIdAsync(managerRow.UserID);
         TenantDTO? meta = null;
         if (_tenantInfo.TenantId is int tId)
         {
@@ -337,7 +333,7 @@ END";
                         .ToList();
                     var users = new Dictionary<string, ApplicationUser?>(StringComparer.Ordinal);
                     foreach (var uid in userIds)
-                        users[uid] = await _userManager.FindByIdAsync(uid);
+                        users[uid] = await _userRepository.GetUserByIdAsync(uid);
 
                     foreach (var m in managers)
                     {
@@ -400,7 +396,7 @@ END";
             .ToList();
         var userMap = new Dictionary<string, ApplicationUser?>(StringComparer.Ordinal);
         foreach (var uid in ids)
-            userMap[uid] = await _userManager.FindByIdAsync(uid);
+            userMap[uid] = await _userRepository.GetUserByIdAsync(uid);
 
         return managersList
             .Select(m => Map(
@@ -430,12 +426,12 @@ END";
 
             manager.FullName = managerDTO.FullName;
 
-            var appUser = await _userManager.FindByIdAsync(manager.UserID);
+            var appUser = await _userRepository.GetUserByIdAsync(manager.UserID);
             if (appUser != null)
             {
                 appUser.UserName = managerDTO.UserName;
                 appUser.Email = managerDTO.Email;
-                await _userManager.UpdateAsync(appUser);
+                await _userRepository.UpdateAsync(appUser);
             }
 
             await db.SaveChangesAsync();
@@ -451,12 +447,12 @@ END";
 
         existing.FullName = managerDTO.FullName;
 
-        var u = await _userManager.FindByIdAsync(existing.UserID);
+        var u = await _userRepository.GetUserByIdAsync(existing.UserID);
         if (u != null)
         {
             u.UserName = managerDTO.UserName;
             u.Email = managerDTO.Email;
-            await _userManager.UpdateAsync(u);
+            await _userRepository.UpdateAsync(u);
         }
 
         await _tenantContext.SaveChangesAsync();
